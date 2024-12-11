@@ -15,12 +15,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import SettingsDialog from "@/components/SettingsDialog";
+import { useState } from "react";
 
 const Index = () => {
   const supabase = useSupabaseClient();
   const user = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -65,7 +68,7 @@ const Index = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsSettingsOpen(true)}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
@@ -100,6 +103,11 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <SettingsDialog 
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
     </div>
   );
 };
