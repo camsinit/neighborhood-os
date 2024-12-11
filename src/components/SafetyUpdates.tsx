@@ -105,7 +105,7 @@ const SafetyUpdates = () => {
         <Button 
           variant="outline"
           onClick={() => setIsArchiveOpen(true)}
-          className="w-full max-w-xs"
+          className="w-full max-w-xs border-red-600 border-dotted hover:bg-red-50"
         >
           Archive
         </Button>

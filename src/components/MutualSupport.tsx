@@ -131,7 +131,7 @@ const MutualSupport = () => {
         <Button 
           variant="outline"
           onClick={() => setIsArchiveOpen(true)}
-          className="w-full max-w-xs"
+          className="w-full max-w-xs border-[#F3D649] border-dotted hover:bg-[#F3D649]/10"
         >
           Archive
         </Button>
