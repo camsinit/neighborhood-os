@@ -48,18 +48,18 @@ const SafetyUpdates = () => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Safety Updates</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">Safety Updates</h2>
         <Button>Share Update</Button>
       </div>
-      <div className="mb-4">
+      <div className="mb-6">
         <Input 
           type="search" 
           placeholder="Search safety updates..." 
           className="max-w-sm bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300" 
         />
       </div>
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-8">
         {categories.map((cat) => (
           <Button 
             key={cat.label} 
@@ -71,17 +71,17 @@ const SafetyUpdates = () => {
           </Button>
         ))}
       </div>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {updates.map((update) => (
-          <div key={update.title} className={`bg-white border-l-4 ${update.borderColor} rounded-lg p-4 shadow-sm`}>
-            <div className={`inline-flex items-center px-2 py-1 rounded-full ${update.color} ${update.bgColor} text-sm mb-2`}>
-              <update.icon className="h-4 w-4 mr-1" />
+          <div key={update.title} className={`bg-white border-l-4 ${update.borderColor} rounded-lg p-6 shadow-sm`}>
+            <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${update.color} ${update.bgColor} text-sm font-medium mb-3`}>
+              <update.icon className="h-4 w-4 mr-2" />
               {update.type}
             </div>
-            <h4 className="text-lg font-medium mb-2">{update.title}</h4>
-            <p className="text-muted-foreground mb-4">{update.description}</p>
+            <h4 className="text-lg font-medium mb-3">{update.title}</h4>
+            <p className="text-muted-foreground mb-6">{update.description}</p>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span>{update.author}</span>
                 <span>{update.timeAgo}</span>
                 {update.updates && <span>{update.updates} update</span>}

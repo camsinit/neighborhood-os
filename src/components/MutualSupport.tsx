@@ -51,18 +51,18 @@ const MutualSupport = () => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Mutual Support</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">Mutual Support</h2>
         <Button>Create Request</Button>
       </div>
-      <div className="mb-4">
+      <div className="mb-6">
         <Input 
           type="search" 
           placeholder="Search requests..." 
           className="max-w-sm bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300" 
         />
       </div>
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-8">
         {categories.map((cat) => (
           <Button 
             key={cat.label} 
@@ -74,18 +74,18 @@ const MutualSupport = () => {
           </Button>
         ))}
       </div>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div>
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-6">
           <h3 className="text-lg font-medium mb-4">Needs</h3>
           {needs.map((need) => (
-            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-4 shadow-sm`}>
-              <div className={`inline-flex items-center px-2 py-1 rounded-full ${need.tagColor} ${need.tagBg} text-sm mb-2`}>
+            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-6 shadow-sm`}>
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${need.tagColor} ${need.tagBg} text-sm font-medium mb-3`}>
                 {need.type}
               </div>
-              <h4 className="text-lg font-medium mb-2">{need.title}</h4>
-              <p className="text-muted-foreground mb-4">{need.description}</p>
+              <h4 className="text-lg font-medium mb-3">{need.title}</h4>
+              <p className="text-muted-foreground mb-6">{need.description}</p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-6 text-sm text-muted-foreground">
                   <span>{need.location}</span>
                   <span>{need.timeAgo}</span>
                   <span>{need.responses} responses</span>
@@ -95,17 +95,17 @@ const MutualSupport = () => {
             </div>
           ))}
         </div>
-        <div>
+        <div className="space-y-6">
           <h3 className="text-lg font-medium mb-4">Offers</h3>
           {offers.map((offer) => (
-            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-4 shadow-sm`}>
-              <div className={`inline-flex items-center px-2 py-1 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm mb-2`}>
+            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-6 shadow-sm`}>
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm font-medium mb-3`}>
                 {offer.type}
               </div>
-              <h4 className="text-lg font-medium mb-2">{offer.title}</h4>
-              <p className="text-muted-foreground mb-4">{offer.description}</p>
+              <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
+              <p className="text-muted-foreground mb-6">{offer.description}</p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-6 text-sm text-muted-foreground">
                   <span>{offer.location}</span>
                   <span>{offer.timeAgo}</span>
                   <span>{offer.helped} helped</span>
