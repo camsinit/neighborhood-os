@@ -59,9 +59,6 @@ const Login = () => {
                 }
               }
             }}
-            onAuthError={(error) => {
-              toast.error(error.message);
-            }}
           />
         </div>
       </div>
