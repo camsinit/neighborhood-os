@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddSupportRequestDialogProps {
   open: boolean;
@@ -29,10 +30,19 @@ const AddSupportRequestDialog = ({ open, onOpenChange }: AddSupportRequestDialog
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
+  const [requestType, setRequestType] = useState<"need" | "offer" | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!requestType) {
+      toast({
+        title: "Error",
+        description: "Please select whether this is a Need or an Offer",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: "Request Added",
       description: "Your support request has been successfully posted.",
@@ -43,15 +53,34 @@ const AddSupportRequestDialog = ({ open, onOpenChange }: AddSupportRequestDialog
     setDescription("");
     setType("");
     setLocation("");
+    setRequestType(null);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Support Request</DialogTitle>
+          <DialogTitle>Share Need or Offer</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="need" 
+                checked={requestType === "need"}
+                onCheckedChange={() => setRequestType("need")}
+              />
+              <Label htmlFor="need">Need Help</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="offer" 
+                checked={requestType === "offer"}
+                onCheckedChange={() => setRequestType("offer")}
+              />
+              <Label htmlFor="offer">Offer Help</Label>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="type">Request Type</Label>
             <Select onValueChange={setType} value={type}>
