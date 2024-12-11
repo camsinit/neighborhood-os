@@ -28,7 +28,7 @@ const Index = () => {
           <div className="p-6 rounded-lg bg-[#D3E4FD] bg-opacity-50">
             <CommunityCalendar />
           </div>
-          <div className="p-6 rounded-lg bg-[#FEC6A1] bg-opacity-50">
+          <div className="p-6 rounded-lg bg-[rgba(254,198,161,0.3)]">
             <MutualSupport />
           </div>
           <div className="p-6 rounded-lg bg-[#FDE1D3] bg-opacity-50">

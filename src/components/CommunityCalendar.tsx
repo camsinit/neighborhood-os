@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { 
   addWeeks, 
@@ -11,14 +11,21 @@ import {
   startOfMonth, 
   endOfMonth, 
   eachDayOfInterval,
-  isSameMonth 
+  isSameMonth,
+  parse 
 } from "date-fns";
 import EventCard from "./EventCard";
 import { monthEvents } from "@/data/events";
+import AddEventDialog from "./AddEventDialog";
+import { CalendarEvent } from "@/types/calendar";
+import { useToast } from "@/components/ui/use-toast";
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const { toast } = useToast();
+  
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
   const weekStart = startOfWeek(currentDate);
@@ -38,6 +45,14 @@ const CommunityCalendar = () => {
 
   const handleToday = () => {
     setCurrentDate(new Date());
+  };
+
+  const handleAddEvent = (event: Omit<CalendarEvent, "id">) => {
+    toast({
+      title: "Event Added",
+      description: "Your event has been successfully added to the calendar.",
+    });
+    // Here you would typically update your events state or make an API call
   };
 
   const renderWeekView = () => (
@@ -84,6 +99,13 @@ const CommunityCalendar = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Community Calendar</h2>
         <div className="flex items-center gap-6">
+          <Button 
+            onClick={() => setIsAddEventOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Event
+          </Button>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -114,6 +136,11 @@ const CommunityCalendar = () => {
         </div>
       </div>
       {view === 'week' ? renderWeekView() : renderMonthView()}
+      <AddEventDialog 
+        open={isAddEventOpen}
+        onOpenChange={setIsAddEventOpen}
+        onAddEvent={handleAddEvent}
+      />
     </div>
   );
 };
