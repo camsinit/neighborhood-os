@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertTriangle, Bell, Tool, Clock } from "lucide-react";
+import { AlertTriangle, Bell, Wrench, Clock } from "lucide-react";
 
 const SafetyUpdates = () => {
   const categories = [
     { icon: Clock, label: "Updates" },
     { icon: Bell, label: "Alerts" },
-    { icon: Tool, label: "Maintenance" },
+    { icon: Wrench, label: "Maintenance" },
   ];
 
   const updates = [
@@ -27,7 +27,7 @@ const SafetyUpdates = () => {
       description: "Scheduled maintenance for street lights. Work will be conducted between 9 AM and 4 PM.",
       author: "Sarah Johnson",
       timeAgo: "5 days ago",
-      icon: Tool,
+      icon: Wrench,
       color: "text-blue-500",
       bgColor: "bg-blue-100",
     },
