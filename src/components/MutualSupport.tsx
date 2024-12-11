@@ -3,9 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Package, Car, Wrench, Share2 } from "lucide-react";
 import { useState } from "react";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
+import ArchiveDialog from "./ArchiveDialog";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  
   const categories = [
     { icon: Package, label: "Goods" },
     { icon: Car, label: "Transportation" },
@@ -18,9 +21,7 @@ const MutualSupport = () => {
       type: "Needs Help",
       title: "Grocery Shopping Helper",
       description: "Looking for assistance with weekly grocery shopping. I have mobility issues and would appreciate help every Saturday morning.",
-      location: "Pine Road",
       timeAgo: "11 months ago",
-      responses: 2,
       borderColor: "border-l-purple-500",
       tagColor: "text-purple-600",
       tagBg: "bg-purple-100",
@@ -32,9 +33,7 @@ const MutualSupport = () => {
       type: "Offering Help",
       title: "Garden Tools Available",
       description: "Offering to lend gardening tools including spades, rakes, and a lawn mower for the weekend.",
-      location: "Oak Street",
       timeAgo: "11 months ago",
-      helped: 3,
       borderColor: "border-l-emerald-500",
       tagColor: "text-emerald-600",
       tagBg: "bg-emerald-100",
@@ -43,9 +42,7 @@ const MutualSupport = () => {
       type: "Offering Help",
       title: "Free Moving Boxes",
       description: "Just finished moving, have 20+ boxes in good condition. Perfect for anyone planning to move.",
-      location: "Maple Avenue",
       timeAgo: "11 months ago",
-      helped: 5,
       borderColor: "border-l-emerald-500",
       tagColor: "text-emerald-600",
       tagBg: "bg-emerald-100",
@@ -93,11 +90,7 @@ const MutualSupport = () => {
               <h4 className="text-lg font-medium mb-3">{need.title}</h4>
               <p className="text-muted-foreground mb-6">{need.description}</p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <span>{need.location}</span>
-                  <span>{need.timeAgo}</span>
-                  <span>{need.responses} responses</span>
-                </div>
+                <span className="text-sm text-muted-foreground">{need.timeAgo}</span>
                 <Button variant="secondary">I can help</Button>
               </div>
             </div>
@@ -113,20 +106,29 @@ const MutualSupport = () => {
               <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
               <p className="text-muted-foreground mb-6">{offer.description}</p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <span>{offer.location}</span>
-                  <span>{offer.timeAgo}</span>
-                  <span>{offer.helped} helped</span>
-                </div>
+                <span className="text-sm text-muted-foreground">{offer.timeAgo}</span>
                 <Button variant="secondary">I'm Interested</Button>
               </div>
             </div>
           ))}
         </div>
       </div>
+      <div className="mt-8 flex justify-center">
+        <Button 
+          variant="outline"
+          onClick={() => setIsArchiveOpen(true)}
+          className="w-full max-w-xs"
+        >
+          Archive
+        </Button>
+      </div>
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
+      />
+      <ArchiveDialog
+        open={isArchiveOpen}
+        onOpenChange={setIsArchiveOpen}
       />
     </div>
   );

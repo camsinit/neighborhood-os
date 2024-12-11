@@ -31,24 +31,22 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
-  const [location, setLocation] = useState("");
+  const [validUntil, setValidUntil] = useState("");
   const [requestType, setRequestType] = useState<"need" | "offer" | null>(initialRequestType);
   const { toast } = useToast();
 
-  // Set initial request type when dialog opens
   React.useEffect(() => {
     if (open && initialRequestType) {
       setRequestType(initialRequestType);
     }
   }, [open, initialRequestType]);
 
-  // Reset form when dialog closes
   React.useEffect(() => {
     if (!open) {
       setTitle("");
       setDescription("");
       setType("");
-      setLocation("");
+      setValidUntil("");
       setRequestType(null);
     }
   }, [open]);
@@ -68,12 +66,6 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
       description: "Your support request has been successfully posted.",
     });
     onOpenChange(false);
-    // Reset form
-    setTitle("");
-    setDescription("");
-    setType("");
-    setLocation("");
-    setRequestType(null);
   };
 
   return (
@@ -134,11 +126,12 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="validUntil">Valid Until</Label>
             <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              id="validUntil"
+              type="date"
+              value={validUntil}
+              onChange={(e) => setValidUntil(e.target.value)}
               required
             />
           </div>
