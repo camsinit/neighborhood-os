@@ -2,8 +2,38 @@ import QuickActions from "@/components/QuickActions";
 import CommunityCalendar from "@/components/CommunityCalendar";
 import MutualSupport from "@/components/MutualSupport";
 import SafetyUpdates from "@/components/SafetyUpdates";
+import { UserCircle } from "lucide-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
+  const supabase = useSupabaseClient();
+  const user = useUser();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/login");
+      toast({
+        title: "Signed out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
@@ -13,8 +43,19 @@ const Index = () => {
               <div className="text-2xl font-bold text-primary">NeighBoard</div>
             </div>
             <div className="flex items-center gap-4">
-              <button className="text-sm text-gray-600">Sign In</button>
-              <button className="bg-primary text-white px-4 py-2 rounded-lg text-sm">Sign Up</button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="focus:outline-none">
+                  <div className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+                    <UserCircle className="h-8 w-8" />
+                    <span className="text-sm">{user?.email}</span>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
