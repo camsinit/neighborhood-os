@@ -53,7 +53,7 @@ const SafetyUpdates = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Safety Updates</h2>
-        <Button onClick={() => setIsAddUpdateOpen(true)}>Share Update</Button>
+        <Button onClick={() => setIsAddUpdateOpen(true)}>+ Share Update</Button>
       </div>
       <div className="mb-6">
         <Input 
