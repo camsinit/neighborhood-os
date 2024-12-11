@@ -10,7 +10,7 @@ const MutualSupport = () => {
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
 
-  const { data: supportRequests = [] } = useQuery({
+  const { data: supportRequests = [], isError } = useQuery({
     queryKey: ["support-requests"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -19,13 +19,33 @@ const MutualSupport = () => {
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching support requests:", error);
+        throw error;
+      }
+      
+      console.log("Fetched support requests:", data); // Debug log
       return data;
     },
   });
 
-  const needs = supportRequests.filter((request) => request.type === "need");
-  const offers = supportRequests.filter((request) => request.type === "offer");
+  // Filter needs and offers, logging the results for debugging
+  const needs = supportRequests.filter((request) => {
+    const isNeed = request.type.toLowerCase() === "need";
+    return isNeed;
+  });
+  
+  const offers = supportRequests.filter((request) => {
+    const isOffer = request.type.toLowerCase() === "offer";
+    return isOffer;
+  });
+
+  console.log("Filtered needs:", needs); // Debug log
+  console.log("Filtered offers:", offers); // Debug log
+
+  if (isError) {
+    return <div>Error loading support requests</div>;
+  }
 
   return (
     <div className="space-y-6">
