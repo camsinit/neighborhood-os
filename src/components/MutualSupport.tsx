@@ -1,139 +1,148 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import ArchiveDialog from "./ArchiveDialog";
+import { Input } from "@/components/ui/input";
+import { Package, Car, Wrench, Share2 } from "lucide-react";
+import { useState } from "react";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import ArchiveDialog from "./ArchiveDialog";
 
 const MutualSupport = () => {
-  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
-
-  const { data: supportRequests = [], isError } = useQuery({
-    queryKey: ["support-requests"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("support_requests")
-        .select("*")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching support requests:", error);
-        throw error;
-      }
-      
-      console.log("Fetched support requests:", data); // Debug log
-      return data;
-    },
-  });
-
-  // Filter needs and offers, logging the results for debugging
-  const needs = supportRequests.filter((request) => {
-    const isNeed = request.type.toLowerCase() === "need";
-    return isNeed;
-  });
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   
-  const offers = supportRequests.filter((request) => {
-    const isOffer = request.type.toLowerCase() === "offer";
-    return isOffer;
-  });
+  const categories = [
+    { icon: Package, label: "Goods" },
+    { icon: Car, label: "Transportation" },
+    { icon: Wrench, label: "Skills" },
+    { icon: Share2, label: "Resources" },
+  ];
 
-  console.log("Filtered needs:", needs); // Debug log
-  console.log("Filtered offers:", offers); // Debug log
+  const needs = [
+    {
+      type: "Needs Help",
+      title: "Grocery Shopping Helper",
+      description: "Looking for assistance with weekly grocery shopping. I have mobility issues and would appreciate help every Saturday morning.",
+      timeAgo: "11 months ago",
+      borderColor: "border-l-purple-500",
+      tagColor: "text-purple-600",
+      tagBg: "bg-purple-100",
+      requestType: "Transportation"
+    }
+  ];
 
-  if (isError) {
-    return <div>Error loading support requests</div>;
-  }
+  const offers = [
+    {
+      type: "Offering Help",
+      title: "Garden Tools Available",
+      description: "Offering to lend gardening tools including spades, rakes, and a lawn mower for the weekend.",
+      timeAgo: "11 months ago",
+      borderColor: "border-l-emerald-500",
+      tagColor: "text-emerald-600",
+      tagBg: "bg-emerald-100",
+      requestType: "Goods"
+    },
+    {
+      type: "Offering Help",
+      title: "Free Moving Boxes",
+      description: "Just finished moving, have 20+ boxes in good condition. Perfect for anyone planning to move.",
+      timeAgo: "11 months ago",
+      borderColor: "border-l-emerald-500",
+      tagColor: "text-emerald-600",
+      tagBg: "bg-emerald-100",
+      requestType: "Goods"
+    }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 pb-2 border-b">Mutual Support</h2>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="border-[#F3D649] border-dotted hover:bg-[#F3D649] hover:bg-opacity-10"
-            onClick={() => setIsArchiveOpen(true)}
-          >
-            Archive
-          </Button>
-          <Button onClick={() => setIsAddRequestOpen(true)}>Add Request</Button>
-        </div>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">Mutual Support</h2>
+        <Button 
+          onClick={() => setIsAddRequestOpen(true)}
+          className="bg-[#F3D649] hover:bg-[#F3D649]/90 text-black"
+        >
+          + Share Need or Offer
+        </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Needs</h3>
-          <div className="space-y-4">
-            {needs.map((need) => (
-              <div
-                key={need.id}
-                className="p-4 rounded-lg border bg-white shadow-sm"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                      {need.request_type}
-                    </span>
-                  </div>
-                  <h4 className="font-medium">{need.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {need.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Need by: {format(new Date(need.valid_until), "PPP")}
-                    </span>
-                    <Button variant="secondary">I can help</Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Offers</h3>
-          <div className="space-y-4">
-            {offers.map((offer) => (
-              <div
-                key={offer.id}
-                className="p-4 rounded-lg border bg-white shadow-sm"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium bg-green-100 text-green-800 px-2 py-1 rounded">
-                      {offer.request_type}
-                    </span>
-                  </div>
-                  <h4 className="font-medium">{offer.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {offer.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Offer available until: {format(new Date(offer.valid_until), "PPP")}
-                    </span>
-                    <Button variant="secondary">I'm Interested</Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="flex items-center gap-6 mb-8">
+        <Input 
+          type="search" 
+          placeholder="Search requests..." 
+          className="max-w-[240px] bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300" 
+        />
+        <div className="flex gap-4">
+          {categories.map((cat) => (
+            <Button 
+              key={cat.label} 
+              variant="outline" 
+              className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200"
+            >
+              <cat.icon className="h-4 w-4" />
+              {cat.label}
+            </Button>
+          ))}
         </div>
       </div>
-
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium mb-4">Needs</h3>
+          {needs.map((need) => (
+            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-6 shadow-sm relative`}>
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${need.tagColor} ${need.tagBg} text-sm font-medium mb-3`}>
+                {need.type}
+              </div>
+              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {need.requestType}
+              </div>
+              <h4 className="text-lg font-medium mb-3">{need.title}</h4>
+              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
+                {need.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Need by: {need.timeAgo}</span>
+                <Button variant="secondary">I can help</Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium mb-4">Offers</h3>
+          {offers.map((offer) => (
+            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-6 shadow-sm relative`}>
+              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm font-medium mb-3`}>
+                {offer.type}
+              </div>
+              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {offer.requestType}
+              </div>
+              <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
+              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
+                {offer.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Offer available until: {offer.timeAgo}</span>
+                <Button variant="secondary">I'm Interested</Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-8 flex justify-center">
+        <Button 
+          variant="outline"
+          onClick={() => setIsArchiveOpen(true)}
+          className="w-full max-w-xs border-[#F3D649] border-dotted hover:bg-[#F3D649]/10"
+        >
+          Archive
+        </Button>
+      </div>
+      <AddSupportRequestDialog 
+        open={isAddRequestOpen}
+        onOpenChange={setIsAddRequestOpen}
+      />
       <ArchiveDialog
         open={isArchiveOpen}
         onOpenChange={setIsArchiveOpen}
-        type="support"
-      />
-
-      <AddSupportRequestDialog
-        open={isAddRequestOpen}
-        onOpenChange={setIsAddRequestOpen}
       />
     </div>
   );
