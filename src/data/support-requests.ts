@@ -1,4 +1,6 @@
-export const supportRequests = [
+import { SupportRequest } from "@/components/SupportRequestCard";
+
+export const supportRequests: SupportRequest[] = [
   {
     id: "1",
     type: "need",

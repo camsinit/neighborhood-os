@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 
-interface SupportRequest {
+export interface SupportRequest {
   id: string;
   type: "need" | "offer";
   title: string;
