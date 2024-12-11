@@ -55,7 +55,7 @@ const MutualSupport = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">Mutual Support</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Mutual Support</h2>
         <Button 
           onClick={() => setIsAddRequestOpen(true)}
           className="bg-[#F3D649] hover:bg-[#F3D649]/90 text-black"
