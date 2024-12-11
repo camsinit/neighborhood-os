@@ -3,7 +3,18 @@ import { ChevronLeft, ChevronRight, Clock, User, MapPin } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useState } from "react";
-import { addWeeks, subWeeks, startOfWeek, addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from "date-fns";
+import { 
+  addWeeks, 
+  subWeeks, 
+  startOfWeek, 
+  endOfWeek,
+  addDays, 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  eachDayOfInterval,
+  isSameMonth 
+} from "date-fns";
 
 // Example event data with added color property
 const monthEvents = {
