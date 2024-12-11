@@ -88,7 +88,9 @@ const MutualSupport = () => {
                 {need.type}
               </div>
               <h4 className="text-lg font-medium mb-3">{need.title}</h4>
-              <p className="text-muted-foreground mb-6">{need.description}</p>
+              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
+                {need.description}
+              </p>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{need.timeAgo}</span>
                 <Button variant="secondary">I can help</Button>
@@ -104,7 +106,9 @@ const MutualSupport = () => {
                 {offer.type}
               </div>
               <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
-              <p className="text-muted-foreground mb-6">{offer.description}</p>
+              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
+                {offer.description}
+              </p>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{offer.timeAgo}</span>
                 <Button variant="secondary">I'm Interested</Button>
