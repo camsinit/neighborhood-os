@@ -19,9 +19,10 @@ interface ArchivedItem {
 interface ArchiveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  type?: string;  // Added this line to fix the TypeScript error
 }
 
-const ArchiveDialog = ({ open, onOpenChange }: ArchiveDialogProps) => {
+const ArchiveDialog = ({ open, onOpenChange, type }: ArchiveDialogProps) => {
   // This would typically come from your backend
   const archivedItems: ArchivedItem[] = [
     {
