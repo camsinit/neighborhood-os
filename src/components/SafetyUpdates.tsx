@@ -55,7 +55,7 @@ const SafetyUpdates = () => {
         <h2 className="text-xl font-semibold">Safety Updates</h2>
         <Button 
           onClick={() => setIsAddUpdateOpen(true)}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="bg-red-600 hover:bg-red-700 text-white h-10"
         >
           + Share Update
         </Button>
@@ -64,14 +64,14 @@ const SafetyUpdates = () => {
         <Input 
           type="search" 
           placeholder="Search safety updates..." 
-          className="max-w-sm bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300" 
+          className="max-w-sm bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300 h-10" 
         />
         <div className="flex gap-4">
           {categories.map((cat) => (
             <Button 
               key={cat.label} 
               variant="outline" 
-              className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200"
+              className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200 h-10"
             >
               <cat.icon className="h-4 w-4" />
               {cat.label}
