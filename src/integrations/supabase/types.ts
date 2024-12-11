@@ -9,7 +9,147 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          host_id: string
+          id: string
+          location: string
+          time: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          host_id: string
+          id?: string
+          location: string
+          time: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          host_id?: string
+          id?: string
+          location?: string
+          time?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      safety_updates: {
+        Row: {
+          author_id: string
+          created_at: string
+          description: string | null
+          id: string
+          status: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_requests: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          request_type: string
+          status: string | null
+          title: string
+          type: string
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          request_type: string
+          status?: string | null
+          title: string
+          type: string
+          user_id: string
+          valid_until: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          request_type?: string
+          status?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
