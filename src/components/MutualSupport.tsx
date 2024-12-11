@@ -18,6 +18,9 @@ const MutualSupport = () => {
       location: "Pine Road",
       timeAgo: "11 months ago",
       responses: 2,
+      borderColor: "border-l-purple-500",
+      tagColor: "text-purple-600",
+      tagBg: "bg-purple-100",
     }
   ];
 
@@ -29,6 +32,9 @@ const MutualSupport = () => {
       location: "Oak Street",
       timeAgo: "11 months ago",
       helped: 3,
+      borderColor: "border-l-emerald-500",
+      tagColor: "text-emerald-600",
+      tagBg: "bg-emerald-100",
     },
     {
       type: "Offering Help",
@@ -37,6 +43,9 @@ const MutualSupport = () => {
       location: "Maple Avenue",
       timeAgo: "11 months ago",
       helped: 5,
+      borderColor: "border-l-emerald-500",
+      tagColor: "text-emerald-600",
+      tagBg: "bg-emerald-100",
     }
   ];
 
@@ -61,8 +70,8 @@ const MutualSupport = () => {
         <div>
           <h3 className="text-lg font-medium mb-4">Needs</h3>
           {needs.map((need) => (
-            <div key={need.title} className="border rounded-lg p-4 mb-4">
-              <div className="inline-flex items-center px-2 py-1 rounded-full text-purple-600 bg-purple-100 text-sm mb-2">
+            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-4 shadow-sm`}>
+              <div className={`inline-flex items-center px-2 py-1 rounded-full ${need.tagColor} ${need.tagBg} text-sm mb-2`}>
                 {need.type}
               </div>
               <h4 className="text-lg font-medium mb-2">{need.title}</h4>
@@ -81,8 +90,8 @@ const MutualSupport = () => {
         <div>
           <h3 className="text-lg font-medium mb-4">Offers</h3>
           {offers.map((offer) => (
-            <div key={offer.title} className="border rounded-lg p-4 mb-4">
-              <div className="inline-flex items-center px-2 py-1 rounded-full text-emerald-600 bg-emerald-100 text-sm mb-2">
+            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-4 shadow-sm`}>
+              <div className={`inline-flex items-center px-2 py-1 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm mb-2`}>
                 {offer.type}
               </div>
               <h4 className="text-lg font-medium mb-2">{offer.title}</h4>

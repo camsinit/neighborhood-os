@@ -20,6 +20,7 @@ const SafetyUpdates = () => {
       icon: AlertTriangle,
       color: "text-red-500",
       bgColor: "bg-red-100",
+      borderColor: "border-l-red-500",
     },
     {
       type: "Maintenance",
@@ -30,6 +31,7 @@ const SafetyUpdates = () => {
       icon: Wrench,
       color: "text-blue-500",
       bgColor: "bg-blue-100",
+      borderColor: "border-l-blue-500",
     },
     {
       type: "Updates",
@@ -40,6 +42,7 @@ const SafetyUpdates = () => {
       icon: Clock,
       color: "text-green-500",
       bgColor: "bg-green-100",
+      borderColor: "border-l-green-500",
     },
   ];
 
@@ -62,7 +65,7 @@ const SafetyUpdates = () => {
       </div>
       <div className="space-y-4">
         {updates.map((update) => (
-          <div key={update.title} className="border rounded-lg p-4">
+          <div key={update.title} className={`bg-white border-l-4 ${update.borderColor} rounded-lg p-4 shadow-sm`}>
             <div className={`inline-flex items-center px-2 py-1 rounded-full ${update.color} ${update.bgColor} text-sm mb-2`}>
               <update.icon className="h-4 w-4 mr-1" />
               {update.type}
