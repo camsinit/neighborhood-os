@@ -3,55 +3,116 @@ import { ChevronLeft, ChevronRight, Clock, User, MapPin } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useState } from "react";
-import { addWeeks, subWeeks, startOfWeek, addDays, format } from "date-fns";
+import { addWeeks, subWeeks, startOfWeek, addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from "date-fns";
 
 // Example event data with added color property
-const events = {
-  11: [
+const monthEvents = {
+  // Week 1
+  31: [
     {
       id: 1,
-      title: "Community Garden Workshop",
+      title: "Update Design System",
       host: "Sarah Chen",
-      time: "10:00 AM",
-      location: "Community Garden, 123 Main St",
-      description: "Learn about sustainable gardening practices and help maintain our community garden. Bring your own gloves and we'll provide the rest of the tools!",
-      color: "bg-yellow-100 border-yellow-300"
+      time: "10:30 - 12:00",
+      location: "Design Lab",
+      description: "Monthly design system update and review session",
+      color: "bg-purple-100 border-purple-300"
+    }
+  ],
+  5: [
+    {
+      id: 2,
+      title: "Update Design System",
+      host: "Emily Wong",
+      time: "10:30 - 12:00",
+      location: "Virtual Meeting Room",
+      description: "Review and update design system components",
+      color: "bg-pink-100 border-pink-300"
+    }
+  ],
+  // Week 2
+  9: [
+    {
+      id: 3,
+      title: "Wireframe Update",
+      host: "Alex Johnson",
+      time: "10:30 - 12:00",
+      location: "Design Studio",
+      description: "Review and update website wireframes",
+      color: "bg-orange-100 border-orange-300"
+    }
+  ],
+  11: [
+    {
+      id: 4,
+      title: "Client Website",
+      host: "Michael Brown",
+      time: "10:30 - 12:00",
+      location: "Meeting Room A",
+      description: "Client website development review",
+      color: "bg-green-100 border-green-300"
     }
   ],
   13: [
     {
-      id: 2,
-      title: "Neighborhood Watch Meeting",
-      host: "Robert Martinez",
-      time: "7:00 PM",
-      location: "Community Center Room 2B",
-      description: "Monthly meeting to discuss neighborhood safety and upcoming initiatives.",
+      id: 5,
+      title: "Update Design System",
+      host: "Lisa Park",
+      time: "10:30 - 12:00",
+      location: "Design Lab",
+      description: "Biweekly design system maintenance",
       color: "bg-purple-100 border-purple-300"
     }
   ],
-  15: [
+  // Week 3
+  14: [
     {
-      id: 3,
-      title: "Kids Art in Park",
-      host: "Emily Wong",
-      time: "3:30 PM",
-      location: "Central Park Pavilion",
-      description: "Outdoor art session for children ages 5-12. All materials provided. Parents must be present.",
-      color: "bg-blue-100 border-blue-300"
-    },
-    {
-      id: 4,
-      title: "Evening Yoga Session",
+      id: 6,
+      title: "Website Product Envato",
       host: "David Kumar",
-      time: "6:00 PM",
-      location: "Wellness Center Studio 3",
-      description: "Beginner-friendly yoga session in the community center. Bring your own mat!",
-      color: "bg-green-100 border-green-300"
+      time: "10:30 - 12:00",
+      location: "Virtual Room",
+      description: "Envato marketplace product review",
+      color: "bg-purple-100 border-purple-300"
+    }
+  ],
+  18: [
+    {
+      id: 7,
+      title: "Wireframe Update",
+      host: "Sophie Chen",
+      time: "10:30 - 12:00",
+      location: "Design Studio",
+      description: "Weekly wireframe review session",
+      color: "bg-orange-100 border-orange-300"
+    }
+  ],
+  // Week 4
+  23: [
+    {
+      id: 8,
+      title: "Website Product UI kit",
+      host: "Ryan Wilson",
+      time: "10:30 - 12:00",
+      location: "Design Lab",
+      description: "UI kit development and review",
+      color: "bg-yellow-100 border-yellow-300"
+    }
+  ],
+  27: [
+    {
+      id: 9,
+      title: "Wireframe Update",
+      host: "Emma Thompson",
+      time: "10:30 - 12:00",
+      location: "Meeting Room B",
+      description: "Final wireframe review of the month",
+      color: "bg-orange-100 border-orange-300"
     }
   ]
 };
 
-const EventCard = ({ event }: { event: typeof events[keyof typeof events][0] }) => {
+const EventCard = ({ event }: { event: typeof monthEvents[keyof typeof monthEvents][0] }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -114,10 +175,15 @@ const EventCard = ({ event }: { event: typeof events[keyof typeof events][0] }) 
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [view, setView] = useState<'week' | 'month'>('week');
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
   const weekStart = startOfWeek(currentDate);
-  const dates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  
+  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const monthDates = eachDayOfInterval({ start: startOfWeek(monthStart), end: endOfWeek(monthEnd) });
 
   const handlePreviousWeek = () => {
     setCurrentDate(subWeeks(currentDate, 1));
@@ -131,14 +197,67 @@ const CommunityCalendar = () => {
     setCurrentDate(new Date());
   };
 
+  const renderWeekView = () => (
+    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      {weekDates.map((date, i) => (
+        <div key={i} className="bg-white p-4">
+          <div className="text-sm text-gray-500 mb-1">{days[i]}</div>
+          <div className="text-lg font-medium mb-3">{format(date, 'd')}</div>
+          <div className="space-y-1">
+            {monthEvents[parseInt(format(date, 'd'))]?.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderMonthView = () => (
+    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      {days.map((day, i) => (
+        <div key={i} className="bg-white p-2 text-sm text-gray-500 font-medium text-center">
+          {day}
+        </div>
+      ))}
+      {monthDates.map((date, i) => (
+        <div 
+          key={i} 
+          className={`bg-white p-2 min-h-[120px] ${!isSameMonth(date, currentDate) ? 'opacity-50' : ''}`}
+        >
+          <div className="text-sm font-medium mb-2">{format(date, 'd')}</div>
+          <div className="space-y-1">
+            {monthEvents[parseInt(format(date, 'd'))]?.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Community Calendar</h2>
         <div className="flex items-center gap-6">
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="active">Week</Button>
-            <Button variant="outline" size="sm">Month</Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={view === 'week' ? 'bg-primary text-white hover:bg-primary' : ''}
+              onClick={() => setView('week')}
+            >
+              Week
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className={view === 'month' ? 'bg-primary text-white hover:bg-primary' : ''}
+              onClick={() => setView('month')}
+            >
+              Month
+            </Button>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={handlePreviousWeek}>
@@ -151,24 +270,7 @@ const CommunityCalendar = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-        {dates.map((date, i) => (
-          <div key={i} className="bg-white p-4">
-            <div className="text-sm text-gray-500 mb-1">{days[i]}</div>
-            <div className="text-lg font-medium mb-3">{format(date, 'd')}</div>
-            <div className="space-y-1">
-              {events[parseInt(format(date, 'd'))]?.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-              {events[parseInt(format(date, 'd'))]?.length > 3 && (
-                <div className="text-xs text-gray-500 mt-2">
-                  {events[parseInt(format(date, 'd'))]!.length - 3} more
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      {view === 'week' ? renderWeekView() : renderMonthView()}
     </div>
   );
 };
