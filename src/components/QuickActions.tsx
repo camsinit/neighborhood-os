@@ -46,7 +46,7 @@ const QuickActions = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-2">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {actions.map((action) => (
           <Button
