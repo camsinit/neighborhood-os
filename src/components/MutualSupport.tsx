@@ -99,7 +99,7 @@ const MutualSupport = () => {
                 {need.description}
               </p>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Need by: {need.timeAgo}</span>
+                <span className="text-sm text-muted-foreground">{need.timeAgo}</span>
                 <Button variant="secondary">I can help</Button>
               </div>
             </div>
@@ -120,7 +120,7 @@ const MutualSupport = () => {
                 {offer.description}
               </p>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Offer available until: {offer.timeAgo}</span>
+                <span className="text-sm text-muted-foreground">{offer.timeAgo}</span>
                 <Button variant="secondary">I'm Interested</Button>
               </div>
             </div>
