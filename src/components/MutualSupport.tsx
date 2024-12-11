@@ -98,7 +98,7 @@ const MutualSupport = () => {
                   <span>{need.timeAgo}</span>
                   <span>{need.responses} responses</span>
                 </div>
-                <Button variant="secondary">Offer Help</Button>
+                <Button variant="secondary">I can help</Button>
               </div>
             </div>
           ))}
