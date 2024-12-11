@@ -22,16 +22,16 @@ const Index = () => {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <div className="p-6 rounded-lg bg-[#FEF7CD]">
+          <div className="p-6 rounded-lg bg-[#f3f3f3]">
             <QuickActions />
           </div>
-          <div className="p-6 rounded-lg bg-[#D3E4FD]">
+          <div className="p-6 rounded-lg bg-[#f3f3f3]">
             <CommunityCalendar />
           </div>
-          <div className="p-6 rounded-lg bg-[#F2FCE2]">
+          <div className="p-6 rounded-lg bg-[#f3f3f3]">
             <MutualSupport />
           </div>
-          <div className="p-6 rounded-lg bg-red-50">
+          <div className="p-6 rounded-lg bg-[#f3f3f3]">
             <SafetyUpdates />
           </div>
         </div>
