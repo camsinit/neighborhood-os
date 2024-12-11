@@ -30,7 +30,7 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome to NeighborhoodOS
+            Welcome to Terrific Terrace
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Connect with your community
@@ -54,7 +54,7 @@ const Login = () => {
             localization={{
               variables: {
                 sign_up: {
-                  password_input_label: "Password (minimum 6 characters)",
+                  password_label: "Password (minimum 6 characters)",
                   password_input_placeholder: "Enter your password (min. 6 characters)"
                 }
               }

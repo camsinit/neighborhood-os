@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Tabs,
@@ -51,6 +50,11 @@ const profileFormSchema = z.object({
   }),
 });
 
+type NotificationPreferences = {
+  email: boolean;
+  push: boolean;
+};
+
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const user = useUser();
   const { toast } = useToast();
@@ -91,16 +95,18 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       }
 
       if (data) {
+        const notificationPrefs = data.notification_preferences as NotificationPreferences || {
+          email: true,
+          push: true,
+        };
+
         form.reset({
           display_name: data.display_name || "",
           bio: data.bio || "",
           timezone: data.timezone || "UTC",
           language: data.language || "en",
           theme: data.theme || "light",
-          notification_preferences: data.notification_preferences || {
-            email: true,
-            push: true,
-          },
+          notification_preferences: notificationPrefs,
         });
       }
     };
