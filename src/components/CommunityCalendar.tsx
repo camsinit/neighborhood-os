@@ -85,9 +85,9 @@ const CommunityCalendar = () => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Community Calendar</h2>
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">Community Calendar</h2>
+        <div className="flex items-center gap-6">
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="active">Week</Button>
             <Button variant="outline" size="sm">Month</Button>
@@ -103,12 +103,12 @@ const CommunityCalendar = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-4">
+      <div className="grid grid-cols-7 gap-6">
         {days.map((day, i) => (
           <div key={day} className="text-center">
-            <div className="text-sm text-muted-foreground mb-2">{day}</div>
-            <div className="text-sm mb-2">{dates[i]}</div>
-            <div className="min-h-[150px] bg-gray-50 p-2 rounded-md">
+            <div className="text-sm font-medium text-muted-foreground mb-2">{day}</div>
+            <div className="text-sm font-semibold mb-3">{dates[i]}</div>
+            <div className="min-h-[200px] bg-gray-50/50 p-3 rounded-lg border border-gray-100 shadow-sm">
               {events[dates[i]]?.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
