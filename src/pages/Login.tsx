@@ -3,12 +3,20 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/");
       }
@@ -31,9 +39,21 @@ const Login = () => {
         <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <Auth
             supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
-            theme="light"
+            appearance={{ 
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: '#2563eb',
+                    brandAccent: '#1d4ed8',
+                  },
+                },
+              },
+            }}
             providers={[]}
+            onError={(error) => {
+              toast.error(error.message);
+            }}
           />
         </div>
       </div>
