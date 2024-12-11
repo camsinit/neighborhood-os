@@ -82,7 +82,7 @@ const AddSafetyUpdateDialog = ({ open, onOpenChange }: AddSafetyUpdateDialogProp
             />
           </div>
           <DialogFooter>
-            <Button type="submit">Share Update</Button>
+            <Button type="submit" className="bg-[#ea384c] hover:bg-[#ea384c]/90">Share Update</Button>
           </DialogFooter>
         </form>
       </DialogContent>

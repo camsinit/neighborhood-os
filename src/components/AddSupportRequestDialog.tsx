@@ -23,15 +23,34 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface AddSupportRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialRequestType?: "need" | "offer" | null;
 }
 
-const AddSupportRequestDialog = ({ open, onOpenChange }: AddSupportRequestDialogProps) => {
+const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: AddSupportRequestDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
   const [location, setLocation] = useState("");
-  const [requestType, setRequestType] = useState<"need" | "offer" | null>(null);
+  const [requestType, setRequestType] = useState<"need" | "offer" | null>(initialRequestType);
   const { toast } = useToast();
+
+  // Set initial request type when dialog opens
+  React.useEffect(() => {
+    if (open && initialRequestType) {
+      setRequestType(initialRequestType);
+    }
+  }, [open, initialRequestType]);
+
+  // Reset form when dialog closes
+  React.useEffect(() => {
+    if (!open) {
+      setTitle("");
+      setDescription("");
+      setType("");
+      setLocation("");
+      setRequestType(null);
+    }
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
