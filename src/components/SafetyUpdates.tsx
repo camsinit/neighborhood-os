@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertTriangle, Bell, Wrench, Clock } from "lucide-react";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
+import SafetyArchiveDialog from "./SafetyArchiveDialog";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  
   const categories = [
     { icon: Clock, label: "Updates" },
     { icon: Bell, label: "Alerts" },
@@ -98,9 +101,22 @@ const SafetyUpdates = () => {
           </div>
         ))}
       </div>
+      <div className="mt-8 flex justify-center">
+        <Button 
+          variant="outline"
+          onClick={() => setIsArchiveOpen(true)}
+          className="w-full max-w-xs"
+        >
+          Archive
+        </Button>
+      </div>
       <AddSafetyUpdateDialog 
         open={isAddUpdateOpen}
         onOpenChange={setIsAddUpdateOpen}
+      />
+      <SafetyArchiveDialog
+        open={isArchiveOpen}
+        onOpenChange={setIsArchiveOpen}
       />
     </div>
   );
