@@ -1,5 +1,83 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, User } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+// Example event data
+const events = {
+  1: [
+    {
+      id: 1,
+      title: "Community Garden Workshop",
+      host: "Sarah Chen",
+      time: "10:00 AM",
+      description: "Learn about sustainable gardening practices and help maintain our community garden. Bring your own gloves and we'll provide the rest of the tools!"
+    }
+  ],
+  3: [
+    {
+      id: 2,
+      title: "Neighborhood Watch Meeting",
+      host: "Robert Martinez",
+      time: "7:00 PM",
+      description: "Monthly meeting to discuss neighborhood safety and upcoming initiatives."
+    }
+  ],
+  5: [
+    {
+      id: 3,
+      title: "Kids Art in Park",
+      host: "Emily Wong",
+      time: "3:30 PM",
+      description: "Outdoor art session for children ages 5-12. All materials provided. Parents must be present."
+    },
+    {
+      id: 4,
+      title: "Evening Yoga Session",
+      host: "David Kumar",
+      time: "6:00 PM",
+      description: "Beginner-friendly yoga session in the community center. Bring your own mat!"
+    }
+  ]
+};
+
+const EventCard = ({ event }: { event: typeof events[keyof typeof events][0] }) => {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <div className="bg-white rounded-sm p-2 mb-1 text-xs cursor-pointer hover:bg-gray-50 border-l-4 border-primary">
+          <div className="font-medium truncate">{event.title}</div>
+          <div className="flex items-center gap-1 text-gray-600">
+            <User className="h-3 w-3" />
+            <span className="truncate">{event.host}</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-600">
+            <Clock className="h-3 w-3" />
+            <span>{event.time}</span>
+          </div>
+        </div>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>{event.title}</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-gray-500" />
+            <span className="text-gray-700">{event.host}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-gray-500" />
+            <span className="text-gray-700">{event.time}</span>
+          </div>
+          <div className="pt-4 border-t">
+            <h3 className="font-medium mb-2">About this event</h3>
+            <p className="text-gray-600">{event.description}</p>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
 const CommunityCalendar = () => {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -29,7 +107,12 @@ const CommunityCalendar = () => {
         {days.map((day, i) => (
           <div key={day} className="text-center">
             <div className="text-sm text-muted-foreground mb-2">{day}</div>
-            <div className="text-sm">{dates[i]}</div>
+            <div className="text-sm mb-2">{dates[i]}</div>
+            <div className="min-h-[150px] bg-gray-50 p-2 rounded-md">
+              {events[dates[i]]?.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
           </div>
         ))}
       </div>
