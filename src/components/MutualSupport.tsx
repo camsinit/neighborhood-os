@@ -1,22 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Package, Car, Wrench, Share2 } from "lucide-react";
 import { useState } from "react";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import ArchiveDialog from "./ArchiveDialog";
+import SearchBar from "./mutual-support/SearchBar";
+import CategoryFilters from "./mutual-support/CategoryFilters";
+import SupportSection from "./mutual-support/SupportSection";
+import { SupportItem } from "./mutual-support/types";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
-  
-  const categories = [
-    { icon: Package, label: "Goods" },
-    { icon: Car, label: "Transportation" },
-    { icon: Wrench, label: "Skills" },
-    { icon: Share2, label: "Resources" },
-  ];
 
-  const needs = [
+  const needs: SupportItem[] = [
     {
       type: "Needs Help",
       title: "Grocery Shopping Helper",
@@ -29,7 +24,7 @@ const MutualSupport = () => {
     }
   ];
 
-  const offers = [
+  const offers: SupportItem[] = [
     {
       type: "Offering Help",
       title: "Garden Tools Available",
@@ -65,68 +60,15 @@ const MutualSupport = () => {
       </div>
 
       <div className="flex items-center gap-6 mb-8">
-        <Input 
-          type="search" 
-          placeholder="Search requests..." 
-          className="max-w-[240px] bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300" 
-        />
-        <div className="flex gap-4">
-          {categories.map((cat) => (
-            <Button 
-              key={cat.label} 
-              variant="outline" 
-              className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200"
-            >
-              <cat.icon className="h-4 w-4" />
-              {cat.label}
-            </Button>
-          ))}
-        </div>
+        <SearchBar />
+        <CategoryFilters />
       </div>
+
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium mb-4">Needs</h3>
-          {needs.map((need) => (
-            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-6 shadow-sm relative`}>
-              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${need.tagColor} ${need.tagBg} text-sm font-medium mb-3`}>
-                {need.type}
-              </div>
-              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {need.requestType}
-              </div>
-              <h4 className="text-lg font-medium mb-3">{need.title}</h4>
-              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
-                {need.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{need.timeAgo}</span>
-                <Button variant="secondary">I can help</Button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium mb-4">Offers</h3>
-          {offers.map((offer) => (
-            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-6 shadow-sm relative`}>
-              <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm font-medium mb-3`}>
-                {offer.type}
-              </div>
-              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {offer.requestType}
-              </div>
-              <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
-              <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
-                {offer.description}
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{offer.timeAgo}</span>
-                <Button variant="secondary">I'm Interested</Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SupportSection title="Needs" items={needs} />
+        <SupportSection title="Offers" items={offers} />
       </div>
+
       <div className="mt-8 flex justify-center">
         <Button 
           variant="outline"
@@ -136,6 +78,7 @@ const MutualSupport = () => {
           Archive
         </Button>
       </div>
+
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
