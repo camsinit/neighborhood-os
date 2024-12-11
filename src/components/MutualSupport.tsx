@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Package, Car, Wrench, Share2 } from "lucide-react";
+import { useState } from "react";
+import AddSupportRequestDialog from "./AddSupportRequestDialog";
 
 const MutualSupport = () => {
+  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const categories = [
     { icon: Package, label: "Goods" },
     { icon: Car, label: "Transportation" },
@@ -53,7 +56,7 @@ const MutualSupport = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Mutual Support</h2>
-        <Button>Create Request</Button>
+        <Button onClick={() => setIsAddRequestOpen(true)}>Create Request</Button>
       </div>
       <div className="mb-6">
         <Input 
@@ -116,6 +119,10 @@ const MutualSupport = () => {
           ))}
         </div>
       </div>
+      <AddSupportRequestDialog 
+        open={isAddRequestOpen}
+        onOpenChange={setIsAddRequestOpen}
+      />
     </div>
   );
 };

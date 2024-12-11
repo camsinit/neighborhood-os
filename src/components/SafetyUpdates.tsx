@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertTriangle, Bell, Wrench, Clock } from "lucide-react";
+import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 
 const SafetyUpdates = () => {
+  const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const categories = [
     { icon: Clock, label: "Updates" },
     { icon: Bell, label: "Alerts" },
@@ -50,7 +52,7 @@ const SafetyUpdates = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Safety Updates</h2>
-        <Button>Share Update</Button>
+        <Button onClick={() => setIsAddUpdateOpen(true)}>Share Update</Button>
       </div>
       <div className="mb-6">
         <Input 
@@ -90,6 +92,10 @@ const SafetyUpdates = () => {
           </div>
         ))}
       </div>
+      <AddSafetyUpdateDialog 
+        open={isAddUpdateOpen}
+        onOpenChange={setIsAddUpdateOpen}
+      />
     </div>
   );
 };

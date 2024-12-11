@@ -99,13 +99,6 @@ const CommunityCalendar = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Community Calendar</h2>
         <div className="flex items-center gap-6">
-          <Button 
-            onClick={() => setIsAddEventOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Event
-          </Button>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -131,6 +124,13 @@ const CommunityCalendar = () => {
             <Button variant="outline" size="sm" onClick={handleToday}>Today</Button>
             <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleNextWeek}>
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button 
+              onClick={() => setIsAddEventOpen(true)}
+              className="flex items-center gap-2 ml-4"
+            >
+              <Plus className="h-4 w-4" />
+              Add Event
             </Button>
           </div>
         </div>
