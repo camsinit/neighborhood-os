@@ -63,24 +63,6 @@ const AddSupportRequestDialog = ({ open, onOpenChange }: AddSupportRequestDialog
           <DialogTitle>Share Need or Offer</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex gap-4 items-center">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="need" 
-                checked={requestType === "need"}
-                onCheckedChange={() => setRequestType("need")}
-              />
-              <Label htmlFor="need">Need Help</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="offer" 
-                checked={requestType === "offer"}
-                onCheckedChange={() => setRequestType("offer")}
-              />
-              <Label htmlFor="offer">Offer Help</Label>
-            </div>
-          </div>
           <div className="space-y-2">
             <Label htmlFor="type">Request Type</Label>
             <Select onValueChange={setType} value={type}>
@@ -94,6 +76,24 @@ const AddSupportRequestDialog = ({ open, onOpenChange }: AddSupportRequestDialog
                 <SelectItem value="resources">Resources</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="need" 
+                checked={requestType === "need"}
+                onCheckedChange={() => setRequestType("need")}
+              />
+              <Label htmlFor="need">I need help</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="offer" 
+                checked={requestType === "offer"}
+                onCheckedChange={() => setRequestType("offer")}
+              />
+              <Label htmlFor="offer">I have an offer</Label>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
