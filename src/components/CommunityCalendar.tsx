@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Clock, User } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-// Example event data
+// Example event data with added color property
 const events = {
   1: [
     {
@@ -10,7 +10,8 @@ const events = {
       title: "Community Garden Workshop",
       host: "Sarah Chen",
       time: "10:00 AM",
-      description: "Learn about sustainable gardening practices and help maintain our community garden. Bring your own gloves and we'll provide the rest of the tools!"
+      description: "Learn about sustainable gardening practices and help maintain our community garden. Bring your own gloves and we'll provide the rest of the tools!",
+      color: "bg-yellow-100 border-yellow-300"
     }
   ],
   3: [
@@ -19,7 +20,8 @@ const events = {
       title: "Neighborhood Watch Meeting",
       host: "Robert Martinez",
       time: "7:00 PM",
-      description: "Monthly meeting to discuss neighborhood safety and upcoming initiatives."
+      description: "Monthly meeting to discuss neighborhood safety and upcoming initiatives.",
+      color: "bg-purple-100 border-purple-300"
     }
   ],
   5: [
@@ -28,14 +30,16 @@ const events = {
       title: "Kids Art in Park",
       host: "Emily Wong",
       time: "3:30 PM",
-      description: "Outdoor art session for children ages 5-12. All materials provided. Parents must be present."
+      description: "Outdoor art session for children ages 5-12. All materials provided. Parents must be present.",
+      color: "bg-blue-100 border-blue-300"
     },
     {
       id: 4,
       title: "Evening Yoga Session",
       host: "David Kumar",
       time: "6:00 PM",
-      description: "Beginner-friendly yoga session in the community center. Bring your own mat!"
+      description: "Beginner-friendly yoga session in the community center. Bring your own mat!",
+      color: "bg-green-100 border-green-300"
     }
   ]
 };
@@ -44,12 +48,8 @@ const EventCard = ({ event }: { event: typeof events[keyof typeof events][0] }) 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className="bg-white rounded-sm p-2 mb-1 text-xs cursor-pointer hover:bg-gray-50 border-l-4 border-primary">
+        <div className={`rounded-md p-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${event.color}`}>
           <div className="font-medium truncate">{event.title}</div>
-          <div className="flex items-center gap-1 text-gray-600">
-            <User className="h-3 w-3" />
-            <span className="truncate">{event.host}</span>
-          </div>
           <div className="flex items-center gap-1 text-gray-600">
             <Clock className="h-3 w-3" />
             <span>{event.time}</span>
@@ -103,15 +103,20 @@ const CommunityCalendar = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-7 gap-6">
+      <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
         {days.map((day, i) => (
-          <div key={day} className="text-center">
-            <div className="text-sm font-medium text-muted-foreground mb-2">{day}</div>
-            <div className="text-sm font-semibold mb-3">{dates[i]}</div>
-            <div className="min-h-[200px] bg-gray-50/50 p-3 rounded-lg border border-gray-100 shadow-sm">
+          <div key={day} className="bg-white p-4">
+            <div className="text-sm text-gray-500 mb-1">{day}</div>
+            <div className="text-lg font-medium mb-3">{dates[i]}</div>
+            <div className="space-y-1">
               {events[dates[i]]?.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
+              {events[dates[i]]?.length > 3 && (
+                <div className="text-xs text-gray-500 mt-2">
+                  {events[dates[i]]!.length - 3} more
+                </div>
+              )}
             </div>
           </div>
         ))}
