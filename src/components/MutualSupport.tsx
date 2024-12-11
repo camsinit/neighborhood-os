@@ -55,7 +55,7 @@ const MutualSupport = () => {
         <h2 className="text-xl font-semibold">Mutual Support</h2>
         <Button 
           onClick={() => setIsAddRequestOpen(true)}
-          className="bg-[#FEF7CD] hover:bg-[#FEF7CD]/90 text-black"
+          className="bg-[#F3D649] hover:bg-[#F3D649]/90 text-black"
         >
           Share Need or Offer
         </Button>
