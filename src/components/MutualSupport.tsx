@@ -25,6 +25,7 @@ const MutualSupport = () => {
       borderColor: "border-l-purple-500",
       tagColor: "text-purple-600",
       tagBg: "bg-purple-100",
+      requestType: "Transportation"
     }
   ];
 
@@ -37,6 +38,7 @@ const MutualSupport = () => {
       borderColor: "border-l-emerald-500",
       tagColor: "text-emerald-600",
       tagBg: "bg-emerald-100",
+      requestType: "Goods"
     },
     {
       type: "Offering Help",
@@ -46,12 +48,12 @@ const MutualSupport = () => {
       borderColor: "border-l-emerald-500",
       tagColor: "text-emerald-600",
       tagBg: "bg-emerald-100",
+      requestType: "Goods"
     }
   ];
 
   return (
     <div className="w-full">
-
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Mutual Support</h2>
         <Button 
@@ -85,9 +87,12 @@ const MutualSupport = () => {
         <div className="space-y-6">
           <h3 className="text-lg font-medium mb-4">Needs</h3>
           {needs.map((need) => (
-            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-6 shadow-sm`}>
+            <div key={need.title} className={`bg-white border-l-4 ${need.borderColor} rounded-lg p-6 shadow-sm relative`}>
               <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${need.tagColor} ${need.tagBg} text-sm font-medium mb-3`}>
                 {need.type}
+              </div>
+              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {need.requestType}
               </div>
               <h4 className="text-lg font-medium mb-3">{need.title}</h4>
               <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
@@ -103,9 +108,12 @@ const MutualSupport = () => {
         <div className="space-y-6">
           <h3 className="text-lg font-medium mb-4">Offers</h3>
           {offers.map((offer) => (
-            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-6 shadow-sm`}>
+            <div key={offer.title} className={`bg-white border-l-4 ${offer.borderColor} rounded-lg p-6 shadow-sm relative`}>
               <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${offer.tagColor} ${offer.tagBg} text-sm font-medium mb-3`}>
                 {offer.type}
+              </div>
+              <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                {offer.requestType}
               </div>
               <h4 className="text-lg font-medium mb-3">{offer.title}</h4>
               <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
