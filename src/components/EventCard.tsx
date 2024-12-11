@@ -5,6 +5,7 @@ import { Clock, User, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import { CalendarEvent } from "@/types/calendar";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -18,6 +19,8 @@ const EventCard = ({ event }: EventCardProps) => {
     toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
   };
 
+  const formattedTime = event.time ? format(parseISO(event.time), 'h:mm a') : '';
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -27,7 +30,7 @@ const EventCard = ({ event }: EventCardProps) => {
               <div className="font-medium truncate">{event.title}</div>
               <div className="flex items-center gap-1 text-gray-600">
                 <Clock className="h-3 w-3" />
-                <span>{event.time}</span>
+                <span>{formattedTime}</span>
               </div>
             </div>
           </HoverCardTrigger>
@@ -36,7 +39,7 @@ const EventCard = ({ event }: EventCardProps) => {
               <h4 className="font-semibold">{event.title}</h4>
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-gray-500" />
-                <span>{event.time}</span>
+                <span>{formattedTime}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-gray-500" />
@@ -76,7 +79,7 @@ const EventCard = ({ event }: EventCardProps) => {
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-gray-500" />
-            <span className="text-gray-700">{event.time}</span>
+            <span className="text-gray-700">{formattedTime}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-gray-500" />
