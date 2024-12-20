@@ -89,6 +89,18 @@ export const monthEvents: CalendarEvents = {
     }
   ],
   // Week 4
+  19: [
+    {
+      id: 10,
+      title: "Personal Emergency Preparedness Training",
+      host: "Michael Rodriguez",
+      time: "14:00 - 16:30",
+      location: "Community Center - Main Hall",
+      description: "Learn essential emergency preparedness skills including first aid basics, emergency kit assembly, evacuation planning, and communication during disasters. Bring a notebook and wear comfortable clothing.",
+      color: "bg-blue-100 border-blue-300",
+      attendees: 0
+    }
+  ],
   23: [
     {
       id: 8,
