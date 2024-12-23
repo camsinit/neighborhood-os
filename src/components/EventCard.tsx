@@ -31,6 +31,26 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   const displayTime = format(new Date(event.time), 'h:mm a');
   const isHost = user?.id === event.host_id;
 
+  const EditButton = () => isHost ? (
+    <Button 
+      variant="outline" 
+      size="default" 
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+      <EditEventDialog 
+        event={event}
+        onDelete={onDelete}
+      >
+        <div className="flex items-center gap-2">
+          <Pencil className="h-4 w-4" />
+          Edit
+        </div>
+      </EditEventDialog>
+    </Button>
+  ) : null;
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -62,25 +82,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
               <p className="text-sm text-gray-600">{event.description}</p>
               <div className="flex gap-2">
                 <RSVPButton eventId={event.id} />
-                {isHost && (
-                  <Button 
-                    variant="outline" 
-                    size="default" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <EditEventDialog 
-                      event={event}
-                      onDelete={onDelete}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Pencil className="h-4 w-4" />
-                        Edit
-                      </div>
-                    </EditEventDialog>
-                  </Button>
-                )}
+                <EditButton />
               </div>
             </div>
           </HoverCardContent>
@@ -109,25 +111,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
           </div>
           <div className="flex gap-2">
             <RSVPButton eventId={event.id} />
-            {isHost && (
-              <Button 
-                variant="outline" 
-                size="default"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <EditEventDialog 
-                  event={event}
-                  onDelete={onDelete}
-                >
-                  <div className="flex items-center gap-2">
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </div>
-                </EditEventDialog>
-              </Button>
-            )}
+            <EditButton />
           </div>
         </div>
       </SheetContent>
