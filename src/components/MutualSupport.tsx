@@ -1,45 +1,18 @@
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import ArchiveDialog from "./ArchiveDialog";
-import SearchBar from "./mutual-support/SearchBar";
-import CategoryFilters from "./mutual-support/CategoryFilters";
+import { Button } from "@/components/ui/button";
 import SupportSection from "./mutual-support/SupportSection";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
-import { Skeleton } from "./ui/skeleton";
-import { SupportItem, SupportRequestFromDB } from "./mutual-support/types";
-import { formatDistanceToNow } from "date-fns";
+import MutualSupportHeader from "./mutual-support/MutualSupportHeader";
+import SearchSection from "./mutual-support/SearchSection";
+import LoadingSkeleton from "./mutual-support/LoadingSkeleton";
+import { transformRequest } from "@/utils/supportRequestTransformer";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const { data: requests, isLoading } = useSupportRequests();
-
-  const transformRequest = (request: SupportRequestFromDB): SupportItem => {
-    const type = request.request_type === 'need' ? "Needs Help" : "Offering Help";
-    const colors = type === "Needs Help" 
-      ? {
-          borderColor: "border-orange-500",
-          tagColor: "text-orange-700",
-          tagBg: "bg-orange-100",
-        }
-      : {
-          borderColor: "border-green-500",
-          tagColor: "text-green-700",
-          tagBg: "bg-green-100",
-        };
-
-    return {
-      type,
-      title: request.title,
-      description: request.description,
-      timeAgo: formatDistanceToNow(new Date(request.created_at), { addSuffix: true }),
-      borderColor: colors.borderColor,
-      tagColor: colors.tagColor,
-      tagBg: colors.tagBg,
-      requestType: request.type,
-    };
-  };
 
   const needs = requests
     ?.filter(req => req.request_type === 'need')
@@ -49,43 +22,16 @@ const MutualSupport = () => {
     ?.filter(req => req.request_type === 'offer')
     .map(transformRequest) || [];
 
-  const renderSkeleton = () => (
-    <div className="space-y-6">
-      <Skeleton className="h-6 w-32 mb-4" />
-      <div className="space-y-4">
-        {[1, 2].map((i) => (
-          <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
-            <Skeleton className="h-6 w-32 mb-3" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Mutual Support</h2>
-        <Button 
-          onClick={() => setIsAddRequestOpen(true)}
-          className="bg-[#F3D649] hover:bg-[#F3D649]/90 text-black"
-        >
-          + Share Need or Offer
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-6 mb-8">
-        <SearchBar />
-        <CategoryFilters />
-      </div>
+      <MutualSupportHeader onAddRequest={() => setIsAddRequestOpen(true)} />
+      <SearchSection />
 
       <div className="grid md:grid-cols-2 gap-8">
         {isLoading ? (
           <>
-            <div>{renderSkeleton()}</div>
-            <div>{renderSkeleton()}</div>
+            <LoadingSkeleton />
+            <LoadingSkeleton />
           </>
         ) : (
           <>
