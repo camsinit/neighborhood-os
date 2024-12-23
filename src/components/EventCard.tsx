@@ -1,10 +1,11 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Clock, User, MapPin } from "lucide-react";
+import { Clock, User, MapPin, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import RSVPButton from "./event/RSVPButton";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
+import { Button } from "./ui/button";
 
 interface EventCardProps {
   event: {
@@ -14,7 +15,7 @@ interface EventCardProps {
     location: string;
     description: string | null;
     color: string;
-    host_id: string; // Changed from optional to required
+    host_id: string;
     is_recurring?: boolean;
     recurrence_pattern?: string;
     recurrence_end_date?: string | null;
@@ -62,10 +63,23 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
               <div className="flex gap-2">
                 <RSVPButton eventId={event.id} />
                 {isHost && (
-                  <EditEventDialog 
-                    event={event}
-                    onDelete={onDelete}
-                  />
+                  <Button 
+                    variant="outline" 
+                    size="default" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <EditEventDialog 
+                      event={event}
+                      onDelete={onDelete}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </div>
+                    </EditEventDialog>
+                  </Button>
                 )}
               </div>
             </div>
@@ -96,10 +110,23 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
           <div className="flex gap-2">
             <RSVPButton eventId={event.id} />
             {isHost && (
-              <EditEventDialog 
-                event={event}
-                onDelete={onDelete}
-              />
+              <Button 
+                variant="outline" 
+                size="default"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <EditEventDialog 
+                  event={event}
+                  onDelete={onDelete}
+                >
+                  <div className="flex items-center gap-2">
+                    <Pencil className="h-4 w-4" />
+                    Edit
+                  </div>
+                </EditEventDialog>
+              </Button>
             )}
           </div>
         </div>
