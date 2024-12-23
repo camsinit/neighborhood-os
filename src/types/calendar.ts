@@ -12,3 +12,13 @@ export interface CalendarEvent {
 export type CalendarEvents = {
   [key: number]: CalendarEvent[];
 };
+
+export type Event = {
+  id: string;
+  title: string;
+  description: string | null;
+  time: string;
+  location: string;
+  host_id: string;
+  created_at: string;
+};
