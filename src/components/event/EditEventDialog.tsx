@@ -60,19 +60,19 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
           <DialogTitle>Edit Event</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="flex justify-between gap-2">
-            <DeleteEventButton 
-              eventId={event.id} 
-              hostId={event.host_id}
-              eventTitle={event.title}
-              onDelete={handleDelete} 
-            />
-          </div>
           <EventForm
             initialValues={initialValues}
             eventId={event.id}
             onClose={() => setOpen(false)}
             mode="edit"
+            deleteButton={
+              <DeleteEventButton 
+                eventId={event.id} 
+                hostId={event.host_id}
+                eventTitle={event.title}
+                onDelete={handleDelete} 
+              />
+            }
           />
         </div>
       </DialogContent>

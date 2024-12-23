@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEventSubmit } from "@/hooks/events/useEventSubmit";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -24,6 +24,7 @@ interface EventFormProps {
   };
   eventId?: string;
   mode?: 'create' | 'edit';
+  deleteButton?: React.ReactNode;
 }
 
 const EventForm = ({ 
@@ -31,7 +32,8 @@ const EventForm = ({
   onAddEvent, 
   initialValues,
   eventId,
-  mode = 'create' 
+  mode = 'create',
+  deleteButton
 }: EventFormProps) => {
   const [title, setTitle] = useState(initialValues?.title || "");
   const [description, setDescription] = useState(initialValues?.description || "");
@@ -185,7 +187,8 @@ const EventForm = ({
           </div>
         </>
       )}
-      <DialogFooter>
+      <DialogFooter className="flex justify-between items-center gap-2 sm:justify-between">
+        {deleteButton}
         <Button type="submit">
           {mode === 'edit' ? 'Update Event' : 'Add Event'}
         </Button>
