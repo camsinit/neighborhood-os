@@ -4,7 +4,9 @@ import {
   subWeeks, 
   startOfWeek, 
   endOfWeek,
-  addDays, 
+  addDays,
+  addMonths,
+  subMonths, 
   startOfMonth, 
   endOfMonth,
   eachDayOfInterval,
@@ -30,12 +32,20 @@ const CommunityCalendar = () => {
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const monthDates = eachDayOfInterval({ start: startOfWeek(monthStart), end: endOfWeek(monthEnd) });
 
-  const handlePreviousWeek = () => {
-    setCurrentDate(subWeeks(currentDate, 1));
+  const handlePrevious = () => {
+    if (view === 'week') {
+      setCurrentDate(subWeeks(currentDate, 1));
+    } else {
+      setCurrentDate(subMonths(currentDate, 1));
+    }
   };
 
-  const handleNextWeek = () => {
-    setCurrentDate(addWeeks(currentDate, 1));
+  const handleNext = () => {
+    if (view === 'week') {
+      setCurrentDate(addWeeks(currentDate, 1));
+    } else {
+      setCurrentDate(addMonths(currentDate, 1));
+    }
   };
 
   const handleToday = () => {
@@ -63,8 +73,8 @@ const CommunityCalendar = () => {
         view={view}
         currentDate={currentDate}
         setView={setView}
-        handlePreviousWeek={handlePreviousWeek}
-        handleNextWeek={handleNextWeek}
+        handlePreviousWeek={handlePrevious}
+        handleNextWeek={handleNext}
         handleToday={handleToday}
         setIsAddEventOpen={setIsAddEventOpen}
       />
