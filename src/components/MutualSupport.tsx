@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import ArchiveDialog from "./ArchiveDialog";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,30 @@ import MutualSupportHeader from "./mutual-support/MutualSupportHeader";
 import SearchSection from "./mutual-support/SearchSection";
 import LoadingSkeleton from "./mutual-support/LoadingSkeleton";
 import { transformRequest } from "@/utils/supportRequestTransformer";
+import { seedDashboard } from "@/utils/seedDashboard";
+import { toast } from "sonner";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const { data: requests, isLoading } = useSupportRequests();
+
+  useEffect(() => {
+    const initializeData = async () => {
+      if (!requests || requests.length === 0) {
+        try {
+          await seedDashboard();
+          // Refetch data after seeding
+          window.location.reload();
+        } catch (error) {
+          console.error('Error seeding data:', error);
+          toast.error("Failed to load demo content");
+        }
+      }
+    };
+
+    initializeData();
+  }, [requests]);
 
   const needs = requests
     ?.filter(req => req.request_type === 'need')
