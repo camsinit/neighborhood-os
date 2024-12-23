@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import EventForm from "@/components/events/EventForm";
 import DeleteEventButton from "./DeleteEventButton";
-import { Pencil } from "lucide-react";
 import { format } from "date-fns";
 
 interface EditEventDialogProps {
@@ -44,8 +43,7 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="default">
-          <Pencil className="h-4 w-4 mr-2" />
-          Edit
+          {children}
         </Button>
       </DialogTrigger>
       <DialogContent>

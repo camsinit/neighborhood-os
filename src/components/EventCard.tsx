@@ -14,23 +14,15 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   const isHost = user?.id === event.host_id;
 
   const EditButton = () => isHost ? (
-    <Button 
-      variant="outline" 
-      size="default" 
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
+    <EditEventDialog 
+      event={event}
+      onDelete={onDelete}
     >
-      <EditEventDialog 
-        event={event}
-        onDelete={onDelete}
-      >
-        <div className="flex items-center gap-2">
-          <Pencil className="h-4 w-4" />
-          Edit
-        </div>
-      </EditEventDialog>
-    </Button>
+      <div className="flex items-center gap-2">
+        <Pencil className="h-4 w-4" />
+        Edit
+      </div>
+    </EditEventDialog>
   ) : null;
 
   const eventPreview = (
