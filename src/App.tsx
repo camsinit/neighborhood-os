@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import { supabase } from "@/integrations/supabase/client";
-import { seedDashboard } from "@/utils/seedDashboard";
 
 const queryClient = new QueryClient();
 
@@ -16,22 +15,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
-      
-      // If this is a new sign up, seed the dashboard
-      if (event === 'SIGNED_IN') {
-        // Check if user has any existing data
-        const { data: existingData } = await supabase
-          .from('support_requests')
-          .select('id')
-          .limit(1);
-          
-        if (!existingData?.length) {
-          console.log('Seeding initial data...');
-          await seedDashboard();
-        }
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
