@@ -69,8 +69,8 @@ const CalendarHeader = ({
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-center">
-        <h3 className="text-lg font-medium text-gray-700">{periodLabel}</h3>
+      <div className="flex items-center">
+        <h3 className="text-xl font-medium text-gray-700">{periodLabel}</h3>
       </div>
     </div>
   );
