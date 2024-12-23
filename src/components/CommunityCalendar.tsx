@@ -21,7 +21,7 @@ const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const { data: events, isLoading } = useEvents();
+  const { data: events, isLoading, refetch } = useEvents();
   
   const weekStart = startOfWeek(currentDate);
   const monthStart = startOfMonth(currentDate);
@@ -51,6 +51,10 @@ const CommunityCalendar = () => {
         new Date(date.getFullYear(), date.getMonth(), date.getDate())
       );
     });
+  };
+
+  const handleAddEvent = async () => {
+    await refetch();
   };
 
   return (
@@ -85,7 +89,7 @@ const CommunityCalendar = () => {
       <AddEventDialog 
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}
-        onAddEvent={() => {}}
+        onAddEvent={handleAddEvent}
       />
     </div>
   );
