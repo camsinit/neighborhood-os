@@ -1,9 +1,10 @@
-import { Calendar, HelpCircle, Heart, AlertTriangle } from "lucide-react";
+import { Calendar, HelpCircle, Heart, AlertTriangle, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
+import { seedDashboardData } from "@/utils/seedData";
 
 const QuickActions = () => {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -46,7 +47,17 @@ const QuickActions = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Quick Actions</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+        <Button
+          variant="outline"
+          onClick={seedDashboardData}
+          className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300"
+        >
+          <Database className="h-4 w-4" />
+          Populate Dashboard
+        </Button>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {actions.map((action) => (
           <Button
