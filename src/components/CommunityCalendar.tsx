@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import { 
   addWeeks, 
@@ -7,26 +5,23 @@ import {
   startOfWeek, 
   endOfWeek,
   addDays, 
-  format, 
   startOfMonth, 
   endOfMonth,
   eachDayOfInterval,
-  isSameMonth,
   parseISO,
   isEqual,
 } from "date-fns";
-import EventCard from "./EventCard";
 import AddEventDialog from "./AddEventDialog";
 import { useEvents } from "@/utils/queries/useEvents";
-import { Skeleton } from "./ui/skeleton";
+import CalendarHeader from "./calendar/CalendarHeader";
+import WeekView from "./calendar/WeekView";
+import MonthView from "./calendar/MonthView";
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { data: events, isLoading } = useEvents();
-  
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
   const weekStart = startOfWeek(currentDate);
   const monthStart = startOfMonth(currentDate);
@@ -58,113 +53,34 @@ const CommunityCalendar = () => {
     });
   };
 
-  const renderWeekView = () => (
-    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-      {weekDates.map((date, i) => (
-        <div key={i} className="bg-white p-4">
-          <div className="text-sm text-gray-500 mb-1">{days[i]}</div>
-          <div className="text-lg font-medium mb-3">{format(date, 'd')}</div>
-          <div className="space-y-1">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : (
-              getEventsForDate(date).map((event) => (
-                <EventCard 
-                  key={event.id} 
-                  event={{
-                    ...event,
-                    color: "bg-blue-100 border-blue-300",
-                  }} 
-                />
-              ))
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderMonthView = () => (
-    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-      {days.map((day, i) => (
-        <div key={i} className="bg-white p-2 text-sm text-gray-500 font-medium text-center">
-          {day}
-        </div>
-      ))}
-      {monthDates.map((date, i) => (
-        <div 
-          key={i} 
-          className={`bg-white p-2 min-h-[120px] ${!isSameMonth(date, currentDate) ? 'opacity-50' : ''}`}
-        >
-          <div className="text-sm font-medium mb-2">{format(date, 'd')}</div>
-          <div className="space-y-1">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </div>
-            ) : (
-              getEventsForDate(date).map((event) => (
-                <EventCard 
-                  key={event.id} 
-                  event={{
-                    ...event,
-                    color: "bg-blue-100 border-blue-300",
-                  }} 
-                />
-              ))
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
-        <div className="flex items-center gap-6">
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={`hover:bg-gray-100 ${view === 'week' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
-              onClick={() => setView('week')}
-            >
-              Week
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={`hover:bg-gray-100 ${view === 'month' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
-              onClick={() => setView('month')}
-            >
-              Month
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={handlePreviousWeek}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="hover:bg-gray-100" onClick={handleToday}>Today</Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={handleNextWeek}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button 
-              onClick={() => setIsAddEventOpen(true)}
-              className="flex items-center gap-2 ml-4 hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              Add Event
-            </Button>
-          </div>
-        </div>
-      </div>
-      {view === 'week' ? renderWeekView() : renderMonthView()}
+      <CalendarHeader 
+        view={view}
+        setView={setView}
+        handlePreviousWeek={handlePreviousWeek}
+        handleNextWeek={handleNextWeek}
+        handleToday={handleToday}
+        setIsAddEventOpen={setIsAddEventOpen}
+      />
+      
+      {view === 'week' ? (
+        <WeekView 
+          weekDates={weekDates}
+          events={events}
+          isLoading={isLoading}
+          getEventsForDate={getEventsForDate}
+        />
+      ) : (
+        <MonthView 
+          monthDates={monthDates}
+          currentDate={currentDate}
+          events={events}
+          isLoading={isLoading}
+          getEventsForDate={getEventsForDate}
+        />
+      )}
+
       <AddEventDialog 
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}

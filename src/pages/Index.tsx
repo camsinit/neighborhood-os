@@ -39,7 +39,7 @@ const Index = () => {
       });
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
@@ -95,7 +95,7 @@ const Index = () => {
           <div className="p-6 rounded-lg bg-[#D3E4FD]/40">
             <CommunityCalendar />
           </div>
-          <div className="p-6 rounded-lg bg-[#FEF7CD]/40">
+          <div className="p-6 rounded-lg bg-[#E5DEFF]">
             <MutualSupport />
           </div>
           <div className="p-6 rounded-lg bg-[#FDE1D3]/40">
