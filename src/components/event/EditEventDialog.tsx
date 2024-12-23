@@ -42,7 +42,11 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="default">
+        <Button 
+          variant="ghost" 
+          size="default"
+          className="hover:bg-secondary"
+        >
           {children}
         </Button>
       </DialogTrigger>
