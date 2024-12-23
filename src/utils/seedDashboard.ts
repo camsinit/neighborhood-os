@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { addDays, addHours } from "date-fns";
+import { addDays, addHours, addMonths } from "date-fns";
 
 export const seedDashboard = async () => {
   const { data: { user } } = await supabase.auth.getUser();
@@ -30,7 +30,7 @@ export const seedDashboard = async () => {
   // Support Requests
   const supportRequests = [
     {
-      type: "Goods",
+      type: "goods",
       request_type: "offer",
       title: "Free Moving Boxes",
       description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
@@ -38,7 +38,7 @@ export const seedDashboard = async () => {
       valid_until: addDays(new Date(), 7).toISOString()
     },
     {
-      type: "Skills",
+      type: "skills",
       request_type: "need",
       title: "Help with Basic Phone Setup",
       description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
@@ -46,12 +46,28 @@ export const seedDashboard = async () => {
       valid_until: addDays(new Date(), 14).toISOString()
     },
     {
-      type: "Care",
+      type: "transportation",
       request_type: "offer",
-      title: "Pet Sitting Available",
-      description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
+      title: "Regular Rides to Grocery Store",
+      description: "I go to Trader Joe's every Sunday morning. Happy to take neighbors who need a ride.",
       user_id: user.id,
       valid_until: addDays(new Date(), 30).toISOString()
+    },
+    {
+      type: "resources",
+      request_type: "need",
+      title: "Seeking Spanish Language Exchange",
+      description: "Looking for a conversation partner to practice Spanish with. Happy to help with English in return!",
+      user_id: user.id,
+      valid_until: addMonths(new Date(), 2).toISOString()
+    },
+    {
+      type: "goods",
+      request_type: "need",
+      title: "Looking for Garden Tools",
+      description: "Starting a small vegetable garden. Would appreciate borrowing or buying used gardening tools.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 21).toISOString()
     }
   ];
 
@@ -77,6 +93,40 @@ export const seedDashboard = async () => {
       time: addDays(addHours(new Date(), 2), 1).toISOString(),
       location: "Community Center",
       host_id: user.id
+    },
+    {
+      title: "Local Artists Exhibition",
+      description: "Showcase of local artists' work with light refreshments. Come support our creative neighbors!",
+      time: addDays(new Date(), 10).toISOString(),
+      location: "Community Center Gallery",
+      host_id: user.id
+    },
+    {
+      title: "Senior Citizens' Social",
+      description: "Afternoon tea and board games for our senior residents. All ages welcome to join!",
+      time: addDays(new Date(), 7).toISOString(),
+      location: "Library Meeting Room",
+      host_id: user.id
+    },
+    {
+      title: "Youth Sports Day",
+      description: "Fun sports activities for neighborhood youth aged 8-15. Parents welcome to volunteer!",
+      time: addDays(new Date(), 14).toISOString(),
+      location: "Community Park",
+      host_id: user.id,
+      is_recurring: true,
+      recurrence_pattern: 'monthly',
+      recurrence_end_date: addMonths(new Date(), 6).toISOString()
+    },
+    {
+      title: "Neighborhood Watch Meeting",
+      description: "Monthly safety meeting and updates from local law enforcement.",
+      time: addDays(new Date(), 5).toISOString(),
+      location: "Community Center - Room 2B",
+      host_id: user.id,
+      is_recurring: true,
+      recurrence_pattern: 'monthly',
+      recurrence_end_date: addMonths(new Date(), 12).toISOString()
     }
   ];
 
@@ -95,6 +145,3 @@ export const seedDashboard = async () => {
     console.error('Error populating dashboard:', error);
   }
 };
-
-// Execute the seeding
-seedDashboard();
