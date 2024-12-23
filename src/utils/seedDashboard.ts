@@ -35,7 +35,7 @@ export const seedDashboard = async () => {
       title: "Free Moving Boxes",
       description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 7)
+      valid_until: addDays(new Date(), 7).toISOString()
     },
     {
       type: "Skills",
@@ -43,7 +43,7 @@ export const seedDashboard = async () => {
       title: "Help with Basic Phone Setup",
       description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 14)
+      valid_until: addDays(new Date(), 14).toISOString()
     },
     {
       type: "Care",
@@ -51,7 +51,7 @@ export const seedDashboard = async () => {
       title: "Pet Sitting Available",
       description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 30)
+      valid_until: addDays(new Date(), 30).toISOString()
     }
   ];
 
@@ -60,21 +60,21 @@ export const seedDashboard = async () => {
     {
       title: "Monthly Neighborhood Cleanup",
       description: "Join us for our monthly neighborhood cleanup! Bring gloves if you have them. Tools and bags provided.",
-      time: addDays(new Date(), 3),
+      time: addDays(new Date(), 3).toISOString(),
       location: "Meet at Central Park entrance",
       host_id: user.id
     },
     {
       title: "Community Garden Workshop",
       description: "Learn about seasonal planting and composting. Perfect for beginners!",
-      time: addDays(addHours(new Date(), 4), 5),
+      time: addDays(addHours(new Date(), 4), 5).toISOString(),
       location: "Community Garden on Pine Street",
       host_id: user.id
     },
     {
       title: "Block Party Planning Meeting",
       description: "Help us plan the upcoming summer block party. All neighbors welcome!",
-      time: addDays(addHours(new Date(), 2), 1),
+      time: addDays(addHours(new Date(), 2), 1).toISOString(),
       location: "Community Center",
       host_id: user.id
     }
