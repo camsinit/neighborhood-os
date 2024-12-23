@@ -66,12 +66,14 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
             onClose={() => setOpen(false)}
             mode="edit"
           />
-          <DeleteEventButton 
-            eventId={event.id} 
-            hostId={event.host_id}
-            eventTitle={event.title}
-            onDelete={handleDelete} 
-          />
+          <div className="flex justify-end gap-2">
+            <DeleteEventButton 
+              eventId={event.id} 
+              hostId={event.host_id}
+              eventTitle={event.title}
+              onDelete={handleDelete} 
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
