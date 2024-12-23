@@ -57,6 +57,7 @@ const CommunityCalendar = () => {
     <div className="w-full">
       <CalendarHeader 
         view={view}
+        currentDate={currentDate}
         setView={setView}
         handlePreviousWeek={handlePreviousWeek}
         handleNextWeek={handleNextWeek}
