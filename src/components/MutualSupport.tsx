@@ -7,14 +7,47 @@ import CategoryFilters from "./mutual-support/CategoryFilters";
 import SupportSection from "./mutual-support/SupportSection";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { Skeleton } from "./ui/skeleton";
+import { SupportItem, SupportRequestFromDB } from "./mutual-support/types";
+import { formatDistanceToNow } from "date-fns";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const { data: requests, isLoading } = useSupportRequests();
 
-  const needs = requests?.filter(req => req.request_type === 'need') || [];
-  const offers = requests?.filter(req => req.request_type === 'offer') || [];
+  const transformRequest = (request: SupportRequestFromDB): SupportItem => {
+    const type = request.request_type === 'need' ? "Needs Help" : "Offering Help";
+    const colors = type === "Needs Help" 
+      ? {
+          borderColor: "border-orange-500",
+          tagColor: "text-orange-700",
+          tagBg: "bg-orange-100",
+        }
+      : {
+          borderColor: "border-green-500",
+          tagColor: "text-green-700",
+          tagBg: "bg-green-100",
+        };
+
+    return {
+      type,
+      title: request.title,
+      description: request.description,
+      timeAgo: formatDistanceToNow(new Date(request.created_at), { addSuffix: true }),
+      borderColor: colors.borderColor,
+      tagColor: colors.tagColor,
+      tagBg: colors.tagBg,
+      requestType: request.type,
+    };
+  };
+
+  const needs = requests
+    ?.filter(req => req.request_type === 'need')
+    .map(transformRequest) || [];
+    
+  const offers = requests
+    ?.filter(req => req.request_type === 'offer')
+    .map(transformRequest) || [];
 
   const renderSkeleton = () => (
     <div className="space-y-6">
