@@ -24,32 +24,42 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
 
     setIsLoading(true);
     try {
-      // Notify RSVP'd users about the cancellation
-      await fetch('/functions/v1/notify-event-changes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          eventId,
-          action: 'delete',
-          eventTitle,
-        }),
-      });
-
-      // Delete the event
-      const { error } = await supabase
+      // First delete the event
+      const { error: deleteError } = await supabase
         .from('events')
         .delete()
         .eq('id', eventId);
 
-      if (error) throw error;
+      if (deleteError) {
+        console.error('Error deleting event:', deleteError);
+        throw new Error(deleteError.message);
+      }
+
+      // If event deletion was successful, notify RSVP'd users
+      try {
+        const { data: { anon_key } } = await supabase.auth.getSession();
+        await fetch('/functions/v1/notify-event-changes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anon_key}`,
+          },
+          body: JSON.stringify({
+            eventId,
+            action: 'delete',
+            eventTitle,
+          }),
+        });
+      } catch (notifyError) {
+        // If notification fails, we still consider the deletion successful
+        console.error('Error notifying users:', notifyError);
+      }
 
       toast.success("Event deleted successfully");
       if (onDelete) onDelete();
     } catch (error) {
-      toast.error("Failed to delete event");
+      console.error('Error in delete operation:', error);
+      toast.error("Failed to delete event. Please try again.");
     } finally {
       setIsLoading(false);
     }
