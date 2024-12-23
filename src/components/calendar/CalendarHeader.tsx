@@ -70,7 +70,7 @@ const CalendarHeader = ({
         </div>
       </div>
       <div className="flex items-center">
-        <h3 className="text-xl font-medium text-gray-700">{periodLabel}</h3>
+        <h3 className="text-xl font-medium text-gray-700 py-2 pl-1">{periodLabel}</h3>
       </div>
     </div>
   );
