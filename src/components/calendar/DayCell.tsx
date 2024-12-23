@@ -24,6 +24,7 @@ const DayCell = ({
     <div 
       className={`bg-white transition-all duration-300
         ${!isCurrentMonth ? 'opacity-50' : ''}
+        ${isToday(date) ? 'border-2 border-[#0EA5E9]' : ''}
         ${className}
       `}
     >
