@@ -14,7 +14,7 @@ interface EventCardProps {
     location: string;
     description: string | null;
     color: string;
-    host_id?: string;
+    host_id: string; // Changed from optional to required
     is_recurring?: boolean;
     recurrence_pattern?: string;
     recurrence_end_date?: string | null;
