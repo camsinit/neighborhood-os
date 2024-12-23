@@ -1,25 +1,5 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { useUser } from "@supabase/auth-helpers-react";
+import DialogWrapper from "./dialog/DialogWrapper";
+import SafetyUpdateForm from "./safety/SafetyUpdateForm";
 
 interface AddSafetyUpdateDialogProps {
   open: boolean;
@@ -27,100 +7,14 @@ interface AddSafetyUpdateDialogProps {
 }
 
 const AddSafetyUpdateDialog = ({ open, onOpenChange }: AddSafetyUpdateDialogProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("");
-  const { toast } = useToast();
-  const user = useUser();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create a safety update",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('safety_updates')
-        .insert({
-          title,
-          description,
-          type,
-          author_id: user.id,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Your safety update has been successfully posted.",
-      });
-      
-      onOpenChange(false);
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setType("");
-    } catch (error) {
-      console.error('Error creating safety update:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create safety update. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Share Safety Update</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="type">Update Type</Label>
-            <Select onValueChange={setType} value={type}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alerts">Alerts</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="updates">Updates</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-          <DialogFooter>
-            <Button type="submit" className="bg-[#ea384c] hover:bg-[#ea384c]/90">Share Update</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <DialogWrapper
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Share Safety Update"
+    >
+      <SafetyUpdateForm onClose={() => onOpenChange(false)} />
+    </DialogWrapper>
   );
 };
 
