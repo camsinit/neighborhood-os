@@ -1,4 +1,4 @@
-import { format, isEqual, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventCard from "../EventCard";
 import { Event } from "@/types/calendar";
@@ -8,9 +8,10 @@ interface WeekViewProps {
   events: Event[] | undefined;
   isLoading: boolean;
   getEventsForDate: (date: Date) => Event[];
+  onEventDelete?: () => void;
 }
 
-const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewProps) => {
+const WeekView = ({ weekDates, events, isLoading, getEventsForDate, onEventDelete }: WeekViewProps) => {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
@@ -32,7 +33,8 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
                   event={{
                     ...event,
                     color: "bg-blue-100 border-blue-300",
-                  }} 
+                  }}
+                  onDelete={onEventDelete}
                 />
               ))
             )}

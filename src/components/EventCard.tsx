@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Clock, User, MapPin, Users } from "lucide-react";
-import { useState } from "react";
+import { Clock, User, MapPin, Users, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface EventCardProps {
   event: {
@@ -19,14 +21,101 @@ interface EventCardProps {
       display_name: string | null;
     };
   };
+  onDelete?: () => void;
 }
 
-const EventCard = ({ event }: EventCardProps) => {
+const EventCard = ({ event, onDelete }: EventCardProps) => {
   const [isRsvped, setIsRsvped] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const user = useUser();
 
-  const handleRSVP = () => {
-    setIsRsvped(!isRsvped);
-    toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
+  useEffect(() => {
+    if (user) {
+      checkRsvpStatus();
+    }
+  }, [user, event.id]);
+
+  const checkRsvpStatus = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('event_rsvps')
+      .select()
+      .eq('event_id', event.id)
+      .eq('user_id', user.id)
+      .single();
+
+    setIsRsvped(!!data);
+  };
+
+  const handleRSVP = async () => {
+    if (!user) {
+      toast.error("Please log in to RSVP");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isRsvped) {
+        await supabase
+          .from('event_rsvps')
+          .delete()
+          .eq('event_id', event.id)
+          .eq('user_id', user.id);
+      } else {
+        await supabase
+          .from('event_rsvps')
+          .insert([
+            { event_id: event.id, user_id: user.id }
+          ]);
+      }
+
+      setIsRsvped(!isRsvped);
+      toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
+    } catch (error) {
+      toast.error("Failed to update RSVP");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user || user.id !== event.host_id) {
+      toast.error("You don't have permission to delete this event");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Notify RSVP'd users about the cancellation
+      await fetch('/functions/v1/notify-event-changes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          eventId: event.id,
+          action: 'delete',
+          eventTitle: event.title,
+        }),
+      });
+
+      // Delete the event
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id);
+
+      if (error) throw error;
+
+      toast.success("Event deleted successfully");
+      if (onDelete) onDelete();
+    } catch (error) {
+      toast.error("Failed to delete event");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const displayTime = format(new Date(event.time), 'h:mm a');
@@ -60,16 +149,32 @@ const EventCard = ({ event }: EventCardProps) => {
                 <span>{event.location}</span>
               </div>
               <p className="text-sm text-gray-600">{event.description}</p>
-              <Button 
-                variant={isRsvped ? "destructive" : "default"}
-                className="w-full mt-2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleRSVP();
-                }}
-              >
-                {isRsvped ? "Cancel RSVP" : "RSVP"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant={isRsvped ? "destructive" : "default"}
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleRSVP();
+                  }}
+                  disabled={isLoading}
+                >
+                  {isRsvped ? "Cancel RSVP" : "RSVP"}
+                </Button>
+                {user && user.id === event.host_id && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete();
+                    }}
+                    disabled={isLoading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </HoverCardContent>
         </HoverCard>
@@ -95,13 +200,26 @@ const EventCard = ({ event }: EventCardProps) => {
             <h3 className="font-medium mb-2">About this event</h3>
             <p className="text-gray-600">{event.description}</p>
           </div>
-          <Button 
-            variant={isRsvped ? "destructive" : "default"}
-            className="w-full mt-4"
-            onClick={handleRSVP}
-          >
-            {isRsvped ? "Cancel RSVP" : "RSVP"}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant={isRsvped ? "destructive" : "default"}
+              className="flex-1"
+              onClick={handleRSVP}
+              disabled={isLoading}
+            >
+              {isRsvped ? "Cancel RSVP" : "RSVP"}
+            </Button>
+            {user && user.id === event.host_id && (
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isLoading}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
