@@ -1,25 +1,25 @@
-import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
-import DialogWrapper from "../dialog/DialogWrapper";
 import { useState } from "react";
-import EventForm from "../events/EventForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import EventForm from "@/components/events/EventForm";
 import DeleteEventButton from "./DeleteEventButton";
-import { format } from "date-fns";
+import { Pencil } from "lucide-react";
 
 interface EditEventDialogProps {
   event: {
     id: string;
     title: string;
-    description: string | null;
     time: string;
     location: string;
+    description: string | null;
+    color: string;
     host_id: string;
     is_recurring?: boolean;
     recurrence_pattern?: string;
     recurrence_end_date?: string | null;
   };
   onDelete?: () => void;
-  children?: React.ReactNode;  // Add this line to accept children prop
+  children?: React.ReactNode;
 }
 
 const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) => {
@@ -28,39 +28,36 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
   const initialValues = {
     title: event.title,
     description: event.description || "",
-    date: format(new Date(event.time), "yyyy-MM-dd"),
-    time: format(new Date(event.time), "HH:mm"),
+    time: event.time,
     location: event.location,
-    isRecurring: event.is_recurring || false,
-    recurrencePattern: event.recurrence_pattern || "weekly",
-    recurrenceEndDate: event.recurrence_end_date 
-      ? format(new Date(event.recurrence_end_date), "yyyy-MM-dd")
-      : "",
+    color: event.color,
+    is_recurring: event.is_recurring || false,
+    recurrence_pattern: event.recurrence_pattern || "",
+    recurrence_end_date: event.recurrence_end_date || null,
   };
 
   return (
-    <DialogWrapper
-      open={open}
-      onOpenChange={setOpen}
-      title="Edit Event"
-    >
-      <div className="space-y-4">
-        <EventForm 
-          onClose={() => setOpen(false)}
-          initialValues={initialValues}
-          eventId={event.id}
-          mode="edit"
-        />
-        <div className="flex justify-end pt-4 border-t">
-          <DeleteEventButton 
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="default">
+          <Pencil className="h-4 w-4 mr-2" />
+          Edit
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Event</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <EventForm
+            initialValues={initialValues}
             eventId={event.id}
-            hostId={event.host_id}
-            eventTitle={event.title}
-            onDelete={onDelete}
+            onSuccess={() => setOpen(false)}
           />
+          <DeleteEventButton eventId={event.id} onDelete={onDelete} />
         </div>
-      </div>
-    </DialogWrapper>
+      </DialogContent>
+    </Dialog>
   );
 };
 
