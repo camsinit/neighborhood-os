@@ -27,7 +27,6 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps)
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
-  const [host, setHost] = useState("");
   const user = useUser();
   const { toast } = useToast();
 
@@ -72,7 +71,6 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps)
       setDate("");
       setTime("");
       setLocation("");
-      setHost("");
       
     } catch (error) {
       console.error('Error creating event:', error);
