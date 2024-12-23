@@ -37,21 +37,17 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
 
       // If event deletion was successful, notify RSVP'd users
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const anonKey = supabase.supabaseKey;
-        
-        await fetch('/functions/v1/notify-event-changes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${anonKey}`,
-          },
-          body: JSON.stringify({
+        const { error } = await supabase.functions.invoke('notify-event-changes', {
+          body: {
             eventId,
             action: 'delete',
             eventTitle,
-          }),
+          },
         });
+
+        if (error) {
+          console.error('Error notifying users:', error);
+        }
       } catch (notifyError) {
         // If notification fails, we still consider the deletion successful
         console.error('Error notifying users:', notifyError);
