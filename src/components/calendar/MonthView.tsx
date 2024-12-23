@@ -1,7 +1,6 @@
-import { format, isSameMonth, isToday, parseISO } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton";
-import EventCard from "../EventCard";
+import { isSameMonth } from "date-fns";
 import { Event } from "@/types/calendar";
+import DayCell from "./DayCell";
 
 interface MonthViewProps {
   monthDates: Date[];
@@ -22,37 +21,14 @@ const MonthView = ({ monthDates, currentDate, events, isLoading, getEventsForDat
         </div>
       ))}
       {monthDates.map((date, i) => (
-        <div 
-          key={i} 
-          className={`bg-white p-2 min-h-[120px] transition-all duration-300
-            ${!isSameMonth(date, currentDate) ? 'opacity-50' : ''}
-            ${isToday(date) ? 'ring-2 ring-primary ring-offset-2' : ''}
-          `}
-        >
-          <div className={`text-sm font-medium mb-2 ${
-            isToday(date) ? 'text-primary' : ''
-          }`}>
-            {format(date, 'd')}
-          </div>
-          <div className="space-y-1">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </div>
-            ) : (
-              getEventsForDate(date).map((event) => (
-                <EventCard 
-                  key={event.id} 
-                  event={{
-                    ...event,
-                    color: "bg-blue-100 border-blue-300",
-                  }} 
-                />
-              ))
-            )}
-          </div>
-        </div>
+        <DayCell
+          key={i}
+          date={date}
+          isCurrentMonth={isSameMonth(date, currentDate)}
+          events={getEventsForDate(date)}
+          isLoading={isLoading}
+          className="p-2 min-h-[120px]"
+        />
       ))}
     </div>
   );

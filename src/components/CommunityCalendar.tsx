@@ -18,6 +18,7 @@ import { useEvents } from "@/utils/queries/useEvents";
 import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
+import { addScaleAnimation } from "@/utils/animations";
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -51,14 +52,7 @@ const CommunityCalendar = () => {
   const handleToday = () => {
     const today = new Date();
     setCurrentDate(today);
-    // Add a class to trigger the animation on the calendar container
-    const calendarContainer = document.querySelector('.calendar-container');
-    if (calendarContainer) {
-      calendarContainer.classList.add('animate-scale-in');
-      setTimeout(() => {
-        calendarContainer.classList.remove('animate-scale-in');
-      }, 300);
-    }
+    addScaleAnimation(document.querySelector('.calendar-container'));
   };
 
   const getEventsForDate = (date: Date) => {
