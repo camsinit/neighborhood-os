@@ -1,4 +1,4 @@
-import { format, isSameMonth, parseISO } from "date-fns";
+import { format, isSameMonth, isToday, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventCard from "../EventCard";
 import { Event } from "@/types/calendar";
@@ -24,9 +24,16 @@ const MonthView = ({ monthDates, currentDate, events, isLoading, getEventsForDat
       {monthDates.map((date, i) => (
         <div 
           key={i} 
-          className={`bg-white p-2 min-h-[120px] ${!isSameMonth(date, currentDate) ? 'opacity-50' : ''}`}
+          className={`bg-white p-2 min-h-[120px] transition-all duration-300
+            ${!isSameMonth(date, currentDate) ? 'opacity-50' : ''}
+            ${isToday(date) ? 'ring-2 ring-primary ring-offset-2' : ''}
+          `}
         >
-          <div className="text-sm font-medium mb-2">{format(date, 'd')}</div>
+          <div className={`text-sm font-medium mb-2 ${
+            isToday(date) ? 'text-primary' : ''
+          }`}>
+            {format(date, 'd')}
+          </div>
           <div className="space-y-1">
             {isLoading ? (
               <div className="space-y-2">

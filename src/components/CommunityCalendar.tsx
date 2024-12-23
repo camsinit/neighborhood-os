@@ -49,7 +49,16 @@ const CommunityCalendar = () => {
   };
 
   const handleToday = () => {
-    setCurrentDate(new Date());
+    const today = new Date();
+    setCurrentDate(today);
+    // Add a class to trigger the animation on the calendar container
+    const calendarContainer = document.querySelector('.calendar-container');
+    if (calendarContainer) {
+      calendarContainer.classList.add('animate-scale-in');
+      setTimeout(() => {
+        calendarContainer.classList.remove('animate-scale-in');
+      }, 300);
+    }
   };
 
   const getEventsForDate = (date: Date) => {
@@ -79,22 +88,24 @@ const CommunityCalendar = () => {
         setIsAddEventOpen={setIsAddEventOpen}
       />
       
-      {view === 'week' ? (
-        <WeekView 
-          weekDates={weekDates}
-          events={events}
-          isLoading={isLoading}
-          getEventsForDate={getEventsForDate}
-        />
-      ) : (
-        <MonthView 
-          monthDates={monthDates}
-          currentDate={currentDate}
-          events={events}
-          isLoading={isLoading}
-          getEventsForDate={getEventsForDate}
-        />
-      )}
+      <div className="calendar-container">
+        {view === 'week' ? (
+          <WeekView 
+            weekDates={weekDates}
+            events={events}
+            isLoading={isLoading}
+            getEventsForDate={getEventsForDate}
+          />
+        ) : (
+          <MonthView 
+            monthDates={monthDates}
+            currentDate={currentDate}
+            events={events}
+            isLoading={isLoading}
+            getEventsForDate={getEventsForDate}
+          />
+        )}
+      </div>
 
       <AddEventDialog 
         open={isAddEventOpen}
