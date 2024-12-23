@@ -24,5 +24,6 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
     requestType: request.type,
+    originalRequest: request,
   };
 };

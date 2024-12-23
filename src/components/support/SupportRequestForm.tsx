@@ -17,23 +17,42 @@ import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit
 interface SupportRequestFormProps {
   onClose: () => void;
   initialRequestType?: "need" | "offer" | null;
+  initialValues?: {
+    title: string;
+    description: string;
+    type: string;
+    requestType: "need" | "offer";
+    validUntil: string;
+  };
+  mode?: 'create' | 'edit';
+  requestId?: string;
 }
 
-const SupportRequestForm = ({ onClose, initialRequestType }: SupportRequestFormProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("");
-  const [validUntil, setValidUntil] = useState("");
-  const [requestType, setRequestType] = useState<"need" | "offer" | null>(initialRequestType);
+const SupportRequestForm = ({ 
+  onClose, 
+  initialRequestType,
+  initialValues,
+  mode = 'create',
+  requestId
+}: SupportRequestFormProps) => {
+  const [title, setTitle] = useState(initialValues?.title || "");
+  const [description, setDescription] = useState(initialValues?.description || "");
+  const [type, setType] = useState(initialValues?.type || "");
+  const [validUntil, setValidUntil] = useState(initialValues?.validUntil || "");
+  const [requestType, setRequestType] = useState<"need" | "offer" | null>(
+    initialValues?.requestType || initialRequestType || null
+  );
 
-  const { handleSubmit } = useSupportRequestSubmit({
+  const { handleSubmit, handleUpdate } = useSupportRequestSubmit({
     onSuccess: () => {
       onClose();
-      setTitle("");
-      setDescription("");
-      setType("");
-      setValidUntil("");
-      setRequestType(null);
+      if (mode === 'create') {
+        setTitle("");
+        setDescription("");
+        setType("");
+        setValidUntil("");
+        setRequestType(null);
+      }
     }
   });
 
@@ -47,13 +66,19 @@ const SupportRequestForm = ({ onClose, initialRequestType }: SupportRequestFormP
     e.preventDefault();
     if (!requestType) return;
     
-    handleSubmit({
+    const formData = {
       title,
       description,
       type,
       validUntil,
       requestType,
-    });
+    };
+
+    if (mode === 'edit' && requestId) {
+      handleUpdate(requestId, formData);
+    } else {
+      handleSubmit(formData);
+    }
   };
 
   return (
@@ -119,7 +144,9 @@ const SupportRequestForm = ({ onClose, initialRequestType }: SupportRequestFormP
         />
       </div>
       <DialogFooter>
-        <Button type="submit">Create Request</Button>
+        <Button type="submit">
+          {mode === 'edit' ? 'Update Request' : 'Create Request'}
+        </Button>
       </DialogFooter>
     </form>
   );

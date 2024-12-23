@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SupportItem } from "./types";
+import EditSupportRequestDialog from "../support/EditSupportRequestDialog";
 
 const SupportCard = ({ item }: { item: SupportItem }) => {
   return (
@@ -16,9 +17,12 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
       </p>
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
-        <Button variant="secondary">
-          {item.type === "Needs Help" ? "I can help" : "I'm Interested"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <EditSupportRequestDialog request={item.originalRequest} />
+          <Button variant="secondary">
+            {item.type === "Needs Help" ? "I can help" : "I'm Interested"}
+          </Button>
+        </div>
       </div>
     </div>
   );

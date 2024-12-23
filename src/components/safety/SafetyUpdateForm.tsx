@@ -15,29 +15,44 @@ import { useSafetyUpdateSubmit } from "@/hooks/safety/useSafetyUpdateSubmit";
 
 interface SafetyUpdateFormProps {
   onClose: () => void;
+  initialValues?: {
+    title: string;
+    description: string;
+    type: string;
+  };
+  mode?: 'create' | 'edit';
+  updateId?: string;
 }
 
-const SafetyUpdateForm = ({ onClose }: SafetyUpdateFormProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("");
+const SafetyUpdateForm = ({ onClose, initialValues, mode = 'create', updateId }: SafetyUpdateFormProps) => {
+  const [title, setTitle] = useState(initialValues?.title || "");
+  const [description, setDescription] = useState(initialValues?.description || "");
+  const [type, setType] = useState(initialValues?.type || "");
 
-  const { handleSubmit } = useSafetyUpdateSubmit({
+  const { handleSubmit, handleUpdate } = useSafetyUpdateSubmit({
     onSuccess: () => {
       onClose();
-      setTitle("");
-      setDescription("");
-      setType("");
+      if (mode === 'create') {
+        setTitle("");
+        setDescription("");
+        setType("");
+      }
     }
   });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit({
+    const formData = {
       title,
       description,
       type,
-    });
+    };
+
+    if (mode === 'edit' && updateId) {
+      handleUpdate(updateId, formData);
+    } else {
+      handleSubmit(formData);
+    }
   };
 
   return (
@@ -75,7 +90,7 @@ const SafetyUpdateForm = ({ onClose }: SafetyUpdateFormProps) => {
       </div>
       <DialogFooter>
         <Button type="submit" className="bg-[#ea384c] hover:bg-[#ea384c]/90">
-          Share Update
+          {mode === 'edit' ? 'Update' : 'Share Update'}
         </Button>
       </DialogFooter>
     </form>

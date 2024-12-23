@@ -6,6 +6,7 @@ import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
 import { useSafetyUpdates } from "@/utils/queries/useSafetyUpdates";
 import { Skeleton } from "./ui/skeleton";
+import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
@@ -114,6 +115,7 @@ const SafetyUpdates = () => {
                     <span>{update.profiles?.display_name}</span>
                     <span>{new Date(update.created_at).toLocaleDateString()}</span>
                   </div>
+                  <EditSafetyUpdateDialog update={update} />
                 </div>
               </div>
             );

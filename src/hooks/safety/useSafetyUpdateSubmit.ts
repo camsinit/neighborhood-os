@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SafetyUpdateSubmitProps {
   onSuccess: () => void;
@@ -14,15 +15,11 @@ interface SafetyUpdateFormData {
 
 export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
   const user = useUser();
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create a safety update",
-        variant: "destructive",
-      });
+      toast.error("You must be logged in to create a safety update");
       return;
     }
 
@@ -38,21 +35,42 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Your safety update has been successfully posted.",
-      });
-
+      toast.success("Safety update created successfully");
+      queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       onSuccess();
     } catch (error) {
       console.error('Error creating safety update:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create safety update. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to create safety update. Please try again.");
     }
   };
 
-  return { handleSubmit };
+  const handleUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
+    if (!user) {
+      toast.error("You must be logged in to update a safety update");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('safety_updates')
+        .update({
+          title: formData.title,
+          description: formData.description,
+          type: formData.type,
+        })
+        .eq('id', updateId)
+        .eq('author_id', user.id);
+
+      if (error) throw error;
+
+      toast.success("Safety update updated successfully");
+      queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+      onSuccess();
+    } catch (error) {
+      console.error('Error updating safety update:', error);
+      toast.error("Failed to update safety update. Please try again.");
+    }
+  };
+
+  return { handleSubmit, handleUpdate };
 };

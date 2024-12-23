@@ -27,4 +27,5 @@ export type SupportItem = {
   tagColor: string;
   tagBg: string;
   requestType: string;
+  originalRequest: SupportRequestFromDB;
 };
