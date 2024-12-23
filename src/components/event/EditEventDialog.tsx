@@ -19,9 +19,10 @@ interface EditEventDialogProps {
     recurrence_end_date?: string | null;
   };
   onDelete?: () => void;
+  children?: React.ReactNode;  // Add this line to accept children prop
 }
 
-const EditEventDialog = ({ event, onDelete }: EditEventDialogProps) => {
+const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const initialValues = {
