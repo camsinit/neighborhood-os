@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
 
 interface AddSupportRequestDialogProps {
   open: boolean;
@@ -34,6 +36,7 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
   const [validUntil, setValidUntil] = useState("");
   const [requestType, setRequestType] = useState<"need" | "offer" | null>(initialRequestType);
   const { toast } = useToast();
+  const user = useUser();
 
   React.useEffect(() => {
     if (open && initialRequestType) {
@@ -51,8 +54,18 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
     }
   }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a support request",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!requestType) {
       toast({
         title: "Error",
@@ -61,11 +74,35 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
       });
       return;
     }
-    toast({
-      title: "Request Added",
-      description: "Your support request has been successfully posted.",
-    });
-    onOpenChange(false);
+
+    try {
+      const { error } = await supabase
+        .from('support_requests')
+        .insert({
+          title,
+          description,
+          type,
+          request_type: requestType,
+          user_id: user.id,
+          valid_until: new Date(validUntil).toISOString(),
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your support request has been successfully posted.",
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating support request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create support request. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

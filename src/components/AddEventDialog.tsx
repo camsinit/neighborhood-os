@@ -11,6 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { CalendarEvent } from "@/types/calendar";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -25,26 +28,60 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps)
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [host, setHost] = useState("");
+  const user = useUser();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAddEvent({
-      title,
-      description,
-      time,
-      location,
-      host,
-      color: "bg-blue-100 border-blue-300",
-      attendees: 0
-    });
-    onOpenChange(false);
-    // Reset form
-    setTitle("");
-    setDescription("");
-    setDate("");
-    setTime("");
-    setLocation("");
-    setHost("");
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create an event",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Combine date and time into a timestamp
+      const timestamp = new Date(`${date}T${time}`).toISOString();
+
+      const { error } = await supabase
+        .from('events')
+        .insert({
+          title,
+          description,
+          time: timestamp,
+          location,
+          host_id: user.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Event created successfully",
+      });
+
+      onOpenChange(false);
+      
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setDate("");
+      setTime("");
+      setLocation("");
+      setHost("");
+      
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -100,15 +137,6 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps)
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="host">Host</Label>
-            <Input
-              id="host"
-              value={host}
-              onChange={(e) => setHost(e.target.value)}
               required
             />
           </div>
