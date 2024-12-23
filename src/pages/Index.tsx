@@ -89,16 +89,16 @@ const Index = () => {
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <div className="p-6 rounded-lg border-2 border-[#F1F0FB]">
+          <div className="p-6 rounded-lg border-[3.5px] border-[#F1F0FB]">
             <QuickActions />
           </div>
-          <div className="p-6 rounded-lg border-2 border-[#D3E4FD]">
+          <div className="p-6 rounded-lg border-[3.5px] border-[#D3E4FD]">
             <CommunityCalendar />
           </div>
-          <div className="p-6 rounded-lg border-2 border-[#FEF7CD]">
+          <div className="p-6 rounded-lg border-[3.5px] border-[#FEF7CD]">
             <MutualSupport />
           </div>
-          <div className="p-6 rounded-lg border-2 border-[#FDE1D3]">
+          <div className="p-6 rounded-lg border-[3.5px] border-[#FDE1D3]">
             <SafetyUpdates />
           </div>
         </div>
