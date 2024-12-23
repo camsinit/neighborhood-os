@@ -12,6 +12,9 @@ interface EventFormData {
   date: string;
   time: string;
   location: string;
+  isRecurring?: boolean;
+  recurrencePattern?: string;
+  recurrenceEndDate?: string;
 }
 
 export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
@@ -39,6 +42,9 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           time: timestamp,
           location: formData.location,
           host_id: user.id,
+          is_recurring: formData.isRecurring || false,
+          recurrence_pattern: formData.recurrencePattern,
+          recurrence_end_date: formData.recurrenceEndDate ? new Date(`${formData.recurrenceEndDate}T23:59:59`).toISOString() : null,
         });
 
       if (error) throw error;

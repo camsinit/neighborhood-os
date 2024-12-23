@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useEventSubmit } from "@/hooks/events/useEventSubmit";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,6 +20,9 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrencePattern, setRecurrencePattern] = useState("weekly");
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
   
   const queryClient = useQueryClient();
   
@@ -32,6 +37,9 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
           date,
           time,
           location,
+          isRecurring,
+          recurrencePattern,
+          recurrenceEndDate,
         });
       }
       setTitle("");
@@ -39,6 +47,9 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
       setDate("");
       setTime("");
       setLocation("");
+      setIsRecurring(false);
+      setRecurrencePattern("weekly");
+      setRecurrenceEndDate("");
     }
   });
 
@@ -50,6 +61,9 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
       date,
       time,
       location,
+      isRecurring,
+      recurrencePattern,
+      recurrenceEndDate,
     });
   };
 
@@ -104,6 +118,49 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
           required
         />
       </div>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="recurring"
+          checked={isRecurring}
+          onCheckedChange={setIsRecurring}
+        />
+        <Label htmlFor="recurring">Recurring Event</Label>
+      </div>
+      {isRecurring && (
+        <>
+          <div className="space-y-2">
+            <Label>Recurrence Pattern</Label>
+            <RadioGroup
+              value={recurrencePattern}
+              onValueChange={setRecurrencePattern}
+              className="flex flex-col space-y-1"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="daily" id="daily" />
+                <Label htmlFor="daily">Daily</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="weekly" id="weekly" />
+                <Label htmlFor="weekly">Weekly</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="monthly" id="monthly" />
+                <Label htmlFor="monthly">Monthly</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="endDate">End Date</Label>
+            <Input
+              id="endDate"
+              type="date"
+              value={recurrenceEndDate}
+              onChange={(e) => setRecurrenceEndDate(e.target.value)}
+              required={isRecurring}
+            />
+          </div>
+        </>
+      )}
       <DialogFooter>
         <Button type="submit">Add Event</Button>
       </DialogFooter>

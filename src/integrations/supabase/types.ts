@@ -15,7 +15,10 @@ export type Database = {
           description: string | null
           host_id: string
           id: string
+          is_recurring: boolean | null
           location: string
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
           time: string
           title: string
         }
@@ -24,7 +27,10 @@ export type Database = {
           description?: string | null
           host_id: string
           id?: string
+          is_recurring?: boolean | null
           location: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           time: string
           title: string
         }
@@ -33,7 +39,10 @@ export type Database = {
           description?: string | null
           host_id?: string
           id?: string
+          is_recurring?: boolean | null
           location?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           time?: string
           title?: string
         }
