@@ -10,7 +10,7 @@ const MutualSupportHeader = ({ onAddRequest }: MutualSupportHeaderProps) => {
       <h2 className="text-2xl font-bold text-gray-900">Mutual Support</h2>
       <Button 
         onClick={onAddRequest}
-        className="bg-[#F3D649] hover:bg-[#F3D649]/90 text-black"
+        className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
       >
         + Share Need or Offer
       </Button>

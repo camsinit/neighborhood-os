@@ -132,7 +132,7 @@ const CommunityCalendar = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className={view === 'week' ? 'bg-primary text-white hover:bg-primary' : ''}
+              className={`hover:bg-gray-100 ${view === 'week' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
               onClick={() => setView('week')}
             >
               Week
@@ -140,23 +140,23 @@ const CommunityCalendar = () => {
             <Button 
               variant="outline" 
               size="sm"
-              className={view === 'month' ? 'bg-primary text-white hover:bg-primary' : ''}
+              className={`hover:bg-gray-100 ${view === 'month' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
               onClick={() => setView('month')}
             >
               Month
             </Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={handlePreviousWeek}>
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={handlePreviousWeek}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handleToday}>Today</Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleNextWeek}>
+            <Button variant="outline" size="sm" className="hover:bg-gray-100" onClick={handleToday}>Today</Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-gray-100" onClick={handleNextWeek}>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button 
               onClick={() => setIsAddEventOpen(true)}
-              className="flex items-center gap-2 ml-4"
+              className="flex items-center gap-2 ml-4 hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
               Add Event
