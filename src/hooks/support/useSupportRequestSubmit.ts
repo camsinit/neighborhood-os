@@ -13,6 +13,7 @@ interface SupportRequestFormData {
   type: string;
   validUntil: string;
   requestType: "need" | "offer";
+  imageUrl?: string | null;
 }
 
 export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps) => {
@@ -35,6 +36,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           request_type: formData.requestType,
           user_id: user.id,
           valid_until: new Date(formData.validUntil).toISOString(),
+          image_url: formData.imageUrl,
         });
 
       if (error) throw error;
@@ -63,6 +65,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           type: formData.type,
           request_type: formData.requestType,
           valid_until: new Date(formData.validUntil).toISOString(),
+          image_url: formData.imageUrl,
         })
         .eq('id', requestId)
         .eq('user_id', user.id);

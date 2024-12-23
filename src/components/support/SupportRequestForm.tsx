@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
+import { Image } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SupportRequestFormProps {
   onClose: () => void;
@@ -23,6 +26,7 @@ interface SupportRequestFormProps {
     type: string;
     requestType: "need" | "offer";
     validUntil: string;
+    imageUrl?: string;
   };
   mode?: 'create' | 'edit';
   requestId?: string;
@@ -42,6 +46,9 @@ const SupportRequestForm = ({
   const [requestType, setRequestType] = useState<"need" | "offer" | null>(
     initialValues?.requestType || initialRequestType || null
   );
+  const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState(initialValues?.imageUrl || "");
+  const [isUploading, setIsUploading] = useState(false);
 
   const { handleSubmit, handleUpdate } = useSupportRequestSubmit({
     onSuccess: () => {
@@ -52,6 +59,8 @@ const SupportRequestForm = ({
         setType("");
         setValidUntil("");
         setRequestType(null);
+        setImage(null);
+        setImageUrl("");
       }
     }
   });
@@ -62,7 +71,33 @@ const SupportRequestForm = ({
     }
   }, [initialRequestType]);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const handleImageUpload = async (file: File) => {
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('mutual_aid_images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('mutual_aid_images')
+        .getPublicUrl(filePath);
+
+      setImageUrl(publicUrl);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!requestType) return;
     
@@ -72,6 +107,7 @@ const SupportRequestForm = ({
       type,
       validUntil,
       requestType,
+      imageUrl: type === 'goods' ? imageUrl : null,
     };
 
     if (mode === 'edit' && requestId) {
@@ -133,6 +169,35 @@ const SupportRequestForm = ({
           required
         />
       </div>
+      {type === 'goods' && (
+        <div className="space-y-2">
+          <Label htmlFor="image">Image</Label>
+          <div className="flex items-center gap-4">
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImage(file);
+                  handleImageUpload(file);
+                }
+              }}
+              className="flex-1"
+            />
+            {imageUrl && (
+              <div className="relative w-16 h-16">
+                <img 
+                  src={imageUrl} 
+                  alt="Preview" 
+                  className="w-full h-full object-cover rounded"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="validUntil">Valid Until</Label>
         <Input
@@ -144,8 +209,8 @@ const SupportRequestForm = ({
         />
       </div>
       <DialogFooter>
-        <Button type="submit">
-          {mode === 'edit' ? 'Update Request' : 'Create Request'}
+        <Button type="submit" disabled={isUploading}>
+          {isUploading ? "Uploading..." : mode === 'edit' ? 'Update Request' : 'Create Request'}
         </Button>
       </DialogFooter>
     </form>

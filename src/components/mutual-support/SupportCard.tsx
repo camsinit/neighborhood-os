@@ -12,6 +12,15 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
         {item.requestType}
       </div>
       <h4 className="text-lg font-medium mb-3">{item.title}</h4>
+      {item.imageUrl && item.requestType === 'goods' && (
+        <div className="mb-4">
+          <img 
+            src={item.imageUrl} 
+            alt={item.title}
+            className="w-full h-48 object-cover rounded-md"
+          />
+        </div>
+      )}
       <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
         {item.description}
       </p>

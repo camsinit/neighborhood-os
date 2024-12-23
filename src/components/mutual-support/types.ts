@@ -13,6 +13,7 @@ export type SupportRequestFromDB = {
   valid_until: string;
   status: string;
   created_at: string;
+  image_url: string | null;
   profiles: {
     display_name: string;
   };
@@ -27,5 +28,6 @@ export type SupportItem = {
   tagColor: string;
   tagBg: string;
   requestType: string;
+  imageUrl: string | null;
   originalRequest: SupportRequestFromDB;
 };
