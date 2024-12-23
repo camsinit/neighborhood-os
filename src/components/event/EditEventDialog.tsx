@@ -56,7 +56,7 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
           <EventForm
             initialValues={initialValues}
             eventId={event.id}
-            onSuccess={() => setOpen(false)}
+            onClose={() => setOpen(false)}
             mode="edit"
           />
           <DeleteEventButton 
