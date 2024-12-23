@@ -73,6 +73,52 @@ export const seedDashboard = async () => {
       user_id: user.id,
       valid_until: addDays(new Date(), 21).toISOString(),
       status: "active"
+    },
+    // New support requests
+    {
+      type: "skills",
+      request_type: "offer",
+      title: "Free Guitar Lessons",
+      description: "Offering beginner guitar lessons. I have 5 years of teaching experience and can provide a guitar if needed.",
+      user_id: user.id,
+      valid_until: addMonths(new Date(), 1).toISOString(),
+      status: "active"
+    },
+    {
+      type: "resources",
+      request_type: "offer",
+      title: "Extra Produce from Garden",
+      description: "My garden produced more than expected! Offering fresh tomatoes, cucumbers, and herbs to neighbors.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 5).toISOString(),
+      status: "active"
+    },
+    {
+      type: "transportation",
+      request_type: "need",
+      title: "Ride to Medical Appointment",
+      description: "Need a ride to doctor's appointment next Tuesday at 2 PM. Can contribute for gas.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 10).toISOString(),
+      status: "active"
+    },
+    {
+      type: "goods",
+      request_type: "offer",
+      title: "Children's Books (Ages 5-10)",
+      description: "Donating gently used children's books. Perfect for elementary school readers. About 30 books total.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 14).toISOString(),
+      status: "active"
+    },
+    {
+      type: "skills",
+      request_type: "need",
+      title: "Basic Car Maintenance Help",
+      description: "Looking for someone to teach me basic car maintenance - oil check, tire pressure, etc.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 30).toISOString(),
+      status: "active"
     }
   ];
 
