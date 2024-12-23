@@ -32,10 +32,7 @@ const DayCell = ({
         <div className="text-sm text-gray-500 mb-1">{dayLabel}</div>
       )}
       <div className={`font-medium mb-2 flex justify-center`}>
-        <span className={`
-          ${isToday(date) ? 'bg-[#0EA5E9] text-white w-8 h-8 flex items-center justify-center rounded-full' : ''}
-          transition-all duration-300
-        `}>
+        <span className="transition-all duration-300">
           {format(date, 'd')}
         </span>
       </div>
