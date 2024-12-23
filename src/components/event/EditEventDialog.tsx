@@ -25,6 +25,11 @@ interface EditEventDialogProps {
 const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) => {
   const [open, setOpen] = useState(false);
 
+  const handleDelete = () => {
+    setOpen(false); // Close the dialog
+    if (onDelete) onDelete(); // Call the parent's onDelete callback
+  };
+
   const eventDate = new Date(event.time);
   const initialValues = {
     title: event.title,
@@ -65,7 +70,7 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
             eventId={event.id} 
             hostId={event.host_id}
             eventTitle={event.title}
-            onDelete={onDelete} 
+            onDelete={handleDelete} 
           />
         </div>
       </DialogContent>
