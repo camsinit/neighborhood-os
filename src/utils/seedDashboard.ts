@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { addDays, addHours, addMonths } from "date-fns";
+import { addDays, addHours } from "date-fns";
 
 export const seedDashboard = async () => {
   const { data: { user } } = await supabase.auth.getUser();
@@ -30,94 +30,28 @@ export const seedDashboard = async () => {
   // Support Requests
   const supportRequests = [
     {
-      type: "goods",
+      type: "Goods",
       request_type: "offer",
       title: "Free Moving Boxes",
       description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 7).toISOString(),
-      status: "active"
+      valid_until: addDays(new Date(), 7).toISOString()
     },
     {
-      type: "skills",
+      type: "Skills",
       request_type: "need",
       title: "Help with Basic Phone Setup",
       description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 14).toISOString(),
-      status: "active"
+      valid_until: addDays(new Date(), 14).toISOString()
     },
     {
-      type: "transportation",
+      type: "Care",
       request_type: "offer",
-      title: "Regular Rides to Grocery Store",
-      description: "I go to Trader Joe's every Sunday morning. Happy to take neighbors who need a ride.",
+      title: "Pet Sitting Available",
+      description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 30).toISOString(),
-      status: "active"
-    },
-    {
-      type: "resources",
-      request_type: "need",
-      title: "Seeking Spanish Language Exchange",
-      description: "Looking for a conversation partner to practice Spanish with. Happy to help with English in return!",
-      user_id: user.id,
-      valid_until: addMonths(new Date(), 2).toISOString(),
-      status: "active"
-    },
-    {
-      type: "goods",
-      request_type: "need",
-      title: "Looking for Garden Tools",
-      description: "Starting a small vegetable garden. Would appreciate borrowing or buying used gardening tools.",
-      user_id: user.id,
-      valid_until: addDays(new Date(), 21).toISOString(),
-      status: "active"
-    },
-    {
-      type: "skills",
-      request_type: "offer",
-      title: "Free Guitar Lessons",
-      description: "Offering beginner guitar lessons. I have 5 years of teaching experience and can provide a guitar if needed.",
-      user_id: user.id,
-      valid_until: addMonths(new Date(), 1).toISOString(),
-      status: "active"
-    },
-    {
-      type: "resources",
-      request_type: "offer",
-      title: "Extra Produce from Garden",
-      description: "My garden produced more than expected! Offering fresh tomatoes, cucumbers, and herbs to neighbors.",
-      user_id: user.id,
-      valid_until: addDays(new Date(), 5).toISOString(),
-      status: "active"
-    },
-    {
-      type: "transportation",
-      request_type: "need",
-      title: "Ride to Medical Appointment",
-      description: "Need a ride to doctor's appointment next Tuesday at 2 PM. Can contribute for gas.",
-      user_id: user.id,
-      valid_until: addDays(new Date(), 10).toISOString(),
-      status: "active"
-    },
-    {
-      type: "goods",
-      request_type: "offer",
-      title: "Children's Books (Ages 5-10)",
-      description: "Donating gently used children's books. Perfect for elementary school readers. About 30 books total.",
-      user_id: user.id,
-      valid_until: addDays(new Date(), 14).toISOString(),
-      status: "active"
-    },
-    {
-      type: "skills",
-      request_type: "need",
-      title: "Basic Car Maintenance Help",
-      description: "Looking for someone to teach me basic car maintenance - oil check, tire pressure, etc.",
-      user_id: user.id,
-      valid_until: addDays(new Date(), 30).toISOString(),
-      status: "active"
+      valid_until: addDays(new Date(), 30).toISOString()
     }
   ];
 
@@ -143,20 +77,6 @@ export const seedDashboard = async () => {
       time: addDays(addHours(new Date(), 2), 1).toISOString(),
       location: "Community Center",
       host_id: user.id
-    },
-    {
-      title: "Local Artists Exhibition",
-      description: "Showcase of local artists' work with light refreshments. Come support our creative neighbors!",
-      time: addDays(new Date(), 10).toISOString(),
-      location: "Community Center Gallery",
-      host_id: user.id
-    },
-    {
-      title: "Senior Citizens' Social",
-      description: "Afternoon tea and board games for our senior residents. All ages welcome to join!",
-      time: addDays(new Date(), 7).toISOString(),
-      location: "Library Meeting Room",
-      host_id: user.id
     }
   ];
 
@@ -164,19 +84,17 @@ export const seedDashboard = async () => {
     // Insert safety updates
     await supabase.from('safety_updates').insert(safetyUpdates);
     
-    // Insert support requests one by one for better error handling
-    for (const request of supportRequests) {
-      await supabase.from('support_requests').insert(request);
-    }
+    // Insert support requests
+    await supabase.from('support_requests').insert(supportRequests);
     
     // Insert events
-    for (const event of events) {
-      await supabase.from('events').insert(event);
-    }
+    await supabase.from('events').insert(events);
 
     console.log('Dashboard populated successfully!');
   } catch (error) {
     console.error('Error populating dashboard:', error);
-    throw error;
   }
 };
+
+// Execute the seeding
+seedDashboard();
