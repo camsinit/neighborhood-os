@@ -60,11 +60,12 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
   return (
     <Button
       variant="destructive"
-      size="icon"
       onClick={handleDelete}
       disabled={isLoading}
+      className="flex items-center gap-2"
     >
       <Trash2 className="h-4 w-4" />
+      Delete Event
     </Button>
   );
 };

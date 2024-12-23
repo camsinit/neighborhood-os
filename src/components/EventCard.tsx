@@ -1,6 +1,6 @@
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Clock } from "lucide-react";
 import { format } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
