@@ -5,32 +5,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEventSubmit } from "@/hooks/events/useEventSubmit";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface EventFormProps {
   onClose: () => void;
   onAddEvent?: (event: any) => void;
+  initialValues?: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    location: string;
+    isRecurring: boolean;
+    recurrencePattern: string;
+    recurrenceEndDate: string;
+  };
+  eventId?: string;
+  mode?: 'create' | 'edit';
 }
 
-const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrencePattern, setRecurrencePattern] = useState("weekly");
-  const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
+const EventForm = ({ 
+  onClose, 
+  onAddEvent, 
+  initialValues,
+  eventId,
+  mode = 'create' 
+}: EventFormProps) => {
+  const [title, setTitle] = useState(initialValues?.title || "");
+  const [description, setDescription] = useState(initialValues?.description || "");
+  const [date, setDate] = useState(initialValues?.date || "");
+  const [time, setTime] = useState(initialValues?.time || "");
+  const [location, setLocation] = useState(initialValues?.location || "");
+  const [isRecurring, setIsRecurring] = useState(initialValues?.isRecurring || false);
+  const [recurrencePattern, setRecurrencePattern] = useState(initialValues?.recurrencePattern || "weekly");
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialValues?.recurrenceEndDate || "");
   
   const queryClient = useQueryClient();
   
-  const { handleSubmit } = useEventSubmit({
+  const { handleSubmit, handleUpdate } = useEventSubmit({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       onClose();
-      if (onAddEvent) {
+      if (onAddEvent && mode === 'create') {
         onAddEvent({
           title,
           description,
@@ -55,7 +73,7 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleSubmit({
+    const formData = {
       title,
       description,
       date,
@@ -64,7 +82,13 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
       isRecurring,
       recurrencePattern,
       recurrenceEndDate,
-    });
+    };
+
+    if (mode === 'edit' && eventId) {
+      handleUpdate(eventId, formData);
+    } else {
+      handleSubmit(formData);
+    }
   };
 
   return (
@@ -162,7 +186,9 @@ const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
         </>
       )}
       <DialogFooter>
-        <Button type="submit">Add Event</Button>
+        <Button type="submit">
+          {mode === 'edit' ? 'Update Event' : 'Add Event'}
+        </Button>
       </DialogFooter>
     </form>
   );

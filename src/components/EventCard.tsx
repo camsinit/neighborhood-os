@@ -3,7 +3,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Clock, User, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import RSVPButton from "./event/RSVPButton";
-import DeleteEventButton from "./event/DeleteEventButton";
+import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 
 interface EventCardProps {
@@ -15,6 +15,9 @@ interface EventCardProps {
     description: string | null;
     color: string;
     host_id?: string;
+    is_recurring?: boolean;
+    recurrence_pattern?: string;
+    recurrence_end_date?: string | null;
     profiles?: {
       display_name: string | null;
     };
@@ -25,6 +28,7 @@ interface EventCardProps {
 const EventCard = ({ event, onDelete }: EventCardProps) => {
   const user = useUser();
   const displayTime = format(new Date(event.time), 'h:mm a');
+  const isHost = user?.id === event.host_id;
 
   return (
     <Sheet>
@@ -57,12 +61,12 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
               <p className="text-sm text-gray-600">{event.description}</p>
               <div className="flex gap-2">
                 <RSVPButton eventId={event.id} />
-                <DeleteEventButton 
-                  eventId={event.id}
-                  hostId={event.host_id || ''}
-                  eventTitle={event.title}
-                  onDelete={onDelete}
-                />
+                {isHost && (
+                  <EditEventDialog 
+                    event={event}
+                    onDelete={onDelete}
+                  />
+                )}
               </div>
             </div>
           </HoverCardContent>
@@ -91,12 +95,12 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
           </div>
           <div className="flex gap-2">
             <RSVPButton eventId={event.id} />
-            <DeleteEventButton 
-              eventId={event.id}
-              hostId={event.host_id || ''}
-              eventTitle={event.title}
-              onDelete={onDelete}
-            />
+            {isHost && (
+              <EditEventDialog 
+                event={event}
+                onDelete={onDelete}
+              />
+            )}
           </div>
         </div>
       </SheetContent>
