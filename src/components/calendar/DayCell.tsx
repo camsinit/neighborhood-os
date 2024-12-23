@@ -24,17 +24,19 @@ const DayCell = ({
     <div 
       className={`bg-white transition-all duration-300
         ${!isCurrentMonth ? 'opacity-50' : ''}
-        ${isToday(date) ? 'ring-2 ring-primary ring-offset-2' : ''}
         ${className}
       `}
     >
       {dayLabel && (
         <div className="text-sm text-gray-500 mb-1">{dayLabel}</div>
       )}
-      <div className={`font-medium mb-2 ${
-        isToday(date) ? 'text-primary' : ''
-      }`}>
-        {format(date, 'd')}
+      <div className={`font-medium mb-2 flex justify-center`}>
+        <span className={`
+          ${isToday(date) ? 'bg-[#0EA5E9] text-white w-8 h-8 flex items-center justify-center rounded-full' : ''}
+          transition-all duration-300
+        `}>
+          {format(date, 'd')}
+        </span>
       </div>
       <div className="space-y-1">
         {isLoading ? (
