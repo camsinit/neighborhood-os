@@ -7,14 +7,14 @@ interface AddEventDialogProps {
   onAddEvent: (event: any) => void;
 }
 
-const AddEventDialog = ({ open, onOpenChange }: AddEventDialogProps) => {
+const AddEventDialog = ({ open, onOpenChange, onAddEvent }: AddEventDialogProps) => {
   return (
     <DialogWrapper
       open={open}
       onOpenChange={onOpenChange}
       title="Add New Event"
     >
-      <EventForm onClose={() => onOpenChange(false)} />
+      <EventForm onClose={() => onOpenChange(false)} onAddEvent={onAddEvent} />
     </DialogWrapper>
   );
 };

@@ -5,17 +5,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useEventSubmit } from "@/hooks/events/useEventSubmit";
+import { useQueryClient } from "@tanstack/react-query";
 
-const EventForm = ({ onClose }: { onClose: () => void }) => {
+interface EventFormProps {
+  onClose: () => void;
+  onAddEvent?: (event: any) => void;
+}
+
+const EventForm = ({ onClose, onAddEvent }: EventFormProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   
+  const queryClient = useQueryClient();
+  
   const { handleSubmit } = useEventSubmit({
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       onClose();
+      if (onAddEvent) {
+        onAddEvent({
+          title,
+          description,
+          date,
+          time,
+          location,
+        });
+      }
       setTitle("");
       setDescription("");
       setDate("");
