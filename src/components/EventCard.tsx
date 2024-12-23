@@ -3,11 +3,22 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Clock, User, MapPin, Users } from "lucide-react";
 import { useState } from "react";
-import { CalendarEvent } from "@/types/calendar";
+import { format } from "date-fns";
 import { toast } from "sonner";
 
 interface EventCardProps {
-  event: CalendarEvent;
+  event: {
+    id: string;
+    title: string;
+    time: string;
+    location: string;
+    description: string | null;
+    color: string;
+    host_id?: string;
+    profiles?: {
+      display_name: string | null;
+    };
+  };
 }
 
 const EventCard = ({ event }: EventCardProps) => {
@@ -18,19 +29,7 @@ const EventCard = ({ event }: EventCardProps) => {
     toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
   };
 
-  // Extract just the start time from the "HH:mm - HH:mm" format
-  const formattedTime = event.time ? event.time.split(' - ')[0] : '';
-  
-  // Convert 24h to 12h format if needed
-  const formatTimeToAMPM = (time: string) => {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${minutes} ${ampm}`;
-  };
-
-  const displayTime = formattedTime ? formatTimeToAMPM(formattedTime) : '';
+  const displayTime = format(new Date(event.time), 'h:mm a');
 
   return (
     <Sheet>
@@ -54,15 +53,11 @@ const EventCard = ({ event }: EventCardProps) => {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-gray-500" />
-                <span>{event.host}</span>
+                <span>{event.profiles?.display_name || 'Anonymous'}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-gray-500" />
                 <span>{event.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span>{event.attendees} attending</span>
               </div>
               <p className="text-sm text-gray-600">{event.description}</p>
               <Button 
@@ -86,7 +81,7 @@ const EventCard = ({ event }: EventCardProps) => {
         <div className="mt-6 space-y-4">
           <div className="flex items-center gap-2">
             <User className="h-5 w-5 text-gray-500" />
-            <span className="text-gray-700">{event.host}</span>
+            <span className="text-gray-700">{event.profiles?.display_name || 'Anonymous'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-gray-500" />
@@ -95,10 +90,6 @@ const EventCard = ({ event }: EventCardProps) => {
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-gray-500" />
             <span className="text-gray-700">{event.location}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-gray-500" />
-            <span className="text-gray-700">{event.attendees} attending</span>
           </div>
           <div className="pt-4 border-t">
             <h3 className="font-medium mb-2">About this event</h3>

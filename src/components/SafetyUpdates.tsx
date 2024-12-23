@@ -4,10 +4,13 @@ import { Input } from "@/components/ui/input";
 import { AlertTriangle, Bell, Wrench, Clock } from "lucide-react";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
+import { useSafetyUpdates } from "@/utils/queries/useSafetyUpdates";
+import { Skeleton } from "./ui/skeleton";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const { data: updates, isLoading } = useSafetyUpdates();
   
   const categories = [
     { icon: Clock, label: "Updates" },
@@ -15,42 +18,51 @@ const SafetyUpdates = () => {
     { icon: Wrench, label: "Maintenance" },
   ];
 
-  const updates = [
-    {
-      type: "Alerts",
-      title: "Gas Leak on Oak Street",
-      description: "Potential gas leak detected. Emergency services are on site. Please avoid the area.",
-      author: "John Smith",
-      timeAgo: "2 days ago",
-      updates: 1,
-      icon: AlertTriangle,
-      color: "text-red-500",
-      bgColor: "bg-red-100",
-      borderColor: "border-l-red-500",
-    },
-    {
-      type: "Maintenance",
-      title: "Street Light Repairs",
-      description: "Scheduled maintenance for street lights. Work will be conducted between 9 AM and 4 PM.",
-      author: "Sarah Johnson",
-      timeAgo: "5 days ago",
-      icon: Wrench,
-      color: "text-blue-500",
-      bgColor: "bg-blue-100",
-      borderColor: "border-l-blue-500",
-    },
-    {
-      type: "Updates",
-      title: "Community Meeting Summary",
-      description: "Key points from today's community safety meeting and upcoming initiatives.",
-      author: "Mike Peterson",
-      timeAgo: "7 days ago",
-      icon: Clock,
-      color: "text-green-500",
-      bgColor: "bg-green-100",
-      borderColor: "border-l-green-500",
-    },
-  ];
+  const getUpdateIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'alerts':
+        return AlertTriangle;
+      case 'maintenance':
+        return Wrench;
+      default:
+        return Clock;
+    }
+  };
+
+  const getUpdateColors = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'alerts':
+        return {
+          color: "text-red-500",
+          bgColor: "bg-red-100",
+          borderColor: "border-l-red-500",
+        };
+      case 'maintenance':
+        return {
+          color: "text-blue-500",
+          bgColor: "bg-blue-100",
+          borderColor: "border-l-blue-500",
+        };
+      default:
+        return {
+          color: "text-green-500",
+          bgColor: "bg-green-100",
+          borderColor: "border-l-green-500",
+        };
+    }
+  };
+
+  const renderSkeleton = () => (
+    <div className="space-y-6">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+          <Skeleton className="h-6 w-32 mb-3" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="w-full">
@@ -83,23 +95,30 @@ const SafetyUpdates = () => {
         </div>
       </div>
       <div className="space-y-6">
-        {updates.map((update) => (
-          <div key={update.title} className={`bg-white border-l-4 ${update.borderColor} rounded-lg p-6 shadow-sm`}>
-            <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${update.color} ${update.bgColor} text-sm font-medium mb-3`}>
-              <update.icon className="h-4 w-4 mr-2" />
-              {update.type}
-            </div>
-            <h4 className="text-lg font-medium mb-3">{update.title}</h4>
-            <p className="text-muted-foreground mb-6">{update.description}</p>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <span>{update.author}</span>
-                <span>{update.timeAgo}</span>
-                {update.updates && <span>{update.updates} update</span>}
+        {isLoading ? (
+          renderSkeleton()
+        ) : (
+          updates?.map((update) => {
+            const UpdateIcon = getUpdateIcon(update.type);
+            const colors = getUpdateColors(update.type);
+            return (
+              <div key={update.id} className={`bg-white border-l-4 ${colors.borderColor} rounded-lg p-6 shadow-sm`}>
+                <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${colors.color} ${colors.bgColor} text-sm font-medium mb-3`}>
+                  <UpdateIcon className="h-4 w-4 mr-2" />
+                  {update.type}
+                </div>
+                <h4 className="text-lg font-medium mb-3">{update.title}</h4>
+                <p className="text-muted-foreground mb-6">{update.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <span>{update.profiles?.display_name}</span>
+                    <span>{new Date(update.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            );
+          })
+        )}
       </div>
       <div className="mt-8 flex justify-center">
         <Button 

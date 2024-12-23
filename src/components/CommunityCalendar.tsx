@@ -9,22 +9,22 @@ import {
   addDays, 
   format, 
   startOfMonth, 
-  endOfMonth, 
+  endOfMonth,
   eachDayOfInterval,
   isSameMonth,
-  parse 
+  parseISO,
+  isEqual,
 } from "date-fns";
 import EventCard from "./EventCard";
-import { monthEvents } from "@/data/events";
 import AddEventDialog from "./AddEventDialog";
-import { CalendarEvent } from "@/types/calendar";
-import { useToast } from "@/components/ui/use-toast";
+import { useEvents } from "@/utils/queries/useEvents";
+import { Skeleton } from "./ui/skeleton";
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const { toast } = useToast();
+  const { data: events, isLoading } = useEvents();
   
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
@@ -47,12 +47,15 @@ const CommunityCalendar = () => {
     setCurrentDate(new Date());
   };
 
-  const handleAddEvent = (event: Omit<CalendarEvent, "id">) => {
-    toast({
-      title: "Event Added",
-      description: "Your event has been successfully added to the calendar.",
+  const getEventsForDate = (date: Date) => {
+    if (!events) return [];
+    return events.filter(event => {
+      const eventDate = parseISO(event.time);
+      return isEqual(
+        new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()),
+        new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      );
     });
-    // Here you would typically update your events state or make an API call
   };
 
   const renderWeekView = () => (
@@ -62,9 +65,22 @@ const CommunityCalendar = () => {
           <div className="text-sm text-gray-500 mb-1">{days[i]}</div>
           <div className="text-lg font-medium mb-3">{format(date, 'd')}</div>
           <div className="space-y-1">
-            {monthEvents[parseInt(format(date, 'd'))]?.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-full" />
+              </div>
+            ) : (
+              getEventsForDate(date).map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={{
+                    ...event,
+                    color: "bg-blue-100 border-blue-300",
+                  }} 
+                />
+              ))
+            )}
           </div>
         </div>
       ))}
@@ -85,9 +101,22 @@ const CommunityCalendar = () => {
         >
           <div className="text-sm font-medium mb-2">{format(date, 'd')}</div>
           <div className="space-y-1">
-            {monthEvents[parseInt(format(date, 'd'))]?.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ) : (
+              getEventsForDate(date).map((event) => (
+                <EventCard 
+                  key={event.id} 
+                  event={{
+                    ...event,
+                    color: "bg-blue-100 border-blue-300",
+                  }} 
+                />
+              ))
+            )}
           </div>
         </div>
       ))}
@@ -97,7 +126,7 @@ const CommunityCalendar = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 border-b pb-2">Community Calendar</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
         <div className="flex items-center gap-6">
           <div className="flex gap-2">
             <Button 
@@ -139,7 +168,7 @@ const CommunityCalendar = () => {
       <AddEventDialog 
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}
-        onAddEvent={handleAddEvent}
+        onAddEvent={() => {}}
       />
     </div>
   );
