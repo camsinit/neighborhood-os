@@ -42,7 +42,7 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="default">
+        <Button variant="secondary" size="default">
           {children}
         </Button>
       </DialogTrigger>
