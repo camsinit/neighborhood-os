@@ -17,7 +17,7 @@ const SupportSection = ({ title, items }: SupportSectionProps) => {
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
       <div className="space-y-4">
         {items.map((item, index) => (
-          <SupportCard key={index} {...item} />
+          <SupportCard key={index} item={item} />
         ))}
       </div>
     </div>
