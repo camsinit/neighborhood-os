@@ -74,7 +74,6 @@ export const seedDashboard = async () => {
       valid_until: addDays(new Date(), 21).toISOString(),
       status: "active"
     },
-    // Additional support requests
     {
       type: "skills",
       request_type: "offer",
