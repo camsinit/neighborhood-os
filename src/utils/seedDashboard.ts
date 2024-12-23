@@ -74,7 +74,7 @@ export const seedDashboard = async () => {
       valid_until: addDays(new Date(), 21).toISOString(),
       status: "active"
     },
-    // New support requests
+    // Additional support requests
     {
       type: "skills",
       request_type: "offer",
@@ -165,7 +165,7 @@ export const seedDashboard = async () => {
     // Insert safety updates
     await supabase.from('safety_updates').insert(safetyUpdates);
     
-    // Insert support requests
+    // Insert support requests one by one for better error handling
     for (const request of supportRequests) {
       await supabase.from('support_requests').insert(request);
     }
