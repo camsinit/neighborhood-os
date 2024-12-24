@@ -7,6 +7,8 @@ import SafetyArchiveDialog from "./SafetyArchiveDialog";
 import { useSafetyUpdates } from "@/utils/queries/useSafetyUpdates";
 import { Skeleton } from "./ui/skeleton";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
@@ -105,8 +107,19 @@ const SafetyUpdates = () => {
             return (
               <div 
                 key={update.id} 
-                className={`group bg-white border-l-4 ${colors.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out`}
+                className={`group bg-white border-l-4 ${colors.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative`}
               >
+                <div className="absolute top-3 right-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage 
+                      src={update.profiles?.avatar_url || ''} 
+                      alt={update.profiles?.display_name || 'User'} 
+                    />
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
                 <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${colors.color} ${colors.bgColor} text-sm font-medium mb-3`}>
                   <UpdateIcon className="h-4 w-4 mr-2" />
                   {update.type}

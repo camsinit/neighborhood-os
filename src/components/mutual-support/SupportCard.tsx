@@ -1,10 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { SupportItem } from "./types";
 import EditSupportRequestDialog from "../support/EditSupportRequestDialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 const SupportCard = ({ item }: { item: SupportItem }) => {
   return (
-    <div className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out`}>
+    <div className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative`}>
+      <div className="absolute top-3 right-3">
+        <Avatar className="h-8 w-8">
+          <AvatarImage 
+            src={item.originalRequest.profiles?.avatar_url || ''} 
+            alt={item.originalRequest.profiles?.display_name || 'User'} 
+          />
+          <AvatarFallback>
+            <User className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+      </div>
       <div className="space-y-2">
         <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium`}>
           {item.requestType}
