@@ -12,20 +12,33 @@ import { transformRequest } from "@/utils/supportRequestTransformer";
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: requests, isLoading } = useSupportRequests();
 
-  const needs = requests
-    ?.filter(req => req.request_type === 'need')
-    .map(transformRequest) || [];
+  const filterByCategory = (items: ReturnType<typeof transformRequest>[]) => {
+    if (!selectedCategory) return items;
+    return items.filter(item => item.requestType.toLowerCase() === selectedCategory.toLowerCase());
+  };
+
+  const needs = filterByCategory(
+    requests
+      ?.filter(req => req.request_type === 'need')
+      .map(transformRequest) || []
+  );
     
-  const offers = requests
-    ?.filter(req => req.request_type === 'offer')
-    .map(transformRequest) || [];
+  const offers = filterByCategory(
+    requests
+      ?.filter(req => req.request_type === 'offer')
+      .map(transformRequest) || []
+  );
 
   return (
     <div className="w-full">
       <MutualSupportHeader onAddRequest={() => setIsAddRequestOpen(true)} />
-      <SearchSection />
+      <SearchSection 
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
 
       <div className="grid md:grid-cols-2 gap-8">
         {isLoading ? (

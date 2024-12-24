@@ -9,14 +9,20 @@ const categories: Category[] = [
   { icon: Share2, label: "Resources" },
 ];
 
-const CategoryFilters = () => {
+interface CategoryFiltersProps {
+  selectedCategory: string | null;
+  onCategorySelect: (category: string | null) => void;
+}
+
+const CategoryFilters = ({ selectedCategory, onCategorySelect }: CategoryFiltersProps) => {
   return (
     <div className="flex gap-4">
       {categories.map((cat) => (
         <Button 
           key={cat.label} 
-          variant="outline" 
-          className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-200"
+          variant={selectedCategory === cat.label ? "default" : "outline"}
+          className="flex items-center gap-2 hover:bg-gray-50 border-gray-200"
+          onClick={() => onCategorySelect(selectedCategory === cat.label ? null : cat.label)}
         >
           <cat.icon className="h-4 w-4" />
           {cat.label}
