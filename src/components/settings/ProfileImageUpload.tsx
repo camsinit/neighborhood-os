@@ -25,8 +25,7 @@ export const ProfileImageUpload = () => {
     width: 90,
     height: 90,
     x: 5,
-    y: 5,
-    aspect: 1
+    y: 5
   });
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -171,7 +170,6 @@ export const ProfileImageUpload = () => {
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
-                aspect={1}
                 circularCrop
               >
                 <img
