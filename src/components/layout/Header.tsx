@@ -2,6 +2,8 @@ import { Bell, Settings, UserCircle } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,14 +19,28 @@ interface HeaderProps {
 }
 
 const Header = ({ onOpenSettings }: HeaderProps) => {
-  const supabase = useSupabaseClient();
+  const supabaseClient = useSupabaseClient();
   const user = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       navigate("/login");
       toast({
         title: "Signed out successfully",
@@ -49,7 +65,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
                   <AvatarImage 
-                    src={user?.user_metadata?.avatar_url} 
+                    src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
                     alt={user?.user_metadata?.full_name || user?.email}
                   />
                   <AvatarFallback>
