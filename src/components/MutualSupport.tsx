@@ -8,25 +8,25 @@ import MutualSupportHeader from "./mutual-support/MutualSupportHeader";
 import SearchSection from "./mutual-support/SearchSection";
 import LoadingSkeleton from "./mutual-support/LoadingSkeleton";
 import { transformRequest } from "@/utils/supportRequestTransformer";
+import SupportRequestDialog from "./support/SupportRequestDialog";
 
 const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const { data: requests, isLoading } = useSupportRequests();
 
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
 
-    // Filter by category if selected
     if (selectedCategory) {
       filtered = filtered.filter(item => 
         item.requestType.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
-    // Filter by search query if present
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item =>
@@ -67,8 +67,16 @@ const MutualSupport = () => {
           </>
         ) : (
           <>
-            <SupportSection title="Needs" items={needs} />
-            <SupportSection title="Offers" items={offers} />
+            <SupportSection 
+              title="Needs" 
+              items={needs}
+              onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+            />
+            <SupportSection 
+              title="Offers" 
+              items={offers}
+              onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+            />
           </>
         )}
       </div>
@@ -90,6 +98,11 @@ const MutualSupport = () => {
       <ArchiveDialog
         open={isArchiveOpen}
         onOpenChange={setIsArchiveOpen}
+      />
+      <SupportRequestDialog
+        request={selectedRequest}
+        open={!!selectedRequest}
+        onOpenChange={(open) => !open && setSelectedRequest(null)}
       />
     </div>
   );

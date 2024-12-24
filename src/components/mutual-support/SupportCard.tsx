@@ -1,20 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { SupportItem } from "./types";
-import EditSupportRequestDialog from "../support/EditSupportRequestDialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 
-const SupportCard = ({ item }: { item: SupportItem }) => {
+const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void }) => {
   return (
-    <div className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative`}>
+    <div 
+      className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
+      onClick={onClick}
+    >
       <div className="absolute top-3 right-3">
-        <Avatar className="h-8 w-8">
+        <Avatar className="h-6 w-6">
           <AvatarImage 
             src={item.originalRequest.profiles?.avatar_url || ''} 
             alt={item.originalRequest.profiles?.display_name || 'User'} 
           />
           <AvatarFallback>
-            <User className="h-4 w-4" />
+            <User className="h-3 w-3" />
           </AvatarFallback>
         </Avatar>
       </div>
@@ -33,19 +35,11 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
           />
         </div>
       )}
-      <div className="transition-all duration-200 ease-in-out transform group-hover:translate-y-0 group-hover:opacity-100 group-hover:max-h-[500px] opacity-70 max-h-12 overflow-hidden">
-        <p className="text-sm text-muted-foreground group-hover:mb-6 mb-0 line-clamp-2 group-hover:line-clamp-none cursor-pointer transition-all mt-3">
-          {item.description}
-        </p>
-        <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-0 group-hover:h-auto">
-          <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
-          <div className="flex items-center gap-2">
-            <EditSupportRequestDialog request={item.originalRequest} />
-            <Button variant="secondary">
-              {item.type === "Needs Help" ? "I can help" : "I'm Interested"}
-            </Button>
-          </div>
-        </div>
+      <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
+        {item.description}
+      </p>
+      <div className="mt-4">
+        <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
       </div>
     </div>
   );

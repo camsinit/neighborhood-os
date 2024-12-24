@@ -51,13 +51,13 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
       onClick={onClick}
     >
       <div className="absolute top-3 right-3">
-        <Avatar className="h-8 w-8">
+        <Avatar className="h-6 w-6">
           <AvatarImage 
             src={update.profiles?.avatar_url || ''} 
             alt={update.profiles?.display_name || 'User'} 
           />
           <AvatarFallback>
-            <User className="h-4 w-4" />
+            <User className="h-3 w-3" />
           </AvatarFallback>
         </Avatar>
       </div>
