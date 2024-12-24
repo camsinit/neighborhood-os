@@ -13,6 +13,7 @@ export const ProfileImageUpload = () => {
   const [uploading, setUploading] = useState(false);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 50,
@@ -40,12 +41,12 @@ export const ProfileImageUpload = () => {
 
   const uploadAvatar = async () => {
     try {
-      if (!imgRef.current || !selectedImage) return;
+      if (!imgRef.current || !selectedImage || !user) return;
       
       setUploading(true);
       const croppedImageBlob = await getCroppedImg(imgRef.current, crop as PixelCrop);
       
-      const filePath = `${user?.id}-${Math.random()}.jpg`;
+      const filePath = `${user.id}-${Math.random()}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('mutual_aid_images')
@@ -62,19 +63,18 @@ export const ProfileImageUpload = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', user?.id);
+        .eq('id', user.id);
 
       if (updateError) {
         throw updateError;
       }
 
+      setAvatarUrl(publicUrl);
+      
       toast({
         title: "Success",
         description: "Profile image updated successfully.",
       });
-
-      // Force a reload of the profile data
-      window.location.reload();
 
     } catch (error: any) {
       toast({
@@ -94,6 +94,7 @@ export const ProfileImageUpload = () => {
       <ImageUploadButton
         onImageSelect={handleImageSelect}
         uploading={uploading}
+        avatarUrl={avatarUrl}
       />
       <ImageCropDialog
         open={cropDialogOpen}

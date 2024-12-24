@@ -34,4 +34,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  *:focus {
+    @apply outline-none ring-0 ring-offset-0;
+  }
 }
