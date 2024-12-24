@@ -12,6 +12,8 @@ interface NotificationItemProps {
   onItemClick: (type: "safety" | "event" | "support", id: string) => void;
 }
 
+type TableName = "safety_updates" | "events" | "support_requests";
+
 const NotificationItem = ({ 
   title, 
   type, 
@@ -57,7 +59,7 @@ const NotificationItem = ({
       .eq('id', itemId);
   };
 
-  const getTableName = (type: string) => {
+  const getTableName = (type: "safety" | "event" | "support"): TableName => {
     switch (type) {
       case "safety":
         return "safety_updates";
@@ -65,8 +67,6 @@ const NotificationItem = ({
         return "events";
       case "support":
         return "support_requests";
-      default:
-        return "";
     }
   };
 
