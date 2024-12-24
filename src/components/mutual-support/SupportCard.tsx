@@ -4,7 +4,7 @@ import EditSupportRequestDialog from "../support/EditSupportRequestDialog";
 
 const SupportCard = ({ item }: { item: SupportItem }) => {
   return (
-    <div className={`bg-white border-l-4 ${item.borderColor} rounded-lg p-6 shadow-sm`}>
+    <div className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-6 shadow-sm`}>
       <div className="flex items-center gap-4 mb-3">
         <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${item.tagColor} ${item.tagBg} text-sm font-medium`}>
           {item.requestType}
@@ -23,7 +23,7 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
       <p className="text-sm text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
         {item.description}
       </p>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
         <div className="flex items-center gap-2">
           <EditSupportRequestDialog request={item.originalRequest} />
