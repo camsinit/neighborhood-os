@@ -1,0 +1,46 @@
+import { Bell, Calendar, Shield, HandHelping } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface NotificationItemProps {
+  title: string;
+  type: "safety" | "event" | "support";
+  link: string;
+  onClose: () => void;
+}
+
+const NotificationItem = ({ title, type, link, onClose }: NotificationItemProps) => {
+  const navigate = useNavigate();
+
+  const getIcon = () => {
+    switch (type) {
+      case "safety":
+        return <Shield className="h-4 w-4 text-red-500" />;
+      case "event":
+        return <Calendar className="h-4 w-4 text-blue-500" />;
+      case "support":
+        return <HandHelping className="h-4 w-4 text-green-500" />;
+      default:
+        return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const handleClick = () => {
+    navigate(link);
+    onClose();
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      className="flex items-start gap-3 p-3 hover:bg-gray-50 cursor-pointer"
+    >
+      {getIcon()}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 truncate">{title}</p>
+        <p className="text-xs text-gray-500 capitalize">{type}</p>
+      </div>
+    </div>
+  );
+};
+
+export default NotificationItem;

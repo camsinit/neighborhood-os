@@ -1,9 +1,10 @@
-import { Bell, Settings, UserCircle } from "lucide-react";
+import { Settings, UserCircle } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
             <div className="text-2xl font-bold text-primary">Terrific Terrace</div>
           </div>
           <div className="flex items-center gap-4">
+            <NotificationsPopover />
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
@@ -88,10 +90,6 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
                 <DropdownMenuItem onClick={onOpenSettings}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Bell className="mr-2 h-4 w-4" />
-                  <span>Notifications</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
