@@ -21,7 +21,7 @@ const CategoryFilters = ({ selectedCategory, onCategorySelect }: CategoryFilters
         <Button 
           key={cat.label} 
           variant={selectedCategory === cat.label ? "default" : "outline"}
-          className="flex items-center gap-2 hover:bg-gray-50 border-gray-200"
+          className="flex items-center gap-2 hover:bg-accent/50 border-gray-200"
           onClick={() => onCategorySelect(selectedCategory === cat.label ? null : cat.label)}
         >
           <cat.icon className="h-4 w-4" />
