@@ -15,10 +15,10 @@ export const ProfileImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
-    width: 90,
-    height: 90,
-    x: 5,
-    y: 5
+    width: 100,
+    height: 100,
+    x: 0,
+    y: 0
   });
   const imgRef = useRef<HTMLImageElement>(null);
 

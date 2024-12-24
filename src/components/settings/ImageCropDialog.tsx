@@ -33,7 +33,7 @@ export const ImageCropDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Crop Image</DialogTitle>
+          <DialogTitle>Crop Profile Picture</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4">
           {selectedImage && (
@@ -41,6 +41,8 @@ export const ImageCropDialog = ({
               crop={crop}
               onChange={(_, percentCrop) => onCropChange(percentCrop)}
               circularCrop
+              aspect={1}
+              minWidth={100}
             >
               <img
                 ref={imgRef}
