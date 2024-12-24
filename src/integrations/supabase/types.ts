@@ -131,6 +131,45 @@ export type Database = {
         }
         Relationships: []
       }
+      safety_update_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          safety_update_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          safety_update_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          safety_update_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_update_comments_safety_update_id_fkey"
+            columns: ["safety_update_id"]
+            isOneToOne: false
+            referencedRelation: "safety_updates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_update_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safety_updates: {
         Row: {
           author_id: string

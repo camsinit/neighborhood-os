@@ -46,9 +46,12 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
           </div>
           <div className="flex items-center gap-4">
             <DropdownMenu modal={false}>
-              <DropdownMenuTrigger className="focus:outline-none focus:ring-0">
-                <Avatar className="h-9 w-9 hover:ring-2 hover:ring-primary transition-all focus:ring-0">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <DropdownMenuTrigger className="focus:outline-none">
+                <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100 focus:outline-none">
+                  <AvatarImage 
+                    src={user?.user_metadata?.avatar_url} 
+                    alt={user?.user_metadata?.full_name || user?.email}
+                  />
                   <AvatarFallback>
                     {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
                   </AvatarFallback>
@@ -57,9 +60,11 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.email}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user?.user_metadata?.full_name}
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.user_metadata?.full_name || 'Your Profile'}
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
