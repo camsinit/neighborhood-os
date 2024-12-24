@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
@@ -23,6 +23,21 @@ const SafetyUpdates = () => {
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   const { data: updates, isLoading } = useSafetyUpdates();
   const user = useUser();
+
+  useEffect(() => {
+    const handleOpenSafetyDialog = (event: CustomEvent<{ id: string }>) => {
+      const update = updates?.find(u => u.id === event.detail.id);
+      if (update) {
+        setSelectedUpdate(update);
+      }
+    };
+
+    window.addEventListener('opensafetyDialog', handleOpenSafetyDialog as EventListener);
+    
+    return () => {
+      window.removeEventListener('opensafetyDialog', handleOpenSafetyDialog as EventListener);
+    };
+  }, [updates]);
   
   return (
     <div className="w-full">

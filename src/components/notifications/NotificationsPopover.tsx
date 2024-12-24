@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
+import { useNavigate } from "react-router-dom";
 
 const NotificationsPopover = () => {
   const { data: notifications } = useQuery({
@@ -37,26 +38,31 @@ const NotificationsPopover = () => {
           id: update.id,
           title: update.title,
           type: "safety" as const,
-          link: `/safety/${update.id}`,
           created_at: update.created_at,
         })) || []),
         ...(events.data?.map(event => ({
           id: event.id,
           title: event.title,
           type: "event" as const,
-          link: `/event/${event.id}`,
           created_at: event.created_at,
         })) || []),
         ...(supportRequests.data?.map(request => ({
           id: request.id,
           title: request.title,
           type: "support" as const,
-          link: `/support/${request.id}`,
           created_at: request.created_at,
         })) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
   });
+
+  const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
+    // Emit a custom event that the parent components will listen to
+    const event = new CustomEvent('openItemDialog', {
+      detail: { type, id }
+    });
+    window.dispatchEvent(event);
+  };
 
   return (
     <Popover>
@@ -81,8 +87,11 @@ const NotificationsPopover = () => {
             notifications.map((notification) => (
               <NotificationItem
                 key={notification.id}
-                {...notification}
+                title={notification.title}
+                type={notification.type}
+                itemId={notification.id}
                 onClose={() => {}}
+                onItemClick={handleItemClick}
               />
             ))
           ) : (

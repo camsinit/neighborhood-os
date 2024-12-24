@@ -1,16 +1,14 @@
 import { Bell, Calendar, Shield, HandHelping } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface NotificationItemProps {
   title: string;
   type: "safety" | "event" | "support";
-  link: string;
+  itemId: string;
   onClose: () => void;
+  onItemClick: (type: "safety" | "event" | "support", id: string) => void;
 }
 
-const NotificationItem = ({ title, type, link, onClose }: NotificationItemProps) => {
-  const navigate = useNavigate();
-
+const NotificationItem = ({ title, type, itemId, onClose, onItemClick }: NotificationItemProps) => {
   const getIcon = () => {
     switch (type) {
       case "safety":
@@ -25,7 +23,7 @@ const NotificationItem = ({ title, type, link, onClose }: NotificationItemProps)
   };
 
   const handleClick = () => {
-    navigate(link);
+    onItemClick(type, itemId);
     onClose();
   };
 
