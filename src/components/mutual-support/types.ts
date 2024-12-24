@@ -16,6 +16,7 @@ export type SupportRequestFromDB = {
   image_url: string | null;
   profiles: {
     display_name: string;
+    avatar_url: string | null;
   };
 };
 
