@@ -7,7 +7,7 @@ export const useSafetyUpdates = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("safety_updates")
-        .select("*, profiles(display_name)")
+        .select("*, profiles(display_name, avatar_url)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

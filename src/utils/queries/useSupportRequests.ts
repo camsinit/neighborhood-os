@@ -7,7 +7,7 @@ export const useSupportRequests = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("support_requests")
-        .select("*, profiles(display_name)")
+        .select("*, profiles(display_name, avatar_url)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
