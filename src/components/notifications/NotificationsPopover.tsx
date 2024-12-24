@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Archive, Bell } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -10,27 +10,32 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 const NotificationsPopover = () => {
   const { toast } = useToast();
+  const [showArchived, setShowArchived] = useState(false);
   
   const { data: notifications, refetch } = useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["notifications", showArchived],
     queryFn: async () => {
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase
           .from("safety_updates")
           .select("id, title, type, created_at, is_read, is_archived")
+          .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("events")
           .select("id, title, created_at, is_read, is_archived")
+          .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("support_requests")
           .select("id, title, created_at, is_read, is_archived")
+          .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
       ]);
@@ -118,8 +123,19 @@ const NotificationsPopover = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <div className="p-4 border-b">
-          <h4 className="font-semibold">Notifications</h4>
+        <div className="flex items-center justify-between p-4 border-b">
+          <h4 className="font-semibold">
+            {showArchived ? "Archived Notifications" : "Notifications"}
+          </h4>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 px-2 text-gray-500"
+            onClick={() => setShowArchived(!showArchived)}
+          >
+            <Archive className="h-4 w-4 mr-1" />
+            {showArchived ? "Show Active" : "Show Archived"}
+          </Button>
         </div>
         <ScrollArea className="h-[300px]">
           {notifications?.length ? (
@@ -137,7 +153,7 @@ const NotificationsPopover = () => {
             ))
           ) : (
             <div className="p-4 text-center text-sm text-gray-500">
-              No new notifications
+              {showArchived ? "No archived notifications" : "No new notifications"}
             </div>
           )}
         </ScrollArea>

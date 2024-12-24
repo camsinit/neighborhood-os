@@ -1,4 +1,4 @@
-import { Bell, Calendar, Shield, HandHelping, Check, Archive } from "lucide-react";
+import { Bell, Calendar, Shield, HandHelping, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -50,15 +50,6 @@ const NotificationItem = ({
       .eq('id', itemId);
   };
 
-  const toggleArchive = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const table = getTableName(type);
-    await supabase
-      .from(table)
-      .update({ is_archived: !isArchived })
-      .eq('id', itemId);
-  };
-
   const getTableName = (type: "safety" | "event" | "support"): TableName => {
     switch (type) {
       case "safety":
@@ -69,8 +60,6 @@ const NotificationItem = ({
         return "support_requests";
     }
   };
-
-  if (isArchived) return null;
 
   return (
     <div
@@ -88,29 +77,19 @@ const NotificationItem = ({
         </p>
         <p className="text-xs text-gray-500 capitalize">{type}</p>
       </div>
-      <div className="flex gap-2">
-        {!isRead && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={(e) => {
-              e.stopPropagation();
-              markAsRead();
-            }}
-          >
-            <Check className="h-4 w-4" />
-          </Button>
-        )}
+      {!isRead && (
         <Button
           variant="ghost"
           size="icon"
           className="h-6 w-6"
-          onClick={toggleArchive}
+          onClick={(e) => {
+            e.stopPropagation();
+            markAsRead();
+          }}
         >
-          <Archive className="h-4 w-4" />
+          <Check className="h-4 w-4" />
         </Button>
-      </div>
+      )}
     </div>
   );
 };
