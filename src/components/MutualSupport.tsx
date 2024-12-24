@@ -16,7 +16,13 @@ const MutualSupport = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const { data: requests, isLoading } = useSupportRequests();
+
+  const handleAddRequest = (type: "need" | "offer") => {
+    setInitialRequestType(type);
+    setIsAddRequestOpen(true);
+  };
 
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
@@ -52,7 +58,7 @@ const MutualSupport = () => {
 
   return (
     <div className="w-full">
-      <MutualSupportHeader onAddRequest={() => setIsAddRequestOpen(true)} />
+      <MutualSupportHeader />
       <SearchSection 
         selectedCategory={selectedCategory}
         onCategorySelect={setSelectedCategory}
@@ -71,11 +77,15 @@ const MutualSupport = () => {
               title="Needs" 
               items={needs}
               onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+              onAddClick={() => handleAddRequest("need")}
+              buttonLabel="New Need"
             />
             <SupportSection 
               title="Offers" 
               items={offers}
               onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+              onAddClick={() => handleAddRequest("offer")}
+              buttonLabel="New Offer"
             />
           </>
         )}
@@ -94,6 +104,7 @@ const MutualSupport = () => {
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
+        initialRequestType={initialRequestType}
       />
       <ArchiveDialog
         open={isArchiveOpen}
