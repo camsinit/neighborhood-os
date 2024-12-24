@@ -103,14 +103,19 @@ const SafetyUpdates = () => {
             const UpdateIcon = getUpdateIcon(update.type);
             const colors = getUpdateColors(update.type);
             return (
-              <div key={update.id} className={`bg-white border-l-4 ${colors.borderColor} rounded-lg p-6 shadow-sm`}>
+              <div 
+                key={update.id} 
+                className={`group bg-white border-l-4 ${colors.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out`}
+              >
                 <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${colors.color} ${colors.bgColor} text-sm font-medium mb-3`}>
                   <UpdateIcon className="h-4 w-4 mr-2" />
                   {update.type}
                 </div>
                 <h4 className="text-lg font-medium mb-3">{update.title}</h4>
-                <p className="text-muted-foreground mb-6">{update.description}</p>
-                <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground group-hover:mb-6 mb-0 line-clamp-2 group-hover:line-clamp-none cursor-pointer transition-all">
+                  {update.description}
+                </p>
+                <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-0 group-hover:h-auto">
                   <div className="flex items-center gap-6 text-sm text-muted-foreground">
                     <span>{update.profiles?.display_name}</span>
                     <span>{new Date(update.created_at).toLocaleDateString()}</span>
