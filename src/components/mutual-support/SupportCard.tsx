@@ -20,11 +20,11 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
           />
         </div>
       )}
-      <div className="transition-all duration-200 ease-in-out transform group-hover:translate-y-0 group-hover:opacity-100 group-hover:max-h-[500px] opacity-70 max-h-12 overflow-hidden">
+      <div className="transition-all duration-200 ease-in-out transform group-hover:translate-y-0 group-hover:opacity-100 opacity-70">
         <p className="text-sm text-muted-foreground group-hover:mb-6 mb-0 line-clamp-2 group-hover:line-clamp-none cursor-pointer transition-all mt-3">
           {item.description}
         </p>
-        <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-0 group-hover:h-auto">
+        <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
           <div className="flex items-center gap-2">
             <EditSupportRequestDialog request={item.originalRequest} />
