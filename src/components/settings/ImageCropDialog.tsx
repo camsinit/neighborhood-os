@@ -36,7 +36,7 @@ export const ImageCropDialog = ({
           <DialogTitle>Crop Profile Picture</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4">
-          <div className="w-full max-w-[400px] h-[400px] overflow-hidden">
+          <div className="w-[400px] h-[400px] overflow-hidden bg-gray-100 flex items-center justify-center">
             {selectedImage && (
               <ReactCrop
                 crop={crop}
@@ -44,13 +44,13 @@ export const ImageCropDialog = ({
                 circularCrop
                 aspect={1}
                 minWidth={100}
+                className="max-w-full max-h-full"
               >
                 <img
                   ref={imgRef}
                   src={selectedImage}
                   alt="Crop preview"
-                  className="max-w-full h-auto object-contain"
-                  style={{ maxHeight: '400px' }}
+                  className="max-w-full max-h-[400px] object-contain"
                 />
               </ReactCrop>
             )}

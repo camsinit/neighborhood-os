@@ -46,8 +46,8 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
           </div>
           <div className="flex items-center gap-4">
             <DropdownMenu modal={false}>
-              <DropdownMenuTrigger className="focus:outline-none">
-                <Avatar className="h-9 w-9 hover:ring-2 hover:ring-primary transition-all">
+              <DropdownMenuTrigger className="focus:outline-none focus:ring-0">
+                <Avatar className="h-9 w-9 hover:ring-2 hover:ring-primary transition-all focus:ring-0">
                   <AvatarImage src={user?.user_metadata?.avatar_url} />
                   <AvatarFallback>
                     {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
