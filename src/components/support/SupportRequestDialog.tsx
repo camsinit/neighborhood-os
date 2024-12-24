@@ -24,25 +24,11 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>{request?.title}</DialogTitle>
-            {user && user.id === request?.user_id && (
-              <EditSupportRequestDialog request={request}>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="hover:bg-secondary"
-                >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              </EditSupportRequestDialog>
-            )}
-          </div>
+          <DialogTitle>{request?.title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-6 w-6">
               <AvatarImage 
                 src={request?.profiles?.avatar_url || ''} 
                 alt={request?.profiles?.display_name || 'User'} 
@@ -66,8 +52,19 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
               className="w-full max-h-96 object-cover rounded-md"
             />
           )}
-          <div className="flex justify-end">
-            <Button>
+          <div className="flex justify-between items-center">
+            {user && user.id === request?.user_id && (
+              <EditSupportRequestDialog request={request}>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              </EditSupportRequestDialog>
+            )}
+            <Button className="ml-auto">
               {request?.request_type === 'need' ? "I can help" : "I'm Interested"}
             </Button>
           </div>

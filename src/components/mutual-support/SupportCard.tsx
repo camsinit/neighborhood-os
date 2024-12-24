@@ -21,8 +21,11 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
         </Avatar>
       </div>
       <div className="space-y-2">
-        <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium`}>
-          {item.requestType}
+        <div className="flex items-center gap-2">
+          <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium uppercase`}>
+            {item.requestType}
+          </div>
+          <span className="text-xs text-muted-foreground">{item.timeAgo}</span>
         </div>
         <h4 className="text-lg font-medium">{item.title}</h4>
       </div>
@@ -38,9 +41,6 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
       <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
         {item.description}
       </p>
-      <div className="mt-4">
-        <span className="text-sm text-muted-foreground">{item.timeAgo}</span>
-      </div>
     </div>
   );
 };
