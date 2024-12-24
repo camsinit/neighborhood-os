@@ -45,6 +45,8 @@ export const ImageCropDialog = ({
                 aspect={1}
                 minWidth={100}
                 className="max-w-full max-h-full"
+                ruleOfThirds
+                keepSelection
               >
                 <img
                   ref={imgRef}
