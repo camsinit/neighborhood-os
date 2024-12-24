@@ -4,14 +4,13 @@ import EditSupportRequestDialog from "../support/EditSupportRequestDialog";
 
 const SupportCard = ({ item }: { item: SupportItem }) => {
   return (
-    <div className={`bg-white border-l-4 ${item.borderColor} rounded-lg p-6 shadow-sm relative`}>
-      <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${item.tagColor} ${item.tagBg} text-sm font-medium mb-3`}>
-        {item.type}
+    <div className={`bg-white border-l-4 ${item.borderColor} rounded-lg p-6 shadow-sm`}>
+      <div className="flex items-center gap-4 mb-3">
+        <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${item.tagColor} ${item.tagBg} text-sm font-medium`}>
+          {item.requestType}
+        </div>
+        <h4 className="text-lg font-medium">{item.title}</h4>
       </div>
-      <div className="absolute top-6 right-6 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-        {item.requestType}
-      </div>
-      <h4 className="text-lg font-medium mb-3">{item.title}</h4>
       {item.imageUrl && item.requestType === 'goods' && (
         <div className="mb-4">
           <img 
