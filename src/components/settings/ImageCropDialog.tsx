@@ -1,4 +1,4 @@
-import ReactCrop, { Crop } from 'react-image-crop';
+import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {
   Dialog,
@@ -43,7 +43,8 @@ export const ImageCropDialog = ({
                 onChange={(_, percentCrop) => onCropChange(percentCrop)}
                 circularCrop
                 aspect={1}
-                minWidth={100}
+                minWidth={50}
+                minHeight={50}
                 className="max-w-full max-h-full"
                 ruleOfThirds
                 keepSelection
@@ -52,7 +53,7 @@ export const ImageCropDialog = ({
                   ref={imgRef}
                   src={selectedImage}
                   alt="Crop preview"
-                  className="max-w-full max-h-[400px] object-contain"
+                  style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
                 />
               </ReactCrop>
             )}
@@ -61,12 +62,14 @@ export const ImageCropDialog = ({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="hover:bg-gray-100"
             >
               Cancel
             </Button>
             <Button
               onClick={onSave}
               disabled={uploading}
+              className="hover:bg-gray-100"
             >
               {uploading ? "Uploading..." : "Save"}
             </Button>

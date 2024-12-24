@@ -4,14 +4,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User } from "lucide-react";
 import { toast } from "sonner";
+import { SafetyUpdateComment } from "./SafetyUpdateComment";
 
 interface Comment {
   id: string;
   content: string;
   created_at: string;
+  user_id: string;
   profiles: {
     display_name: string | null;
     avatar_url: string | null;
@@ -32,6 +32,7 @@ export const SafetyUpdateComments = ({ updateId }: { updateId: string }) => {
           id,
           content,
           created_at,
+          user_id,
           profiles (
             display_name,
             avatar_url
@@ -79,28 +80,11 @@ export const SafetyUpdateComments = ({ updateId }: { updateId: string }) => {
         <h3 className="font-semibold mb-4">Comments</h3>
         <div className="space-y-4">
           {comments?.map((comment) => (
-            <div key={comment.id} className="flex gap-4">
-              <Avatar className="h-8 w-8">
-                <AvatarImage 
-                  src={comment.profiles.avatar_url || ''} 
-                  alt={comment.profiles.display_name || 'User'} 
-                />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="font-medium text-sm">
-                    {comment.profiles.display_name}
-                  </p>
-                  <p className="text-sm text-gray-700">{comment.content}</p>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
+            <SafetyUpdateComment 
+              key={comment.id} 
+              comment={comment}
+              updateId={updateId}
+            />
           ))}
         </div>
       </div>
