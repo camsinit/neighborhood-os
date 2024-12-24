@@ -45,7 +45,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
             <div className="text-2xl font-bold text-primary">Terrific Terrace</div>
           </div>
           <div className="flex items-center gap-4">
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger className="focus:outline-none">
                 <Avatar className="h-9 w-9 hover:ring-2 hover:ring-primary transition-all">
                   <AvatarImage src={user?.user_metadata?.avatar_url} />

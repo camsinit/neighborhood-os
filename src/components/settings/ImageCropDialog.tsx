@@ -36,22 +36,25 @@ export const ImageCropDialog = ({
           <DialogTitle>Crop Profile Picture</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4">
-          {selectedImage && (
-            <ReactCrop
-              crop={crop}
-              onChange={(_, percentCrop) => onCropChange(percentCrop)}
-              circularCrop
-              aspect={1}
-              minWidth={100}
-            >
-              <img
-                ref={imgRef}
-                src={selectedImage}
-                alt="Crop preview"
-                className="max-h-[400px] w-auto"
-              />
-            </ReactCrop>
-          )}
+          <div className="w-full max-w-[400px] h-[400px] overflow-hidden">
+            {selectedImage && (
+              <ReactCrop
+                crop={crop}
+                onChange={(_, percentCrop) => onCropChange(percentCrop)}
+                circularCrop
+                aspect={1}
+                minWidth={100}
+              >
+                <img
+                  ref={imgRef}
+                  src={selectedImage}
+                  alt="Crop preview"
+                  className="max-w-full h-auto object-contain"
+                  style={{ maxHeight: '400px' }}
+                />
+              </ReactCrop>
+            )}
+          </div>
           <div className="flex justify-end gap-2 w-full">
             <Button
               variant="outline"
