@@ -9,9 +9,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const NotificationsPopover = () => {
+  const { toast } = useToast();
+  
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
@@ -57,11 +59,38 @@ const NotificationsPopover = () => {
   });
 
   const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
-    // Emit a custom event that the parent components will listen to
+    // Emit custom event
     const event = new CustomEvent('openItemDialog', {
       detail: { type, id }
     });
     window.dispatchEvent(event);
+
+    // Show toast for event and support notifications
+    if (type === 'event' || type === 'support') {
+      toast({
+        title: "Navigating to item",
+        description: "The relevant section has been highlighted for you.",
+        duration: 3000,
+      });
+
+      // Add highlight class to relevant section
+      setTimeout(() => {
+        const section = type === 'event' ? 
+          document.querySelector('.calendar-container') : 
+          document.querySelector('.mutual-support-container');
+        
+        if (section) {
+          section.classList.add('highlight-section');
+          // Remove highlight after animation
+          setTimeout(() => {
+            section.classList.remove('highlight-section');
+          }, 2000);
+        }
+
+        // Scroll section into view
+        section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
   };
 
   return (
