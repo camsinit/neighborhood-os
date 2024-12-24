@@ -17,17 +17,17 @@ const NotificationsPopover = () => {
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase
           .from("safety_updates")
-          .select("id, title, type")
+          .select("id, title, type, created_at")
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("events")
-          .select("id, title")
+          .select("id, title, created_at")
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("support_requests")
-          .select("id, title")
+          .select("id, title, created_at")
           .order("created_at", { ascending: false })
           .limit(5),
       ]);
@@ -38,20 +38,23 @@ const NotificationsPopover = () => {
           title: update.title,
           type: "safety" as const,
           link: `/safety/${update.id}`,
+          created_at: update.created_at,
         })) || []),
         ...(events.data?.map(event => ({
           id: event.id,
           title: event.title,
           type: "event" as const,
           link: `/event/${event.id}`,
+          created_at: event.created_at,
         })) || []),
         ...(supportRequests.data?.map(request => ({
           id: request.id,
           title: request.title,
           type: "support" as const,
           link: `/support/${request.id}`,
+          created_at: request.created_at,
         })) || []),
-      ].sort((a, b) => b.created_at - a.created_at).slice(0, 5);
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
   });
 
