@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -6,10 +6,12 @@ import { Crop, PixelCrop } from 'react-image-crop';
 import { ImageUploadButton } from "./ImageUploadButton";
 import { ImageCropDialog } from "./ImageCropDialog";
 import { getCroppedImg } from "@/utils/cropUtils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const ProfileImageUpload = () => {
   const user = useUser();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -23,6 +25,26 @@ export const ProfileImageUpload = () => {
     y: 25
   });
   const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', user.id)
+      .single();
+    
+    if (data?.avatar_url) {
+      setAvatarUrl(data.avatar_url);
+    }
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
@@ -72,10 +94,10 @@ export const ProfileImageUpload = () => {
 
       setAvatarUrl(publicUrl);
       
-      toast({
-        title: "Success",
-        description: "Profile image updated successfully.",
-      });
+      // Invalidate and refetch all queries that might contain the user's avatar
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
+      await queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+      await queryClient.invalidateQueries({ queryKey: ['support-requests'] });
 
     } catch (error: any) {
       toast({
