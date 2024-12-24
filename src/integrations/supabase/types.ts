@@ -51,6 +51,8 @@ export type Database = {
           description: string | null
           host_id: string
           id: string
+          is_archived: boolean | null
+          is_read: boolean | null
           is_recurring: boolean | null
           location: string
           recurrence_end_date: string | null
@@ -63,6 +65,8 @@ export type Database = {
           description?: string | null
           host_id: string
           id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
           is_recurring?: boolean | null
           location: string
           recurrence_end_date?: string | null
@@ -75,6 +79,8 @@ export type Database = {
           description?: string | null
           host_id?: string
           id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
           is_recurring?: boolean | null
           location?: string
           recurrence_end_date?: string | null
@@ -176,6 +182,8 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_archived: boolean | null
+          is_read: boolean | null
           status: string | null
           title: string
           type: string
@@ -185,6 +193,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
           status?: string | null
           title: string
           type: string
@@ -194,6 +204,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
           status?: string | null
           title?: string
           type?: string
@@ -214,6 +226,8 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          is_archived: boolean | null
+          is_read: boolean | null
           request_type: string
           status: string | null
           title: string
@@ -226,6 +240,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean | null
+          is_read?: boolean | null
           request_type: string
           status?: string | null
           title: string
@@ -238,6 +254,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          is_archived?: boolean | null
+          is_read?: boolean | null
           request_type?: string
           status?: string | null
           title?: string

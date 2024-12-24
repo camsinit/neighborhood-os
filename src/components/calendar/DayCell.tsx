@@ -34,7 +34,7 @@ const DayCell = ({
         )}
         <span className="text-sm font-medium">{format(date, 'd')}</span>
       </div>
-      <div className="space-y-0">
+      <div className="space-y-0 px-0.5">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-full" />

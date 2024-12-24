@@ -26,7 +26,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   ) : null;
 
   const eventPreview = (
-    <div className={`rounded-md p-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${event.color}`}>
+    <div className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${event.color} w-full`}>
       <div className="font-medium truncate">{event.title}</div>
       <div className="flex items-center gap-1 text-gray-600">
         <Clock className="h-3 w-3" />

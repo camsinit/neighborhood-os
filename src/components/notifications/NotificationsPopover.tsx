@@ -14,23 +14,23 @@ import { useToast } from "@/components/ui/use-toast";
 const NotificationsPopover = () => {
   const { toast } = useToast();
   
-  const { data: notifications } = useQuery({
+  const { data: notifications, refetch } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase
           .from("safety_updates")
-          .select("id, title, type, created_at")
+          .select("id, title, type, created_at, is_read, is_archived")
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("events")
-          .select("id, title, created_at")
+          .select("id, title, created_at, is_read, is_archived")
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("support_requests")
-          .select("id, title, created_at")
+          .select("id, title, created_at, is_read, is_archived")
           .order("created_at", { ascending: false })
           .limit(5),
       ]);
@@ -41,18 +41,24 @@ const NotificationsPopover = () => {
           title: update.title,
           type: "safety" as const,
           created_at: update.created_at,
+          is_read: update.is_read,
+          is_archived: update.is_archived,
         })) || []),
         ...(events.data?.map(event => ({
           id: event.id,
           title: event.title,
           type: "event" as const,
           created_at: event.created_at,
+          is_read: event.is_read,
+          is_archived: event.is_archived,
         })) || []),
         ...(supportRequests.data?.map(request => ({
           id: request.id,
           title: request.title,
           type: "support" as const,
           created_at: request.created_at,
+          is_read: request.is_read,
+          is_archived: request.is_archived,
         })) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
@@ -91,7 +97,11 @@ const NotificationsPopover = () => {
         section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
+    
+    refetch();
   };
+
+  const hasUnreadNotifications = notifications?.some(n => !n.is_read && !n.is_archived);
 
   return (
     <Popover>
@@ -102,9 +112,9 @@ const NotificationsPopover = () => {
           className="relative hover:bg-gray-100"
         >
           <Bell className="h-5 w-5" />
-          {notifications?.length ? (
+          {hasUnreadNotifications && (
             <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
-          ) : null}
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
@@ -119,6 +129,8 @@ const NotificationsPopover = () => {
                 title={notification.title}
                 type={notification.type}
                 itemId={notification.id}
+                isRead={notification.is_read}
+                isArchived={notification.is_archived}
                 onClose={() => {}}
                 onItemClick={handleItemClick}
               />
