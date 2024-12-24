@@ -7,7 +7,7 @@ import { ProfileImageUpload } from "./ProfileImageUpload";
 
 export const ProfileTab = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 outline-none">
       <ProfileImageUpload />
       <div className="space-y-4">
         <FormField
