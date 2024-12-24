@@ -46,7 +46,7 @@ const NotificationItem = ({
     const table = getTableName(type);
     await supabase
       .from(table)
-      .update({ is_read: true })
+      .update({ is_read: true, is_archived: true })
       .eq('id', itemId);
   };
 
