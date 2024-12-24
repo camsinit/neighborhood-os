@@ -37,4 +37,19 @@
   *:focus {
     @apply outline-none ring-0 ring-offset-0;
   }
+  
+  /* Remove focus styles from all interactive elements */
+  button:focus,
+  [role="button"]:focus,
+  a:focus,
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply outline-none ring-0 ring-offset-0;
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }

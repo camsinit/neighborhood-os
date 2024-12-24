@@ -14,6 +14,7 @@ interface ImageCropDialogProps {
   selectedImage: string | null;
   crop: Crop;
   onCropChange: (crop: Crop) => void;
+  onCropComplete: (crop: PixelCrop) => void;
   imgRef: React.RefObject<HTMLImageElement>;
   onSave: () => void;
   uploading: boolean;
@@ -25,6 +26,7 @@ export const ImageCropDialog = ({
   selectedImage,
   crop,
   onCropChange,
+  onCropComplete,
   imgRef,
   onSave,
   uploading,
@@ -41,6 +43,7 @@ export const ImageCropDialog = ({
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => onCropChange(percentCrop)}
+                onComplete={(c) => onCropComplete(c)}
                 circularCrop
                 aspect={1}
                 minWidth={100}
@@ -61,13 +64,15 @@ export const ImageCropDialog = ({
                     const size = Math.min(width, height);
                     const x = (width - size) / 2;
                     const y = (height - size) / 2;
-                    onCropChange({
+                    const newCrop = {
                       unit: '%',
                       width: (size / width) * 100,
                       height: (size / height) * 100,
                       x: (x / width) * 100,
                       y: (y / height) * 100,
-                    });
+                    };
+                    onCropChange(newCrop);
+                    onCropComplete(newCrop as PixelCrop);
                   }}
                 />
               </ReactCrop>

@@ -14,6 +14,7 @@ export const ProfileImageUpload = () => {
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [finalCrop, setFinalCrop] = useState<PixelCrop | null>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 50,
@@ -41,10 +42,10 @@ export const ProfileImageUpload = () => {
 
   const uploadAvatar = async () => {
     try {
-      if (!imgRef.current || !selectedImage || !user) return;
+      if (!imgRef.current || !selectedImage || !user || !finalCrop) return;
       
       setUploading(true);
-      const croppedImageBlob = await getCroppedImg(imgRef.current, crop as PixelCrop);
+      const croppedImageBlob = await getCroppedImg(imgRef.current, finalCrop);
       
       const filePath = `${user.id}-${Math.random()}.jpg`;
 
@@ -86,7 +87,12 @@ export const ProfileImageUpload = () => {
       setUploading(false);
       setCropDialogOpen(false);
       setSelectedImage(null);
+      setFinalCrop(null);
     }
+  };
+
+  const handleCropComplete = (crop: PixelCrop) => {
+    setFinalCrop(crop);
   };
 
   return (
@@ -100,11 +106,15 @@ export const ProfileImageUpload = () => {
         open={cropDialogOpen}
         onOpenChange={(open) => {
           setCropDialogOpen(open);
-          if (!open) setSelectedImage(null);
+          if (!open) {
+            setSelectedImage(null);
+            setFinalCrop(null);
+          }
         }}
         selectedImage={selectedImage}
         crop={crop}
         onCropChange={setCrop}
+        onCropComplete={handleCropComplete}
         imgRef={imgRef}
         onSave={uploadAvatar}
         uploading={uploading}
