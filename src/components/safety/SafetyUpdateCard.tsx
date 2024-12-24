@@ -62,7 +62,7 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
           </AvatarFallback>
         </Avatar>
       </div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-3 mb-3">
         <div className={`inline-flex items-center px-3 py-1.5 rounded-full ${colors.color} ${colors.bgColor} text-sm font-medium`}>
           <UpdateIcon className="h-4 w-4 mr-2" />
           {update.type}
