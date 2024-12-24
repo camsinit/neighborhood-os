@@ -27,6 +27,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const user = useUser();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<ProfileFormValues | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -68,14 +69,17 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           push: true,
         };
 
-        form.reset({
+        const values = {
           display_name: data.display_name || "",
           bio: data.bio || "",
           timezone: data.timezone || "UTC",
           language: data.language || "en",
           theme: data.theme || "light",
           notification_preferences: notificationPrefs,
-        });
+        };
+
+        setInitialValues(values);
+        form.reset(values);
       }
     };
 
@@ -83,7 +87,24 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   }, [user]);
 
   const onSubmit = async (values: ProfileFormValues) => {
-    if (!user) return;
+    if (!user || !initialValues) return;
+    
+    // Check if any values have actually changed
+    const hasChanges = Object.keys(values).some(key => {
+      if (key === 'notification_preferences') {
+        return JSON.stringify(values[key]) !== JSON.stringify(initialValues[key]);
+      }
+      return values[key] !== initialValues[key];
+    });
+
+    if (!hasChanges) {
+      toast({
+        title: "No changes detected",
+        description: "No changes were made to your profile settings.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase
@@ -109,6 +130,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       return;
     }
 
+    setInitialValues(values);
     toast({
       title: "Settings updated",
       description: "Your profile settings have been saved successfully.",

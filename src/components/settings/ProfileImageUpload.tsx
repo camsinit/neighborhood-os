@@ -15,10 +15,10 @@ export const ProfileImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
-    width: 100,
-    height: 100,
-    x: 0,
-    y: 0
+    width: 50,
+    height: 50,
+    x: 25,
+    y: 25
   });
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -73,8 +73,8 @@ export const ProfileImageUpload = () => {
         description: "Profile image updated successfully.",
       });
 
-      setCropDialogOpen(false);
-      setSelectedImage(null);
+      // Force a reload of the profile data
+      window.location.reload();
 
     } catch (error: any) {
       toast({
@@ -84,6 +84,8 @@ export const ProfileImageUpload = () => {
       });
     } finally {
       setUploading(false);
+      setCropDialogOpen(false);
+      setSelectedImage(null);
     }
   };
 

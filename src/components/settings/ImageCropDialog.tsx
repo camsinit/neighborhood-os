@@ -43,8 +43,8 @@ export const ImageCropDialog = ({
                 onChange={(_, percentCrop) => onCropChange(percentCrop)}
                 circularCrop
                 aspect={1}
-                minWidth={50}
-                minHeight={50}
+                minWidth={100}
+                minHeight={100}
                 className="max-w-full max-h-full"
                 ruleOfThirds
                 keepSelection
@@ -54,6 +54,21 @@ export const ImageCropDialog = ({
                   src={selectedImage}
                   alt="Crop preview"
                   style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    const width = img.width;
+                    const height = img.height;
+                    const size = Math.min(width, height);
+                    const x = (width - size) / 2;
+                    const y = (height - size) / 2;
+                    onCropChange({
+                      unit: '%',
+                      width: (size / width) * 100,
+                      height: (size / height) * 100,
+                      x: (x / width) * 100,
+                      y: (y / height) * 100,
+                    });
+                  }}
                 />
               </ReactCrop>
             )}
@@ -62,16 +77,14 @@ export const ImageCropDialog = ({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="hover:bg-gray-100"
             >
               Cancel
             </Button>
             <Button
               onClick={onSave}
               disabled={uploading}
-              className="hover:bg-gray-100"
             >
-              {uploading ? "Uploading..." : "Save"}
+              {uploading ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
