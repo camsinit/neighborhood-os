@@ -37,7 +37,7 @@ const CalendarHeader = ({
             <Button 
               variant="outline" 
               size="sm" 
-              className={`hover:bg-gray-100 ${view === 'week' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
+              className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'week' ? 'border-primary' : ''}`}
               onClick={() => setView('week')}
             >
               Week
@@ -45,24 +45,24 @@ const CalendarHeader = ({
             <Button 
               variant="outline" 
               size="sm"
-              className={`hover:bg-gray-100 ${view === 'month' ? 'bg-primary text-white hover:bg-primary/90' : ''}`}
+              className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'month' ? 'border-primary' : ''}`}
               onClick={() => setView('month')}
             >
               Month
             </Button>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="hover:bg-gray-100" onClick={handlePreviousWeek}>
+            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handlePreviousWeek}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" className="hover:bg-gray-100" onClick={handleToday}>Today</Button>
-            <Button variant="outline" size="sm" className="hover:bg-gray-100" onClick={handleNextWeek}>
+            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handleToday}>Today</Button>
+            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handleNextWeek}>
               <ChevronRight className="h-4 w-4" />
             </Button>
             <Button 
               size="sm"
               onClick={() => setIsAddEventOpen(true)}
-              className="flex items-center gap-2 ml-4 hover:bg-primary/90"
+              className="flex items-center gap-2 ml-4 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 text-white"
             >
               <Plus className="h-4 w-4" />
               Add Event
