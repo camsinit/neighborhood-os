@@ -1,7 +1,6 @@
 import { AlertTriangle, Bell, Clock, Wrench, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import EditSafetyUpdateDialog from "./EditSafetyUpdateDialog";
 
 interface SafetyUpdateCardProps {
   update: any;
@@ -75,9 +74,6 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
       <p className="text-sm text-muted-foreground line-clamp-2">
         {update.description}
       </p>
-      <div className="absolute bottom-2 right-3">
-        <EditSafetyUpdateDialog update={update} />
-      </div>
     </div>
   );
 };

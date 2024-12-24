@@ -12,14 +12,17 @@ import {
 } from "@/components/ui/dialog";
 import { SafetyUpdateComments } from "./safety/SafetyUpdateComments";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User } from "lucide-react";
+import { User, Pencil } from "lucide-react";
 import { format } from "date-fns";
+import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
+import { useUser } from "@supabase/auth-helpers-react";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   const { data: updates, isLoading } = useSafetyUpdates();
+  const user = useUser();
   
   return (
     <div className="w-full">
@@ -61,7 +64,21 @@ const SafetyUpdates = () => {
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>{selectedUpdate?.title}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{selectedUpdate?.title}</DialogTitle>
+              {user && user.id === selectedUpdate?.author_id && (
+                <EditSafetyUpdateDialog update={selectedUpdate}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="hover:bg-secondary"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </EditSafetyUpdateDialog>
+              )}
+            </div>
           </DialogHeader>
           <div className="space-y-6">
             <div className="flex items-center gap-4">

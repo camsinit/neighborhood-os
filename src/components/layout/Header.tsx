@@ -31,7 +31,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
       if (!user?.id) return null;
       const { data } = await supabase
         .from('profiles')
-        .select('avatar_url')
+        .select('avatar_url, display_name')
         .eq('id', user.id)
         .single();
       return data;
@@ -68,7 +68,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
                 <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
                   <AvatarImage 
                     src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
-                    alt={user?.user_metadata?.full_name || user?.email}
+                    alt={profile?.display_name || user?.email}
                   />
                   <AvatarFallback>
                     {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
@@ -79,7 +79,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user?.user_metadata?.full_name}
+                      {profile?.display_name || user?.user_metadata?.full_name}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user?.email}
