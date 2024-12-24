@@ -73,7 +73,7 @@ const SafetyUpdates = () => {
           onClick={() => setIsAddUpdateOpen(true)}
           className="bg-red-600 hover:bg-red-700 text-white h-10"
         >
-          + Share Update
+          Post Update
         </Button>
       </div>
       <div className="flex items-center gap-6 mb-8">
