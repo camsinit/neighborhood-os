@@ -64,7 +64,7 @@ export const ImageCropDialog = ({
                     const size = Math.min(width, height);
                     const x = (width - size) / 2;
                     const y = (height - size) / 2;
-                    const newCrop = {
+                    const newCrop: Crop = {
                       unit: '%',
                       width: (size / width) * 100,
                       height: (size / height) * 100,
