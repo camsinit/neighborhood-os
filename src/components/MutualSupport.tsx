@@ -13,20 +13,38 @@ const MutualSupport = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: requests, isLoading } = useSupportRequests();
 
-  const filterByCategory = (items: ReturnType<typeof transformRequest>[]) => {
-    if (!selectedCategory) return items;
-    return items.filter(item => item.requestType.toLowerCase() === selectedCategory.toLowerCase());
+  const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
+    let filtered = items;
+
+    // Filter by category if selected
+    if (selectedCategory) {
+      filtered = filtered.filter(item => 
+        item.requestType.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // Filter by search query if present
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.title.toLowerCase().includes(query) ||
+        (item.description?.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
   };
 
-  const needs = filterByCategory(
+  const needs = filterRequests(
     requests
       ?.filter(req => req.request_type === 'need')
       .map(transformRequest) || []
   );
     
-  const offers = filterByCategory(
+  const offers = filterRequests(
     requests
       ?.filter(req => req.request_type === 'offer')
       .map(transformRequest) || []
@@ -38,6 +56,7 @@ const MutualSupport = () => {
       <SearchSection 
         selectedCategory={selectedCategory}
         onCategorySelect={setSelectedCategory}
+        onSearch={setSearchQuery}
       />
 
       <div className="grid md:grid-cols-2 gap-8">

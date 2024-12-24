@@ -20,7 +20,7 @@ const SupportCard = ({ item }: { item: SupportItem }) => {
           />
         </div>
       )}
-      <p className="text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
+      <p className="text-sm text-muted-foreground mb-6 line-clamp-2 hover:line-clamp-none cursor-pointer transition-all">
         {item.description}
       </p>
       <div className="flex items-center justify-between">
