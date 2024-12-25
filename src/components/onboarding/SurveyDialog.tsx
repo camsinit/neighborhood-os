@@ -4,7 +4,7 @@ import { ProfileImageUpload } from "@/components/settings/ProfileImageUpload";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { User, Mail, Home, Wrench } from "lucide-react";
+import { User, Mail, Home, Wrench, Heart, Shield } from "lucide-react";
 import { SurveyStepHeader } from "./survey/SurveyStepHeader";
 import { SurveyProgress } from "./survey/SurveyProgress";
 import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
@@ -80,45 +80,55 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
       ),
     },
     {
-      title: "Emergency & Professional Skills",
-      icon: Wrench,
-      description: "Share your emergency response and professional skills to help neighbors in need.",
+      title: "Emergency & Safety Skills",
+      icon: Shield,
+      description: "Share your emergency response and safety skills to help neighbors during critical situations. When neighbors need assistance, they can request your help and coordinate timing through the community calendar.",
       component: (
-        <div className="space-y-6">
-          <SkillCategory
-            title={SKILL_CATEGORIES.emergency.title}
-            skills={SKILL_CATEGORIES.emergency.skills}
-            selectedSkills={formData.skills}
-            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
-          />
-          <SkillCategory
-            title={SKILL_CATEGORIES.professional.title}
-            skills={SKILL_CATEGORIES.professional.skills}
-            selectedSkills={formData.skills}
-            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
-          />
-        </div>
+        <SkillCategory
+          title={SKILL_CATEGORIES.emergency.title}
+          skills={SKILL_CATEGORIES.emergency.skills}
+          selectedSkills={formData.skills}
+          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+        />
       ),
     },
     {
-      title: "Maintenance & Care Skills",
+      title: "Professional Services",
       icon: Wrench,
-      description: "Share your practical skills that can help maintain our community.",
+      description: "Share your professional expertise with the community. Neighbors can request your assistance for various services, and you can schedule convenient times through our calendar system.",
       component: (
-        <div className="space-y-6">
-          <SkillCategory
-            title={SKILL_CATEGORIES.maintenance.title}
-            skills={SKILL_CATEGORIES.maintenance.skills}
-            selectedSkills={formData.skills}
-            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
-          />
-          <SkillCategory
-            title={SKILL_CATEGORIES.care.title}
-            skills={SKILL_CATEGORIES.care.skills}
-            selectedSkills={formData.skills}
-            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
-          />
-        </div>
+        <SkillCategory
+          title={SKILL_CATEGORIES.professional.title}
+          skills={SKILL_CATEGORIES.professional.skills}
+          selectedSkills={formData.skills}
+          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+        />
+      ),
+    },
+    {
+      title: "Home Maintenance Skills",
+      icon: Home,
+      description: "Share your home maintenance and repair skills. Your neighbors can discover these skills and coordinate with you for assistance through our community calendar.",
+      component: (
+        <SkillCategory
+          title={SKILL_CATEGORIES.maintenance.title}
+          skills={SKILL_CATEGORIES.maintenance.skills}
+          selectedSkills={formData.skills}
+          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+        />
+      ),
+    },
+    {
+      title: "Care & Support Skills",
+      icon: Heart,
+      description: "Share your caregiving and support abilities to help neighbors in need. They can request your assistance and arrange timing through our community calendar system.",
+      component: (
+        <SkillCategory
+          title={SKILL_CATEGORIES.care.title}
+          skills={SKILL_CATEGORIES.care.skills}
+          selectedSkills={formData.skills}
+          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+        />
       ),
     },
   ];
