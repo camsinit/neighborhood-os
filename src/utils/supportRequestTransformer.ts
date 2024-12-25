@@ -36,12 +36,13 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
   return {
     type,
     title: request.title,
-    description: request.description,
+    description: request.description || "",
     timeAgo: getTimeAgo(new Date(request.created_at)),
     borderColor: colors.borderColor,
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
     requestType: request.category,
+    supportType: request.support_type,
     imageUrl: request.image_url,
     originalRequest: request,
   };

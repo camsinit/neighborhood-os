@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { SupportItem } from "./types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void }) => {
   return (
@@ -25,6 +26,9 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
           <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium uppercase`}>
             {item.requestType}
           </div>
+          <Badge variant="secondary" className="text-xs">
+            {item.supportType}
+          </Badge>
           <span className="text-xs text-muted-foreground">{item.timeAgo}</span>
         </div>
         <h4 className="text-lg font-medium">{item.title}</h4>

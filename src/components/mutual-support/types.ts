@@ -30,6 +30,7 @@ export type SupportItem = {
   tagColor: string;
   tagBg: string;
   requestType: string;
+  supportType: string;
   imageUrl: string | null;
   originalRequest: SupportRequestFromDB;
 };

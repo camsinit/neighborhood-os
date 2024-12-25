@@ -3,10 +3,10 @@ import { Package, Car, Wrench, Share2 } from "lucide-react";
 import { Category } from "./types";
 
 const categories: Category[] = [
-  { icon: Package, label: "Goods" },
-  { icon: Car, label: "Transportation" },
-  { icon: Wrench, label: "Skills" },
-  { icon: Share2, label: "Resources" },
+  { icon: Package, label: "goods" },
+  { icon: Car, label: "transportation" },
+  { icon: Wrench, label: "skills" },
+  { icon: Share2, label: "resources" },
 ];
 
 interface CategoryFiltersProps {
