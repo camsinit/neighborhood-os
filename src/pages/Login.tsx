@@ -1,17 +1,12 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
-import SurveyDialog from "@/components/onboarding/SurveyDialog";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import AuthHeader from "@/components/auth/AuthHeader";
+import AuthForm from "@/components/auth/AuthForm";
+import SecretTestButton from "@/components/auth/SecretTestButton";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showSurvey, setShowSurvey] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -26,10 +21,10 @@ const Login = () => {
 
           // If the profile was just created (within the last minute), show onboarding
           if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
-            setShowOnboarding(true);
+            navigate("/");
           } else if (!profile?.display_name) {
             // If the user hasn't completed their profile, show the survey
-            setShowSurvey(true);
+            navigate("/");
           } else {
             navigate("/");
           }
@@ -52,72 +47,10 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome to Terrific Terrace
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Connect with your community
-          </p>
-        </div>
-        <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ 
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#2563eb',
-                    brandAccent: '#1d4ed8',
-                  },
-                },
-              },
-            }}
-            providers={[]}
-            redirectTo={window.location.origin}
-            localization={{
-              variables: {
-                sign_up: {
-                  password_label: "Password (minimum 6 characters)",
-                  password_input_placeholder: "Enter your password (min. 6 characters)",
-                  email_label: "Email address",
-                  email_input_placeholder: "Your email address",
-                  button_label: "Sign up",
-                  loading_button_label: "Signing up ...",
-                  social_provider_text: "Sign in with {{provider}}",
-                  link_text: "Don't have an account? Sign up",
-                  confirmation_text: "Check your email for the confirmation link"
-                },
-                sign_in: {
-                  password_label: "Password",
-                  password_input_placeholder: "Enter your password",
-                  email_label: "Email address",
-                  email_input_placeholder: "Your email address",
-                  button_label: "Sign in",
-                  loading_button_label: "Signing in ...",
-                  social_provider_text: "Sign in with {{provider}}",
-                  link_text: "Already have an account? Sign in"
-                }
-              }
-            }}
-            showLinks={true}
-          />
-        </div>
+        <AuthHeader />
+        <AuthForm />
       </div>
-      <OnboardingDialog 
-        open={showOnboarding} 
-        onOpenChange={(open) => {
-          setShowOnboarding(open);
-          if (!open) {
-            setShowSurvey(true);
-          }
-        }}
-      />
-      <SurveyDialog
-        open={showSurvey}
-        onOpenChange={setShowSurvey}
-      />
+      <SecretTestButton />
     </div>
   );
 };
