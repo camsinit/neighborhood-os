@@ -27,8 +27,6 @@ const AuthForm = () => {
               password_input_placeholder: "Enter your password (min. 6 characters)",
               email_label: "Email address",
               email_input_placeholder: "Your email address",
-              phone_label: "Phone number",
-              phone_input_placeholder: "Your phone number",
               button_label: "Sign up",
               loading_button_label: "Signing in ...",
               social_provider_text: "Sign in with {{provider}}",
