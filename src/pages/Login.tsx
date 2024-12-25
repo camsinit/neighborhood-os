@@ -81,7 +81,7 @@ const Login = () => {
                 sign_up: {
                   password_label: "Password (minimum 6 characters)",
                   password_input_placeholder: "Enter your password (min. 6 characters)",
-                  email_input_label: "Email address",
+                  email_label: "Email address",
                   email_input_placeholder: "Your email address",
                   button_label: "Sign up",
                   loading_button_label: "Signing up ...",
@@ -92,7 +92,7 @@ const Login = () => {
                 sign_in: {
                   password_label: "Password",
                   password_input_placeholder: "Enter your password",
-                  email_input_label: "Email address",
+                  email_label: "Email address",
                   email_input_placeholder: "Your email address",
                   button_label: "Sign in",
                   loading_button_label: "Signing in ...",
