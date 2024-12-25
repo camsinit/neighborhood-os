@@ -50,7 +50,7 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -60,7 +60,7 @@ const Login = () => {
             Connect with your community
           </p>
         </div>
-        <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
           <Auth
             supabaseClient={supabase}
             appearance={{ 
