@@ -5,7 +5,7 @@ export type Category = {
 
 export type SupportRequestFromDB = {
   id: string;
-  type: string;
+  category: string;
   request_type: string;
   title: string;
   description: string;
@@ -14,6 +14,7 @@ export type SupportRequestFromDB = {
   status: string;
   created_at: string;
   image_url: string | null;
+  support_type: string;
   profiles: {
     display_name: string;
     avatar_url: string | null;

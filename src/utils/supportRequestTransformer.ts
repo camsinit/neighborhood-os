@@ -41,7 +41,7 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
     borderColor: colors.borderColor,
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
-    requestType: request.type,
+    requestType: request.category,
     imageUrl: request.image_url,
     originalRequest: request,
   };

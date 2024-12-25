@@ -222,6 +222,7 @@ export type Database = {
       }
       support_requests: {
         Row: {
+          category: string
           created_at: string
           description: string | null
           id: string
@@ -230,12 +231,13 @@ export type Database = {
           is_read: boolean | null
           request_type: string
           status: string | null
+          support_type: string | null
           title: string
-          type: string
           user_id: string
           valid_until: string
         }
         Insert: {
+          category: string
           created_at?: string
           description?: string | null
           id?: string
@@ -244,12 +246,13 @@ export type Database = {
           is_read?: boolean | null
           request_type: string
           status?: string | null
+          support_type?: string | null
           title: string
-          type: string
           user_id: string
           valid_until: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -258,8 +261,8 @@ export type Database = {
           is_read?: boolean | null
           request_type?: string
           status?: string | null
+          support_type?: string | null
           title?: string
-          type?: string
           user_id?: string
           valid_until?: string
         }

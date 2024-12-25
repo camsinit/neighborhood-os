@@ -2,25 +2,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { SupportRequestFormData } from "@/components/support/types/formTypes";
 
 interface SupportRequestSubmitProps {
   onSuccess: () => void;
-}
-
-interface SupportRequestFormData {
-  title: string;
-  description: string;
-  type: string;
-  validUntil: string;
-  requestType: "need" | "offer";
-  imageUrl?: string | null;
 }
 
 export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
 
-  const handleSubmit = async (formData: SupportRequestFormData) => {
+  const handleSubmit = async (formData: Partial<SupportRequestFormData>) => {
     if (!user) {
       toast.error("You must be logged in to create a support request");
       return;
@@ -32,10 +24,11 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
         .insert({
           title: formData.title,
           description: formData.description,
-          type: formData.type,
+          category: formData.category,
           request_type: formData.requestType,
+          support_type: formData.supportType,
           user_id: user.id,
-          valid_until: new Date(formData.validUntil).toISOString(),
+          valid_until: new Date(formData.validUntil!).toISOString(),
           image_url: formData.imageUrl,
         });
 
@@ -50,7 +43,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
     }
   };
 
-  const handleUpdate = async (requestId: string, formData: SupportRequestFormData) => {
+  const handleUpdate = async (requestId: string, formData: Partial<SupportRequestFormData>) => {
     if (!user) {
       toast.error("You must be logged in to update a support request");
       return;
@@ -62,9 +55,10 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
         .update({
           title: formData.title,
           description: formData.description,
-          type: formData.type,
+          category: formData.category,
           request_type: formData.requestType,
-          valid_until: new Date(formData.validUntil).toISOString(),
+          support_type: formData.supportType,
+          valid_until: new Date(formData.validUntil!).toISOString(),
           image_url: formData.imageUrl,
         })
         .eq('id', requestId)
