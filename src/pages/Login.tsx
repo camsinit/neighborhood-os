@@ -80,13 +80,37 @@ const Login = () => {
               variables: {
                 sign_up: {
                   password_label: "Password (minimum 6 characters)",
-                  password_input_placeholder: "Enter your password (min. 6 characters)"
+                  password_input_placeholder: "Enter your password (min. 6 characters)",
+                  email_input_label: "Email address",
+                  email_input_placeholder: "Your email address",
+                  button_label: "Sign up",
+                  loading_button_label: "Signing up ...",
+                  social_provider_text: "Sign in with {{provider}}",
+                  link_text: "Don't have an account? Sign up",
+                  confirmation_text: "Check your email for the confirmation link"
                 },
                 sign_in: {
                   password_label: "Password",
-                  password_input_placeholder: "Enter your password"
+                  password_input_placeholder: "Enter your password",
+                  email_input_label: "Email address",
+                  email_input_placeholder: "Your email address",
+                  button_label: "Sign in",
+                  loading_button_label: "Signing in ...",
+                  social_provider_text: "Sign in with {{provider}}",
+                  link_text: "Already have an account? Sign in"
                 }
               }
+            }}
+            onError={(error) => {
+              let message = error.message;
+              if (error.message.includes("User already registered")) {
+                message = "This email is already registered. Please sign in instead.";
+              }
+              toast({
+                title: "Error",
+                description: message,
+                variant: "destructive",
+              });
             }}
           />
         </div>
