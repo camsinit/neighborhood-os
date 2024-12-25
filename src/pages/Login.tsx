@@ -5,31 +5,37 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        // Check if this is a new user (first sign in)
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('created_at, display_name')
-          .eq('id', session.user.id)
-          .single();
+      if (event === 'SIGNED_IN') {
+        if (session) {
+          // Check if this is a new user (first sign in)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('created_at, display_name')
+            .eq('id', session.user.id)
+            .single();
 
-        // If the profile was just created (within the last minute), show onboarding
-        if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
-          setShowOnboarding(true);
-        } else if (!profile?.display_name) {
-          // If the user hasn't completed their profile, show the survey
-          setShowSurvey(true);
-        } else {
-          navigate("/");
+          // If the profile was just created (within the last minute), show onboarding
+          if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
+            setShowOnboarding(true);
+          } else if (!profile?.display_name) {
+            // If the user hasn't completed their profile, show the survey
+            setShowSurvey(true);
+          } else {
+            navigate("/");
+          }
         }
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/login");
       }
     });
 
@@ -69,6 +75,14 @@ const Login = () => {
               },
             }}
             providers={[]}
+            redirectTo={window.location.origin}
+            onError={(error) => {
+              toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }}
             localization={{
               variables: {
                 sign_up: {
