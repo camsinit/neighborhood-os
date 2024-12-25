@@ -73,7 +73,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
       <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-lg">
+        <div className="max-w-2xl w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-lg">
           <SurveyStepHeader
             icon={steps[step].icon}
             title={steps[step].title}
