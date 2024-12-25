@@ -13,4 +13,5 @@ export type SupportRequestFormProps = {
   initialValues?: Partial<SupportRequestFormData>;
   mode?: 'create' | 'edit';
   requestId?: string;
+  initialRequestType?: "need" | "offer" | null;
 };

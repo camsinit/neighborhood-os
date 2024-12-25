@@ -30,28 +30,31 @@ export const seedDashboard = async () => {
   // Support Requests
   const supportRequests = [
     {
-      type: "Goods",
+      category: "goods",
       request_type: "offer",
       title: "Free Moving Boxes",
       description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 7).toISOString()
+      valid_until: addDays(new Date(), 7).toISOString(),
+      support_type: "immediate"
     },
     {
-      type: "Skills",
+      category: "skills",
       request_type: "need",
       title: "Help with Basic Phone Setup",
       description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 14).toISOString()
+      valid_until: addDays(new Date(), 14).toISOString(),
+      support_type: "immediate"
     },
     {
-      type: "Care",
+      category: "resources",
       request_type: "offer",
       title: "Pet Sitting Available",
       description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
       user_id: user.id,
-      valid_until: addDays(new Date(), 30).toISOString()
+      valid_until: addDays(new Date(), 30).toISOString(),
+      support_type: "ongoing"
     }
   ];
 

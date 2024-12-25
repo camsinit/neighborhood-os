@@ -16,7 +16,7 @@ const AddSupportRequestDialog = ({ open, onOpenChange, initialRequestType }: Add
     >
       <SupportRequestForm 
         onClose={() => onOpenChange(false)}
-        initialRequestType={initialRequestType}
+        initialValues={{ requestType: initialRequestType || null }}
       />
     </DialogWrapper>
   );

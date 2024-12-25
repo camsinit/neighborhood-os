@@ -10,10 +10,11 @@ interface EditSupportRequestDialogProps {
     id: string;
     title: string;
     description: string | null;
-    type: string;
+    category: string;
     request_type: string;
     user_id: string;
     valid_until: string;
+    support_type: string;
   };
   children?: React.ReactNode;
 }
@@ -44,9 +45,10 @@ const EditSupportRequestDialog = ({ request, children }: EditSupportRequestDialo
           initialValues={{
             title: request.title,
             description: request.description || "",
-            type: request.type,
+            category: request.category,
             requestType: request.request_type as "need" | "offer",
             validUntil: request.valid_until.split('T')[0],
+            supportType: request.support_type as "immediate" | "ongoing",
           }}
           mode="edit"
           requestId={request.id}
