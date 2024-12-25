@@ -13,6 +13,7 @@ const MutualSupportContainer = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedView, setSelectedView] = useState<"time-sensitive" | "ongoing" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
@@ -26,7 +27,15 @@ const MutualSupportContainer = () => {
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
 
-    if (selectedCategory) {
+    if (selectedView === "time-sensitive") {
+      filtered = filtered.filter(item => 
+        ["goods", "transportation"].includes(item.requestType.toLowerCase())
+      );
+    } else if (selectedView === "ongoing") {
+      filtered = filtered.filter(item => 
+        ["skills", "resources"].includes(item.requestType.toLowerCase())
+      );
+    } else if (selectedCategory) {
       filtered = filtered.filter(item => 
         item.requestType.toLowerCase() === selectedCategory.toLowerCase()
       );
@@ -62,6 +71,8 @@ const MutualSupportContainer = () => {
         selectedCategory={selectedCategory}
         onCategorySelect={setSelectedCategory}
         onSearch={setSearchQuery}
+        selectedView={selectedView}
+        onViewSelect={setSelectedView}
       />
 
       <MutualSupportContent 
