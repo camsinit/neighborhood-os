@@ -44,6 +44,12 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
     }
   };
 
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   if (!open) return null;
 
   const CurrentIcon = steps[currentStep].icon;
@@ -73,10 +79,18 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
               />
             ))}
           </div>
-          <div className="flex justify-center mt-6">
+          <div className="flex flex-col items-center gap-2">
             <Button onClick={handleNext}>
               {currentStep === steps.length - 1 ? "Get Started" : "Next"}
             </Button>
+            {currentStep > 0 && (
+              <button
+                onClick={handleBack}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Back
+              </button>
+            )}
           </div>
         </div>
       </div>
