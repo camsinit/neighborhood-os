@@ -1,17 +1,31 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        navigate("/");
+        // Check if this is a new user (first sign in)
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('created_at')
+          .eq('id', session.user.id)
+          .single();
+
+        // If the profile was just created (within the last minute), show onboarding
+        if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
+          setShowOnboarding(true);
+        } else {
+          navigate("/");
+        }
       }
     });
 
@@ -62,6 +76,10 @@ const Login = () => {
           />
         </div>
       </div>
+      <OnboardingDialog 
+        open={showOnboarding} 
+        onOpenChange={setShowOnboarding}
+      />
     </div>
   );
 };
