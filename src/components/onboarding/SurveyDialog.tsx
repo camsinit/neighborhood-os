@@ -4,13 +4,14 @@ import { ProfileImageUpload } from "@/components/settings/ProfileImageUpload";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { User, Camera, Mail, Home, Wrench } from "lucide-react";
+import { User, Mail, Home, Wrench } from "lucide-react";
 import { SurveyStepHeader } from "./survey/SurveyStepHeader";
 import { SurveyProgress } from "./survey/SurveyProgress";
 import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
 import { ContactInfoStep } from "./survey/steps/ContactInfoStep";
 import { AddressStep } from "./survey/steps/AddressStep";
-import { SkillsStep } from "./survey/steps/SkillsStep";
+import { SkillCategory } from "./survey/steps/skills/SkillCategory";
+import { SKILL_CATEGORIES } from "./survey/steps/skills/skillCategories";
 
 interface SurveyDialogProps {
   open: boolean;
@@ -34,6 +35,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     {
       title: "Basic Information",
       icon: User,
+      description: "Let's start with your name so your neighbors can get to know you.",
       component: (
         <BasicInfoStep
           firstName={formData.firstName}
@@ -49,12 +51,14 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     },
     {
       title: "Profile Picture",
-      icon: Camera,
+      icon: User,
+      description: "Add a friendly photo to help build trust in the community.",
       component: <ProfileImageUpload />,
     },
     {
       title: "Contact Information",
       icon: Mail,
+      description: "Your contact details help us keep you informed about community events and updates.",
       component: (
         <ContactInfoStep
           email={formData.email}
@@ -67,6 +71,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     {
       title: "Address",
       icon: Home,
+      description: "Your address helps us connect you with nearby neighbors and local events.",
       component: (
         <AddressStep
           address={formData.address}
@@ -75,13 +80,45 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
       ),
     },
     {
-      title: "Skills to Share",
+      title: "Emergency & Professional Skills",
       icon: Wrench,
+      description: "Share your emergency response and professional skills to help neighbors in need.",
       component: (
-        <SkillsStep
-          selectedSkills={formData.skills}
-          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
-        />
+        <div className="space-y-6">
+          <SkillCategory
+            title={SKILL_CATEGORIES.emergency.title}
+            skills={SKILL_CATEGORIES.emergency.skills}
+            selectedSkills={formData.skills}
+            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+          />
+          <SkillCategory
+            title={SKILL_CATEGORIES.professional.title}
+            skills={SKILL_CATEGORIES.professional.skills}
+            selectedSkills={formData.skills}
+            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+          />
+        </div>
+      ),
+    },
+    {
+      title: "Maintenance & Care Skills",
+      icon: Wrench,
+      description: "Share your practical skills that can help maintain our community.",
+      component: (
+        <div className="space-y-6">
+          <SkillCategory
+            title={SKILL_CATEGORIES.maintenance.title}
+            skills={SKILL_CATEGORIES.maintenance.skills}
+            selectedSkills={formData.skills}
+            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+          />
+          <SkillCategory
+            title={SKILL_CATEGORIES.care.title}
+            skills={SKILL_CATEGORIES.care.skills}
+            selectedSkills={formData.skills}
+            onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+          />
+        </div>
       ),
     },
   ];
@@ -130,6 +167,9 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
             icon={steps[step].icon}
             title={steps[step].title}
           />
+          <p className="text-center text-sm text-muted-foreground mb-6">
+            {steps[step].description}
+          </p>
           <div className="py-4">{steps[step].component}</div>
           <SurveyProgress currentStep={step} totalSteps={steps.length} />
           <div className="flex justify-between pt-4">

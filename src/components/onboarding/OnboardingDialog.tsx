@@ -9,22 +9,22 @@ import SurveyDialog from "./SurveyDialog";
 const steps = [
   {
     title: "Welcome to Terrific Terrace",
-    description: "Your community hub for mutual support, safety updates, and events.",
+    description: "We're excited to have you join our community! Together, we'll create a stronger, more connected neighborhood where everyone can thrive and support each other.",
     icon: Check,
   },
   {
     title: "Community Calendar",
-    description: "Stay updated with local events and activities. Create or join events to connect with your neighbors.",
+    description: "Never miss out on neighborhood events! From block parties to community meetings, stay connected with what's happening around you. You can even host your own events!",
     icon: Calendar,
   },
   {
     title: "Safety Updates",
-    description: "Get real-time safety information and updates from your community members.",
+    description: "Your safety matters to us. Get real-time updates about important neighborhood safety information and contribute to keeping our community secure and informed.",
     icon: Shield,
   },
   {
     title: "Mutual Support",
-    description: "Share resources, skills, and help with your neighbors. Request or offer support when needed.",
+    description: "We believe in the power of community helping community. Share your skills, request assistance, or offer support to neighbors in need. Together, we're stronger!",
     icon: HandHelping,
   },
 ];
