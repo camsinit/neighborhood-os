@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Calendar, Shield, HandHelping } from "lucide-react";
@@ -55,19 +55,19 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
   const CurrentIcon = steps[currentStep].icon;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="sm:max-w-md">
+        <SheetHeader>
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <CurrentIcon className="h-6 w-6 text-primary" />
           </div>
-          <DialogTitle className="text-center text-xl">
+          <SheetTitle className="text-center text-xl">
             {steps[currentStep].title}
-          </DialogTitle>
-          <DialogDescription className="text-center">
+          </SheetTitle>
+          <SheetDescription className="text-center">
             {steps[currentStep].description}
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
         <div className="flex justify-center space-x-1 pt-4">
           {steps.map((_, index) => (
             <div
@@ -78,13 +78,13 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
             />
           ))}
         </div>
-        <DialogFooter className="sm:justify-center">
+        <SheetFooter className="sm:justify-center mt-6">
           <Button onClick={handleNext}>
             {currentStep === steps.length - 1 ? "Get Started" : "Next"}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 
