@@ -101,17 +101,7 @@ const Login = () => {
                 }
               }
             }}
-            onError={(error) => {
-              let message = error.message;
-              if (error.message.includes("User already registered")) {
-                message = "This email is already registered. Please sign in instead.";
-              }
-              toast({
-                title: "Error",
-                description: message,
-                variant: "destructive",
-              });
-            }}
+            showLinks={true}
           />
         </div>
       </div>
