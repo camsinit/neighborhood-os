@@ -76,18 +76,15 @@ const Login = () => {
             }}
             providers={[]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive",
-              });
-            }}
             localization={{
               variables: {
                 sign_up: {
                   password_label: "Password (minimum 6 characters)",
                   password_input_placeholder: "Enter your password (min. 6 characters)"
+                },
+                sign_in: {
+                  password_label: "Password",
+                  password_input_placeholder: "Enter your password"
                 }
               }
             }}
