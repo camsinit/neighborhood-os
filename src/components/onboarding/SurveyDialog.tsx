@@ -1,37 +1,17 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ProfileImageUpload } from "@/components/settings/ProfileImageUpload";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { User, Camera, Mail, Phone, Home, Wrench } from "lucide-react";
-
-const SKILLS_OPTIONS = [
-  "Medical (Doctor, Nurse, EMT)",
-  "Mental Health (Counselor, Therapist)",
-  "Construction/Home Repair",
-  "Electrical Work",
-  "Plumbing",
-  "Legal Knowledge",
-  "Financial/Accounting",
-  "IT/Technical Support",
-  "First Aid/CPR Certified",
-  "Emergency Response Training",
-  "Search and Rescue Experience",
-  "Fire Safety Training",
-  "Childcare/Education",
-  "Elder Care",
-  "Pet Care/Veterinary",
-  "Cooking/Meal Preparation",
-  "Language Translation/Interpretation",
-  "Gardening/Landscaping",
-  "Car Maintenance/Repair",
-  "Solar/Alternative Energy Knowledge",
-];
+import { User, Camera, Mail, Home, Wrench } from "lucide-react";
+import { SurveyStepHeader } from "./survey/SurveyStepHeader";
+import { SurveyProgress } from "./survey/SurveyProgress";
+import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
+import { ContactInfoStep } from "./survey/steps/ContactInfoStep";
+import { AddressStep } from "./survey/steps/AddressStep";
+import { SkillsStep } from "./survey/steps/SkillsStep";
 
 interface SurveyDialogProps {
   open: boolean;
@@ -55,128 +35,54 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     {
       title: "Basic Information",
       icon: User,
-      fields: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
-                }
-                required
-              />
-            </div>
-          </div>
-        </div>
+      component: (
+        <BasicInfoStep
+          firstName={formData.firstName}
+          lastName={formData.lastName}
+          onFirstNameChange={(value) =>
+            setFormData({ ...formData, firstName: value })
+          }
+          onLastNameChange={(value) =>
+            setFormData({ ...formData, lastName: value })
+          }
+        />
       ),
     },
     {
       title: "Profile Picture",
       icon: Camera,
-      fields: (
-        <div className="space-y-4">
-          <ProfileImageUpload />
-        </div>
-      ),
+      component: <ProfileImageUpload />,
     },
     {
       title: "Contact Information",
       icon: Mail,
-      fields: (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              required
-            />
-          </div>
-        </div>
+      component: (
+        <ContactInfoStep
+          email={formData.email}
+          phone={formData.phone}
+          onEmailChange={(value) => setFormData({ ...formData, email: value })}
+          onPhoneChange={(value) => setFormData({ ...formData, phone: value })}
+        />
       ),
     },
     {
       title: "Address",
       icon: Home,
-      fields: (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
-              required
-            />
-            <p className="text-sm text-muted-foreground">
-              Your address will only be visible to Neighborhood Admins for emergency purposes.
-            </p>
-          </div>
-        </div>
+      component: (
+        <AddressStep
+          address={formData.address}
+          onAddressChange={(value) => setFormData({ ...formData, address: value })}
+        />
       ),
     },
     {
       title: "Skills to Share",
       icon: Wrench,
-      fields: (
-        <div className="space-y-4">
-          <div className="h-[300px] overflow-y-auto space-y-2">
-            {SKILLS_OPTIONS.map((skill) => (
-              <div key={skill} className="flex items-center space-x-2">
-                <Checkbox
-                  id={skill}
-                  checked={formData.skills.includes(skill)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setFormData({
-                        ...formData,
-                        skills: [...formData.skills, skill],
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        skills: formData.skills.filter((s) => s !== skill),
-                      });
-                    }
-                  }}
-                />
-                <Label htmlFor={skill}>{skill}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
+      component: (
+        <SkillsStep
+          selectedSkills={formData.skills}
+          onSkillsChange={(skills) => setFormData({ ...formData, skills })}
+        />
       ),
     },
   ];
@@ -215,30 +121,15 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     }
   };
 
-  const CurrentIcon = steps[step].icon;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <CurrentIcon className="h-6 w-6 text-primary" />
-          </div>
-          <DialogTitle className="text-center text-xl">
-            {steps[step].title}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="py-4">{steps[step].fields}</div>
-        <div className="flex justify-center space-x-1 pt-4">
-          {steps.map((_, index) => (
-            <div
-              key={index}
-              className={`h-1.5 w-12 rounded-full ${
-                index === step ? "bg-primary" : "bg-primary/20"
-              }`}
-            />
-          ))}
-        </div>
+        <SurveyStepHeader
+          icon={steps[step].icon}
+          title={steps[step].title}
+        />
+        <div className="py-4">{steps[step].component}</div>
+        <SurveyProgress currentStep={step} totalSteps={steps.length} />
         <div className="flex justify-between pt-4">
           <Button
             variant="outline"
