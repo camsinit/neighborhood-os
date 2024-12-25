@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ProfileImageUpload } from "@/components/settings/ProfileImageUpload";
 import { useNavigate } from "react-router-dom";
@@ -121,29 +120,33 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     }
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <SurveyStepHeader
-          icon={steps[step].icon}
-          title={steps[step].title}
-        />
-        <div className="py-4">{steps[step].component}</div>
-        <SurveyProgress currentStep={step} totalSteps={steps.length} />
-        <div className="flex justify-between pt-4">
-          <Button
-            variant="outline"
-            onClick={() => setStep(step - 1)}
-            disabled={step === 0}
-          >
-            Back
-          </Button>
-          <Button onClick={handleNext}>
-            {step === steps.length - 1 ? "Complete" : "Next"}
-          </Button>
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-lg">
+          <SurveyStepHeader
+            icon={steps[step].icon}
+            title={steps[step].title}
+          />
+          <div className="py-4">{steps[step].component}</div>
+          <SurveyProgress currentStep={step} totalSteps={steps.length} />
+          <div className="flex justify-between pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setStep(step - 1)}
+              disabled={step === 0}
+            >
+              Back
+            </Button>
+            <Button onClick={handleNext}>
+              {step === steps.length - 1 ? "Complete" : "Next"}
+            </Button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 

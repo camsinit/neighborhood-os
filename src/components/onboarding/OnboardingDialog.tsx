@@ -1,12 +1,4 @@
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Calendar, Shield, HandHelping } from "lucide-react";
@@ -52,39 +44,43 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
     }
   };
 
+  if (!open) return null;
+
   const CurrentIcon = steps[currentStep].icon;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md">
-        <SheetHeader>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <CurrentIcon className="h-6 w-6 text-primary" />
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <CurrentIcon className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="text-center text-xl font-semibold">
+              {steps[currentStep].title}
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              {steps[currentStep].description}
+            </p>
           </div>
-          <SheetTitle className="text-center text-xl">
-            {steps[currentStep].title}
-          </SheetTitle>
-          <SheetDescription className="text-center">
-            {steps[currentStep].description}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="flex justify-center space-x-1 pt-4">
-          {steps.map((_, index) => (
-            <div
-              key={index}
-              className={`h-1.5 w-12 rounded-full ${
-                index === currentStep ? "bg-primary" : "bg-primary/20"
-              }`}
-            />
-          ))}
+          <div className="flex justify-center space-x-1 pt-4">
+            {steps.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 w-12 rounded-full ${
+                  index === currentStep ? "bg-primary" : "bg-primary/20"
+                }`}
+              />
+            ))}
+          </div>
+          <div className="flex justify-center mt-6">
+            <Button onClick={handleNext}>
+              {currentStep === steps.length - 1 ? "Get Started" : "Next"}
+            </Button>
+          </div>
         </div>
-        <SheetFooter className="sm:justify-center mt-6">
-          <Button onClick={handleNext}>
-            {currentStep === steps.length - 1 ? "Get Started" : "Next"}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 };
 
