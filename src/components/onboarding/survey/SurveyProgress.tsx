@@ -5,7 +5,7 @@ interface SurveyProgressProps {
 
 export const SurveyProgress = ({ currentStep, totalSteps }: SurveyProgressProps) => {
   return (
-    <div className="flex justify-center space-x-1 pt-4">
+    <div className="flex justify-center space-x-1">
       {Array.from({ length: totalSteps }).map((_, index) => (
         <div
           key={index}

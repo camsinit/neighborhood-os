@@ -4,6 +4,7 @@ import { Check, Calendar, Shield, HandHelping } from "lucide-react";
 import OnboardingStep from "./steps/OnboardingStep";
 import OnboardingProgress from "./navigation/OnboardingProgress";
 import OnboardingNavigation from "./navigation/OnboardingNavigation";
+import SurveyDialog from "./SurveyDialog";
 
 const steps = [
   {
@@ -35,6 +36,7 @@ interface OnboardingDialogProps {
 
 const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showSurvey, setShowSurvey] = useState(false);
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -42,7 +44,7 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
       setCurrentStep(currentStep + 1);
     } else {
       onOpenChange(false);
-      navigate("/");
+      setShowSurvey(true);
     }
   };
 
@@ -53,6 +55,13 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  if (showSurvey) {
+    return <SurveyDialog open={true} onOpenChange={(open) => {
+      setShowSurvey(open);
+      if (!open) navigate("/");
+    }} />;
+  }
 
   if (!open) return null;
 
