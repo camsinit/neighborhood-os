@@ -3,12 +3,13 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
+import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
 const Login = () => {
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -16,13 +17,16 @@ const Login = () => {
         // Check if this is a new user (first sign in)
         const { data: profile } = await supabase
           .from('profiles')
-          .select('created_at')
+          .select('created_at, display_name')
           .eq('id', session.user.id)
           .single();
 
         // If the profile was just created (within the last minute), show onboarding
         if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
           setShowOnboarding(true);
+        } else if (!profile?.display_name) {
+          // If the user hasn't completed their profile, show the survey
+          setShowSurvey(true);
         } else {
           navigate("/");
         }
@@ -78,7 +82,16 @@ const Login = () => {
       </div>
       <OnboardingDialog 
         open={showOnboarding} 
-        onOpenChange={setShowOnboarding}
+        onOpenChange={(open) => {
+          setShowOnboarding(open);
+          if (!open) {
+            setShowSurvey(true);
+          }
+        }}
+      />
+      <SurveyDialog
+        open={showSurvey}
+        onOpenChange={setShowSurvey}
       />
     </div>
   );

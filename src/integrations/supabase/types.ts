@@ -100,6 +100,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -107,11 +108,14 @@ export type Database = {
           id: string
           language: string | null
           notification_preferences: Json | null
+          phone_number: string | null
+          skills: string[] | null
           theme: string | null
           timezone: string | null
           username: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -119,11 +123,14 @@ export type Database = {
           id: string
           language?: string | null
           notification_preferences?: Json | null
+          phone_number?: string | null
+          skills?: string[] | null
           theme?: string | null
           timezone?: string | null
           username?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -131,6 +138,8 @@ export type Database = {
           id?: string
           language?: string | null
           notification_preferences?: Json | null
+          phone_number?: string | null
+          skills?: string[] | null
           theme?: string | null
           timezone?: string | null
           username?: string | null
