@@ -1,7 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Calendar, Shield, HandHelping } from "lucide-react";
+import OnboardingStep from "./steps/OnboardingStep";
+import OnboardingProgress from "./navigation/OnboardingProgress";
+import OnboardingNavigation from "./navigation/OnboardingNavigation";
 
 const steps = [
   {
@@ -54,44 +56,25 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
 
   if (!open) return null;
 
-  const CurrentIcon = steps[currentStep].icon;
-
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
       <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          <div>
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <CurrentIcon className="h-6 w-6 text-primary" />
-            </div>
-            <h2 className="text-center text-xl font-semibold">
-              {steps[currentStep].title}
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              {steps[currentStep].description}
-            </p>
-          </div>
-          <div className="flex justify-center space-x-1 pt-4">
-            {steps.map((_, index) => (
-              <div
-                key={index}
-                className={`h-1.5 w-12 rounded-full ${
-                  index === currentStep ? "bg-primary" : "bg-primary/20"
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <Button onClick={handleNext}>
-              {currentStep === steps.length - 1 ? "Get Started" : "Next"}
-            </Button>
-            <button
-              onClick={handleBack}
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              {currentStep === 0 ? "Login" : "Back"}
-            </button>
-          </div>
+          <OnboardingStep
+            icon={steps[currentStep].icon}
+            title={steps[currentStep].title}
+            description={steps[currentStep].description}
+          />
+          <OnboardingProgress
+            currentStep={currentStep}
+            totalSteps={steps.length}
+          />
+          <OnboardingNavigation
+            currentStep={currentStep}
+            isLastStep={currentStep === steps.length - 1}
+            onNext={handleNext}
+            onBack={handleBack}
+          />
         </div>
       </div>
     </div>
