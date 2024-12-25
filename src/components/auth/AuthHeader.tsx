@@ -5,7 +5,7 @@ const AuthHeader = () => {
         Welcome to Terrific Terrace
       </h2>
       <p className="mt-2 text-center text-sm text-gray-600">
-        Connect with your community
+        Join us in organizing the neighborhood!
       </p>
     </div>
   );
