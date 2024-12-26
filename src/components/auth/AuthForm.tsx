@@ -3,6 +3,9 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 
 const AuthForm = () => {
+  // Get the current URL's origin (protocol + hostname + port)
+  const redirectTo = `${window.location.origin}/`;
+
   return (
     <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
       <Auth
@@ -19,7 +22,7 @@ const AuthForm = () => {
           },
         }}
         providers={[]}
-        redirectTo={window.location.origin}
+        redirectTo={redirectTo}
         localization={{
           variables: {
             sign_up: {
