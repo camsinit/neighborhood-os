@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const categories: Category[] = [
-  { icon: Package, label: "goods" },
-  { icon: Car, label: "transportation" },
-  { icon: Wrench, label: "skills" },
-  { icon: Share2, label: "resources" },
+  { icon: Package, label: "Goods" },
+  { icon: Car, label: "Transportation" },
+  { icon: Wrench, label: "Skills" },
+  { icon: Share2, label: "Resources" },
 ];
 
 interface CategoryFiltersProps {
@@ -42,7 +42,7 @@ const CategoryFilters = ({
           {categories.map((cat) => (
             <DropdownMenuItem
               key={cat.label}
-              onClick={() => onCategorySelect(selectedCategory === cat.label ? null : cat.label)}
+              onClick={() => onCategorySelect(selectedCategory === cat.label.toLowerCase() ? null : cat.label.toLowerCase())}
               className="flex items-center gap-2"
             >
               <cat.icon className="h-4 w-4" />
@@ -58,7 +58,7 @@ const CategoryFilters = ({
           onClick={() => onViewSelect(selectedView === "time-sensitive" ? null : "time-sensitive")}
           className="h-[36px]"
         >
-          Time-sensitive
+          Immediate
         </Button>
         <Button
           variant={selectedView === "ongoing" ? "default" : "outline"}
