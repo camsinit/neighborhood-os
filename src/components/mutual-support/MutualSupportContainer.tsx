@@ -29,11 +29,11 @@ const MutualSupportContainer = () => {
 
     if (selectedView === "time-sensitive") {
       filtered = filtered.filter(item => 
-        ["goods", "transportation"].includes(item.requestType.toLowerCase())
+        ["Goods", "Transportation"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
       );
     } else if (selectedView === "ongoing") {
       filtered = filtered.filter(item => 
-        ["skills", "resources"].includes(item.requestType.toLowerCase())
+        ["Skills", "Resources"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
       );
     } else if (selectedCategory) {
       filtered = filtered.filter(item => 
