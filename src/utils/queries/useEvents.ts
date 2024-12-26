@@ -6,6 +6,7 @@ export const useEvents = () => {
   return useQuery({
     queryKey: ["events"],
     queryFn: async () => {
+      console.log('Fetching events...');
       const { data: rawEvents, error } = await supabase
         .from("events")
         .select(`
@@ -16,7 +17,12 @@ export const useEvents = () => {
         `)
         .order("time", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching events:', error);
+        throw error;
+      }
+
+      console.log('Fetched events:', rawEvents);
 
       // Process recurring events
       const processedEvents = rawEvents.flatMap(event => {
@@ -85,6 +91,7 @@ export const useEvents = () => {
         return recurringEvents;
       });
 
+      console.log('Processed events:', processedEvents);
       return processedEvents;
     },
   });
