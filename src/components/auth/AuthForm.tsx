@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 const AuthForm = () => {
   // Get the current URL's origin (protocol + hostname + port)
   const redirectTo = `${window.location.origin}/`;
+  
+  console.log('Current redirect URL:', redirectTo);
 
   return (
     <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
