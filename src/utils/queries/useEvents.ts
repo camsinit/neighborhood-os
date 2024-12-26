@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { addDays, eachWeekOfInterval, eachMonthOfInterval, isBefore, startOfDay, endOfDay } from "date-fns";
+import { addDays, eachWeekOfInterval, eachMonthOfInterval, isBefore } from "date-fns";
 
 export const useEvents = () => {
   return useQuery({
@@ -94,5 +94,7 @@ export const useEvents = () => {
       console.log('Processed events:', processedEvents);
       return processedEvents;
     },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
