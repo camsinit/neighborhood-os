@@ -14,20 +14,25 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
+    // First, check the current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      setIsLoading(false);
+    });
+
+    // Then, set up the listener for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
