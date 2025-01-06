@@ -46,12 +46,17 @@ const Login = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const handleBackClick = () => {
+    // Force navigation to root without auth check
+    window.location.href = '/';
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#F1F0FB] via-[#D3E4FD] to-[#F2FCE2]">
       <Button
         variant="ghost"
         className="absolute top-4 left-4 flex items-center gap-2"
-        onClick={() => navigate("/")}
+        onClick={handleBackClick}
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Home
