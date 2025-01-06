@@ -53,13 +53,14 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
-              path="/"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Index />
                 </ProtectedRoute>
               }
             />
+            <Route path="/" element={<Index />} />
           </Routes>
         </TooltipProvider>
       </QueryClientProvider>
