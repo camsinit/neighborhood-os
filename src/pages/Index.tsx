@@ -27,10 +27,12 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F1F0FB] via-[#D3E4FD] to-[#F2FCE2]">
-      <nav className="max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F1F0FB] via-[#D3E4FD] to-[#F2FCE2] flex flex-col">
+      <nav className="max-w-7xl mx-auto px-6 py-8 w-full">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Neighborhood Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 leading-tight">
+            Neighborhood<br />Dashboard
+          </h1>
           <div className="flex gap-4">
             <Button 
               variant="ghost" 
@@ -50,7 +52,7 @@ const Index = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6">
+      <main className="max-w-7xl mx-auto px-6 flex-1">
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center mb-16">
           <h1 className="text-6xl font-bold text-gray-900 mb-6 max-w-4xl leading-tight">
             Your Community Hub for Local Connection and Support
