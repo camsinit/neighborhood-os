@@ -1,11 +1,12 @@
 import { useSession } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogIn, ArrowRight } from "lucide-react";
+import { LogIn, ArrowRight, Users, Calendar, Shield, HandHelping } from "lucide-react";
 import Header from "@/components/layout/Header";
 import MainContent from "@/components/layout/MainContent";
 import SettingsDialog from "@/components/SettingsDialog";
 import { useState } from "react";
+import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -50,7 +51,7 @@ const Index = () => {
       </nav>
 
       <main className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center mb-16">
           <h1 className="text-6xl font-bold text-gray-900 mb-6 max-w-4xl leading-tight">
             Your Community Hub for Local Connection and Support
           </h1>
@@ -76,6 +77,27 @@ const Index = () => {
             </Button>
           </div>
         </div>
+
+        <BentoGrid className="px-4 mb-16">
+          <BentoGridItem
+            title="Community Events"
+            description="Organize and discover local events, from block parties to community meetings."
+            className="md:col-span-1"
+            icon={<Calendar className="h-6 w-6 text-blue-500" />}
+          />
+          <BentoGridItem
+            title="Mutual Support"
+            description="Exchange resources and help within your community, fostering a network of support."
+            className="md:col-span-1"
+            icon={<HandHelping className="h-6 w-6 text-green-500" />}
+          />
+          <BentoGridItem
+            title="Safety Updates"
+            description="Stay informed about neighborhood safety with real-time community updates."
+            className="md:col-span-1"
+            icon={<Shield className="h-6 w-6 text-red-500" />}
+          />
+        </BentoGrid>
       </main>
     </div>
   );
