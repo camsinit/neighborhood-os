@@ -4,16 +4,49 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const redirectTo = window.location.origin;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any) => {
+    // Log the current origin and redirect URL for debugging
+    console.log('Current origin:', window.location.origin);
+    console.log('Redirect URL:', redirectTo);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session) => {
+      console.log('Auth state change event:', event);
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
+      } else if (event === 'SIGNED_IN') {
+        console.log('Sign in successful');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('Sign out successful');
+      } else if (event === 'USER_UPDATED') {
+        console.log('User updated');
+      } else if (event === 'USER_DELETED') {
+        console.log('User deleted');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        console.log('Password recovery initiated');
+      }
+
+      // Log any errors that occur during authentication
+      if (session?.error) {
+        console.error('Session error:', session.error);
+        setError(session.error.message);
+      }
+    });
+
+    // Test the Supabase connection
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        setError(error.message);
+      } else {
+        console.log('Session retrieved successfully:', data);
       }
     });
 
@@ -22,6 +55,11 @@ const AuthForm = () => {
 
   return (
     <>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
         <Auth
           supabaseClient={supabase}
