@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AuthError, AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { AuthError, Session } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
