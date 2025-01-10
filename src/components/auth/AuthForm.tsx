@@ -18,20 +18,27 @@ const AuthForm = () => {
     console.log('Current origin:', window.location.origin);
     console.log('Redirect URL:', redirectTo);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
       console.log('Auth state change event:', event);
-      if (event === 'SIGNED_UP') {
-        setShowOnboarding(true);
-      } else if (event === 'SIGNED_IN') {
-        console.log('Sign in successful');
-      } else if (event === 'SIGNED_OUT') {
-        console.log('Sign out successful');
-      } else if (event === 'USER_UPDATED') {
-        console.log('User updated');
-      } else if (event === 'USER_DELETED') {
-        console.log('User deleted');
-      } else if (event === 'PASSWORD_RECOVERY') {
-        console.log('Password recovery initiated');
+      switch (event) {
+        case 'SIGNED_UP':
+          setShowOnboarding(true);
+          break;
+        case 'SIGNED_IN':
+          console.log('Sign in successful');
+          break;
+        case 'SIGNED_OUT':
+          console.log('Sign out successful');
+          break;
+        case 'USER_UPDATED':
+          console.log('User updated');
+          break;
+        case 'USER_DELETED':
+          console.log('User deleted');
+          break;
+        case 'PASSWORD_RECOVERY':
+          console.log('Password recovery initiated');
+          break;
       }
     });
 
