@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AuthError, AuthStateChangeEvent, Session } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -17,7 +18,7 @@ const AuthForm = () => {
     console.log('Current origin:', window.location.origin);
     console.log('Redirect URL:', redirectTo);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthStateChangeEvent, session: Session | null) => {
       console.log('Auth state change event:', event);
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
@@ -31,12 +32,6 @@ const AuthForm = () => {
         console.log('User deleted');
       } else if (event === 'PASSWORD_RECOVERY') {
         console.log('Password recovery initiated');
-      }
-
-      // Log any errors that occur during authentication
-      if (session?.error) {
-        console.error('Session error:', session.error);
-        setError(session.error.message);
       }
     });
 
