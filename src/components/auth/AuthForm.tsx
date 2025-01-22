@@ -36,13 +36,10 @@ const AuthForm = () => {
         case 'INITIAL_SESSION':
           console.log('Initial session loaded');
           break;
-        case 'USER_DELETED':
-          console.log('User deleted');
-          break;
       }
 
-      // Handle sign up outside of switch statement
-      if (event === 'SIGNED_UP') {
+      // Handle sign up separately since it's a special case
+      if (event === AuthChangeEvent.SIGNED_UP) {
         setShowOnboarding(true);
         console.log('User signed up');
       }
