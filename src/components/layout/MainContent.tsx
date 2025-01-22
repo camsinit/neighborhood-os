@@ -19,7 +19,7 @@ const MainContent = () => {
         `}
       </style>
       <div className="space-y-8">
-        <div className="p-6 rounded-lg bg-gray-50 border border-gray-200">
+        <div className="p-6 rounded-lg bg-white border border-gray-200">
           <QuickActions />
         </div>
         <div className="p-6 rounded-lg bg-white shadow-lg border border-gray-200">
