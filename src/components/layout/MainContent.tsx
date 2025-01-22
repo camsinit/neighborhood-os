@@ -25,7 +25,7 @@ const MainContent = () => {
         <div className="p-6 rounded-lg bg-white shadow-lg border border-gray-200">
           <CommunityCalendar />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-lg mutual-support-container border border-gray-200">
+        <div className="p-6 rounded-lg bg-white shadow-lg mutual-support-container border border-[#9b87f5]">
           <MutualSupport />
         </div>
         <div className="p-6 rounded-lg bg-white shadow-lg border border-gray-200">
