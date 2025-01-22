@@ -14,7 +14,7 @@ const OnboardingNavigation = ({
   onBack 
 }: OnboardingNavigationProps) => {
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-2">
       <Button onClick={onNext}>
         {isLastStep ? "Get Started" : "Next"}
       </Button>
@@ -22,7 +22,7 @@ const OnboardingNavigation = ({
         onClick={onBack}
         className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
       >
-        {currentStep === 0 ? "Go back to Login" : "Back"}
+        {currentStep === 0 ? "Login" : "Back"}
       </button>
     </div>
   );
