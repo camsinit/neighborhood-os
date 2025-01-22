@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthError, Session, AuthChangeEvent } from "@supabase/supabase-js";
+import { Session, AuthChangeEvent, AuthError as SupabaseAuthError } from "@supabase/supabase-js";
 import AuthUI from "./AuthUI";
 import AuthError from "./AuthError";
 import AuthOnboarding from "./AuthOnboarding";
