@@ -38,16 +38,13 @@ const AuthForm = () => {
         case 'MFA_CHALLENGE_VERIFIED':
           console.log('MFA challenge verified');
           break;
-        default:
-          if (event === 'INITIAL_SESSION') {
-            console.log('Initial session loaded');
-          }
+        case 'INITIAL_SESSION':
+          console.log('Initial session loaded');
           break;
-      }
-
-      // Handle sign up separately since it might trigger onboarding
-      if (event === 'SIGNED_UP') {
-        setShowOnboarding(true);
+        case 'SIGNED_UP':
+          setShowOnboarding(true);
+          console.log('User signed up');
+          break;
       }
     });
 
