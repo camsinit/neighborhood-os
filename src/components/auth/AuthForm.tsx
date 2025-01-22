@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Session, AuthChangeEvent, AuthError as SupabaseAuthError } from "@supabase/supabase-js";
+import { Session, AuthError as SupabaseAuthError, AuthChangeEvent } from "@supabase/supabase-js";
 import AuthUI from "./AuthUI";
 import AuthErrorComponent from "./AuthError";
 import AuthOnboarding from "./AuthOnboarding";
@@ -36,10 +36,15 @@ const AuthForm = () => {
         case 'INITIAL_SESSION':
           console.log('Initial session loaded');
           break;
-        case 'USER_SIGNED_UP':
-          setShowOnboarding(true);
-          console.log('User signed up');
+        case 'USER_DELETED':
+          console.log('User deleted');
           break;
+      }
+
+      // Handle sign up outside of switch statement
+      if (event === 'SIGNED_UP') {
+        setShowOnboarding(true);
+        console.log('User signed up');
       }
     });
 
