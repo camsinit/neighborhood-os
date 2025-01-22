@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AuthError, Session } from "@supabase/supabase-js";
+import { AuthError, Session, AuthChangeEvent } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -18,7 +18,7 @@ const AuthForm = () => {
     console.log('Current origin:', window.location.origin);
     console.log('Redirect URL:', redirectTo);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       console.log('Auth state change event:', event);
       switch (event) {
         case 'SIGNED_UP':
