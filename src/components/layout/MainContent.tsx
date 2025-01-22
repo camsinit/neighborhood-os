@@ -22,7 +22,7 @@ const MainContent = () => {
         <div className="p-6 rounded-lg bg-white border border-gray-200">
           <QuickActions />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-lg border border-gray-200">
+        <div className="p-6 rounded-lg bg-white shadow-lg border border-blue-300">
           <CommunityCalendar />
         </div>
         <div className="p-6 rounded-lg bg-white shadow-lg mutual-support-container border border-[#9b87f5]">
