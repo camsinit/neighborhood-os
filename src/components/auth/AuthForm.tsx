@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, AuthChangeEvent, AuthError as SupabaseAuthError } from "@supabase/supabase-js";
 import AuthUI from "./AuthUI";
-import AuthError from "./AuthError";
+import AuthErrorComponent from "./AuthError";
 import AuthOnboarding from "./AuthOnboarding";
 
 const AuthForm = () => {
@@ -58,7 +58,7 @@ const AuthForm = () => {
 
   return (
     <>
-      <AuthError error={error} />
+      <AuthErrorComponent error={error} />
       <AuthUI />
       <AuthOnboarding 
         showOnboarding={showOnboarding}
