@@ -10,7 +10,7 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
   
   return (
     <div 
-      className={`group bg-white border-l-4 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
+      className={`group bg-white border border-gray-200 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
       onClick={onClick}
     >
       <div className="absolute top-3 right-3">
