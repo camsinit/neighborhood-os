@@ -36,7 +36,7 @@ const AuthForm = () => {
         case 'INITIAL_SESSION':
           console.log('Initial session loaded');
           break;
-        case 'SIGNED_UP':
+        case 'USER_SIGNED_UP':
           setShowOnboarding(true);
           console.log('User signed up');
           break;
