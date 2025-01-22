@@ -70,17 +70,6 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-  }
-
-  /* Remove focus outline and tap highlight */
-  * {
-    -webkit-tap-highlight-color: transparent;
-    outline: none !important;
-  }
-
-  *:focus {
-    outline: none !important;
-    box-shadow: none !important;
+    @apply bg-white text-foreground;
   }
 }
