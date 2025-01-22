@@ -14,16 +14,12 @@ const AuthForm = () => {
   const redirectTo = window.location.origin;
   
   useEffect(() => {
-    // Log the current origin and redirect URL for debugging
     console.log('Current origin:', window.location.origin);
     console.log('Redirect URL:', redirectTo);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       console.log('Auth state change event:', event);
       switch (event) {
-        case 'SIGNED_UP':
-          setShowOnboarding(true);
-          break;
         case 'SIGNED_IN':
           console.log('Sign in successful');
           break;
@@ -33,12 +29,25 @@ const AuthForm = () => {
         case 'USER_UPDATED':
           console.log('User updated');
           break;
-        case 'USER_DELETED':
-          console.log('User deleted');
-          break;
         case 'PASSWORD_RECOVERY':
           console.log('Password recovery initiated');
           break;
+        case 'TOKEN_REFRESHED':
+          console.log('Token refreshed');
+          break;
+        case 'MFA_CHALLENGE_VERIFIED':
+          console.log('MFA challenge verified');
+          break;
+        default:
+          if (event === 'INITIAL_SESSION') {
+            console.log('Initial session loaded');
+          }
+          break;
+      }
+
+      // Handle sign up separately since it might trigger onboarding
+      if (event === 'SIGNED_UP') {
+        setShowOnboarding(true);
       }
     });
 
