@@ -28,7 +28,7 @@ const MainContent = () => {
         <div className="p-6 rounded-lg bg-white shadow-lg mutual-support-container border border-[#9b87f5]">
           <MutualSupport />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-lg border border-gray-200">
+        <div className="p-6 rounded-lg bg-white shadow-[0_4px_12px_rgba(239,68,68,0.15)] border border-red-300">
           <SafetyUpdates />
         </div>
       </div>
