@@ -22,13 +22,13 @@ const MainContent = () => {
         <div className="p-6 rounded-lg bg-gray-50">
           <QuickActions />
         </div>
-        <div className="p-6 rounded-lg bg-gray-50">
+        <div className="p-6 rounded-lg bg-white">
           <CommunityCalendar />
         </div>
-        <div className="p-6 rounded-lg bg-gray-50 mutual-support-container">
+        <div className="p-6 rounded-lg bg-white mutual-support-container">
           <MutualSupport />
         </div>
-        <div className="p-6 rounded-lg bg-gray-50">
+        <div className="p-6 rounded-lg bg-white">
           <SafetyUpdates />
         </div>
       </div>
