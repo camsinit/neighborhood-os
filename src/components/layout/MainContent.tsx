@@ -22,13 +22,13 @@ const MainContent = () => {
         <div className="p-6 rounded-lg bg-white border border-gray-200">
           <QuickActions />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-[0_4px_12px_#D3E4FD] border border-blue-300">
+        <div className="p-6 rounded-lg bg-white border border-blue-300">
           <CommunityCalendar />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-[0_4px_12px_#9b87f5] mutual-support-container border border-[#9b87f5]">
+        <div className="p-6 rounded-lg bg-white border border-[#9b87f5] mutual-support-container">
           <MutualSupport />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-[0_4px_12px_#ef4444] border border-red-300">
+        <div className="p-6 rounded-lg bg-white border border-red-300">
           <SafetyUpdates />
         </div>
       </div>
