@@ -22,19 +22,19 @@ const DayCell = ({
 }: DayCellProps) => {
   return (
     <div 
-      className={`bg-white transition-all duration-300
+      className={`bg-white border border-gray-200 min-h-[120px] transition-all duration-300
         ${!isCurrentMonth ? 'opacity-50' : ''}
         ${isToday(date) ? 'border-2 border-[#0EA5E9]' : ''}
         ${className}
       `}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between p-2 border-b border-gray-100">
         {dayLabel && (
           <span className="text-sm text-gray-500">{dayLabel}</span>
         )}
         <span className="text-sm font-medium">{format(date, 'd')}</span>
       </div>
-      <div className="space-y-0 px-0.5">
+      <div className="space-y-0 p-2">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-full" />
