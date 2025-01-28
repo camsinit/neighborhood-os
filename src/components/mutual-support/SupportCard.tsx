@@ -8,9 +8,46 @@ import { format } from "date-fns";
 const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void }) => {
   const isTimeSensitive = ["goods", "transportation"].includes(item.requestType.toLowerCase());
   
+  const getCardColors = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'goods':
+        return {
+          borderColor: "border-l-blue-500",
+          color: "text-blue-500",
+          bgColor: "bg-blue-100"
+        };
+      case 'transportation':
+        return {
+          borderColor: "border-l-green-500",
+          color: "text-green-500",
+          bgColor: "bg-green-100"
+        };
+      case 'skills':
+        return {
+          borderColor: "border-l-purple-500",
+          color: "text-purple-500",
+          bgColor: "bg-purple-100"
+        };
+      case 'resources':
+        return {
+          borderColor: "border-l-orange-500",
+          color: "text-orange-500",
+          bgColor: "bg-orange-100"
+        };
+      default:
+        return {
+          borderColor: "border-l-gray-500",
+          color: "text-gray-500",
+          bgColor: "bg-gray-100"
+        };
+    }
+  };
+
+  const colors = getCardColors(item.requestType);
+  
   return (
     <div 
-      className={`group bg-white border border-gray-200 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
+      className={`group bg-white border border-gray-200 ${colors.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
       onClick={onClick}
     >
       <div className="absolute top-3 right-3">
@@ -26,7 +63,7 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
       </div>
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium uppercase`}>
+          <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${colors.color} ${colors.bgColor} text-xs font-medium uppercase`}>
             {item.requestType}
           </div>
           <Badge variant="secondary" className="text-xs">
