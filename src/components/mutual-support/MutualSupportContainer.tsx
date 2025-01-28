@@ -27,20 +27,25 @@ const MutualSupportContainer = () => {
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
 
-    if (selectedView === "time-sensitive") {
-      filtered = filtered.filter(item => 
-        ["Goods", "Transportation"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
-      );
-    } else if (selectedView === "ongoing") {
-      filtered = filtered.filter(item => 
-        ["Skills", "Resources"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
-      );
-    } else if (selectedCategory) {
+    // Apply category filter
+    if (selectedCategory) {
       filtered = filtered.filter(item => 
         item.requestType.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
+    // Apply view filter (time-sensitive vs ongoing)
+    if (selectedView === "time-sensitive") {
+      filtered = filtered.filter(item => 
+        ["goods", "transportation"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
+      );
+    } else if (selectedView === "ongoing") {
+      filtered = filtered.filter(item => 
+        ["skills", "resources"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
+      );
+    }
+
+    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item =>

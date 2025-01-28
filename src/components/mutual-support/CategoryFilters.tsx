@@ -32,9 +32,12 @@ const CategoryFilters = ({
     <div className="flex gap-4 items-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className={`flex items-center gap-2 ${selectedCategory ? 'bg-gray-100' : ''}`}
+          >
             <Filter className="h-4 w-4" />
-            Categories
+            {selectedCategory ? categories.find(c => c.label.toLowerCase() === selectedCategory)?.label : 'Categories'}
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
