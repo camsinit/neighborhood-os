@@ -7,7 +7,6 @@ import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Landing from "./pages/Landing";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "./components/ui/loading";
 
@@ -53,7 +52,6 @@ const App = () => (
           <Sonner />
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/landing" element={<Landing />} />
             <Route
               path="/dashboard"
               element={
@@ -62,7 +60,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<Index />} />
           </Routes>
         </TooltipProvider>
       </QueryClientProvider>
