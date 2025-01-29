@@ -147,8 +147,8 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+      <DialogContent className="sm:max-w-[400px] border-none shadow-none">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
