@@ -59,7 +59,11 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="text-2xl font-bold text-primary">Terrific Terrace</div>
+            <img 
+              src="/lovable-uploads/0b971e7e-959c-4a3c-aba7-984caf24216c.png" 
+              alt="Neighborhood Logo" 
+              className="h-8 w-auto"
+            />
           </div>
           <div className="flex items-center gap-4">
             <NotificationsPopover />
