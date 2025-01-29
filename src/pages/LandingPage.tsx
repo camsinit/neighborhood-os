@@ -66,14 +66,6 @@ const LandingPage = () => {
               Join Your Block
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
-              className="border-gray-300 text-gray-700 hover:text-gray-900 px-8 py-6 text-lg"
-            >
-              {isAuthenticated ? "Return to Dashboard" : "See How It Works"}
-            </Button>
           </div>
         </div>
 
