@@ -40,10 +40,10 @@ const LandingPage = () => {
             </Button>
             <Button 
               variant="default" 
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
+              onClick={() => navigate("/login")}
               className="bg-gray-900 text-white hover:bg-gray-800"
             >
-              {isAuthenticated ? "Go to Dashboard" : "Sign up"}
+              Sign up
             </Button>
           </div>
         </div>
@@ -60,10 +60,10 @@ const LandingPage = () => {
           <div className="flex gap-4">
             <Button 
               size="lg"
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
+              onClick={() => navigate("/login")}
               className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-6 text-lg"
             >
-              {isAuthenticated ? "Go to Dashboard" : "Join Your Block"}
+              Join Your Block
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
