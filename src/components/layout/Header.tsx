@@ -62,7 +62,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
             <img 
               src="/lovable-uploads/0b971e7e-959c-4a3c-aba7-984caf24216c.png" 
               alt="Neighborhood Logo" 
-              className="h-8 w-auto"
+              className="h-32 w-auto"
             />
           </div>
           <div className="flex items-center gap-4">
