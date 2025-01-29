@@ -6,6 +6,9 @@ export const profileFormSchema = z.object({
   timezone: z.string(),
   language: z.string(),
   theme: z.string(),
+  first_name: z.string().min(2).max(50).optional(),
+  last_name: z.string().min(2).max(50).optional(),
+  email: z.string().email().optional(),
   notification_preferences: z.object({
     email: z.boolean(),
     push: z.boolean(),

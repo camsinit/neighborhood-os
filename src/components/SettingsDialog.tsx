@@ -37,6 +37,9 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       timezone: "UTC",
       language: "en",
       theme: "light",
+      first_name: "",
+      last_name: "",
+      email: "",
       notification_preferences: {
         email: true,
         push: true,
@@ -75,6 +78,9 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           timezone: data.timezone || "UTC",
           language: data.language || "en",
           theme: data.theme || "light",
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
           notification_preferences: notificationPrefs,
         };
 
@@ -115,6 +121,9 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         timezone: values.timezone,
         language: values.language,
         theme: values.theme,
+        first_name: values.first_name,
+        last_name: values.last_name,
+        email: values.email,
         notification_preferences: values.notification_preferences,
       })
       .eq("id", user.id);

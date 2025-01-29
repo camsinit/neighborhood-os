@@ -105,9 +105,13 @@ export type Database = {
           bio: string | null
           created_at: string
           display_name: string | null
+          email: string | null
+          first_name: string | null
           id: string
           language: string | null
+          last_name: string | null
           notification_preferences: Json | null
+          onboarding_completed: boolean | null
           phone_number: string | null
           skills: string[] | null
           theme: string | null
@@ -120,9 +124,13 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          first_name?: string | null
           id: string
           language?: string | null
+          last_name?: string | null
           notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
           phone_number?: string | null
           skills?: string[] | null
           theme?: string | null
@@ -135,9 +143,13 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
+          first_name?: string | null
           id?: string
           language?: string | null
+          last_name?: string | null
           notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
           phone_number?: string | null
           skills?: string[] | null
           theme?: string | null
