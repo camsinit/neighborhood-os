@@ -1,8 +1,8 @@
-import { Clock, Bell, Wrench } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, Clock, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import SafetyUpdateCard from "./SafetyUpdateCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 interface SafetyUpdatesListProps {
@@ -15,9 +15,9 @@ const SafetyUpdatesList = ({ updates, isLoading, onUpdateClick }: SafetyUpdatesL
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const categories = [
-    { icon: Clock, label: "Updates" },
-    { icon: Bell, label: "Alerts" },
-    { icon: Wrench, label: "Maintenance" },
+    { icon: Clock, label: "update", displayLabel: "Updates" },
+    { icon: Bell, label: "alert", displayLabel: "Alerts" },
+    { icon: Wrench, label: "maintenance", displayLabel: "Maintenance" },
   ];
 
   const filteredUpdates = updates.filter(update => {
@@ -28,24 +28,28 @@ const SafetyUpdatesList = ({ updates, isLoading, onUpdateClick }: SafetyUpdatesL
   const renderSkeleton = () => (
     <div className="space-y-6">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
-          <Skeleton className="h-6 w-32 mb-3" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4" />
+        <div key={i} className="flex items-start gap-4">
+          <Skeleton className="h-12 w-12" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
         </div>
       ))}
     </div>
   );
 
   return (
-    <div>
-      <div className="flex items-center gap-6 mb-8">
-        <Input 
-          type="search" 
-          placeholder="Search safety updates..." 
-          className="max-w-sm bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300 h-10" 
-        />
-        <div className="flex gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <Input
+            type="search"
+            placeholder="Search updates..."
+            className="max-w-sm"
+          />
+        </div>
+        <div className="flex gap-2">
           {categories.map((cat) => (
             <Button 
               key={cat.label} 
@@ -58,12 +62,13 @@ const SafetyUpdatesList = ({ updates, isLoading, onUpdateClick }: SafetyUpdatesL
               )}
             >
               <cat.icon className="h-4 w-4" />
-              {cat.label}
+              {cat.displayLabel}
             </Button>
           ))}
         </div>
       </div>
-      <div className="space-y-6">
+
+      <div className="space-y-4">
         {isLoading ? (
           renderSkeleton()
         ) : (
