@@ -2,9 +2,26 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn, ArrowRight, Users, Calendar, Shield, HandHelping } from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F1F0FB] via-[#D3E4FD] to-[#F2FCE2] flex flex-col">
@@ -16,17 +33,17 @@ const LandingPage = () => {
           <div className="flex gap-4">
             <Button 
               variant="ghost" 
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
               className="text-gray-700 hover:text-gray-900"
             >
-              Log in
+              {isAuthenticated ? "View Dashboard" : "Log in"}
             </Button>
             <Button 
               variant="default" 
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
               className="bg-gray-900 text-white hover:bg-gray-800"
             >
-              Sign up
+              {isAuthenticated ? "Go to Dashboard" : "Sign up"}
             </Button>
           </div>
         </div>
@@ -43,19 +60,19 @@ const LandingPage = () => {
           <div className="flex gap-4">
             <Button 
               size="lg"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
               className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-6 text-lg"
             >
-              Join Your Block
+              {isAuthenticated ? "Go to Dashboard" : "Join Your Block"}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
               size="lg"
               variant="outline"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
               className="border-gray-300 text-gray-700 hover:text-gray-900 px-8 py-6 text-lg"
             >
-              See How It Works
+              {isAuthenticated ? "Return to Dashboard" : "See How It Works"}
             </Button>
           </div>
         </div>
