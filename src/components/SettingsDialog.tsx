@@ -95,7 +95,6 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const onSubmit = async (values: ProfileFormValues) => {
     if (!user || !initialValues) return;
     
-    // Check if any values have actually changed
     const hasChanges = Object.keys(values).some(key => {
       if (key === 'notification_preferences') {
         return JSON.stringify(values[key]) !== JSON.stringify(initialValues[key]);
@@ -153,22 +152,22 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="profile" className="flex-1 h-full">
+          <Tabs defaultValue="profile" className="flex flex-col flex-1 overflow-hidden">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Profile</TabsTrigger>
               <TabsTrigger value="account" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Account</TabsTrigger>
               <TabsTrigger value="notifications" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 mt-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 mt-4 overflow-hidden">
                 <div className="flex-1 overflow-y-auto pr-4">
-                  <TabsContent value="profile" className="mt-0 focus-visible:outline-none h-full">
+                  <TabsContent value="profile" className="mt-0 focus-visible:outline-none">
                     <ProfileTab form={form} />
                   </TabsContent>
-                  <TabsContent value="account" className="mt-0 focus-visible:outline-none h-full">
+                  <TabsContent value="account" className="mt-0 focus-visible:outline-none">
                     <AccountTab form={form} />
                   </TabsContent>
-                  <TabsContent value="notifications" className="mt-0 focus-visible:outline-none h-full">
+                  <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
                     <NotificationsTab form={form} />
                   </TabsContent>
                 </div>
