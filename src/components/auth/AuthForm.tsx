@@ -13,7 +13,7 @@ const AuthForm = () => {
   const redirectTo = `${window.location.origin}/dashboard`;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
       }
