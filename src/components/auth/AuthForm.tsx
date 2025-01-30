@@ -4,16 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
-  const redirectTo = window.location.origin;
+  const { toast } = useToast();
+  const redirectTo = `${window.location.origin}/dashboard`;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
+      } else if (event === 'USER_UPDATED') {
+        console.log('User updated:', session);
+      } else if (event === 'SIGNED_IN') {
+        console.log('Signed in:', session);
       }
     });
 
@@ -38,6 +44,14 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
+          onError={(error) => {
+            console.error('Auth error:', error);
+            toast({
+              title: "Authentication Error",
+              description: error.message,
+              variant: "destructive",
+            });
+          }}
           localization={{
             variables: {
               sign_up: {
