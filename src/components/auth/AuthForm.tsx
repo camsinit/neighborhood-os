@@ -13,13 +13,9 @@ const AuthForm = () => {
   const redirectTo = `${window.location.origin}/dashboard`;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
-      } else if (event === 'USER_UPDATED') {
-        console.log('User updated:', session);
-      } else if (event === 'SIGNED_IN') {
-        console.log('Signed in:', session);
       }
     });
 
@@ -44,14 +40,6 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
-          onError={(error) => {
-            console.error('Auth error:', error);
-            toast({
-              title: "Authentication Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }}
           localization={{
             variables: {
               sign_up: {
