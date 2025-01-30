@@ -15,7 +15,7 @@ const AuthForm = () => {
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
-      if (event === "SIGNED_UP") {
+      if (event === AuthChangeEvent.SIGNED_UP) {
         setShowOnboarding(true);
       }
     });
