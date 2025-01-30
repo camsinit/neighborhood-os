@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { ProfileTab } from "./settings/ProfileTab";
 import { AccountTab } from "./settings/AccountTab";
 import { NotificationsTab } from "./settings/NotificationsTab";
-import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./types";
+import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./settings/types";
 
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const user = useUser();
