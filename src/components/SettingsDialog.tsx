@@ -152,25 +152,25 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40" />
       )}
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[400px] aspect-square rounded-lg border bg-background p-6 shadow-lg z-50">
-          <DialogHeader>
+        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[500px] aspect-square rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
+          <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="profile" className="focus-visible:outline-none">Profile</TabsTrigger>
+              <TabsTrigger value="account" className="focus-visible:outline-none">Account</TabsTrigger>
+              <TabsTrigger value="notifications" className="focus-visible:outline-none">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4">
-                <TabsContent value="profile">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
+                <TabsContent value="profile" className="focus-visible:outline-none">
                   <ProfileTab form={form} />
                 </TabsContent>
-                <TabsContent value="account">
+                <TabsContent value="account" className="focus-visible:outline-none">
                   <AccountTab form={form} />
                 </TabsContent>
-                <TabsContent value="notifications">
+                <TabsContent value="notifications" className="focus-visible:outline-none">
                   <NotificationsTab form={form} />
                 </TabsContent>
                 <div className="flex justify-end">
