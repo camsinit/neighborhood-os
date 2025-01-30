@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 
 export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <ProfileImageUpload />
       
       <div className="space-y-4">
@@ -16,10 +16,10 @@ export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues
           control={form.control}
           name="display_name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-full">
               <FormLabel>Display Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your display name" {...field} />
+                <Input placeholder="Your display name" {...field} className="w-full" />
               </FormControl>
               <FormDescription>
                 This is your public display name.
@@ -34,10 +34,10 @@ export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues
             control={form.control}
             name="first_name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your first name" {...field} />
+                  <Input placeholder="Your first name" {...field} className="w-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -48,10 +48,10 @@ export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues
             control={form.control}
             name="last_name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your last name" {...field} />
+                  <Input placeholder="Your last name" {...field} className="w-full" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -63,10 +63,10 @@ export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-full">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="Your email" {...field} />
+                <Input type="email" placeholder="Your email" {...field} className="w-full" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -79,12 +79,12 @@ export const ProfileSection = ({ form }: { form: UseFormReturn<ProfileFormValues
           control={form.control}
           name="bio"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="w-full">
               <FormLabel>Bio</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Tell us about yourself"
-                  className="resize-none"
+                  className="resize-none w-full"
                   {...field}
                 />
               </FormControl>

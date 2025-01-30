@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { ProfileTab } from "./settings/ProfileTab";
 import { AccountTab } from "./settings/AccountTab";
 import { NotificationsTab } from "./settings/NotificationsTab";
-import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./settings/types";
+import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./types";
 
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const user = useUser();
@@ -162,7 +162,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               </TabsList>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 mt-4 min-h-0">
-                  <div className="flex-1 overflow-y-auto pr-2">
+                  <div className="flex-1 overflow-y-auto pr-6">
                     <TabsContent value="profile" className="mt-0 focus-visible:outline-none">
                       <ProfileTab form={form} />
                     </TabsContent>
