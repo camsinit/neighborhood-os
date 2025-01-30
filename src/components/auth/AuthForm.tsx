@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -15,7 +15,7 @@ const AuthForm = () => {
   
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session: Session | null) => {
-      if (event === AuthChangeEvent.SIGNED_UP) {
+      if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
       }
     });
