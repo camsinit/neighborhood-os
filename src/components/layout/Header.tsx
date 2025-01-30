@@ -2,7 +2,7 @@ import NotificationsPopover from "@/components/notifications/NotificationsPopove
 import UserMenu from "./UserMenu";
 
 interface HeaderProps {
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
 }
 
 const Header = ({ onOpenSettings }: HeaderProps) => {

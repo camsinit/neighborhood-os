@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -15,15 +14,15 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ProfileTab } from "./settings/ProfileTab";
-import { AccountTab } from "./settings/AccountTab";
-import { NotificationsTab } from "./settings/NotificationsTab";
-import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./settings/types";
+import { ProfileTab } from "@/components/settings/ProfileTab";
+import { AccountTab } from "@/components/settings/AccountTab";
+import { NotificationsTab } from "@/components/settings/NotificationsTab";
+import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "@/components/settings/types";
 
-const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
+const Settings = () => {
+  const navigate = useNavigate();
   const user = useUser();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -146,21 +145,38 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[750px] h-[650px] rounded-lg border bg-background p-0 shadow-lg">
-        <div className="flex flex-col h-full p-6">
-          <DialogHeader className="mb-4">
-            <DialogTitle>Settings</DialogTitle>
-          </DialogHeader>
-          <Tabs defaultValue="profile" className="flex flex-col flex-1 overflow-hidden">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Profile</TabsTrigger>
-              <TabsTrigger value="account" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Account</TabsTrigger>
-              <TabsTrigger value="notifications" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">Notifications</TabsTrigger>
-            </TabsList>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 mt-4 overflow-hidden">
-                <div className="flex-1 overflow-y-auto pr-4">
+    <div className="min-h-screen bg-background">
+      <Toaster />
+      <Sonner />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/dashboard")}
+            className="mb-6"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+          
+          <div className="bg-card rounded-lg border shadow-sm p-6">
+            <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+            
+            <Tabs defaultValue="profile" className="flex flex-col">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="profile" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger value="account" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">
+                  Account
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="focus:ring-0 focus-visible:ring-0 focus-visible:outline-none">
+                  Notifications
+                </TabsTrigger>
+              </TabsList>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <TabsContent value="profile" className="mt-0 focus-visible:outline-none">
                     <ProfileTab form={form} />
                   </TabsContent>
@@ -170,19 +186,20 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
                   <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
                     <NotificationsTab form={form} />
                   </TabsContent>
-                </div>
-                <div className="flex justify-end pt-4 mt-4 border-t">
-                  <Button type="submit" disabled={loading}>
-                    {loading ? "Saving..." : "Save changes"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </Tabs>
+
+                  <div className="flex justify-end pt-4 border-t">
+                    <Button type="submit" disabled={loading}>
+                      {loading ? "Saving..." : "Save changes"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </Tabs>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
-export default SettingsDialog;
+export default Settings;

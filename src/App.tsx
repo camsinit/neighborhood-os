@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
+import Settings from "./pages/Settings";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "./components/ui/loading";
 
@@ -72,6 +73,14 @@ const App = () => (
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={
