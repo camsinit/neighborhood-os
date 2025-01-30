@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { AuthError, Session, User } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -13,7 +14,7 @@ const AuthForm = () => {
   const redirectTo = `${window.location.origin}/dashboard`;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: 'INITIAL_SESSION' | 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED' | 'USER_DELETED' | 'PASSWORD_RECOVERY' | 'TOKEN_REFRESHED' | 'SIGNED_UP', session: Session | null) => {
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
       }
