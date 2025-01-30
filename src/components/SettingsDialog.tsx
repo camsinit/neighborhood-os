@@ -149,28 +149,30 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[600px] h-[500px] rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
+        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[650px] h-[550px] rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="profile" className="w-full h-full">
+          <Tabs defaultValue="profile" className="w-full h-full flex flex-col">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile" className="focus-visible:outline-none">Profile</TabsTrigger>
               <TabsTrigger value="account" className="focus-visible:outline-none">Account</TabsTrigger>
               <TabsTrigger value="notifications" className="focus-visible:outline-none">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6 h-[calc(100%-80px)] overflow-y-auto">
-                <TabsContent value="profile" className="focus-visible:outline-none">
-                  <ProfileTab form={form} />
-                </TabsContent>
-                <TabsContent value="account" className="focus-visible:outline-none">
-                  <AccountTab form={form} />
-                </TabsContent>
-                <TabsContent value="notifications" className="focus-visible:outline-none">
-                  <NotificationsTab form={form} />
-                </TabsContent>
-                <div className="flex justify-end sticky bottom-0 bg-background pt-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 overflow-y-auto pr-2">
+                  <TabsContent value="profile" className="mt-0 focus-visible:outline-none">
+                    <ProfileTab form={form} />
+                  </TabsContent>
+                  <TabsContent value="account" className="mt-0 focus-visible:outline-none">
+                    <AccountTab form={form} />
+                  </TabsContent>
+                  <TabsContent value="notifications" className="mt-0 focus-visible:outline-none">
+                    <NotificationsTab form={form} />
+                  </TabsContent>
+                </div>
+                <div className="flex justify-end pt-4 mt-4 border-t">
                   <Button type="submit" disabled={loading}>
                     {loading ? "Saving..." : "Save changes"}
                   </Button>
