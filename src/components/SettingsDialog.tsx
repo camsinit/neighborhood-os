@@ -153,14 +153,14 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="profile" className="w-full h-full flex flex-col">
+          <Tabs defaultValue="profile" className="flex flex-col h-[calc(100%-4rem)]">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile" className="focus-visible:outline-none">Profile</TabsTrigger>
               <TabsTrigger value="account" className="focus-visible:outline-none">Account</TabsTrigger>
               <TabsTrigger value="notifications" className="focus-visible:outline-none">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 mt-4 overflow-hidden">
                 <div className="flex-1 overflow-y-auto pr-2">
                   <TabsContent value="profile" className="mt-0 focus-visible:outline-none">
                     <ProfileTab form={form} />
