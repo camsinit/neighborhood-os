@@ -148,10 +148,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   return (
     <>
-      {open && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40" />
-      )}
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[600px] h-[500px] rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
