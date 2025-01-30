@@ -152,18 +152,18 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40" />
       )}
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[500px] aspect-square rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
+        <DialogContent className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[600px] h-[500px] rounded-lg border bg-background p-8 shadow-lg z-50 my-8 focus-visible:outline-none">
           <DialogHeader className="mb-4">
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="profile" className="w-full">
+          <Tabs defaultValue="profile" className="w-full h-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile" className="focus-visible:outline-none">Profile</TabsTrigger>
               <TabsTrigger value="account" className="focus-visible:outline-none">Account</TabsTrigger>
               <TabsTrigger value="notifications" className="focus-visible:outline-none">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-6 h-[calc(100%-80px)] overflow-y-auto">
                 <TabsContent value="profile" className="focus-visible:outline-none">
                   <ProfileTab form={form} />
                 </TabsContent>
@@ -173,7 +173,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 <TabsContent value="notifications" className="focus-visible:outline-none">
                   <NotificationsTab form={form} />
                 </TabsContent>
-                <div className="flex justify-end">
+                <div className="flex justify-end sticky bottom-0 bg-background pt-4">
                   <Button type="submit" disabled={loading}>
                     {loading ? "Saving..." : "Save changes"}
                   </Button>
