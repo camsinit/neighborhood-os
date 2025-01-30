@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/tabs";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { ProfileTab } from "./tabs/ProfileTab";
-import { AccountTab } from "./tabs/AccountTab";
-import { NotificationsTab } from "./tabs/NotificationsTab";
+import { ProfileTab } from "./ProfileTab";
+import { AccountTab } from "./AccountTab";
+import { NotificationsTab } from "./NotificationsTab";
 import { useSettingsForm } from "@/hooks/useSettingsForm";
 
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
