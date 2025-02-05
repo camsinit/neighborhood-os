@@ -43,7 +43,7 @@ const LandingPage = () => {
               onClick={() => navigate("/login")}
               className="bg-gray-900 text-white hover:bg-gray-800"
             >
-              Sign up
+              Login/Sign up
             </Button>
           </div>
         </div>
