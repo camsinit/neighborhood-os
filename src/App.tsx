@@ -21,6 +21,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkAuth = async () => {
       try {
         console.log('Checking authentication status...');
@@ -32,17 +34,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         }
 
         console.log('Session status:', session ? 'Active' : 'None');
-        setIsAuthenticated(!!session);
         
-        if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
-          console.log('No session, redirecting to landing page');
-          navigate('/landing', { replace: true });
+        if (mounted) {
+          setIsAuthenticated(!!session);
+          if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+            console.log('No session, redirecting to landing page');
+            navigate('/landing', { replace: true });
+          }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Auth error:', error);
-        navigate('/landing', { replace: true });
-      } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          navigate('/landing', { replace: true });
+        }
       }
     };
 
@@ -50,15 +57,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
       
-      if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
-        navigate('/landing', { replace: true });
+      if (mounted) {
+        setIsAuthenticated(!!session);
+        setIsLoading(false);
+        
+        if (event === 'SIGNED_IN') {
+          console.log('User signed in, navigating to dashboard');
+          navigate('/dashboard');
+        } else if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+          console.log('No session in auth change, redirecting to landing');
+          navigate('/landing', { replace: true });
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate, location.pathname]);
