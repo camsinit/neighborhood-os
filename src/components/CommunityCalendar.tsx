@@ -26,6 +26,7 @@ const CommunityCalendar = () => {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { data: events, isLoading, refetch } = useEvents();
   const calendarRef = useRef<HTMLDivElement>(null);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   
   const weekStart = startOfWeek(currentDate);
   const monthStart = startOfMonth(currentDate);
@@ -37,26 +38,36 @@ const CommunityCalendar = () => {
   useEffect(() => {
     let resizeObserver: ResizeObserver | null = null;
     
-    if (calendarRef.current) {
-      let timeout: NodeJS.Timeout;
-      
-      resizeObserver = new ResizeObserver((entries) => {
-        // Debounce resize handling
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          for (const entry of entries) {
-            if (entry.target === calendarRef.current) {
-              // Handle resize if needed
-              console.log("Calendar resized");
-            }
+    try {
+      if (calendarRef.current) {
+        resizeObserver = new ResizeObserver((entries) => {
+          // Clear any existing timeout
+          if (resizeTimeoutRef.current) {
+            clearTimeout(resizeTimeoutRef.current);
           }
-        }, 100);
-      });
+          
+          // Set new debounced timeout
+          resizeTimeoutRef.current = setTimeout(() => {
+            requestAnimationFrame(() => {
+              for (const entry of entries) {
+                if (entry.target === calendarRef.current) {
+                  console.log("Calendar resized");
+                }
+              }
+            });
+          }, 100);
+        });
 
-      resizeObserver.observe(calendarRef.current);
+        resizeObserver.observe(calendarRef.current);
+      }
+    } catch (error) {
+      console.error("ResizeObserver error:", error);
     }
 
     return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
