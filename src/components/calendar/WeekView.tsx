@@ -13,7 +13,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+    <div className="grid grid-cols-7 divide-x divide-gray-200 rounded-lg overflow-hidden border border-gray-200">
       {weekDates.map((date, i) => (
         <DayCell
           key={i}
