@@ -1,49 +1,41 @@
-import type { AuthChangeEvent, Session, AuthError } from "@supabase/supabase-js";
+import { AuthError, Session } from "@supabase/supabase-js";
+import { Location } from "react-router-dom";
 
-export const logAuthStateChange = (
-  event: AuthChangeEvent, 
-  session: Session | null
-) => {
+export const logAuthCheck = () => {
+  console.log('Environment details:', {
+    nodeEnv: import.meta.env.MODE,
+    baseUrl: window.location.origin,
+    currentPath: window.location.pathname,
+    timestamp: new Date().toISOString(),
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+  });
+};
+
+export const logAuthError = (error: AuthError, location: Location) => {
+  console.error('Auth check error:', {
+    message: error.message,
+    status: error.status,
+    name: error.name,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    location: location.pathname
+  });
+};
+
+export const logAuthStateChange = (event: string, session: Session | null) => {
   console.log('Auth state changed:', {
     event,
     hasSession: !!session,
+    currentPath: window.location.pathname,
     userId: session?.user?.id,
     email: session?.user?.email,
     timestamp: new Date().toISOString(),
-    currentPath: window.location.pathname,
-    accessToken: session?.access_token ? 'Present' : 'Missing',
-    refreshToken: session?.refresh_token ? 'Present' : 'Missing',
-    expiresAt: session?.expires_at
-  });
-};
-
-export const logSignIn = (session: Session | null) => {
-  console.log('Sign in successful:', {
-    userId: session?.user?.id,
-    email: session?.user?.email,
-    aud: session?.user?.aud,
-    lastSignInAt: session?.user?.last_sign_in_at,
-    expiresIn: session?.expires_in,
-    tokenDetails: {
-      accessTokenPresent: !!session?.access_token,
-      refreshTokenPresent: !!session?.refresh_token,
-      expiresAt: session?.expires_at
+    navigationState: window.history.state,
+    sessionData: {
+      role: session?.user?.role,
+      authProvider: session?.user?.app_metadata?.provider,
+      lastSignInAt: session?.user?.last_sign_in_at,
     }
-  });
-};
-
-export const logSessionCheck = (session: Session | null, error: AuthError | null) => {
-  console.log('Session validation check:', {
-    hasValidSession: !!session,
-    sessionError: error?.message,
-    timestamp: new Date().toISOString()
-  });
-};
-
-export const logNewSignUp = (session: Session | null) => {
-  console.log('New user signed up:', {
-    userId: session?.user?.id,
-    email: session?.user?.email,
-    timestamp: new Date().toISOString()
   });
 };
