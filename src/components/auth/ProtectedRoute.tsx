@@ -20,16 +20,28 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const checkAuth = async () => {
       try {
-        console.log('Starting auth check at:', location.pathname);
+        console.log('Starting auth check at:', location.pathname, {
+          timestamp: new Date().toISOString(),
+          currentUrl: window.location.href
+        });
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Auth check error:', error.message, error.stack);
+          console.error('Auth check error:', {
+            message: error.message,
+            status: error.status,
+            name: error.name,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+          });
+          
           toast({
             title: "Authentication Error",
-            description: error.message,
+            description: `Error checking session: ${error.message}`,
             variant: "destructive",
           });
+          
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
@@ -49,6 +61,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           userId: session?.user?.id,
           email: session?.user?.email,
           lastSignInAt: session?.user?.last_sign_in_at,
+          timestamp: new Date().toISOString(),
+          accessToken: session?.access_token ? 'Present' : 'Missing',
+          refreshToken: session?.refresh_token ? 'Present' : 'Missing'
         });
 
         if (hasSession) {
@@ -57,11 +72,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             email: session.user.email,
             aud: session.user.aud,
             role: session.user.role,
+            lastSignInAt: session.user.last_sign_in_at,
+            expiresAt: session.expires_at
           });
           setIsAuthenticated(true);
           setIsLoading(false);
         } else {
           console.log('No valid session found, redirecting from:', location.pathname);
+          toast({
+            title: "Session Expired",
+            description: "Please log in again to continue.",
+            variant: "destructive",
+          });
           setIsAuthenticated(false);
           setIsLoading(false);
           if (location.pathname !== '/login') {
@@ -69,12 +91,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           }
         }
       } catch (error) {
-        console.error('Unexpected auth check error:', error);
+        console.error('Unexpected auth check error:', {
+          error,
+          timestamp: new Date().toISOString(),
+          location: location.pathname
+        });
+        
         toast({
           title: "Authentication Check Failed",
           description: "An unexpected error occurred while checking your authentication status.",
           variant: "destructive",
         });
+        
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -97,6 +125,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         currentPath: location.pathname,
         userId: session?.user?.id,
         email: session?.user?.email,
+        timestamp: new Date().toISOString()
       });
 
       if (event === 'SIGNED_IN' && session) {
@@ -105,17 +134,27 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           email: session.user.email,
           aud: session.user.aud,
           role: session.user.role,
+          lastSignInAt: session.user.last_sign_in_at,
+          expiresAt: session.expires_at
         });
         setIsAuthenticated(true);
         setIsLoading(false);
         navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT' || !session) {
-        console.log('User signed out or session expired');
+        console.log('User signed out or session expired:', {
+          event,
+          timestamp: new Date().toISOString()
+        });
         setIsAuthenticated(false);
         setIsLoading(false);
         if (location.pathname !== '/login') {
           navigate('/', { replace: true });
         }
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Session token refreshed:', {
+          userId: session?.user?.id,
+          timestamp: new Date().toISOString()
+        });
       }
     });
 
@@ -127,16 +166,22 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }, [navigate, location.pathname, toast]);
 
   if (isLoading) {
-    console.log('Auth check loading at path:', location.pathname);
+    console.log('Auth check loading at path:', location.pathname, {
+      timestamp: new Date().toISOString()
+    });
     return <LoadingSpinner />;
   }
 
   if (!isAuthenticated && location.pathname !== '/login') {
-    console.log('Access denied - not authenticated at path:', location.pathname);
+    console.log('Access denied - not authenticated at path:', location.pathname, {
+      timestamp: new Date().toISOString()
+    });
     return null;
   }
 
-  console.log('Rendering protected content at:', location.pathname);
+  console.log('Rendering protected content at:', location.pathname, {
+    timestamp: new Date().toISOString()
+  });
   return <>{children}</>;
 };
 
