@@ -39,3 +39,30 @@ export const logAuthStateChange = (event: string, session: Session | null) => {
     }
   });
 };
+
+export const logSignIn = (session: Session | null) => {
+  console.log('User signed in:', {
+    userId: session?.user?.id,
+    email: session?.user?.email,
+    timestamp: new Date().toISOString(),
+    provider: session?.user?.app_metadata?.provider
+  });
+};
+
+export const logSessionCheck = (session: Session | null, error: AuthError | null) => {
+  console.log('Session check:', {
+    hasSession: !!session,
+    userId: session?.user?.id,
+    error: error?.message,
+    timestamp: new Date().toISOString()
+  });
+};
+
+export const logNewSignUp = (session: Session | null) => {
+  console.log('New user signed up:', {
+    userId: session?.user?.id,
+    email: session?.user?.email,
+    timestamp: new Date().toISOString(),
+    metadata: session?.user?.user_metadata
+  });
+};
