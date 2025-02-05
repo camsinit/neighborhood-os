@@ -15,28 +15,47 @@ export const useAuthState = (redirectTo: string) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('Auth state management initialized');
-    console.log('Redirect URL configured as:', redirectTo);
-    console.log('Current origin:', window.location.origin);
-    console.log('Current pathname:', window.location.pathname);
+    console.log('Auth state management initialized', {
+      redirectTo,
+      currentPath: window.location.pathname,
+      timestamp: new Date().toISOString()
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
+        console.log('Auth state changed:', {
+          event,
+          hasSession: !!session,
+          userId: session?.user?.id,
+          timestamp: new Date().toISOString()
+        });
+
         logAuthStateChange(event, session);
 
         if (event === 'SIGNED_IN') {
           logSignIn(session);
+          console.log('Sign in detected, checking session...');
 
           // Check if session is actually valid
           const { data: sessionCheck, error: sessionError } = await supabase.auth.getSession();
           logSessionCheck(sessionCheck.session, sessionError);
 
           if (sessionError) {
-            console.error('Session validation failed:', sessionError);
+            console.error('Session validation failed:', {
+              error: sessionError,
+              message: sessionError.message,
+              details: sessionError.stack,
+              timestamp: new Date().toISOString()
+            });
             toast({
               title: "Authentication Error",
               description: `Session validation failed: ${sessionError.message}`,
               variant: "destructive",
+            });
+          } else {
+            console.log('Session validated successfully:', {
+              userId: sessionCheck.session?.user?.id,
+              timestamp: new Date().toISOString()
             });
           }
         } else if (event === 'SIGNED_OUT') {
@@ -66,7 +85,9 @@ export const useAuthState = (redirectTo: string) => {
         console.error('Session check error:', {
           message: error.message,
           status: error.status,
-          name: error.name
+          name: error.name,
+          stack: error.stack,
+          timestamp: new Date().toISOString()
         });
         toast({
           title: "Session Check Failed",

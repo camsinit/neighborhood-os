@@ -11,43 +11,81 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Login page mounted');
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change in Login page:', {
+        event,
+        hasSession: !!session,
+        userId: session?.user?.id,
+        timestamp: new Date().toISOString()
+      });
+
       if (event === 'SIGNED_IN') {
         if (session) {
+          console.log('User signed in, checking profile');
           // Check if this is a new user (first sign in)
-          const { data: profile } = await supabase
+          const { data: profile, error } = await supabase
             .from('profiles')
             .select('created_at, display_name')
             .eq('id', session.user.id)
             .single();
 
+          if (error) {
+            console.error('Error fetching profile:', {
+              error,
+              userId: session.user.id,
+              timestamp: new Date().toISOString()
+            });
+          }
+
+          console.log('Profile check result:', {
+            hasProfile: !!profile,
+            createdAt: profile?.created_at,
+            displayName: profile?.display_name,
+            timestamp: new Date().toISOString()
+          });
+
           // If the profile was just created (within the last minute), show onboarding
           if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
+            console.log('New profile detected, navigating to root');
             navigate("/");
           } else if (!profile?.display_name) {
-            // If the user hasn't completed their profile, show the survey
+            console.log('Incomplete profile detected, navigating to root');
             navigate("/");
           } else {
+            console.log('Existing profile detected, navigating to root');
             navigate("/");
           }
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out, staying on login page');
         navigate("/login");
       }
     });
 
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('Initial session check in Login page:', {
+        hasSession: !!session,
+        error: error?.message,
+        timestamp: new Date().toISOString()
+      });
+
       if (session) {
+        console.log('Session found, navigating to root');
         navigate("/");
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Login page unmounting');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleBackClick = () => {
-    // Force navigation to root without auth check
+    console.log('Back button clicked, navigating to root');
     window.location.href = '/';
   };
 
