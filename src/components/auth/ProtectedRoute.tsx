@@ -52,9 +52,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
             name: error.name,
             stack: error.stack,
             timestamp: new Date().toISOString(),
-            location: location.pathname,
-            headers: error.context?.headers,
-            requestDetails: error.context?.requestDetails
+            location: location.pathname
           });
           
           toast({
@@ -93,7 +91,6 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           provider: session?.user?.app_metadata?.provider,
           intendedPath: location.state?.from?.pathname || '/dashboard',
           sessionData: {
-            aal: session?.user?.aal,
             role: session?.user?.role,
             authProvider: session?.user?.app_metadata?.provider,
             lastSignInAt: session?.user?.last_sign_in_at,
