@@ -52,9 +52,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         } else {
           setIsAuthenticated(false);
           setIsLoading(false);
-          if (location.pathname !== '/login' && location.pathname !== '/landing') {
-            console.log('No session, redirecting to landing from:', location.pathname);
-            navigate('/landing', { replace: true });
+          if (location.pathname !== '/login') {
+            console.log('No session, redirecting to root from:', location.pathname);
+            navigate('/', { replace: true });
           }
         }
       } catch (error) {
@@ -62,7 +62,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
-          navigate('/landing', { replace: true });
+          navigate('/', { replace: true });
         }
       }
     };
@@ -84,11 +84,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
         navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT' || !session) {
-        console.log('User signed out or no session, redirecting to landing');
+        console.log('User signed out or no session, redirecting to root');
         setIsAuthenticated(false);
         setIsLoading(false);
-        if (location.pathname !== '/login' && location.pathname !== '/landing') {
-          navigate('/landing', { replace: true });
+        if (location.pathname !== '/login') {
+          navigate('/', { replace: true });
         }
       }
     });
@@ -104,7 +104,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/landing') {
+  if (!isAuthenticated && location.pathname !== '/login') {
     console.log('Not authenticated, preventing access to:', location.pathname);
     return null;
   }
@@ -121,7 +121,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Routes>
-            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/settings"
@@ -139,7 +139,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/landing" replace />} />
+            {/* Redirect /landing to root */}
+            <Route path="/landing" element={<Navigate to="/" replace />} />
           </Routes>
         </TooltipProvider>
       </QueryClientProvider>
