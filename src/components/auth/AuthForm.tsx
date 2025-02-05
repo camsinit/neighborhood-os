@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
-import { useToast } from "@/components/ui/use-toast";
-import type { AuthChangeEvent, Session, AuthError } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -16,6 +16,8 @@ const AuthForm = () => {
   useEffect(() => {
     console.log('AuthForm mounted, setting up auth state change listener');
     console.log('Redirect URL configured as:', redirectTo);
+    console.log('Current origin:', window.location.origin);
+    console.log('Current pathname:', window.location.pathname);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
@@ -24,7 +26,11 @@ const AuthForm = () => {
           hasSession: !!session,
           userId: session?.user?.id,
           email: session?.user?.email,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          currentPath: window.location.pathname,
+          accessToken: session?.access_token ? 'Present' : 'Missing',
+          refreshToken: session?.refresh_token ? 'Present' : 'Missing',
+          expiresAt: session?.expires_at
         });
 
         if (event === 'SIGNED_IN') {
@@ -32,8 +38,31 @@ const AuthForm = () => {
             userId: session?.user?.id,
             email: session?.user?.email,
             aud: session?.user?.aud,
-            lastSignInAt: session?.user?.last_sign_in_at
+            lastSignInAt: session?.user?.last_sign_in_at,
+            expiresIn: session?.expires_in,
+            tokenDetails: {
+              accessTokenPresent: !!session?.access_token,
+              refreshTokenPresent: !!session?.refresh_token,
+              expiresAt: session?.expires_at
+            }
           });
+
+          // Check if session is actually valid
+          const { data: sessionCheck, error: sessionError } = await supabase.auth.getSession();
+          console.log('Session validation check:', {
+            hasValidSession: !!sessionCheck.session,
+            sessionError: sessionError?.message,
+            timestamp: new Date().toISOString()
+          });
+
+          if (sessionError) {
+            console.error('Session validation failed:', sessionError);
+            toast({
+              title: "Authentication Error",
+              description: `Session validation failed: ${sessionError.message}`,
+              variant: "destructive",
+            });
+          }
         } else if (event === 'SIGNED_OUT') {
           console.log('User signed out');
         } else if (event === 'USER_UPDATED') {
@@ -43,7 +72,8 @@ const AuthForm = () => {
         if (event === 'SIGNED_UP' as AuthChangeEvent) {
           console.log('New user signed up:', {
             userId: session?.user?.id,
-            email: session?.user?.email
+            email: session?.user?.email,
+            timestamp: new Date().toISOString()
           });
           setShowOnboarding(true);
         }
@@ -56,31 +86,29 @@ const AuthForm = () => {
         hasSession: !!session,
         userId: session?.user?.id,
         error: error?.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentPath: window.location.pathname
       });
+
+      if (error) {
+        console.error('Session check error:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        });
+        toast({
+          title: "Session Check Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     });
 
     return () => {
       console.log('AuthForm unmounting, cleaning up subscription');
       subscription.unsubscribe();
     };
-  }, []);
-
-  const handleAuthError = (error: AuthError) => {
-    console.error('Authentication error:', {
-      message: error.message,
-      status: error.status,
-      name: error.name,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    });
-    
-    toast({
-      title: "Authentication Error",
-      description: error.message,
-      variant: "destructive",
-    });
-  };
+  }, [toast]);
 
   return (
     <>
@@ -100,7 +128,6 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
-          onError={handleAuthError}
           localization={{
             variables: {
               sign_up: {
