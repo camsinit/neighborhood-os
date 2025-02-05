@@ -28,13 +28,13 @@ const DayCell = ({
         ${className}
       `}
     >
-      <div className="flex items-center justify-between p-2 border-b border-gray-200">
+      <div className="flex flex-col p-2">
         {dayLabel && (
-          <span className="text-sm text-gray-500">{dayLabel}</span>
+          <span className="text-sm text-gray-500 text-center mb-1">{dayLabel}</span>
         )}
         <span className="text-sm font-medium">{format(date, 'd')}</span>
       </div>
-      <div className="space-y-1 p-2">
+      <div className="space-y-1 px-2 pb-2">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-full" />
