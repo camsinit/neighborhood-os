@@ -22,29 +22,38 @@ const Login = () => {
         userId: session?.user?.id,
         timestamp: new Date().toISOString(),
         currentLocation: window.location.pathname,
-        navigationState: window.history.state
+        navigationState: window.history.state,
+        sessionDetails: {
+          expiresAt: session?.expires_at,
+          provider: session?.user?.app_metadata?.provider,
+          lastSignIn: session?.user?.last_sign_in_at
+        }
       });
 
       if (event === 'SIGNED_IN') {
         if (session) {
           console.log('User signed in, checking profile');
           try {
+            console.log('Starting profile fetch for user:', session.user.id);
             const { data: profile, error } = await supabase
               .from('profiles')
-              .select('created_at, display_name')
+              .select('*')
               .eq('id', session.user.id)
               .single();
 
-            console.log('Profile check result in Login:', {
+            console.log('Profile fetch result:', {
               hasProfile: !!profile,
               profileData: profile,
               error,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              userId: session.user.id
             });
 
             if (error) {
               console.error('Error fetching profile in Login:', {
                 error,
+                errorMessage: error.message,
+                errorDetails: error.details,
                 userId: session.user.id,
                 timestamp: new Date().toISOString()
               });
@@ -56,21 +65,41 @@ const Login = () => {
               return;
             }
 
-            console.log('Attempting navigation to root', {
+            console.log('Profile fetch successful, attempting navigation', {
               timestamp: new Date().toISOString(),
-              from: window.location.pathname
+              from: window.location.pathname,
+              profile: {
+                id: profile?.id,
+                created_at: profile?.created_at,
+                hasUsername: !!profile?.username
+              }
             });
             
-            navigate("/", { replace: true });
-            
-            console.log('Navigation completed', {
-              timestamp: new Date().toISOString(),
-              to: '/',
-              navigationState: window.history.state
-            });
+            try {
+              console.log('Starting navigation to root');
+              navigate("/", { replace: true });
+              console.log('Navigation completed successfully', {
+                timestamp: new Date().toISOString(),
+                to: '/',
+                navigationState: window.history.state
+              });
+            } catch (navError) {
+              console.error('Navigation failed:', {
+                error: navError,
+                timestamp: new Date().toISOString(),
+                attempted_path: '/'
+              });
+              toast({
+                title: "Navigation Error",
+                description: "Failed to redirect after login",
+                variant: "destructive",
+              });
+            }
           } catch (error) {
             console.error('Unexpected error in Login profile check:', {
               error,
+              errorMessage: error instanceof Error ? error.message : 'Unknown error',
+              stack: error instanceof Error ? error.stack : undefined,
               timestamp: new Date().toISOString()
             });
             toast({
@@ -92,7 +121,12 @@ const Login = () => {
         hasSession: !!session,
         error: error?.message,
         timestamp: new Date().toISOString(),
-        currentPath: window.location.pathname
+        currentPath: window.location.pathname,
+        sessionDetails: session ? {
+          expiresAt: session.expires_at,
+          provider: session.user?.app_metadata?.provider,
+          lastSignIn: session.user?.last_sign_in_at
+        } : null
       });
 
       if (session) {
