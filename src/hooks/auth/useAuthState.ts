@@ -52,21 +52,62 @@ export const useAuthState = (redirectTo: string) => {
               description: `Session validation failed: ${sessionError.message}`,
               variant: "destructive",
             });
-          } else {
-            console.log('Session validated successfully:', {
-              userId: sessionCheck.session?.user?.id,
+            return;
+          }
+
+          console.log('Session validated successfully, checking profile...', {
+            userId: session?.user?.id,
+            timestamp: new Date().toISOString()
+          });
+
+          // Check profile
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session?.user?.id)
+              .single();
+
+            console.log('Profile check result:', {
+              hasProfile: !!profile,
+              profileData: profile,
+              error: profileError,
               timestamp: new Date().toISOString()
             });
-          }
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out');
-        } else if (event === 'USER_UPDATED') {
-          console.log('User profile updated');
-        }
 
-        if (event === 'SIGNED_UP' as AuthChangeEvent) {
-          logNewSignUp(session);
-          setShowOnboarding(true);
+            if (profileError) {
+              console.error('Profile fetch error:', {
+                error: profileError,
+                message: profileError.message,
+                details: profileError.details,
+                timestamp: new Date().toISOString()
+              });
+              toast({
+                title: "Profile Error",
+                description: `Error fetching profile: ${profileError.message}`,
+                variant: "destructive",
+              });
+              return;
+            }
+
+            // If this is a new signup (profile just created)
+            if (event === 'SIGNED_UP' as AuthChangeEvent) {
+              logNewSignUp(session);
+              setShowOnboarding(true);
+              console.log('New signup detected, showing onboarding');
+            }
+
+          } catch (error) {
+            console.error('Unexpected error during profile check:', {
+              error,
+              timestamp: new Date().toISOString()
+            });
+            toast({
+              title: "Error",
+              description: "An unexpected error occurred while checking your profile",
+              variant: "destructive",
+            });
+          }
         }
       }
     );

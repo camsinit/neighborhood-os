@@ -6,9 +6,11 @@ import AuthForm from "@/components/auth/AuthForm";
 import SecretTestButton from "@/components/auth/SecretTestButton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log('Login page mounted');
@@ -18,49 +20,69 @@ const Login = () => {
         event,
         hasSession: !!session,
         userId: session?.user?.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentLocation: window.location.pathname,
+        navigationState: window.history.state
       });
 
       if (event === 'SIGNED_IN') {
         if (session) {
           console.log('User signed in, checking profile');
-          // Check if this is a new user (first sign in)
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('created_at, display_name')
-            .eq('id', session.user.id)
-            .single();
+          try {
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('created_at, display_name')
+              .eq('id', session.user.id)
+              .single();
 
-          if (error) {
-            console.error('Error fetching profile:', {
+            console.log('Profile check result in Login:', {
+              hasProfile: !!profile,
+              profileData: profile,
               error,
-              userId: session.user.id,
               timestamp: new Date().toISOString()
             });
-          }
 
-          console.log('Profile check result:', {
-            hasProfile: !!profile,
-            createdAt: profile?.created_at,
-            displayName: profile?.display_name,
-            timestamp: new Date().toISOString()
-          });
+            if (error) {
+              console.error('Error fetching profile in Login:', {
+                error,
+                userId: session.user.id,
+                timestamp: new Date().toISOString()
+              });
+              toast({
+                title: "Profile Error",
+                description: `Error fetching profile: ${error.message}`,
+                variant: "destructive",
+              });
+              return;
+            }
 
-          // If the profile was just created (within the last minute), show onboarding
-          if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
-            console.log('New profile detected, navigating to root');
-            navigate("/");
-          } else if (!profile?.display_name) {
-            console.log('Incomplete profile detected, navigating to root');
-            navigate("/");
-          } else {
-            console.log('Existing profile detected, navigating to root');
-            navigate("/");
+            console.log('Attempting navigation to root', {
+              timestamp: new Date().toISOString(),
+              from: window.location.pathname
+            });
+            
+            navigate("/", { replace: true });
+            
+            console.log('Navigation completed', {
+              timestamp: new Date().toISOString(),
+              to: '/',
+              navigationState: window.history.state
+            });
+          } catch (error) {
+            console.error('Unexpected error in Login profile check:', {
+              error,
+              timestamp: new Date().toISOString()
+            });
+            toast({
+              title: "Error",
+              description: "An unexpected error occurred while checking your profile",
+              variant: "destructive",
+            });
           }
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out, staying on login page');
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     });
 
@@ -69,7 +91,8 @@ const Login = () => {
       console.log('Initial session check in Login page:', {
         hasSession: !!session,
         error: error?.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentPath: window.location.pathname
       });
 
       if (session) {
@@ -82,7 +105,7 @@ const Login = () => {
       console.log('Login page unmounting');
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleBackClick = () => {
     console.log('Back button clicked, navigating to root');
