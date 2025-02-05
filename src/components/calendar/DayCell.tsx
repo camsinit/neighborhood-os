@@ -29,11 +29,11 @@ const DayCell = ({
       `}
     >
       {dayLabel && (
-        <div className="absolute -top-7 left-0 right-0 text-sm text-gray-500 text-center">
+        <div className="absolute -top-2 left-0 right-0 text-sm text-gray-500 text-center">
           {dayLabel}
         </div>
       )}
-      <div className="p-2">
+      <div className="p-2 pt-6">
         <span className="text-sm font-medium">{format(date, 'd')}</span>
       </div>
       <div className="space-y-1 px-2 pb-2">
