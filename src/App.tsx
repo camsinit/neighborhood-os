@@ -25,50 +25,53 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     const checkAuth = async () => {
       try {
-        console.log('Checking authentication status...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Auth check error:', error);
-          throw error;
+          if (mounted) {
+            setIsAuthenticated(false);
+            setIsLoading(false);
+            navigate('/landing');
+          }
+          return;
         }
 
-        console.log('Session status:', session ? 'Active' : 'None');
-        
-        if (mounted) {
-          setIsAuthenticated(!!session);
-          if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
-            console.log('No session, redirecting to landing page');
-            navigate('/landing', { replace: true });
-          }
-          setIsLoading(false);
+        if (!mounted) return;
+
+        setIsAuthenticated(!!session);
+        setIsLoading(false);
+
+        if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+          navigate('/landing');
         }
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Auth check failed:', error);
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
-          navigate('/landing', { replace: true });
+          navigate('/landing');
         }
       }
     };
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+
+      console.log('Auth state changed:', event);
       
-      if (mounted) {
-        setIsAuthenticated(!!session);
+      setIsAuthenticated(!!session);
+      
+      if (event === 'SIGNED_IN' && session) {
         setIsLoading(false);
-        
-        if (event === 'SIGNED_IN') {
-          console.log('User signed in, navigating to dashboard');
-          navigate('/dashboard');
-        } else if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
-          console.log('No session in auth change, redirecting to landing');
-          navigate('/landing', { replace: true });
-        }
+        navigate('/dashboard');
+      } else if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+        setIsLoading(false);
+        navigate('/landing');
+      } else {
+        setIsLoading(false);
       }
     });
 
@@ -79,16 +82,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [navigate, location.pathname]);
 
   if (isLoading) {
-    console.log('Still loading authentication status...');
     return <LoadingSpinner />;
   }
 
   if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/landing') {
-    console.log('Not authenticated, rendering null');
     return null;
   }
 
-  console.log('Rendering protected content');
   return <>{children}</>;
 };
 
