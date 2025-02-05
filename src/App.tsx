@@ -11,6 +11,7 @@ import LandingPage from "./pages/LandingPage";
 import Settings from "./pages/Settings";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "./components/ui/loading";
+import { useToast } from "./components/ui/use-toast";
 
 const queryClient = new QueryClient();
 
@@ -19,17 +20,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
 
     const checkAuth = async () => {
       try {
-        console.log('Checking auth session at:', location.pathname);
+        console.log('Starting auth check at:', location.pathname);
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Auth check error:', error.message);
+          console.error('Auth check error:', error.message, error.stack);
+          toast({
+            title: "Authentication Error",
+            description: error.message,
+            variant: "destructive",
+          });
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
@@ -37,28 +44,44 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('Component unmounted during auth check');
+          return;
+        }
 
         const hasSession = !!session;
-        console.log('Session check result:', {
+        console.log('Auth check results:', {
           hasSession,
-          currentPath: location.pathname
+          currentPath: location.pathname,
+          userId: session?.user?.id,
+          email: session?.user?.email,
+          lastSignInAt: session?.user?.last_sign_in_at,
         });
 
         if (hasSession) {
+          console.log('Valid session found:', {
+            userId: session.user.id,
+            email: session.user.email,
+            aud: session.user.aud,
+            role: session.user.role,
+          });
           setIsAuthenticated(true);
           setIsLoading(false);
-          console.log('Session exists, staying at:', location.pathname);
         } else {
+          console.log('No valid session found, redirecting from:', location.pathname);
           setIsAuthenticated(false);
           setIsLoading(false);
           if (location.pathname !== '/login') {
-            console.log('No session, redirecting to root from:', location.pathname);
             navigate('/', { replace: true });
           }
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Unexpected auth check error:', error);
+        toast({
+          title: "Authentication Check Failed",
+          description: "An unexpected error occurred while checking your authentication status.",
+          variant: "destructive",
+        });
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -70,21 +93,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return;
+      if (!mounted) {
+        console.log('Auth state change ignored - component unmounted');
+        return;
+      }
 
       console.log('Auth state changed:', {
         event,
         hasSession: !!session,
-        currentPath: location.pathname
+        currentPath: location.pathname,
+        userId: session?.user?.id,
+        email: session?.user?.email,
       });
 
       if (event === 'SIGNED_IN' && session) {
-        console.log('User signed in, navigating to dashboard');
+        console.log('User signed in successfully:', {
+          userId: session.user.id,
+          email: session.user.email,
+          aud: session.user.aud,
+          role: session.user.role,
+        });
         setIsAuthenticated(true);
         setIsLoading(false);
         navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT' || !session) {
-        console.log('User signed out or no session, redirecting to root');
+        console.log('User signed out or session expired');
         setIsAuthenticated(false);
         setIsLoading(false);
         if (location.pathname !== '/login') {
@@ -94,18 +127,19 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => {
+      console.log('Cleaning up auth check effect');
       mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate, location.pathname]);
 
   if (isLoading) {
-    console.log('Loading state at path:', location.pathname);
+    console.log('Auth check loading at path:', location.pathname);
     return <LoadingSpinner />;
   }
 
   if (!isAuthenticated && location.pathname !== '/login') {
-    console.log('Not authenticated, preventing access to:', location.pathname);
+    console.log('Access denied - not authenticated at path:', location.pathname);
     return null;
   }
 
