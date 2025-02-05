@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   addWeeks, 
   subWeeks, 
@@ -25,6 +25,7 @@ const CommunityCalendar = () => {
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { data: events, isLoading, refetch } = useEvents();
+  const calendarRef = useRef<HTMLDivElement>(null);
   
   const weekStart = startOfWeek(currentDate);
   const monthStart = startOfMonth(currentDate);
@@ -32,6 +33,35 @@ const CommunityCalendar = () => {
   
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const monthDates = eachDayOfInterval({ start: startOfWeek(monthStart), end: endOfWeek(monthEnd) });
+
+  useEffect(() => {
+    let resizeObserver: ResizeObserver | null = null;
+    
+    if (calendarRef.current) {
+      let timeout: NodeJS.Timeout;
+      
+      resizeObserver = new ResizeObserver((entries) => {
+        // Debounce resize handling
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          for (const entry of entries) {
+            if (entry.target === calendarRef.current) {
+              // Handle resize if needed
+              console.log("Calendar resized");
+            }
+          }
+        }, 100);
+      });
+
+      resizeObserver.observe(calendarRef.current);
+    }
+
+    return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, []);
 
   const handlePrevious = () => {
     if (view === 'week') {
@@ -52,7 +82,9 @@ const CommunityCalendar = () => {
   const handleToday = () => {
     const today = new Date();
     setCurrentDate(today);
-    addScaleAnimation(document.querySelector('.calendar-container'));
+    if (calendarRef.current) {
+      addScaleAnimation(calendarRef.current);
+    }
   };
 
   const getEventsForDate = (date: Date) => {
@@ -82,7 +114,7 @@ const CommunityCalendar = () => {
         setIsAddEventOpen={setIsAddEventOpen}
       />
       
-      <div className="calendar-container">
+      <div ref={calendarRef} className="calendar-container">
         {view === 'week' ? (
           <WeekView 
             weekDates={weekDates}
