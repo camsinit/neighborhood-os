@@ -23,14 +23,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Checking authentication status...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth check error:', error);
+          throw error;
+        }
+
+        console.log('Session status:', session ? 'Active' : 'None');
         setIsAuthenticated(!!session);
-        if (!session && location.pathname !== '/login') {
-          navigate('/login', { replace: true });
+        
+        if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+          console.log('No session, redirecting to landing page');
+          navigate('/landing', { replace: true });
         }
       } catch (error) {
         console.error('Auth error:', error);
-        navigate('/login', { replace: true });
+        navigate('/landing', { replace: true });
       } finally {
         setIsLoading(false);
       }
@@ -39,11 +49,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
       setIsAuthenticated(!!session);
       setIsLoading(false);
       
-      if (!session && location.pathname !== '/login') {
-        navigate('/login', { replace: true });
+      if (!session && location.pathname !== '/login' && location.pathname !== '/landing') {
+        navigate('/landing', { replace: true });
       }
     });
 
@@ -53,13 +64,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [navigate, location.pathname]);
 
   if (isLoading) {
+    console.log('Still loading authentication status...');
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated && location.pathname !== '/login') {
-    return null; // Let the useEffect handle the navigation
+  if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/landing') {
+    console.log('Not authenticated, rendering null');
+    return null;
   }
 
+  console.log('Rendering protected content');
   return <>{children}</>;
 };
 
