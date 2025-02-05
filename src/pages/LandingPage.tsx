@@ -32,13 +32,6 @@ const LandingPage = () => {
           </h1>
           <div className="flex gap-4">
             <Button 
-              variant="ghost" 
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
-              className="text-gray-700 hover:text-gray-900"
-            >
-              {isAuthenticated ? "View Dashboard" : "Log in"}
-            </Button>
-            <Button 
               variant="default" 
               onClick={() => navigate("/login")}
               className="bg-gray-900 text-white hover:bg-gray-800"
