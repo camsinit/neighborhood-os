@@ -13,7 +13,12 @@ const Login = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    console.log('Login page mounted');
+    console.log('Login page mounted', {
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      href: window.location.href
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change in Login page:', {
@@ -23,16 +28,21 @@ const Login = () => {
         timestamp: new Date().toISOString(),
         currentLocation: window.location.pathname,
         navigationState: window.history.state,
-        sessionDetails: {
-          expiresAt: session?.expires_at,
-          provider: session?.user?.app_metadata?.provider,
-          lastSignIn: session?.user?.last_sign_in_at
-        }
+        sessionDetails: session ? {
+          expiresAt: session.expires_at,
+          provider: session.user?.app_metadata?.provider,
+          lastSignIn: session.user?.last_sign_in_at,
+          email: session.user?.email
+        } : null
       });
 
       if (event === 'SIGNED_IN') {
         if (session) {
-          console.log('User signed in, checking profile');
+          console.log('User signed in, checking profile', {
+            userId: session.user.id,
+            timestamp: new Date().toISOString()
+          });
+          
           try {
             console.log('Starting profile fetch for user:', session.user.id);
             const { data: profile, error } = await supabase
@@ -55,7 +65,8 @@ const Login = () => {
                 errorMessage: error.message,
                 errorDetails: error.details,
                 userId: session.user.id,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                stack: new Error().stack
               });
               toast({
                 title: "Profile Error",
@@ -76,8 +87,14 @@ const Login = () => {
             });
             
             try {
-              console.log('Starting navigation to root');
-              navigate("/", { replace: true });
+              console.log('Starting navigation to root', {
+                currentPath: window.location.pathname,
+                navigationState: window.history.state
+              });
+              navigate("/", { 
+                replace: true,
+                state: { from: 'login', timestamp: new Date().toISOString() }
+              });
               console.log('Navigation completed successfully', {
                 timestamp: new Date().toISOString(),
                 to: '/',
@@ -87,7 +104,8 @@ const Login = () => {
               console.error('Navigation failed:', {
                 error: navError,
                 timestamp: new Date().toISOString(),
-                attempted_path: '/'
+                attempted_path: '/',
+                stack: navError instanceof Error ? navError.stack : undefined
               });
               toast({
                 title: "Navigation Error",
@@ -125,7 +143,8 @@ const Login = () => {
         sessionDetails: session ? {
           expiresAt: session.expires_at,
           provider: session.user?.app_metadata?.provider,
-          lastSignIn: session.user?.last_sign_in_at
+          lastSignIn: session.user?.last_sign_in_at,
+          email: session.user?.email
         } : null
       });
 
@@ -136,7 +155,10 @@ const Login = () => {
     });
 
     return () => {
-      console.log('Login page unmounting');
+      console.log('Login page unmounting', {
+        timestamp: new Date().toISOString(),
+        pathname: window.location.pathname
+      });
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
