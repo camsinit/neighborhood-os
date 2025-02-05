@@ -4,12 +4,30 @@ import AuthForm from "@/components/auth/AuthForm";
 import SecretTestButton from "@/components/auth/SecretTestButton";
 import { ArrowLeft } from "lucide-react";
 import { useLoginState } from "@/hooks/auth/useLoginState";
+import { useEffect } from "react";
 
 const Login = () => {
   useLoginState();
 
+  useEffect(() => {
+    console.log('Login component mounted', {
+      timestamp: new Date().toISOString(),
+      pathname: window.location.pathname,
+      href: window.location.href
+    });
+
+    return () => {
+      console.log('Login component unmounting', {
+        timestamp: new Date().toISOString(),
+        pathname: window.location.pathname
+      });
+    };
+  }, []);
+
   const handleBackClick = () => {
-    console.log('Back button clicked, navigating to root');
+    console.log('Back button clicked, navigating to root', {
+      timestamp: new Date().toISOString()
+    });
     window.location.href = '/';
   };
 

@@ -9,35 +9,53 @@ export const useLoginState = () => {
 
   const fetchProfile = async (userId: string) => {
     console.log('Starting profile fetch for user:', userId);
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    console.log('Profile fetch result:', {
-      hasProfile: !!profile,
-      profileData: profile,
-      error,
-      timestamp: new Date().toISOString(),
-      userId
-    });
+      console.log('Profile fetch completed:', {
+        success: !error,
+        hasProfile: !!profile,
+        error: error?.message,
+        timestamp: new Date().toISOString(),
+        userId
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Profile fetch error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      return profile;
+    } catch (error) {
+      console.error('Unexpected error in fetchProfile:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
       throw error;
     }
-
-    return profile;
   };
 
   const handleNavigation = async () => {
     console.log('Starting navigation to root', {
       currentPath: window.location.pathname,
-      navigationState: window.history.state
+      navigationState: window.history.state,
+      timestamp: new Date().toISOString()
     });
 
     try {
-      navigate("/", { 
+      await navigate("/", { 
         replace: true,
         state: { from: 'login', timestamp: new Date().toISOString() }
       });
@@ -62,7 +80,8 @@ export const useLoginState = () => {
       pathname: window.location.pathname,
       search: window.location.search,
       hash: window.location.hash,
-      href: window.location.href
+      href: window.location.href,
+      timestamp: new Date().toISOString()
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -82,15 +101,27 @@ export const useLoginState = () => {
       });
 
       if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, checking profile', {
+          userId: session.user.id,
+          timestamp: new Date().toISOString()
+        });
+
         try {
-          await fetchProfile(session.user.id);
+          const profile = await fetchProfile(session.user.id);
+          console.log('Profile fetch successful, attempting navigation', {
+            hasProfile: !!profile,
+            userId: session.user.id,
+            timestamp: new Date().toISOString()
+          });
+
           await handleNavigation();
         } catch (error) {
           console.error('Error in auth flow:', {
             error,
             errorMessage: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            userId: session.user.id
           });
           toast({
             title: "Error",
@@ -116,9 +147,24 @@ export const useLoginState = () => {
         } : null
       });
 
+      if (error) {
+        console.error('Session check error:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          stack: error.stack,
+          timestamp: new Date().toISOString()
+        });
+      }
+
       if (session) {
-        console.log('Session found, navigating to root');
-        navigate("/");
+        console.log('Session found, attempting navigation');
+        handleNavigation().catch(error => {
+          console.error('Navigation error during initial session check:', {
+            error,
+            timestamp: new Date().toISOString()
+          });
+        });
       }
     });
 
