@@ -15,6 +15,10 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
               src="/lovable-uploads/0b971e7e-959c-4a3c-aba7-984caf24216c.png" 
               alt="Neighborhood Logo" 
               className="h-24 w-auto"
+              onError={(e) => {
+                console.error('Error loading logo image');
+                e.currentTarget.src = '/placeholder.svg';
+              }}
             />
           </div>
           <div className="flex items-center gap-4">
