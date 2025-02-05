@@ -6,7 +6,6 @@ import { Event } from "@/types/calendar";
 interface DayCellProps {
   date: Date;
   isCurrentMonth?: boolean;
-  dayLabel?: string;
   events: Event[];
   isLoading: boolean;
   className?: string;
@@ -15,26 +14,20 @@ interface DayCellProps {
 const DayCell = ({ 
   date, 
   isCurrentMonth = true, 
-  dayLabel,
   events,
   isLoading,
   className = ""
 }: DayCellProps) => {
   return (
     <div 
-      className={`bg-white min-h-[120px] transition-all duration-300 relative
+      className={`bg-white transition-all duration-300 relative
         ${!isCurrentMonth ? 'opacity-50' : ''}
         ${isToday(date) ? 'ring-2 ring-[#0EA5E9] ring-inset' : ''}
         ${className}
       `}
     >
-      {dayLabel && (
-        <div className="absolute -top-7 left-0 right-0 text-sm text-gray-500 text-center">
-          {dayLabel}
-        </div>
-      )}
       <div className="p-2">
-        <span className="text-sm font-medium">{format(date, 'd')}</span>
+        <span className="text-sm font-medium text-gray-900">{format(date, 'd')}</span>
       </div>
       <div className="space-y-1 px-2 pb-2">
         {isLoading ? (

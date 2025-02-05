@@ -14,22 +14,26 @@ const MonthView = ({ monthDates, currentDate, events, isLoading, getEventsForDat
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-      {days.map((day, i) => (
-        <div key={i} className="bg-white p-2 text-sm text-gray-500 font-medium text-center">
-          {day}
-        </div>
-      ))}
-      {monthDates.map((date, i) => (
-        <DayCell
-          key={i}
-          date={date}
-          isCurrentMonth={isSameMonth(date, currentDate)}
-          events={getEventsForDate(date)}
-          isLoading={isLoading}
-          className="p-2 min-h-[120px]"
-        />
-      ))}
+    <div className="rounded-lg overflow-hidden border border-gray-200">
+      <div className="grid grid-cols-7">
+        {days.map((day, i) => (
+          <div key={i} className="p-2 text-sm font-semibold text-gray-900 text-center">
+            {day}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 divide-x divide-y divide-gray-200">
+        {monthDates.map((date, i) => (
+          <DayCell
+            key={i}
+            date={date}
+            isCurrentMonth={isSameMonth(date, currentDate)}
+            events={getEventsForDate(date)}
+            isLoading={isLoading}
+            className="min-h-[120px]"
+          />
+        ))}
+      </div>
     </div>
   );
 };
