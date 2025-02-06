@@ -1,9 +1,11 @@
+
 import { Settings, UserCircle } from "lucide-react";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,23 +22,9 @@ interface UserMenuProps {
 
 const UserMenu = ({ onOpenSettings }: UserMenuProps) => {
   const supabaseClient = useSupabaseClient();
-  const user = useUser();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from('profiles')
-        .select('avatar_url, display_name')
-        .eq('id', user.id)
-        .single();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
 
   const handleSignOut = async () => {
     try {
@@ -52,6 +40,10 @@ const UserMenu = ({ onOpenSettings }: UserMenuProps) => {
       });
     }
   };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -70,10 +62,10 @@ const UserMenu = ({ onOpenSettings }: UserMenuProps) => {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.display_name || user?.user_metadata?.full_name}
+              {profile?.display_name || user?.user_metadata?.full_name || user?.email}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
