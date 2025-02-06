@@ -1,5 +1,7 @@
 import { Settings, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,23 +19,38 @@ interface UserMenuProps {
 const UserMenu = ({ onOpenSettings }: UserMenuProps) => {
   const navigate = useNavigate();
   
-  // Hardcoded user profile for single-player mode
-  const profile = {
-    email: 'cam@contxt.wiki',
-    display_name: 'Cam',
-    avatar_url: null
-  };
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', 'cclindsay@gmail.com')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+
+      return data || {
+        email: 'cclindsay@gmail.com',
+        display_name: 'C',
+        avatar_url: null
+      };
+    }
+  });
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger className="focus:outline-none">
         <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
           <AvatarImage 
-            src={profile.avatar_url || undefined}
-            alt={profile.display_name || profile.email}
+            src={profile?.avatar_url || undefined}
+            alt={profile?.display_name || profile?.email}
           />
           <AvatarFallback>
-            {profile.email.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
+            {profile?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -41,10 +58,10 @@ const UserMenu = ({ onOpenSettings }: UserMenuProps) => {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile.display_name || 'Cam'}
+              {profile?.display_name || 'C'}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {profile.email}
+              {profile?.email}
             </p>
           </div>
         </DropdownMenuLabel>
