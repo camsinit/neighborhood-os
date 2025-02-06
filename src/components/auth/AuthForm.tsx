@@ -32,9 +32,6 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
-          onError={(error) => {
-            console.error('Auth error:', error);
-          }}
           localization={{
             variables: {
               sign_up: {
