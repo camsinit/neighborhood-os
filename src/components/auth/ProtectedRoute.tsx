@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,20 +49,31 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         }
 
         console.log("Auth check successful, profile found");
+        setIsAuthenticated(true);
       } catch (error) {
         console.error("Unexpected error during auth check:", error);
         navigate("/login");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAuth();
   }, [navigate]);
 
-  return (
-    <div className="min-h-screen bg-white">
-      <LoadingSpinner />
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
