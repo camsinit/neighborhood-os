@@ -1,4 +1,5 @@
 import NotificationsPopover from "@/components/notifications/NotificationsPopover";
+import UserMenu from "./UserMenu";
 
 interface HeaderProps {
   onOpenSettings?: () => void;
@@ -22,14 +23,7 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
           </div>
           <div className="flex items-center gap-4">
             <NotificationsPopover />
-            {onOpenSettings && (
-              <button 
-                onClick={onOpenSettings}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Settings
-              </button>
-            )}
+            <UserMenu onOpenSettings={onOpenSettings} />
           </div>
         </div>
       </div>
