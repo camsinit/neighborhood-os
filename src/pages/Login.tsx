@@ -1,17 +1,20 @@
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { LoadingSpinner } from "@/components/ui/loading";
 
 const Login = () => {
   const { session, loading } = useAuth();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/dashboard";
 
   if (loading) {
-    return null;
+    return <LoadingSpinner />;
   }
 
   if (session) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   return (
