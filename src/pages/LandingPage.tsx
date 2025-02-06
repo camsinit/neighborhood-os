@@ -13,15 +13,22 @@ const LandingPage = () => {
     // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      console.log('Auth state checked:', { hasSession: !!session });
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', { event, hasSession: !!session });
       setIsAuthenticated(!!session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleNavigation = (path: string) => {
+    console.log('Navigating to:', path);
+    navigate(path);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F1F0FB] via-[#D3E4FD] to-[#F2FCE2] flex flex-col">
@@ -33,7 +40,7 @@ const LandingPage = () => {
           <div className="flex gap-4">
             <Button 
               variant="default" 
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/login")}
+              onClick={() => handleNavigation(isAuthenticated ? "/dashboard" : "/login")}
               className="bg-gray-900 text-white hover:bg-gray-800"
             >
               {isAuthenticated ? "View Dashboard" : "Login/Sign up"}
@@ -53,7 +60,7 @@ const LandingPage = () => {
           <div className="flex gap-4">
             <Button 
               size="lg"
-              onClick={() => navigate("/login")}
+              onClick={() => handleNavigation("/login")}
               className="bg-gray-900 text-white hover:bg-gray-800 px-8 py-6 text-lg"
             >
               Join Your Block
