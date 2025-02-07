@@ -13,6 +13,28 @@ const AuthForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const handleError = (error: any) => {
+    console.error("Auth error:", error);
+    let message = "An error occurred during authentication";
+    
+    // Handle specific error cases
+    if (error.message.includes("Email not confirmed")) {
+      message = "Please check your email to confirm your account";
+    } else if (error.message.includes("Invalid login credentials")) {
+      message = "Invalid email or password";
+    } else if (error.message.includes("User already registered")) {
+      message = "This email is already registered";
+    } else if (error.message.includes("Password should be at least")) {
+      message = "Password should be at least 6 characters long";
+    }
+
+    toast({
+      title: "Error",
+      description: message,
+      variant: "destructive",
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -25,13 +47,13 @@ const AuthForm = () => {
 
       if (error) throw error;
 
+      toast({
+        title: "Success",
+        description: "You have successfully signed in",
+      });
       navigate("/dashboard");
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      handleError(error);
     } finally {
       setLoading(false);
     }
@@ -44,6 +66,11 @@ const AuthForm = () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            email: email,
+          },
+        },
       });
 
       if (error) throw error;
@@ -53,11 +80,7 @@ const AuthForm = () => {
         description: "Check your email for the confirmation link",
       });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      handleError(error);
     } finally {
       setLoading(false);
     }
