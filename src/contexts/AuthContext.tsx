@@ -18,27 +18,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     // Initial session check
@@ -46,11 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("Initial session check:", { hasSession: !!session });
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     });
 
     // Listen for auth changes
@@ -62,8 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
           if (event === "SIGNED_IN") {
+            console.log("User signed in, navigating to dashboard");
             toast({
               title: "Success",
               description: "You have successfully logged in",
@@ -71,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             navigate("/dashboard");
           }
         } else {
-          setProfile(null);
           setLoading(false);
           if (event === "SIGNED_OUT") {
             navigate("/login");
@@ -90,7 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
       setSession(null);
       setUser(null);
-      setProfile(null);
       navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -98,7 +74,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, signOut, loading }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      profile: null, // Simplified - remove profile fetching
+      signOut, 
+      loading 
+    }}>
       {children}
     </AuthContext.Provider>
   );
