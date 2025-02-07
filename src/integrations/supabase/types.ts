@@ -36,13 +36,6 @@ export type Database = {
             referencedRelation: "events"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "event_rsvps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       events: {
@@ -88,74 +81,6 @@ export type Database = {
           time?: string
           title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_host_id_fkey"
-            columns: ["host_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          address: string | null
-          avatar_url: string | null
-          bio: string | null
-          created_at: string
-          display_name: string | null
-          email: string | null
-          first_name: string | null
-          id: string
-          language: string | null
-          last_name: string | null
-          notification_preferences: Json | null
-          onboarding_completed: boolean | null
-          phone_number: string | null
-          skills: string[] | null
-          theme: string | null
-          timezone: string | null
-          username: string | null
-        }
-        Insert: {
-          address?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          first_name?: string | null
-          id: string
-          language?: string | null
-          last_name?: string | null
-          notification_preferences?: Json | null
-          onboarding_completed?: boolean | null
-          phone_number?: string | null
-          skills?: string[] | null
-          theme?: string | null
-          timezone?: string | null
-          username?: string | null
-        }
-        Update: {
-          address?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          language?: string | null
-          last_name?: string | null
-          notification_preferences?: Json | null
-          onboarding_completed?: boolean | null
-          phone_number?: string | null
-          skills?: string[] | null
-          theme?: string | null
-          timezone?: string | null
-          username?: string | null
-        }
         Relationships: []
       }
       safety_update_comments: {
@@ -186,13 +111,6 @@ export type Database = {
             columns: ["safety_update_id"]
             isOneToOne: false
             referencedRelation: "safety_updates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "safety_update_comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -231,15 +149,7 @@ export type Database = {
           title?: string
           type?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "safety_updates_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       support_requests: {
         Row: {
@@ -287,15 +197,7 @@ export type Database = {
           user_id?: string
           valid_until?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "support_requests_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
