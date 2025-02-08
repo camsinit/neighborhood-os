@@ -1,134 +1,85 @@
-
-import { useState } from "react";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
+import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
 const AuthForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const handleError = (error: any) => {
-    console.error("Auth error:", error);
-    let message = "An error occurred during authentication";
-    
-    // Handle specific error cases
-    if (error.message.includes("Email not confirmed")) {
-      message = "Please check your email to confirm your account";
-    } else if (error.message.includes("Invalid login credentials")) {
-      message = "Invalid email or password";
-    } else if (error.message.includes("User already registered")) {
-      message = "This email is already registered";
-    } else if (error.message.includes("Password should be at least")) {
-      message = "Password should be at least 6 characters long";
-    }
-
-    toast({
-      title: "Error",
-      description: message,
-      variant: "destructive",
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const redirectTo = window.location.origin;
+  
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any) => {
+      if (event === 'SIGNED_UP') {
+        setShowOnboarding(true);
+      }
     });
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "You have successfully signed in",
-      });
-      navigate("/dashboard");
-    } catch (error: any) {
-      handleError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            email: email,
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Check your email for the confirmation link",
-      });
-    } catch (error: any) {
-      handleError(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
-    <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1"
-            />
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Loading..." : "Sign In"}
-            </Button>
-            <Button type="button" variant="outline" onClick={handleSignUp} disabled={loading}>
-              Sign Up
-            </Button>
-          </div>
-        </form>
+    <>
+      <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ 
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#000000',
+                  brandAccent: '#222222',
+                },
+              },
+            },
+          }}
+          providers={[]}
+          redirectTo={redirectTo}
+          localization={{
+            variables: {
+              sign_up: {
+                password_label: "Password (minimum 6 characters)",
+                password_input_placeholder: "Enter your password (min. 6 characters)",
+                email_label: "Email address",
+                email_input_placeholder: "Your email address",
+                button_label: "Sign up",
+                loading_button_label: "Signing in ...",
+                social_provider_text: "Sign in with {{provider}}",
+                link_text: "Don't have an account? Sign up",
+                confirmation_text: "Check your email for the confirmation link"
+              },
+              sign_in: {
+                password_label: "Password",
+                password_input_placeholder: "Enter your password",
+                email_label: "Email address",
+                email_input_placeholder: "Your email address",
+                button_label: "Sign in",
+                loading_button_label: "Signing in ...",
+                social_provider_text: "Sign in with {{provider}}",
+                link_text: "Already have an account? Sign in"
+              }
+            }
+          }}
+          showLinks={true}
+        />
       </div>
-    </div>
+      <OnboardingDialog 
+        open={showOnboarding} 
+        onOpenChange={(open) => {
+          setShowOnboarding(open);
+          if (!open) {
+            setShowSurvey(true);
+          }
+        }}
+      />
+      <SurveyDialog
+        open={showSurvey}
+        onOpenChange={setShowSurvey}
+      />
+    </>
   );
 };
 

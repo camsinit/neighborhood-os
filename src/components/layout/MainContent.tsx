@@ -19,16 +19,16 @@ const MainContent = () => {
         `}
       </style>
       <div className="space-y-8">
-        <div className="p-6 rounded-lg bg-white shadow-md">
+        <div className="p-6 rounded-lg bg-white border border-gray-200">
           <QuickActions />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-md">
+        <div className="p-6 rounded-lg bg-white border border-blue-300">
           <CommunityCalendar />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-md mutual-support-container">
+        <div className="p-6 rounded-lg bg-white border border-[#9b87f5] mutual-support-container">
           <MutualSupport />
         </div>
-        <div className="p-6 rounded-lg bg-white shadow-md">
+        <div className="p-6 rounded-lg bg-white border border-red-300">
           <SafetyUpdates />
         </div>
       </div>

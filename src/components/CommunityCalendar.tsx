@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { 
   addWeeks, 
   subWeeks, 
@@ -25,8 +25,6 @@ const CommunityCalendar = () => {
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { data: events, isLoading, refetch } = useEvents();
-  const calendarRef = useRef<HTMLDivElement>(null);
-  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
   
   const weekStart = startOfWeek(currentDate);
   const monthStart = startOfMonth(currentDate);
@@ -34,45 +32,6 @@ const CommunityCalendar = () => {
   
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const monthDates = eachDayOfInterval({ start: startOfWeek(monthStart), end: endOfWeek(monthEnd) });
-
-  useEffect(() => {
-    let resizeObserver: ResizeObserver | null = null;
-    
-    try {
-      if (calendarRef.current) {
-        resizeObserver = new ResizeObserver((entries) => {
-          // Clear any existing timeout
-          if (resizeTimeoutRef.current) {
-            clearTimeout(resizeTimeoutRef.current);
-          }
-          
-          // Set new debounced timeout
-          resizeTimeoutRef.current = setTimeout(() => {
-            requestAnimationFrame(() => {
-              for (const entry of entries) {
-                if (entry.target === calendarRef.current) {
-                  console.log("Calendar resized");
-                }
-              }
-            });
-          }, 100);
-        });
-
-        resizeObserver.observe(calendarRef.current);
-      }
-    } catch (error) {
-      console.error("ResizeObserver error:", error);
-    }
-
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-    };
-  }, []);
 
   const handlePrevious = () => {
     if (view === 'week') {
@@ -93,9 +52,7 @@ const CommunityCalendar = () => {
   const handleToday = () => {
     const today = new Date();
     setCurrentDate(today);
-    if (calendarRef.current) {
-      addScaleAnimation(calendarRef.current);
-    }
+    addScaleAnimation(document.querySelector('.calendar-container'));
   };
 
   const getEventsForDate = (date: Date) => {
@@ -125,7 +82,7 @@ const CommunityCalendar = () => {
         setIsAddEventOpen={setIsAddEventOpen}
       />
       
-      <div ref={calendarRef} className="calendar-container">
+      <div className="calendar-container">
         {view === 'week' ? (
           <WeekView 
             weekDates={weekDates}

@@ -10,12 +10,10 @@ interface SafetyUpdateCardProps {
 const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
   const getUpdateIcon = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'alert':
+      case 'alerts':
         return AlertTriangle;
       case 'maintenance':
         return Wrench;
-      case 'update':
-        return Clock;
       default:
         return Clock;
     }
@@ -23,7 +21,7 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
 
   const getUpdateColors = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'alert':
+      case 'alerts':
         return {
           color: "text-red-500",
           bgColor: "bg-red-100",
@@ -34,12 +32,6 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
           color: "text-blue-500",
           bgColor: "bg-blue-100",
           borderColor: "border-l-blue-500",
-        };
-      case 'update':
-        return {
-          color: "text-green-500",
-          bgColor: "bg-green-100",
-          borderColor: "border-l-green-500",
         };
       default:
         return {
