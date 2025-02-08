@@ -1,3 +1,4 @@
+
 export type Category = {
   icon: any;
   label: string;
@@ -8,15 +9,16 @@ export type SupportRequestFromDB = {
   category: string;
   request_type: string;
   title: string;
-  description: string;
+  description: string | null;
   user_id: string;
   valid_until: string;
-  status: string;
   created_at: string;
   image_url: string | null;
-  support_type: string;
+  support_type: string | null;
+  is_archived: boolean | null;
+  is_read: boolean | null;
   profiles: {
-    display_name: string;
+    display_name: string | null;
     avatar_url: string | null;
   };
 };

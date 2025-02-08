@@ -1,3 +1,4 @@
+
 import { SupportItem, SupportRequestFromDB } from "@/components/mutual-support/types";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 
@@ -42,7 +43,7 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
     requestType: request.category,
-    supportType: request.support_type,
+    supportType: request.support_type || 'immediate',
     imageUrl: request.image_url,
     originalRequest: request,
   };
