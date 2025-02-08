@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string
@@ -69,6 +105,10 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          language: string | null
+          notification_preferences: Json | null
+          theme: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
@@ -77,6 +117,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          language?: string | null
+          notification_preferences?: Json | null
+          theme?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
@@ -85,6 +129,10 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          language?: string | null
+          notification_preferences?: Json | null
+          theme?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []
