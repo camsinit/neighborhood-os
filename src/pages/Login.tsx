@@ -6,13 +6,15 @@ import AuthHeader from "@/components/auth/AuthHeader";
 import AuthForm from "@/components/auth/AuthForm";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && session) {
+        toast.success('Successfully signed in!');
         navigate("/");
       }
     });
@@ -28,7 +30,7 @@ const Login = () => {
   }, [navigate]);
 
   const handleBackClick = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (

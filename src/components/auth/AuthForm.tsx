@@ -3,18 +3,23 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
 const AuthForm = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
-  const redirectTo = window.location.origin;
+  const redirectTo = `${window.location.origin}/`;
   
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session) => {
       if (event === 'SIGNED_UP') {
         setShowOnboarding(true);
+      } else if (event === 'USER_UPDATED') {
+        toast.success('Profile updated successfully!');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        toast.info('Please check your email to reset your password.');
       }
     });
 
@@ -39,6 +44,9 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
+          onError={(error) => {
+            toast.error(error.message);
+          }}
           localization={{
             variables: {
               sign_up: {
@@ -47,7 +55,7 @@ const AuthForm = () => {
                 email_label: "Email address",
                 email_input_placeholder: "Your email address",
                 button_label: "Sign up",
-                loading_button_label: "Signing in ...",
+                loading_button_label: "Signing up ...",
                 social_provider_text: "Sign in with {{provider}}",
                 link_text: "Don't have an account? Sign up",
                 confirmation_text: "Check your email for the confirmation link"
