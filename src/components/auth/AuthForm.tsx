@@ -44,9 +44,6 @@ const AuthForm = () => {
           }}
           providers={[]}
           redirectTo={redirectTo}
-          onError={(error) => {
-            toast.error(error.message);
-          }}
           localization={{
             variables: {
               sign_up: {
