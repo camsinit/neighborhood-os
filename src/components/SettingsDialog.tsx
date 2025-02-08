@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,52 +90,37 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const onSubmit = async (values: ProfileFormValues) => {
     if (!user || !initialValues) return;
     
-    // Check if any values have actually changed
-    const hasChanges = Object.keys(values).some(key => {
-      if (key === 'notification_preferences') {
-        return JSON.stringify(values[key]) !== JSON.stringify(initialValues[key]);
-      }
-      return values[key] !== initialValues[key];
-    });
-
-    if (!hasChanges) {
-      toast({
-        title: "No changes detected",
-        description: "No changes were made to your profile settings.",
-      });
-      return;
-    }
-
     setLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: values.display_name,
+          bio: values.bio,
+          timezone: values.timezone,
+          language: values.language,
+          theme: values.theme,
+          notification_preferences: values.notification_preferences,
+        })
+        .eq("id", user.id);
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        display_name: values.display_name,
-        bio: values.bio,
-        timezone: values.timezone,
-        language: values.language,
-        theme: values.theme,
-        notification_preferences: values.notification_preferences,
-      })
-      .eq("id", user.id);
+      if (error) throw error;
 
-    setLoading(false);
-
-    if (error) {
+      setInitialValues(values);
       toast({
-        title: "Error updating profile",
+        title: "Settings saved",
+        description: "Your profile settings have been updated successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error saving settings",
         description: error.message,
         variant: "destructive",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    setInitialValues(values);
-    toast({
-      title: "Settings updated",
-      description: "Your profile settings have been saved successfully.",
-    });
   };
 
   return (
