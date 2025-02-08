@@ -1,9 +1,9 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthForm from "@/components/auth/AuthForm";
-import SecretTestButton from "@/components/auth/SecretTestButton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,26 +13,7 @@ const Login = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
-        if (session) {
-          // Check if this is a new user (first sign in)
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('created_at, display_name')
-            .eq('id', session.user.id)
-            .single();
-
-          // If the profile was just created (within the last minute), show onboarding
-          if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
-            navigate("/");
-          } else if (!profile?.display_name) {
-            // If the user hasn't completed their profile, show the survey
-            navigate("/");
-          } else {
-            navigate("/");
-          }
-        }
-      } else if (event === 'SIGNED_OUT') {
-        navigate("/login");
+        navigate("/");
       }
     });
 
@@ -47,7 +28,6 @@ const Login = () => {
   }, [navigate]);
 
   const handleBackClick = () => {
-    // Force navigation to root without auth check
     window.location.href = '/';
   };
 
@@ -65,7 +45,6 @@ const Login = () => {
         <AuthHeader />
         <AuthForm />
       </div>
-      <SecretTestButton />
     </div>
   );
 };
