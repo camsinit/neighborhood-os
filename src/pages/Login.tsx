@@ -1,21 +1,38 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthForm from "@/components/auth/AuthForm";
+import SecretTestButton from "@/components/auth/SecretTestButton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        toast.success('Successfully signed in!');
-        navigate("/");
+      if (event === 'SIGNED_IN') {
+        if (session) {
+          // Check if this is a new user (first sign in)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('created_at, display_name')
+            .eq('id', session.user.id)
+            .single();
+
+          // If the profile was just created (within the last minute), show onboarding
+          if (profile && new Date(profile.created_at).getTime() > Date.now() - 60000) {
+            navigate("/");
+          } else if (!profile?.display_name) {
+            // If the user hasn't completed their profile, show the survey
+            navigate("/");
+          } else {
+            navigate("/");
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        navigate("/login");
       }
     });
 
@@ -30,7 +47,8 @@ const Login = () => {
   }, [navigate]);
 
   const handleBackClick = () => {
-    navigate('/');
+    // Force navigation to root without auth check
+    window.location.href = '/';
   };
 
   return (
@@ -47,6 +65,7 @@ const Login = () => {
         <AuthHeader />
         <AuthForm />
       </div>
+      <SecretTestButton />
     </div>
   );
 };

@@ -1,10 +1,9 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, addHours } from "date-fns";
 
 export const seedDashboard = async () => {
-  // Generate a temporary ID for demo purposes
-  const demoUserId = '00000000-0000-0000-0000-000000000000';
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
   // Safety Updates
   const safetyUpdates = [
@@ -12,19 +11,19 @@ export const seedDashboard = async () => {
       type: "Updates",
       title: "New Street Lights Installation",
       description: "The city will be installing LED street lights on Oak Avenue next week to improve nighttime visibility.",
-      author_id: demoUserId
+      author_id: user.id
     },
     {
       type: "Maintenance",
       title: "Community Garden Water System",
       description: "The irrigation system in the community garden will be upgraded this weekend. Please hand-water your plants on Saturday.",
-      author_id: demoUserId
+      author_id: user.id
     },
     {
       type: "Alerts",
       title: "Temporary Road Closure",
       description: "Maple Street will be closed for repaving between 9 AM and 4 PM tomorrow. Please use alternate routes.",
-      author_id: demoUserId
+      author_id: user.id
     }
   ];
 
@@ -35,7 +34,7 @@ export const seedDashboard = async () => {
       request_type: "offer",
       title: "Free Moving Boxes",
       description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
-      user_id: demoUserId,
+      user_id: user.id,
       valid_until: addDays(new Date(), 7).toISOString(),
       support_type: "immediate"
     },
@@ -44,7 +43,7 @@ export const seedDashboard = async () => {
       request_type: "need",
       title: "Help with Basic Phone Setup",
       description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
-      user_id: demoUserId,
+      user_id: user.id,
       valid_until: addDays(new Date(), 14).toISOString(),
       support_type: "immediate"
     },
@@ -53,7 +52,7 @@ export const seedDashboard = async () => {
       request_type: "offer",
       title: "Pet Sitting Available",
       description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
-      user_id: demoUserId,
+      user_id: user.id,
       valid_until: addDays(new Date(), 30).toISOString(),
       support_type: "ongoing"
     }
@@ -66,21 +65,21 @@ export const seedDashboard = async () => {
       description: "Join us for our monthly neighborhood cleanup! Bring gloves if you have them. Tools and bags provided.",
       time: addDays(new Date(), 3).toISOString(),
       location: "Meet at Central Park entrance",
-      host_id: demoUserId
+      host_id: user.id
     },
     {
       title: "Community Garden Workshop",
       description: "Learn about seasonal planting and composting. Perfect for beginners!",
       time: addDays(addHours(new Date(), 4), 5).toISOString(),
       location: "Community Garden on Pine Street",
-      host_id: demoUserId
+      host_id: user.id
     },
     {
       title: "Block Party Planning Meeting",
       description: "Help us plan the upcoming summer block party. All neighbors welcome!",
       time: addDays(addHours(new Date(), 2), 1).toISOString(),
       location: "Community Center",
-      host_id: demoUserId
+      host_id: user.id
     }
   ];
 
@@ -97,6 +96,8 @@ export const seedDashboard = async () => {
     console.log('Dashboard populated successfully!');
   } catch (error) {
     console.error('Error populating dashboard:', error);
-    throw error; // Re-throw to handle in the component
   }
 };
+
+// Execute the seeding
+seedDashboard();
