@@ -1,41 +1,34 @@
+
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { addDays, eachWeekOfInterval, eachMonthOfInterval, isBefore } from "date-fns";
+import { Event } from "@/types/localTypes";
+
+const mockEvents: Event[] = [
+  {
+    id: "1",
+    title: "Community Meeting",
+    description: "Monthly community gathering",
+    time: new Date().toISOString(),
+    location: "Community Center",
+    host_id: "1",
+    is_recurring: true,
+    recurrence_pattern: "monthly",
+    profiles: {
+      id: "1",
+      display_name: "Test User",
+      avatar_url: "/placeholder.svg"
+    }
+  }
+];
 
 export const useEvents = () => {
   return useQuery({
     queryKey: ["events"],
     queryFn: async () => {
       try {
-        const { data: events, error } = await supabase
-          .from("events")
-          .select(`
-            *,
-            profiles (
-              display_name
-            )
-          `)
-          .order('time', { ascending: true });
-
-        if (error) {
-          console.error('Error fetching events:', error);
-          throw error;
-        }
-
-        if (!events) {
-          console.log('No events found');
-          return [];
-        }
-
-        // Process events to include additional logic if necessary
-        const processedEvents = events.map(event => {
-          return {
-            ...event,
-            formattedTime: new Date(event.time).toLocaleString(), // Example of processing
-          };
-        });
-
-        return processedEvents;
+        return mockEvents.map(event => ({
+          ...event,
+          formattedTime: new Date(event.time).toLocaleString(),
+        }));
       } catch (error) {
         console.error('Error in events query:', error);
         throw error;
