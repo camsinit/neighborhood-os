@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format, startOfWeek, endOfWeek } from "date-fns";
@@ -25,7 +26,7 @@ const CalendarHeader = ({
   const weekEnd = endOfWeek(currentDate);
   
   const periodLabel = view === 'month' 
-    ? format(currentDate, 'MMMM yyyy')
+    ? format(currentDate, 'MMMM')
     : `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
 
   return (
