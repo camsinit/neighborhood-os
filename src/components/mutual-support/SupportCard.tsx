@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { SupportItem } from "./types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -25,7 +26,7 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
         </Avatar>
       </div>
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className={`inline-flex items-center px-2 py-0.5 rounded-full ${item.tagColor} ${item.tagBg} text-xs font-medium uppercase`}>
             {item.requestType}
           </div>
@@ -33,6 +34,11 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
             {item.supportType}
           </Badge>
           <span className="text-xs text-muted-foreground">{item.timeAgo}</span>
+          {isTimeSensitive && item.originalRequest.valid_until && (
+            <span className="text-xs text-muted-foreground">
+              Due: {format(new Date(item.originalRequest.valid_until), 'MMM d, yyyy')}
+            </span>
+          )}
         </div>
         <h4 className="text-lg font-medium">{item.title}</h4>
       </div>
@@ -48,11 +54,6 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
       <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
         {item.description}
       </p>
-      {isTimeSensitive && item.originalRequest.valid_until && (
-        <div className="mt-3 text-sm text-muted-foreground">
-          Due by: {format(new Date(item.originalRequest.valid_until), 'MMM d, yyyy')}
-        </div>
-      )}
     </div>
   );
 };
