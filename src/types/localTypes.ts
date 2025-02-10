@@ -43,5 +43,5 @@ export interface SupportRequest {
   created_at: string;
   is_archived: boolean | null;
   is_read: boolean | null;
-  profiles?: Profile;
+  profiles: Profile;
 }
