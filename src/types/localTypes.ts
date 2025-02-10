@@ -41,7 +41,7 @@ export interface SupportRequest {
   valid_until: string;
   image_url: string | null;
   created_at: string;
-  is_archived?: boolean;
-  is_read?: boolean;
+  is_archived: boolean | null;
+  is_read: boolean | null;
   profiles?: Profile;
 }

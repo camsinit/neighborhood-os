@@ -13,8 +13,8 @@ const mockSupportRequests: SupportRequest[] = [
     user_id: "1",
     valid_until: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     created_at: new Date().toISOString(),
-    is_archived: false,
-    is_read: false,
+    is_archived: null,
+    is_read: null,
     image_url: null,
     profiles: {
       id: "1",
