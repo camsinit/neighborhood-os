@@ -1,3 +1,4 @@
+
 import { format, isToday } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import EventCard from "../EventCard";
@@ -6,7 +7,6 @@ import { Event } from "@/types/calendar";
 interface DayCellProps {
   date: Date;
   isCurrentMonth?: boolean;
-  dayLabel?: string;
   events: Event[];
   isLoading: boolean;
   className?: string;
@@ -15,7 +15,6 @@ interface DayCellProps {
 const DayCell = ({ 
   date, 
   isCurrentMonth = true, 
-  dayLabel,
   events,
   isLoading,
   className = ""
@@ -28,11 +27,8 @@ const DayCell = ({
         ${className}
       `}
     >
-      <div className="flex items-center justify-between p-2 border-b border-gray-100">
-        {dayLabel && (
-          <span className="text-sm text-gray-500">{dayLabel}</span>
-        )}
-        <span className="text-sm font-medium">{format(date, 'd')}</span>
+      <div className="p-2">
+        <span className="text-lg font-medium">{format(date, 'd')}</span>
       </div>
       <div className="space-y-0 p-2">
         {isLoading ? (
