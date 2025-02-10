@@ -25,9 +25,7 @@ const CalendarHeader = ({
   const weekStart = startOfWeek(currentDate);
   const weekEnd = endOfWeek(currentDate);
   
-  const periodLabel = view === 'month' 
-    ? format(currentDate, 'MMMM')
-    : `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+  const periodLabel = format(currentDate, 'MMMM');
 
   return (
     <div className="space-y-4">
