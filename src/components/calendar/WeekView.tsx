@@ -16,7 +16,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
   return (
     <div className="space-y-2">
       {/* Day names header */}
-      <div className="grid grid-cols-7 gap-px">
+      <div className="grid grid-cols-7">
         {days.map((day) => (
           <div key={day} className="text-lg font-medium px-4">
             {day}
@@ -25,7 +25,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 border border-gray-200 rounded-lg overflow-hidden">
         {weekDates.map((date, i) => (
           <DayCell
             key={i}
