@@ -15,6 +15,7 @@ const mockSupportRequests: SupportRequest[] = [
     created_at: new Date().toISOString(),
     is_archived: false,
     is_read: false,
+    image_url: null,
     profiles: {
       id: "1",
       display_name: "Test User",

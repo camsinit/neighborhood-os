@@ -36,3 +36,4 @@ export type SupportItem = {
   imageUrl: string | null;
   originalRequest: SupportRequestFromDB;
 };
+

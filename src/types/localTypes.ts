@@ -39,7 +39,7 @@ export interface SupportRequest {
   support_type: string;
   user_id: string;
   valid_until: string;
-  image_url?: string;
+  image_url: string | null;
   created_at: string;
   is_archived?: boolean;
   is_read?: boolean;
