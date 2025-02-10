@@ -1,8 +1,8 @@
 
 export interface Profile {
   id: string;
-  display_name?: string;
-  avatar_url?: string;
+  display_name: string;
+  avatar_url: string;
   created_at?: string;
 }
 

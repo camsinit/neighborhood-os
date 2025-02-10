@@ -19,7 +19,8 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "1",
       display_name: "Test User",
-      avatar_url: "/placeholder.svg"
+      avatar_url: "/placeholder.svg",
+      created_at: new Date().toISOString()
     }
   }
 ];
