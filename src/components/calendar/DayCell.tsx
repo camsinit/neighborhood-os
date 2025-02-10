@@ -23,7 +23,7 @@ const DayCell = ({
     <div 
       className={`relative bg-white border-r border-b border-gray-200 min-h-[120px] transition-all duration-300 last:border-r-0
         ${!isCurrentMonth ? 'opacity-50' : ''}
-        ${isToday(date) ? 'outline outline-2 outline-[#0EA5E9] outline-offset-[-1px] z-10' : ''}
+        ${isToday(date) ? 'outline outline-1 outline-[#0EA5E9] outline-offset-[-1px] z-10' : ''}
         ${className}
       `}
     >
