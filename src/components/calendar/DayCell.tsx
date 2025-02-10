@@ -21,9 +21,9 @@ const DayCell = ({
 }: DayCellProps) => {
   return (
     <div 
-      className={`bg-white border-r border-b border-gray-200 min-h-[120px] transition-all duration-300 last:border-r-0
+      className={`relative bg-white border-r border-b border-gray-200 min-h-[120px] transition-all duration-300 last:border-r-0
         ${!isCurrentMonth ? 'opacity-50' : ''}
-        ${isToday(date) ? 'ring-2 ring-[#0EA5E9]' : ''}
+        ${isToday(date) ? 'outline outline-2 outline-[#0EA5E9] z-10' : ''}
         ${className}
       `}
     >
