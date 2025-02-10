@@ -103,15 +103,7 @@ const mockEvents: Event[] = [
 export const useEvents = () => {
   return useQuery({
     queryKey: ["events"],
-    queryFn: async () => {
-      try {
-        return mockEvents;
-      } catch (error) {
-        console.error('Error in events query:', error);
-        throw error;
-      }
-    },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    queryFn: () => Promise.resolve(mockEvents),
   });
 };
+

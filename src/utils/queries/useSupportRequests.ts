@@ -19,8 +19,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "1",
       display_name: "Sarah Johnson",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   },
   {
@@ -39,8 +38,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "2",
       display_name: "Robert Chen",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   },
   {
@@ -59,8 +57,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "3",
       display_name: "Maria Garcia",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   },
   {
@@ -79,8 +76,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "4",
       display_name: "James Wilson",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   },
   {
@@ -99,8 +95,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "5",
       display_name: "David Kim",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   },
   {
@@ -119,8 +114,7 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "6",
       display_name: "Emma Thompson",
-      avatar_url: "/placeholder.svg",
-      created_at: new Date().toISOString()
+      avatar_url: "/placeholder.svg"
     }
   }
 ];
@@ -128,8 +122,7 @@ const mockSupportRequests: SupportRequest[] = [
 export const useSupportRequests = () => {
   return useQuery({
     queryKey: ["support-requests"],
-    queryFn: async () => {
-      return mockSupportRequests;
-    },
+    queryFn: () => Promise.resolve(mockSupportRequests),
   });
 };
+
