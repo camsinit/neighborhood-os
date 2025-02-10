@@ -12,6 +12,7 @@ const mockEvents: Event[] = [
     host_id: "1",
     is_recurring: true,
     recurrence_pattern: "monthly",
+    created_at: new Date().toISOString(),
     profiles: {
       id: "1",
       display_name: "Test User",
@@ -25,10 +26,7 @@ export const useEvents = () => {
     queryKey: ["events"],
     queryFn: async () => {
       try {
-        return mockEvents.map(event => ({
-          ...event,
-          formattedTime: new Date(event.time).toLocaleString(),
-        }));
+        return mockEvents;
       } catch (error) {
         console.error('Error in events query:', error);
         throw error;

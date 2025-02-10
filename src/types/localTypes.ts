@@ -26,6 +26,7 @@ export interface Event {
   is_recurring: boolean;
   recurrence_pattern?: string;
   recurrence_end_date?: string;
+  created_at: string;
   profiles?: Profile;
 }
 
@@ -40,5 +41,7 @@ export interface SupportRequest {
   valid_until: string;
   image_url?: string;
   created_at: string;
+  is_archived?: boolean;
+  is_read?: boolean;
   profiles?: Profile;
 }
