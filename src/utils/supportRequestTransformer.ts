@@ -42,9 +42,11 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
     borderColor: colors.borderColor,
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
-    requestType: request.category,
+    requestType: request.request_type,
+    category: request.category,
     supportType: request.support_type || 'immediate',
     imageUrl: request.image_url,
     originalRequest: request,
+    profiles: request.profiles
   };
 };

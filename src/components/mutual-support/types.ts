@@ -34,7 +34,12 @@ export type SupportItem = {
   tagColor: string;
   tagBg: string;
   requestType: string;
+  category: string;
   supportType: string;
   imageUrl: string | null;
   originalRequest: SupportRequestFromDB;
+  profiles?: {
+    display_name: string | null;
+    avatar_url: string | null;
+  };
 };

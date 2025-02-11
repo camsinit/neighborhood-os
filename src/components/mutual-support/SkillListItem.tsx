@@ -10,12 +10,14 @@ interface SkillListItemProps {
 }
 
 const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
+  const displayName = item.profiles?.display_name || item.originalRequest.profiles.display_name;
+  
   return (
     <div className="flex items-start justify-between py-4 group hover:bg-gray-50 px-4 rounded-lg transition-colors">
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10 mt-1">
           <AvatarFallback>
-            {item.profiles?.display_name?.[0] || <Circle className="h-5 w-5 text-gray-400" />}
+            {displayName?.[0] || <Circle className="h-5 w-5 text-gray-400" />}
           </AvatarFallback>
         </Avatar>
         <div>
