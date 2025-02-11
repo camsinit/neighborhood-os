@@ -12,6 +12,7 @@ interface RequestScheduleDialogProps {
     days: string[];
     timePreference: string[];
   }) => void;
+  displayName: string; // Add displayName prop
 }
 
 const DAYS = [
@@ -34,6 +35,7 @@ const RequestScheduleDialog = ({
   open,
   onOpenChange,
   onConfirm,
+  displayName,
 }: RequestScheduleDialogProps) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [timePreferences, setTimePreferences] = useState<string[]>([]);
@@ -53,6 +55,10 @@ const RequestScheduleDialog = ({
       title="Schedule Your Request"
     >
       <div className="space-y-6">
+        <p className="text-gray-600 text-sm">
+          To help {displayName} share their skills with you, please fill out the following information.
+        </p>
+
         <div className="space-y-4">
           <h3 className="text-base font-bold tracking-tight">Preferred Days</h3>
           <div className="grid grid-cols-7 gap-2">

@@ -53,6 +53,7 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
         open={isScheduleOpen}
         onOpenChange={setIsScheduleOpen}
         onConfirm={handleScheduleConfirm}
+        displayName={displayName || ""}
       />
     </>
   );
