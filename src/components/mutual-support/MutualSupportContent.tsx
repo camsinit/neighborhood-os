@@ -33,7 +33,7 @@ const MutualSupportContent = ({
   // Special handling for skills view
   if (useListView) {
     const allItems = [...needs, ...offers];
-    const isSkillsView = allItems.some(item => item.requestType === 'skills');
+    const isSkillsView = allItems.some(item => item.category === 'skills');
     
     // Use SkillListItem for skills view
     if (isSkillsView) {
