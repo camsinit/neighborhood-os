@@ -12,6 +12,7 @@ import GoodsPage from "@/pages/GoodsPage";
 import CarePage from "@/pages/CarePage";
 import SafetyPage from "@/pages/SafetyPage";
 import SettingsDialog from "@/components/SettingsDialog";
+import Sidebar from "@/components/layout/Sidebar";
 
 const queryClient = new QueryClient();
 
@@ -22,17 +23,24 @@ const App = () => {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Header onOpenSettings={() => setIsSettingsOpen(true)} />
+          <div className="min-h-screen flex w-full">
+            <Sidebar />
+            <div className="flex-1">
+              <Header onOpenSettings={() => setIsSettingsOpen(true)} />
+              <main>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/calendar" replace />} />
+                  <Route path="/calendar" element={<CalendarPage />} />
+                  <Route path="/skills" element={<SkillsPage />} />
+                  <Route path="/goods" element={<GoodsPage />} />
+                  <Route path="/care" element={<CarePage />} />
+                  <Route path="/safety" element={<SafetyPage />} />
+                </Routes>
+              </main>
+            </div>
+          </div>
           <Toaster />
           <Sonner />
-          <Routes>
-            <Route path="/" element={<Navigate to="/calendar" replace />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/goods" element={<GoodsPage />} />
-            <Route path="/care" element={<CarePage />} />
-            <Route path="/safety" element={<SafetyPage />} />
-          </Routes>
           <SettingsDialog 
             open={isSettingsOpen}
             onOpenChange={setIsSettingsOpen}
