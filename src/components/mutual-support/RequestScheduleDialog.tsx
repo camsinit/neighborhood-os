@@ -54,7 +54,7 @@ const RequestScheduleDialog = ({
     >
       <div className="space-y-6">
         <div className="space-y-4">
-          <h3 className="text-sm font-medium">Preferred Days</h3>
+          <h3 className="text-base font-bold tracking-tight">Preferred Days</h3>
           <div className="grid grid-cols-7 gap-2">
             {DAYS.map((day) => (
               <div key={day.full} className="flex flex-col items-center gap-2">
@@ -79,7 +79,7 @@ const RequestScheduleDialog = ({
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-medium">Preferred time of day:</h3>
+          <h3 className="text-base font-bold tracking-tight">Preferred time of day:</h3>
           <div className="flex flex-col space-y-2">
             {TIME_PREFERENCES.map((time) => (
               <div key={time.id} className="flex items-center space-x-2">
