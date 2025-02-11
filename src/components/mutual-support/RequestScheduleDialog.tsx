@@ -16,13 +16,13 @@ interface RequestScheduleDialogProps {
 }
 
 const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
+  { full: "Monday", abbr: "Mon" },
+  { full: "Tuesday", abbr: "Tue" },
+  { full: "Wednesday", abbr: "Wed" },
+  { full: "Thursday", abbr: "Thu" },
+  { full: "Friday", abbr: "Fri" },
+  { full: "Saturday", abbr: "Sat" },
+  { full: "Sunday", abbr: "Sun" },
 ];
 
 const TIME_PREFERENCES = [
@@ -56,21 +56,24 @@ const RequestScheduleDialog = ({
       <div className="space-y-6">
         <div className="space-y-4">
           <Label>Select available days:</Label>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-7 gap-2">
             {DAYS.map((day) => (
-              <div key={day} className="flex items-center space-x-2">
+              <div key={day.full} className="flex flex-col items-center gap-2">
+                <Label htmlFor={day.full} className="text-sm font-medium">
+                  {day.abbr}
+                </Label>
                 <Checkbox
-                  id={day}
-                  checked={selectedDays.includes(day)}
+                  id={day.full}
+                  checked={selectedDays.includes(day.full)}
                   onCheckedChange={(checked) => {
                     setSelectedDays(
                       checked
-                        ? [...selectedDays, day]
-                        : selectedDays.filter((d) => d !== day)
+                        ? [...selectedDays, day.full]
+                        : selectedDays.filter((d) => d !== day.full)
                     );
                   }}
+                  className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
                 />
-                <Label htmlFor={day}>{day}</Label>
               </div>
             ))}
           </div>
