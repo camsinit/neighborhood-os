@@ -1,3 +1,4 @@
+
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -10,9 +11,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 
-const NotificationsPopover = () => {
+interface NotificationsPopoverProps {
+  children?: ReactNode;
+}
+
+const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
   
@@ -111,16 +116,18 @@ const NotificationsPopover = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative hover:bg-gray-100"
-        >
-          <Bell className="h-5 w-5" />
-          {hasUnreadNotifications && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
-          )}
-        </Button>
+        {children || (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative hover:bg-gray-100"
+          >
+            <Bell className="h-5 w-5" />
+            {hasUnreadNotifications && (
+              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between p-4 border-b">
