@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
-import Header from "@/components/layout/Header";
 import CalendarPage from "@/pages/CalendarPage";
 import SkillsPage from "@/pages/SkillsPage";
 import GoodsPage from "@/pages/GoodsPage";
@@ -24,9 +23,8 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <div className="min-h-screen flex w-full">
-            <Sidebar />
+            <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
             <div className="flex-1">
-              <Header onOpenSettings={() => setIsSettingsOpen(true)} />
               <main>
                 <Routes>
                   <Route path="/" element={<Navigate to="/calendar" replace />} />
