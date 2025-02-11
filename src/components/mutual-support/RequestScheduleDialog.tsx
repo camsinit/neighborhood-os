@@ -2,7 +2,6 @@
 import { useState } from "react";
 import DialogWrapper from "@/components/dialog/DialogWrapper";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -11,7 +10,7 @@ interface RequestScheduleDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (schedule: {
     days: string[];
-    timePreference: string;
+    timePreference: string[];
   }) => void;
 }
 
@@ -37,12 +36,12 @@ const RequestScheduleDialog = ({
   onConfirm,
 }: RequestScheduleDialogProps) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [timePreference, setTimePreference] = useState<string>("");
+  const [timePreferences, setTimePreferences] = useState<string[]>([]);
 
   const handleConfirm = () => {
     onConfirm({
       days: selectedDays,
-      timePreference,
+      timePreference: timePreferences,
     });
     onOpenChange(false);
   };
@@ -55,7 +54,7 @@ const RequestScheduleDialog = ({
     >
       <div className="space-y-6">
         <div className="space-y-4">
-          <Label>Select available days:</Label>
+          <h3 className="text-sm font-medium">Preferred Days</h3>
           <div className="grid grid-cols-7 gap-2">
             {DAYS.map((day) => (
               <div key={day.full} className="flex flex-col items-center gap-2">
@@ -80,19 +79,26 @@ const RequestScheduleDialog = ({
         </div>
 
         <div className="space-y-4">
-          <Label>Preferred time of day:</Label>
-          <RadioGroup
-            value={timePreference}
-            onValueChange={setTimePreference}
-            className="flex flex-col space-y-2"
-          >
+          <h3 className="text-sm font-medium">Preferred time of day:</h3>
+          <div className="flex flex-col space-y-2">
             {TIME_PREFERENCES.map((time) => (
               <div key={time.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={time.id} id={time.id} />
+                <Checkbox
+                  id={time.id}
+                  checked={timePreferences.includes(time.id)}
+                  onCheckedChange={(checked) => {
+                    setTimePreferences(
+                      checked
+                        ? [...timePreferences, time.id]
+                        : timePreferences.filter((t) => t !== time.id)
+                    );
+                  }}
+                  className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                />
                 <Label htmlFor={time.id}>{time.label}</Label>
               </div>
             ))}
-          </RadioGroup>
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 mt-6">
@@ -104,7 +110,7 @@ const RequestScheduleDialog = ({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={selectedDays.length === 0 || !timePreference}
+            disabled={selectedDays.length === 0 || timePreferences.length === 0}
           >
             Confirm Request
           </Button>
