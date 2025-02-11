@@ -36,8 +36,8 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 border-r bg-white">
-      <div className="p-6">
+    <div className="w-48 border-r bg-white">
+      <div className="p-4">
         <Link to="/" className="flex items-center">
           <img 
             src="/lovable-uploads/93ce5a6d-0cd1-4119-926e-185060c6479d.png" 
@@ -46,7 +46,7 @@ const Sidebar = () => {
           />
         </Link>
       </div>
-      <nav className="space-y-1 px-3">
+      <nav className="space-y-1 px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           return (
@@ -54,11 +54,11 @@ const Sidebar = () => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-base font-medium",
+                  "w-full justify-start gap-2 text-sm font-medium",
                   isActive && "bg-gray-100"
                 )}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-4 w-4" />
                 {item.label}
               </Button>
             </Link>
