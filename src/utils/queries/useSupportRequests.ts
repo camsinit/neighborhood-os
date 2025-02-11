@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { SupportRequest } from "@/types/localTypes";
 
@@ -63,7 +64,7 @@ const mockSupportRequests: SupportRequest[] = [
   // Goods-related requests
   {
     id: "4",
-    title: "Garden Tools Available",
+    title: "Garden Tools to Share",
     description: "Have various gardening tools available to borrow - spades, pruning shears, wheelbarrow, etc.",
     category: "goods",
     request_type: "offer",
@@ -73,36 +74,17 @@ const mockSupportRequests: SupportRequest[] = [
     created_at: new Date().toISOString(),
     is_archived: null,
     is_read: null,
-    image_url: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9",
+    image_url: null,
     profiles: {
       id: "4",
       display_name: "Emma Thompson",
       avatar_url: "/placeholder.svg"
     }
   },
-  {
-    id: "7",
-    title: "Fresh Homegrown Vegetables",
-    description: "Sharing excess produce from my garden - tomatoes, cucumbers, and herbs available weekly.",
-    category: "goods",
-    request_type: "offer",
-    support_type: "recurring",
-    user_id: "7",
-    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    created_at: new Date().toISOString(),
-    is_archived: null,
-    is_read: null,
-    image_url: "https://images.unsplash.com/photo-1485833077593-4278bba3f11f",
-    profiles: {
-      id: "7",
-      display_name: "Michael Chen",
-      avatar_url: "/placeholder.svg"
-    }
-  },
   // Care-related requests
   {
     id: "5",
-    title: "Pet Sitting Services",
+    title: "Need Pet Sitter for Weekend",
     description: "Looking for someone to feed my cat and change litter box while I'm away next weekend.",
     category: "care",
     request_type: "need",
@@ -112,7 +94,7 @@ const mockSupportRequests: SupportRequest[] = [
     created_at: new Date().toISOString(),
     is_archived: null,
     is_read: null,
-    image_url: "https://images.unsplash.com/photo-1535268647677-300dbf3d78d1",
+    image_url: null,
     profiles: {
       id: "5",
       display_name: "Sarah Wilson",
@@ -121,7 +103,7 @@ const mockSupportRequests: SupportRequest[] = [
   },
   {
     id: "6",
-    title: "Elderly Companionship",
+    title: "Elderly Companion Available",
     description: "Retired nurse offering companionship and basic care for elderly. Available weekday afternoons.",
     category: "care",
     request_type: "offer",
@@ -131,29 +113,10 @@ const mockSupportRequests: SupportRequest[] = [
     created_at: new Date().toISOString(),
     is_archived: null,
     is_read: null,
-    image_url: "https://images.unsplash.com/photo-1517022812141-23620dba5c23",
+    image_url: null,
     profiles: {
       id: "6",
       display_name: "Patricia Brown",
-      avatar_url: "/placeholder.svg"
-    }
-  },
-  {
-    id: "8",
-    title: "After-School Care Support",
-    description: "Experienced teacher available for after-school care and homework help. Ages 6-12.",
-    category: "care",
-    request_type: "offer",
-    support_type: "recurring",
-    user_id: "8",
-    valid_until: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
-    created_at: new Date().toISOString(),
-    is_archived: null,
-    is_read: null,
-    image_url: null,
-    profiles: {
-      id: "8",
-      display_name: "Robert Martinez",
       avatar_url: "/placeholder.svg"
     }
   }
