@@ -125,7 +125,15 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
               </Link>
             );
           })}
-          <NotificationsPopover />
+          <NotificationsPopover>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-base font-medium"
+            >
+              <Bell className="h-5 w-5" />
+              Notifications
+            </Button>
+          </NotificationsPopover>
         </div>
 
         <Separator className="my-4" />
