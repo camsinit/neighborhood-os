@@ -28,33 +28,31 @@ const GoodsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="p-6 rounded-lg bg-white shadow-md">
-        <div className="flex items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
-        </div>
-
-        <MutualSupportContent 
-          isLoading={isLoading}
-          needs={needs}
-          offers={offers}
-          onItemClick={(item) => setSelectedRequest(item.originalRequest)}
-          onAddRequest={handleAddRequest}
-          selectedView="goods"
-        />
-
-        <AddSupportRequestDialog 
-          open={isAddRequestOpen}
-          onOpenChange={setIsAddRequestOpen}
-          initialRequestType={initialRequestType}
-        />
-        
-        <SupportRequestDialog
-          request={selectedRequest}
-          open={!!selectedRequest}
-          onOpenChange={(open) => !open && setSelectedRequest(null)}
-        />
+    <div className="h-full w-full bg-gray-50">
+      <div className="flex items-center mb-6 px-8 pt-8">
+        <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
       </div>
+
+      <MutualSupportContent 
+        isLoading={isLoading}
+        needs={needs}
+        offers={offers}
+        onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+        onAddRequest={handleAddRequest}
+        selectedView="goods"
+      />
+
+      <AddSupportRequestDialog 
+        open={isAddRequestOpen}
+        onOpenChange={setIsAddRequestOpen}
+        initialRequestType={initialRequestType}
+      />
+      
+      <SupportRequestDialog
+        request={selectedRequest}
+        open={!!selectedRequest}
+        onOpenChange={(open) => !open && setSelectedRequest(null)}
+      />
     </div>
   );
 };
