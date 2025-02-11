@@ -81,6 +81,44 @@ const mockSupportRequests: SupportRequest[] = [
       avatar_url: "/placeholder.svg"
     }
   },
+  {
+    id: "9",
+    title: "Kitchen Appliances Available",
+    description: "Bread maker, slow cooker, and food processor available to borrow. All in excellent condition.",
+    category: "goods",
+    request_type: "offer",
+    support_type: "recurring",
+    user_id: "9",
+    valid_until: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    is_archived: null,
+    is_read: null,
+    image_url: null,
+    profiles: {
+      id: "9",
+      display_name: "James Wilson",
+      avatar_url: "/placeholder.svg"
+    }
+  },
+  {
+    id: "10",
+    title: "Children's Books Collection",
+    description: "Large collection of children's books (ages 3-12) available for lending. Over 50 titles.",
+    category: "goods",
+    request_type: "offer",
+    support_type: "recurring",
+    user_id: "10",
+    valid_until: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    is_archived: null,
+    is_read: null,
+    image_url: null,
+    profiles: {
+      id: "10",
+      display_name: "Lisa Chen",
+      avatar_url: "/placeholder.svg"
+    }
+  },
   // Care-related requests
   {
     id: "5",
@@ -117,6 +155,25 @@ const mockSupportRequests: SupportRequest[] = [
     profiles: {
       id: "6",
       display_name: "Patricia Brown",
+      avatar_url: "/placeholder.svg"
+    }
+  },
+  {
+    id: "11",
+    title: "After-School Care Needed",
+    description: "Looking for someone to watch two children (ages 8 and 10) after school, 3-6pm on weekdays.",
+    category: "care",
+    request_type: "need",
+    support_type: "recurring",
+    user_id: "11",
+    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    created_at: new Date().toISOString(),
+    is_archived: null,
+    is_read: null,
+    image_url: null,
+    profiles: {
+      id: "11",
+      display_name: "Rachel Martinez",
       avatar_url: "/placeholder.svg"
     }
   }
