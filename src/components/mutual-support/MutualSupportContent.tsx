@@ -33,13 +33,18 @@ const MutualSupportContent = ({
   // Special handling for skills view
   if (useListView) {
     const allItems = [...needs, ...offers];
-    const isSkillsView = allItems.some(item => item.category === 'skills');
+    
+    // Check if we're in skills view and filter for skills items
+    const isSkillsView = selectedView === 'skills';
+    const displayItems = isSkillsView 
+      ? allItems.filter(item => item.category === 'skills')
+      : allItems;
     
     // Use SkillListItem for skills view
     if (isSkillsView) {
       return (
         <div className="space-y-1 max-w-4xl mx-auto bg-white rounded-lg border divide-y">
-          {allItems.map((item) => (
+          {displayItems.map((item) => (
             <SkillListItem
               key={`${item.title}-${item.type}`}
               item={item}
@@ -53,7 +58,7 @@ const MutualSupportContent = ({
     // Default list view for other categories
     return (
       <div className="space-y-4">
-        {allItems.map((item) => (
+        {displayItems.map((item) => (
           <div 
             key={`${item.title}-${item.type}`}
             className="max-w-3xl mx-auto"

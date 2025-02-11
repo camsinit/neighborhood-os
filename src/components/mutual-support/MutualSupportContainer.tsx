@@ -30,7 +30,7 @@ const MutualSupportContainer = () => {
 
     if (selectedView) {
       filtered = filtered.filter(item => 
-        item.requestType.toLowerCase() === selectedView.toLowerCase()
+        item.category === selectedView
       );
     }
 
@@ -75,6 +75,7 @@ const MutualSupportContainer = () => {
         onItemClick={(item) => setSelectedRequest(item.originalRequest)}
         onAddRequest={handleAddRequest}
         useListView={shouldUseListView}
+        selectedView={selectedView}
       />
 
       <ArchiveButton onClick={() => setIsArchiveOpen(true)} />
