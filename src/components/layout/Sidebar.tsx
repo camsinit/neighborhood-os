@@ -97,7 +97,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   return (
     <div className="w-48 border-r bg-white flex flex-col">
-      <div className="p-4">
+      <div className="p-4 flex justify-center">
         <Link to="/" className="flex items-center">
           <img 
             src="/lovable-uploads/93ce5a6d-0cd1-4119-926e-185060c6479d.png" 
