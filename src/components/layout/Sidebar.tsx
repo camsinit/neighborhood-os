@@ -102,7 +102,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           <img 
             src="/lovable-uploads/93ce5a6d-0cd1-4119-926e-185060c6479d.png" 
             alt="Terrific Terrace Logo" 
-            className="h-8"
+            className="h-24" /* Changed from h-8 to h-24 (3x bigger) */
           />
         </Link>
       </div>
