@@ -4,6 +4,8 @@ export type Category = {
   label: string;
 };
 
+export type ViewType = 'skills' | 'goods' | 'care' | null;
+
 export type SupportRequestFromDB = {
   id: string;
   category: string;
@@ -36,4 +38,3 @@ export type SupportItem = {
   imageUrl: string | null;
   originalRequest: SupportRequestFromDB;
 };
-

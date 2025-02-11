@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
+import { ViewType } from "./types";
 import MutualSupportHeader from "./MutualSupportHeader";
 import SearchSection from "./SearchSection";
 import MutualSupportContent from "./MutualSupportContent";
@@ -12,8 +14,7 @@ import SupportRequestDialog from "../support/SupportRequestDialog";
 const MutualSupportContainer = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedView, setSelectedView] = useState<"time-sensitive" | "ongoing" | null>(null);
+  const [selectedView, setSelectedView] = useState<ViewType>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
@@ -27,17 +28,9 @@ const MutualSupportContainer = () => {
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
 
-    if (selectedView === "time-sensitive") {
+    if (selectedView) {
       filtered = filtered.filter(item => 
-        ["Goods", "Transportation"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
-      );
-    } else if (selectedView === "ongoing") {
-      filtered = filtered.filter(item => 
-        ["Skills", "Resources"].map(cat => cat.toLowerCase()).includes(item.requestType.toLowerCase())
-      );
-    } else if (selectedCategory) {
-      filtered = filtered.filter(item => 
-        item.requestType.toLowerCase() === selectedCategory.toLowerCase()
+        item.requestType.toLowerCase() === selectedView.toLowerCase()
       );
     }
 
@@ -64,15 +57,15 @@ const MutualSupportContainer = () => {
       .map(transformRequest) || []
   );
 
+  const shouldUseListView = selectedView === 'skills' || searchQuery;
+
   return (
     <div className="w-full">
       <MutualSupportHeader />
       <SearchSection 
-        selectedCategory={selectedCategory}
-        onCategorySelect={setSelectedCategory}
-        onSearch={setSearchQuery}
         selectedView={selectedView}
         onViewSelect={setSelectedView}
+        onSearch={setSearchQuery}
       />
 
       <MutualSupportContent 
@@ -81,6 +74,7 @@ const MutualSupportContainer = () => {
         offers={offers}
         onItemClick={(item) => setSelectedRequest(item.originalRequest)}
         onAddRequest={handleAddRequest}
+        useListView={shouldUseListView}
       />
 
       <ArchiveButton onClick={() => setIsArchiveOpen(true)} />

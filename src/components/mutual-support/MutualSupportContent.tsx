@@ -1,3 +1,4 @@
+
 import { SupportItem } from "./types";
 import LoadingSkeleton from "./LoadingSkeleton";
 import SupportSection from "./SupportSection";
@@ -8,6 +9,7 @@ interface MutualSupportContentProps {
   offers: SupportItem[];
   onItemClick: (item: SupportItem) => void;
   onAddRequest: (type: "need" | "offer") => void;
+  useListView?: boolean;
 }
 
 const MutualSupportContent = ({ 
@@ -15,13 +17,38 @@ const MutualSupportContent = ({
   needs, 
   offers, 
   onItemClick,
-  onAddRequest 
+  onAddRequest,
+  useListView = false
 }: MutualSupportContentProps) => {
   if (isLoading) {
     return (
       <div className="grid md:grid-cols-2 gap-8">
         <LoadingSkeleton />
         <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (useListView) {
+    const allItems = [...needs, ...offers];
+    return (
+      <div className="space-y-4">
+        {allItems.map((item) => (
+          <div 
+            key={`${item.title}-${item.type}`}
+            className="max-w-3xl mx-auto"
+            onClick={() => onItemClick(item)}
+          >
+            <SupportSection
+              items={[item]}
+              title=""
+              onItemClick={onItemClick}
+              onAddClick={() => {}}
+              buttonLabel=""
+              hideHeader
+            />
+          </div>
+        ))}
       </div>
     );
   }

@@ -1,30 +1,48 @@
+
 import SearchBar from "./SearchBar";
-import CategoryFilters from "./CategoryFilters";
+import { ViewType } from "./types";
+import { Button } from "@/components/ui/button";
 
 interface SearchSectionProps {
-  selectedCategory: string | null;
-  onCategorySelect: (category: string | null) => void;
+  selectedView: ViewType;
+  onViewSelect: (view: ViewType) => void;
   onSearch: (query: string) => void;
-  selectedView: "time-sensitive" | "ongoing" | null;
-  onViewSelect: (view: "time-sensitive" | "ongoing" | null) => void;
 }
 
 const SearchSection = ({ 
-  selectedCategory, 
-  onCategorySelect, 
-  onSearch,
   selectedView,
-  onViewSelect
+  onViewSelect,
+  onSearch,
 }: SearchSectionProps) => {
   return (
     <div className="flex items-center gap-6 mb-8">
       <SearchBar onSearch={onSearch} />
-      <CategoryFilters 
-        selectedCategory={selectedCategory}
-        onCategorySelect={onCategorySelect}
-        selectedView={selectedView}
-        onViewSelect={onViewSelect}
-      />
+      <div className="flex gap-2">
+        <Button
+          variant={selectedView === "skills" ? "default" : "outline"}
+          onClick={() => onViewSelect(selectedView === "skills" ? null : "skills")}
+          className="h-[36px]"
+          size="sm"
+        >
+          Skills
+        </Button>
+        <Button
+          variant={selectedView === "goods" ? "default" : "outline"}
+          onClick={() => onViewSelect(selectedView === "goods" ? null : "goods")}
+          className="h-[36px]"
+          size="sm"
+        >
+          Goods
+        </Button>
+        <Button
+          variant={selectedView === "care" ? "default" : "outline"}
+          onClick={() => onViewSelect(selectedView === "care" ? null : "care")}
+          className="h-[36px]"
+          size="sm"
+        >
+          Care
+        </Button>
+      </div>
     </div>
   );
 };
