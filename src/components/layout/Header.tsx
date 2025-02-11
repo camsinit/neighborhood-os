@@ -1,7 +1,8 @@
+
 import { Settings, UserCircle } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationsPopover from "@/components/notifications/NotificationsPopover";
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   onOpenSettings: () => void;
@@ -58,8 +60,27 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
     <header className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="text-2xl font-bold text-primary">Terrific Terrace</div>
+          <div className="flex items-center gap-8">
+            <Link to="/" className="text-2xl font-bold text-primary">
+              Terrific Terrace
+            </Link>
+            <nav className="hidden md:flex items-center gap-4">
+              <Link to="/calendar">
+                <Button variant="ghost">Calendar</Button>
+              </Link>
+              <Link to="/skills">
+                <Button variant="ghost">Skills</Button>
+              </Link>
+              <Link to="/goods">
+                <Button variant="ghost">Goods</Button>
+              </Link>
+              <Link to="/care">
+                <Button variant="ghost">Care</Button>
+              </Link>
+              <Link to="/safety">
+                <Button variant="ghost">Safety</Button>
+              </Link>
+            </nav>
           </div>
           <div className="flex items-center gap-4">
             <NotificationsPopover />
