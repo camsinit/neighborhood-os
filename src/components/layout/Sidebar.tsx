@@ -54,11 +54,11 @@ const Sidebar = () => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-2 text-sm font-medium",
+                  "w-full justify-start gap-3 text-base font-medium",
                   isActive && "bg-gray-100"
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
                 {item.label}
               </Button>
             </Link>
