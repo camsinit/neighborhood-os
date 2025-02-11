@@ -17,10 +17,10 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
   const { toast } = useToast();
   const displayName = item.profiles?.display_name || item.originalRequest.profiles.display_name;
   
-  const handleScheduleConfirm = (schedule: { days: string[]; timePreference: string }) => {
+  const handleScheduleConfirm = (schedule: { days: string[]; timePreference: string[] }) => {
     toast({
       title: "Request scheduled",
-      description: `Your request has been scheduled for ${schedule.days.join(", ")} during ${schedule.timePreference}`,
+      description: `Your request has been scheduled for ${schedule.days.join(", ")} during ${schedule.timePreference.join(", ")}`,
     });
     onClick();
   };
