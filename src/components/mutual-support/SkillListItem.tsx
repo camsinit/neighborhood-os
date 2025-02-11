@@ -27,7 +27,7 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
 
   return (
     <>
-      <div className="flex items-start justify-between py-4 group hover:bg-gray-50 px-4 rounded-lg transition-colors">
+      <div className="flex items-start justify-between py-4 group hover:bg-gray-50 px-4 rounded-lg transition-colors shadow-sm">
         <div className="flex items-start gap-3">
           <Avatar className="h-10 w-10 mt-1">
             <AvatarFallback>
@@ -43,7 +43,7 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
           variant="outline" 
           size="sm"
           onClick={() => setIsScheduleOpen(true)}
-          className="border-gray-200 text-gray-700 hover:bg-gray-50"
+          className="text-gray-700 hover:bg-gray-50"
         >
           Request
         </Button>
