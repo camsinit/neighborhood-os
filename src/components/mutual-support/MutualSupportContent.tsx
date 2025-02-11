@@ -2,6 +2,7 @@
 import { SupportItem } from "./types";
 import LoadingSkeleton from "./LoadingSkeleton";
 import SupportSection from "./SupportSection";
+import SkillListItem from "./SkillListItem";
 
 interface MutualSupportContentProps {
   isLoading: boolean;
@@ -29,8 +30,27 @@ const MutualSupportContent = ({
     );
   }
 
+  // Special handling for skills view
   if (useListView) {
     const allItems = [...needs, ...offers];
+    const isSkillsView = allItems.some(item => item.requestType === 'skills');
+    
+    // Use SkillListItem for skills view
+    if (isSkillsView) {
+      return (
+        <div className="space-y-1 max-w-4xl mx-auto bg-white rounded-lg border divide-y">
+          {allItems.map((item) => (
+            <SkillListItem
+              key={`${item.title}-${item.type}`}
+              item={item}
+              onClick={() => onItemClick(item)}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    // Default list view for other categories
     return (
       <div className="space-y-4">
         {allItems.map((item) => (
