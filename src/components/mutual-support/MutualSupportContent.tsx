@@ -1,5 +1,5 @@
 
-import { SupportItem } from "./types";
+import { SupportItem, ViewType } from "./types";
 import LoadingSkeleton from "./LoadingSkeleton";
 import SupportSection from "./SupportSection";
 import SkillListItem from "./SkillListItem";
@@ -11,6 +11,7 @@ interface MutualSupportContentProps {
   onItemClick: (item: SupportItem) => void;
   onAddRequest: (type: "need" | "offer") => void;
   useListView?: boolean;
+  selectedView: ViewType;
 }
 
 const MutualSupportContent = ({ 
@@ -19,7 +20,8 @@ const MutualSupportContent = ({
   offers, 
   onItemClick,
   onAddRequest,
-  useListView = false
+  useListView = false,
+  selectedView
 }: MutualSupportContentProps) => {
   if (isLoading) {
     return (
