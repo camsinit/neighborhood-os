@@ -57,7 +57,7 @@ const MutualSupportContainer = () => {
       .map(transformRequest) || []
   );
 
-  const shouldUseListView = selectedView === 'skills' || !!searchQuery;
+  const shouldUseListView = selectedView === 'skills' || selectedView === 'care' || !!searchQuery;
 
   return (
     <div className="w-full">
