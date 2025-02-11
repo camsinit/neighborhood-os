@@ -32,8 +32,8 @@ const MutualSupportContent = ({
     );
   }
 
-  // Special handling for list views (skills, care, goods)
-  if (useListView || ['skills', 'care', 'goods'].includes(selectedView || '')) {
+  // Special handling for list views (skills and care only)
+  if (useListView || ['skills', 'care'].includes(selectedView || '')) {
     const allItems = [...needs, ...offers];
     
     // Filter items based on selected category
