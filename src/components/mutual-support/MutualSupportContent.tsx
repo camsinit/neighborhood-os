@@ -32,49 +32,23 @@ const MutualSupportContent = ({
     );
   }
 
-  // Special handling for skills view
-  if (useListView) {
+  // Special handling for list views (skills, care, goods)
+  if (useListView || selectedView === 'skills' || selectedView === 'care' || selectedView === 'goods') {
     const allItems = [...needs, ...offers];
     
-    // Check if we're in skills view and filter for skills items
-    const isSkillsView = selectedView === 'skills';
-    const displayItems = isSkillsView 
-      ? allItems.filter(item => item.category === 'skills')
+    // Filter items based on selected category
+    const displayItems = selectedView 
+      ? allItems.filter(item => item.category === selectedView)
       : allItems;
     
-    // Use SkillListItem for skills view
-    if (isSkillsView) {
-      return (
-        <div className="space-y-1 max-w-4xl mx-auto bg-white rounded-lg border divide-y">
-          {displayItems.map((item) => (
-            <SkillListItem
-              key={`${item.title}-${item.type}`}
-              item={item}
-              onClick={() => onItemClick(item)}
-            />
-          ))}
-        </div>
-      );
-    }
-
-    // Default list view for other categories
     return (
-      <div className="space-y-4">
+      <div className="space-y-1 max-w-4xl mx-auto bg-white rounded-lg shadow-md">
         {displayItems.map((item) => (
-          <div 
+          <SkillListItem
             key={`${item.title}-${item.type}`}
-            className="max-w-3xl mx-auto"
+            item={item}
             onClick={() => onItemClick(item)}
-          >
-            <SupportSection
-              items={[item]}
-              title=""
-              onItemClick={onItemClick}
-              onAddClick={() => {}}
-              buttonLabel=""
-              hideHeader
-            />
-          </div>
+          />
         ))}
       </div>
     );
