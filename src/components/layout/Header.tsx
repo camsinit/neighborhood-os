@@ -61,24 +61,28 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              Terrific Terrace
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/lovable-uploads/93ce5a6d-0cd1-4119-926e-185060c6479d.png" 
+                alt="Terrific Terrace Logo" 
+                className="h-12"
+              />
             </Link>
             <nav className="hidden md:flex items-center gap-4">
               <Link to="/calendar">
-                <Button variant="ghost">Calendar</Button>
+                <Button variant="ghost" className="text-lg font-semibold">Calendar</Button>
               </Link>
               <Link to="/skills">
-                <Button variant="ghost">Skills</Button>
+                <Button variant="ghost" className="text-lg font-semibold">Skills</Button>
               </Link>
               <Link to="/goods">
-                <Button variant="ghost">Goods</Button>
+                <Button variant="ghost" className="text-lg font-semibold">Goods</Button>
               </Link>
               <Link to="/care">
-                <Button variant="ghost">Care</Button>
+                <Button variant="ghost" className="text-lg font-semibold">Care</Button>
               </Link>
               <Link to="/safety">
-                <Button variant="ghost">Safety</Button>
+                <Button variant="ghost" className="text-lg font-semibold">Safety</Button>
               </Link>
             </nav>
           </div>
