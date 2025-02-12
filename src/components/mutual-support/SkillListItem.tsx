@@ -27,7 +27,7 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
 
   return (
     <>
-      <div className="flex items-start justify-between py-4 group hover:bg-gray-50 px-4 rounded-lg transition-colors">
+      <div className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors">
         <div className="flex items-start gap-3">
           <Avatar className="h-10 w-10 mt-1">
             <AvatarFallback>
