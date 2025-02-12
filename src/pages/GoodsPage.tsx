@@ -28,7 +28,7 @@ const GoodsPage = () => {
   };
 
   return (
-    <div className="h-full w-full bg-gray-50">
+    <div className="h-full w-full bg-white">
       <div className="flex items-center mb-6 px-8 pt-8">
         <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
       </div>
