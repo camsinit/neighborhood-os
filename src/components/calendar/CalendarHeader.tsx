@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, Calendar } from "lucide-react";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 
 interface CalendarHeaderProps {
@@ -42,6 +42,7 @@ const CalendarHeader = ({
               className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'week' ? 'border-primary' : ''}`}
               onClick={() => setView('week')}
             >
+              <CalendarDays className="h-4 w-4" />
               Week
             </Button>
             <Button 
@@ -50,6 +51,7 @@ const CalendarHeader = ({
               className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'month' ? 'border-primary' : ''}`}
               onClick={() => setView('month')}
             >
+              <Calendar className="h-4 w-4" />
               Month
             </Button>
           </div>
