@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -94,7 +95,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
           value={formData.description || ''}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           placeholder={mode === 'offer' 
-            ? 'Share your expertise and how you plan to teach others'
+            ? 'Share your expertise and how you can help your neighbors'
             : 'Explain what specific aspects you want to learn and your goals'
           }
           required
