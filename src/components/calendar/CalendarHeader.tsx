@@ -29,7 +29,7 @@ const CalendarHeader = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4">
         <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
         <div className="flex items-center gap-6">
           <div className="flex gap-2">
