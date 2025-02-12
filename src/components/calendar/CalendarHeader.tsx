@@ -28,7 +28,7 @@ const CalendarHeader = ({
   const periodLabel = format(currentDate, 'MMMM');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-8">
       <div className="flex flex-col gap-4">
         <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
       </div>
