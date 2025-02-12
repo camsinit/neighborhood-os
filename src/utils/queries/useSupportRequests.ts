@@ -6,7 +6,7 @@ const mockSupportRequests: SupportRequest[] = [
   // Skills-related requests
   {
     id: "1",
-    title: "Python Programming & Web Development Mentoring",
+    title: "Python Programming & Web Development",
     description: "Experienced software developer offering Python programming and web development mentoring. Can help with projects, debugging, and best practices.",
     category: "skills",
     request_type: "offer",
@@ -26,7 +26,7 @@ const mockSupportRequests: SupportRequest[] = [
   },
   {
     id: "2",
-    title: "Guitar & Music Theory Lessons",
+    title: "Guitar & Music Theory",
     description: "Professional musician offering guitar lessons and music theory tutoring. All skill levels welcome. Can teach acoustic, electric, and bass guitar.",
     category: "skills",
     request_type: "offer",
@@ -46,7 +46,7 @@ const mockSupportRequests: SupportRequest[] = [
   },
   {
     id: "3",
-    title: "Photography & Photo Editing Workshops",
+    title: "Photography & Photo Editing",
     description: "Professional photographer offering photography workshops and photo editing training. Learn composition, lighting, and post-processing techniques.",
     category: "skills",
     request_type: "offer",
@@ -66,7 +66,7 @@ const mockSupportRequests: SupportRequest[] = [
   },
   {
     id: "6",
-    title: "Home Repair & Maintenance Training",
+    title: "Home Repair & Maintenance",
     description: "Licensed contractor offering hands-on training in basic home repairs and maintenance. Learn practical skills for taking care of your home.",
     category: "skills",
     request_type: "offer",
