@@ -2,6 +2,7 @@
 import { SupportItem } from "./types";
 import SupportCard from "./SupportCard";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface SupportSectionProps {
   title: string;
@@ -27,10 +28,10 @@ const SupportSection = ({
           <h3 className="text-lg font-medium">{title}</h3>
           <Button 
             onClick={onAddClick}
-            className="h-[28px] bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+            className="h-[28px] bg-[#9b87f5] hover:bg-[#7E69AB] text-white rounded-full w-[28px] p-0"
             size="sm"
           >
-            {buttonLabel}
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
       )}

@@ -1,7 +1,6 @@
+
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
 import FormFields from "./form/FormFields";
@@ -50,25 +49,6 @@ const SupportRequestForm = ({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="flex gap-4 items-center">
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="need" 
-            checked={formData.requestType === "need"}
-            onCheckedChange={() => handleFieldChange('requestType', "need")}
-          />
-          <Label htmlFor="need">I need help</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="offer" 
-            checked={formData.requestType === "offer"}
-            onCheckedChange={() => handleFieldChange('requestType', "offer")}
-          />
-          <Label htmlFor="offer">I have an offer</Label>
-        </div>
-      </div>
-
       <FormFields 
         formData={formData}
         onChange={handleFieldChange}
