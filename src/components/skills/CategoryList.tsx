@@ -11,6 +11,7 @@ interface CategoryItem {
   name: string;
   icon: React.ComponentType<any>;
   color: string;
+  examples: string;
 }
 
 const categories: CategoryItem[] = [
@@ -19,30 +20,35 @@ const categories: CategoryItem[] = [
     name: 'Technology',
     icon: Computer,
     color: '#9b87f5',
+    examples: 'Web Development, Cybersecurity, Data Science, App Development',
   },
   {
     id: 'creative',
     name: 'Creative',
     icon: Paintbrush,
     color: '#D946EF',
+    examples: 'Graphic Design, Photography, Digital Art, Video Editing',
   },
   {
     id: 'trade',
     name: 'Trade Skills',
     icon: Wrench,
     color: '#F97316',
+    examples: 'Carpentry, Plumbing, Electrical Work, Car Repair',
   },
   {
     id: 'education',
     name: 'Education',
     icon: GraduationCap,
     color: '#0EA5E9',
+    examples: 'Tutoring, Language Learning, Test Prep, Music Lessons',
   },
   {
     id: 'wellness',
     name: 'Wellness',
     icon: PersonStanding,
     color: '#8B5CF6',
+    examples: 'Yoga, Personal Training, Nutrition, Meditation',
   },
 ];
 
@@ -53,7 +59,7 @@ export const CategoryList = ({ onCategorySelect }: CategoryListProps) => {
         <button
           key={category.id}
           onClick={() => onCategorySelect(category.id)}
-          className="flex items-center p-6 rounded-lg border border-gray-100 bg-white transition-all hover:scale-[1.02] hover:shadow-sm"
+          className="flex items-center p-6 rounded-lg border border-gray-100 bg-white transition-all hover:scale-[1.02] shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
         >
           <div 
             className="p-3 rounded-lg mr-4"
@@ -64,7 +70,7 @@ export const CategoryList = ({ onCategorySelect }: CategoryListProps) => {
           <div className="text-left">
             <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
             <p className="text-sm text-gray-600">
-              Browse {category.name.toLowerCase()} skills
+              {category.examples}
             </p>
           </div>
         </button>
