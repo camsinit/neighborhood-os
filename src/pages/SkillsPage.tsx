@@ -5,20 +5,43 @@ import { useState } from "react";
 import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Plus, HelpCircle, Filter } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SkillCategory } from "@/components/mutual-support/types";
 
 const SkillsPage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+  
   const { data: requests, isLoading } = useSupportRequests();
 
   const skillsRequests = requests?.filter(req => req.category === 'skills') || [];
 
-  const needs = skillsRequests
+  const filteredRequests = skillsRequests.filter(req => {
+    const matchesSearch = searchQuery.toLowerCase() === '' || 
+      req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      req.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = !selectedCategory || req.skill_category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const needs = filteredRequests
     .filter(req => req.request_type === 'need')
     .map(transformRequest);
     
-  const offers = skillsRequests
+  const offers = filteredRequests
     .filter(req => req.request_type === 'offer')
     .map(transformRequest);
 
@@ -29,8 +52,68 @@ const SkillsPage = () => {
 
   return (
     <div className="h-full w-full bg-white">
-      <div className="flex items-center mb-6 px-8 pt-8">
+      <div className="flex flex-col gap-6 px-8 pt-8">
         <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
+        
+        <div className="flex items-center justify-between">
+          <div className="relative w-[300px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+            <Input 
+              type="search"
+              placeholder="Search for skills..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => handleAddRequest("offer")}
+              className="bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Offer Skill
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => handleAddRequest("need")}
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Request Skill
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => setSelectedCategory(null)}>
+                  All Categories
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("tech")}>
+                  Tech
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("creative")}>
+                  Creative
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("trade")}>
+                  Trade
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("education")}>
+                  Education
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedCategory("wellness")}>
+                  Wellness
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
 
       <MutualSupportContent 

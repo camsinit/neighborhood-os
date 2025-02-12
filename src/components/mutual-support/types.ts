@@ -6,6 +6,8 @@ export type Category = {
 
 export type ViewType = 'skills' | 'goods' | 'care' | null;
 
+export type SkillCategory = 'tech' | 'creative' | 'trade' | 'education' | 'wellness';
+
 export type SupportRequestFromDB = {
   id: string;
   category: string;
@@ -19,6 +21,7 @@ export type SupportRequestFromDB = {
   support_type: string | null;
   is_archived: boolean | null;
   is_read: boolean | null;
+  skill_category?: SkillCategory;
   profiles: {
     display_name: string | null;
     avatar_url: string | null;
@@ -37,6 +40,7 @@ export type SupportItem = {
   category: string;
   supportType: string;
   imageUrl: string | null;
+  skillCategory?: SkillCategory;
   originalRequest: SupportRequestFromDB;
   profiles?: {
     display_name: string | null;
