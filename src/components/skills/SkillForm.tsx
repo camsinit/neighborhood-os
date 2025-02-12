@@ -35,7 +35,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       description: formData.description,
       category: 'skills',
       requestType: mode === 'offer' ? 'offer' : 'need',
-      supportType: 'recurring',
+      supportType: 'ongoing', // Changed from 'recurring' to 'ongoing'
       validUntil: formData.validUntil,
       skill_category: formData.category,
     });
