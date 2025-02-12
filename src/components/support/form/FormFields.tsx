@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,41 +17,47 @@ interface FormFieldsProps {
 }
 
 const FormFields = ({ formData, onChange }: FormFieldsProps) => {
+  const showCategoryField = formData.requestType !== 'offer' || formData.category !== 'skills';
+
   return (
     <>
-      <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <Select 
-          value={formData.category} 
-          onValueChange={(value) => onChange('category', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="goods">Goods</SelectItem>
-            <SelectItem value="transportation">Transportation</SelectItem>
-            <SelectItem value="skills">Skills</SelectItem>
-            <SelectItem value="resources">Resources</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showCategoryField && (
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select 
+            value={formData.category} 
+            onValueChange={(value) => onChange('category', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="goods">Goods</SelectItem>
+              <SelectItem value="transportation">Transportation</SelectItem>
+              <SelectItem value="skills">Skills</SelectItem>
+              <SelectItem value="resources">Resources</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
-      <div className="space-y-2">
-        <Label htmlFor="supportType">Support Type</Label>
-        <Select 
-          value={formData.supportType} 
-          onValueChange={(value) => onChange('supportType', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select support type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="immediate">Immediate</SelectItem>
-            <SelectItem value="ongoing">Ongoing</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showCategoryField && (
+        <div className="space-y-2">
+          <Label htmlFor="supportType">Support Type</Label>
+          <Select 
+            value={formData.supportType} 
+            onValueChange={(value) => onChange('supportType', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select support type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="immediate">Immediate</SelectItem>
+              <SelectItem value="ongoing">Ongoing</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
