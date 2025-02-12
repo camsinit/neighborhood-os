@@ -1,5 +1,5 @@
 
-import { Computer, PenTool, Wrench, GraduationCap, Leaf } from "lucide-react";
+import { Computer, Paintbrush, Wrench, GraduationCap, PersonStanding } from "lucide-react";
 import { SkillCategory } from "@/components/mutual-support/types";
 
 interface CategoryListProps {
@@ -11,7 +11,6 @@ interface CategoryItem {
   name: string;
   icon: React.ComponentType<any>;
   color: string;
-  bgColor: string;
 }
 
 const categories: CategoryItem[] = [
@@ -20,35 +19,30 @@ const categories: CategoryItem[] = [
     name: 'Technology',
     icon: Computer,
     color: '#9b87f5',
-    bgColor: '#F1F0FB',
   },
   {
     id: 'creative',
     name: 'Creative',
-    icon: PenTool,
+    icon: Paintbrush,
     color: '#D946EF',
-    bgColor: '#FFDEE2',
   },
   {
     id: 'trade',
     name: 'Trade Skills',
     icon: Wrench,
     color: '#F97316',
-    bgColor: '#FDE1D3',
   },
   {
     id: 'education',
     name: 'Education',
     icon: GraduationCap,
     color: '#0EA5E9',
-    bgColor: '#D3E4FD',
   },
   {
     id: 'wellness',
     name: 'Wellness',
-    icon: Leaf,
+    icon: PersonStanding,
     color: '#8B5CF6',
-    bgColor: '#E5DEFF',
   },
 ];
 
@@ -59,8 +53,7 @@ export const CategoryList = ({ onCategorySelect }: CategoryListProps) => {
         <button
           key={category.id}
           onClick={() => onCategorySelect(category.id)}
-          className="flex items-center p-6 rounded-lg transition-all hover:scale-[1.02]"
-          style={{ backgroundColor: category.bgColor }}
+          className="flex items-center p-6 rounded-lg border border-gray-100 bg-white transition-all hover:scale-[1.02] hover:shadow-sm"
         >
           <div 
             className="p-3 rounded-lg mr-4"
