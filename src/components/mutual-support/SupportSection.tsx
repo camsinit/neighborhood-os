@@ -21,7 +21,7 @@ const SupportSection = ({
   hideHeader = false
 }: SupportSectionProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-8">
       {!hideHeader && (
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">{title}</h3>
