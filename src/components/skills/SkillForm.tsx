@@ -18,7 +18,7 @@ import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   const [formData, setFormData] = useState<Partial<SkillFormData>>({
     category: 'tech',
-    validUntil: '',
+    timePreference: [],
   });
 
   const { handleSubmit } = useSupportRequestSubmit({
@@ -29,15 +29,24 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Transform skill form data to support request format
     handleSubmit({
       title: formData.title,
       description: formData.description,
       category: 'skills',
       requestType: mode === 'offer' ? 'offer' : 'need',
-      supportType: 'ongoing', // Changed from 'recurring' to 'ongoing'
-      validUntil: formData.validUntil,
+      supportType: 'ongoing',
+      validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 year from now
       skill_category: formData.category,
+    });
+  };
+
+  const handleTimePreferenceChange = (value: string) => {
+    setFormData(prev => {
+      const currentPreferences = prev.timePreference || [];
+      const newPreferences = currentPreferences.includes(value as TimePreference)
+        ? currentPreferences.filter(p => p !== value)
+        : [...currentPreferences, value as TimePreference];
+      return { ...prev, timePreference: newPreferences };
     });
   };
 
@@ -113,20 +122,20 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="timePreference">Preferred Time</Label>
-            <Select 
-              value={formData.timePreference?.[0]} 
-              onValueChange={(value: any) => setFormData(prev => ({ ...prev, timePreference: [value] }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select preferred time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="morning">Morning</SelectItem>
-                <SelectItem value="afternoon">Afternoon</SelectItem>
-                <SelectItem value="evening">Evening</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Preferred Times (Select all that apply)</Label>
+            <div className="flex flex-wrap gap-2">
+              {['morning', 'afternoon', 'evening'].map((time) => (
+                <Button
+                  key={time}
+                  type="button"
+                  variant={formData.timePreference?.includes(time as TimePreference) ? 'default' : 'outline'}
+                  onClick={() => handleTimePreferenceChange(time)}
+                  className="flex-1"
+                >
+                  {time.charAt(0).toUpperCase() + time.slice(1)}
+                </Button>
+              ))}
+            </div>
           </div>
         </>
       )}
@@ -149,17 +158,6 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
           </Select>
         </div>
       )}
-
-      <div className="space-y-2">
-        <Label htmlFor="validUntil">Available Until</Label>
-        <Input
-          id="validUntil"
-          type="date"
-          value={formData.validUntil || ''}
-          onChange={(e) => setFormData(prev => ({ ...prev, validUntil: e.target.value }))}
-          required
-        />
-      </div>
 
       <DialogFooter>
         <Button type="submit">

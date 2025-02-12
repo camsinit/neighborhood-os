@@ -10,7 +10,6 @@ export interface SkillFormData {
   category: SkillCategory;
   availability?: SkillAvailability;
   timePreference?: TimePreference[];
-  validUntil: string;
   experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
   expectedDuration?: string;
 }
