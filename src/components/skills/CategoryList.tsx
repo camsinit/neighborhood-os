@@ -20,35 +20,35 @@ const categories: CategoryItem[] = [
     name: 'Technology',
     icon: Computer,
     color: '#9b87f5',
-    examples: 'Web Development, Cybersecurity, Data Science, App Development',
+    examples: 'Web Development, Smart Phone Help, Tech Questions, App Development, Etc.',
   },
   {
     id: 'creative',
     name: 'Creative',
     icon: Paintbrush,
     color: '#D946EF',
-    examples: 'Graphic Design, Photography, Digital Art, Video Editing',
+    examples: 'Graphic Design, Photography, Collage, Drawing, Etc.',
   },
   {
     id: 'trade',
     name: 'Trade Skills',
     icon: Wrench,
     color: '#F97316',
-    examples: 'Carpentry, Plumbing, Electrical Work, Car Repair',
+    examples: 'Carpentry, Plumbing, Electrical Work, Car Repair, Etc.',
   },
   {
     id: 'education',
     name: 'Education',
     icon: GraduationCap,
     color: '#0EA5E9',
-    examples: 'Tutoring, Language Learning, Test Prep, Music Lessons',
+    examples: 'Tutoring, Language Learning, Test Prep, Music Lessons, Etc.',
   },
   {
     id: 'wellness',
     name: 'Wellness',
     icon: PersonStanding,
     color: '#8B5CF6',
-    examples: 'Yoga, Personal Training, Nutrition, Meditation',
+    examples: 'Yoga, Personal Training, Nutrition, Meditation, Etc.',
   },
 ];
 
@@ -69,7 +69,7 @@ export const CategoryList = ({ onCategorySelect }: CategoryListProps) => {
           </div>
           <div className="text-left">
             <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">
               {category.examples}
             </p>
           </div>
