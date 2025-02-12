@@ -1,3 +1,4 @@
+
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Pencil, Clock } from "lucide-react";
@@ -27,11 +28,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
 
   const eventPreview = (
     <div className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${event.color} w-full`}>
-      <div className="font-medium truncate">{event.title}</div>
-      <div className="flex items-center gap-1 text-gray-600">
-        <Clock className="h-3 w-3" />
-        <span>{displayTime}</span>
-      </div>
+      <div className="font-medium line-clamp-2">{event.title}</div>
     </div>
   );
 
