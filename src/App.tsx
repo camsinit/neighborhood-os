@@ -10,6 +10,7 @@ import SkillsPage from "@/pages/SkillsPage";
 import GoodsPage from "@/pages/GoodsPage";
 import CarePage from "@/pages/CarePage";
 import SafetyPage from "@/pages/SafetyPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import SettingsDialog from "@/components/SettingsDialog";
 import Sidebar from "@/components/layout/Sidebar";
 
@@ -29,6 +30,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Navigate to="/calendar" replace />} />
                   <Route path="/calendar" element={<CalendarPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/skills" element={<SkillsPage />} />
                   <Route path="/goods" element={<GoodsPage />} />
                   <Route path="/care" element={<CarePage />} />

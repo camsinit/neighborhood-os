@@ -16,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 import { Separator } from "@/components/ui/separator";
 
 interface SidebarProps {
@@ -65,6 +64,11 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       label: "Home", 
       href: "/" 
     },
+    {
+      icon: Bell,
+      label: "Notifications",
+      href: "/notifications"
+    }
   ];
 
   const middleNavItems = [
@@ -102,7 +106,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           <img 
             src="/lovable-uploads/93ce5a6d-0cd1-4119-926e-185060c6479d.png" 
             alt="Terrific Terrace Logo" 
-            className="h-24" /* Changed from h-8 to h-24 (3x bigger) */
+            className="h-24"
           />
         </Link>
       </div>
@@ -125,15 +129,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
               </Link>
             );
           })}
-          <NotificationsPopover>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-base font-medium"
-            >
-              <Bell className="h-5 w-5" />
-              Notifications
-            </Button>
-          </NotificationsPopover>
         </div>
 
         <Separator className="my-4" />
