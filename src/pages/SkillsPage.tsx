@@ -7,14 +7,9 @@ import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle, Filter } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Search, Plus, HelpCircle, ArrowLeft } from "lucide-react";
 import { SkillCategory } from "@/components/mutual-support/types";
+import { CategoryList } from "@/components/skills/CategoryList";
 
 const SkillsPage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -53,7 +48,23 @@ const SkillsPage = () => {
   return (
     <div className="h-full w-full bg-white">
       <div className="flex flex-col gap-6 px-8 pt-8">
-        <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
+        <div className="flex items-center gap-4">
+          {selectedCategory && (
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedCategory(null)}
+              className="p-0 hover:bg-transparent"
+            >
+              <ArrowLeft className="h-6 w-6 mr-2" />
+              Back to Categories
+            </Button>
+          )}
+          <h2 className="text-2xl font-bold text-gray-900">
+            {selectedCategory 
+              ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills` 
+              : 'Skills Exchange'}
+          </h2>
+        </div>
         
         <div className="flex items-center justify-between">
           <div className="relative w-[300px]">
@@ -83,47 +94,22 @@ const SkillsPage = () => {
               <HelpCircle className="h-4 w-4 mr-2" />
               Request Skill
             </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={() => setSelectedCategory(null)}>
-                  All Categories
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("tech")}>
-                  Tech
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("creative")}>
-                  Creative
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("trade")}>
-                  Trade
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("education")}>
-                  Education
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSelectedCategory("wellness")}>
-                  Wellness
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <MutualSupportContent 
-        isLoading={isLoading}
-        needs={needs}
-        offers={offers}
-        onItemClick={(item) => setSelectedRequest(item.originalRequest)}
-        onAddRequest={handleAddRequest}
-        selectedView="skills"
-      />
+      {!selectedCategory ? (
+        <CategoryList onCategorySelect={setSelectedCategory} />
+      ) : (
+        <MutualSupportContent 
+          isLoading={isLoading}
+          needs={needs}
+          offers={offers}
+          onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+          onAddRequest={handleAddRequest}
+          selectedView="skills"
+        />
+      )}
 
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
