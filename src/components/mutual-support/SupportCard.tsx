@@ -10,10 +10,10 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
   
   return (
     <div 
-      className={`group bg-white border border-gray-200 ${item.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
+      className={`group bg-white border border-gray-200 ${item.borderColor} rounded-lg p-2 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
       onClick={onClick}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <h4 className="text-lg font-medium">{item.title}</h4>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{item.timeAgo}</span>
@@ -29,7 +29,7 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
         </div>
       </div>
       {item.imageUrl && item.requestType === 'goods' && (
-        <div className="mt-4">
+        <div className="mt-2">
           <img 
             src={item.imageUrl} 
             alt={item.title}
@@ -37,11 +37,11 @@ const SupportCard = ({ item, onClick }: { item: SupportItem; onClick: () => void
           />
         </div>
       )}
-      <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
+      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
         {item.description}
       </p>
       {isTimeSensitive && item.originalRequest.valid_until && (
-        <div className="mt-2">
+        <div className="mt-1">
           <span className="text-xs text-muted-foreground">
             Due: {format(new Date(item.originalRequest.valid_until), 'MMM d, yyyy')}
           </span>
