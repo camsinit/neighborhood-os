@@ -129,6 +129,7 @@ const SkillsPage = () => {
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
         initialRequestType={initialRequestType}
+        view="skills"
       />
       
       <SupportRequestDialog
