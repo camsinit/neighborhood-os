@@ -26,7 +26,7 @@ const App = () => {
         <TooltipProvider>
           <div className="min-h-screen flex w-full">
             <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
-            <div className="flex-1">
+            <div className="flex-1 bg-white">
               <main>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
