@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { SkillFormData, SkillFormProps } from "./types/skillFormTypes";
+import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
@@ -79,7 +78,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
           id="title"
           value={formData.title || ''}
           onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          placeholder={mode === 'offer' ? 'e.g., Python Programming' : 'e.g., Learn Python Programming'}
+          placeholder={mode === 'offer' ? 'e.g., Baking or Car Repair' : 'e.g., Learn Baking or Car Repair'}
           required
         />
       </div>
