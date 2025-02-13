@@ -119,7 +119,7 @@ const SkillsPage = () => {
               <div className="space-y-4">
                 {pendingRequests.map((request) => (
                   <div 
-                    key={request.id}
+                    key={request.originalRequest.id}
                     className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
                     onClick={() => setSelectedRequest(request.originalRequest)}
                   >
