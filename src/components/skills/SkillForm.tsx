@@ -14,15 +14,23 @@ import {
 import { useState } from "react";
 import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
+import { useToast } from "@/hooks/use-toast";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   const [formData, setFormData] = useState<Partial<SkillFormData>>({
     category: 'tech',
     timePreference: [],
   });
+  const { toast } = useToast();
 
   const { handleSubmit } = useSupportRequestSubmit({
     onSuccess: () => {
+      toast({
+        title: mode === 'offer' ? "Skill offered successfully" : "Skill requested successfully",
+        description: mode === 'offer' 
+          ? "Your neighbors can now see your skill offering"
+          : "Your request has been posted. We'll notify you when someone offers to help",
+      });
       onClose();
     }
   });
@@ -35,7 +43,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       category: 'skills',
       requestType: mode === 'offer' ? 'offer' : 'need',
       supportType: 'ongoing',
-      validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 year from now
+      validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       skill_category: formData.category,
     });
   };
@@ -73,13 +81,15 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
 
       <div className="space-y-2">
         <Label htmlFor="title">
-          {mode === 'offer' ? 'What skill can you teach?' : 'What skill do you want to learn?'}
+          {mode === 'offer' ? 'What skill can you teach?' : 'What would you like to learn?'}
         </Label>
         <Input
           id="title"
           value={formData.title || ''}
           onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          placeholder={mode === 'offer' ? 'e.g., Baking or Car Repair' : 'e.g., Learn Baking or Car Repair'}
+          placeholder={mode === 'offer' 
+            ? 'e.g., Python Programming, Guitar Lessons' 
+            : 'e.g., Learn Python, Guitar Basics'}
           required
         />
       </div>
@@ -88,16 +98,15 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
         <Label htmlFor="description">
           {mode === 'offer' 
             ? 'Describe your experience and teaching approach' 
-            : 'Describe what you want to learn and your current level'}
+            : 'What aspects would you like to learn? Any specific goals?'}
         </Label>
         <Textarea
           id="description"
           value={formData.description || ''}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           placeholder={mode === 'offer' 
-            ? 'Share your expertise and how you can help your neighbors'
-            : 'Explain what specific aspects you want to learn and your goals'
-          }
+            ? 'Share your expertise and how you can help others learn'
+            : 'Share what you hope to learn and achieve'}
           required
         />
       </div>
@@ -138,25 +147,6 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
             </div>
           </div>
         </>
-      )}
-
-      {mode === 'request' && (
-        <div className="space-y-2">
-          <Label htmlFor="experienceLevel">Your Experience Level</Label>
-          <Select 
-            value={formData.experienceLevel} 
-            onValueChange={(value: any) => setFormData(prev => ({ ...prev, experienceLevel: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select your level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       )}
 
       <DialogFooter>

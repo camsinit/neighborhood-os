@@ -45,6 +45,8 @@ const SkillsPage = () => {
     setIsAddRequestOpen(true);
   };
 
+  const pendingRequests = needs.filter(request => !request.isClaimed);
+
   return (
     <div className="h-full w-full bg-white">
       <div className="flex flex-col gap-6 px-8 pt-8">
@@ -101,14 +103,34 @@ const SkillsPage = () => {
       {!selectedCategory ? (
         <CategoryList onCategorySelect={setSelectedCategory} />
       ) : (
-        <MutualSupportContent 
-          isLoading={isLoading}
-          needs={needs}
-          offers={offers}
-          onItemClick={(item) => setSelectedRequest(item.originalRequest)}
-          onAddRequest={handleAddRequest}
-          selectedView="skills"
-        />
+        <>
+          <MutualSupportContent 
+            isLoading={isLoading}
+            needs={needs}
+            offers={offers}
+            onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+            onAddRequest={handleAddRequest}
+            selectedView="skills"
+          />
+          
+          {pendingRequests.length > 0 && (
+            <div className="px-8 py-6 mt-8 border-t">
+              <h3 className="text-lg font-semibold mb-4">Pending Skill Requests</h3>
+              <div className="space-y-4">
+                {pendingRequests.map((request) => (
+                  <div 
+                    key={request.id}
+                    className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
+                    onClick={() => setSelectedRequest(request.originalRequest)}
+                  >
+                    <h4 className="font-medium text-gray-900">{request.title}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{request.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <AddSupportRequestDialog 
