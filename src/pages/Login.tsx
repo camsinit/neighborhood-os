@@ -2,12 +2,22 @@
 import { useNavigate } from "react-router-dom";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthForm from "@/components/auth/AuthForm";
-import SecretTestButton from "@/components/auth/SecretTestButton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/');
+      }
+    });
+  }, [navigate]);
 
   const handleBackClick = () => {
     window.location.href = '/';
@@ -27,7 +37,6 @@ const Login = () => {
         <AuthHeader />
         <AuthForm />
       </div>
-      <SecretTestButton />
     </div>
   );
 };

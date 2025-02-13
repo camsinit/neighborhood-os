@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
@@ -11,12 +13,78 @@ const AuthForm = () => {
   const [showSurvey, setShowSurvey] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - just navigate to home
-    navigate("/");
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+          },
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Check your email",
+          description: "We've sent you a verification link",
+        });
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (error.message.includes('credentials')) {
+            toast({
+              title: "Invalid credentials",
+              description: "Please check your email and password",
+              variant: "destructive",
+            });
+          } else {
+            throw error;
+          }
+          return;
+        }
+
+        if (data.user) {
+          // Check if profile exists
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select()
+            .eq('id', data.user.id)
+            .single();
+
+          if (!profile) {
+            setShowOnboarding(true);
+          } else {
+            toast({
+              title: "Welcome back!",
+              description: "Successfully signed in",
+            });
+            navigate("/");
+          }
+        }
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -34,6 +102,7 @@ const AuthForm = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="mt-1"
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -47,11 +116,23 @@ const AuthForm = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               className="mt-1"
+              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Sign in
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
+            </Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              className="w-full"
+              onClick={() => setIsSignUp(!isSignUp)}
+              disabled={isLoading}
+            >
+              {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+            </Button>
+          </div>
         </form>
       </div>
       <OnboardingDialog 
