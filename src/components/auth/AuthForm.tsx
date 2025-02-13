@@ -5,12 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
-import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
 const AuthForm = () => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showSurvey, setShowSurvey] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -57,24 +53,11 @@ const AuthForm = () => {
           return;
         }
 
-        if (data.user) {
-          // Check if profile exists
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select()
-            .eq('id', data.user.id)
-            .single();
-
-          if (!profile) {
-            setShowOnboarding(true);
-          } else {
-            toast({
-              title: "Welcome back!",
-              description: "Successfully signed in",
-            });
-            navigate("/");
-          }
-        }
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in",
+        });
+        navigate("/");
       }
     } catch (error: any) {
       toast({
@@ -88,67 +71,52 @@ const AuthForm = () => {
   };
 
   return (
-    <>
-      <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1"
-              disabled={isLoading}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
-            </Button>
-            <Button 
-              type="button" 
-              variant="ghost" 
-              className="w-full"
-              onClick={() => setIsSignUp(!isSignUp)}
-              disabled={isLoading}
-            >
-              {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
-            </Button>
-          </div>
-        </form>
-      </div>
-      <OnboardingDialog 
-        open={showOnboarding} 
-        onOpenChange={(open) => {
-          setShowOnboarding(open);
-          if (!open) {
-            setShowSurvey(true);
-          }
-        }}
-      />
-      <SurveyDialog
-        open={showSurvey}
-        onOpenChange={setShowSurvey}
-      />
-    </>
+    <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email address
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="mt-1"
+            disabled={isLoading}
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="mt-1"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
+          </Button>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            className="w-full"
+            onClick={() => setIsSignUp(!isSignUp)}
+            disabled={isLoading}
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 
