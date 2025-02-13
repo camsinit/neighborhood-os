@@ -2,8 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://edzjbrjxrgsnynolppss.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkempicmp4cmdzbnlub2xwcHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM5MzM2ODksImV4cCI6MjA0OTUwOTY4OX0.ADWwYJb0qTmEjFD7R1ASdJEvdPeSB_B5Dnr4mQZU1Vo";
+// Replace these values with your new project's URL and anon key
+const SUPABASE_URL = "YOUR_NEW_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_NEW_PROJECT_ANON_KEY";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
