@@ -57,7 +57,7 @@ const AuthForm = () => {
           title: "Welcome back!",
           description: "Successfully signed in",
         });
-        navigate("/");
+        navigate("/calendar");
       }
     } catch (error: any) {
       toast({
