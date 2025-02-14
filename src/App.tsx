@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,9 +19,26 @@ import SettingsDialog from "@/components/SettingsDialog";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const Layout = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  return (
+    <div className="min-h-screen flex w-full">
+      <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
+      <div className="flex-1 bg-white">
+        <main>
+          <Outlet />
+        </main>
+      </div>
+      <SettingsDialog 
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
+    </div>
+  );
+};
 
+const App = () => {
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
@@ -29,35 +46,23 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
-              path="/"
               element={
                 <ProtectedRoute>
-                  <div className="min-h-screen flex w-full">
-                    <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
-                    <div className="flex-1 bg-white">
-                      <main>
-                        <Routes>
-                          <Route index element={<HomePage />} />
-                          <Route path="calendar" element={<CalendarPage />} />
-                          <Route path="notifications" element={<NotificationsPage />} />
-                          <Route path="skills" element={<SkillsPage />} />
-                          <Route path="goods" element={<GoodsPage />} />
-                          <Route path="care" element={<CarePage />} />
-                          <Route path="safety" element={<SafetyPage />} />
-                        </Routes>
-                      </main>
-                    </div>
-                  </div>
+                  <Layout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<HomePage />} />
+              <Route path="calendar" element={<CalendarPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="skills" element={<SkillsPage />} />
+              <Route path="goods" element={<GoodsPage />} />
+              <Route path="care" element={<CarePage />} />
+              <Route path="safety" element={<SafetyPage />} />
+            </Route>
           </Routes>
           <Toaster />
           <Sonner />
-          <SettingsDialog 
-            open={isSettingsOpen}
-            onOpenChange={setIsSettingsOpen}
-          />
         </TooltipProvider>
       </QueryClientProvider>
     </BrowserRouter>
