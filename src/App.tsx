@@ -29,7 +29,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
-              path="*"
+              path="/"
               element={
                 <ProtectedRoute>
                   <div className="min-h-screen flex w-full">
@@ -37,13 +37,13 @@ const App = () => {
                     <div className="flex-1 bg-white">
                       <main>
                         <Routes>
-                          <Route path="/" element={<HomePage />} />
-                          <Route path="/calendar" element={<CalendarPage />} />
-                          <Route path="/notifications" element={<NotificationsPage />} />
-                          <Route path="/skills" element={<SkillsPage />} />
-                          <Route path="/goods" element={<GoodsPage />} />
-                          <Route path="/care" element={<CarePage />} />
-                          <Route path="/safety" element={<SafetyPage />} />
+                          <Route index element={<HomePage />} />
+                          <Route path="calendar" element={<CalendarPage />} />
+                          <Route path="notifications" element={<NotificationsPage />} />
+                          <Route path="skills" element={<SkillsPage />} />
+                          <Route path="goods" element={<GoodsPage />} />
+                          <Route path="care" element={<CarePage />} />
+                          <Route path="safety" element={<SafetyPage />} />
                         </Routes>
                       </main>
                     </div>
