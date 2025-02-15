@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -72,7 +73,7 @@ export const ProfileImageUpload = () => {
       const filePath = `${user.id}-${Math.random()}.jpg`;
 
       const { error: uploadError } = await supabase.storage
-        .from('mutual_aid_images')
+        .from('avatars')
         .upload(filePath, croppedImageBlob);
 
       if (uploadError) {
@@ -80,7 +81,7 @@ export const ProfileImageUpload = () => {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('mutual_aid_images')
+        .from('avatars')
         .getPublicUrl(filePath);
 
       const { error: updateError } = await supabase
@@ -98,6 +99,11 @@ export const ProfileImageUpload = () => {
       await queryClient.invalidateQueries({ queryKey: ['events'] });
       await queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       await queryClient.invalidateQueries({ queryKey: ['support-requests'] });
+
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully",
+      });
 
     } catch (error: any) {
       toast({
