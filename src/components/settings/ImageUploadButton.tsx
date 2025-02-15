@@ -1,8 +1,9 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { UserCircle, Upload } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface ImageUploadButtonProps {
   onImageSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -13,9 +14,13 @@ interface ImageUploadButtonProps {
 export const ImageUploadButton = ({ onImageSelect, uploading, avatarUrl }: ImageUploadButtonProps) => {
   const user = useUser();
   const [isHovered, setIsHovered] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    document.getElementById('single-upload')?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''; // Reset the file input
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -37,6 +42,7 @@ export const ImageUploadButton = ({ onImageSelect, uploading, avatarUrl }: Image
         </div>
       </div>
       <input
+        ref={fileInputRef}
         type="file"
         id="single-upload"
         accept="image/*"
