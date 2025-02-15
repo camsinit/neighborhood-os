@@ -113,7 +113,6 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       setInitialValues(values);
       toast({
         title: "Settings saved",
-        description: "Your profile settings have been updated successfully.",
       });
     } catch (error: any) {
       toast({
