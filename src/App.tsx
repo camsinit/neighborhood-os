@@ -14,8 +14,10 @@ import NotificationsPage from "@/pages/NotificationsPage";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Sidebar from "@/components/layout/Sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SettingsDialog from "@/components/SettingsDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from "@/components/ui/loading";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,38 @@ const Layout = () => {
 };
 
 const App = () => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        console.log("[App] Initializing authentication...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("[App] Error getting session:", error);
+        } else {
+          console.log("[App] Initial session state:", { 
+            hasSession: !!session,
+            userId: session?.user?.id 
+          });
+        }
+      } catch (error) {
+        console.error("[App] Unexpected error during initialization:", error);
+      } finally {
+        console.log("[App] Initialization complete");
+        setIsInitializing(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  if (isInitializing) {
+    console.log("[App] Showing loading state while initializing");
+    return <LoadingSpinner />;
+  }
+
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
