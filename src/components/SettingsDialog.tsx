@@ -1,8 +1,9 @@
 
 import { useEffect, useState } from "react";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,8 @@ import { profileFormSchema, ProfileFormValues, NotificationPreferences } from ".
 
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const user = useUser();
+  const supabaseClient = useSupabaseClient();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [initialValues, setInitialValues] = useState<ProfileFormValues | null>(null);
@@ -123,6 +126,21 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabaseClient.auth.signOut();
+      navigate("/login");
+      toast({
+        title: "Signed out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -146,7 +164,14 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               <TabsContent value="notifications">
                 <NotificationsTab form={form} />
               </TabsContent>
-              <div className="flex justify-end">
+              <div className="flex justify-between">
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleSignOut}
+                >
+                  Sign out
+                </Button>
                 <Button type="submit" disabled={loading}>
                   {loading ? "Saving..." : "Save changes"}
                 </Button>

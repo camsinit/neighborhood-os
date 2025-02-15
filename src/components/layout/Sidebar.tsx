@@ -1,37 +1,19 @@
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Bell, Calendar, Heart, Gift, Brain, Shield, Settings, UserCircle } from "lucide-react";
+import { Home, Bell, Calendar, Heart, Gift, Brain, Shield, Settings } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 
-interface SidebarProps {
-  onOpenSettings: () => void;
-}
-
-const Sidebar = ({ onOpenSettings }: SidebarProps) => {
+const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const supabaseClient = useSupabaseClient();
-  const user = useUser();
-  const { toast } = useToast();
-
   const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ['profile', useUser()?.id],
     queryFn: async () => {
+      const user = useUser();
       if (!user?.id) return null;
       const { data } = await supabase
         .from('profiles')
@@ -40,23 +22,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         .single();
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!useUser()?.id,
   });
-
-  const handleSignOut = async () => {
-    try {
-      await supabaseClient.auth.signOut();
-      navigate("/login");
-      toast({
-        title: "Signed out successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error signing out",
-        variant: "destructive",
-      });
-    }
-  };
 
   const mainNavItems = [
     { 
@@ -131,7 +98,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           })}
         </div>
 
-        <Separator className="my-4" />
+        <div className="my-4 h-px bg-gray-200" />
 
         <div className="space-y-1">
           {middleNavItems.map((item) => {
@@ -153,45 +120,9 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           })}
         </div>
 
-        <Separator className="my-4" />
+        <div className="my-4 h-px bg-gray-200" />
 
         <div className="space-y-1">
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-3 text-base font-medium"
-              >
-                <Avatar className="h-5 w-5">
-                  <AvatarImage 
-                    src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
-                    alt={profile?.display_name || user?.email}
-                  />
-                  <AvatarFallback>
-                    <UserCircle className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-                Profile
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {profile?.display_name || user?.user_metadata?.full_name}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-base font-medium"
