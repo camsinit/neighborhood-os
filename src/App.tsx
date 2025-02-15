@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import SettingsDialog from "@/components/SettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
 
 const queryClient = new QueryClient();
 
@@ -74,33 +75,35 @@ const App = () => {
   }
 
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<HomePage />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="skills" element={<SkillsPage />} />
-              <Route path="goods" element={<GoodsPage />} />
-              <Route path="care" element={<CarePage />} />
-              <Route path="safety" element={<SafetyPage />} />
-            </Route>
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <SessionContextProvider supabaseClient={supabase}>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<HomePage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="skills" element={<SkillsPage />} />
+                <Route path="goods" element={<GoodsPage />} />
+                <Route path="care" element={<CarePage />} />
+                <Route path="safety" element={<SafetyPage />} />
+              </Route>
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </SessionContextProvider>
   );
 };
 
