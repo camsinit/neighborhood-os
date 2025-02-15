@@ -1,6 +1,6 @@
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Bell, Calendar, Heart, Gift, Brain, Shield, Settings } from "lucide-react";
+import { Home, Bell, Calendar, Heart, Gift, Brain, Shield, Settings, Users } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -63,6 +63,11 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
       icon: Shield, 
       label: "Safety", 
       href: "/safety" 
+    },
+    {
+      icon: Users,
+      label: "Neighbors",
+      href: "/neighbors"
     },
   ];
 

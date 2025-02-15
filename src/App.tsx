@@ -10,6 +10,7 @@ import SkillsPage from "@/pages/SkillsPage";
 import GoodsPage from "@/pages/GoodsPage";
 import CarePage from "@/pages/CarePage";
 import SafetyPage from "@/pages/SafetyPage";
+import NeighborsPage from "@/pages/NeighborsPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -96,6 +97,7 @@ const App = () => {
                 <Route path="goods" element={<GoodsPage />} />
                 <Route path="care" element={<CarePage />} />
                 <Route path="safety" element={<SafetyPage />} />
+                <Route path="neighbors" element={<NeighborsPage />} />
               </Route>
             </Routes>
             <Toaster />
