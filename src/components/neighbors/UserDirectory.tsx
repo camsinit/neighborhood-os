@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole, UserRole } from "@/types/roles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Shield } from "lucide-react";
+import { User, Shield, MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,9 +13,30 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const UserDirectory = () => {
   const queryClient = useQueryClient();
+
+  // Add a query to check if current user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ['check-admin'],
+    queryFn: async () => {
+      const { data: isAdminResult } = await supabase.rpc('check_user_role', {
+        user_id: (await supabase.auth.getUser()).data.user?.id || '',
+        required_role: 'super_admin'
+      });
+      if (!isAdminResult) {
+        const { data: isModeratorResult } = await supabase.rpc('check_user_role', {
+          user_id: (await supabase.auth.getUser()).data.user?.id || '',
+          required_role: 'admin'
+        });
+        return isModeratorResult;
+      }
+      return isAdminResult;
+    },
+    enabled: !!supabase.auth.getUser()
+  });
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users-with-roles'],
@@ -23,7 +44,7 @@ export const UserDirectory = () => {
       // First get all users from auth.users through profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url');
+        .select('id, display_name, avatar_url, address');
 
       if (profilesError) throw profilesError;
 
@@ -50,7 +71,8 @@ export const UserDirectory = () => {
           created_at: authUser?.created_at,
           profiles: {
             display_name: profile.display_name,
-            avatar_url: profile.avatar_url
+            avatar_url: profile.avatar_url,
+            address: profile.address
           },
           roles: roles?.filter(r => r.user_id === profile.id).map(r => r.role as UserRole) || ['user']
         };
@@ -97,49 +119,57 @@ export const UserDirectory = () => {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-6">Neighbor Directory</h2>
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {users?.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center justify-between p-4 border rounded-lg"
-          >
-            <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src={user.profiles?.avatar_url || ''} />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-medium">
-                  {user.profiles?.display_name || user.email}
-                </h3>
-                <p className="text-sm text-gray-500">{user.email}</p>
+          <Card key={user.id} className="overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={user.profiles?.avatar_url || ''} />
+                  <AvatarFallback>
+                    <User className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <h3 className="font-medium text-lg">
+                    {user.profiles?.display_name || user.email}
+                  </h3>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                  {user.profiles?.address && (
+                    <div className="flex items-center justify-center mt-2 text-sm text-gray-600">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{user.profiles.address}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {isAdmin && (
+                  <div className="flex items-center space-x-2 mt-4">
+                    <Shield className="h-4 w-4 text-gray-400" />
+                    <Select
+                      value={user.roles[0] || 'user'}
+                      onValueChange={(role) => {
+                        updateRoleMutation.mutate({ 
+                          userId: user.id, 
+                          role: role as UserRole 
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="moderator">Moderator</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Shield className="h-4 w-4 text-gray-400" />
-              <Select
-                value={user.roles[0] || 'user'}
-                onValueChange={(role) => {
-                  updateRoleMutation.mutate({ 
-                    userId: user.id, 
-                    role: role as UserRole 
-                  });
-                }}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="moderator">Moderator</SelectItem>
-                  <SelectItem value="user">User</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
