@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const profileFormSchema = z.object({
@@ -8,7 +9,6 @@ export const profileFormSchema = z.object({
   theme: z.string(),
   notification_preferences: z.object({
     email: z.boolean(),
-    push: z.boolean(),
   }),
 });
 
@@ -16,5 +16,4 @@ export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export type NotificationPreferences = {
   email: boolean;
-  push: boolean;
 };

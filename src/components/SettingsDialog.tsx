@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,7 +42,6 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       theme: "light",
       notification_preferences: {
         email: true,
-        push: true,
       },
     },
   });
@@ -70,7 +68,6 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       if (data) {
         const notificationPrefs = data.notification_preferences as NotificationPreferences || {
           email: true,
-          push: true,
         };
 
         const values = {
