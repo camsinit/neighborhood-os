@@ -20,34 +20,41 @@ export const UserDirectory = () => {
   const { data: users, isLoading } = useQuery({
     queryKey: ['users-with-roles'],
     queryFn: async () => {
-      const { data: users, error } = await supabase
+      // First get all users from auth.users through profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          display_name,
-          avatar_url,
-          auth.users!inner (
-            email,
-            created_at
-          )
-        `);
+        .select('id, display_name, avatar_url');
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
 
-      const { data: roles } = await supabase
+      // Then get user emails from auth.users
+      const { data: authUsers, error: authError } = await supabase
+        .from('auth_users_view')
+        .select('id, email, created_at');
+
+      if (authError) throw authError;
+
+      // Get all user roles
+      const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
-      const usersWithRoles = users.map((user: any) => ({
-        id: user.id,
-        email: user.auth.users.email,
-        created_at: user.auth.users.created_at,
-        profiles: {
-          display_name: user.display_name,
-          avatar_url: user.avatar_url
-        },
-        roles: roles?.filter(r => r.user_id === user.id).map(r => r.role as UserRole) || ['user']
-      }));
+      if (rolesError) throw rolesError;
+
+      // Combine the data
+      const usersWithRoles = profiles.map((profile: any) => {
+        const authUser = authUsers.find((u: any) => u.id === profile.id);
+        return {
+          id: profile.id,
+          email: authUser?.email,
+          created_at: authUser?.created_at,
+          profiles: {
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url
+          },
+          roles: roles?.filter(r => r.user_id === profile.id).map(r => r.role as UserRole) || ['user']
+        };
+      });
 
       return usersWithRoles as UserWithRole[];
     }
