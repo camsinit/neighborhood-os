@@ -16,13 +16,18 @@ const AuthForm = () => {
 
   // Listen for auth state changes
   useEffect(() => {
+    console.log("[AuthForm] Setting up auth state change listener");
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
+      
       if (event === 'SIGNED_IN' && session) {
+        console.log("[AuthForm] Valid SIGNED_IN event received, attempting navigation to /calendar");
         navigate("/calendar");
       }
     });
 
     return () => {
+      console.log("[AuthForm] Cleaning up auth state change listener");
       subscription.unsubscribe();
     };
   }, [navigate]);
@@ -30,9 +35,11 @@ const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("[AuthForm] Starting authentication process", { isSignUp });
 
     try {
       if (isSignUp) {
+        console.log("[AuthForm] Attempting signup");
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -42,18 +49,21 @@ const AuthForm = () => {
         });
 
         if (error) throw error;
+        console.log("[AuthForm] Signup successful");
 
         toast({
           title: "Check your email",
           description: "We've sent you a verification link",
         });
       } else {
+        console.log("[AuthForm] Attempting signin");
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
+          console.error("[AuthForm] Signin error:", error);
           if (error.message.includes('credentials')) {
             toast({
               title: "Invalid credentials",
@@ -66,19 +76,21 @@ const AuthForm = () => {
           return;
         }
 
+        console.log("[AuthForm] Signin successful", { user: data.user?.id });
         toast({
           title: "Welcome back!",
           description: "Successfully signed in",
         });
-        // Note: We don't need to navigate here anymore as the onAuthStateChange handler will do it
       }
     } catch (error: any) {
+      console.error("[AuthForm] Authentication error:", error);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     } finally {
+      console.log("[AuthForm] Completing authentication process");
       setIsLoading(false);
     }
   };
