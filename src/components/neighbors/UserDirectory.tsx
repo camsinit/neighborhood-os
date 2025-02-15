@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { UserWithRole } from "@/types/roles";
+import { UserWithRole, UserRole } from "@/types/roles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Shield } from "lucide-react";
 import {
@@ -46,7 +46,7 @@ export const UserDirectory = () => {
           display_name: user.display_name,
           avatar_url: user.avatar_url
         },
-        roles: roles?.filter(r => r.user_id === user.id).map(r => r.role) || ['user']
+        roles: roles?.filter(r => r.user_id === user.id).map(r => r.role as UserRole) || ['user']
       }));
 
       return usersWithRoles as UserWithRole[];
@@ -54,7 +54,7 @@ export const UserDirectory = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string, role: string }) => {
+    mutationFn: async ({ userId, role }: { userId: string, role: UserRole }) => {
       // First remove existing roles
       const { error: deleteError } = await supabase
         .from('user_roles')
@@ -66,7 +66,10 @@ export const UserDirectory = () => {
       // Then add new role
       const { error: insertError } = await supabase
         .from('user_roles')
-        .insert({ user_id: userId, role });
+        .insert({ 
+          user_id: userId, 
+          role: role as 'super_admin' | 'admin' | 'moderator' | 'user'
+        });
 
       if (insertError) throw insertError;
     },
@@ -112,7 +115,10 @@ export const UserDirectory = () => {
               <Select
                 value={user.roles[0] || 'user'}
                 onValueChange={(role) => {
-                  updateRoleMutation.mutate({ userId: user.id, role });
+                  updateRoleMutation.mutate({ 
+                    userId: user.id, 
+                    role: role as UserRole 
+                  });
                 }}
               >
                 <SelectTrigger className="w-[140px]">
