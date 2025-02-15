@@ -1,3 +1,4 @@
+
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import {
@@ -44,13 +45,11 @@ export const ImageCropDialog = ({
                 crop={crop}
                 onChange={(_, percentCrop) => onCropChange(percentCrop)}
                 onComplete={(c) => onCropComplete(c)}
-                circularCrop
                 aspect={1}
                 minWidth={100}
                 minHeight={100}
+                circularCrop
                 className="max-w-full max-h-full"
-                ruleOfThirds
-                keepSelection
               >
                 <img
                   ref={imgRef}
@@ -59,20 +58,20 @@ export const ImageCropDialog = ({
                   style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }}
                   onLoad={(e) => {
                     const img = e.currentTarget;
-                    const width = img.width;
-                    const height = img.height;
-                    const size = Math.min(width, height);
-                    const x = (width - size) / 2;
-                    const y = (height - size) / 2;
-                    const newCrop: Crop = {
-                      unit: '%',
-                      width: (size / width) * 100,
-                      height: (size / height) * 100,
-                      x: (x / width) * 100,
-                      y: (y / height) * 100,
+                    const minSize = Math.min(img.width, img.height);
+                    const x = (img.width - minSize) / 2;
+                    const y = (img.height - minSize) / 2;
+                    
+                    // Calculate crop as pixels instead of percentages
+                    const newCrop: PixelCrop = {
+                      unit: 'px',
+                      width: minSize,
+                      height: minSize,
+                      x: x,
+                      y: y
                     };
-                    onCropChange(newCrop);
-                    onCropComplete(newCrop as PixelCrop);
+                    
+                    onCropComplete(newCrop);
                   }}
                 />
               </ReactCrop>
