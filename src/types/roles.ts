@@ -8,6 +8,7 @@ export interface UserWithRole {
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
+    address: string | null;
   };
   roles: UserRole[];
 }
