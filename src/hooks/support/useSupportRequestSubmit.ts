@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -30,11 +31,12 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           user_id: user.id,
           valid_until: new Date(formData.validUntil!).toISOString(),
           image_url: formData.imageUrl,
+          skill_category: formData.skill_category,
         });
 
       if (error) throw error;
 
-      toast.success("Support request created successfully");
+      // Let the parent component handle success messages
       queryClient.invalidateQueries({ queryKey: ['support-requests'] });
       onSuccess();
     } catch (error) {
@@ -60,13 +62,14 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           support_type: formData.supportType,
           valid_until: new Date(formData.validUntil!).toISOString(),
           image_url: formData.imageUrl,
+          skill_category: formData.skill_category,
         })
         .eq('id', requestId)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      toast.success("Support request updated successfully");
+      // Let the parent component handle success messages
       queryClient.invalidateQueries({ queryKey: ['support-requests'] });
       onSuccess();
     } catch (error) {
