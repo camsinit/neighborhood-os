@@ -30,37 +30,43 @@ const CarePage = () => {
   };
 
   return (
-    <div className="h-full w-full bg-white">
-      <div className="flex flex-col gap-6 px-8 pt-8">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600 max-w-2xl">
-            Request help with transportation, household tasks, medical assistance, childcare, eldercare, pet care, meal preparation, and more.
-          </p>
-          
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => handleAddRequest("need")}
-              className="bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
-            >
-              <HeartHandshake className="h-4 w-4 mr-2" />
-              Request Care
-            </Button>
+    <div className="min-h-full w-full bg-gradient-to-b from-rose-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-8">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <HeartHandshake className="h-8 w-8 text-rose-600" />
+                <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
+              </div>
+              
+              <Button 
+                onClick={() => handleAddRequest("need")}
+                className="bg-rose-600 hover:bg-rose-700 text-white"
+              >
+                <HeartHandshake className="h-4 w-4 mr-2" />
+                Request Care
+              </Button>
+            </div>
+            
+            <div className="bg-rose-100 rounded-lg p-4 mb-6">
+              <p className="text-rose-800 text-sm">
+                Request help with transportation, household tasks, medical assistance, childcare, eldercare, 
+                pet care, meal preparation, and more. Our community is here to support you.
+              </p>
+            </div>
           </div>
+
+          <MutualSupportContent 
+            isLoading={isLoading}
+            needs={needs}
+            offers={offers}
+            onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+            onAddRequest={handleAddRequest}
+            selectedView="care"
+          />
         </div>
       </div>
-
-      <MutualSupportContent 
-        isLoading={isLoading}
-        needs={needs}
-        offers={offers}
-        onItemClick={(item) => setSelectedRequest(item.originalRequest)}
-        onAddRequest={handleAddRequest}
-        selectedView="care"
-      />
 
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
