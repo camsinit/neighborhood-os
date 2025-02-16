@@ -89,23 +89,26 @@ const SkillsPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-4">
-              {selectedCategory && (
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setSelectedCategory(null)} 
-                  className="p-0 hover:bg-transparent"
-                >
-                  <ArrowLeft className="h-6 w-6 mr-2" />
-                  Back to Categories
-                </Button>
+            <div className="flex flex-col gap-2">
+              {selectedCategory ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setSelectedCategory(null)} 
+                    className="p-0 hover:bg-transparent w-fit"
+                  >
+                    <ArrowLeft className="h-6 w-6 mr-2" />
+                    Back to Categories
+                  </Button>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills
+                  </h2>
+                </>
+              ) : (
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Skills Exchange
+                </h2>
               )}
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedCategory 
-                  ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills`
-                  : 'Skills Exchange'
-                }
-              </h2>
             </div>
             
             {!selectedCategory && (
