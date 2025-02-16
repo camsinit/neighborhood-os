@@ -1,5 +1,5 @@
+
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
-import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
 import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -130,7 +130,7 @@ const SkillsPage = () => {
             )}
 
             <div className="flex items-center justify-between py-4 flex-nowrap">
-              <div className="relative w-[300px] flex-shrink-0">
+              <div className="relative w-[200px] flex-shrink-0">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <Input 
                   type="search" 
@@ -143,8 +143,9 @@ const SkillsPage = () => {
               
               <div className="flex items-center gap-3 flex-shrink-0">
                 <Button 
+                  variant="outline"
                   onClick={() => handleAddRequest("offer")} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white whitespace-nowrap"
+                  className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Offer Skill

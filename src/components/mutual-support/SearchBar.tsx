@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 
 interface SearchBarProps {
@@ -9,7 +10,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     <Input 
       type="search" 
       placeholder="Search requests..." 
-      className="max-w-[240px] bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300"
+      className="max-w-[200px] bg-white border-gray-200 focus:ring-gray-200 focus:border-gray-300"
       onChange={(e) => onSearch(e.target.value)}
     />
   );
