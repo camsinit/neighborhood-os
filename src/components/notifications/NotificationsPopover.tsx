@@ -79,12 +79,12 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
 
       return [
         ...(safetyUpdates.data?.map(update => ({
-          id: update.id,
+          itemId: update.id,
           title: update.title,
           type: "safety" as const,
           created_at: update.created_at,
-          is_read: update.is_read,
-          is_archived: update.is_archived,
+          isRead: update.is_read,
+          isArchived: update.is_archived,
           context: {
             contextType: "safety_alert" as const,
             neighborName: update.profiles?.display_name,
@@ -94,12 +94,12 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionType: "comment" as const
         })) || []),
         ...(events.data?.map(event => ({
-          id: event.id,
+          itemId: event.id,
           title: event.title,
           type: "event" as const,
           created_at: event.created_at,
-          is_read: event.is_read,
-          is_archived: event.is_archived,
+          isRead: event.is_read,
+          isArchived: event.is_archived,
           context: {
             contextType: "event_invite" as const,
             neighborName: event.profiles?.display_name,
@@ -109,12 +109,12 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionType: "rsvp" as const
         })) || []),
         ...(supportRequests.data?.map(request => ({
-          id: request.id,
+          itemId: request.id,
           title: request.title,
           type: "support" as const,
           created_at: request.created_at,
-          is_read: request.is_read,
-          is_archived: request.is_archived,
+          isRead: request.is_read,
+          isArchived: request.is_archived,
           context: {
             contextType: "help_request" as const,
             neighborName: request.profiles?.display_name,
@@ -168,7 +168,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
     refetch();
   };
 
-  const hasUnreadNotifications = notifications?.some(n => !n.is_read && !n.is_archived);
+  const hasUnreadNotifications = notifications?.some(n => !n.isRead && !n.isArchived);
 
   return (
     <Popover>
@@ -205,7 +205,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           {notifications?.length ? (
             notifications.map((notification) => (
               <NotificationItem
-                key={notification.id}
+                key={notification.itemId}
                 {...notification}
                 onClose={() => refetch()}
                 onItemClick={handleItemClick}
