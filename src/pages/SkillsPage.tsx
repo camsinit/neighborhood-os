@@ -1,4 +1,3 @@
-
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
 import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
@@ -47,10 +46,11 @@ const SkillsPage = () => {
       skillCategory: skill.skill_category as SkillCategory,
       originalRequest: {
         ...skill,
-        category: "skills",
+        category: "skills" as const,
         image_url: null,
-        support_type: "ongoing",
+        support_type: "ongoing" as const,
         care_category: undefined,
+        skill_category: skill.skill_category as SkillCategory
       },
       profiles: skill.profiles,
     }));
@@ -72,10 +72,11 @@ const SkillsPage = () => {
       skillCategory: skill.skill_category as SkillCategory,
       originalRequest: {
         ...skill,
-        category: "skills",
+        category: "skills" as const,
         image_url: null,
-        support_type: "ongoing",
+        support_type: "ongoing" as const,
         care_category: undefined,
+        skill_category: skill.skill_category as SkillCategory
       },
       profiles: skill.profiles,
     }));
