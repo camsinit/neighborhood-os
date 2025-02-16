@@ -15,10 +15,11 @@ import { useState } from "react";
 import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
 import { useToast } from "@/hooks/use-toast";
+import { SkillCategory } from "@/components/mutual-support/types";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   const [formData, setFormData] = useState<Partial<SkillFormData>>({
-    category: 'technology',
+    category: 'technology' as SkillCategory,
     timePreference: [],
   });
   const { toast } = useToast();
@@ -37,6 +38,16 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.category) {
+      toast({
+        title: "Category required",
+        description: "Please select a skill category",
+        variant: "destructive"
+      });
+      return;
+    }
+
     handleSubmit({
       title: formData.title,
       description: formData.description,
@@ -64,7 +75,8 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
         <Label htmlFor="category">Skill Category</Label>
         <Select 
           value={formData.category} 
-          onValueChange={(value: any) => setFormData(prev => ({ ...prev, category: value }))}
+          onValueChange={(value: SkillCategory) => setFormData(prev => ({ ...prev, category: value }))}
+          required
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
