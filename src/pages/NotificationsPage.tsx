@@ -103,7 +103,7 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="h-full w-full bg-gray-50">
+    <div className="h-full w-full bg-white">
       <div className="flex items-center justify-between p-8 border-b bg-white">
         <h2 className="text-2xl font-bold text-gray-900">
           {showArchived ? "Archived Notifications" : "Notifications"}
