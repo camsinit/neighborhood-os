@@ -1,5 +1,4 @@
-
-import { useSupportRequests } from "@/utils/queries/useSupportRequests";
+import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
 import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
 import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
@@ -18,59 +17,57 @@ const SkillsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   
-  const { data: requests, isLoading } = useSupportRequests();
+  const { data: skillsExchange, isLoading } = useSkillsExchange();
   
-  console.log("All requests:", requests);
+  console.log("All skills:", skillsExchange);
   
-  const skillsRequests = requests?.filter(req => {
-    const isSkill = req.category === 'skills';
-    console.log(`Request ${req.id}:`, {
-      category: req.category,
-      isSkill,
-      skillCategory: req.skill_category,
-      title: req.title
-    });
-    return isSkill;
-  }) || [];
-
-  console.log("Filtered skills requests:", skillsRequests);
-  
-  const filteredRequests = skillsRequests.filter(req => {
+  const filteredSkills = skillsExchange?.filter(skill => {
     const matchesSearch = searchQuery.toLowerCase() === '' || 
-      req.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      req.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      skill.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      skill.description?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesCategory = !selectedCategory || req.skill_category === selectedCategory;
-    
-    console.log(`Filtering request ${req.id}:`, {
-      skillCategory: req.skill_category,
-      selectedCategory,
-      matchesCategory,
-      matchesSearch,
-      passes: matchesSearch && matchesCategory
-    });
+    const matchesCategory = !selectedCategory || skill.skill_category === selectedCategory;
     
     return matchesSearch && matchesCategory;
-  });
+  }) || [];
 
-  console.log("Final filtered requests:", {
-    selectedCategory,
-    totalRequests: filteredRequests.length,
-    requests: filteredRequests
-  });
-
-  const needs = filteredRequests
-    .filter(req => req.request_type === 'need')
-    .map(transformRequest);
+  const needs = filteredSkills
+    .filter(skill => skill.request_type === 'need')
+    .map(skill => ({
+      type: "Needs Help" as const,
+      title: skill.title,
+      description: skill.description || "",
+      timeAgo: new Date(skill.created_at).toLocaleDateString(),
+      borderColor: "border-red-200",
+      tagColor: "text-red-500",
+      tagBg: "bg-red-50",
+      requestType: skill.request_type,
+      category: "skills",
+      supportType: "ongoing",
+      imageUrl: null,
+      skillCategory: skill.skill_category as SkillCategory,
+      originalRequest: skill,
+      profiles: skill.profiles,
+    }));
     
-  const offers = filteredRequests
-    .filter(req => req.request_type === 'offer')
-    .map(transformRequest);
-
-  console.log("Processed requests:", {
-    needs: needs.length,
-    offers: offers.length
-  });
+  const offers = filteredSkills
+    .filter(skill => skill.request_type === 'offer')
+    .map(skill => ({
+      type: "Offering Help" as const,
+      title: skill.title,
+      description: skill.description || "",
+      timeAgo: new Date(skill.created_at).toLocaleDateString(),
+      borderColor: "border-green-200",
+      tagColor: "text-green-500",
+      tagBg: "bg-green-50",
+      requestType: skill.request_type,
+      category: "skills",
+      supportType: "ongoing",
+      imageUrl: null,
+      skillCategory: skill.skill_category as SkillCategory,
+      originalRequest: skill,
+      profiles: skill.profiles,
+    }));
 
   const handleAddRequest = (type: "need" | "offer") => {
     setInitialRequestType(type);

@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      care_requests: {
+        Row: {
+          care_category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_archived: boolean | null
+          is_read: boolean | null
+          request_type: string
+          support_type: string
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          care_category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type: string
+          support_type: string
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Update: {
+          care_category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type?: string
+          support_type?: string
+          title?: string
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -97,6 +139,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      goods_exchange: {
+        Row: {
+          condition: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_archived: boolean | null
+          is_read: boolean | null
+          request_type: string
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type: string
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Update: {
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type?: string
+          title?: string
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -296,6 +380,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      skills_exchange: {
+        Row: {
+          availability: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_archived: boolean | null
+          is_read: boolean | null
+          request_type: string
+          skill_category: string
+          time_preferences: string[] | null
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type: string
+          skill_category: string
+          time_preferences?: string[] | null
+          title: string
+          user_id: string
+          valid_until: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          request_type?: string
+          skill_category?: string
+          time_preferences?: string[] | null
+          title?: string
+          user_id?: string
+          valid_until?: string
+        }
+        Relationships: []
       }
       support_requests: {
         Row: {

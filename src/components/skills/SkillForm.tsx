@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
-import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
+import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import { useToast } from "@/hooks/use-toast";
 import { SkillCategory } from "@/components/mutual-support/types";
 
@@ -24,7 +23,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   });
   const { toast } = useToast();
 
-  const { handleSubmit } = useSupportRequestSubmit({
+  const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
       toast({
         title: mode === 'offer' ? "Skill offered successfully" : "Skill requested successfully",
@@ -48,15 +47,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       return;
     }
 
-    handleSubmit({
-      title: formData.title,
-      description: formData.description,
-      category: 'skills',
-      requestType: mode === 'offer' ? 'offer' : 'need',
-      supportType: 'ongoing',
-      validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      skill_category: formData.category,
-    });
+    handleSubmit(formData, mode);
   };
 
   const handleTimePreferenceChange = (value: string) => {
