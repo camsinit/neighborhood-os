@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
@@ -51,11 +52,13 @@ const SafetyUpdates = () => {
         </Button>
       </div>
       
-      <SafetyUpdatesList
-        updates={updates || []}
-        isLoading={isLoading}
-        onUpdateClick={setSelectedUpdate}
-      />
+      <div className="bg-transparent">
+        <SafetyUpdatesList
+          updates={updates || []}
+          isLoading={isLoading}
+          onUpdateClick={setSelectedUpdate}
+        />
+      </div>
 
       <div className="mt-8 flex justify-center">
         <Button 
