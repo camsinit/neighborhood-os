@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,17 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       language: "en",
       theme: "light",
       notification_preferences: {
-        email: true,
+        involved_only: true,
+        page_specific: {
+          events: true,
+          safety: true,
+          care: true,
+          goods: true,
+          skills: true,
+          neighbors: true
+        },
+        all_activity: false,
+        new_neighbors: true
       },
     },
   });
@@ -67,7 +78,17 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
       if (data) {
         const notificationPrefs = data.notification_preferences as NotificationPreferences || {
-          email: true,
+          involved_only: true,
+          page_specific: {
+            events: true,
+            safety: true,
+            care: true,
+            goods: true,
+            skills: true,
+            neighbors: true
+          },
+          all_activity: false,
+          new_neighbors: true
         };
 
         const values = {

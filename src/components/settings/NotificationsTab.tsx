@@ -6,6 +6,15 @@ import { ProfileFormValues } from "./types";
 import { Separator } from "@/components/ui/separator";
 
 export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
+  const pageSpecificSettings = [
+    { key: "events", label: "Events" },
+    { key: "safety", label: "Safety Updates" },
+    { key: "care", label: "Care Requests" },
+    { key: "goods", label: "Goods Exchange" },
+    { key: "skills", label: "Skills Sharing" },
+    { key: "neighbors", label: "Neighbor Activity" }
+  ] as const;
+
   return (
     <div className="space-y-6">
       <FormField
@@ -34,18 +43,11 @@ export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValu
       <div>
         <h3 className="text-lg font-medium mb-4">Page-Specific Notifications</h3>
         <div className="space-y-4">
-          {Object.entries({
-            events: "Events",
-            safety: "Safety Updates",
-            care: "Care Requests",
-            goods: "Goods Exchange",
-            skills: "Skills Sharing",
-            neighbors: "Neighbor Activity"
-          }).map(([key, label]) => (
+          {pageSpecificSettings.map(({ key, label }) => (
             <FormField
               key={key}
               control={form.control}
-              name={`notification_preferences.page_specific.${key}`}
+              name={`notification_preferences.page_specific.${key}` as const}
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
