@@ -1,4 +1,3 @@
-
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
@@ -107,6 +106,14 @@ const SkillsPage = () => {
                 }
               </h2>
             </div>
+            
+            {!selectedCategory && (
+              <div className="bg-indigo-100 rounded-lg p-4">
+                <p className="text-indigo-800 text-sm">
+                  Share your expertise or learn something new. Connect with neighbors to exchange knowledge and skills.
+                </p>
+              </div>
+            )}
 
             <div className="flex items-center justify-between py-4">
               <div className="relative w-[300px]">
@@ -138,14 +145,6 @@ const SkillsPage = () => {
                 </Button>
               </div>
             </div>
-
-            {!selectedCategory && (
-              <div className="bg-indigo-100 rounded-lg p-4 mb-6">
-                <p className="text-indigo-800 text-sm">
-                  Share your expertise or learn something new. Connect with neighbors to exchange knowledge and skills.
-                </p>
-              </div>
-            )}
           </div>
 
           {!selectedCategory ? (
