@@ -3,6 +3,11 @@ import { Bell, Calendar, Shield, HandHelping, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
+interface NotificationContext {
+  neighborName?: string;
+  contextType: "help_request" | "event_invite" | "safety_alert";
+}
+
 interface NotificationItemProps {
   title: string;
   type: "safety" | "event" | "support";
@@ -11,6 +16,7 @@ interface NotificationItemProps {
   isArchived?: boolean;
   onClose: () => void;
   onItemClick: (type: "safety" | "event" | "support", id: string) => void;
+  context?: NotificationContext;
 }
 
 type TableName = "safety_updates" | "events" | "support_requests";
@@ -22,7 +28,8 @@ const NotificationItem = ({
   isRead = false,
   isArchived = false,
   onClose, 
-  onItemClick 
+  onItemClick,
+  context 
 }: NotificationItemProps) => {
   const getIcon = () => {
     switch (type) {
@@ -34,6 +41,21 @@ const NotificationItem = ({
         return <HandHelping className="h-4 w-4 text-green-500" />;
       default:
         return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const getContextText = (context?: NotificationContext) => {
+    if (!context) return null;
+
+    switch (context.contextType) {
+      case "help_request":
+        return `Can you help ${context.neighborName} with`;
+      case "event_invite":
+        return "Join your neighbors for";
+      case "safety_alert":
+        return "Important update about";
+      default:
+        return null;
     }
   };
 
@@ -70,6 +92,11 @@ const NotificationItem = ({
       <div className="flex items-start gap-3">
         {getIcon()}
         <div>
+          {context && (
+            <p className="text-sm text-gray-500 italic mb-1">
+              {getContextText(context)}
+            </p>
+          )}
           <h3 className={`text-lg font-medium text-gray-900 ${isRead ? 'text-gray-500' : ''}`}>
             {title}
           </h3>
