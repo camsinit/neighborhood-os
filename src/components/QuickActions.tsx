@@ -1,4 +1,5 @@
-import { Calendar, HelpCircle, Heart, AlertTriangle } from "lucide-react";
+
+import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
@@ -10,6 +11,7 @@ const QuickActions = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  const [requestView, setRequestView] = useState<string | undefined>();
 
   const actions = [
     { 
@@ -19,35 +21,57 @@ const QuickActions = () => {
       className: "bg-[#D3E4FD] hover:bg-[#D3E4FD]/80 text-blue-700 border-blue-300"
     },
     { 
-      icon: HelpCircle, 
-      label: "Ask for Help", 
+      icon: Package, 
+      label: "Share an item", 
       onClick: () => {
-        setInitialRequestType("need");
+        setInitialRequestType("offer");
+        setRequestView(undefined);
         setIsAddRequestOpen(true);
       },
       className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300"
     },
     { 
-      icon: Heart, 
-      label: "Share an Offer", 
+      icon: Package, 
+      label: "Request an item", 
       onClick: () => {
-        setInitialRequestType("offer");
+        setInitialRequestType("need");
+        setRequestView(undefined);
         setIsAddRequestOpen(true);
       },
       className: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-300"
     },
     { 
+      icon: Wrench, 
+      label: "Share a Skill", 
+      onClick: () => {
+        setInitialRequestType("offer");
+        setRequestView('skills');
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-300"
+    },
+    { 
+      icon: HelpCircle, 
+      label: "Request a Skill", 
+      onClick: () => {
+        setInitialRequestType("need");
+        setRequestView('skills');
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-[#E8F5FF] hover:bg-[#E8F5FF]/80 text-sky-700 border-sky-300"
+    },
+    { 
       icon: AlertTriangle, 
-      label: "Safety Update", 
+      label: "Post a Safety Update", 
       onClick: () => setIsSafetyUpdateOpen(true),
-      className: "bg-[#FDE1D3] hover:bg-[#FDE1D3]/80 text-red-700 border-red-300"
+      className: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-300"
     },
   ];
 
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold mb-6 text-gray-900">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {actions.map((action) => (
           <Button
             key={action.label}
@@ -69,6 +93,7 @@ const QuickActions = () => {
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
         initialRequestType={initialRequestType}
+        view={requestView}
       />
       <AddSafetyUpdateDialog
         open={isSafetyUpdateOpen}
