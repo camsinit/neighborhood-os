@@ -20,9 +20,7 @@ const SafetyPage = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm">
-              <SafetyUpdates />
-            </div>
+            <SafetyUpdates />
           </div>
         </div>
       </div>

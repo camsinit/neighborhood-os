@@ -41,7 +41,7 @@ const SafetyUpdates = () => {
   }, [updates]);
   
   return (
-    <div className="w-full bg-transparent">
+    <>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
         <Button 
@@ -123,7 +123,7 @@ const SafetyUpdates = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
