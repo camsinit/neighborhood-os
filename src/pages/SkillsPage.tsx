@@ -1,3 +1,4 @@
+
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
@@ -115,8 +116,8 @@ const SkillsPage = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between py-4">
-              <div className="relative w-[300px]">
+            <div className="flex items-center justify-between py-4 flex-nowrap">
+              <div className="relative w-[300px] flex-shrink-0">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <Input 
                   type="search" 
@@ -127,10 +128,10 @@ const SkillsPage = () => {
                 />
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <Button 
                   onClick={() => handleAddRequest("offer")} 
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white whitespace-nowrap"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Offer Skill
@@ -138,7 +139,7 @@ const SkillsPage = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => handleAddRequest("need")}
-                  className="bg-white"
+                  className="bg-white whitespace-nowrap"
                 >
                   <HelpCircle className="h-4 w-4 mr-2" />
                   Request Skill
