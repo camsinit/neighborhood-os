@@ -42,11 +42,11 @@ const SafetyUpdates = () => {
   
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
         <Button 
           onClick={() => setIsAddUpdateOpen(true)}
-          className="bg-red-600 hover:bg-red-700 text-white h-10"
+          className="bg-amber-500 hover:bg-amber-600 text-white h-10"
         >
           Post Update
         </Button>
@@ -64,7 +64,7 @@ const SafetyUpdates = () => {
         <Button 
           variant="outline"
           onClick={() => setIsArchiveOpen(true)}
-          className="w-full max-w-xs border-red-600 border-dotted hover:bg-gray-50"
+          className="w-full max-w-xs border-amber-500 border-dotted hover:bg-amber-50"
         >
           Archive
         </Button>
