@@ -10,7 +10,7 @@ export const useSkillsExchange = () => {
         .from('skills_exchange')
         .select(`
           *,
-          profiles:user_id (
+          profiles (
             display_name,
             avatar_url
           )
