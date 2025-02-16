@@ -18,19 +18,47 @@ const NotificationsPage = () => {
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase
           .from("safety_updates")
-          .select("id, title, type, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            type, 
+            created_at, 
+            is_read, 
+            is_archived,
+            profiles:author_id (
+              display_name
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("events")
-          .select("id, title, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            created_at, 
+            is_read, 
+            is_archived,
+            profiles:host_id (
+              display_name
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("support_requests")
-          .select("id, title, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            created_at, 
+            is_read, 
+            is_archived,
+            profiles:user_id (
+              display_name
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
@@ -44,6 +72,9 @@ const NotificationsPage = () => {
           created_at: update.created_at,
           is_read: update.is_read,
           is_archived: update.is_archived,
+          context: {
+            contextType: "safety_alert" as const
+          }
         })) || []),
         ...(events.data?.map(event => ({
           id: event.id,
@@ -52,6 +83,9 @@ const NotificationsPage = () => {
           created_at: event.created_at,
           is_read: event.is_read,
           is_archived: event.is_archived,
+          context: {
+            contextType: "event_invite" as const
+          }
         })) || []),
         ...(supportRequests.data?.map(request => ({
           id: request.id,
@@ -60,6 +94,10 @@ const NotificationsPage = () => {
           created_at: request.created_at,
           is_read: request.is_read,
           is_archived: request.is_archived,
+          context: {
+            contextType: "help_request" as const,
+            neighborName: request.profiles?.display_name
+          }
         })) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     },
@@ -132,6 +170,7 @@ const NotificationsPage = () => {
                 isArchived={notification.is_archived}
                 onClose={() => {}}
                 onItemClick={handleItemClick}
+                context={notification.context}
               />
             ))
           ) : (
