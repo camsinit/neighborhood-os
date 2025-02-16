@@ -16,7 +16,7 @@ interface CategoryItem {
 
 const categories: CategoryItem[] = [
   {
-    id: 'tech',
+    id: 'technology',
     name: 'Technology',
     icon: Computer,
     color: '#9b87f5',

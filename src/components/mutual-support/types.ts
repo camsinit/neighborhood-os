@@ -6,7 +6,7 @@ export type Category = {
 
 export type ViewType = 'skills' | 'goods' | 'care' | null;
 
-export type SkillCategory = 'tech' | 'creative' | 'trade' | 'education' | 'wellness';
+export type SkillCategory = 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
 
 export type CareCategory = 'transportation' | 'household' | 'medical' | 'childcare' | 'eldercare' | 'petcare' | 'mealprep' | 'general';
 
