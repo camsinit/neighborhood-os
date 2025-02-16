@@ -17,6 +17,8 @@ interface NotificationsPopoverProps {
   children?: ReactNode;
 }
 
+type NotificationActionType = "view" | "rsvp" | "comment" | "help" | "respond" | "share";
+
 const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
@@ -91,7 +93,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             avatarUrl: update.profiles?.avatar_url
           },
           actionLabel: "Comment",
-          actionType: "comment" as const
+          actionType: "comment" as NotificationActionType
         })) || []),
         ...(events.data?.map(event => ({
           itemId: event.id,
@@ -106,27 +108,32 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             avatarUrl: event.profiles?.avatar_url
           },
           actionLabel: "RSVP",
-          actionType: "rsvp" as const
+          actionType: "rsvp" as NotificationActionType
         })) || []),
-        ...(supportRequests.data?.map(request => ({
-          itemId: request.id,
-          title: request.title,
-          type: "support" as const,
-          created_at: request.created_at,
-          isRead: request.is_read,
-          isArchived: request.is_archived,
-          context: {
-            contextType: "help_request" as const,
-            neighborName: request.profiles?.display_name,
-            avatarUrl: request.profiles?.avatar_url
-          },
-          actionLabel: request.category === 'care' ? "Help" :
-                      request.category === 'goods' ? "Respond" :
-                      request.category === 'skills' ? "Share" : "View",
-          actionType: request.category === 'care' ? "help" :
-                     request.category === 'goods' ? "respond" :
-                     request.category === 'skills' ? "share" : "view"
-        })) || []),
+        ...(supportRequests.data?.map(request => {
+          const actionType: NotificationActionType = 
+            request.category === 'care' ? "help" :
+            request.category === 'goods' ? "respond" :
+            request.category === 'skills' ? "share" : "view";
+
+          return {
+            itemId: request.id,
+            title: request.title,
+            type: "support" as const,
+            created_at: request.created_at,
+            isRead: request.is_read,
+            isArchived: request.is_archived,
+            context: {
+              contextType: "help_request" as const,
+              neighborName: request.profiles?.display_name,
+              avatarUrl: request.profiles?.avatar_url
+            },
+            actionLabel: request.category === 'care' ? "Help" :
+                        request.category === 'goods' ? "Respond" :
+                        request.category === 'skills' ? "Share" : "View",
+            actionType
+          };
+        }) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
   });
