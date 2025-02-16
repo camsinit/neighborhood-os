@@ -21,8 +21,8 @@ const AuthForm = () => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
       if (event === 'SIGNED_IN' && session) {
-        console.log("[AuthForm] Valid SIGNED_IN event received, attempting navigation to /calendar");
-        navigate("/calendar");
+        console.log("[AuthForm] Valid SIGNED_IN event received, attempting navigation to /");
+        navigate("/");
       }
     });
 
