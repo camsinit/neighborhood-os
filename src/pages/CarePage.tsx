@@ -6,7 +6,7 @@ import MutualSupportContent from "@/components/mutual-support/MutualSupportConte
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
-import { Hug } from "lucide-react";
+import { HeartHandshake } from "lucide-react";
 
 const CarePage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -46,7 +46,7 @@ const CarePage = () => {
               onClick={() => handleAddRequest("need")}
               className="bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
             >
-              <Hug className="h-4 w-4 mr-2" />
+              <HeartHandshake className="h-4 w-4 mr-2" />
               Request Care
             </Button>
           </div>
