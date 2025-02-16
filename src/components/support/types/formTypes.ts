@@ -7,7 +7,8 @@ export type SupportRequestFormData = {
   validUntil: string;
   supportType: "immediate" | "ongoing";
   imageUrl?: string | null;
-  skill_category?: string;  // Added this field
+  skill_category?: string;
+  care_category?: string;
 };
 
 export type SupportRequestFormProps = {

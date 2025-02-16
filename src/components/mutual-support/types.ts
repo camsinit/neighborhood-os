@@ -8,6 +8,8 @@ export type ViewType = 'skills' | 'goods' | 'care' | null;
 
 export type SkillCategory = 'tech' | 'creative' | 'trade' | 'education' | 'wellness';
 
+export type CareCategory = 'transportation' | 'household' | 'medical' | 'childcare' | 'eldercare' | 'petcare' | 'mealprep' | 'general';
+
 export type SupportRequestFromDB = {
   id: string;
   category: string;
@@ -22,6 +24,7 @@ export type SupportRequestFromDB = {
   is_archived: boolean | null;
   is_read: boolean | null;
   skill_category?: SkillCategory;
+  care_category?: CareCategory;
   profiles: {
     display_name: string | null;
     avatar_url: string | null;
@@ -41,6 +44,7 @@ export type SupportItem = {
   supportType: string;
   imageUrl: string | null;
   skillCategory?: SkillCategory;
+  careCategory?: CareCategory;
   originalRequest: SupportRequestFromDB;
   profiles?: {
     display_name: string | null;

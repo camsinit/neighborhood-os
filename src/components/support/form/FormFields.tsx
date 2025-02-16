@@ -18,6 +18,7 @@ interface FormFieldsProps {
 
 const FormFields = ({ formData, onChange }: FormFieldsProps) => {
   const showCategoryField = formData.requestType !== 'offer' || formData.category !== 'skills';
+  const isCareCategory = formData.category === 'care';
 
   return (
     <>
@@ -35,7 +36,32 @@ const FormFields = ({ formData, onChange }: FormFieldsProps) => {
               <SelectItem value="goods">Goods</SelectItem>
               <SelectItem value="transportation">Transportation</SelectItem>
               <SelectItem value="skills">Skills</SelectItem>
+              <SelectItem value="care">Care</SelectItem>
               <SelectItem value="resources">Resources</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {isCareCategory && (
+        <div className="space-y-2">
+          <Label htmlFor="careCategory">Care Type</Label>
+          <Select 
+            value={formData.care_category} 
+            onValueChange={(value) => onChange('care_category', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select care type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="transportation">Transportation</SelectItem>
+              <SelectItem value="household">Household Tasks</SelectItem>
+              <SelectItem value="medical">Medical Assistance</SelectItem>
+              <SelectItem value="childcare">Childcare</SelectItem>
+              <SelectItem value="eldercare">Elder Care</SelectItem>
+              <SelectItem value="petcare">Pet Care</SelectItem>
+              <SelectItem value="mealprep">Meal Preparation</SelectItem>
+              <SelectItem value="general">General Assistance</SelectItem>
             </SelectContent>
           </Select>
         </div>

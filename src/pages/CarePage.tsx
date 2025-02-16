@@ -5,6 +5,8 @@ import { useState } from "react";
 import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import { Button } from "@/components/ui/button";
+import { HelpCircle, Plus } from "lucide-react";
 
 const CarePage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -28,33 +30,58 @@ const CarePage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="p-6 rounded-lg bg-white shadow-md">
-        <div className="flex items-center mb-6">
+    <div className="h-full w-full bg-white">
+      <div className="flex flex-col gap-6 px-8 pt-8">
+        <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
         </div>
-
-        <MutualSupportContent 
-          isLoading={isLoading}
-          needs={needs}
-          offers={offers}
-          onItemClick={(item) => setSelectedRequest(item.originalRequest)}
-          onAddRequest={handleAddRequest}
-          selectedView="care"
-        />
-
-        <AddSupportRequestDialog 
-          open={isAddRequestOpen}
-          onOpenChange={setIsAddRequestOpen}
-          initialRequestType={initialRequestType}
-        />
         
-        <SupportRequestDialog
-          request={selectedRequest}
-          open={!!selectedRequest}
-          onOpenChange={(open) => !open && setSelectedRequest(null)}
-        />
+        <div className="flex items-center justify-between">
+          <p className="text-gray-600 max-w-2xl">
+            Request or offer help with transportation, household tasks, medical assistance, childcare, eldercare, pet care, meal preparation, and more.
+          </p>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => handleAddRequest("offer")}
+              className="bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Offer Care
+            </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => handleAddRequest("need")}
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Request Care
+            </Button>
+          </div>
+        </div>
       </div>
+
+      <MutualSupportContent 
+        isLoading={isLoading}
+        needs={needs}
+        offers={offers}
+        onItemClick={(item) => setSelectedRequest(item.originalRequest)}
+        onAddRequest={handleAddRequest}
+        selectedView="care"
+      />
+
+      <AddSupportRequestDialog 
+        open={isAddRequestOpen}
+        onOpenChange={setIsAddRequestOpen}
+        initialRequestType={initialRequestType}
+        view="care"
+      />
+      
+      <SupportRequestDialog
+        request={selectedRequest}
+        open={!!selectedRequest}
+        onOpenChange={(open) => !open && setSelectedRequest(null)}
+      />
     </div>
   );
 };

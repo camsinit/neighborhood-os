@@ -236,6 +236,7 @@ export type Database = {
       }
       support_requests: {
         Row: {
+          care_category: string | null
           category: string
           created_at: string
           description: string | null
@@ -251,6 +252,7 @@ export type Database = {
           valid_until: string
         }
         Insert: {
+          care_category?: string | null
           category: string
           created_at?: string
           description?: string | null
@@ -266,6 +268,7 @@ export type Database = {
           valid_until: string
         }
         Update: {
+          care_category?: string | null
           category?: string
           created_at?: string
           description?: string | null
