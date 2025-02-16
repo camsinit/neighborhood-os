@@ -1,4 +1,16 @@
+
 export const SKILL_CATEGORIES = {
+  technology: {
+    title: "Technology",
+    skills: [
+      "Web Development",
+      "Mobile App Development",
+      "IT Support",
+      "Cybersecurity",
+      "Data Analysis",
+      "Digital Marketing"
+    ],
+  },
   emergency: {
     title: "Emergency & Safety",
     skills: [
