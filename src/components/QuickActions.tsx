@@ -70,7 +70,13 @@ const QuickActions = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Quick Actions</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
+      <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6">
+        <p className="text-gray-700 text-sm">
+          Welcome to your community hub. Here you can quickly access common actions
+          to connect, share, and engage with your neighbors.
+        </p>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {actions.map((action) => (
           <Button
