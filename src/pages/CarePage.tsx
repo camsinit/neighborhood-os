@@ -6,7 +6,7 @@ import MutualSupportContent from "@/components/mutual-support/MutualSupportConte
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
-import { HelpCircle, Plus } from "lucide-react";
+import { Hug } from "lucide-react";
 
 const CarePage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -38,23 +38,15 @@ const CarePage = () => {
         
         <div className="flex items-center justify-between">
           <p className="text-gray-600 max-w-2xl">
-            Request or offer help with transportation, household tasks, medical assistance, childcare, eldercare, pet care, meal preparation, and more.
+            Request help with transportation, household tasks, medical assistance, childcare, eldercare, pet care, meal preparation, and more.
           </p>
           
           <div className="flex items-center gap-3">
             <Button 
-              onClick={() => handleAddRequest("offer")}
+              onClick={() => handleAddRequest("need")}
               className="bg-[#1EAEDB] hover:bg-[#1EAEDB]/90"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Offer Care
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={() => handleAddRequest("need")}
-            >
-              <HelpCircle className="h-4 w-4 mr-2" />
+              <Hug className="h-4 w-4 mr-2" />
               Request Care
             </Button>
           </div>
