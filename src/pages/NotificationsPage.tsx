@@ -119,8 +119,8 @@ const NotificationsPage = () => {
         </Button>
       </div>
       
-      <ScrollArea className="h-[calc(100vh-5rem)] p-4">
-        <div className="max-w-3xl mx-auto">
+      <ScrollArea className="h-[calc(100vh-5rem)]">
+        <div className="space-y-1">
           {notifications?.length ? (
             notifications.map((notification) => (
               <NotificationItem

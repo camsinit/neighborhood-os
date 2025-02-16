@@ -1,3 +1,4 @@
+
 import { Bell, Calendar, Shield, HandHelping, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,22 +65,20 @@ const NotificationItem = ({
   return (
     <div
       onClick={handleClick}
-      className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer ${
-        isRead ? 'bg-gray-50' : ''
-      }`}
+      className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors"
     >
-      {getIcon()}
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium text-gray-900 truncate ${
-          isRead ? 'text-gray-500' : ''
-        }`}>
-          {title}
-        </p>
-        <p className="text-xs text-gray-500 capitalize">{type}</p>
+      <div className="flex items-start gap-3">
+        {getIcon()}
+        <div>
+          <h3 className={`text-lg font-medium text-gray-900 ${isRead ? 'text-gray-500' : ''}`}>
+            {title}
+          </h3>
+          <p className="text-gray-500 text-sm capitalize">{type}</p>
+        </div>
       </div>
       {!isRead && (
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           className="h-6 w-6"
           onClick={(e) => {
