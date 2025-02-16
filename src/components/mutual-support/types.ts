@@ -23,8 +23,8 @@ export type SupportRequestFromDB = {
   support_type: string | null;
   is_archived: boolean | null;
   is_read: boolean | null;
-  skill_category?: SkillCategory;
-  care_category?: CareCategory;
+  skill_category?: SkillCategory | null;
+  care_category?: CareCategory | null;
   profiles: {
     display_name: string | null;
     avatar_url: string | null;
