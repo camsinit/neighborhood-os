@@ -42,15 +42,13 @@ const SafetyUpdates = () => {
   
   return (
     <>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
-        <Button 
-          onClick={() => setIsAddUpdateOpen(true)}
-          className="bg-amber-500 hover:bg-amber-600 text-white h-10"
-        >
-          Post Update
-        </Button>
-      </div>
+      <Button 
+        data-add-update-button
+        className="hidden"
+        onClick={() => setIsAddUpdateOpen(true)}
+      >
+        Post Update
+      </Button>
       
       <div className="bg-transparent">
         <SafetyUpdatesList
