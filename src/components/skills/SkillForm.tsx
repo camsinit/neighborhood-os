@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   const [formData, setFormData] = useState<Partial<SkillFormData>>({
-    category: 'tech',
+    category: 'technology',
     timePreference: [],
   });
   const { toast } = useToast();
@@ -70,9 +70,9 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="tech">Technology</SelectItem>
+            <SelectItem value="technology">Technology</SelectItem>
             <SelectItem value="creative">Creative</SelectItem>
-            <SelectItem value="trade">Trade</SelectItem>
+            <SelectItem value="trade">Trade Skills</SelectItem>
             <SelectItem value="education">Education</SelectItem>
             <SelectItem value="wellness">Wellness</SelectItem>
           </SelectContent>

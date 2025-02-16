@@ -1,5 +1,5 @@
 
-export type SkillCategory = 'tech' | 'creative' | 'trade' | 'education' | 'wellness';
+export type SkillCategory = 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
 
 export type SkillAvailability = 'weekdays' | 'weekends' | 'both';
 export type TimePreference = 'morning' | 'afternoon' | 'evening';
