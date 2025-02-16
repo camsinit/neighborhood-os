@@ -100,6 +100,8 @@ export type Database = {
       }
       notifications: {
         Row: {
+          action_label: string
+          action_type: Database["public"]["Enums"]["notification_action_type"]
           actor_id: string
           content_id: string
           content_type: string
@@ -113,6 +115,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          action_label?: string
+          action_type?: Database["public"]["Enums"]["notification_action_type"]
           actor_id: string
           content_id: string
           content_type: string
@@ -126,6 +130,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          action_label?: string
+          action_type?: Database["public"]["Enums"]["notification_action_type"]
           actor_id?: string
           content_id?: string
           content_type?: string
@@ -413,6 +419,13 @@ export type Database = {
       }
     }
     Enums: {
+      notification_action_type:
+        | "rsvp"
+        | "comment"
+        | "help"
+        | "respond"
+        | "share"
+        | "view"
       notification_type:
         | "event"
         | "safety"

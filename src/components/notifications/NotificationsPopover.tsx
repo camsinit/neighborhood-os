@@ -27,19 +27,51 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase
           .from("safety_updates")
-          .select("id, title, type, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            type, 
+            created_at, 
+            is_read, 
+            is_archived,
+            profiles:author_id (
+              display_name,
+              avatar_url
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("events")
-          .select("id, title, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            created_at, 
+            is_read, 
+            is_archived,
+            profiles:host_id (
+              display_name,
+              avatar_url
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("support_requests")
-          .select("id, title, created_at, is_read, is_archived")
+          .select(`
+            id, 
+            title, 
+            created_at, 
+            is_read, 
+            is_archived,
+            category,
+            profiles:user_id (
+              display_name,
+              avatar_url
+            )
+          `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
@@ -53,6 +85,13 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           created_at: update.created_at,
           is_read: update.is_read,
           is_archived: update.is_archived,
+          context: {
+            contextType: "safety_alert" as const,
+            neighborName: update.profiles?.display_name,
+            avatarUrl: update.profiles?.avatar_url
+          },
+          actionLabel: "Comment",
+          actionType: "comment" as const
         })) || []),
         ...(events.data?.map(event => ({
           id: event.id,
@@ -61,6 +100,13 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           created_at: event.created_at,
           is_read: event.is_read,
           is_archived: event.is_archived,
+          context: {
+            contextType: "event_invite" as const,
+            neighborName: event.profiles?.display_name,
+            avatarUrl: event.profiles?.avatar_url
+          },
+          actionLabel: "RSVP",
+          actionType: "rsvp" as const
         })) || []),
         ...(supportRequests.data?.map(request => ({
           id: request.id,
@@ -69,6 +115,17 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           created_at: request.created_at,
           is_read: request.is_read,
           is_archived: request.is_archived,
+          context: {
+            contextType: "help_request" as const,
+            neighborName: request.profiles?.display_name,
+            avatarUrl: request.profiles?.avatar_url
+          },
+          actionLabel: request.category === 'care' ? "Help" :
+                      request.category === 'goods' ? "Respond" :
+                      request.category === 'skills' ? "Share" : "View",
+          actionType: request.category === 'care' ? "help" :
+                     request.category === 'goods' ? "respond" :
+                     request.category === 'skills' ? "share" : "view"
         })) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
@@ -149,12 +206,8 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             notifications.map((notification) => (
               <NotificationItem
                 key={notification.id}
-                title={notification.title}
-                type={notification.type}
-                itemId={notification.id}
-                isRead={notification.is_read}
-                isArchived={notification.is_archived}
-                onClose={() => {}}
+                {...notification}
+                onClose={() => refetch()}
                 onItemClick={handleItemClick}
               />
             ))

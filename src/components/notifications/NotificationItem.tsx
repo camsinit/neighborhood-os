@@ -1,5 +1,5 @@
 
-import { Bell, Calendar, Shield, HandHelping, Check } from "lucide-react";
+import { Bell, Calendar, Shield, HandHelping, Check, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,8 @@ interface NotificationItemProps {
   onClose: () => void;
   onItemClick: (type: "safety" | "event" | "support", id: string) => void;
   context?: NotificationContext;
+  actionLabel?: string;
+  actionType?: "rsvp" | "comment" | "help" | "respond" | "share" | "view";
 }
 
 type TableName = "safety_updates" | "events" | "support_requests";
@@ -31,7 +33,9 @@ const NotificationItem = ({
   isArchived = false,
   onClose, 
   onItemClick,
-  context 
+  context,
+  actionLabel = "View",
+  actionType = "view"
 }: NotificationItemProps) => {
   const getIcon = () => {
     switch (type) {
@@ -71,8 +75,23 @@ const NotificationItem = ({
     const table = getTableName(type);
     await supabase
       .from(table)
-      .update({ is_read: true, is_archived: true })
+      .update({ is_read: true })
       .eq('id', itemId);
+  };
+
+  const handleArchive = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const table = getTableName(type);
+    await supabase
+      .from(table)
+      .update({ is_archived: true })
+      .eq('id', itemId);
+    onClose();
+  };
+
+  const handleAction = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleClick();
   };
 
   const getTableName = (type: "safety" | "event" | "support"): TableName => {
@@ -89,7 +108,7 @@ const NotificationItem = ({
   return (
     <div
       onClick={handleClick}
-      className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors"
+      className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors cursor-pointer"
     >
       <div className="flex items-start gap-3">
         {context?.avatarUrl ? (
@@ -111,19 +130,26 @@ const NotificationItem = ({
           </h3>
         </div>
       </div>
-      {!isRead && (
+      <div className="flex items-center gap-2">
+        {!isArchived && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAction}
+            className="hidden group-hover:inline-flex"
+          >
+            {actionLabel}
+          </Button>
+        )}
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="h-6 w-6"
-          onClick={(e) => {
-            e.stopPropagation();
-            markAsRead();
-          }}
+          className="h-8 w-8 hidden group-hover:inline-flex"
+          onClick={handleArchive}
         >
-          <Check className="h-4 w-4" />
+          <Archive className="h-4 w-4" />
         </Button>
-      )}
+      </div>
     </div>
   );
 };
