@@ -98,6 +98,63 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string
+          content_id: string
+          content_type: string
+          created_at: string | null
+          id: string
+          is_archived: boolean | null
+          is_read: boolean | null
+          metadata: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          actor_id: string
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          metadata?: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          title: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          metadata?: Json | null
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -356,6 +413,13 @@ export type Database = {
       }
     }
     Enums: {
+      notification_type:
+        | "event"
+        | "safety"
+        | "care"
+        | "goods"
+        | "skills"
+        | "neighbor_welcome"
       user_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
