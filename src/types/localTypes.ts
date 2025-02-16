@@ -43,6 +43,6 @@ export interface SupportRequest {
   created_at: string;
   is_archived: boolean | null;
   is_read: boolean | null;
-  skill_category?: 'tech' | 'creative' | 'trade' | 'education' | 'wellness';
+  skill_category?: 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
   profiles: Profile;
 }
