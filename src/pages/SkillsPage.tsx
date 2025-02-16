@@ -20,13 +20,43 @@ const SkillsPage = () => {
   
   const { data: requests, isLoading } = useSupportRequests();
   
-  const skillsRequests = requests?.filter(req => req.category === 'skills') || [];
+  console.log("All requests:", requests);
+  
+  const skillsRequests = requests?.filter(req => {
+    const isSkill = req.category === 'skills';
+    console.log(`Request ${req.id}:`, {
+      category: req.category,
+      isSkill,
+      skillCategory: req.skill_category,
+      title: req.title
+    });
+    return isSkill;
+  }) || [];
+
+  console.log("Filtered skills requests:", skillsRequests);
+  
   const filteredRequests = skillsRequests.filter(req => {
     const matchesSearch = searchQuery.toLowerCase() === '' || 
       req.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
       req.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
     const matchesCategory = !selectedCategory || req.skill_category === selectedCategory;
+    
+    console.log(`Filtering request ${req.id}:`, {
+      skillCategory: req.skill_category,
+      selectedCategory,
+      matchesCategory,
+      matchesSearch,
+      passes: matchesSearch && matchesCategory
+    });
+    
     return matchesSearch && matchesCategory;
+  });
+
+  console.log("Final filtered requests:", {
+    selectedCategory,
+    totalRequests: filteredRequests.length,
+    requests: filteredRequests
   });
 
   const needs = filteredRequests
@@ -37,9 +67,19 @@ const SkillsPage = () => {
     .filter(req => req.request_type === 'offer')
     .map(transformRequest);
 
+  console.log("Processed requests:", {
+    needs: needs.length,
+    offers: offers.length
+  });
+
   const handleAddRequest = (type: "need" | "offer") => {
     setInitialRequestType(type);
     setIsAddRequestOpen(true);
+  };
+
+  const handleCategorySelect = (category: SkillCategory) => {
+    console.log("Category selected:", category);
+    setSelectedCategory(category);
   };
 
   const pendingRequests = needs.filter(request => !request.isClaimed);
@@ -109,7 +149,7 @@ const SkillsPage = () => {
           </div>
 
           {!selectedCategory ? (
-            <CategoryList onCategorySelect={setSelectedCategory} />
+            <CategoryList onCategorySelect={handleCategorySelect} />
           ) : (
             <>
               <MutualSupportContent 
