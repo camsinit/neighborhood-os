@@ -1,3 +1,4 @@
+
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
 import { transformRequest } from "@/utils/supportRequestTransformer";
 import { useState } from "react";
@@ -18,8 +19,6 @@ const SkillsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   
   const { data: skillsExchange, isLoading } = useSkillsExchange();
-  
-  console.log("All skills:", skillsExchange);
   
   const filteredSkills = skillsExchange?.filter(skill => {
     const matchesSearch = searchQuery.toLowerCase() === '' || 
@@ -46,7 +45,13 @@ const SkillsPage = () => {
       supportType: "ongoing",
       imageUrl: null,
       skillCategory: skill.skill_category as SkillCategory,
-      originalRequest: skill,
+      originalRequest: {
+        ...skill,
+        category: "skills",
+        image_url: null,
+        support_type: "ongoing",
+        care_category: undefined,
+      },
       profiles: skill.profiles,
     }));
     
@@ -65,7 +70,13 @@ const SkillsPage = () => {
       supportType: "ongoing",
       imageUrl: null,
       skillCategory: skill.skill_category as SkillCategory,
-      originalRequest: skill,
+      originalRequest: {
+        ...skill,
+        category: "skills",
+        image_url: null,
+        support_type: "ongoing",
+        care_category: undefined,
+      },
       profiles: skill.profiles,
     }));
 
@@ -79,7 +90,8 @@ const SkillsPage = () => {
     setSelectedCategory(category);
   };
 
-  const pendingRequests = needs.filter(request => !request.isClaimed);
+  // Remove the isClaimed filter since we don't have that functionality yet
+  const pendingRequests = needs;
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-indigo-50 to-white">
@@ -163,7 +175,7 @@ const SkillsPage = () => {
               
               {pendingRequests.length > 0 && (
                 <div className="px-8 py-6 mt-8 border-t">
-                  <h3 className="text-lg font-semibold mb-4">Pending Skill Requests</h3>
+                  <h3 className="text-lg font-semibold mb-4">Open Skill Requests</h3>
                   <div className="space-y-4">
                     {pendingRequests.map(request => (
                       <div 
