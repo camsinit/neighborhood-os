@@ -1,10 +1,12 @@
 
 import { Bell, Calendar, Shield, HandHelping, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 
 interface NotificationContext {
   neighborName?: string;
+  avatarUrl?: string;
   contextType: "help_request" | "event_invite" | "safety_alert";
 }
 
@@ -51,9 +53,9 @@ const NotificationItem = ({
       case "help_request":
         return `Can you help ${context.neighborName} with`;
       case "event_invite":
-        return "Join your neighbors for";
+        return `${context.neighborName} invites you to`;
       case "safety_alert":
-        return "Important update about";
+        return `Important update from ${context.neighborName} about`;
       default:
         return null;
     }
@@ -90,7 +92,14 @@ const NotificationItem = ({
       className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors"
     >
       <div className="flex items-start gap-3">
-        {getIcon()}
+        {context?.avatarUrl ? (
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={context.avatarUrl} alt={context.neighborName} />
+            <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
+          </Avatar>
+        ) : (
+          getIcon()
+        )}
         <div>
           {context && (
             <p className="text-sm text-gray-500 italic mb-1">

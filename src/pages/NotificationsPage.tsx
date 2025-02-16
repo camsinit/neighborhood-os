@@ -26,7 +26,8 @@ const NotificationsPage = () => {
             is_read, 
             is_archived,
             profiles:author_id (
-              display_name
+              display_name,
+              avatar_url
             )
           `)
           .eq('is_archived', showArchived)
@@ -41,7 +42,8 @@ const NotificationsPage = () => {
             is_read, 
             is_archived,
             profiles:host_id (
-              display_name
+              display_name,
+              avatar_url
             )
           `)
           .eq('is_archived', showArchived)
@@ -56,7 +58,8 @@ const NotificationsPage = () => {
             is_read, 
             is_archived,
             profiles:user_id (
-              display_name
+              display_name,
+              avatar_url
             )
           `)
           .eq('is_archived', showArchived)
@@ -73,7 +76,9 @@ const NotificationsPage = () => {
           is_read: update.is_read,
           is_archived: update.is_archived,
           context: {
-            contextType: "safety_alert" as const
+            contextType: "safety_alert" as const,
+            neighborName: update.profiles?.display_name,
+            avatarUrl: update.profiles?.avatar_url
           }
         })) || []),
         ...(events.data?.map(event => ({
@@ -84,7 +89,9 @@ const NotificationsPage = () => {
           is_read: event.is_read,
           is_archived: event.is_archived,
           context: {
-            contextType: "event_invite" as const
+            contextType: "event_invite" as const,
+            neighborName: event.profiles?.display_name,
+            avatarUrl: event.profiles?.avatar_url
           }
         })) || []),
         ...(supportRequests.data?.map(request => ({
@@ -96,7 +103,8 @@ const NotificationsPage = () => {
           is_archived: request.is_archived,
           context: {
             contextType: "help_request" as const,
-            neighborName: request.profiles?.display_name
+            neighborName: request.profiles?.display_name,
+            avatarUrl: request.profiles?.avatar_url
           }
         })) || []),
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
