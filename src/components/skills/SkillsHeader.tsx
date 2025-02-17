@@ -1,18 +1,26 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle } from "lucide-react";
+import { Search, Plus, HelpCircle, List } from "lucide-react";
 
 interface SkillsHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onAddRequest: (type: "need" | "offer") => void;
+  // Add new prop for handling view requests click
+  onViewRequests: () => void;
 }
 
 // Component for the search bar and action buttons at the top of the skills page
-const SkillsHeader = ({ searchQuery, onSearchChange, onAddRequest }: SkillsHeaderProps) => {
+const SkillsHeader = ({ 
+  searchQuery, 
+  onSearchChange, 
+  onAddRequest,
+  onViewRequests 
+}: SkillsHeaderProps) => {
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap">
+      {/* Search input with icon */}
       <div className="relative w-[200px] flex-shrink-0">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
         <Input 
@@ -24,7 +32,9 @@ const SkillsHeader = ({ searchQuery, onSearchChange, onAddRequest }: SkillsHeade
         />
       </div>
       
+      {/* Action buttons */}
       <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Offer Skill button */}
         <Button 
           variant="outline"
           onClick={() => onAddRequest("offer")} 
@@ -33,6 +43,8 @@ const SkillsHeader = ({ searchQuery, onSearchChange, onAddRequest }: SkillsHeade
           <Plus className="h-4 w-4 mr-2" />
           Offer Skill
         </Button>
+
+        {/* Request Skill button */}
         <Button 
           variant="outline" 
           onClick={() => onAddRequest("need")}
@@ -40,6 +52,16 @@ const SkillsHeader = ({ searchQuery, onSearchChange, onAddRequest }: SkillsHeade
         >
           <HelpCircle className="h-4 w-4 mr-2" />
           Request Skill
+        </Button>
+
+        {/* New View Skill Requests button */}
+        <Button 
+          variant="outline" 
+          onClick={onViewRequests}
+          className="bg-white whitespace-nowrap"
+        >
+          <List className="h-4 w-4 mr-2" />
+          View Skill Requests
         </Button>
       </div>
     </div>

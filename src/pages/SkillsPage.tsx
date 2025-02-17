@@ -17,11 +17,12 @@ const SkillsPage = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+  const [showOnlyRequests, setShowOnlyRequests] = useState(false); // New state for filtering requests
   
   // Fetch skills data
   const { data: skillsExchange, isLoading } = useSkillsExchange();
   
-  // Filter skills based on search and category
+  // Filter skills based on search, category, and requests filter
   const filteredSkills = skillsExchange?.filter(skill => {
     const matchesSearch = searchQuery.toLowerCase() === '' || 
       skill.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -29,7 +30,10 @@ const SkillsPage = () => {
     
     const matchesCategory = !selectedCategory || skill.skill_category === selectedCategory;
     
-    return matchesSearch && matchesCategory;
+    // Only show requests if showOnlyRequests is true
+    const matchesType = showOnlyRequests ? skill.request_type === 'need' : true;
+    
+    return matchesSearch && matchesCategory && matchesType;
   }) || [];
 
   // Transform skills data for display
@@ -91,6 +95,12 @@ const SkillsPage = () => {
     setIsAddRequestOpen(true);
   };
 
+  // New handler for viewing requests
+  const handleViewRequests = () => {
+    setShowOnlyRequests(!showOnlyRequests);
+    setSelectedCategory(null); // Reset category when toggling requests view
+  };
+
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-indigo-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,12 +123,12 @@ const SkillsPage = () => {
                 </>
               ) : (
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Skills Exchange
+                  {showOnlyRequests ? "Skill Requests" : "Skills Exchange"}
                 </h2>
               )}
             </div>
             
-            {!selectedCategory && (
+            {!selectedCategory && !showOnlyRequests && (
               <div className="bg-indigo-100 rounded-lg p-4">
                 <p className="text-indigo-800 text-sm">
                   Share your expertise or learn something new. Connect with neighbors to exchange knowledge and skills.
@@ -130,10 +140,11 @@ const SkillsPage = () => {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               onAddRequest={handleAddRequest}
+              onViewRequests={handleViewRequests}
             />
           </div>
 
-          {!selectedCategory ? (
+          {!selectedCategory && !showOnlyRequests ? (
             <CategoryList onCategorySelect={setSelectedCategory} />
           ) : (
             <SkillsList 
