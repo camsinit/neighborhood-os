@@ -59,7 +59,7 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
         content_id: item.originalRequest.id,
         content_type: 'skill_request',
         notification_type: 'skills',
-        action_type: 'help',
+        action_type: 'help' as const, // Fix: Use correct action type
         action_label: 'Review Request',
         metadata: {
           schedule,
@@ -68,7 +68,11 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
       }));
 
       if (notifications?.length) {
-        await supabase.from('notifications').insert(notifications);
+        const { error } = await supabase
+          .from('notifications')
+          .insert(notifications);
+
+        if (error) throw error;
       }
 
       toast({
@@ -253,4 +257,3 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
 };
 
 export default SkillListItem;
-
