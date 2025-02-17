@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -10,19 +11,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import { useToast } from "@/hooks/use-toast";
 import { SkillCategory } from "@/components/mutual-support/types";
+import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
+import { AlertCircle } from "lucide-react";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
+  // State to store form data
   const [formData, setFormData] = useState<Partial<SkillFormData>>({
     category: 'technology' as SkillCategory,
     timePreference: [],
   });
+  
+  // Custom hooks for toast and skill submission
   const { toast } = useToast();
-
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
       toast({
@@ -35,6 +40,14 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
     }
   });
 
+  // Check for duplicate skills
+  const { data: duplicates, isLoading: checkingDuplicates } = useSkillDuplicateCheck(formData, mode);
+
+  // Show warning if duplicates are found
+  const duplicateWarning = duplicates && duplicates.length > 0 
+    ? `Similar ${mode === 'offer' ? 'offerings' : 'requests'} exist in this category` 
+    : null;
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -45,6 +58,15 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
         variant: "destructive"
       });
       return;
+    }
+
+    // If duplicates exist, show a warning toast but still allow submission
+    if (duplicates && duplicates.length > 0) {
+      toast({
+        title: "Similar skills exist",
+        description: "You can still submit, but consider checking existing skills first",
+        variant: "warning"
+      });
     }
 
     handleSubmit(formData, mode);
@@ -86,15 +108,23 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
         <Label htmlFor="title">
           {mode === 'offer' ? 'What skill can you teach?' : 'What would you like to learn?'}
         </Label>
-        <Input
-          id="title"
-          value={formData.title || ''}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          placeholder={mode === 'offer' 
-            ? 'e.g., Python Programming, Guitar Lessons' 
-            : 'e.g., Learn Python, Guitar Basics'}
-          required
-        />
+        <div className="space-y-2">
+          <Input
+            id="title"
+            value={formData.title || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            placeholder={mode === 'offer' 
+              ? 'e.g., Python Programming, Guitar Lessons' 
+              : 'e.g., Learn Python, Guitar Basics'}
+            required
+          />
+          {duplicateWarning && (
+            <div className="flex items-center gap-2 text-yellow-600 text-sm">
+              <AlertCircle className="h-4 w-4" />
+              <span>{duplicateWarning}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2">
