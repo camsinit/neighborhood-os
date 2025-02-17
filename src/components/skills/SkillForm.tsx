@@ -65,7 +65,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       toast({
         title: "Similar skills exist",
         description: "You can still submit, but consider checking existing skills first",
-        variant: "warning"
+        variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
       });
     }
 
