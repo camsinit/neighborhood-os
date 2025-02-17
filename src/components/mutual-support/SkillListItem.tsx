@@ -26,8 +26,8 @@ const SkillListItem = ({
   onClick,
   profiles
 }: SkillListItemProps) => {
-  // Determine if this is an unresolved request
-  const isUnresolvedRequest = type === "Needs Help" && (!profiles || profiles.length === 0);
+  // Get the profile of the person who made the request
+  const requesterProfile = profiles[0];
 
   return (
     <div 
@@ -41,15 +41,21 @@ const SkillListItem = ({
           {type}
         </span>
         
-        {/* Simple avatar display - either question mark or single profile */}
+        {/* Display requester's avatar */}
         <Avatar className="h-10 w-10">
-          <AvatarFallback className="bg-gray-100">
-            {isUnresolvedRequest ? (
-              <HelpCircle className="h-6 w-6 text-gray-400" />
-            ) : (
-              'U'
-            )}
-          </AvatarFallback>
+          {requesterProfile?.avatar_url ? (
+            <AvatarImage 
+              src={requesterProfile.avatar_url} 
+              alt={requesterProfile.display_name || 'Neighbor'} 
+            />
+          ) : (
+            <AvatarFallback className="bg-gray-100">
+              {requesterProfile?.display_name 
+                ? requesterProfile.display_name.charAt(0).toUpperCase()
+                : 'N'
+              }
+            </AvatarFallback>
+          )}
         </Avatar>
       </div>
       
