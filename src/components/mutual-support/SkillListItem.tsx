@@ -53,14 +53,14 @@ const SkillListItem = ({ item, onClick }: SkillListItemProps) => {
     try {
       // Create notifications for all contributors
       const notifications = contributors?.map(contributor => ({
-        title: `New request for ${item.title}`,
-        user_id: contributor.user_id,
+        action_label: 'Review Request',
+        action_type: 'help' as const,
         actor_id: user.id,
         content_id: item.originalRequest.id,
         content_type: 'skill_request',
-        notification_type: 'skills',
-        action_type: 'help' as const, // Fix: Use correct action type
-        action_label: 'Review Request',
+        notification_type: 'skills' as const,
+        title: `New request for ${item.title}`,
+        user_id: contributor.user_id,
         metadata: {
           schedule,
           skill_title: item.title
