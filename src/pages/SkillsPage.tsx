@@ -120,19 +120,25 @@ const SkillsPage = () => {
                   <h2 className="text-2xl font-bold text-gray-900">
                     {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills
                   </h2>
+                  <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2">
+                    <p className="text-gray-700 text-sm">
+                      Explore skills and knowledge sharing opportunities in the {selectedCategory.toLowerCase()} category. Connect with neighbors who are offering or seeking expertise in this area.
+                    </p>
+                  </div>
                 </>
               ) : (
                 <>
                   <h2 className="text-2xl font-bold text-gray-900">
                     {showOnlyRequests ? "Skill Requests" : "Skills Exchange"}
                   </h2>
-                  {showOnlyRequests && (
-                    <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2">
-                      <p className="text-gray-700 text-sm">
-                        Browse and respond to current skill requests from your neighbors. Connect with those seeking to learn and share your expertise.
-                      </p>
-                    </div>
-                  )}
+                  <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2">
+                    <p className="text-gray-700 text-sm">
+                      {showOnlyRequests 
+                        ? "Browse and respond to current skill requests from your neighbors. Connect with those seeking to learn and share your expertise."
+                        : "Welcome to the Skills Exchange. Browse categories, offer your expertise, or request help from neighbors. Build community through sharing knowledge and skills."
+                      }
+                    </p>
+                  </div>
                 </>
               )}
             </div>
