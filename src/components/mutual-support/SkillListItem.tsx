@@ -32,7 +32,7 @@ const SkillListItem = ({
   return (
     <div 
       onClick={onClick}
-      className="flex items-start gap-4 pl-10 pr-6 py-3 group hover:bg-gray-50 rounded-lg transition-colors cursor-pointer relative"
+      className="flex items-start gap-3 pl-4 pr-6 py-3 group hover:bg-gray-50 rounded-lg transition-colors cursor-pointer relative"
     >
       {/* Avatar section */}
       <div className="relative">
