@@ -73,6 +73,7 @@ const MutualSupportContent = ({
             tagBg={item.tagBg}
             onClick={() => onItemClick(item)}
             profiles={Array.isArray(item.profiles) ? item.profiles : [item.profiles].filter(Boolean)}
+            requestId={item.originalRequest.id} // Add the requestId prop here
           />
         ))}
       </div>
