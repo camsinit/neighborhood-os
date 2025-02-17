@@ -1,24 +1,27 @@
 
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
 import { useState } from "react";
-import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle, ArrowLeft } from "lucide-react";
 import { SkillCategory } from "@/components/mutual-support/types";
 import { CategoryList } from "@/components/skills/CategoryList";
+import SkillsHeader from "@/components/skills/SkillsHeader";
+import SkillsList from "@/components/skills/SkillsList";
 
 const SkillsPage = () => {
+  // State management
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   
+  // Fetch skills data
   const { data: skillsExchange, isLoading } = useSkillsExchange();
   
+  // Filter skills based on search and category
   const filteredSkills = skillsExchange?.filter(skill => {
     const matchesSearch = searchQuery.toLowerCase() === '' || 
       skill.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -29,6 +32,7 @@ const SkillsPage = () => {
     return matchesSearch && matchesCategory;
   }) || [];
 
+  // Transform skills data for display
   const needs = filteredSkills
     .filter(skill => skill.request_type === 'need')
     .map(skill => ({
@@ -81,18 +85,11 @@ const SkillsPage = () => {
       profiles: skill.profiles,
     }));
 
+  // Event handlers
   const handleAddRequest = (type: "need" | "offer") => {
     setInitialRequestType(type);
     setIsAddRequestOpen(true);
   };
-
-  const handleCategorySelect = (category: SkillCategory) => {
-    console.log("Category selected:", category);
-    setSelectedCategory(category);
-  };
-
-  // Remove the isClaimed filter since we don't have that functionality yet
-  const pendingRequests = needs;
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-indigo-50 to-white">
@@ -129,70 +126,24 @@ const SkillsPage = () => {
               </div>
             )}
 
-            <div className="flex items-center justify-between py-4 flex-nowrap">
-              <div className="relative w-[200px] flex-shrink-0">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                <Input 
-                  type="search" 
-                  placeholder="Search for skills..." 
-                  className="pl-10" 
-                  value={searchQuery} 
-                  onChange={e => setSearchQuery(e.target.value)} 
-                />
-              </div>
-              
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <Button 
-                  variant="outline"
-                  onClick={() => handleAddRequest("offer")} 
-                  className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Offer Skill
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleAddRequest("need")}
-                  className="bg-white whitespace-nowrap"
-                >
-                  <HelpCircle className="h-4 w-4 mr-2" />
-                  Request Skill
-                </Button>
-              </div>
-            </div>
+            <SkillsHeader 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onAddRequest={handleAddRequest}
+            />
           </div>
 
           {!selectedCategory ? (
-            <CategoryList onCategorySelect={handleCategorySelect} />
+            <CategoryList onCategorySelect={setSelectedCategory} />
           ) : (
-            <>
-              <MutualSupportContent 
-                isLoading={isLoading}
-                needs={needs}
-                offers={offers}
-                onItemClick={item => setSelectedRequest(item.originalRequest)}
-                onAddRequest={handleAddRequest}
-                selectedView="skills"
-              />
-              
-              {pendingRequests.length > 0 && (
-                <div className="px-8 py-6 mt-8 border-t">
-                  <h3 className="text-lg font-semibold mb-4">Open Skill Requests</h3>
-                  <div className="space-y-4">
-                    {pendingRequests.map(request => (
-                      <div 
-                        key={request.originalRequest.id} 
-                        className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer" 
-                        onClick={() => setSelectedRequest(request.originalRequest)}
-                      >
-                        <h4 className="font-medium text-gray-900">{request.title}</h4>
-                        <p className="text-sm text-gray-600 mt-1">{request.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
+            <SkillsList 
+              isLoading={isLoading}
+              needs={needs}
+              offers={offers}
+              onItemClick={setSelectedRequest}
+              onAddRequest={handleAddRequest}
+              selectedCategory={selectedCategory}
+            />
           )}
         </div>
       </div>
