@@ -62,7 +62,7 @@ const QuickActions = () => {
     },
     { 
       icon: AlertTriangle, 
-      label: "Post a Safety Update", 
+      label: "Add Safety Update", // Changed this text from "Post a Safety Update"
       onClick: () => setIsSafetyUpdateOpen(true),
       className: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-300"
     },
