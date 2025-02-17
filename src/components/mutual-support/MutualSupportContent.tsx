@@ -72,7 +72,7 @@ const MutualSupportContent = ({
             tagColor={item.tagColor}
             tagBg={item.tagBg}
             onClick={() => onItemClick(item)}
-            profiles={item.profiles || []}
+            profiles={Array.isArray(item.profiles) ? item.profiles : [item.profiles].filter(Boolean)}
           />
         ))}
       </div>

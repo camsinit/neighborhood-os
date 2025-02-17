@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { QuestionMarkCircle } from "lucide-react"; // Import question mark icon
+import { HelpCircle } from "lucide-react"; // Changed from QuestionMarkCircle to HelpCircle
 
 interface SkillListItemProps {
   title: string;
@@ -42,7 +42,7 @@ const SkillListItem = ({
           {isUnresolvedRequest ? (
             // Show question mark for unresolved requests
             <AvatarFallback className="bg-gray-100">
-              <QuestionMarkCircle className="h-6 w-6 text-gray-400" />
+              <HelpCircle className="h-6 w-6 text-gray-400" />
             </AvatarFallback>
           ) : (
             // Show profile image or fallback for resolved requests/offers
