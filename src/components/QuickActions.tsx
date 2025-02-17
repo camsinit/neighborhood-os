@@ -62,7 +62,7 @@ const QuickActions = () => {
     },
     { 
       icon: AlertTriangle, 
-      label: "Add Safety Update", // Changed this text from "Post a Safety Update"
+      label: "Add Safety Update",
       onClick: () => setIsSafetyUpdateOpen(true),
       className: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-300"
     },
@@ -82,10 +82,10 @@ const QuickActions = () => {
           <Button
             key={action.label}
             variant="outline"
-            className={`flex flex-row items-center justify-start h-12 px-4 border-2 ${action.className}`}
+            className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} {/* Changed px-4 to px-2 */}
             onClick={action.onClick}
           >
-            <action.icon className="h-5 w-5 mr-3" />
+            <action.icon className="h-5 w-5 mr-2" /> {/* Changed mr-3 to mr-2 */}
             <span className="text-sm">{action.label}</span>
           </Button>
         ))}
