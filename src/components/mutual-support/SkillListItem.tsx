@@ -41,27 +41,16 @@ const SkillListItem = ({
           {type}
         </span>
         
-        {/* Avatar display - simplified for unclaimed requests */}
-        {isUnresolvedRequest ? (
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-gray-100">
+        {/* Simple avatar display - either question mark or single profile */}
+        <Avatar className="h-10 w-10">
+          <AvatarFallback className="bg-gray-100">
+            {isUnresolvedRequest ? (
               <HelpCircle className="h-6 w-6 text-gray-400" />
-            </AvatarFallback>
-          </Avatar>
-        ) : (
-          <Avatar className="h-10 w-10">
-            {profiles[0]?.avatar_url ? (
-              <AvatarImage src={profiles[0].avatar_url} alt={profiles[0].display_name || 'User'} />
             ) : (
-              <AvatarFallback>
-                {profiles[0]?.display_name 
-                  ? profiles[0].display_name.charAt(0).toUpperCase()
-                  : 'U'
-                }
-              </AvatarFallback>
+              'U'
             )}
-          </Avatar>
-        )}
+          </AvatarFallback>
+        </Avatar>
       </div>
       
       {/* Content section */}
