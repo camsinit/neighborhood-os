@@ -7,8 +7,9 @@ interface SkillsHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onAddRequest: (type: "need" | "offer") => void;
-  // Add new prop for handling view requests click
   onViewRequests: () => void;
+  // Add isViewingRequests prop to track toggle state
+  isViewingRequests?: boolean;
 }
 
 // Component for the search bar and action buttons at the top of the skills page
@@ -16,7 +17,8 @@ const SkillsHeader = ({
   searchQuery, 
   onSearchChange, 
   onAddRequest,
-  onViewRequests 
+  onViewRequests,
+  isViewingRequests = false // Default to false if not provided
 }: SkillsHeaderProps) => {
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap">
@@ -54,11 +56,15 @@ const SkillsHeader = ({
           Request Skill
         </Button>
 
-        {/* New View Skill Requests button */}
+        {/* View Skill Requests button - now changes color when active */}
         <Button 
           variant="outline" 
           onClick={onViewRequests}
-          className="bg-white whitespace-nowrap"
+          className={`whitespace-nowrap ${
+            isViewingRequests 
+              ? "bg-[#333333] text-white hover:bg-[#444444]" 
+              : "bg-white hover:bg-gray-50"
+          }`}
         >
           <List className="h-4 w-4 mr-2" />
           View Skill Requests
