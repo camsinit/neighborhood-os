@@ -1,6 +1,16 @@
 
-import { SupportItem, SupportRequestFromDB } from "@/components/mutual-support/types";
+import { SupportItem, SupportRequestFromDB, SkillCategory, CareCategory } from "@/components/mutual-support/types";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
+
+const isValidSkillCategory = (category: string | null | undefined): category is SkillCategory => {
+  const validCategories = ['technology', 'creative', 'trade', 'education', 'wellness'];
+  return !!category && validCategories.includes(category);
+};
+
+const isValidCareCategory = (category: string | null | undefined): category is CareCategory => {
+  const validCategories = ['transportation', 'household', 'medical', 'childcare', 'eldercare', 'petcare', 'mealprep', 'general'];
+  return !!category && validCategories.includes(category);
+};
 
 const getTimeAgo = (date: Date): string => {
   const now = new Date();
@@ -20,7 +30,7 @@ const getTimeAgo = (date: Date): string => {
   }
 };
 
-export const transformRequest = (request: SupportRequestFromDB): SupportItem => {
+export const transformRequest = (request: any): SupportItem => {
   const type = request.request_type === 'need' ? "Needs Help" : "Offering Help";
   const colors = type === "Needs Help" 
     ? {
@@ -34,6 +44,16 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
         tagBg: "bg-green-100",
       };
 
+  let skillCategory: SkillCategory | undefined;
+  if (isValidSkillCategory(request.skill_category)) {
+    skillCategory = request.skill_category;
+  }
+
+  let careCategory: CareCategory | undefined;
+  if (isValidCareCategory(request.care_category)) {
+    careCategory = request.care_category;
+  }
+
   return {
     type,
     title: request.title,
@@ -46,6 +66,8 @@ export const transformRequest = (request: SupportRequestFromDB): SupportItem => 
     category: request.category,
     supportType: request.support_type || 'immediate',
     imageUrl: request.image_url,
+    skillCategory,
+    careCategory,
     originalRequest: request,
     profiles: request.profiles
   };
