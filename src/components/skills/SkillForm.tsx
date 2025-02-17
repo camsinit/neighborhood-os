@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SkillCategory } from "@/components/mutual-support/types";
 import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 import { AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   // State to store form data
@@ -30,11 +31,14 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   const { toast } = useToast();
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
+      // Show success toast with notification about matching
       toast({
-        title: mode === 'offer' ? "Skill offered successfully" : "Skill requested successfully",
+        title: mode === 'offer' 
+          ? "Skill offered successfully" 
+          : "Skill requested successfully",
         description: mode === 'offer' 
-          ? "Your neighbors can now see your skill offering"
-          : "Your request has been posted. We'll notify you when someone offers to help",
+          ? "Your neighbors with matching skill requests will be notified" 
+          : "Your neighbors with matching skill offers will be notified",
       });
       onClose();
     }
@@ -65,7 +69,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       toast({
         title: "Similar skills exist",
         description: "You can still submit, but consider checking existing skills first",
-        variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
+        variant: "destructive"
       });
     }
 
