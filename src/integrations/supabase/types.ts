@@ -381,6 +381,54 @@ export type Database = {
           },
         ]
       }
+      skill_contributors: {
+        Row: {
+          availability: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          skill_id: string
+          time_preferences: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          skill_id: string
+          time_preferences?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          skill_id?: string
+          time_preferences?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_contributors_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills_exchange"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_contributors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills_exchange: {
         Row: {
           availability: string | null
