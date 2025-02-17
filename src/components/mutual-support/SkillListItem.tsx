@@ -34,14 +34,8 @@ const SkillListItem = ({
       onClick={onClick}
       className="flex items-start gap-3 pl-4 pr-6 py-3 group hover:bg-gray-50 rounded-lg transition-colors cursor-pointer relative"
     >
-      {/* Avatar section */}
+      {/* Avatar section - Now just showing the profile image without the tag */}
       <div className="relative">
-        {/* Tag label */}
-        <span className={`absolute -top-2 -left-2 px-2 py-0.5 rounded-full text-xs font-medium ${tagColor} ${tagBg}`}>
-          {type}
-        </span>
-        
-        {/* Display requester's avatar */}
         <Avatar className="h-10 w-10">
           {requesterProfile?.avatar_url ? (
             <AvatarImage 
