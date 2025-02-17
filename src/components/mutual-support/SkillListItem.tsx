@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { QuestionMarkCircle } from "lucide-react"; // Import question mark icon
 
 interface SkillListItemProps {
   title: string;
@@ -24,18 +26,36 @@ const SkillListItem = ({
   onClick,
   profiles
 }: SkillListItemProps) => {
+  // Determine if this is an unresolved request
+  const isUnresolvedRequest = type === "Needs Help" && (!profiles || profiles.length === 0);
+
   return (
     <div 
       onClick={onClick}
       className="flex items-start gap-4 pl-10 pr-6 py-3 group hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
     >
       <div className="relative">
-        <span className={`absolute -top-2 -left-2 px-2 py-0.5 rounded-full text-xs font-medium ${tagColor} ${tagBg}`}>{type}</span>
+        <span className={`absolute -top-2 -left-2 px-2 py-0.5 rounded-full text-xs font-medium ${tagColor} ${tagBg}`}>
+          {type}
+        </span>
         <Avatar className="h-10 w-10">
-          {profiles && profiles.length > 0 && profiles[0].image_url ? (
-            <AvatarImage src={profiles[0].image_url} alt={profiles[0].full_name} />
+          {isUnresolvedRequest ? (
+            // Show question mark for unresolved requests
+            <AvatarFallback className="bg-gray-100">
+              <QuestionMarkCircle className="h-6 w-6 text-gray-400" />
+            </AvatarFallback>
           ) : (
-            <AvatarFallback>{profiles && profiles.length > 0 ? profiles[0].full_name : 'N/A'}</AvatarFallback>
+            // Show profile image or fallback for resolved requests/offers
+            profiles && profiles.length > 0 && profiles[0].avatar_url ? (
+              <AvatarImage src={profiles[0].avatar_url} alt={profiles[0].display_name || 'User'} />
+            ) : (
+              <AvatarFallback>
+                {profiles && profiles.length > 0 && profiles[0].display_name 
+                  ? profiles[0].display_name.charAt(0).toUpperCase()
+                  : 'U'
+                }
+              </AvatarFallback>
+            )
           )}
         </Avatar>
       </div>
