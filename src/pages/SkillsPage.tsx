@@ -122,25 +122,27 @@ const SkillsPage = () => {
                   </h2>
                 </>
               ) : (
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {showOnlyRequests ? "Skill Requests" : "Skills Exchange"}
-                </h2>
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {showOnlyRequests ? "Skill Requests" : "Skills Exchange"}
+                  </h2>
+                  {showOnlyRequests && (
+                    <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2">
+                      <p className="text-gray-700 text-sm">
+                        Browse and respond to current skill requests from your neighbors. Connect with those seeking to learn and share your expertise.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-            
-            {!selectedCategory && !showOnlyRequests && (
-              <div className="bg-indigo-100 rounded-lg p-4">
-                <p className="text-indigo-800 text-sm">
-                  Share your expertise or learn something new. Connect with neighbors to exchange knowledge and skills.
-                </p>
-              </div>
-            )}
 
             <SkillsHeader 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               onAddRequest={handleAddRequest}
               onViewRequests={handleViewRequests}
+              isViewingRequests={showOnlyRequests}
             />
           </div>
 
