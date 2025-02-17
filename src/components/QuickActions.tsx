@@ -82,10 +82,10 @@ const QuickActions = () => {
           <Button
             key={action.label}
             variant="outline"
-            className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} {/* Changed px-4 to px-2 */}
+            className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`}
             onClick={action.onClick}
           >
-            <action.icon className="h-5 w-5 mr-2" /> {/* Changed mr-3 to mr-2 */}
+            <action.icon className="h-5 w-5 mr-2" />
             <span className="text-sm">{action.label}</span>
           </Button>
         ))}
