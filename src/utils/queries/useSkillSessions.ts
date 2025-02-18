@@ -15,7 +15,17 @@ interface AvailabilityData {
 }
 
 // Type for the Supabase response
-type SkillSessionResponse = Database['public']['Tables']['skill_sessions']['Row'] & {
+type SkillSessionResponse = {
+  created_at: string;
+  event_id: string | null;
+  expires_at: string;
+  id: string;
+  provider_id: string;
+  requester_availability: Database["public"]["Tables"]["skill_sessions"]["Row"]["requester_availability"];
+  requester_id: string;
+  skill_id: string;
+  status: Database["public"]["Tables"]["skill_sessions"]["Row"]["status"];
+  updated_at: string;
   skill: {
     title: string;
     description: string | null;
@@ -41,7 +51,7 @@ export const useSkillSessions = () => {
       if (!user) return null;
 
       // Fetch sessions with type annotation
-      const { data: sessions, error: sessionsError } = await supabase
+      const { data, error: sessionsError } = await supabase
         .from('skill_sessions')
         .select(`
           *,
@@ -64,8 +74,11 @@ export const useSkillSessions = () => {
 
       if (sessionsError) throw sessionsError;
 
+      // Safely cast the data to our expected type
+      const sessions = (data || []) as unknown as SkillSessionResponse[];
+
       // Fetch time slots for each session
-      const sessionIds = (sessions as SkillSessionResponse[]).map(s => s.id);
+      const sessionIds = sessions.map(s => s.id);
       const { data: timeSlots, error: timeSlotsError } = await supabase
         .from('skill_session_time_slots')
         .select('*')
@@ -83,7 +96,7 @@ export const useSkillSessions = () => {
       }, {} as Record<string, TimeSlot[]>);
 
       // Transform the sessions data to match our SkillSession type
-      const transformedSessions: SkillSession[] = (sessions as SkillSessionResponse[]).map((session) => {
+      const transformedSessions: SkillSession[] = sessions.map((session) => {
         // Get availability data with default values
         const defaultAvailability: AvailabilityData = {
           weekday: false,
