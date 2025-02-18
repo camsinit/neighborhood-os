@@ -3,11 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, MapPin } from "lucide-react";
+import { User, MapPin, Phone } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export const UserDirectory = () => {
+  // State to track which user's profile is being viewed
+  const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+
   // Query to fetch users and their profiles
   const {
     data: users,
@@ -21,7 +26,7 @@ export const UserDirectory = () => {
         error: profilesError
       } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs');
+        .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio');
       if (profilesError) throw profilesError;
 
       // Then get user emails from auth.users
@@ -59,7 +64,8 @@ export const UserDirectory = () => {
             email_visible: profile.email_visible,
             phone_visible: profile.phone_visible,
             address_visible: profile.address_visible,
-            needs_visible: profile.needs_visible
+            needs_visible: profile.needs_visible,
+            bio: profile.bio
           }
         };
       });
@@ -74,9 +80,14 @@ export const UserDirectory = () => {
 
   return (
     <div className="p-6">
+      {/* Grid of neighbor cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {users?.map(user => (
-          <Card key={user.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card 
+            key={user.id} 
+            className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => setSelectedUser(user)}
+          >
             <CardContent className="p-4">
               <div className="flex flex-col items-center space-y-3">
                 {/* Avatar */}
@@ -109,6 +120,71 @@ export const UserDirectory = () => {
           </Card>
         ))}
       </div>
+
+      {/* Profile Dialog */}
+      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Neighbor Profile</DialogTitle>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="space-y-6">
+              {/* Profile Header */}
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={selectedUser.profiles?.avatar_url || ''} />
+                  <AvatarFallback>
+                    <User className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-xl font-semibold">
+                    {selectedUser.profiles?.display_name || 'Neighbor'}
+                  </h2>
+                  <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                </div>
+              </div>
+
+              {/* Bio Section */}
+              {selectedUser.profiles?.bio && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500">About</h3>
+                  <p className="text-sm">{selectedUser.profiles.bio}</p>
+                </div>
+              )}
+
+              {/* Contact Information */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-500">Contact Information</h3>
+                <div className="space-y-2">
+                  {selectedUser.profiles?.phone_visible && selectedUser.profiles?.phone_number && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <span>{selectedUser.profiles.phone_number}</span>
+                    </div>
+                  )}
+                  
+                  {selectedUser.profiles?.address_visible && selectedUser.profiles?.address && (
+                    <div className="flex items-center space-x-2 text-sm">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <span>{selectedUser.profiles.address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Access Needs */}
+              {selectedUser.profiles?.needs_visible && selectedUser.profiles?.access_needs && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500">Access & Functional Needs</h3>
+                  <p className="text-sm">{selectedUser.profiles.access_needs}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

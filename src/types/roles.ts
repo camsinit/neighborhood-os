@@ -15,6 +15,7 @@ export interface UserWithRole {
     phone_visible: boolean;
     address_visible: boolean;
     needs_visible: boolean;
+    bio: string | null;
   };
   roles: UserRole[];
 }
