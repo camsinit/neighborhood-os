@@ -54,8 +54,31 @@ export const useSkillSessions = () => {
         return acc;
       }, {} as Record<string, TimeSlot[]>);
 
+      // Transform the sessions data to match our SkillSession type
+      const transformedSessions: SkillSession[] = sessions.map(session => ({
+        ...session,
+        // Parse the JSON requester_availability into our expected structure
+        requester_availability: {
+          weekday: session.requester_availability?.weekday ?? false,
+          weekend: session.requester_availability?.weekend ?? false,
+          morning: session.requester_availability?.morning ?? false,
+          afternoon: session.requester_availability?.afternoon ?? false,
+          evening: session.requester_availability?.evening ?? false,
+        },
+        // Ensure all required fields are present with proper types
+        created_at: session.created_at,
+        updated_at: session.updated_at,
+        expires_at: session.expires_at,
+        event_id: session.event_id || undefined,
+        id: session.id,
+        skill_id: session.skill_id,
+        requester_id: session.requester_id,
+        provider_id: session.provider_id,
+        status: session.status as SkillSessionStatus,
+      }));
+
       return {
-        sessions: sessions as SkillSession[],
+        sessions: transformedSessions,
         timeSlots: timeSlotsBySession,
       };
     },
