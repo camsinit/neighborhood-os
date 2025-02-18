@@ -20,6 +20,11 @@ export const profileFormSchema = z.object({
     all_activity: z.boolean(),
     new_neighbors: z.boolean()
   }),
+  // New privacy settings
+  email_visible: z.boolean().default(false),
+  phone_visible: z.boolean().default(false),
+  address_visible: z.boolean().default(false),
+  needs_visible: z.boolean().default(false),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
