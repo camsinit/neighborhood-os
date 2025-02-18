@@ -57,26 +57,15 @@ export const ProfileTab = ({ form }: { form: UseFormReturn<ProfileFormValues> })
           <h3 className="text-lg font-medium">Directory Visibility Settings</h3>
           <p className="text-sm text-gray-500">Control what information is visible to other neighbors in the directory.</p>
 
-          <FormField
-            control={form.control}
-            name="email_visible"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Email Address</FormLabel>
-                  <FormDescription>
-                    Your email address (required for login)
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {/* Email visibility notice - now shown as required */}
+          <div className="flex flex-row items-center justify-between rounded-lg border p-4 bg-gray-50">
+            <div className="space-y-0.5">
+              <FormLabel className="text-base">Email Address</FormLabel>
+              <FormDescription>
+                Your email address is always visible to neighbors (required)
+              </FormDescription>
+            </div>
+          </div>
 
           <FormField
             control={form.control}

@@ -93,10 +93,8 @@ export const UserDirectory = () => {
                     {user.profiles?.display_name || 'Neighbor'}
                   </h3>
                   
-                  {/* Only show email if user has allowed it */}
-                  {user.profiles?.email_visible && (
-                    <p className="text-sm text-gray-500 truncate max-w-[150px]">{user.email}</p>
-                  )}
+                  {/* Always show email since it's required */}
+                  <p className="text-sm text-gray-500 truncate max-w-[150px]">{user.email}</p>
 
                   {/* Only show address if user has allowed it */}
                   {user.profiles?.address_visible && user.profiles?.address && (
