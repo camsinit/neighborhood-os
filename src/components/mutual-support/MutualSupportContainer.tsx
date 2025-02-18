@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
@@ -11,14 +10,20 @@ import AddSupportRequestDialog from "../AddSupportRequestDialog";
 import ArchiveDialog from "../ArchiveDialog";
 import SupportRequestDialog from "../support/SupportRequestDialog";
 
-const MutualSupportContainer = () => {
+interface MutualSupportContainerProps {
+  selectedView?: ViewType;
+}
+
+const MutualSupportContainer = ({ selectedView }: MutualSupportContainerProps) => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
-  const [selectedView, setSelectedView] = useState<ViewType>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const { data: requests, isLoading } = useSupportRequests();
+
+  const [localView, setLocalView] = useState<ViewType>(selectedView || null);
+  const activeView = selectedView || localView;
 
   const handleAddRequest = (type: "need" | "offer") => {
     setInitialRequestType(type);
@@ -28,9 +33,9 @@ const MutualSupportContainer = () => {
   const filterRequests = (items: ReturnType<typeof transformRequest>[]) => {
     let filtered = items;
 
-    if (selectedView) {
+    if (activeView) {
       filtered = filtered.filter(item => 
-        item.category === selectedView
+        item.category === activeView
       );
     }
 
@@ -57,14 +62,14 @@ const MutualSupportContainer = () => {
       .map(transformRequest) || []
   );
 
-  const shouldUseListView = selectedView === 'skills' || selectedView === 'care' || !!searchQuery;
+  const shouldUseListView = activeView === 'skills' || activeView === 'care' || !!searchQuery;
 
   return (
     <div className="w-full">
       <MutualSupportHeader />
       <SearchSection 
-        selectedView={selectedView}
-        onViewSelect={setSelectedView}
+        selectedView={activeView}
+        onViewSelect={setLocalView}
         onSearch={setSearchQuery}
       />
 
@@ -75,7 +80,7 @@ const MutualSupportContainer = () => {
         onItemClick={(item) => setSelectedRequest(item.originalRequest)}
         onAddRequest={handleAddRequest}
         useListView={shouldUseListView}
-        selectedView={selectedView}
+        selectedView={activeView}
       />
 
       <ArchiveButton onClick={() => setIsArchiveOpen(true)} />

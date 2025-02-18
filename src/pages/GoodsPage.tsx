@@ -1,5 +1,6 @@
 
 import MutualSupport from "@/components/MutualSupport";
+import { ViewType } from "@/components/mutual-support/types";
 
 const GoodsPage = () => {
   return (
