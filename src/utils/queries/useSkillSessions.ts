@@ -3,7 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillSession, TimeSlot, SkillSessionStatus } from "@/types/skillSessions";
 import { useUser } from "@supabase/auth-helpers-react";
-import { Json } from "@/integrations/supabase/types"; // Import Json type from Supabase types
+import { Json } from "@/integrations/supabase/types";
+
+// Define interface for availability data
+interface AvailabilityData {
+  weekday?: boolean;
+  weekend?: boolean;
+  morning?: boolean;
+  afternoon?: boolean;
+  evening?: boolean;
+}
 
 // Define an interface for the raw data from Supabase
 interface RawSession {
@@ -11,7 +20,7 @@ interface RawSession {
   skill_id: string;
   requester_id: string;
   provider_id: string;
-  requester_availability: Json; // Changed to Json type to match Supabase
+  requester_availability: Json;
   status: SkillSessionStatus;
   created_at: string;
   updated_at: string;
@@ -19,18 +28,18 @@ interface RawSession {
   event_id?: string;
   skill?: {
     title: string;
-    description: string;
+    description: string | null;
     request_type: string;
     skill_category: string;
-  };
+  } | null;
   requester?: {
     display_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
   provider?: {
     display_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 export const useSkillSessions = () => {
@@ -84,39 +93,31 @@ export const useSkillSessions = () => {
       }, {} as Record<string, TimeSlot[]>);
 
       // Transform the sessions data to match our SkillSession type
-      const transformedSessions: SkillSession[] = (sessions as RawSession[]).map((session) => {
-        // Handle the requester_availability which might be already an object or a string
-        let availability = session.requester_availability;
-        if (typeof availability === 'string') {
-          try {
-            availability = JSON.parse(availability);
-          } catch (e) {
-            availability = {};
-          }
-        }
-
-        // Ensure availability is an object
-        availability = availability || {};
+      const transformedSessions: SkillSession[] = sessions.map((rawSession) => {
+        // Parse the requester_availability into our expected format
+        const rawAvailability = rawSession.requester_availability as AvailabilityData;
+        
+        // Create properly typed availability object
+        const availability = {
+          weekday: Boolean(rawAvailability?.weekday),
+          weekend: Boolean(rawAvailability?.weekend),
+          morning: Boolean(rawAvailability?.morning),
+          afternoon: Boolean(rawAvailability?.afternoon),
+          evening: Boolean(rawAvailability?.evening),
+        };
 
         return {
-          ...session,
-          // Set default values if properties don't exist in the parsed JSON
-          requester_availability: {
-            weekday: !!availability.weekday,
-            weekend: !!availability.weekend,
-            morning: !!availability.morning,
-            afternoon: !!availability.afternoon,
-            evening: !!availability.evening,
-          },
-          created_at: session.created_at,
-          updated_at: session.updated_at,
-          expires_at: session.expires_at,
-          event_id: session.event_id || undefined,
-          id: session.id,
-          skill_id: session.skill_id,
-          requester_id: session.requester_id,
-          provider_id: session.provider_id,
-          status: session.status,
+          ...rawSession,
+          requester_availability: availability,
+          created_at: rawSession.created_at,
+          updated_at: rawSession.updated_at,
+          expires_at: rawSession.expires_at,
+          event_id: rawSession.event_id || undefined,
+          id: rawSession.id,
+          skill_id: rawSession.skill_id,
+          requester_id: rawSession.requester_id,
+          provider_id: rawSession.provider_id,
+          status: rawSession.status,
         };
       });
 
