@@ -444,6 +444,92 @@ export type Database = {
           },
         ]
       }
+      skill_session_time_slots: {
+        Row: {
+          created_at: string
+          id: string
+          is_selected: boolean | null
+          proposed_time: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_selected?: boolean | null
+          proposed_time: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_selected?: boolean | null
+          proposed_time?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_session_time_slots_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "skill_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_sessions: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          expires_at: string
+          id: string
+          provider_id: string
+          requester_availability: Json
+          requester_id: string
+          skill_id: string
+          status: Database["public"]["Enums"]["skill_session_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          expires_at?: string
+          id?: string
+          provider_id: string
+          requester_availability: Json
+          requester_id: string
+          skill_id: string
+          status?: Database["public"]["Enums"]["skill_session_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          expires_at?: string
+          id?: string
+          provider_id?: string
+          requester_availability?: Json
+          requester_id?: string
+          skill_id?: string
+          status?: Database["public"]["Enums"]["skill_session_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_sessions_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills_exchange"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills_exchange: {
         Row: {
           availability: string | null
@@ -633,6 +719,12 @@ export type Database = {
         | "goods"
         | "skills"
         | "neighbor_welcome"
+      skill_session_status:
+        | "pending_provider_times"
+        | "pending_requester_confirmation"
+        | "confirmed"
+        | "expired"
+        | "completed"
       user_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
