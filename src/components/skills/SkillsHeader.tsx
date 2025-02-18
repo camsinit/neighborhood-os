@@ -61,7 +61,7 @@ const SkillsHeader = ({
           onClick={onViewRequests}
           className={`whitespace-nowrap ${
             isViewingRequests 
-              ? "bg-[#333333] text-white hover:bg-[#444444]" 
+              ? "bg-sky-50 text-sky-700 hover:bg-sky-100" 
               : "bg-white hover:bg-gray-50"
           }`}
         >
