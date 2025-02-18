@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillSession, TimeSlot, SkillSessionStatus } from "@/types/skillSessions";
 import { useUser } from "@supabase/auth-helpers-react";
+import { Json } from "@/integrations/supabase/types"; // Import Json type from Supabase types
 
 // Define an interface for the raw data from Supabase
 interface RawSession {
@@ -10,12 +11,26 @@ interface RawSession {
   skill_id: string;
   requester_id: string;
   provider_id: string;
-  requester_availability: string | null; // JSON string from database
+  requester_availability: Json; // Changed to Json type to match Supabase
   status: SkillSessionStatus;
   created_at: string;
   updated_at: string;
   expires_at: string;
   event_id?: string;
+  skill?: {
+    title: string;
+    description: string;
+    request_type: string;
+    skill_category: string;
+  };
+  requester?: {
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+  provider?: {
+    display_name: string | null;
+    avatar_url: string | null;
+  };
 }
 
 export const useSkillSessions = () => {
@@ -69,14 +84,19 @@ export const useSkillSessions = () => {
       }, {} as Record<string, TimeSlot[]>);
 
       // Transform the sessions data to match our SkillSession type
-      const transformedSessions: SkillSession[] = sessions.map((session: RawSession) => {
-        // Parse the JSON string into an object, with default values if parsing fails
-        let availability;
-        try {
-          availability = JSON.parse(session.requester_availability || '{}');
-        } catch (e) {
-          availability = {};
+      const transformedSessions: SkillSession[] = (sessions as RawSession[]).map((session) => {
+        // Handle the requester_availability which might be already an object or a string
+        let availability = session.requester_availability;
+        if (typeof availability === 'string') {
+          try {
+            availability = JSON.parse(availability);
+          } catch (e) {
+            availability = {};
+          }
         }
+
+        // Ensure availability is an object
+        availability = availability || {};
 
         return {
           ...session,
