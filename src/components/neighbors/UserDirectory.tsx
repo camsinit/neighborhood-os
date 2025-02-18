@@ -31,19 +31,31 @@ export const UserDirectory = () => {
       } = await supabase.from('auth_users_view').select('id, email, created_at');
       if (authError) throw authError;
 
+      // Then get user roles
+      const {
+        data: userRoles,
+        error: rolesError
+      } = await supabase.from('user_roles').select('user_id, role');
+      if (rolesError) throw rolesError;
+
       // Combine the data
       const usersWithProfiles = profiles.map((profile: any) => {
         const authUser = authUsers.find((u: any) => u.id === profile.id);
+        const roles = userRoles
+          .filter((r: any) => r.user_id === profile.id)
+          .map((r: any) => r.role as UserWithRole['roles'][0]);
+
         return {
           id: profile.id,
           email: authUser?.email,
           created_at: authUser?.created_at,
+          roles: roles,
           profiles: {
             display_name: profile.display_name,
             avatar_url: profile.avatar_url,
-            address: profile.address_visible ? profile.address : null,
-            phone_number: profile.phone_visible ? profile.phone_number : null,
-            access_needs: profile.needs_visible ? profile.access_needs : null,
+            address: profile.address,
+            phone_number: profile.phone_number,
+            access_needs: profile.access_needs,
             email_visible: profile.email_visible,
             phone_visible: profile.phone_visible,
             address_visible: profile.address_visible,
@@ -51,6 +63,7 @@ export const UserDirectory = () => {
           }
         };
       });
+
       return usersWithProfiles as UserWithRole[];
     }
   });

@@ -9,6 +9,12 @@ export interface UserWithRole {
     display_name: string | null;
     avatar_url: string | null;
     address: string | null;
+    phone_number: string | null;
+    access_needs: string | null;
+    email_visible: boolean;
+    phone_visible: boolean;
+    address_visible: boolean;
+    needs_visible: boolean;
   };
   roles: UserRole[];
 }

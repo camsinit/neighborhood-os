@@ -247,45 +247,60 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_needs: string | null
           address: string | null
+          address_visible: boolean | null
           avatar_url: string | null
           bio: string | null
           created_at: string
           display_name: string | null
+          email_visible: boolean | null
           id: string
           language: string | null
+          needs_visible: boolean | null
           notification_preferences: Json | null
           phone_number: string | null
+          phone_visible: boolean | null
           skills: string[] | null
           theme: string | null
           timezone: string | null
           updated_at: string
         }
         Insert: {
+          access_needs?: string | null
           address?: string | null
+          address_visible?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          email_visible?: boolean | null
           id: string
           language?: string | null
+          needs_visible?: boolean | null
           notification_preferences?: Json | null
           phone_number?: string | null
+          phone_visible?: boolean | null
           skills?: string[] | null
           theme?: string | null
           timezone?: string | null
           updated_at?: string
         }
         Update: {
+          access_needs?: string | null
           address?: string | null
+          address_visible?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
+          email_visible?: boolean | null
           id?: string
           language?: string | null
+          needs_visible?: boolean | null
           notification_preferences?: Json | null
           phone_number?: string | null
+          phone_visible?: boolean | null
           skills?: string[] | null
           theme?: string | null
           timezone?: string | null
