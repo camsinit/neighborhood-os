@@ -1,41 +1,24 @@
 
 import SafetyUpdates from "@/components/SafetyUpdates";
-import { Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const SafetyPage = () => {
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-amber-50 to-white">
+    <div className="min-h-full w-full bg-gradient-to-b from-[#FDE1D3] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Shield className="h-8 w-8 text-amber-600" />
-                <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
-              </div>
-              <Button 
-                onClick={() => {
-                  const addUpdateButton = document.querySelector('[data-add-update-button]');
-                  if (addUpdateButton instanceof HTMLButtonElement) {
-                    addUpdateButton.click();
-                  }
-                }}
-                className="bg-amber-500 hover:bg-amber-600 text-white h-10"
-              >
-                Post Update
-              </Button>
-            </div>
-            
-            <div className="bg-amber-100 rounded-lg p-4 mb-6">
-              <p className="text-amber-800 text-sm">
-                Stay informed about important safety updates and announcements in your community. 
-                Together we can keep our neighborhood safe and secure.
-              </p>
-            </div>
-
-            <SafetyUpdates />
+          {/* Page Title */}
+          <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
+          
+          {/* Description Box */}
+          <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2 mb-6">
+            <p className="text-gray-700 text-sm">
+              Stay informed about safety matters in your community. Share updates, receive alerts, 
+              and work together to maintain a secure neighborhood environment.
+            </p>
           </div>
+
+          {/* Safety Updates Component */}
+          <SafetyUpdates />
         </div>
       </div>
     </div>
