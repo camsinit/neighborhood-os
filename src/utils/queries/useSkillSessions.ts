@@ -1,8 +1,22 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { SkillSession, TimeSlot } from "@/types/skillSessions";
+import { SkillSession, TimeSlot, SkillSessionStatus } from "@/types/skillSessions";
 import { useUser } from "@supabase/auth-helpers-react";
+
+// Define an interface for the raw data from Supabase
+interface RawSession {
+  id: string;
+  skill_id: string;
+  requester_id: string;
+  provider_id: string;
+  requester_availability: string | null; // JSON string from database
+  status: SkillSessionStatus;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+  event_id?: string;
+}
 
 export const useSkillSessions = () => {
   const user = useUser();
@@ -55,27 +69,36 @@ export const useSkillSessions = () => {
       }, {} as Record<string, TimeSlot[]>);
 
       // Transform the sessions data to match our SkillSession type
-      const transformedSessions: SkillSession[] = sessions.map(session => ({
-        ...session,
-        // Parse the JSON requester_availability into our expected structure
-        requester_availability: {
-          weekday: session.requester_availability?.weekday ?? false,
-          weekend: session.requester_availability?.weekend ?? false,
-          morning: session.requester_availability?.morning ?? false,
-          afternoon: session.requester_availability?.afternoon ?? false,
-          evening: session.requester_availability?.evening ?? false,
-        },
-        // Ensure all required fields are present with proper types
-        created_at: session.created_at,
-        updated_at: session.updated_at,
-        expires_at: session.expires_at,
-        event_id: session.event_id || undefined,
-        id: session.id,
-        skill_id: session.skill_id,
-        requester_id: session.requester_id,
-        provider_id: session.provider_id,
-        status: session.status as SkillSessionStatus,
-      }));
+      const transformedSessions: SkillSession[] = sessions.map((session: RawSession) => {
+        // Parse the JSON string into an object, with default values if parsing fails
+        let availability;
+        try {
+          availability = JSON.parse(session.requester_availability || '{}');
+        } catch (e) {
+          availability = {};
+        }
+
+        return {
+          ...session,
+          // Set default values if properties don't exist in the parsed JSON
+          requester_availability: {
+            weekday: !!availability.weekday,
+            weekend: !!availability.weekend,
+            morning: !!availability.morning,
+            afternoon: !!availability.afternoon,
+            evening: !!availability.evening,
+          },
+          created_at: session.created_at,
+          updated_at: session.updated_at,
+          expires_at: session.expires_at,
+          event_id: session.event_id || undefined,
+          id: session.id,
+          skill_id: session.skill_id,
+          requester_id: session.requester_id,
+          provider_id: session.provider_id,
+          status: session.status,
+        };
+      });
 
       return {
         sessions: transformedSessions,
