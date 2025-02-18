@@ -38,6 +38,12 @@ const SkillListItem = ({
 
   const handleScheduleHelp = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('handleScheduleHelp clicked', {
+      requestId,
+      userId: user?.id,
+      requesterProfileId: requesterProfile?.id,
+      type
+    });
 
     try {
       const defaultAvailability = {
@@ -47,6 +53,13 @@ const SkillListItem = ({
         afternoon: false,
         evening: false
       };
+
+      console.log('Creating skill session with data:', {
+        skill_id: requestId,
+        requester_id: requesterProfile?.id,
+        provider_id: user?.id,
+        defaultAvailability
+      });
 
       const { data: session, error: sessionError } = await supabase
         .from('skill_sessions')
@@ -61,18 +74,24 @@ const SkillListItem = ({
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('Error creating skill session:', sessionError);
+        throw sessionError;
+      }
+
+      console.log('Skill session created successfully:', session);
 
       toast.success(type === "Needs Help" 
         ? "Great! You've offered to help. Please propose some available time slots."
         : "Great! You've requested to learn. Please share your availability."
       );
 
+      console.log('Dispatching openSkillSessionDialog event with sessionId:', session.id);
       window.dispatchEvent(new CustomEvent('openSkillSessionDialog', {
         detail: { sessionId: session.id }
       }));
     } catch (error) {
-      console.error('Error initiating skill session:', error);
+      console.error('Detailed error creating skill session:', error);
       toast.error("Failed to initiate skill session. Please try again.");
     }
   };
@@ -134,7 +153,10 @@ const SkillListItem = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={handleScheduleHelp}
+                onClick={(e) => {
+                  console.log('Learn/Help button clicked');
+                  handleScheduleHelp(e);
+                }}
                 className="text-xs px-3 py-1 h-7"
               >
                 {type === "Needs Help" ? "I can help!" : "I want to learn!"}
