@@ -8,8 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 
+// Define the type for our availability state
+interface Availability {
+  weekday: boolean;
+  weekend: boolean;
+  morning: boolean;
+  afternoon: boolean;
+  evening: boolean;
+}
+
 interface SkillSessionRequestDialogProps {
-  sessionId: string | null; // Changed from skillId/providerId to sessionId
+  sessionId: string | null;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -18,7 +27,7 @@ export const SkillSessionRequestDialog = ({
   onOpenChange,
 }: SkillSessionRequestDialogProps) => {
   const user = useUser();
-  const [availability, setAvailability] = useState({
+  const [availability, setAvailability] = useState<Availability>({
     weekday: false,
     weekend: false,
     morning: false,
@@ -40,8 +49,22 @@ export const SkillSessionRequestDialog = ({
 
         if (error) throw error;
 
-        if (data.requester_availability) {
-          setAvailability(data.requester_availability);
+        // Safely parse the requester_availability data
+        if (data?.requester_availability) {
+          const parsedAvailability = typeof data.requester_availability === 'string' 
+            ? JSON.parse(data.requester_availability) 
+            : data.requester_availability;
+
+          // Ensure all required boolean fields exist
+          const validatedAvailability: Availability = {
+            weekday: Boolean(parsedAvailability?.weekday),
+            weekend: Boolean(parsedAvailability?.weekend),
+            morning: Boolean(parsedAvailability?.morning),
+            afternoon: Boolean(parsedAvailability?.afternoon),
+            evening: Boolean(parsedAvailability?.evening),
+          };
+
+          setAvailability(validatedAvailability);
         }
       } catch (error) {
         console.error('Error loading session data:', error);
