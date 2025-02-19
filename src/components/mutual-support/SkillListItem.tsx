@@ -33,17 +33,50 @@ const SkillListItem = ({
   requestId
 }: SkillListItemProps) => {
   const user = useUser();
-  const requesterProfile = profiles[0];
+  
+  // Log the full profiles array to see what we're receiving
+  console.log('Profiles data:', profiles);
+  
+  // Extract the requester profile and add validation
+  const requesterProfile = profiles?.[0];
+  console.log('Requester profile:', requesterProfile);
+  
   const isOwner = user?.id === requesterProfile?.id;
+
+  // Add validation to ensure we have the necessary data
+  const validateSessionData = () => {
+    if (!user?.id) {
+      console.error('No user ID available');
+      return false;
+    }
+    if (!requesterProfile?.id) {
+      console.error('No requester profile ID available');
+      return false;
+    }
+    if (!requestId) {
+      console.error('No request ID available');
+      return false;
+    }
+    return true;
+  };
 
   const handleScheduleHelp = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('handleScheduleHelp clicked', {
+    
+    // Log all relevant IDs
+    console.log('Session creation attempt:', {
       requestId,
       userId: user?.id,
+      requesterProfile: requesterProfile,
       requesterProfileId: requesterProfile?.id,
       type
     });
+
+    // Validate required data before proceeding
+    if (!validateSessionData()) {
+      toast.error("Unable to create session: Missing required data");
+      return;
+    }
 
     try {
       const defaultAvailability = {
@@ -54,9 +87,21 @@ const SkillListItem = ({
         evening: false
       };
 
+      // Get the actual requester ID from the skills_exchange table
+      const { data: skillRequest, error: skillError } = await supabase
+        .from('skills_exchange')
+        .select('user_id')
+        .eq('id', requestId)
+        .single();
+
+      if (skillError) {
+        console.error('Error fetching skill request:', skillError);
+        throw skillError;
+      }
+
       console.log('Creating skill session with data:', {
         skill_id: requestId,
-        requester_id: requesterProfile?.id,
+        requester_id: skillRequest.user_id,
         provider_id: user?.id,
         defaultAvailability
       });
@@ -65,7 +110,7 @@ const SkillListItem = ({
         .from('skill_sessions')
         .insert({
           skill_id: requestId,
-          requester_id: requesterProfile?.id,
+          requester_id: skillRequest.user_id,
           provider_id: user?.id,
           status: 'pending_provider_times',
           expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
