@@ -97,10 +97,19 @@ export const SkillSessionRequestDialog = ({
     }
 
     try {
+      // Convert Availability type to a plain object that matches Json type
+      const availabilityJson: { [key: string]: boolean } = {
+        weekday: availability.weekday,
+        weekend: availability.weekend,
+        morning: availability.morning,
+        afternoon: availability.afternoon,
+        evening: availability.evening,
+      };
+
       const { error } = await supabase
         .from('skill_sessions')
         .update({
-          requester_availability: availability,
+          requester_availability: availabilityJson,
         })
         .eq('id', sessionId);
 
