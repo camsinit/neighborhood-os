@@ -1,3 +1,4 @@
+
 import { Bell, Calendar, Shield, HandHelping, Check, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -38,6 +39,9 @@ const NotificationItem = ({
   actionLabel = "View",
   actionType = "view"
 }: NotificationItemProps) => {
+  // Add state for fade-out animation
+  const [isRemoving, setIsRemoving] = useState(false);
+
   const getIcon = () => {
     switch (type) {
       case "safety":
@@ -82,12 +86,17 @@ const NotificationItem = ({
 
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const table = getTableName(type);
-    await supabase
-      .from(table)
-      .update({ is_archived: true })
-      .eq('id', itemId);
-    onClose();
+    setIsRemoving(true); // Start fade-out animation
+    
+    // Wait for animation to complete before updating database
+    setTimeout(async () => {
+      const table = getTableName(type);
+      await supabase
+        .from(table)
+        .update({ is_archived: true })
+        .eq('id', itemId);
+      onClose();
+    }, 300); // Match this with CSS transition duration
   };
 
   const [showDateDialog, setShowDateDialog] = useState(false);
@@ -120,7 +129,9 @@ const NotificationItem = ({
     <>
       <div
         onClick={handleClick}
-        className="flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-colors cursor-pointer"
+        className={`flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg transition-all duration-300 ${
+          isRemoving ? 'opacity-0 transform translate-x-full' : 'opacity-100'
+        }`}
       >
         <div className="flex items-start gap-3">
           {context?.avatarUrl ? (
