@@ -2,24 +2,20 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 
 interface SkillSessionRequestDialogProps {
-  open: boolean;
+  sessionId: string | null; // Changed from skillId/providerId to sessionId
   onOpenChange: (open: boolean) => void;
-  skillId: string;
-  providerId: string;
 }
 
 export const SkillSessionRequestDialog = ({
-  open,
+  sessionId,
   onOpenChange,
-  skillId,
-  providerId,
 }: SkillSessionRequestDialogProps) => {
   const user = useUser();
   const [availability, setAvailability] = useState({
@@ -30,9 +26,40 @@ export const SkillSessionRequestDialog = ({
     evening: false,
   });
 
+  // Load existing session data when dialog opens
+  useEffect(() => {
+    const loadSessionData = async () => {
+      if (!sessionId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('skill_sessions')
+          .select('*')
+          .eq('id', sessionId)
+          .single();
+
+        if (error) throw error;
+
+        if (data.requester_availability) {
+          setAvailability(data.requester_availability);
+        }
+      } catch (error) {
+        console.error('Error loading session data:', error);
+        toast.error("Failed to load session data");
+      }
+    };
+
+    loadSessionData();
+  }, [sessionId]);
+
   const handleSubmit = async () => {
     if (!user) {
-      toast.error("You must be logged in to request a skill session");
+      toast.error("You must be logged in to update availability");
+      return;
+    }
+
+    if (!sessionId) {
+      toast.error("No session found");
       return;
     }
 
@@ -49,28 +76,26 @@ export const SkillSessionRequestDialog = ({
     try {
       const { error } = await supabase
         .from('skill_sessions')
-        .insert({
-          skill_id: skillId,
-          provider_id: providerId,
-          requester_id: user.id,
+        .update({
           requester_availability: availability,
-        });
+        })
+        .eq('id', sessionId);
 
       if (error) throw error;
 
-      toast.success("Skill session request sent successfully!");
+      toast.success("Availability updated successfully!");
       onOpenChange(false);
     } catch (error) {
-      console.error('Error creating skill session:', error);
-      toast.error("Failed to create skill session request");
+      console.error('Error updating availability:', error);
+      toast.error("Failed to update availability");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={!!sessionId} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Request Skill Session</DialogTitle>
+          <DialogTitle>Share Your Availability</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -139,7 +164,7 @@ export const SkillSessionRequestDialog = ({
           </div>
 
           <Button onClick={handleSubmit} className="w-full">
-            Submit Request
+            Submit Availability
           </Button>
         </div>
       </DialogContent>
