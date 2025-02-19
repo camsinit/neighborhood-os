@@ -1,4 +1,3 @@
-
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
 import { useState, useEffect } from "react";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -9,7 +8,7 @@ import { SkillCategory } from "@/components/mutual-support/types";
 import { CategoryList } from "@/components/skills/CategoryList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import SkillsList from "@/components/skills/SkillsList";
-import SkillSessionRequestDialog from "@/components/skills/SkillSessionRequestDialog";
+import { SkillSessionRequestDialog } from "@/components/skills/SkillSessionRequestDialog";
 
 const SkillsPage = () => {
   // State management
