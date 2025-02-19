@@ -1,6 +1,6 @@
 
 import { useSkillsExchange } from "@/utils/queries/useSkillsExchange";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { ArrowLeft } from "lucide-react";
@@ -9,6 +9,7 @@ import { SkillCategory } from "@/components/mutual-support/types";
 import { CategoryList } from "@/components/skills/CategoryList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import SkillsList from "@/components/skills/SkillsList";
+import SkillSessionRequestDialog from "@/components/skills/SkillSessionRequestDialog";
 
 const SkillsPage = () => {
   // State management
@@ -17,10 +18,25 @@ const SkillsPage = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
-  const [showOnlyRequests, setShowOnlyRequests] = useState(false); // New state for filtering requests
+  const [showOnlyRequests, setShowOnlyRequests] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   
   // Fetch skills data
   const { data: skillsExchange, isLoading } = useSkillsExchange();
+  
+  // Listen for the custom event to open the session dialog
+  useEffect(() => {
+    const handleOpenSessionDialog = (event: CustomEvent<{ sessionId: string }>) => {
+      console.log('Received openSkillSessionDialog event:', event.detail);
+      setSessionId(event.detail.sessionId);
+    };
+
+    window.addEventListener('openSkillSessionDialog', handleOpenSessionDialog as EventListener);
+
+    return () => {
+      window.removeEventListener('openSkillSessionDialog', handleOpenSessionDialog as EventListener);
+    };
+  }, []);
   
   // Filter skills based on search, category, and requests filter
   const filteredSkills = skillsExchange?.filter(skill => {
@@ -30,7 +46,6 @@ const SkillsPage = () => {
     
     const matchesCategory = !selectedCategory || skill.skill_category === selectedCategory;
     
-    // Only show requests if showOnlyRequests is true
     const matchesType = showOnlyRequests ? skill.request_type === 'need' : true;
     
     return matchesSearch && matchesCategory && matchesType;
@@ -95,7 +110,7 @@ const SkillsPage = () => {
     setIsAddRequestOpen(true);
   };
 
-  // New handler for viewing requests
+  // Handler for viewing requests
   const handleViewRequests = () => {
     setShowOnlyRequests(!showOnlyRequests);
     setSelectedCategory(null); // Reset category when toggling requests view
@@ -178,6 +193,11 @@ const SkillsPage = () => {
         request={selectedRequest}
         open={!!selectedRequest}
         onOpenChange={open => !open && setSelectedRequest(null)}
+      />
+
+      <SkillSessionRequestDialog
+        sessionId={sessionId}
+        onOpenChange={() => setSessionId(null)}
       />
     </div>
   );
