@@ -73,7 +73,7 @@ export const FinalizeDateDialog = ({
         .from('skill_sessions')
         .update({
           scheduled_time: finalDateTime,
-          status: 'scheduled'
+          status: 'confirmed' // Changed from 'scheduled' to 'confirmed' to match our enum
         })
         .eq('id', sessionId);
 
