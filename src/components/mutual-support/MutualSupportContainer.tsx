@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
@@ -5,7 +6,6 @@ import { ViewType } from "./types";
 import MutualSupportHeader from "./MutualSupportHeader";
 import SearchSection from "./SearchSection";
 import MutualSupportContent from "./MutualSupportContent";
-import ArchiveButton from "./ArchiveButton";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 import ArchiveDialog from "../ArchiveDialog";
 import SupportRequestDialog from "../support/SupportRequestDialog";
@@ -83,7 +83,14 @@ const MutualSupportContainer = ({ selectedView }: MutualSupportContainerProps) =
         selectedView={activeView}
       />
 
-      <ArchiveButton onClick={() => setIsArchiveOpen(true)} />
+      {/* Replaced the onClick ArchiveButton with ArchiveDialog */}
+      <Button 
+        variant="outline"
+        onClick={() => setIsArchiveOpen(true)}
+        className="mt-4"
+      >
+        View Archived Items
+      </Button>
 
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
