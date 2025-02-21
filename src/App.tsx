@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Sidebar from "./components/ui/sidebar";
+import { Sidebar } from "./components/ui/sidebar";
 import Login from "./pages/Login";
 import HomePage from "./pages/HomePage";
 import SafetyPage from "./pages/SafetyPage";
