@@ -1,21 +1,20 @@
-
 import { useState } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
 import { HeartHandshake } from "lucide-react";
-
 const CarePage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
-  const { data: requests, isLoading } = useSupportRequests();
+  const {
+    data: requests,
+    isLoading
+  } = useSupportRequests();
 
   // Filter only care-related requests
   const careRequests = requests?.filter(req => req.category === 'care') || [];
-
-  return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#FFDEE2] to-white">
+  return <div className="min-h-full w-full bg-gradient-to-b from-[#FFDEE2] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           {/* Page Title */}
@@ -30,57 +29,31 @@ const CarePage = () => {
           </div>
 
           {/* Care Support Content */}
-          {careRequests.length === 0 ? (
-            <div className="max-w-4xl mx-auto mt-8">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsAddRequestOpen(true)} 
-                className="w-full p-8 h-auto border-2 border-dashed border-gray-300 hover:border-gray-400 flex flex-col items-center gap-4"
-              >
+          {careRequests.length === 0 ? <div className="max-w-4xl mx-auto mt-8">
+              <Button variant="outline" onClick={() => setIsAddRequestOpen(true)} className="w-full p-8 h-auto border-2 border-dashed border-gray-300 hover:border-gray-400 flex flex-col items-center gap-4">
                 <HeartHandshake className="h-8 w-8 text-gray-400" />
                 <div className="flex flex-col items-center text-center">
                   <p className="text-lg font-medium text-gray-900">No active care requests</p>
-                  <p className="text-sm text-gray-500 mt-1">Click here to request support from your neighbors</p>
+                  <p className="text-sm text-gray-500 mt-1">Click here to request or offer support</p>
                 </div>
               </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {careRequests.map(request => (
-                <div 
-                  key={request.id}
-                  onClick={() => setSelectedRequest(request)}
-                  className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
-                >
+            </div> : <div className="space-y-4">
+              {careRequests.map(request => <div key={request.id} onClick={() => setSelectedRequest(request)} className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer">
                   <h3 className="font-medium text-lg">{request.title}</h3>
                   <p className="text-gray-600 mt-1">{request.description}</p>
                   <div className="mt-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {request.request_type === 'offer' ? 'Offering Help' : 'Needs Help'}
                     </span>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                </div>)}
+            </div>}
         </div>
       </div>
 
-      <AddSupportRequestDialog 
-        open={isAddRequestOpen}
-        onOpenChange={setIsAddRequestOpen}
-        view="care"
-      />
+      <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} view="care" />
 
-      <SupportRequestDialog
-        request={selectedRequest}
-        open={!!selectedRequest}
-        onOpenChange={open => !open && setSelectedRequest(null)}
-      />
-    </div>
-  );
+      <SupportRequestDialog request={selectedRequest} open={!!selectedRequest} onOpenChange={open => !open && setSelectedRequest(null)} />
+    </div>;
 };
-
 export default CarePage;
