@@ -11,6 +11,8 @@ export type Database = {
     Tables: {
       care_requests: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           care_category: string
           created_at: string
           description: string | null
@@ -24,6 +26,8 @@ export type Database = {
           valid_until: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           care_category: string
           created_at?: string
           description?: string | null
@@ -37,6 +41,8 @@ export type Database = {
           valid_until: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           care_category?: string
           created_at?: string
           description?: string | null
@@ -49,7 +55,15 @@ export type Database = {
           user_id?: string
           valid_until?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "care_requests_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_rsvps: {
         Row: {
@@ -142,6 +156,8 @@ export type Database = {
       }
       goods_exchange: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           condition: string | null
           created_at: string
           description: string | null
@@ -155,6 +171,8 @@ export type Database = {
           valid_until: string
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           condition?: string | null
           created_at?: string
           description?: string | null
@@ -168,6 +186,8 @@ export type Database = {
           valid_until: string
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           condition?: string | null
           created_at?: string
           description?: string | null
@@ -180,7 +200,15 @@ export type Database = {
           user_id?: string
           valid_until?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "goods_exchange_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
