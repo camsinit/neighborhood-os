@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import { transformRequest } from "@/utils/supportRequestTransformer";
@@ -9,6 +8,7 @@ import MutualSupportContent from "./MutualSupportContent";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 import ArchiveDialog from "../ArchiveDialog";
 import SupportRequestDialog from "../support/SupportRequestDialog";
+import { Button } from "@/components/ui/button";
 
 interface MutualSupportContainerProps {
   selectedView?: ViewType;
@@ -83,7 +83,6 @@ const MutualSupportContainer = ({ selectedView }: MutualSupportContainerProps) =
         selectedView={activeView}
       />
 
-      {/* Replaced the onClick ArchiveButton with ArchiveDialog */}
       <Button 
         variant="outline"
         onClick={() => setIsArchiveOpen(true)}
