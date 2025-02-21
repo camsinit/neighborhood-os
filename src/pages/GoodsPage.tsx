@@ -5,14 +5,21 @@ import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
 import { Gift } from "lucide-react";
+import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 
 const GoodsPage = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
-  const { data: requests, isLoading } = useSupportRequests();
+  const { 
+    data: requests, 
+    isLoading,
+    refetch  // Add refetch to refresh the list after archiving
+  } = useSupportRequests();
 
-  // Filter only goods-related requests
-  const goodsRequests = requests?.filter(req => req.category === 'goods') || [];
+  // Filter only active goods-related requests (not archived)
+  const goodsRequests = requests?.filter(req => 
+    req.category === 'goods' && !req.is_archived
+  ) || [];
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#FEC6A1] to-white">
@@ -49,26 +56,36 @@ const GoodsPage = () => {
               {goodsRequests.map(request => (
                 <div 
                   key={request.id}
-                  onClick={() => setSelectedRequest(request)}
-                  className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer relative"
                 >
-                  {request.image_url && (
-                    <div className="aspect-w-16 aspect-h-9 mb-4">
-                      <img 
-                        src={request.image_url} 
-                        alt={request.title}
-                        className="object-cover rounded-md"
-                      />
+                  <div onClick={() => setSelectedRequest(request)}>
+                    {request.image_url && (
+                      <div className="aspect-w-16 aspect-h-9 mb-4">
+                        <img 
+                          src={request.image_url} 
+                          alt={request.title}
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                    )}
+                    <h3 className="font-medium text-lg">{request.title}</h3>
+                    <p className="text-gray-600 mt-1">{request.description}</p>
+                    <div className="mt-2">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {request.request_type === 'offer' ? 'Offering' : 'Needed'}
+                      </span>
                     </div>
-                  )}
-                  <h3 className="font-medium text-lg">{request.title}</h3>
-                  <p className="text-gray-600 mt-1">{request.description}</p>
-                  <div className="mt-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {request.request_type === 'offer' ? 'Offering' : 'Needed'}
-                    </span>
+                  </div>
+                  
+                  {/* Archive Button */}
+                  <div className="absolute top-2 right-2">
+                    <ArchiveButton 
+                      requestId={request.id}
+                      tableName="goods_exchange"
+                      onArchiveComplete={refetch}
+                    />
                   </div>
                 </div>
               ))}

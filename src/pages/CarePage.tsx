@@ -5,6 +5,7 @@ import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
 import { HeartHandshake } from "lucide-react";
+import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 
 const CarePage = () => {
   // State for managing hover effects on buttons
@@ -14,11 +15,14 @@ const CarePage = () => {
   
   const {
     data: requests,
-    isLoading
+    isLoading,
+    refetch  // Add refetch to refresh the list after archiving
   } = useSupportRequests();
 
-  // Filter only care-related requests
-  const careRequests = requests?.filter(req => req.category === 'care') || [];
+  // Filter only active care-related requests (not archived)
+  const careRequests = requests?.filter(req => 
+    req.category === 'care' && !req.is_archived
+  ) || [];
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#FFDEE2] to-white">
@@ -70,16 +74,25 @@ const CarePage = () => {
                     </div>
                   </div>
 
-                  {/* Help Button with Hover Effect */}
-                  <Button
-                    className="min-w-[120px] transition-colors duration-200"
-                    variant={hoveredRequestId === request.id ? "default" : "secondary"}
-                    onMouseEnter={() => setHoveredRequestId(request.id)}
-                    onMouseLeave={() => setHoveredRequestId(null)}
-                    onClick={() => setSelectedRequest(request)}
-                  >
-                    {hoveredRequestId === request.id ? "I can Help!" : "Care Needed"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {/* Archive Button */}
+                    <ArchiveButton 
+                      requestId={request.id}
+                      tableName="care_requests"
+                      onArchiveComplete={refetch}
+                    />
+
+                    {/* Help Button with Hover Effect */}
+                    <Button
+                      className="min-w-[120px] transition-colors duration-200"
+                      variant={hoveredRequestId === request.id ? "default" : "secondary"}
+                      onMouseEnter={() => setHoveredRequestId(request.id)}
+                      onMouseLeave={() => setHoveredRequestId(null)}
+                      onClick={() => setSelectedRequest(request)}
+                    >
+                      {hoveredRequestId === request.id ? "I can Help!" : "Care Needed"}
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
