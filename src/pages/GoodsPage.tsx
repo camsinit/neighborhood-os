@@ -5,22 +5,28 @@ import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { Button } from "@/components/ui/button";
-import { Gift } from "lucide-react";
+import { Gift, Search, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 
 const GoodsPage = () => {
-  // State management for dialogs and request data
+  // State management for dialogs, search, and request data
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { 
     data: requests, 
     isLoading,
     refetch
   } = useSupportRequests();
 
-  // Filter only active goods-related requests (not archived)
+  // Filter goods requests based on search query and archived status
   const goodsRequests = requests?.filter(req => 
-    req.category === 'goods' && !req.is_archived
+    req.category === 'goods' && 
+    !req.is_archived &&
+    (searchQuery === "" || 
+     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
   ) || [];
 
   return (
@@ -41,6 +47,32 @@ const GoodsPage = () => {
 
           {/* Main Content Container - White background */}
           <div className="bg-white rounded-lg p-6">
+            {/* Search and Actions Bar */}
+            <div className="flex items-center justify-between mb-6">
+              {/* Search Bar Section */}
+              <div className="relative w-[280px]">
+                <Input
+                  type="text"
+                  placeholder="Search goods..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setIsAddRequestOpen(true)}
+                  className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Item
+                </Button>
+              </div>
+            </div>
+
             {/* Content Section */}
             {goodsRequests.length === 0 ? (
               <div className="max-w-4xl mx-auto mt-8">
