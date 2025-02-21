@@ -1,97 +1,112 @@
 
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Home, Bell, Calendar, Heart, Gift, Brain, Shield, Settings, Users } from "lucide-react";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import { 
-  Sidebar, 
-  SidebarProvider,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel
-} from "./components/ui/sidebar";
-import Login from "./pages/Login";
-import HomePage from "./pages/HomePage";
-import SafetyPage from "./pages/SafetyPage";
-import CalendarPage from "./pages/CalendarPage";
-import NeighborsPage from "./pages/NeighborsPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import GoodsPage from "./pages/GoodsPage";
-import CarePage from "./pages/CarePage";
-import SkillsPage from "./pages/SkillsPage";
-import SettingsPage from "./pages/SettingsPage";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import HomePage from "@/pages/HomePage";
+import CalendarPage from "@/pages/CalendarPage";
+import SkillsPage from "@/pages/SkillsPage";
+import GoodsPage from "@/pages/GoodsPage";
+import CarePage from "@/pages/CarePage";
+import SafetyPage from "@/pages/SafetyPage";
+import NeighborsPage from "@/pages/NeighborsPage";
+import NotificationsPage from "@/pages/NotificationsPage";
+import Login from "@/pages/Login";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Sidebar from "@/components/layout/Sidebar";
+import { useState, useEffect } from "react";
+import SettingsDialog from "@/components/SettingsDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
 
-// Define navigation items
-const navigationItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: Shield, label: "Safety", path: "/safety" },
-  { icon: Calendar, label: "Calendar", path: "/calendar" },
-  { icon: Users, label: "Neighbors", path: "/neighbors" },
-  { icon: Bell, label: "Notifications", path: "/notifications" },
-  { icon: Gift, label: "Goods", path: "/goods" },
-  { icon: Heart, label: "Care", path: "/care" },
-  { icon: Brain, label: "Skills", path: "/skills" },
-  { icon: Settings, label: "Settings", path: "/settings" }
-];
+const queryClient = new QueryClient();
 
-function App() {
+const Layout = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <SidebarProvider>
-                {/* Important: wrapper div needs w-full to avoid layout issues */}
-                <div className="flex min-h-screen w-full">
-                  <Sidebar>
-                    <SidebarContent>
-                      <SidebarGroup>
-                        <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                          <SidebarMenu>
-                            {navigationItems.map((item) => (
-                              <SidebarMenuItem key={item.path}>
-                                <SidebarMenuButton asChild>
-                                  <Link to={item.path}>
-                                    <item.icon className="h-4 w-4" />
-                                    <span>{item.label}</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </SidebarGroupContent>
-                      </SidebarGroup>
-                    </SidebarContent>
-                  </Sidebar>
-                  <main className="flex-1">
-                    <Routes>
-                      <Route index element={<HomePage />} />
-                      <Route path="safety" element={<SafetyPage />} />
-                      <Route path="calendar" element={<CalendarPage />} />
-                      <Route path="neighbors" element={<NeighborsPage />} />
-                      <Route path="notifications" element={<NotificationsPage />} />
-                      <Route path="goods" element={<GoodsPage />} />
-                      <Route path="care" element={<CarePage />} />
-                      <Route path="skills" element={<SkillsPage />} />
-                      <Route path="settings" element={<SettingsPage />} />
-                    </Routes>
-                  </main>
-                </div>
-              </SidebarProvider>
-            </ProtectedRoute>
-          }
-        >
-        </Route>
-      </Routes>
-    </Router>
+    <div className="min-h-screen flex w-full">
+      <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
+      <div className="flex-1 bg-white">
+        <main>
+          <Outlet />
+        </main>
+      </div>
+      <SettingsDialog 
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
+    </div>
   );
-}
+};
+
+const App = () => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        console.log("[App] Initializing authentication...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("[App] Error getting session:", error);
+        } else {
+          console.log("[App] Initial session state:", { 
+            hasSession: !!session,
+            userId: session?.user?.id 
+          });
+        }
+      } catch (error) {
+        console.error("[App] Unexpected error during initialization:", error);
+      } finally {
+        console.log("[App] Initialization complete");
+        setIsInitializing(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  if (isInitializing) {
+    console.log("[App] Showing loading state while initializing");
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <SessionContextProvider supabaseClient={supabase}>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<HomePage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="skills" element={<SkillsPage />} />
+                <Route path="goods" element={<GoodsPage />} />
+                <Route path="care" element={<CarePage />} />
+                <Route path="safety" element={<SafetyPage />} />
+                <Route path="neighbors" element={<NeighborsPage />} />
+              </Route>
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </SessionContextProvider>
+  );
+};
 
 export default App;
