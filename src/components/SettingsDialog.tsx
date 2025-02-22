@@ -183,7 +183,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   return (
     <>
       <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[calc(96vh)] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[800px] max-h-[calc(96vh)] overflow-hidden flex flex-col">
           <DialogHeader className="flex flex-row items-center justify-between">
             <Button 
               type="submit"
