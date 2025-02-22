@@ -8,10 +8,15 @@ import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
+  onViewUserRequests: () => void; // New prop for viewing user requests
 }
 
 // Component for the search bar and action buttons at the top of the skills page
-const SkillsHeader = ({ showCategories, onViewChange }: SkillsHeaderProps) => {
+const SkillsHeader = ({ 
+  showCategories, 
+  onViewChange,
+  onViewUserRequests 
+}: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
@@ -56,7 +61,7 @@ const SkillsHeader = ({ showCategories, onViewChange }: SkillsHeaderProps) => {
 
         <Button 
           variant="outline" 
-          onClick={() => handleSubmit({}, 'request')}
+          onClick={onViewUserRequests}
           className="bg-white whitespace-nowrap"
         >
           <HelpCircle className="h-4 w-4 mr-2" />

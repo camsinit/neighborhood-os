@@ -10,10 +10,18 @@ const SkillsPage = () => {
   // State to track whether we're showing categories or list view
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+  const [showUserRequests, setShowUserRequests] = useState(false);
 
   // Handle category selection
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);
+    setShowCategories(false);
+    setShowUserRequests(false);
+  };
+
+  // Handle viewing user's requests
+  const handleViewUserRequests = () => {
+    setShowUserRequests(true);
     setShowCategories(false);
   };
 
@@ -38,14 +46,21 @@ const SkillsPage = () => {
             {/* Skills Header with filter and search */}
             <SkillsHeader 
               showCategories={showCategories}
-              onViewChange={() => setShowCategories(!showCategories)}
+              onViewChange={() => {
+                setShowCategories(!showCategories);
+                setShowUserRequests(false);
+              }}
+              onViewUserRequests={handleViewUserRequests}
             />
             
             {/* Conditional rendering based on view state */}
             {showCategories ? (
               <CategoryView onCategoryClick={handleCategoryClick} />
             ) : (
-              <SkillsList selectedCategory={selectedCategory} />
+              <SkillsList 
+                selectedCategory={selectedCategory} 
+                showUserRequestsOnly={showUserRequests}
+              />
             )}
           </div>
         </div>
