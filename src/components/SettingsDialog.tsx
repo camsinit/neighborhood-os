@@ -34,6 +34,7 @@ import { AccountTab } from "./settings/AccountTab";
 import { NeighborTab } from "./settings/NeighborTab";
 import { NotificationsTab } from "./settings/NotificationsTab";
 import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./settings/types";
+import { buttonVariants } from "@/components/ui/button";
 
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const user = useUser();
@@ -260,7 +261,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 setShowUnsavedDialog(false);
                 onOpenChange(false);
               }}
-              variant="destructive"
+              className={buttonVariants({ variant: "destructive" })}
             >
               Leave without saving
             </AlertDialogAction>
