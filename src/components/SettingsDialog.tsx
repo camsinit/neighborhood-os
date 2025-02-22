@@ -160,18 +160,18 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs defaultValue="profile" className="w-full flex-1">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4 overflow-y-auto h-[calc(80vh-12rem)] px-1">
               <TabsContent value="profile">
                 <ProfileTab form={form} />
               </TabsContent>
@@ -181,7 +181,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               <TabsContent value="notifications">
                 <NotificationsTab form={form} />
               </TabsContent>
-              <div className="flex justify-between">
+              <div className="flex justify-between sticky bottom-0 bg-white py-2">
                 <Button 
                   type="button" 
                   variant="destructive" 
