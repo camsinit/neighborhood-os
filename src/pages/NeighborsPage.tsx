@@ -39,7 +39,7 @@ const NeighborsPage = () => {
               </div>
             </div>
 
-            {/* Pass search query to UserDirectory */}
+            {/* User Directory Component */}
             <UserDirectory searchQuery={searchQuery} />
           </div>
         </div>

@@ -11,7 +11,7 @@ const CalendarPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
           
           {/* Description Box */}
-          <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mt-2 mb-6">
+          <div className="bg-white rounded-lg p-4 mt-2 mb-6">
             <p className="text-gray-700 text-sm">
               Stay connected with your community through local events. View upcoming gatherings, 
               create new events, and join your neighbors in building stronger connections.
@@ -19,7 +19,9 @@ const CalendarPage = () => {
           </div>
 
           {/* Calendar Component */}
-          <CommunityCalendar />
+          <div className="bg-white rounded-lg p-6">
+            <CommunityCalendar />
+          </div>
         </div>
       </div>
     </div>

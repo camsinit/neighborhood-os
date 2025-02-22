@@ -8,19 +8,17 @@ import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 
 const CarePage = () => {
-  // State for managing hover effects, dialogs, and search
   const [hoveredRequestId, setHoveredRequestId] = useState<string | null>(null);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const {
     data: requests,
     isLoading,
     refetch
   } = useSupportRequests();
 
-  // Filter care requests based on search query and archived status
   const careRequests = requests?.filter(req => 
     req.category === 'care' && 
     !req.is_archived &&
@@ -33,10 +31,8 @@ const CarePage = () => {
     <div className="min-h-full w-full bg-gradient-to-b from-[#FFDEE2] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          {/* Page Title */}
           <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
           
-          {/* Description Box */}
           <div className="bg-white rounded-lg p-4 mt-2 mb-6">
             <p className="text-gray-700 text-sm">
               Connect with neighbors for mutual care and support. Whether offering or seeking 
@@ -44,11 +40,8 @@ const CarePage = () => {
             </p>
           </div>
 
-          {/* Main Content Container */}
           <div className="bg-white rounded-lg p-6">
-            {/* Search and Actions Bar */}
             <div className="flex items-center justify-between mb-6">
-              {/* Search Bar Section */}
               <div className="relative w-[280px]">
                 <Input
                   type="text"
@@ -60,11 +53,10 @@ const CarePage = () => {
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               </div>
 
-              {/* Action Button */}
               <div className="flex gap-2">
                 <Button 
                   onClick={() => setIsAddRequestOpen(true)}
-                  className="bg-[#FFDEE2] hover:bg-[#FFDEE2]/90"
+                  className="bg-[#FFDEE2] hover:bg-[#FFDEE2]/90 text-gray-900"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Add Request
@@ -72,7 +64,6 @@ const CarePage = () => {
               </div>
             </div>
 
-            {/* Care Support Content */}
             {careRequests.length === 0 ? (
               <div className="max-w-4xl mx-auto mt-8">
                 <Button 
@@ -94,7 +85,6 @@ const CarePage = () => {
                     key={request.id}
                     className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow flex justify-between items-start"
                   >
-                    {/* Request Content */}
                     <div className="flex-grow cursor-pointer" onClick={() => setSelectedRequest(request)}>
                       <h3 className="font-medium text-lg">{request.title}</h3>
                       <p className="text-gray-600 mt-1">{request.description}</p>
@@ -108,14 +98,12 @@ const CarePage = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* Archive Button */}
                       <ArchiveButton 
                         requestId={request.id}
                         tableName="care_requests"
                         onArchiveComplete={refetch}
                       />
 
-                      {/* Help Button with Hover Effect */}
                       <Button
                         className="min-w-[120px] transition-colors duration-200"
                         variant={hoveredRequestId === request.id ? "default" : "secondary"}
@@ -134,7 +122,6 @@ const CarePage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}

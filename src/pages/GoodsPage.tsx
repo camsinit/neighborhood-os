@@ -1,5 +1,3 @@
-
-// Add thorough comments to explain the structure and styling choices
 import { useState } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -10,17 +8,16 @@ import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 
 const GoodsPage = () => {
-  // State management for dialogs, search, and request data
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
   const { 
     data: requests, 
     isLoading,
     refetch
   } = useSupportRequests();
 
-  // Filter goods requests based on search query and archived status
   const goodsRequests = requests?.filter(req => 
     req.category === 'goods' && 
     !req.is_archived &&
@@ -32,12 +29,9 @@ const GoodsPage = () => {
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#FEC6A1] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Standardized Header Section */}
         <div className="py-8">
-          {/* Page Title - Using exact page name */}
           <h2 className="text-2xl font-bold text-gray-900">Goods</h2>
           
-          {/* Description Box - Solid white background */}
           <div className="bg-white rounded-lg p-4 mt-2 mb-6">
             <p className="text-gray-700 text-sm">
               Share and request items within your community. From tools to furniture, 
@@ -45,11 +39,8 @@ const GoodsPage = () => {
             </p>
           </div>
 
-          {/* Main Content Container - White background */}
           <div className="bg-white rounded-lg p-6">
-            {/* Search and Actions Bar */}
             <div className="flex items-center justify-between mb-6">
-              {/* Search Bar Section */}
               <div className="relative w-[280px]">
                 <Input
                   type="text"
@@ -61,11 +52,10 @@ const GoodsPage = () => {
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               </div>
 
-              {/* Action Buttons */}
               <div className="flex gap-2">
                 <Button 
                   onClick={() => setIsAddRequestOpen(true)}
-                  className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90"
+                  className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Add Item
@@ -73,7 +63,6 @@ const GoodsPage = () => {
               </div>
             </div>
 
-            {/* Content Section */}
             {goodsRequests.length === 0 ? (
               <div className="max-w-4xl mx-auto mt-8">
                 <Button 
@@ -116,7 +105,6 @@ const GoodsPage = () => {
                       </div>
                     </div>
                     
-                    {/* Archive Button */}
                     <div className="absolute top-2 right-2">
                       <ArchiveButton 
                         requestId={request.id}
@@ -132,7 +120,6 @@ const GoodsPage = () => {
         </div>
       </div>
 
-      {/* Dialogs */}
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
