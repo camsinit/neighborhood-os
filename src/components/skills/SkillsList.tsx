@@ -1,57 +1,81 @@
 
-import MutualSupportContent from "@/components/mutual-support/MutualSupportContent";
-import { SkillCategory } from "@/components/mutual-support/types";
-
-interface SkillsListProps {
-  isLoading: boolean;
-  needs: any[];
-  offers: any[];
-  onItemClick: (item: any) => void;
-  onAddRequest: (type: "need" | "offer") => void;
-  selectedCategory: SkillCategory | null;
-}
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skill } from './types/skillTypes';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Component to display the list of skills
-const SkillsList = ({ 
-  isLoading, 
-  needs, 
-  offers, 
-  onItemClick, 
-  onAddRequest,
-  selectedCategory 
-}: SkillsListProps) => {
-  // Show pending requests section only if we're viewing a specific category
-  const pendingRequests = selectedCategory ? needs : [];
+const SkillsList = () => {
+  // State for selected category if needed
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Query to fetch skills data
+  const { data: skills, isLoading } = useQuery({
+    queryKey: ['skills-exchange'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('skills_exchange')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Skill[];
+    }
+  });
+
+  // Separate skills into needs and offers
+  const needs = skills?.filter(skill => skill.request_type === 'need') || [];
+  const offers = skills?.filter(skill => skill.request_type === 'offer') || [];
+
+  if (isLoading) {
+    return <div className="space-y-4">
+      {[1, 2, 3].map(i => (
+        <Skeleton key={i} className="h-24 w-full" />
+      ))}
+    </div>;
+  }
 
   return (
-    <>
-      <MutualSupportContent 
-        isLoading={isLoading}
-        needs={needs}
-        offers={offers}
-        onItemClick={item => onItemClick(item.originalRequest)}
-        onAddRequest={onAddRequest}
-        selectedView="skills"
-      />
-      
-      {pendingRequests.length > 0 && (
-        <div className="px-8 py-6 mt-8 border-t">
-          <h3 className="text-lg font-semibold mb-4">Open Skill Requests</h3>
-          <div className="space-y-4">
-            {pendingRequests.map(request => (
-              <div 
-                key={request.originalRequest.id} 
-                className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer" 
-                onClick={() => onItemClick(request.originalRequest)}
-              >
-                <h4 className="font-medium text-gray-900">{request.title}</h4>
-                <p className="text-sm text-gray-600 mt-1">{request.description}</p>
-              </div>
-            ))}
+    <div className="space-y-6">
+      {/* Offers Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Skills Offered</h3>
+        {offers.map(skill => (
+          <div 
+            key={skill.id}
+            className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
+          >
+            <h4 className="font-medium text-gray-900">{skill.title}</h4>
+            <p className="text-sm text-gray-600 mt-1">{skill.description}</p>
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {skill.skill_category}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        ))}
+      </div>
+
+      {/* Needs Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Skills Needed</h3>
+        {needs.map(skill => (
+          <div 
+            key={skill.id}
+            className="p-4 rounded-lg border border-gray-200 hover:border-gray-300 cursor-pointer"
+          >
+            <h4 className="font-medium text-gray-900">{skill.title}</h4>
+            <p className="text-sm text-gray-600 mt-1">{skill.description}</p>
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                {skill.skill_category}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 

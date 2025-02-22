@@ -1,24 +1,19 @@
 
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle, List } from "lucide-react";
-
-interface SkillsHeaderProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  onAddRequest: (type: "need" | "offer") => void;
-  onViewRequests: () => void;
-  isViewingRequests?: boolean;
-}
+import { Search, Plus, HelpCircle } from "lucide-react";
+import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 
 // Component for the search bar and action buttons at the top of the skills page
-const SkillsHeader = ({ 
-  searchQuery, 
-  onSearchChange, 
-  onAddRequest,
-  onViewRequests,
-  isViewingRequests = false
-}: SkillsHeaderProps) => {
+const SkillsHeader = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { handleSubmit } = useSkillsExchange({
+    onSuccess: () => {
+      // Handle success
+    }
+  });
+
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap">
       {/* Search input with icon */}
@@ -29,7 +24,7 @@ const SkillsHeader = ({
           placeholder="Search for skills..." 
           className="pl-10" 
           value={searchQuery} 
-          onChange={e => onSearchChange(e.target.value)} 
+          onChange={e => setSearchQuery(e.target.value)} 
         />
       </div>
       
@@ -38,7 +33,7 @@ const SkillsHeader = ({
         {/* Offer Skill button */}
         <Button 
           variant="outline"
-          onClick={() => onAddRequest("offer")} 
+          onClick={() => handleSubmit({}, 'offer')} 
           className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -48,25 +43,11 @@ const SkillsHeader = ({
         {/* Request Skill button */}
         <Button 
           variant="outline" 
-          onClick={() => onAddRequest("need")}
+          onClick={() => handleSubmit({}, 'request')}
           className="bg-white whitespace-nowrap"
         >
           <HelpCircle className="h-4 w-4 mr-2" />
           Request Skill
-        </Button>
-
-        {/* View Skill Requests button - changes color when active */}
-        <Button 
-          variant="outline" 
-          onClick={onViewRequests}
-          className={`whitespace-nowrap ${
-            isViewingRequests 
-              ? "bg-sky-50 text-sky-700 hover:bg-sky-100" 
-              : "bg-white hover:bg-gray-50"
-          }`}
-        >
-          <List className="h-4 w-4 mr-2" />
-          View Skill Requests
         </Button>
       </div>
     </div>

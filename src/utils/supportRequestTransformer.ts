@@ -1,15 +1,10 @@
 
-import { SupportItem, SupportRequestFromDB, SkillCategory, CareCategory } from "@/components/mutual-support/types";
+import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 
 const isValidSkillCategory = (category: string | null | undefined): category is SkillCategory => {
-  const validCategories = ['technology', 'creative', 'trade', 'education', 'wellness'];
-  return !!category && validCategories.includes(category);
-};
-
-const isValidCareCategory = (category: string | null | undefined): category is CareCategory => {
-  const validCategories = ['transportation', 'household', 'medical', 'childcare', 'eldercare', 'petcare', 'mealprep', 'general'];
-  return !!category && validCategories.includes(category);
+  const validCategories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
+  return !!category && validCategories.includes(category as SkillCategory);
 };
 
 const getTimeAgo = (date: Date): string => {
@@ -30,7 +25,20 @@ const getTimeAgo = (date: Date): string => {
   }
 };
 
-export const transformRequest = (request: any): SupportItem => {
+export interface TransformedSkill {
+  type: "Needs Help" | "Offering Help";
+  title: string;
+  description: string;
+  timeAgo: string;
+  borderColor: string;
+  tagColor: string;
+  tagBg: string;
+  requestType: string;
+  skillCategory?: SkillCategory;
+  originalRequest: any;
+}
+
+export const transformSkill = (request: any): TransformedSkill => {
   const type = request.request_type === 'need' ? "Needs Help" : "Offering Help";
   const colors = type === "Needs Help" 
     ? {
@@ -49,11 +57,6 @@ export const transformRequest = (request: any): SupportItem => {
     skillCategory = request.skill_category;
   }
 
-  let careCategory: CareCategory | undefined;
-  if (isValidCareCategory(request.care_category)) {
-    careCategory = request.care_category;
-  }
-
   return {
     type,
     title: request.title,
@@ -63,12 +66,7 @@ export const transformRequest = (request: any): SupportItem => {
     tagColor: colors.tagColor,
     tagBg: colors.tagBg,
     requestType: request.request_type,
-    category: request.category,
-    supportType: request.support_type || 'immediate',
-    imageUrl: request.image_url,
     skillCategory,
-    careCategory,
     originalRequest: request,
-    profiles: request.profiles
   };
 };
