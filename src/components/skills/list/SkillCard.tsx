@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowUpRight } from 'lucide-react';
 import { Skill } from '../types/skillTypes';
+import { useState } from 'react';
+import { FinalizeDateDialog } from '../FinalizeDateDialog';
 
 interface SkillCardProps {
   skill: Skill & { 
@@ -17,6 +19,8 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ skill, onContribute, onRequest, type }: SkillCardProps) => {
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+
   if (type === 'request') {
     return (
       <div 
@@ -31,16 +35,35 @@ const SkillCard = ({ skill, onContribute, onRequest, type }: SkillCardProps) => 
             </Avatar>
             <h4 className="font-medium text-gray-900 line-clamp-2">{skill.title}</h4>
           </div>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              onContribute?.();
-            }}
-          >
-            Contribute Skill
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                onContribute?.();
+              }}
+            >
+              Contribute Skill
+            </Button>
+            {skill.status === 'pending_scheduling' && (
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => setIsScheduleDialogOpen(true)}
+              >
+                View Schedule
+              </Button>
+            )}
+          </div>
+
+          {isScheduleDialogOpen && (
+            <FinalizeDateDialog
+              sessionId={skill.id}
+              open={isScheduleDialogOpen}
+              onOpenChange={setIsScheduleDialogOpen}
+            />
+          )}
         </div>
       </div>
     );
