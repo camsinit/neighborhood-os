@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
@@ -9,7 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 
-export const UserDirectory = () => {
+interface UserDirectoryProps {
+  searchQuery?: string;
+}
+
+export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
 
@@ -74,6 +77,14 @@ export const UserDirectory = () => {
     }
   });
 
+  // Filter users based on search query
+  const filteredUsers = users?.filter(user => 
+    searchQuery === "" || 
+    user.profiles?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.profiles?.bio?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -82,7 +93,7 @@ export const UserDirectory = () => {
     <div className="p-6">
       {/* Grid of neighbor cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {users?.map(user => (
+        {filteredUsers?.map(user => (
           <Card 
             key={user.id} 
             className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
