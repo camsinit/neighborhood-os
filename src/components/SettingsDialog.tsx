@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +96,14 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         variant: "destructive",
       });
     }
+  };
+
+  const handleSaveAndClose = async () => {
+    const success = await form.handleSubmit(async (values) => {
+      await onSubmit(values);
+      setShowUnsavedDialog(false);
+      onOpenChange(false);
+    })();
   };
 
   useEffect(() => {
@@ -244,20 +251,24 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           <AlertDialogHeader>
             <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes. Are you sure you want to leave?
+              You have unsaved changes. Do you want to save before leaving?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
-              Cancel
-            </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setShowUnsavedDialog(false);
                 onOpenChange(false);
               }}
+              variant="destructive"
             >
-              Leave
+              Leave without saving
+            </AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleSaveAndClose}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Save and leave
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
