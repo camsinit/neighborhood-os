@@ -510,6 +510,8 @@ export type Database = {
           event_id: string | null
           expires_at: string
           id: string
+          location_details: string | null
+          location_preference: string | null
           provider_id: string
           requester_availability: Json
           requester_id: string
@@ -522,6 +524,8 @@ export type Database = {
           event_id?: string | null
           expires_at?: string
           id?: string
+          location_details?: string | null
+          location_preference?: string | null
           provider_id: string
           requester_availability: Json
           requester_id: string
@@ -534,6 +538,8 @@ export type Database = {
           event_id?: string | null
           expires_at?: string
           id?: string
+          location_details?: string | null
+          location_preference?: string | null
           provider_id?: string
           requester_availability?: Json
           requester_id?: string
@@ -740,6 +746,7 @@ export type Database = {
         | "respond"
         | "share"
         | "view"
+        | "schedule"
       notification_type:
         | "event"
         | "safety"
@@ -753,6 +760,7 @@ export type Database = {
         | "confirmed"
         | "expired"
         | "completed"
+        | "in_progress"
       user_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {

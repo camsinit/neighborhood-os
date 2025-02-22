@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +8,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowUpRight } from 'lucide-react';
+import SkillContributionDialog from './SkillContributionDialog';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -16,6 +18,11 @@ const SkillsList = ({
   selectedCategory
 }: SkillsListProps) => {
   const user = useUser();
+  const [selectedSkill, setSelectedSkill] = useState<{
+    id: string;
+    title: string;
+    requesterId: string;
+  } | null>(null);
 
   const {
     data: skills,
@@ -75,7 +82,11 @@ const SkillsList = ({
                     className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
-                      /* Handle contribute skill */
+                      setSelectedSkill({
+                        id: request.id,
+                        title: request.title,
+                        requesterId: request.user_id
+                      });
                     }}
                   >
                     Contribute Skill
@@ -107,6 +118,16 @@ const SkillsList = ({
           </div>
         ))}
       </div>
+
+      {selectedSkill && (
+        <SkillContributionDialog
+          open={!!selectedSkill}
+          onOpenChange={(open) => !open && setSelectedSkill(null)}
+          skillRequestId={selectedSkill.id}
+          requestTitle={selectedSkill.title}
+          requesterId={selectedSkill.requesterId}
+        />
+      )}
     </div>
   );
 };
