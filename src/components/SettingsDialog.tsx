@@ -53,6 +53,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       timezone: "UTC",
       language: "en",
       theme: "light",
+      skills: [],
       notification_preferences: {
         involved_only: true,
         page_specific: {
@@ -66,6 +67,10 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         all_activity: false,
         new_neighbors: true
       },
+      email_visible: false,
+      phone_visible: false,
+      address_visible: false,
+      needs_visible: false,
     },
   });
 
@@ -134,7 +139,12 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           timezone: data.timezone || "UTC",
           language: data.language || "en",
           theme: data.theme || "light",
+          skills: data.skills || [],
           notification_preferences: notificationPrefs,
+          email_visible: data.email_visible || false,
+          phone_visible: data.phone_visible || false,
+          address_visible: data.address_visible || false,
+          needs_visible: data.needs_visible || false,
         };
 
         setInitialValues(values);
@@ -159,7 +169,12 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
           timezone: values.timezone,
           language: values.language,
           theme: values.theme,
+          skills: values.skills,
           notification_preferences: values.notification_preferences,
+          email_visible: values.email_visible,
+          phone_visible: values.phone_visible,
+          address_visible: values.address_visible,
+          needs_visible: values.needs_visible,
         })
         .eq("id", user.id);
 

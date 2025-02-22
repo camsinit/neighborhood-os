@@ -7,6 +7,7 @@ export const profileFormSchema = z.object({
   timezone: z.string(),
   language: z.string(),
   theme: z.string(),
+  skills: z.array(z.string()).default([]),
   notification_preferences: z.object({
     involved_only: z.boolean(),
     page_specific: z.object({
@@ -20,7 +21,7 @@ export const profileFormSchema = z.object({
     all_activity: z.boolean(),
     new_neighbors: z.boolean()
   }),
-  // New privacy settings
+  // Privacy settings
   email_visible: z.boolean().default(false),
   phone_visible: z.boolean().default(false),
   address_visible: z.boolean().default(false),
