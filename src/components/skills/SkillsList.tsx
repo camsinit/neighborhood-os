@@ -2,23 +2,29 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Skill } from './types/skillTypes';
+import { Skill, SkillCategory } from './types/skillTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Component to display the list of skills
-const SkillsList = () => {
-  // State for selected category if needed
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+interface SkillsListProps {
+  selectedCategory: SkillCategory | null;
+}
 
+// Component to display the list of skills
+const SkillsList = ({ selectedCategory }: SkillsListProps) => {
   // Query to fetch skills data
   const { data: skills, isLoading } = useQuery({
-    queryKey: ['skills-exchange'],
+    queryKey: ['skills-exchange', selectedCategory],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('skills_exchange')
         .select('*')
         .order('created_at', { ascending: false });
       
+      if (selectedCategory) {
+        query = query.eq('skill_category', selectedCategory);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as Skill[];
     }

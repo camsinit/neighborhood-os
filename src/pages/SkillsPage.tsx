@@ -1,8 +1,22 @@
+
+import { useState } from "react";
 import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
+import CategoryView from "@/components/skills/CategoryView";
+import { SkillCategory } from "@/components/skills/types/skillTypes";
 
 // Main Skills page component that displays skills exchange functionality
 const SkillsPage = () => {
+  // State to track whether we're showing categories or list view
+  const [showCategories, setShowCategories] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+
+  // Handle category selection
+  const handleCategoryClick = (category: SkillCategory) => {
+    setSelectedCategory(category);
+    setShowCategories(false);
+  };
+
   return (
     // Main container with gradient background
     <div className="min-h-full w-full bg-gradient-to-b from-[#E8F5FF] to-white">
@@ -20,16 +34,24 @@ const SkillsPage = () => {
           </div>
 
           {/* Main Content Container */}
-          <div className="bg-white rounded-lg p-6 px-[15px] py-0">
+          <div className="bg-white rounded-lg p-6">
             {/* Skills Header with filter and search */}
-            <SkillsHeader />
+            <SkillsHeader 
+              showCategories={showCategories}
+              onViewChange={() => setShowCategories(!showCategories)}
+            />
             
-            {/* Skills List showing all skills */}
-            <SkillsList />
+            {/* Conditional rendering based on view state */}
+            {showCategories ? (
+              <CategoryView onCategoryClick={handleCategoryClick} />
+            ) : (
+              <SkillsList selectedCategory={selectedCategory} />
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default SkillsPage;

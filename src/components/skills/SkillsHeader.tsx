@@ -2,11 +2,16 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle } from "lucide-react";
+import { Search, Plus, HelpCircle, LayoutGrid, List } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 
+interface SkillsHeaderProps {
+  showCategories: boolean;
+  onViewChange: () => void;
+}
+
 // Component for the search bar and action buttons at the top of the skills page
-const SkillsHeader = () => {
+const SkillsHeader = ({ showCategories, onViewChange }: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
@@ -15,22 +20,31 @@ const SkillsHeader = () => {
   });
 
   return (
-    <div className="flex items-center justify-between py-4 flex-nowrap">
-      {/* Search input with icon */}
-      <div className="relative w-[200px] flex-shrink-0">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-        <Input 
-          type="search" 
-          placeholder="Search for skills..." 
-          className="pl-10" 
-          value={searchQuery} 
-          onChange={e => setSearchQuery(e.target.value)} 
-        />
+    <div className="flex items-center justify-between py-4 flex-nowrap gap-4">
+      {/* Left side: Search and view toggle */}
+      <div className="flex items-center gap-4">
+        <div className="relative w-[200px] flex-shrink-0">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input 
+            type="search" 
+            placeholder="Search for skills..." 
+            className="pl-10" 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+          />
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onViewChange}
+          className="flex-shrink-0"
+        >
+          {showCategories ? <List className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
+        </Button>
       </div>
       
-      {/* Action buttons */}
+      {/* Right side: Action buttons */}
       <div className="flex items-center gap-3 flex-shrink-0">
-        {/* Offer Skill button */}
         <Button 
           variant="outline"
           onClick={() => handleSubmit({}, 'offer')} 
@@ -40,7 +54,6 @@ const SkillsHeader = () => {
           Offer Skill
         </Button>
 
-        {/* Request Skill button */}
         <Button 
           variant="outline" 
           onClick={() => handleSubmit({}, 'request')}
