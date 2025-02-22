@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -10,8 +9,8 @@ import DialogWrapper from '../dialog/DialogWrapper';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { addDays, format } from 'date-fns';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
-// Define time of day options
 const TIME_OPTIONS = [
   { id: 'morning', label: 'Morning (9am-12pm)' },
   { id: 'afternoon', label: 'Afternoon (1pm-5pm)' },
@@ -38,32 +37,27 @@ const SkillContributionDialog = ({
   requestTitle,
   requesterId
 }: SkillContributionDialogProps) => {
-  // State for selected dates and their time preferences
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
   const [location, setLocation] = useState<'contributor_home' | 'requester_home' | 'other'>('contributor_home');
   const [locationDetails, setLocationDetails] = useState('');
   const [addToProfile, setAddToProfile] = useState(false);
   const { toast } = useToast();
 
-  // Calendar disabled dates (past dates)
   const disabledDays = {
     before: new Date(),
-    after: addDays(new Date(), 90) // Limit to 90 days in the future
+    after: addDays(new Date(), 90)
   };
 
-  // Handle date selection
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
 
     const formattedDate = format(date, 'yyyy-MM-dd');
     
-    // Check if date is already selected
     const existingSlotIndex = selectedTimeSlots.findIndex(
       slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
     );
 
     if (existingSlotIndex === -1) {
-      // Add new date if we have less than 3 dates
       if (selectedTimeSlots.length < 3) {
         setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
       } else {
@@ -74,12 +68,10 @@ const SkillContributionDialog = ({
         });
       }
     } else {
-      // Remove date if already selected
       setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
     }
   };
 
-  // Handle time preference toggle for a specific date
   const handleTimePreference = (date: Date, timeId: string) => {
     setSelectedTimeSlots(slots =>
       slots.map(slot => {
@@ -94,9 +86,7 @@ const SkillContributionDialog = ({
     );
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
-    // Validate minimum requirements
     if (selectedTimeSlots.length < 3) {
       toast({
         title: "More dates needed",
@@ -116,7 +106,6 @@ const SkillContributionDialog = ({
     }
 
     try {
-      // Create skill session
       const { data: session, error: sessionError } = await supabase
         .from('skill_sessions')
         .insert({
@@ -126,13 +115,13 @@ const SkillContributionDialog = ({
           location_preference: location,
           location_details: location === 'other' ? locationDetails : null,
           status: 'pending_provider_times',
+          requester_availability: {},
         })
         .select()
         .single();
 
       if (sessionError) throw sessionError;
 
-      // Insert time slots
       const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
         slot.preferences.map(preference => ({
           session_id: session.id,
@@ -167,102 +156,99 @@ const SkillContributionDialog = ({
   };
 
   return (
-    <DialogWrapper
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Contribute Your Skill"
-    >
-      <div className="space-y-6 py-4">
-        {/* Request Details */}
-        <div className="text-center mb-6">
-          <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
-          <p className="text-lg font-semibold text-gray-900">{requestTitle}</p>
-        </div>
-
-        {/* Calendar Section */}
-        <div className="space-y-2">
-          <Label>Select 3 dates that work for you</Label>
-          <div className="border rounded-lg p-4">
-            <Calendar
-              mode="single"
-              selected={undefined}
-              onSelect={handleDateSelect}
-              disabled={disabledDays}
-              className="mx-auto"
-            />
+    <TooltipProvider>
+      <DialogWrapper
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Contribute Your Skill"
+      >
+        <div className="space-y-6 py-4">
+          <div className="text-center mb-6">
+            <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
+            <p className="text-lg font-semibold text-gray-900">{requestTitle}</p>
           </div>
-        </div>
 
-        {/* Selected Dates and Time Preferences */}
-        <div className="space-y-4">
-          {selectedTimeSlots.map((slot, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <Label>{format(slot.date, 'EEEE, MMMM d, yyyy')}</Label>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedTimeSlots(slots => 
-                    slots.filter((_, i) => i !== index)
-                  )}
-                >
-                  Remove
-                </Button>
+          <div className="space-y-2">
+            <Label>Select 3 dates that work for you</Label>
+            <div className="border rounded-lg p-4">
+              <Calendar
+                mode="single"
+                selected={undefined}
+                onSelect={handleDateSelect}
+                disabled={disabledDays}
+                className="mx-auto"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {selectedTimeSlots.map((slot, index) => (
+              <div key={index} className="border rounded-lg p-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>{format(slot.date, 'EEEE, MMMM d, yyyy')}</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedTimeSlots(slots => 
+                      slots.filter((_, i) => i !== index)
+                    )}
+                  >
+                    Remove
+                  </Button>
+                </div>
+                <div className="grid gap-2">
+                  {TIME_OPTIONS.map((time) => (
+                    <div key={time.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`${index}-${time.id}`}
+                        checked={slot.preferences.includes(time.id)}
+                        onCheckedChange={() => handleTimePreference(slot.date, time.id)}
+                      />
+                      <Label htmlFor={`${index}-${time.id}`}>{time.label}</Label>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="grid gap-2">
-                {TIME_OPTIONS.map((time) => (
-                  <div key={time.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${index}-${time.id}`}
-                      checked={slot.preferences.includes(time.id)}
-                      onCheckedChange={() => handleTimePreference(slot.date, time.id)}
-                    />
-                    <Label htmlFor={`${index}-${time.id}`}>{time.label}</Label>
-                  </div>
-                ))}
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Where would you like to teach?</Label>
+            <RadioGroup value={location} onValueChange={(value: any) => setLocation(value)}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="contributor_home" id="contributor_home" />
+                <Label htmlFor="contributor_home">At my house</Label>
               </div>
-            </div>
-          ))}
-        </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="requester_home" id="requester_home" />
+                <Label htmlFor="requester_home">At their house</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="other" id="other" />
+                <Label htmlFor="other">Other location</Label>
+              </div>
+            </RadioGroup>
+          </div>
 
-        {/* Location Preference */}
-        <div className="space-y-2">
-          <Label>Where would you like to teach?</Label>
-          <RadioGroup value={location} onValueChange={(value: any) => setLocation(value)}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="contributor_home" id="contributor_home" />
-              <Label htmlFor="contributor_home">At my house</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="requester_home" id="requester_home" />
-              <Label htmlFor="requester_home">At their house</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="other" id="other" />
-              <Label htmlFor="other">Other location</Label>
-            </div>
-          </RadioGroup>
-        </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="add-to-profile"
+              checked={addToProfile}
+              onCheckedChange={(checked) => setAddToProfile(checked as boolean)}
+            />
+            <Label htmlFor="add-to-profile">
+              Add this skill to my profile for future requests
+            </Label>
+          </div>
 
-        {/* Add to Profile Option */}
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="add-to-profile"
-            checked={addToProfile}
-            onCheckedChange={(checked) => setAddToProfile(checked as boolean)}
-          />
-          <Label htmlFor="add-to-profile">
-            Add this skill to my profile for future requests
-          </Label>
+          <DialogFooter>
+            <Button onClick={handleSubmit}>
+              Offer to Contribute
+            </Button>
+          </DialogFooter>
         </div>
-
-        <DialogFooter>
-          <Button onClick={handleSubmit}>
-            Offer to Contribute
-          </Button>
-        </DialogFooter>
-      </div>
-    </DialogWrapper>
+      </DialogWrapper>
+    </TooltipProvider>
   );
 };
 
