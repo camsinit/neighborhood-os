@@ -1,4 +1,3 @@
-
 import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 
@@ -21,7 +20,7 @@ const SkillsPage = () => {
           </div>
 
           {/* Main Content Container */}
-          <div className="bg-white rounded-lg p-6">
+          <div className="bg-white rounded-lg p-6 px-[15px] py-0">
             {/* Skills Header with filter and search */}
             <SkillsHeader />
             
@@ -33,5 +32,4 @@ const SkillsPage = () => {
     </div>
   );
 };
-
 export default SkillsPage;
