@@ -11,19 +11,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
+import { useState } from "react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import { useToast } from "@/hooks/use-toast";
-import { SkillCategory } from "@/components/mutual-support/types";
-import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { SkillCategory } from "./types/skillTypes";
+
+// Types for the form
+interface SkillFormProps {
+  onClose: () => void;
+  mode: 'offer' | 'request';
+}
+
+type TimePreference = 'morning' | 'afternoon' | 'evening';
+
+interface SkillFormData {
+  title?: string;
+  description?: string;
+  category?: SkillCategory;
+  availability?: 'weekdays' | 'weekends' | 'both';
+  timePreference?: TimePreference[];
+}
 
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   // State to store form data
-  const [formData, setFormData] = useState<Partial<SkillFormData>>({
-    category: 'technology' as SkillCategory,
+  const [formData, setFormData] = useState<SkillFormData>({
+    category: 'technology',
     timePreference: [],
   });
   
