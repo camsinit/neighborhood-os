@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -182,7 +183,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   return (
     <>
       <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[600px] max-h-[calc(96vh)] overflow-hidden flex flex-col">
           <DialogHeader className="flex flex-row items-center justify-between">
             <Button 
               type="submit"
@@ -199,7 +200,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4 overflow-y-auto h-[calc(80vh-12rem)] px-1">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4 overflow-y-auto h-[calc(96vh-12rem)] px-1">
                 <TabsContent value="profile">
                   <ProfileTab form={form} />
                 </TabsContent>
