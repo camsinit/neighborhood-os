@@ -8,37 +8,37 @@ const categoryInfo = {
   creative: {
     icon: Palette,
     description: "Share artistic talents, music lessons, writing skills, or crafting expertise",
-    color: "bg-[#FDE1D3]",
+    borderColor: "border-[#FDE1D3]",
     iconColor: "text-[#F97316]",
-    hoverColor: "hover:bg-[#FDE1D3]/80"
+    hoverColor: "hover:bg-[#FDE1D3]/10"
   },
   trade: {
     icon: Wrench,
     description: "Exchange practical skills like repairs, gardening, or home improvement",
-    color: "bg-[#E5DEFF]",
+    borderColor: "border-[#E5DEFF]",
     iconColor: "text-[#8B5CF6]",
-    hoverColor: "hover:bg-[#E5DEFF]/80"
+    hoverColor: "hover:bg-[#E5DEFF]/10"
   },
   technology: {
     icon: BookOpen,
     description: "Help with computers, software, digital tools, or online platforms",
-    color: "bg-[#D3E4FD]",
+    borderColor: "border-[#D3E4FD]",
     iconColor: "text-[#0EA5E9]",
-    hoverColor: "hover:bg-[#D3E4FD]/80"
+    hoverColor: "hover:bg-[#D3E4FD]/10"
   },
   education: {
     icon: GraduationCap,
     description: "Offer tutoring, language lessons, or academic support",
-    color: "bg-[#F2FCE2]",
+    borderColor: "border-[#F2FCE2]",
     iconColor: "text-emerald-600",
-    hoverColor: "hover:bg-[#F2FCE2]/80"
+    hoverColor: "hover:bg-[#F2FCE2]/10"
   },
   wellness: {
     icon: Heart,
     description: "Share fitness tips, nutrition advice, or wellness practices",
-    color: "bg-[#FFDEE2]",
+    borderColor: "border-[#FFDEE2]",
     iconColor: "text-[#D946EF]",
-    hoverColor: "hover:bg-[#FFDEE2]/80"
+    hoverColor: "hover:bg-[#FFDEE2]/10"
   }
 } as const;
 
@@ -49,22 +49,24 @@ interface CategoryViewProps {
 // Component to display skill categories in a grid
 const CategoryView = ({ onCategoryClick }: CategoryViewProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-2">
       {(Object.keys(categoryInfo) as SkillCategory[]).map((category) => {
-        const { icon: Icon, description, color, iconColor, hoverColor } = categoryInfo[category];
+        const { icon: Icon, description, borderColor, iconColor, hoverColor } = categoryInfo[category];
         return (
           <Card 
             key={category}
             onClick={() => onCategoryClick(category)}
-            className={`cursor-pointer transition-all duration-200 border-none shadow-sm ${color} ${hoverColor}`}
+            className={`cursor-pointer transition-all duration-200 border-2 ${borderColor} bg-white shadow-sm ${hoverColor}`}
           >
-            <CardContent className="p-6">
-              <div className="flex flex-col space-y-3">
-                <Icon className={`h-8 w-8 ${iconColor}`} />
-                <h3 className="text-lg font-semibold capitalize">{category}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {description}
-                </p>
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-4">
+                <Icon className={`h-6 w-6 mt-0.5 ${iconColor} shrink-0`} />
+                <div className="space-y-1">
+                  <h3 className="text-base font-medium capitalize">{category}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    {description}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
