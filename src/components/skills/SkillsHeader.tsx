@@ -9,7 +9,7 @@ interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
   onViewUserRequests: () => void;
-  showUserRequestsOnly: boolean; // New prop to track the toggle state
+  showUserRequestsOnly: boolean;
 }
 
 // Component for the search bar and action buttons at the top of the skills page
@@ -62,9 +62,11 @@ const SkillsHeader = ({
         </Button>
 
         <Button 
-          variant={showUserRequestsOnly ? "default" : "outline"}
+          variant="outline"
           onClick={onViewUserRequests}
-          className={`whitespace-nowrap ${showUserRequestsOnly ? 'bg-[#0EA5E9] text-white' : 'bg-white'}`}
+          className={`whitespace-nowrap hover:bg-[#F1F1F1] ${
+            showUserRequestsOnly ? 'bg-[#F1F1F1]' : 'bg-white'
+          }`}
         >
           <HelpCircle className="h-4 w-4 mr-2" />
           Request Skill
