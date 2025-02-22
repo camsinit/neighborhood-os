@@ -31,8 +31,8 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ProfileTab } from "./settings/ProfileTab";
 import { AccountTab } from "./settings/AccountTab";
+import { NeighborTab } from "./settings/NeighborTab";
 import { NotificationsTab } from "./settings/NotificationsTab";
 import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "./settings/types";
 
@@ -193,19 +193,19 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
               {loading ? "Saving..." : "Save changes"}
             </Button>
           </DialogHeader>
-          <Tabs defaultValue="profile" className="w-full flex-1">
+          <Tabs defaultValue="account" className="w-full flex-1">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="account">Account</TabsTrigger>
+              <TabsTrigger value="neighbor">Neighbor Profile</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4 overflow-y-auto h-[calc(96vh-12rem)] px-1">
-                <TabsContent value="profile">
-                  <ProfileTab form={form} />
-                </TabsContent>
                 <TabsContent value="account">
                   <AccountTab form={form} />
+                </TabsContent>
+                <TabsContent value="neighbor">
+                  <NeighborTab form={form} />
                 </TabsContent>
                 <TabsContent value="notifications">
                   <NotificationsTab form={form} />
