@@ -2,22 +2,18 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, HelpCircle, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, LayoutGrid, List } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
-  onViewUserRequests: () => void;
-  showUserRequestsOnly: boolean;
 }
 
 // Component for the search bar and action buttons at the top of the skills page
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
-  onViewUserRequests,
-  showUserRequestsOnly
 }: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSubmit } = useSkillsExchange({
@@ -41,12 +37,14 @@ const SkillsHeader = ({
           />
         </div>
         <Button
-          variant="ghost"
-          size="icon"
+          variant="outline"
           onClick={onViewChange}
-          className="flex-shrink-0"
+          className={`whitespace-nowrap hover:bg-[#F1F1F1] ${
+            !showCategories ? 'bg-[#F1F1F1]' : 'bg-white'
+          }`}
         >
-          {showCategories ? <List className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
+          <List className="h-4 w-4 mr-2" />
+          List All
         </Button>
       </div>
       
@@ -59,17 +57,6 @@ const SkillsHeader = ({
         >
           <Plus className="h-4 w-4 mr-2" />
           Offer Skill
-        </Button>
-
-        <Button 
-          variant="outline"
-          onClick={onViewUserRequests}
-          className={`whitespace-nowrap hover:bg-[#F1F1F1] ${
-            showUserRequestsOnly ? 'bg-[#F1F1F1]' : 'bg-white'
-          }`}
-        >
-          <HelpCircle className="h-4 w-4 mr-2" />
-          Request Skill
         </Button>
       </div>
     </div>
