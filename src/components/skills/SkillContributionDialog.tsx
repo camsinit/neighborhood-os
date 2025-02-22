@@ -1,26 +1,17 @@
+
 import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import DialogWrapper from '../dialog/DialogWrapper';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { addDays, format } from 'date-fns';
 import { TooltipProvider } from '@/components/ui/tooltip';
-
-const TIME_OPTIONS = [
-  { id: 'morning', label: 'Morning (9am-12pm)' },
-  { id: 'afternoon', label: 'Afternoon (1pm-5pm)' },
-  { id: 'evening', label: 'Evening (6pm-9pm)' },
-];
-
-interface TimeSlot {
-  date: Date;
-  preferences: string[];
-}
+import TimeSlotSelector, { TimeSlot } from './contribution/TimeSlotSelector';
+import LocationSelector, { LocationPreference } from './contribution/LocationSelector';
 
 interface SkillContributionDialogProps {
   open: boolean;
@@ -38,7 +29,7 @@ const SkillContributionDialog = ({
   requesterId
 }: SkillContributionDialogProps) => {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
-  const [location, setLocation] = useState<'contributor_home' | 'requester_home' | 'other'>('contributor_home');
+  const [location, setLocation] = useState<LocationPreference>('contributor_home');
   const [locationDetails, setLocationDetails] = useState('');
   const [addToProfile, setAddToProfile] = useState(false);
   const { toast } = useToast();
@@ -50,9 +41,7 @@ const SkillContributionDialog = ({
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
-
     const formattedDate = format(date, 'yyyy-MM-dd');
-    
     const existingSlotIndex = selectedTimeSlots.findIndex(
       slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
     );
@@ -70,20 +59,6 @@ const SkillContributionDialog = ({
     } else {
       setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
     }
-  };
-
-  const handleTimePreference = (date: Date, timeId: string) => {
-    setSelectedTimeSlots(slots =>
-      slots.map(slot => {
-        if (format(slot.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')) {
-          const preferences = slot.preferences.includes(timeId)
-            ? slot.preferences.filter(p => p !== timeId)
-            : [...slot.preferences, timeId];
-          return { ...slot, preferences };
-        }
-        return slot;
-      })
-    );
   };
 
   const handleSubmit = async () => {
@@ -183,52 +158,33 @@ const SkillContributionDialog = ({
 
           <div className="space-y-4">
             {selectedTimeSlots.map((slot, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label>{format(slot.date, 'EEEE, MMMM d, yyyy')}</Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedTimeSlots(slots => 
-                      slots.filter((_, i) => i !== index)
-                    )}
-                  >
-                    Remove
-                  </Button>
-                </div>
-                <div className="grid gap-2">
-                  {TIME_OPTIONS.map((time) => (
-                    <div key={time.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`${index}-${time.id}`}
-                        checked={slot.preferences.includes(time.id)}
-                        onCheckedChange={() => handleTimePreference(slot.date, time.id)}
-                      />
-                      <Label htmlFor={`${index}-${time.id}`}>{time.label}</Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TimeSlotSelector
+                key={format(slot.date, 'yyyy-MM-dd')}
+                timeSlot={slot}
+                onRemove={() => setSelectedTimeSlots(slots => 
+                  slots.filter((_, i) => i !== index)
+                )}
+                onPreferenceChange={(timeId) => {
+                  setSelectedTimeSlots(slots =>
+                    slots.map((s, i) => {
+                      if (i === index) {
+                        const preferences = s.preferences.includes(timeId)
+                          ? s.preferences.filter(p => p !== timeId)
+                          : [...s.preferences, timeId];
+                        return { ...s, preferences };
+                      }
+                      return s;
+                    })
+                  );
+                }}
+              />
             ))}
           </div>
 
-          <div className="space-y-2">
-            <Label>Where would you like to teach?</Label>
-            <RadioGroup value={location} onValueChange={(value: any) => setLocation(value)}>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="contributor_home" id="contributor_home" />
-                <Label htmlFor="contributor_home">At my house</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="requester_home" id="requester_home" />
-                <Label htmlFor="requester_home">At their house</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="other" id="other" />
-                <Label htmlFor="other">Other location</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <LocationSelector 
+            value={location} 
+            onChange={(value) => setLocation(value)} 
+          />
 
           <div className="flex items-center space-x-2">
             <Checkbox
