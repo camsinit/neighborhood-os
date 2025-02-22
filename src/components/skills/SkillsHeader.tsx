@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, List } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
+import AddSupportRequestDialog from "../AddSupportRequestDialog";
 
 interface SkillsHeaderProps {
   showCategories: boolean;
@@ -16,11 +17,7 @@ const SkillsHeader = ({
   onViewChange,
 }: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { handleSubmit } = useSkillsExchange({
-    onSuccess: () => {
-      // Handle success
-    }
-  });
+  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
 
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap gap-4">
@@ -52,13 +49,20 @@ const SkillsHeader = ({
       <div className="flex items-center gap-3 flex-shrink-0">
         <Button 
           variant="outline"
-          onClick={() => handleSubmit({}, 'offer')} 
+          onClick={() => setIsAddSkillOpen(true)} 
           className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
           <Plus className="h-4 w-4 mr-2" />
           Offer Skill
         </Button>
       </div>
+
+      <AddSupportRequestDialog
+        open={isAddSkillOpen}
+        onOpenChange={setIsAddSkillOpen}
+        initialRequestType="offer"
+        view="skills"
+      />
     </div>
   );
 };
