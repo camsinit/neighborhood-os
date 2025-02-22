@@ -19,10 +19,12 @@ const SkillsPage = () => {
     setShowUserRequests(false);
   };
 
-  // Handle viewing user's requests
+  // Handle toggling user's requests view
   const handleViewUserRequests = () => {
-    setShowUserRequests(true);
-    setShowCategories(false);
+    setShowUserRequests(!showUserRequests);
+    if (!showUserRequests) {
+      setShowCategories(false);
+    }
   };
 
   return (
@@ -51,6 +53,7 @@ const SkillsPage = () => {
                 setShowUserRequests(false);
               }}
               onViewUserRequests={handleViewUserRequests}
+              showUserRequestsOnly={showUserRequests}
             />
             
             {/* Conditional rendering based on view state */}

@@ -8,14 +8,16 @@ import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
-  onViewUserRequests: () => void; // New prop for viewing user requests
+  onViewUserRequests: () => void;
+  showUserRequestsOnly: boolean; // New prop to track the toggle state
 }
 
 // Component for the search bar and action buttons at the top of the skills page
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
-  onViewUserRequests 
+  onViewUserRequests,
+  showUserRequestsOnly
 }: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { handleSubmit } = useSkillsExchange({
@@ -60,9 +62,9 @@ const SkillsHeader = ({
         </Button>
 
         <Button 
-          variant="outline" 
+          variant={showUserRequestsOnly ? "default" : "outline"}
           onClick={onViewUserRequests}
-          className="bg-white whitespace-nowrap"
+          className={`whitespace-nowrap ${showUserRequestsOnly ? 'bg-[#0EA5E9] text-white' : 'bg-white'}`}
         >
           <HelpCircle className="h-4 w-4 mr-2" />
           Request Skill
