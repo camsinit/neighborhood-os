@@ -55,53 +55,55 @@ const SkillsList = ({
 
   return (
     <div className="space-y-8">
-      {/* Skill Requests Section */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Skill Requests</h3>
-        <div className="flex overflow-x-auto gap-4 pb-4">
-          {requests.map(request => (
-            <div 
-              key={request.id}
-              className="flex-shrink-0 w-[250px] h-[150px] border border-dashed border-gray-300 rounded-lg p-4 bg-white cursor-pointer hover:border-gray-400 transition-colors"
-            >
-              <div className="h-full flex flex-col justify-between">
-                <h4 className="font-medium text-gray-900 line-clamp-2">{request.title}</h4>
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-2"
-                  onClick={() => {/* Handle contribute skill */}}
-                >
-                  Contribute Skill
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Available Skills Section */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Available Skills</h3>
-        <div className="space-y-4">
-          {offers.map(skill => (
-            <div 
-              key={skill.id} 
-              className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white"
-            >
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-                  <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-medium text-gray-900">{skill.title}</h4>
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">{skill.description}</p>
+      {/* Top Section: Skill Requests */}
+      {requests.length > 0 && (
+        <div>
+          <div className="flex overflow-x-auto gap-4 pb-4 -mx-2 px-2">
+            {requests.map(request => (
+              <div 
+                key={request.id}
+                className="flex-shrink-0 w-[250px] h-[150px] border border-dashed border-gray-300 rounded-lg p-4 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                onClick={() => {/* Handle click to show details */}}
+              >
+                <div className="h-full flex flex-col justify-between">
+                  <h4 className="font-medium text-gray-900 line-clamp-2">{request.title}</h4>
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      /* Handle contribute skill */
+                    }}
+                  >
+                    Contribute Skill
+                  </Button>
                 </div>
               </div>
-              <Button variant="outline">Request Skill</Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Bottom Section: Available Skills List */}
+      <div className="space-y-4">
+        {offers.map(skill => (
+          <div 
+            key={skill.id} 
+            className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white"
+          >
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+                <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h4 className="font-medium text-gray-900">{skill.title}</h4>
+                <p className="text-sm text-gray-600 mt-1 line-clamp-2">{skill.description}</p>
+              </div>
+            </div>
+            <Button variant="outline">Request Skill</Button>
+          </div>
+        ))}
       </div>
     </div>
   );
