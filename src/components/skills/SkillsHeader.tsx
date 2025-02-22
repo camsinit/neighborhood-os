@@ -18,6 +18,13 @@ const SkillsHeader = ({
 }: SkillsHeaderProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
+
+  // Helper function to open dialog with correct mode
+  const openSkillDialog = (mode: 'offer' | 'need') => {
+    setDialogMode(mode);
+    setIsAddSkillOpen(true);
+  };
 
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap gap-4">
@@ -49,7 +56,15 @@ const SkillsHeader = ({
       <div className="flex items-center gap-3 flex-shrink-0">
         <Button 
           variant="outline"
-          onClick={() => setIsAddSkillOpen(true)} 
+          onClick={() => openSkillDialog('need')}
+          className="bg-white hover:bg-gray-50 text-gray-900 whitespace-nowrap border border-gray-200"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Request Skill
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('offer')} 
           className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -60,7 +75,7 @@ const SkillsHeader = ({
       <AddSupportRequestDialog
         open={isAddSkillOpen}
         onOpenChange={setIsAddSkillOpen}
-        initialRequestType="offer"
+        initialRequestType={dialogMode}
         view="skills"
       />
     </div>
