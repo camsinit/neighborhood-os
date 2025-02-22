@@ -1,12 +1,15 @@
 
-import MutualSupport from "@/components/MutualSupport";
+import SkillsList from "@/components/skills/SkillsList";
+import SkillsHeader from "@/components/skills/SkillsHeader";
 
+// Main Skills page component that displays skills exchange functionality
 const SkillsPage = () => {
   return (
+    // Main container with gradient background
     <div className="min-h-full w-full bg-gradient-to-b from-[#E8F5FF] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          {/* Page Title */}
+          {/* Page Header */}
           <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
           
           {/* Description Box */}
@@ -19,7 +22,11 @@ const SkillsPage = () => {
 
           {/* Main Content Container */}
           <div className="bg-white rounded-lg p-6">
-            <MutualSupport view="skills" />
+            {/* Skills Header with filter and search */}
+            <SkillsHeader />
+            
+            {/* Skills List showing all skills */}
+            <SkillsList />
           </div>
         </div>
       </div>
