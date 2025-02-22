@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SkillCategory } from "./types/skillTypes";
+import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 
 // Types for the form
 interface SkillFormProps {
