@@ -8,7 +8,6 @@ import SkillContributionDialog from './SkillContributionDialog';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
-import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -73,12 +72,7 @@ const SkillsList = ({
           actionLabel="Share a Skill"
           onAction={() => setIsAddSkillOpen(true)}
         />
-        <AddSupportRequestDialog
-          open={isAddSkillOpen}
-          onOpenChange={setIsAddSkillOpen}
-          view="skills"
-          initialRequestType="offer"
-        />
+        
       </>
     );
   }
