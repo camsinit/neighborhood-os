@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,22 +42,53 @@ const RSVPButton = ({ eventId }: RSVPButtonProps) => {
     setIsLoading(true);
     try {
       if (isRsvped) {
+        // Cancel RSVP
         await supabase
           .from('event_rsvps')
           .delete()
           .eq('event_id', eventId)
           .eq('user_id', user.id);
+
+        // Delete the notification
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('content_id', eventId)
+          .eq('user_id', user.id)
+          .eq('content_type', 'event_rsvp');
+
       } else {
+        // Create RSVP
         await supabase
           .from('event_rsvps')
           .insert([
             { event_id: eventId, user_id: user.id }
           ]);
+
+        // Create notification
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert([{
+            user_id: user.id,
+            title: "Event RSVP Confirmation",
+            content_type: 'event_rsvp',
+            content_id: eventId,
+            notification_type: 'events',
+            action_type: 'view',
+            action_label: 'View Event',
+            metadata: {
+              event_id: eventId,
+              rsvp_status: 'confirmed'
+            }
+          }]);
+
+        if (notificationError) throw notificationError;
       }
 
       setIsRsvped(!isRsvped);
       toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
     } catch (error) {
+      console.error('Error updating RSVP:', error);
       toast.error("Failed to update RSVP");
     } finally {
       setIsLoading(false);
