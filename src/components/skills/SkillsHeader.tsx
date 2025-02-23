@@ -11,7 +11,6 @@ interface SkillsHeaderProps {
   onViewChange: () => void;
 }
 
-// Component for the search bar and action buttons at the top of the skills page
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
@@ -20,7 +19,6 @@ const SkillsHeader = ({
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
 
-  // Helper function to open dialog with correct mode
   const openSkillDialog = (mode: 'offer' | 'need') => {
     setDialogMode(mode);
     setIsAddSkillOpen(true);
@@ -28,7 +26,6 @@ const SkillsHeader = ({
 
   return (
     <div className="flex items-center justify-between py-4 flex-nowrap gap-4">
-      {/* Left side: Search and view toggle */}
       <div className="flex items-center gap-4">
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
@@ -52,12 +49,11 @@ const SkillsHeader = ({
         </Button>
       </div>
       
-      {/* Right side: Action buttons */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
-          className="bg-white hover:bg-gray-50 text-gray-900 whitespace-nowrap border border-gray-200"
+          className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
           <Plus className="h-4 w-4 mr-2" />
           Request Skill

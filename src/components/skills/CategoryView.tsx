@@ -8,35 +8,35 @@ const categoryInfo = {
   creative: {
     icon: Palette,
     description: "Share artistic talents, music lessons, writing skills, or crafting expertise",
-    borderColor: "border-[#FDE1D3]",
+    borderColor: "border-[#F97316]",
     iconColor: "text-[#F97316]",
     hoverColor: "hover:bg-[#FDE1D3]/10"
   },
   trade: {
     icon: Wrench,
     description: "Exchange practical skills like repairs, gardening, or home improvement",
-    borderColor: "border-[#E5DEFF]",
+    borderColor: "border-[#8B5CF6]",
     iconColor: "text-[#8B5CF6]",
     hoverColor: "hover:bg-[#E5DEFF]/10"
   },
   technology: {
     icon: BookOpen,
     description: "Help with computers, software, digital tools, or online platforms",
-    borderColor: "border-[#D3E4FD]",
+    borderColor: "border-[#0EA5E9]",
     iconColor: "text-[#0EA5E9]",
     hoverColor: "hover:bg-[#D3E4FD]/10"
   },
   education: {
     icon: GraduationCap,
     description: "Offer tutoring, language lessons, or academic support",
-    borderColor: "border-[#F2FCE2]",
+    borderColor: "border-emerald-600",
     iconColor: "text-emerald-600",
     hoverColor: "hover:bg-[#F2FCE2]/10"
   },
   wellness: {
     icon: Heart,
     description: "Share fitness tips, nutrition advice, or wellness practices",
-    borderColor: "border-[#FFDEE2]",
+    borderColor: "border-[#D946EF]",
     iconColor: "text-[#D946EF]",
     hoverColor: "hover:bg-[#FFDEE2]/10"
   }
