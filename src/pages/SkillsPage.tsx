@@ -1,8 +1,11 @@
+
 import { useState } from "react";
 import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SkillsPage = () => {
   const [showCategories, setShowCategories] = useState(true);
@@ -11,6 +14,11 @@ const SkillsPage = () => {
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);
     setShowCategories(false);
+  };
+
+  const handleBackToCategories = () => {
+    setShowCategories(true);
+    setSelectedCategory(null);
   };
 
   return (
@@ -34,6 +42,22 @@ const SkillsPage = () => {
                 setSelectedCategory(null);
               }}
             />
+            
+            {!showCategories && (
+              <div className="flex items-center gap-2 mb-6">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBackToCategories}
+                  className="h-8 w-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {selectedCategory || 'All Skills'}
+                </h3>
+              </div>
+            )}
             
             {showCategories ? (
               <CategoryView onCategoryClick={handleCategoryClick} />
