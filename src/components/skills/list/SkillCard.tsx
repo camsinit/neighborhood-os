@@ -27,21 +27,22 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   if (type === 'request') {
     return (
       <div 
-        className="relative flex-shrink-0 w-[250px] h-[150px] border border-dashed border-gray-300 rounded-lg p-4 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+        className="relative flex-shrink-0 w-[250px] h-[120px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
       >
         <ArrowUpRight className="absolute top-2 right-2 h-4 w-4 text-gray-400" />
-        <div className="h-full flex flex-col justify-between">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="h-full flex flex-col justify-between gap-2">
+          <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
               <AvatarImage src={skill.profiles?.avatar_url || undefined} />
               <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
             </Avatar>
             <h4 className="font-medium text-gray-900 line-clamp-2">{skill.title}</h4>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Button 
               variant="outline" 
               className="w-full"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onContribute?.();
@@ -53,6 +54,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
               <Button
                 variant="secondary"
                 className="w-full"
+                size="sm"
                 onClick={() => setIsScheduleDialogOpen(true)}
               >
                 View Schedule
