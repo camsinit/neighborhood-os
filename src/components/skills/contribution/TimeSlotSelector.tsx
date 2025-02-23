@@ -13,7 +13,7 @@ export const TIME_OPTIONS = [
 
 export interface TimeSlot {
   date: Date;
-  preferences: string[];
+  preferences: string[];  // This will now start empty for each new date
 }
 
 interface TimeSlotSelectorProps {

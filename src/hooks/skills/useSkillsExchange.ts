@@ -20,22 +20,26 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
+      // Format the availability data properly
+      const formattedData = {
+        title: formData.title,
+        description: formData.description,
+        request_type: mode === 'offer' ? 'offer' : 'need',
+        skill_category: formData.category,
+        user_id: user.id,
+        valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        availability: formData.availability || null,
+        time_preferences: formData.timePreference || [],
+      };
+
       const { error } = await supabase
         .from('skills_exchange')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          request_type: mode === 'offer' ? 'offer' : 'need',
-          skill_category: formData.category,
-          user_id: user.id,
-          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-          availability: formData.availability,
-          time_preferences: formData.timePreference,
-        });
+        .insert(formattedData);
 
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       onSuccess();
     } catch (error) {
       console.error('Error creating skill exchange:', error);
@@ -57,8 +61,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
           description: formData.description,
           request_type: mode === 'offer' ? 'offer' : 'need',
           skill_category: formData.category,
-          availability: formData.availability,
-          time_preferences: formData.timePreference,
+          availability: formData.availability || null,
+          time_preferences: formData.timePreference || [],
         })
         .eq('id', skillId)
         .eq('user_id', user.id);
@@ -66,6 +70,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      toast.success('Skill exchange updated successfully!');
       onSuccess();
     } catch (error) {
       console.error('Error updating skill exchange:', error);
