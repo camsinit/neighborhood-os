@@ -65,22 +65,23 @@ const RSVPButton = ({ eventId }: RSVPButtonProps) => {
             { event_id: eventId, user_id: user.id }
           ]);
 
-        // Create notification
+        // Create notification with correct types and required fields
         const { error: notificationError } = await supabase
           .from('notifications')
-          .insert([{
+          .insert({
             user_id: user.id,
+            actor_id: user.id, // Required field that was missing
             title: "Event RSVP Confirmation",
             content_type: 'event_rsvp',
             content_id: eventId,
-            notification_type: 'events',
+            notification_type: 'event', // Changed from 'events' to 'event' to match the enum
             action_type: 'view',
             action_label: 'View Event',
             metadata: {
               event_id: eventId,
               rsvp_status: 'confirmed'
             }
-          }]);
+          });
 
         if (notificationError) throw notificationError;
       }
