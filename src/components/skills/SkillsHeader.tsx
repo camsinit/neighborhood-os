@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, List } from "lucide-react";
+import { Search, Plus, List, Grid } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 
@@ -44,8 +44,17 @@ const SkillsHeader = ({
             !showCategories ? 'bg-[#F1F1F1]' : 'bg-white'
           }`}
         >
-          <List className="h-4 w-4 mr-2" />
-          List All
+          {showCategories ? (
+            <>
+              <List className="h-4 w-4 mr-2" />
+              Show List View
+            </>
+          ) : (
+            <>
+              <Grid className="h-4 w-4 mr-2" />
+              Show Categories
+            </>
+          )}
         </Button>
       </div>
       
