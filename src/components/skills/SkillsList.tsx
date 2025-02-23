@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,7 +73,6 @@ const SkillsList = ({
           actionLabel="Share a Skill"
           onAction={() => setIsAddSkillOpen(true)}
         />
-        
       </>
     );
   }
@@ -104,7 +104,6 @@ const SkillsList = ({
             key={skill.id}
             skill={skill}
             type="offer"
-            onRequest={() => {/* Handle request */}}
           />
         ))}
       </div>
