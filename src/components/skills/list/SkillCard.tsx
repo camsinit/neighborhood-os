@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowUpRight } from 'lucide-react';
@@ -74,10 +75,10 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   return (
     <>
       <div 
-        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
+        className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
         onClick={() => setIsDetailsOpen(true)}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <Avatar className="h-10 w-10">
             <AvatarImage src={skill.profiles?.avatar_url || undefined} />
             <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
@@ -90,7 +91,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
             e.stopPropagation();
             setIsRequestDialogOpen(true);
           }}
-          className="flex-shrink-0"
+          className="ml-4"
         >
           Request Skill
         </Button>
