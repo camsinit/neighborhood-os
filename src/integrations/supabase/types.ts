@@ -747,6 +747,7 @@ export type Database = {
         | "share"
         | "view"
         | "schedule"
+        | "learn"
       notification_type:
         | "event"
         | "safety"
