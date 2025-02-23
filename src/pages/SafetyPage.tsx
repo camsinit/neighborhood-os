@@ -1,4 +1,3 @@
-
 import SafetyUpdates from "@/components/SafetyUpdates";
 
 const SafetyPage = () => {
@@ -10,7 +9,7 @@ const SafetyPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
           
           {/* Description Box */}
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6">
+          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
             <p className="text-gray-700 text-sm">
               Stay informed about safety matters in your community. Share updates, receive alerts, 
               and work together to maintain a secure neighborhood environment.
@@ -18,7 +17,7 @@ const SafetyPage = () => {
           </div>
 
           {/* Safety Updates Component */}
-          <div className="bg-white rounded-lg p-6">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
             <SafetyUpdates />
           </div>
         </div>

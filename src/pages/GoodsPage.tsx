@@ -32,14 +32,14 @@ const GoodsPage = () => {
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Goods</h2>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6">
+          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
             <p className="text-gray-700 text-sm">
               Share and request items within your community. From tools to furniture, 
               connect with neighbors to give, receive, or borrow what you need.
             </p>
           </div>
 
-          <div className="bg-white rounded-lg p-6">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">
               <div className="relative w-[280px]">
                 <Input
