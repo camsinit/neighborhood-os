@@ -57,27 +57,11 @@ const SkillsList = ({
   const requests = skills?.filter(skill => skill.request_type === 'need') || [];
   const offers = skills?.filter(skill => skill.request_type === 'offer') || [];
 
-  if ((!requests.length && !offers.length) || !skills?.length) {
-    return (
-      <EmptyState
-        icon={Sparkles}
-        title={selectedCategory 
-          ? `No ${selectedCategory} skills yet`
-          : "No skills shared yet"}
-        description={selectedCategory 
-          ? `Be the first to share your ${selectedCategory} skills with the community`
-          : "Share your skills with the community or request help from others"}
-        actionLabel="Share a Skill"
-        onAction={() => setSelectedSkill(null)}
-      />
-    );
-  }
-
   return (
     <div className="space-y-8">
-      {requests.length > 0 && (
+      {requests.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
+          <h3 className="text-lg font-semibold text-gray-900 uppercase">Skill Requests</h3>
           <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
             <div className="flex gap-4 pb-2">
               {requests.map(request => (
@@ -95,19 +79,40 @@ const SkillsList = ({
             </div>
           </div>
         </div>
+      ) : (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 uppercase">Skill Requests</h3>
+          <EmptyState
+            icon={Sparkles}
+            title={`No ${selectedCategory || ''} skill requests yet`}
+            description={`Be the first to request ${selectedCategory || 'a'} skill from the community`}
+            actionLabel={`Request ${selectedCategory || 'a'} Skill`}
+            onAction={() => setSelectedSkill(null)}
+          />
+        </div>
       )}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">Available Skills</h3>
-        <div className="space-y-4">
-          {offers.map(skill => (
-            <SkillCard
-              key={skill.id}
-              skill={skill}
-              type="offer"
-            />
-          ))}
-        </div>
+        <h3 className="text-lg font-semibold text-gray-900 uppercase">Available Skills</h3>
+        {offers.length > 0 ? (
+          <div className="space-y-4">
+            {offers.map(skill => (
+              <SkillCard
+                key={skill.id}
+                skill={skill}
+                type="offer"
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={Sparkles}
+            title={`No ${selectedCategory || ''} skills available`}
+            description={`Be the first to share your ${selectedCategory || ''} skills with the community`}
+            actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory : 'a'} Skill`}
+            onAction={() => setSelectedSkill(null)}
+          />
+        )}
       </div>
 
       {selectedSkill && (

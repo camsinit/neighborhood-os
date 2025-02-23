@@ -4,6 +4,16 @@ import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
+import { BookOpen, GraduationCap, Heart, Palette, Tool, Code } from "lucide-react";
+
+// Define category icons mapping
+const categoryIcons = {
+  creative: Palette,
+  trade: Tool,
+  technology: Code,
+  education: GraduationCap,
+  wellness: Heart,
+} as const;
 
 const SkillsPage = () => {
   const [showCategories, setShowCategories] = useState(true);
@@ -12,6 +22,11 @@ const SkillsPage = () => {
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);
     setShowCategories(false);
+  };
+
+  const getCategoryIcon = (category: SkillCategory | null) => {
+    if (!category) return BookOpen;
+    return categoryIcons[category] || BookOpen;
   };
 
   return (
@@ -36,9 +51,14 @@ const SkillsPage = () => {
               }}
             />
             
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
-              {showCategories ? 'Categories' : (selectedCategory || 'All Skills')}
-            </h3>
+            <div className="flex items-center gap-2 mb-6">
+              {React.createElement(getCategoryIcon(selectedCategory), {
+                className: "h-5 w-5 text-gray-700"
+              })}
+              <h3 className="text-lg font-semibold text-gray-900 uppercase">
+                {showCategories ? 'Categories' : (selectedCategory || 'All Skills')}
+              </h3>
+            </div>
             
             {showCategories ? (
               <CategoryView onCategoryClick={handleCategoryClick} />
