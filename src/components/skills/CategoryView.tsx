@@ -22,8 +22,8 @@ const categoryInfo = {
   technology: {
     icon: BookOpen,
     description: "Help with computers, software, digital tools, or online platforms",
-    borderColor: "border-[#0EA5E9]",
-    iconColor: "text-[#0EA5E9]",
+    borderColor: "border-[#221F26]",
+    iconColor: "text-[#221F26]",
     hoverColor: "hover:bg-[#D3E4FD]/10"
   },
   education: {
