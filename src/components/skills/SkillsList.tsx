@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory } from './types/skillTypes';
@@ -9,6 +8,7 @@ import SkillContributionDialog from './SkillContributionDialog';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -23,7 +23,6 @@ const SkillsList = ({
     title: string;
     requesterId: string;
   } | null>(null);
-  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
 
   const {
     data: skills,
@@ -58,54 +57,57 @@ const SkillsList = ({
   const requests = skills?.filter(skill => skill.request_type === 'need') || [];
   const offers = skills?.filter(skill => skill.request_type === 'offer') || [];
 
-  // If there are no skills at all
   if ((!requests.length && !offers.length) || !skills?.length) {
     return (
-      <>
-        <EmptyState
-          icon={Sparkles}
-          title={selectedCategory 
-            ? `No ${selectedCategory} skills yet`
-            : "No skills shared yet"}
-          description={selectedCategory 
-            ? `Be the first to share your ${selectedCategory} skills with the community`
-            : "Share your skills with the community or request help from others"}
-          actionLabel="Share a Skill"
-          onAction={() => setIsAddSkillOpen(true)}
-        />
-      </>
+      <EmptyState
+        icon={Sparkles}
+        title={selectedCategory 
+          ? `No ${selectedCategory} skills yet`
+          : "No skills shared yet"}
+        description={selectedCategory 
+          ? `Be the first to share your ${selectedCategory} skills with the community`
+          : "Share your skills with the community or request help from others"}
+        actionLabel="Share a Skill"
+        onAction={() => setSelectedSkill(null)}
+      />
     );
   }
 
   return (
     <div className="space-y-8">
       {requests.length > 0 && (
-        <div>
-          <div className="flex overflow-x-auto gap-4 pb-4 -mx-2 px-2">
-            {requests.map(request => (
-              <SkillCard
-                key={request.id}
-                skill={request}
-                type="request"
-                onContribute={() => setSelectedSkill({
-                  id: request.id,
-                  title: request.title,
-                  requesterId: request.user_id
-                })}
-              />
-            ))}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
+          <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
+            <div className="flex gap-4 pb-2">
+              {requests.map(request => (
+                <SkillCard
+                  key={request.id}
+                  skill={request}
+                  type="request"
+                  onContribute={() => setSelectedSkill({
+                    id: request.id,
+                    title: request.title,
+                    requesterId: request.user_id
+                  })}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       <div className="space-y-4">
-        {offers.map(skill => (
-          <SkillCard
-            key={skill.id}
-            skill={skill}
-            type="offer"
-          />
-        ))}
+        <h3 className="text-lg font-semibold text-gray-900">Available Skills</h3>
+        <div className="space-y-4">
+          {offers.map(skill => (
+            <SkillCard
+              key={skill.id}
+              skill={skill}
+              type="offer"
+            />
+          ))}
+        </div>
       </div>
 
       {selectedSkill && (
