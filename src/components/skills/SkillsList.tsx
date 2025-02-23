@@ -61,7 +61,7 @@ const SkillsList = ({
     <div className="space-y-8">
       {requests.length > 0 ? (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 uppercase">Skill Requests</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
           <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
             <div className="flex gap-4 pb-2">
               {requests.map(request => (
@@ -81,19 +81,19 @@ const SkillsList = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 uppercase">Skill Requests</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
           <EmptyState
             icon={Sparkles}
-            title={`No ${selectedCategory || ''} skill requests yet`}
+            title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skill Requests Yet`}
             description={`Be the first to request ${selectedCategory || 'a'} skill from the community`}
-            actionLabel={`Request ${selectedCategory || 'a'} Skill`}
+            actionLabel={`Request ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
             onAction={() => setSelectedSkill(null)}
           />
         </div>
       )}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 uppercase">Available Skills</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Available Skills</h3>
         {offers.length > 0 ? (
           <div className="space-y-4">
             {offers.map(skill => (
@@ -107,9 +107,9 @@ const SkillsList = ({
         ) : (
           <EmptyState
             icon={Sparkles}
-            title={`No ${selectedCategory || ''} skills available`}
+            title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`}
             description={`Be the first to share your ${selectedCategory || ''} skills with the community`}
-            actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory : 'a'} Skill`}
+            actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
             onAction={() => setSelectedSkill(null)}
           />
         )}

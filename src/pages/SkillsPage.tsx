@@ -1,15 +1,16 @@
 
+import React from 'react';
 import { useState } from "react";
 import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
-import { BookOpen, GraduationCap, Heart, Palette, Tool, Code } from "lucide-react";
+import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 
 // Define category icons mapping
 const categoryIcons = {
   creative: Palette,
-  trade: Tool,
+  trade: Wrench, // Changed from Tool to Wrench
   technology: Code,
   education: GraduationCap,
   wellness: Heart,
@@ -55,8 +56,8 @@ const SkillsPage = () => {
               {React.createElement(getCategoryIcon(selectedCategory), {
                 className: "h-5 w-5 text-gray-700"
               })}
-              <h3 className="text-lg font-semibold text-gray-900 uppercase">
-                {showCategories ? 'Categories' : (selectedCategory || 'All Skills')}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'All Skills')}
               </h3>
             </div>
             
