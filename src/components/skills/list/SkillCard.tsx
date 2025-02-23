@@ -5,6 +5,7 @@ import { Skill } from '../types/skillTypes';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface SkillCardProps {
   skill: Skill & { 
@@ -18,6 +19,7 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
 
@@ -70,21 +72,89 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   }
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 bg-white">
-      <div className="flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-          <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-        </Avatar>
-        <h4 className="font-medium text-gray-900">{skill.title}</h4>
-      </div>
-      <Button 
-        variant="outline" 
-        onClick={() => setIsRequestDialogOpen(true)}
-        className="flex-shrink-0"
+    <>
+      <div 
+        className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
+        onClick={() => setIsDetailsOpen(true)}
       >
-        Request Skill
-      </Button>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+            <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+          </Avatar>
+          <h4 className="font-medium text-gray-900">{skill.title}</h4>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsRequestDialogOpen(true);
+          }}
+          className="flex-shrink-0"
+        >
+          Request Skill
+        </Button>
+      </div>
+
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{skill.title}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+                <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h4 className="font-medium text-gray-900">
+                  {skill.profiles?.display_name || 'Anonymous'}
+                </h4>
+                <p className="text-sm text-gray-500">Skill Provider</p>
+              </div>
+            </div>
+
+            {skill.description && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900">About this skill</h4>
+                <p className="text-sm text-gray-600">{skill.description}</p>
+              </div>
+            )}
+
+            {skill.availability && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900">Availability</h4>
+                <p className="text-sm text-gray-600">{skill.availability}</p>
+              </div>
+            )}
+
+            {skill.time_preferences && skill.time_preferences.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-medium text-gray-900">Preferred Times</h4>
+                <div className="flex flex-wrap gap-2">
+                  {skill.time_preferences.map((time, index) => (
+                    <span key={index} className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                      {time}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Button 
+              className="w-full"
+              onClick={() => {
+                setIsDetailsOpen(false);
+                setIsRequestDialogOpen(true);
+              }}
+            >
+              Request this Skill
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <SkillSessionRequestDialog
         open={isRequestDialogOpen}
@@ -93,7 +163,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
         skillTitle={skill.title}
         providerId={skill.user_id}
       />
-    </div>
+    </>
   );
 };
 
