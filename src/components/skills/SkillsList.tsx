@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +8,7 @@ import SkillContributionDialog from './SkillContributionDialog';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
+import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
