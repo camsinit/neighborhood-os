@@ -1,205 +1,203 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { useUser } from "@supabase/auth-helpers-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useUser } from '@supabase/auth-helpers-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import DialogWrapper from '@/components/dialog/DialogWrapper';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
-// Define the type for our availability state
-interface Availability {
-  weekday: boolean;
-  weekend: boolean;
-  morning: boolean;
-  afternoon: boolean;
-  evening: boolean;
+// Define the form data structure
+interface SkillRequestFormData {
+  description: string;
+  availability: 'weekdays' | 'weekends' | 'both';
+  timePreference: ('morning' | 'afternoon' | 'evening')[];
 }
 
 interface SkillSessionRequestDialogProps {
-  sessionId: string | null;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
+  skillId: string;
+  skillTitle: string;
+  providerId: string;
 }
 
-export const SkillSessionRequestDialog = ({
-  sessionId,
+const SkillSessionRequestDialog = ({
+  open,
   onOpenChange,
+  skillId,
+  skillTitle,
+  providerId,
 }: SkillSessionRequestDialogProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const user = useUser();
-  const [availability, setAvailability] = useState<Availability>({
-    weekday: false,
-    weekend: false,
-    morning: false,
-    afternoon: false,
-    evening: false,
+  const queryClient = useQueryClient();
+
+  // Initialize form
+  const form = useForm<SkillRequestFormData>({
+    defaultValues: {
+      description: '',
+      availability: 'both',
+      timePreference: ['morning', 'afternoon', 'evening'],
+    },
   });
 
-  // Load existing session data when dialog opens
-  useEffect(() => {
-    const loadSessionData = async () => {
-      if (!sessionId) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('skill_sessions')
-          .select('*')
-          .eq('id', sessionId)
-          .single();
-
-        if (error) throw error;
-
-        // Safely parse the requester_availability data
-        if (data?.requester_availability) {
-          const parsedAvailability = typeof data.requester_availability === 'string' 
-            ? JSON.parse(data.requester_availability) 
-            : data.requester_availability;
-
-          // Ensure all required boolean fields exist
-          const validatedAvailability: Availability = {
-            weekday: Boolean(parsedAvailability?.weekday),
-            weekend: Boolean(parsedAvailability?.weekend),
-            morning: Boolean(parsedAvailability?.morning),
-            afternoon: Boolean(parsedAvailability?.afternoon),
-            evening: Boolean(parsedAvailability?.evening),
-          };
-
-          setAvailability(validatedAvailability);
-        }
-      } catch (error) {
-        console.error('Error loading session data:', error);
-        toast.error("Failed to load session data");
-      }
-    };
-
-    loadSessionData();
-  }, [sessionId]);
-
-  const handleSubmit = async () => {
+  const onSubmit = async (data: SkillRequestFormData) => {
     if (!user) {
-      toast.error("You must be logged in to update availability");
+      toast.error('You must be logged in to request skills');
       return;
     }
 
-    if (!sessionId) {
-      toast.error("No session found");
-      return;
-    }
-
-    // Validate that at least one time and day is selected
-    if (!availability.weekday && !availability.weekend) {
-      toast.error("Please select at least one day preference");
-      return;
-    }
-    if (!availability.morning && !availability.afternoon && !availability.evening) {
-      toast.error("Please select at least one time preference");
-      return;
-    }
-
+    setIsSubmitting(true);
     try {
-      // Convert Availability type to a plain object that matches Json type
-      const availabilityJson: { [key: string]: boolean } = {
-        weekday: availability.weekday,
-        weekend: availability.weekend,
-        morning: availability.morning,
-        afternoon: availability.afternoon,
-        evening: availability.evening,
-      };
-
+      // Create a new skill session
       const { error } = await supabase
         .from('skill_sessions')
-        .update({
-          requester_availability: availabilityJson,
-        })
-        .eq('id', sessionId);
+        .insert({
+          skill_id: skillId,
+          provider_id: providerId,
+          requester_id: user.id,
+          requester_availability: {
+            availability: data.availability,
+            timePreference: data.timePreference,
+            description: data.description,
+          },
+          status: 'pending_provider_times',
+        });
 
       if (error) throw error;
 
-      toast.success("Availability updated successfully!");
+      toast.success('Skill request submitted successfully');
+      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating availability:', error);
-      toast.error("Failed to update availability");
+      console.error('Error submitting skill request:', error);
+      toast.error('Failed to submit skill request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={!!sessionId} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Share Your Availability</DialogTitle>
-        </DialogHeader>
+    <DialogWrapper
+      open={open}
+      onOpenChange={onOpenChange}
+      title={`Request Help with: ${skillTitle}`}
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Description Field */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>What do you need help with?</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe what you'd like to learn or get help with..."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Days Available</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="weekday"
-                    checked={availability.weekday}
-                    onCheckedChange={(checked) => 
-                      setAvailability(prev => ({ ...prev, weekday: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="weekday">Weekdays</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="weekend"
-                    checked={availability.weekend}
-                    onCheckedChange={(checked) => 
-                      setAvailability(prev => ({ ...prev, weekend: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="weekend">Weekends</Label>
-                </div>
-              </div>
-            </div>
+          {/* Availability Field */}
+          <FormField
+            control={form.control}
+            name="availability"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>When are you generally available?</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col space-y-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="weekdays" id="weekdays" />
+                      <label htmlFor="weekdays">Weekdays</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="weekends" id="weekends" />
+                      <label htmlFor="weekends">Weekends</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="both" id="both" />
+                      <label htmlFor="both">Both weekdays and weekends</label>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <div>
-              <h3 className="text-sm font-medium mb-2">Times Available</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="morning"
-                    checked={availability.morning}
-                    onCheckedChange={(checked) => 
-                      setAvailability(prev => ({ ...prev, morning: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="morning">Morning (8am - 12pm)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="afternoon"
-                    checked={availability.afternoon}
-                    onCheckedChange={(checked) => 
-                      setAvailability(prev => ({ ...prev, afternoon: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="afternoon">Afternoon (12pm - 5pm)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="evening"
-                    checked={availability.evening}
-                    onCheckedChange={(checked) => 
-                      setAvailability(prev => ({ ...prev, evening: !!checked }))
-                    }
-                  />
-                  <Label htmlFor="evening">Evening (5pm - 9pm)</Label>
-                </div>
-              </div>
-            </div>
+          {/* Time Preference Field */}
+          <FormField
+            control={form.control}
+            name="timePreference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>What times of day work best for you?</FormLabel>
+                <FormControl>
+                  <div className="flex flex-wrap gap-4">
+                    {['morning', 'afternoon', 'evening'].map((time) => (
+                      <div key={time} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={time}
+                          checked={field.value.includes(time as any)}
+                          onChange={(e) => {
+                            const updatedValue = e.target.checked
+                              ? [...field.value, time]
+                              : field.value.filter((t) => t !== time);
+                            field.onChange(updatedValue);
+                          }}
+                          className="mr-2"
+                        />
+                        <label htmlFor={time} className="capitalize">
+                          {time}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Request'}
+            </Button>
           </div>
-
-          <Button onClick={handleSubmit} className="w-full">
-            Submit Availability
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </form>
+      </Form>
+    </DialogWrapper>
   );
 };
+
+export default SkillSessionRequestDialog;

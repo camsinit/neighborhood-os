@@ -5,6 +5,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Skill } from '../types/skillTypes';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
+import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 
 interface SkillCardProps {
   skill: Skill & { 
@@ -14,12 +15,12 @@ interface SkillCardProps {
     } 
   };
   onContribute?: () => void;
-  onRequest?: () => void;
   type: 'request' | 'offer';
 }
 
-const SkillCard = ({ skill, onContribute, onRequest, type }: SkillCardProps) => {
+const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
 
   if (type === 'request') {
     return (
@@ -81,7 +82,20 @@ const SkillCard = ({ skill, onContribute, onRequest, type }: SkillCardProps) => 
           <p className="text-sm text-gray-600 mt-1 line-clamp-2">{skill.description}</p>
         </div>
       </div>
-      <Button variant="outline" onClick={onRequest}>Request Skill</Button>
+      <Button 
+        variant="outline" 
+        onClick={() => setIsRequestDialogOpen(true)}
+      >
+        Request Skill
+      </Button>
+
+      <SkillSessionRequestDialog
+        open={isRequestDialogOpen}
+        onOpenChange={setIsRequestDialogOpen}
+        skillId={skill.id}
+        skillTitle={skill.title}
+        providerId={skill.user_id}
+      />
     </div>
   );
 };
