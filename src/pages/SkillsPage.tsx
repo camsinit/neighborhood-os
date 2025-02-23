@@ -43,8 +43,8 @@ const SkillsPage = () => {
               }}
             />
             
-            {!showCategories && (
-              <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-2 mb-6">
+              {!showCategories && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -53,11 +53,11 @@ const SkillsPage = () => {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedCategory || 'All Skills'}
-                </h3>
-              </div>
-            )}
+              )}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {showCategories ? 'Categories' : (selectedCategory || 'All Skills')}
+              </h3>
+            </div>
             
             {showCategories ? (
               <CategoryView onCategoryClick={handleCategoryClick} />
