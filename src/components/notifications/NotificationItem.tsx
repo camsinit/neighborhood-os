@@ -61,9 +61,28 @@ const NotificationItem = ({
   };
 
   const handleClick = () => {
-    onItemClick(type, itemId);
-    markAsRead(type, itemId);
-    onClose();
+    // For events, dispatch a custom event to navigate to the specific event
+    if (type === 'event') {
+      // First mark as read and close
+      markAsRead(type, itemId);
+      onClose();
+      
+      // Dispatch custom event for calendar navigation
+      window.dispatchEvent(new CustomEvent('navigateToEvent', {
+        detail: { eventId: itemId }
+      }));
+
+      // Navigate to calendar page if not already there
+      const calendarLink = document.querySelector('a[href="/calendar"]') as HTMLAnchorElement;
+      if (calendarLink) {
+        calendarLink.click();
+      }
+    } else {
+      // For other types, use default behavior
+      onItemClick(type, itemId);
+      markAsRead(type, itemId);
+      onClose();
+    }
   };
 
   const handleArchive = async (e: React.MouseEvent) => {
