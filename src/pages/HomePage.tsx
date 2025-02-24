@@ -9,13 +9,11 @@ import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 import NotificationItem from "@/components/notifications/NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
-
 const HomePage = () => {
   const {
     toast
   } = useToast();
   const [showArchived, setShowArchived] = useState(false);
-
   const {
     data: notifications,
     refetch
@@ -99,7 +97,6 @@ const HomePage = () => {
       })) || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
-
   const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
     const event = new CustomEvent('openItemDialog', {
       detail: {
@@ -108,14 +105,12 @@ const HomePage = () => {
       }
     });
     window.dispatchEvent(event);
-
     if (type === 'event' || type === 'support') {
       toast({
         title: "Navigating to item",
         description: "The relevant section has been highlighted for you.",
         duration: 3000
       });
-
       setTimeout(() => {
         const section = type === 'event' ? document.querySelector('.calendar-container') : document.querySelector('.mutual-support-container');
         if (section) {
@@ -124,7 +119,6 @@ const HomePage = () => {
             section.classList.remove('highlight-section');
           }, 2000);
         }
-
         section?.scrollIntoView({
           behavior: 'smooth',
           block: 'center'
@@ -133,7 +127,6 @@ const HomePage = () => {
     }
     refetch();
   };
-
   return <div className="min-h-full w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 space-y-8">
@@ -153,7 +146,7 @@ const HomePage = () => {
                   Archive
                 </Button>
               </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0">
+              <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0 py-[3px]">
                 <ScrollArea className="h-[550px]">
                   {notifications?.length ? <div className="space-y-1">
                       {notifications.map(notification => <NotificationItem key={notification.id} title={notification.title} type={notification.type} itemId={notification.id} isRead={notification.is_read} isArchived={notification.is_archived} onClose={() => refetch()} onItemClick={handleItemClick} context={notification.context} />)}
@@ -177,5 +170,4 @@ const HomePage = () => {
       </div>
     </div>;
 };
-
 export default HomePage;
