@@ -1,9 +1,11 @@
-import { Bell, Calendar, Shield, HandHelping, Check, Archive } from "lucide-react";
+
+import { useState } from "react";
+import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
 import { FinalizeDateDialog } from "@/components/skills/FinalizeDateDialog";
+import { getNotificationStyle } from "./utils/notificationStyles";
+import { archiveNotification, markAsRead } from "./utils/notificationActions";
 
 interface NotificationContext {
   neighborName?: string;
@@ -24,8 +26,6 @@ interface NotificationItemProps {
   actionType?: "rsvp" | "comment" | "help" | "respond" | "share" | "view" | "schedule";
 }
 
-type TableName = "safety_updates" | "events" | "support_requests" | "skill_sessions";
-
 const NotificationItem = ({ 
   title, 
   type, 
@@ -40,19 +40,10 @@ const NotificationItem = ({
 }: NotificationItemProps) => {
   const [isRemoving, setIsRemoving] = useState(false);
   const [height, setHeight] = useState<number | undefined>();
+  const [showDateDialog, setShowDateDialog] = useState(false);
   
-  const getIcon = () => {
-    switch (type) {
-      case "safety":
-        return <Shield className="h-4 w-4 text-red-500" />;
-      case "event":
-        return <Calendar className="h-4 w-4 text-blue-500" />;
-      case "support":
-        return <HandHelping className="h-4 w-4 text-green-500" />;
-      default:
-        return <Bell className="h-4 w-4" />;
-    }
-  };
+  const style = getNotificationStyle(type);
+  const Icon = style.icon;
 
   const getContextText = (context?: NotificationContext) => {
     if (!context) return null;
@@ -71,16 +62,8 @@ const NotificationItem = ({
 
   const handleClick = () => {
     onItemClick(type, itemId);
-    markAsRead();
+    markAsRead(type, itemId);
     onClose();
-  };
-
-  const markAsRead = async () => {
-    const table = getTableName(type);
-    await supabase
-      .from(table)
-      .update({ is_read: true })
-      .eq('id', itemId);
   };
 
   const handleArchive = async (e: React.MouseEvent) => {
@@ -89,22 +72,15 @@ const NotificationItem = ({
     const element = e.currentTarget.closest('.notification-item');
     if (element) {
       setHeight(element.getBoundingClientRect().height);
-      element.getBoundingClientRect();
     }
     
     setIsRemoving(true);
     
     setTimeout(async () => {
-      const table = getTableName(type);
-      await supabase
-        .from(table)
-        .update({ is_archived: true })
-        .eq('id', itemId);
+      await archiveNotification(type, itemId);
       onClose();
     }, 300);
   };
-
-  const [showDateDialog, setShowDateDialog] = useState(false);
 
   const handleAction = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,26 +93,15 @@ const NotificationItem = ({
     handleClick();
   };
 
-  const getTableName = (type: "safety" | "event" | "support" | "skills"): TableName => {
-    switch (type) {
-      case "safety":
-        return "safety_updates";
-      case "event":
-        return "events";
-      case "support":
-        return "support_requests";
-      case "skills":
-        return "skill_sessions";
-    }
-  };
-
   return (
     <>
       <div
         onClick={handleClick}
-        className={`notification-item flex items-start justify-between py-4 group hover:bg-gray-50 px-8 rounded-lg 
-          transition-all duration-300 overflow-hidden
+        className={`notification-item flex items-start justify-between py-4 group 
+          ${style.backgroundColor} ${style.hoverColor} px-8 rounded-lg 
+          transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
           ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
+          ${isRead ? 'opacity-75' : ''}
         `}
         style={{
           height: isRemoving ? 0 : height,
@@ -152,7 +117,7 @@ const NotificationItem = ({
               <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
             </Avatar>
           ) : (
-            getIcon()
+            <Icon className={`h-5 w-5 ${style.textColor}`} />
           )}
           <div>
             {context && (
@@ -160,7 +125,7 @@ const NotificationItem = ({
                 {getContextText(context)}
               </p>
             )}
-            <h3 className={`text-lg font-medium text-gray-900 ${isRead ? 'text-gray-500' : ''}`}>
+            <h3 className={`text-lg font-medium ${isRead ? 'text-gray-500' : style.textColor}`}>
               {title}
             </h3>
           </div>
@@ -171,7 +136,7 @@ const NotificationItem = ({
               variant="outline"
               size="sm"
               onClick={handleAction}
-              className="hidden group-hover:inline-flex"
+              className={`hidden group-hover:inline-flex ${style.textColor} ${style.borderColor}`}
             >
               {actionLabel}
             </Button>
