@@ -1,4 +1,3 @@
-
 import { Activity } from "@/utils/queries/useActivities";
 import { useActivities } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -97,10 +96,18 @@ const ActivityFeed = () => {
     );
   }
 
+  if (!activities?.length) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        <p className="text-gray-500">No new neighborhood activity</p>
+      </div>
+    );
+  }
+
   return (
     <ScrollArea className="h-[500px]">
       <div className="space-y-4 pr-4">
-        {activities?.map((activity) => (
+        {activities.map((activity) => (
           <ActivityItem key={activity.id} activity={activity} />
         ))}
       </div>
