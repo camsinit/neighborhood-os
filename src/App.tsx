@@ -11,7 +11,6 @@ import GoodsPage from "@/pages/GoodsPage";
 import CarePage from "@/pages/CarePage";
 import SafetyPage from "@/pages/SafetyPage";
 import NeighborsPage from "@/pages/NeighborsPage";
-import NotificationsPage from "@/pages/NotificationsPage";
 import Login from "@/pages/Login";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Sidebar from "@/components/layout/Sidebar";
@@ -92,7 +91,6 @@ const App = () => {
               >
                 <Route index element={<HomePage />} />
                 <Route path="calendar" element={<CalendarPage />} />
-                <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="skills" element={<SkillsPage />} />
                 <Route path="goods" element={<GoodsPage />} />
                 <Route path="care" element={<CarePage />} />
