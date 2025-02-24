@@ -93,6 +93,14 @@ const getActionButton = (activity: Activity) => {
   }
 };
 
+const getActivityDescription = (metadata: Activity['metadata']) => {
+  if (!metadata) return null;
+  if (typeof metadata === 'object' && metadata !== null && 'description' in metadata) {
+    return metadata.description as string;
+  }
+  return null;
+};
+
 interface ActivityItemProps {
   activity: Activity;
   onAction: (activity: Activity) => void;
@@ -214,7 +222,7 @@ const ActivityFeed = () => {
           </SheetHeader>
           <div className="mt-4">
             <p className="text-sm text-gray-500">
-              {selectedActivity?.metadata?.description || "No additional details available."}
+              {getActivityDescription(selectedActivity?.metadata) || "No additional details available."}
             </p>
           </div>
         </SheetContent>
