@@ -9,13 +9,13 @@ import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 import NotificationItem from "@/components/notifications/NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
+
 const HomePage = () => {
   const {
     toast
   } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
-  // Query notifications using the same logic as NotificationsPage
   const {
     data: notifications,
     refetch
@@ -99,8 +99,8 @@ const HomePage = () => {
       })) || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
+
   const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
-    // Emit custom event
     const event = new CustomEvent('openItemDialog', {
       detail: {
         type,
@@ -109,7 +109,6 @@ const HomePage = () => {
     });
     window.dispatchEvent(event);
 
-    // Show toast for event and support notifications
     if (type === 'event' || type === 'support') {
       toast({
         title: "Navigating to item",
@@ -117,18 +116,15 @@ const HomePage = () => {
         duration: 3000
       });
 
-      // Add highlight class to relevant section
       setTimeout(() => {
         const section = type === 'event' ? document.querySelector('.calendar-container') : document.querySelector('.mutual-support-container');
         if (section) {
           section.classList.add('highlight-section');
-          // Remove highlight after animation
           setTimeout(() => {
             section.classList.remove('highlight-section');
           }, 2000);
         }
 
-        // Scroll section into view
         section?.scrollIntoView({
           behavior: 'smooth',
           block: 'center'
@@ -137,10 +133,10 @@ const HomePage = () => {
     }
     refetch();
   };
+
   return <div className="min-h-full w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 space-y-8">
-          {/* Quick Actions Section */}
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
             <QuickActions />
@@ -148,15 +144,13 @@ const HomePage = () => {
 
           <Separator className="my-8 bg-gray-200" />
 
-          {/* Two Column Layout for Notifications and Activity */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Notifications Section */}
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowArchived(!showArchived)}>
+                <Button variant="outline" size="sm" className="flex items-center" onClick={() => setShowArchived(!showArchived)}>
                   <Archive className="h-4 w-4" />
-                  {showArchived ? "Show Active" : "Show Archived"}
+                  Archive
                 </Button>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0">
@@ -172,7 +166,6 @@ const HomePage = () => {
               </div>
             </section>
 
-            {/* Neighborhood Activity Section */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">Neighborhood Activity</h2>
               <div className="bg-white rounded-lg shadow-sm p-4">
@@ -184,4 +177,5 @@ const HomePage = () => {
       </div>
     </div>;
 };
+
 export default HomePage;
