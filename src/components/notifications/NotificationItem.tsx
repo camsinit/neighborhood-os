@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,27 +60,32 @@ const NotificationItem = ({
   };
 
   const handleClick = () => {
-    // For events, dispatch a custom event to navigate to the specific event
-    if (type === 'event') {
-      // First mark as read and close
-      markAsRead(type, itemId);
-      onClose();
-      
-      // Dispatch custom event for calendar navigation
-      window.dispatchEvent(new CustomEvent('navigateToEvent', {
-        detail: { eventId: itemId }
-      }));
+    markAsRead(type, itemId);
+    onClose();
 
-      // Navigate to calendar page if not already there
-      const calendarLink = document.querySelector('a[href="/calendar"]') as HTMLAnchorElement;
-      if (calendarLink) {
-        calendarLink.click();
+    const navigationEvent = new CustomEvent('navigateToContent', {
+      detail: {
+        type,
+        itemId,
+        title
       }
-    } else {
-      // For other types, use default behavior
-      onItemClick(type, itemId);
-      markAsRead(type, itemId);
-      onClose();
+    });
+    window.dispatchEvent(navigationEvent);
+
+    const pageMapping = {
+      event: '/calendar',
+      safety: '/safety',
+      skills: '/skills',
+      support: '/support',
+      care: '/care'
+    };
+
+    const targetPath = pageMapping[type];
+    if (targetPath) {
+      const pageLink = document.querySelector(`a[href="${targetPath}"]`) as HTMLAnchorElement;
+      if (pageLink) {
+        pageLink.click();
+      }
     }
   };
 
@@ -114,14 +118,12 @@ const NotificationItem = ({
 
   return (
     <div className="mb-4">
-      {/* Context text now sits above the notification card with no left margin */}
       {context && (
         <p className="text-sm text-gray-500 italic mb-1">
           {getContextText(context)}
         </p>
       )}
       
-      {/* Notification card with adjusted padding */}
       <div
         onClick={handleClick}
         className={`notification-item flex items-start justify-between py-4 group 

@@ -1,3 +1,4 @@
+
 import { AlertTriangle, Bell, Clock, Wrench, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
@@ -47,6 +48,7 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
 
   return (
     <div 
+      data-safety-id={update.id}
       className={`group bg-white border border-gray-200 ${colors.borderColor} rounded-lg p-3 pt-2 pb-6 shadow-sm hover:scale-[1.02] transition-all duration-200 ease-in-out relative cursor-pointer`}
       onClick={onClick}
     >
