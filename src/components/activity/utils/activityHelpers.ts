@@ -1,6 +1,28 @@
 
 import { Calendar, Book, Package, Heart, Shield } from "lucide-react";
 
+// Color mapping for different activity types
+export const getActivityColor = (type: string): string => {
+  switch (type) {
+    case 'event_created':
+    case 'event_rsvp':
+      return '#0EA5E9'; // Calendar blue
+    case 'skill_offered':
+    case 'skill_requested':
+      return '#9b87f5'; // Skills purple
+    case 'good_shared':
+    case 'good_requested':
+      return '#F97316'; // Goods orange
+    case 'care_offered':
+    case 'care_requested':
+      return '#22C55E'; // Care green
+    case 'safety_update':
+      return '#EA384C'; // Safety red
+    default:
+      return '#8E9196'; // Default gray
+  }
+};
+
 export const getActivityIcon = (type: string) => {
   switch (type) {
     case 'event_created':

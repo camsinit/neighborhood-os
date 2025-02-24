@@ -1,10 +1,14 @@
 
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { User } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getActivityIcon, getActivityBackground, getActionButton } from "./utils/activityHelpers";
+import { 
+  getActivityIcon, 
+  getActionButton,
+  getActivityColor 
+} from "./utils/activityHelpers";
 
 interface ActivityItemProps {
   activity: Activity;
@@ -12,59 +16,69 @@ interface ActivityItemProps {
 }
 
 const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
+  // Get icon and styling details
   const actionButton = getActionButton(activity);
   const IconComponent = getActivityIcon(activity.activity_type);
+  const activityColor = getActivityColor(activity.activity_type);
+  
+  // Calculate time ago
+  const timeAgo = formatDistanceToNow(new Date(activity.created_at), { addSuffix: true });
 
   return (
     <div 
-      className={`p-4 transition-colors ${getActivityBackground(activity.activity_type)} rounded-lg group cursor-pointer hover:shadow-md`}
+      className="relative flex gap-4 p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group"
       onClick={() => onAction(activity)}
+      style={{ 
+        borderLeft: `4px solid ${activityColor}` 
+      }}
     >
-      <div className="flex items-start gap-4">
-        <Avatar className="h-8 w-8">
+      {/* Activity Type Icon */}
+      {IconComponent && (
+        <div className="flex-shrink-0 mt-1">
+          <IconComponent 
+            className="h-5 w-5"
+            style={{ color: activityColor }}
+          />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex-1">
+        {/* Title */}
+        <p className="text-sm font-medium text-gray-900 mb-1">
+          {activity.title}
+        </p>
+
+        {/* Action Button */}
+        {actionButton && (
+          <Button 
+            variant="outline"
+            size="sm"
+            className="opacity-0 group-hover:opacity-100 transition-opacity mt-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(activity);
+            }}
+          >
+            <span className="flex items-center gap-2">
+              <actionButton.icon className="h-4 w-4" />
+              {actionButton.label}
+            </span>
+          </Button>
+        )}
+      </div>
+
+      {/* Time and Avatar */}
+      <div className="flex items-start gap-2 flex-shrink-0">
+        <span className="text-xs text-gray-500 mt-1">
+          {timeAgo}
+        </span>
+        <Avatar className="h-6 w-6">
           <AvatarImage src={activity.profiles.avatar_url} />
           <AvatarFallback>
-            <User className="h-4 w-4" />
+            <User className="h-3 w-3" />
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 space-y-1">
-          <p className="text-sm font-medium leading-none">
-            {activity.profiles.display_name}
-          </p>
-          <p className="text-sm text-gray-500">
-            {activity.title}
-          </p>
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2">
-              {IconComponent && <IconComponent className={`h-4 w-4 ${
-                activity.activity_type.includes('event') ? 'text-blue-500' :
-                activity.activity_type.includes('skill') ? 'text-purple-500' :
-                activity.activity_type.includes('good') ? 'text-yellow-500' :
-                activity.activity_type.includes('care') ? 'text-green-500' :
-                'text-red-500'
-              }`} />}
-              <p className="text-xs text-gray-400">
-                {format(new Date(activity.created_at), 'MMM d, yyyy • h:mm a')}
-              </p>
-            </div>
-            {actionButton && (
-              <Button 
-                variant={actionButton.variant}
-                size="sm"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAction(activity);
-                }}
-              >
-                <span className="flex items-center gap-2">
-                  <actionButton.icon className="h-4 w-4" />
-                  {actionButton.label}
-                </span>
-              </Button>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
