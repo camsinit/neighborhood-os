@@ -97,7 +97,7 @@ const NotificationItem = ({
     <div className="mb-4">
       {/* Context text now sits above the notification card */}
       {context && (
-        <p className="text-sm text-gray-500 italic ml-8 mb-1">
+        <p className="text-sm text-gray-500 italic mb-1">
           {getContextText(context)}
         </p>
       )}
