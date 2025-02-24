@@ -94,7 +94,15 @@ const NotificationItem = ({
   };
 
   return (
-    <>
+    <div className="mb-4">
+      {/* Context text now sits above the notification card */}
+      {context && (
+        <p className="text-sm text-gray-500 italic ml-8 mb-1">
+          {getContextText(context)}
+        </p>
+      )}
+      
+      {/* Notification card */}
       <div
         onClick={handleClick}
         className={`notification-item flex items-start justify-between py-4 group 
@@ -120,11 +128,6 @@ const NotificationItem = ({
             <Icon className={`h-5 w-5 ${style.textColor}`} />
           )}
           <div>
-            {context && (
-              <p className="text-sm text-gray-500 italic mb-1">
-                {getContextText(context)}
-              </p>
-            )}
             <h3 className={`text-lg font-medium ${isRead ? 'text-gray-500' : style.textColor}`}>
               {title}
             </h3>
@@ -159,7 +162,7 @@ const NotificationItem = ({
           onOpenChange={setShowDateDialog}
         />
       )}
-    </>
+    </div>
   );
 };
 
