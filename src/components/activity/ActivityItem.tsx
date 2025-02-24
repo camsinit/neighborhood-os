@@ -1,5 +1,5 @@
 
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { User, Archive } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,23 +21,36 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
   const timeAgo = formatDistanceToNow(new Date(activity.created_at), { addSuffix: true });
   const contextText = getActivityContext(activity.activity_type);
 
+  const handleClick = () => {
+    // Dispatch custom event for navigation
+    const event = new CustomEvent('openActivityDialog', {
+      detail: {
+        type: activity.activity_type.split('_')[0], // Extract base type (event, skill, etc.)
+        id: activity.content_id,
+        title: activity.title
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
   return (
-    <div className="mb-4">
-      <p className="text-sm text-gray-500 italic mb-1">
+    <div className="mb-2">
+      <p className="text-xs text-gray-500 italic mb-0.5">
         {contextText}
       </p>
       
       <div 
-        className="h-[88px] relative flex gap-4 p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow"
+        onClick={handleClick}
+        className="h-[64px] relative flex items-center gap-3 py-2 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
         style={{ 
           borderLeft: `4px solid ${activityColor}` 
         }}
       >
         {/* Activity Type Icon */}
         {IconComponent && (
-          <div className="flex-shrink-0 mt-1">
+          <div className="flex-shrink-0">
             <IconComponent 
-              className="h-5 w-5"
+              className="h-4 w-4"
               style={{ color: activityColor }}
             />
           </div>
@@ -45,28 +58,14 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Title */}
-          <p className="text-sm font-medium text-gray-900 mb-1 truncate">
+          <p className="text-sm font-medium text-gray-900 truncate">
             {activity.title}
           </p>
-
-          {/* Archive Button */}
-          <Button 
-            variant="ghost"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity mt-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(activity);
-            }}
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Time and Avatar */}
-        <div className="flex items-start gap-2 flex-shrink-0 pr-1">
-          <span className="text-xs text-gray-500 mt-1">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs text-gray-500">
             {timeAgo}
           </span>
           <Avatar className="h-6 w-6 flex-shrink-0">

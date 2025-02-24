@@ -35,7 +35,6 @@ const NotificationItem = ({
 }: NotificationItemProps) => {
   const [isRemoving, setIsRemoving] = useState(false);
   const [height, setHeight] = useState<number | undefined>();
-  const [showDateDialog, setShowDateDialog] = useState(false);
   
   const style = getNotificationStyle(type);
   const Icon = style.icon;
@@ -71,17 +70,22 @@ const NotificationItem = ({
     }, 300);
   };
 
+  const handleClick = () => {
+    onItemClick(type, itemId);
+  };
+
   return (
-    <div className="mb-4">
+    <div className="mb-2">
       {context && (
-        <p className="text-sm text-gray-500 italic mb-1">
+        <p className="text-xs text-gray-500 italic mb-0.5">
           {getContextText(context)}
         </p>
       )}
       
       <div
-        className={`notification-item h-[88px] flex items-start justify-between py-4 group 
-          ${style.backgroundColor} ${style.hoverColor} pr-8 pl-4 rounded-lg 
+        onClick={handleClick}
+        className={`notification-item h-[64px] flex items-center justify-between py-2 group cursor-pointer
+          ${style.backgroundColor} ${style.hoverColor} pr-6 pl-4 rounded-lg 
           transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
           ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
           ${isRead ? 'opacity-75' : ''}
@@ -93,30 +97,30 @@ const NotificationItem = ({
           paddingBottom: isRemoving ? 0 : undefined
         }}
       >
-        <div className="flex items-start gap-3 flex-1">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           {context?.avatarUrl ? (
-            <Avatar className="h-8 w-8 flex-shrink-0">
+            <Avatar className="h-6 w-6 flex-shrink-0">
               <AvatarImage src={context.avatarUrl} alt={context.neighborName} />
               <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
             </Avatar>
           ) : (
-            <Icon className={`h-5 w-5 flex-shrink-0 ${style.textColor}`} />
+            <Icon className={`h-4 w-4 flex-shrink-0 ${style.textColor}`} />
           )}
           <div className="min-w-0 flex-1">
-            <h3 className={`text-lg font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
+            <h3 className={`text-sm font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
               {title}
             </h3>
           </div>
         </div>
-        <div className="flex items-center flex-shrink-0">
+        <div className="flex items-center gap-2">
           {!isArchived && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hidden group-hover:inline-flex"
+              className="h-6 w-6 hidden group-hover:inline-flex"
               onClick={handleArchive}
             >
-              <Archive className="h-4 w-4" />
+              <Archive className="h-3 w-3" />
             </Button>
           )}
         </div>
