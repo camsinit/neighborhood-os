@@ -95,18 +95,18 @@ const NotificationItem = ({
 
   return (
     <div className="mb-4">
-      {/* Context text now sits above the notification card */}
+      {/* Context text now sits above the notification card with no left margin */}
       {context && (
         <p className="text-sm text-gray-500 italic mb-1">
           {getContextText(context)}
         </p>
       )}
       
-      {/* Notification card */}
+      {/* Notification card with adjusted padding */}
       <div
         onClick={handleClick}
         className={`notification-item flex items-start justify-between py-4 group 
-          ${style.backgroundColor} ${style.hoverColor} px-8 rounded-lg 
+          ${style.backgroundColor} ${style.hoverColor} pr-8 pl-4 rounded-lg 
           transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
           ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
           ${isRead ? 'opacity-75' : ''}
