@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 // Create an interface for our Activity type
 export interface Activity {
@@ -11,9 +12,7 @@ export interface Activity {
   content_id: string;
   content_type: string;
   title: string;
-  metadata: {
-    description?: string;
-  };
+  metadata: Json; // Update to use the Json type from Supabase
   profiles: {
     display_name: string;
     avatar_url: string;
