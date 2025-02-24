@@ -21,8 +21,6 @@ interface NotificationItemProps {
   onClose: () => void;
   onItemClick: (type: "safety" | "event" | "support" | "skills", id: string) => void;
   context?: NotificationContext;
-  actionLabel?: string;
-  actionType?: "rsvp" | "comment" | "help" | "respond" | "share" | "view" | "schedule";
 }
 
 const NotificationItem = ({ 
@@ -34,8 +32,6 @@ const NotificationItem = ({
   onClose, 
   onItemClick,
   context,
-  actionLabel = "View",
-  actionType = "view"
 }: NotificationItemProps) => {
   const [isRemoving, setIsRemoving] = useState(false);
   const [height, setHeight] = useState<number | undefined>();
@@ -59,36 +55,6 @@ const NotificationItem = ({
     }
   };
 
-  const handleClick = () => {
-    markAsRead(type, itemId);
-    onClose();
-
-    const navigationEvent = new CustomEvent('navigateToContent', {
-      detail: {
-        type,
-        itemId,
-        title
-      }
-    });
-    window.dispatchEvent(navigationEvent);
-
-    const pageMapping = {
-      event: '/calendar',
-      safety: '/safety',
-      skills: '/skills',
-      support: '/support',
-      care: '/care'
-    };
-
-    const targetPath = pageMapping[type];
-    if (targetPath) {
-      const pageLink = document.querySelector(`a[href="${targetPath}"]`) as HTMLAnchorElement;
-      if (pageLink) {
-        pageLink.click();
-      }
-    }
-  };
-
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -105,17 +71,6 @@ const NotificationItem = ({
     }, 300);
   };
 
-  const handleAction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (actionType === 'schedule' && type === 'skills') {
-      setShowDateDialog(true);
-      return;
-    }
-    
-    handleClick();
-  };
-
   return (
     <div className="mb-4">
       {context && (
@@ -125,7 +80,6 @@ const NotificationItem = ({
       )}
       
       <div
-        onClick={handleClick}
         className={`notification-item flex items-start justify-between py-4 group 
           ${style.backgroundColor} ${style.hoverColor} pr-8 pl-4 rounded-lg 
           transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
@@ -154,35 +108,19 @@ const NotificationItem = ({
             </h3>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           {!isArchived && (
             <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAction}
-              className={`hidden group-hover:inline-flex ${style.textColor} ${style.borderColor}`}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hidden group-hover:inline-flex"
+              onClick={handleArchive}
             >
-              {actionLabel}
+              <Archive className="h-4 w-4" />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hidden group-hover:inline-flex"
-            onClick={handleArchive}
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
         </div>
       </div>
-      
-      {actionType === 'schedule' && (
-        <FinalizeDateDialog
-          sessionId={itemId}
-          open={showDateDialog}
-          onOpenChange={setShowDateDialog}
-        />
-      )}
     </div>
   );
 };

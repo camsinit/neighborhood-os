@@ -1,12 +1,11 @@
 
 import { format, formatDistanceToNow } from "date-fns";
-import { User } from "lucide-react";
+import { User, Archive } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
-  getActivityIcon, 
-  getActionButton,
+  getActivityIcon,
   getActivityColor 
 } from "./utils/activityHelpers";
 
@@ -16,18 +15,13 @@ interface ActivityItemProps {
 }
 
 const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
-  // Get icon and styling details
-  const actionButton = getActionButton(activity);
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
-  
-  // Calculate time ago
   const timeAgo = formatDistanceToNow(new Date(activity.created_at), { addSuffix: true });
 
   return (
     <div 
-      className="relative flex gap-4 p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer group"
-      onClick={() => onAction(activity)}
+      className="relative flex gap-4 p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow"
       style={{ 
         borderLeft: `4px solid ${activityColor}` 
       }}
@@ -49,31 +43,26 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
           {activity.title}
         </p>
 
-        {/* Action Button */}
-        {actionButton && (
-          <Button 
-            variant="outline"
-            size="sm"
-            className="opacity-0 group-hover:opacity-100 transition-opacity mt-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(activity);
-            }}
-          >
-            <span className="flex items-center gap-2">
-              <actionButton.icon className="h-4 w-4" />
-              {actionButton.label}
-            </span>
-          </Button>
-        )}
+        {/* Archive Button */}
+        <Button 
+          variant="ghost"
+          size="sm"
+          className="opacity-0 group-hover:opacity-100 transition-opacity mt-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAction(activity);
+          }}
+        >
+          <Archive className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Time and Avatar */}
-      <div className="flex items-start gap-2 flex-shrink-0">
+      {/* Time and Avatar - Now with proper padding */}
+      <div className="flex items-start gap-2 flex-shrink-0 pr-1">
         <span className="text-xs text-gray-500 mt-1">
           {timeAgo}
         </span>
-        <Avatar className="h-6 w-6">
+        <Avatar className="h-6 w-6 flex-shrink-0">
           <AvatarImage src={activity.profiles.avatar_url} />
           <AvatarFallback>
             <User className="h-3 w-3" />
