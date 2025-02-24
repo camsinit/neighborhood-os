@@ -99,15 +99,15 @@ const NotificationItem = ({
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {context?.avatarUrl ? (
-            <Avatar className="h-6 w-6 flex-shrink-0">
+            <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarImage src={context.avatarUrl} alt={context.neighborName} />
               <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
             </Avatar>
           ) : (
-            <Icon className={`h-4 w-4 flex-shrink-0 ${style.textColor}`} />
+            <Icon className={`h-5 w-5 flex-shrink-0 ${style.textColor}`} />
           )}
           <div className="min-w-0 flex-1">
-            <h3 className={`text-sm font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
+            <h3 className={`text-base font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
               {title}
             </h3>
           </div>
@@ -117,10 +117,10 @@ const NotificationItem = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 hidden group-hover:inline-flex"
+              className="h-8 w-8 hidden group-hover:inline-flex"
               onClick={handleArchive}
             >
-              <Archive className="h-3 w-3" />
+              <Archive className="h-4 w-4" />
             </Button>
           )}
         </div>

@@ -50,7 +50,7 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
         {IconComponent && (
           <div className="flex-shrink-0">
             <IconComponent 
-              className="h-4 w-4"
+              className="h-5 w-5"
               style={{ color: activityColor }}
             />
           </div>
@@ -58,20 +58,20 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
+          <p className="text-base font-medium text-gray-900 truncate">
             {activity.title}
           </p>
         </div>
 
         {/* Time and Avatar */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-xs text-gray-500">
+          <span className="text-sm text-gray-500">
             {timeAgo}
           </span>
-          <Avatar className="h-6 w-6 flex-shrink-0">
+          <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={activity.profiles.avatar_url} />
             <AvatarFallback>
-              <User className="h-3 w-3" />
+              <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
         </div>

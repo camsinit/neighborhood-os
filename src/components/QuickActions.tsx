@@ -4,17 +4,19 @@ import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
+
 const QuickActions = () => {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<string | undefined>();
+
   const actions = [{
     icon: Calendar,
     label: "Add Event",
     onClick: () => setIsAddEventOpen(true),
-    className: "bg-[#D3E4FD] hover:bg-[#D3E4FD]/80 text-blue-700 border-blue-300"
+    className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
   }, {
     icon: Package,
     label: "Share an item",
@@ -23,7 +25,7 @@ const QuickActions = () => {
       setRequestView(undefined);
       setIsAddRequestOpen(true);
     },
-    className: "bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300"
+    className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
   }, {
     icon: Package,
     label: "Request an item",
@@ -32,7 +34,7 @@ const QuickActions = () => {
       setRequestView(undefined);
       setIsAddRequestOpen(true);
     },
-    className: "bg-emerald-100 hover:bg-emerald-200 text-emerald-700 border-emerald-300"
+    className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
   }, {
     icon: Wrench,
     label: "Share a Skill",
@@ -41,7 +43,7 @@ const QuickActions = () => {
       setRequestView('skills');
       setIsAddRequestOpen(true);
     },
-    className: "bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-300"
+    className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
   }, {
     icon: HelpCircle,
     label: "Request a Skill",
@@ -50,15 +52,16 @@ const QuickActions = () => {
       setRequestView('skills');
       setIsAddRequestOpen(true);
     },
-    className: "bg-[#E8F5FF] hover:bg-[#E8F5FF]/80 text-sky-700 border-sky-300"
+    className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
   }, {
     icon: AlertTriangle,
     label: "Add Safety Update",
     onClick: () => setIsSafetyUpdateOpen(true),
-    className: "bg-amber-100 hover:bg-amber-200 text-amber-700 border-amber-300"
+    className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
   }];
-  return <div className="w-full">
-      
+
+  return (
+    <div className="w-full">
       <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6">
         <p className="text-gray-700 text-sm">
           Welcome to your community hub. Here you can quickly access common actions
@@ -66,14 +69,23 @@ const QuickActions = () => {
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {actions.map(action => <Button key={action.label} variant="outline" className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} onClick={action.onClick}>
+        {actions.map(action => (
+          <Button 
+            key={action.label} 
+            variant="outline" 
+            className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} 
+            onClick={action.onClick}
+          >
             <action.icon className="h-5 w-5 mr-2" />
             <span className="text-sm">{action.label}</span>
-          </Button>)}
+          </Button>
+        ))}
       </div>
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
       <AddSafetyUpdateDialog open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
-    </div>;
+    </div>
+  );
 };
+
 export default QuickActions;
