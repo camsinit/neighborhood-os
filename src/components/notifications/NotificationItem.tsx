@@ -80,7 +80,7 @@ const NotificationItem = ({
       )}
       
       <div
-        className={`notification-item flex items-start justify-between py-4 group 
+        className={`notification-item h-[88px] flex items-start justify-between py-4 group 
           ${style.backgroundColor} ${style.hoverColor} pr-8 pl-4 rounded-lg 
           transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
           ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
@@ -93,22 +93,22 @@ const NotificationItem = ({
           paddingBottom: isRemoving ? 0 : undefined
         }}
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 flex-1">
           {context?.avatarUrl ? (
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarImage src={context.avatarUrl} alt={context.neighborName} />
               <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
             </Avatar>
           ) : (
-            <Icon className={`h-5 w-5 ${style.textColor}`} />
+            <Icon className={`h-5 w-5 flex-shrink-0 ${style.textColor}`} />
           )}
-          <div>
-            <h3 className={`text-lg font-medium ${isRead ? 'text-gray-500' : style.textColor}`}>
+          <div className="min-w-0 flex-1">
+            <h3 className={`text-lg font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
               {title}
             </h3>
           </div>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center flex-shrink-0">
           {!isArchived && (
             <Button
               variant="ghost"

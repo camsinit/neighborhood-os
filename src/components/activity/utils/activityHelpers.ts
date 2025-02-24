@@ -1,4 +1,3 @@
-
 import { Calendar, Book, Package, Heart, Shield } from "lucide-react";
 
 // Color mapping for different activity types
@@ -62,6 +61,31 @@ export const getActivityBackground = (type: string) => {
       return 'hover:bg-[#FDE1D3]/50';
     default:
       return 'hover:bg-gray-50';
+  }
+};
+
+export const getActivityContext = (type: string): string => {
+  switch (type) {
+    case 'event_created':
+      return "New event added to the calendar";
+    case 'event_rsvp':
+      return "New event RSVP received";
+    case 'skill_offered':
+      return "New skill offering available";
+    case 'skill_requested':
+      return "New skill request posted";
+    case 'good_shared':
+      return "New item shared with the community";
+    case 'good_requested':
+      return "New item request posted";
+    case 'care_offered':
+      return "New care offering available";
+    case 'care_requested':
+      return "New care request posted";
+    case 'safety_update':
+      return "New safety update posted";
+    default:
+      return "New activity in the neighborhood";
   }
 };
 
