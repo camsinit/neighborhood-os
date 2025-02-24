@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          actor_id: string
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          is_public: boolean | null
+          metadata: Json | null
+          title: string
+        }
+        Insert: {
+          activity_type: Database["public"]["Enums"]["activity_type"]
+          actor_id: string
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          title: string
+        }
+        Update: {
+          activity_type?: Database["public"]["Enums"]["activity_type"]
+          actor_id?: string
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          metadata?: Json | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_requests: {
         Row: {
           archived_at: string | null
@@ -739,6 +783,16 @@ export type Database = {
       }
     }
     Enums: {
+      activity_type:
+        | "event_created"
+        | "event_rsvp"
+        | "skill_offered"
+        | "skill_requested"
+        | "good_shared"
+        | "good_requested"
+        | "care_offered"
+        | "care_requested"
+        | "safety_update"
       notification_action_type:
         | "rsvp"
         | "comment"
