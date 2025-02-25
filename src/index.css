@@ -73,3 +73,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes rainbow-border {
+  0% { border-color: #ff0000; }
+  17% { border-color: #ff8000; }
+  33% { border-color: #ffff00; }
+  50% { border-color: #00ff00; }
+  67% { border-color: #0000ff; }
+  83% { border-color: #8000ff; }
+  100% { border-color: #ff0000; }
+}
+
+.rainbow-highlight {
+  animation: rainbow-border 2s linear infinite;
+  border: 2px solid;
+}

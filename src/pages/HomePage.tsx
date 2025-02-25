@@ -1,5 +1,7 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,12 +10,11 @@ import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 import NotificationItem from "@/components/notifications/NotificationItem";
-import { useToast } from "@/components/ui/use-toast";
+
 const HomePage = () => {
-  const {
-    toast
-  } = useToast();
   const [showArchived, setShowArchived] = useState(false);
+  const navigate = useNavigate();
+
   const {
     data: notifications,
     refetch
@@ -97,37 +98,39 @@ const HomePage = () => {
       })) || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
-  const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
-    const event = new CustomEvent('openItemDialog', {
+
+  const handleItemClick = (type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", id: string) => {
+    // Map notification types to their respective routes
+    const routeMap = {
+      safety: "/safety",
+      event: "/calendar",
+      support: "/care",
+      skills: "/skills",
+      goods: "/goods",
+      neighbors: "/neighbors"
+    };
+
+    // Navigate to the appropriate page
+    navigate(routeMap[type]);
+
+    // Dispatch an event that the target page will listen for
+    const event = new CustomEvent('highlightItem', {
       detail: {
         type,
-        id
+        id,
       }
     });
-    window.dispatchEvent(event);
-    if (type === 'event' || type === 'support') {
-      toast({
-        title: "Navigating to item",
-        description: "The relevant section has been highlighted for you.",
-        duration: 3000
-      });
-      setTimeout(() => {
-        const section = type === 'event' ? document.querySelector('.calendar-container') : document.querySelector('.mutual-support-container');
-        if (section) {
-          section.classList.add('highlight-section');
-          setTimeout(() => {
-            section.classList.remove('highlight-section');
-          }, 2000);
-        }
-        section?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
-        });
-      }, 100);
-    }
+    
+    // Small delay to ensure navigation completes first
+    setTimeout(() => {
+      window.dispatchEvent(event);
+    }, 100);
+
     refetch();
   };
-  return <div className="min-h-full w-full">
+
+  return (
+    <div className="min-h-full w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 space-y-8">
           <section>
@@ -141,20 +144,41 @@ const HomePage = () => {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
-                <Button variant="outline" size="sm" className="flex items-center" onClick={() => setShowArchived(!showArchived)}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center" 
+                  onClick={() => setShowArchived(!showArchived)}
+                >
                   <Archive className="h-4 w-4" />
                   Archive
                 </Button>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0 py-[3px]">
                 <ScrollArea className="h-[550px]">
-                  {notifications?.length ? <div className="space-y-1">
-                      {notifications.map(notification => <NotificationItem key={notification.id} title={notification.title} type={notification.type} itemId={notification.id} isRead={notification.is_read} isArchived={notification.is_archived} onClose={() => refetch()} onItemClick={handleItemClick} context={notification.context} />)}
-                    </div> : <div className="flex items-center justify-center h-full">
+                  {notifications?.length ? (
+                    <div className="space-y-1">
+                      {notifications.map(notification => (
+                        <NotificationItem
+                          key={notification.id}
+                          title={notification.title}
+                          type={notification.type}
+                          itemId={notification.id}
+                          isRead={notification.is_read}
+                          isArchived={notification.is_archived}
+                          onClose={() => refetch()}
+                          onItemClick={handleItemClick}
+                          context={notification.context}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
                       <p className="text-gray-500">
                         {showArchived ? "No archived notifications" : "No new notifications"}
                       </p>
-                    </div>}
+                    </div>
+                  )}
                 </ScrollArea>
               </div>
             </section>
@@ -168,6 +192,8 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HomePage;
