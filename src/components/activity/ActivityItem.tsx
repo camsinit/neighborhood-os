@@ -1,4 +1,3 @@
-
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, Archive } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -39,12 +38,10 @@ const ActivityItem = ({
   const contextText = getActivityContext(activity.activity_type);
 
   const handleClick = () => {
-    // Dispatch custom event for navigation
-    const event = new CustomEvent('openActivityDialog', {
+    const event = new CustomEvent('highlightItem', {
       detail: {
-        type: activity.activity_type.split('_')[0], // Extract base type (event, skill, etc.)
-        id: activity.content_id,
-        title: activity.title
+        type: activity.activity_type.split('_')[0],
+        id: activity.content_id
       }
     });
     window.dispatchEvent(event);
@@ -63,7 +60,6 @@ const ActivityItem = ({
           borderLeft: `4px solid ${activityColor}`
         }}
       >
-        {/* Activity Type Icon */}
         {IconComponent && (
           <div className="flex-shrink-0">
             <IconComponent 
@@ -75,14 +71,12 @@ const ActivityItem = ({
           </div>
         )}
 
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <p className="text-base font-medium text-gray-900 truncate">
             {activity.title}
           </p>
         </div>
 
-        {/* Time and Avatar */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-sm text-gray-500">
             {timeAgo}
