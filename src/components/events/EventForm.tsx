@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +14,14 @@ interface EventFormProps {
   onClose: () => void;
   onAddEvent?: (event: any) => void;
   initialValues?: {
-    title: string;
-    description: string;
-    date: string;
-    time: string;
-    location: string;
-    isRecurring: boolean;
-    recurrencePattern: string;
-    recurrenceEndDate: string;
+    title?: string;
+    description?: string;
+    date?: string;
+    time?: string;
+    location?: string;
+    isRecurring?: boolean;
+    recurrencePattern?: string;
+    recurrenceEndDate?: string;
   };
   eventId?: string;
   mode?: 'create' | 'edit';
@@ -30,19 +31,19 @@ interface EventFormProps {
 const EventForm = ({ 
   onClose, 
   onAddEvent, 
-  initialValues,
+  initialValues = {},
   eventId,
   mode = 'create',
   deleteButton
 }: EventFormProps) => {
-  const [title, setTitle] = useState(initialValues?.title || "");
-  const [description, setDescription] = useState(initialValues?.description || "");
-  const [date, setDate] = useState(initialValues?.date || "");
-  const [time, setTime] = useState(initialValues?.time || "");
-  const [location, setLocation] = useState(initialValues?.location || "");
-  const [isRecurring, setIsRecurring] = useState(initialValues?.isRecurring || false);
-  const [recurrencePattern, setRecurrencePattern] = useState(initialValues?.recurrencePattern || "weekly");
-  const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialValues?.recurrenceEndDate || "");
+  const [title, setTitle] = useState(initialValues.title || "");
+  const [description, setDescription] = useState(initialValues.description || "");
+  const [date, setDate] = useState(initialValues.date || "");
+  const [time, setTime] = useState(initialValues.time || "");
+  const [location, setLocation] = useState(initialValues.location || "");
+  const [isRecurring, setIsRecurring] = useState(initialValues.isRecurring || false);
+  const [recurrencePattern, setRecurrencePattern] = useState(initialValues.recurrencePattern || "weekly");
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialValues.recurrenceEndDate || "");
   
   const queryClient = useQueryClient();
   
@@ -62,14 +63,6 @@ const EventForm = ({
           recurrenceEndDate,
         });
       }
-      setTitle("");
-      setDescription("");
-      setDate("");
-      setTime("");
-      setLocation("");
-      setIsRecurring(false);
-      setRecurrencePattern("weekly");
-      setRecurrenceEndDate("");
     }
   });
 
