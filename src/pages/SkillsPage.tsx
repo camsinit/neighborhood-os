@@ -1,16 +1,14 @@
-
 import React from 'react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
 import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 
-// Define category icons mapping
 const categoryIcons = {
   creative: Palette,
-  trade: Wrench, // Changed from Tool to Wrench
+  trade: Wrench,
   technology: Code,
   education: GraduationCap,
   wellness: Heart,
@@ -19,6 +17,29 @@ const categoryIcons = {
 const SkillsPage = () => {
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+
+  useEffect(() => {
+    const handleHighlightItem = (e: CustomEvent) => {
+      if (e.detail.type === 'skills') {
+        setTimeout(() => {
+          const skillCard = document.querySelector(`[data-skill-id="${e.detail.id}"]`);
+          if (skillCard) {
+            skillCard.classList.add('rainbow-highlight');
+            skillCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+              skillCard.classList.remove('rainbow-highlight');
+            }, 2000);
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
 
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);

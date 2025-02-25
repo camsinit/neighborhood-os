@@ -1,7 +1,27 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
 
 const CalendarPage = () => {
+  useEffect(() => {
+    const handleHighlightItem = (e: CustomEvent) => {
+      if (e.detail.type === 'event') {
+        // Dispatch a custom event for the calendar component
+        const event = new CustomEvent('navigateToEvent', {
+          detail: {
+            eventId: e.detail.id
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    };
+
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
+
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#F2FCE2] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

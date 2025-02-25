@@ -7,36 +7,29 @@ const SafetyPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const handleNavigateToContent = (e: CustomEvent) => {
+    const handleHighlightItem = (e: CustomEvent) => {
       if (e.detail.type === 'safety') {
         // Find and highlight the safety update card
         setTimeout(() => {
-          const updateCard = document.querySelector(`[data-safety-id="${e.detail.itemId}"]`);
+          const updateCard = document.querySelector(`[data-safety-id="${e.detail.id}"]`);
           if (updateCard) {
-            updateCard.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            updateCard.classList.add('rainbow-highlight');
             updateCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             // Remove highlight after animation
             setTimeout(() => {
-              updateCard.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+              updateCard.classList.remove('rainbow-highlight');
             }, 2000);
           }
-
-          // Show toast
-          toast({
-            title: "Item Located",
-            description: `Navigated to "${e.detail.title}"`,
-            duration: 3000,
-          });
         }, 100);
       }
     };
 
-    window.addEventListener('navigateToContent', handleNavigateToContent as EventListener);
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     return () => {
-      window.removeEventListener('navigateToContent', handleNavigateToContent as EventListener);
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
     };
-  }, [toast]);
+  }, []);
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#FDE1D3] to-white">

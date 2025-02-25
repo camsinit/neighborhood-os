@@ -1,10 +1,34 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 const NeighborsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const handleHighlightItem = (e: CustomEvent) => {
+      if (e.detail.type === 'neighbors') {
+        setTimeout(() => {
+          const neighborCard = document.querySelector(`[data-neighbor-id="${e.detail.id}"]`);
+          if (neighborCard) {
+            neighborCard.classList.add('rainbow-highlight');
+            neighborCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+              neighborCard.classList.remove('rainbow-highlight');
+            }, 2000);
+          }
+        }, 100);
+      }
+    };
+
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#D3E4FD] to-white">
