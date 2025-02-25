@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   addWeeks, 
@@ -79,7 +80,6 @@ const CommunityCalendar = () => {
   const monthEnd = endOfMonth(currentDate);
   
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const monthDates = eachDayOfInterval({ start: startOfWeek(monthStart), end: endOfWeek(monthEnd) });
 
   const handlePrevious = () => {
     if (view === 'week') {
@@ -140,11 +140,9 @@ const CommunityCalendar = () => {
           />
         ) : (
           <MonthView 
-            monthDates={monthDates}
             currentDate={currentDate}
-            events={events}
+            events={events || []}
             isLoading={isLoading}
-            getEventsForDate={getEventsForDate}
           />
         )}
       </div>
