@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowUpRight } from 'lucide-react';
@@ -27,6 +26,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   if (type === 'request') {
     return (
       <div 
+        data-skill-id={skill.id}
         className="relative flex-shrink-0 w-[250px] h-[120px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
       >
         <ArrowUpRight className="absolute top-2 right-2 h-4 w-4 text-gray-400" />
@@ -77,6 +77,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   return (
     <>
       <div 
+        data-skill-id={skill.id}
         className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
         onClick={() => setIsDetailsOpen(true)}
       >

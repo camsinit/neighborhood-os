@@ -96,6 +96,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
         {filteredUsers?.map(user => (
           <Card 
             key={user.id} 
+            data-neighbor-id={user.id}
             className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => setSelectedUser(user)}
           >

@@ -58,7 +58,10 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   };
 
   const eventPreview = (
-    <div className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full`}>
+    <div 
+      data-event-id={event.id}
+      className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full`}
+    >
       <div className="font-medium line-clamp-2">{event.title}</div>
     </div>
   );
