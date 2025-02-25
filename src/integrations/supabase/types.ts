@@ -254,6 +254,150 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by_id: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          id: string
+          invite_code: string
+          inviter_id: string
+          neighborhood_id: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          invite_code: string
+          inviter_id: string
+          neighborhood_id: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          id?: string
+          invite_code?: string
+          inviter_id?: string
+          neighborhood_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_accepted_by_id_fkey"
+            columns: ["accepted_by_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      neighborhood_members: {
+        Row: {
+          id: string
+          joined_at: string
+          neighborhood_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          neighborhood_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          neighborhood_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighborhood_members_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "neighborhood_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      neighborhoods: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string
+          geo_boundary: Json | null
+          id: string
+          name: string
+          state: string | null
+          zip: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by: string
+          geo_boundary?: Json | null
+          id?: string
+          name: string
+          state?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string
+          geo_boundary?: Json | null
+          id?: string
+          name?: string
+          state?: string | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighborhoods_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           action_label: string
@@ -793,6 +937,7 @@ export type Database = {
         | "care_offered"
         | "care_requested"
         | "safety_update"
+      invitation_status: "pending" | "accepted" | "expired" | "deleted"
       notification_action_type:
         | "rsvp"
         | "comment"
