@@ -1,9 +1,11 @@
+
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, Archive } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
+import { useNavigate } from "react-router-dom";
 
 interface ActivityItemProps {
   activity: Activity;
@@ -32,19 +34,26 @@ const ActivityItem = ({
   activity,
   onAction
 }: ActivityItemProps) => {
+  const navigate = useNavigate();
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
   const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
   const contextText = getActivityContext(activity.activity_type);
 
   const handleClick = () => {
-    const event = new CustomEvent('highlightItem', {
-      detail: {
-        type: activity.activity_type.split('_')[0],
-        id: activity.content_id
-      }
-    });
-    window.dispatchEvent(event);
+    // First navigate to calendar page
+    navigate('/calendar');
+    
+    // Then dispatch the highlight event after a short delay to ensure navigation is complete
+    setTimeout(() => {
+      const event = new CustomEvent('highlightItem', {
+        detail: {
+          type: activity.activity_type.split('_')[0],
+          id: activity.content_id
+        }
+      });
+      window.dispatchEvent(event);
+    }, 100);
   };
 
   return (
