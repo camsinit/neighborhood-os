@@ -12,6 +12,7 @@ import CarePage from "@/pages/CarePage";
 import SafetyPage from "@/pages/SafetyPage";
 import NeighborsPage from "@/pages/NeighborsPage";
 import Login from "@/pages/Login";
+import JoinPage from "@/pages/JoinPage";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Sidebar from "@/components/layout/Sidebar";
 import { useState, useEffect } from "react";
@@ -83,6 +84,7 @@ const App = () => {
             <TooltipProvider>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/join/:inviteCode" element={<JoinPage />} />
                 <Route
                   path="/"
                   element={
