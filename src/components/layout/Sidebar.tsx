@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import InviteDialog from "@/components/InviteDialog";
 
+// Add comments to explain what each color represents
 const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
   const location = useLocation();
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -28,6 +29,7 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
     enabled: !!useUser()?.id,
   });
 
+  // Main navigation item (Home) doesn't need a theme color
   const mainNavItems = [
     { 
       icon: Home, 
@@ -36,36 +38,43 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
     }
   ];
 
+  // Define middle navigation items with their respective theme colors
   const middleNavItems = [
     { 
       icon: Calendar, 
       label: "Calendar", 
-      href: "/calendar" 
+      href: "/calendar",
+      color: "#0EA5E9" // Calendar uses a bright blue theme
     },
     { 
       icon: Brain, 
       label: "Skills", 
-      href: "/skills" 
+      href: "/skills",
+      color: "#9b87f5" // Skills uses a purple theme
     },
     { 
       icon: Gift, 
       label: "Goods", 
-      href: "/goods" 
+      href: "/goods",
+      color: "#F97316" // Goods uses an orange theme
     },
     { 
       icon: Heart, 
       label: "Care", 
-      href: "/care" 
+      href: "/care",
+      color: "#22C55E" // Care uses a green theme
     },
     { 
       icon: Shield, 
       label: "Safety", 
-      href: "/safety" 
+      href: "/safety",
+      color: "#EA384C" // Safety uses a red theme
     },
     {
       icon: Users,
       label: "Neighbors",
-      href: "/neighbors"
+      href: "/neighbors",
+      color: "#7E69AB" // Neighbors uses a secondary purple theme
     },
   ];
 
@@ -115,7 +124,10 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
                     isActive && "bg-gray-100"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon 
+                    className="h-5 w-5" 
+                    color={item.color} // Apply the theme color to the icon
+                  />
                   {item.label}
                 </Button>
               </Link>
