@@ -1,15 +1,18 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users } from "lucide-react";
+import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import InviteDialog from "@/components/InviteDialog";
 
 const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
   const location = useLocation();
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const { data: profile } = useQuery({
     queryKey: ['profile', useUser()?.id],
     queryFn: async () => {
@@ -131,8 +134,20 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
             <Settings className="h-5 w-5" />
             Settings
           </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-base font-medium"
+            onClick={() => setIsInviteOpen(true)}
+          >
+            <UserPlus className="h-5 w-5" />
+            Invite Neighbor
+          </Button>
         </div>
       </nav>
+      <InviteDialog 
+        open={isInviteOpen} 
+        onOpenChange={setIsInviteOpen} 
+      />
     </div>
   );
 };
