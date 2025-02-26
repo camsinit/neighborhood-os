@@ -33,12 +33,14 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     async function fetchNeighborhood() {
       if (!user) {
+        console.log("[NeighborhoodContext] No user found, skipping fetch");
         setIsLoading(false);
         return;
       }
 
+      console.log("[NeighborhoodContext] Fetching neighborhood for user:", user.id);
+
       try {
-        // Fetch the user's neighborhood
         const { data, error } = await supabase
           .from('neighborhood_members')
           .select(`
@@ -52,13 +54,22 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           .eq('user_id', user.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("[NeighborhoodContext] Error fetching neighborhood:", error);
+          throw error;
+        }
+
+        console.log("[NeighborhoodContext] Fetched data:", data);
 
         if (data?.neighborhoods) {
+          console.log("[NeighborhoodContext] Setting neighborhood:", data.neighborhoods);
           setCurrentNeighborhood(data.neighborhoods as Neighborhood);
+        } else {
+          console.log("[NeighborhoodContext] No neighborhood found for user");
+          setCurrentNeighborhood(null);
         }
       } catch (err) {
-        console.error('Error fetching neighborhood:', err);
+        console.error("[NeighborhoodContext] Error:", err);
         setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       } finally {
         setIsLoading(false);
@@ -67,6 +78,15 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
 
     fetchNeighborhood();
   }, [user]);
+
+  // Log state changes
+  useEffect(() => {
+    console.log("[NeighborhoodContext] State updated:", {
+      currentNeighborhood,
+      isLoading,
+      error
+    });
+  }, [currentNeighborhood, isLoading, error]);
 
   return (
     <NeighborhoodContext.Provider value={{ currentNeighborhood, isLoading, error }}>

@@ -16,24 +16,34 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
-// Component for displaying the invite dialog
 const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const [email, setEmail] = useState("");
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const { toast } = useToast();
   const user = useUser();
-  const { currentNeighborhood, isLoading } = useNeighborhood();
+  const { currentNeighborhood, isLoading, error } = useNeighborhood();
 
-  // Function to generate and copy invite link
+  // Debug log when component renders
+  console.log("[InviteDialog] Render state:", {
+    user: !!user,
+    currentNeighborhood,
+    isLoading,
+    error,
+    isGeneratingLink
+  });
+
   const generateAndCopyLink = async () => {
-    if (!user || !currentNeighborhood) return;
+    if (!user || !currentNeighborhood) {
+      console.log("[InviteDialog] Cannot generate link:", { user: !!user, currentNeighborhood });
+      return;
+    }
     
     setIsGeneratingLink(true);
     try {
-      // Generate a unique invite code
       const inviteCode = crypto.randomUUID();
       
-      // Create invitation record in the database
+      console.log("[InviteDialog] Generating invite for neighborhood:", currentNeighborhood.id);
+      
       const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
         inviter_id: user.id,
@@ -42,10 +52,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
       if (error) throw error;
 
-      // Create the full invite URL
       const inviteUrl = `${window.location.origin}/join/${inviteCode}`;
-      
-      // Copy to clipboard
       await navigator.clipboard.writeText(inviteUrl);
       
       toast({
@@ -53,6 +60,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         description: "You can now share this link with your neighbor.",
       });
     } catch (error: any) {
+      console.error("[InviteDialog] Error generating invite:", error);
       toast({
         title: "Error generating invite link",
         description: error.message,
@@ -63,7 +71,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     }
   };
 
-  // Function to send email invite (to be implemented with Resend)
   const sendEmailInvite = async () => {
     toast({
       title: "Coming soon!",
@@ -73,7 +80,12 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   };
 
   if (isLoading) {
+    console.log("[InviteDialog] Still loading...");
     return null;
+  }
+
+  if (error) {
+    console.error("[InviteDialog] Error state:", error);
   }
 
   return (
@@ -112,7 +124,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
               disabled={isGeneratingLink || !currentNeighborhood}
             >
               <Copy className="mr-2 h-4 w-4" />
-              {isGeneratingLink ? "Generating..." : "Generate and copy link"}
+              {isGeneratingLink 
+                ? "Generating..." 
+                : !currentNeighborhood 
+                  ? "No neighborhood available" 
+                  : "Generate and copy link"}
             </Button>
           </div>
         </div>
