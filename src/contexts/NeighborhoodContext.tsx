@@ -51,50 +51,58 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       });
 
       try {
-        // Fetch neighborhood data - use maybeSingle() instead of single() to handle no results case
-        const { data, error: fetchError } = await supabase
+        // First fetch the neighborhood_id
+        const { data: membershipData, error: membershipError } = await supabase
           .from('neighborhood_members')
-          .select(`
-            neighborhoods:neighborhood_id (
-              id,
-              name,
-              created_by
-            )
-          `)
+          .select('neighborhood_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
-          .maybeSingle();
+          .single();
 
-        if (fetchError) {
-          console.error("[NeighborhoodContext] Fetch error:", {
-            error: fetchError,
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          });
-          throw new Error(`Error fetching neighborhood: ${fetchError.message}`);
-        }
-
-        console.log("[NeighborhoodContext] Fetch result:", {
-          data,
-          userId: user.id,
-          timestamp: new Date().toISOString()
-        });
-
-        if (!data?.neighborhoods) {
-          console.log("[NeighborhoodContext] No neighborhood found for user", {
+        if (membershipError) {
+          console.error("[NeighborhoodContext] Membership fetch error:", {
+            error: membershipError,
             userId: user.id,
             timestamp: new Date().toISOString()
           });
           setCurrentNeighborhood(null);
-        } else {
-          console.log("[NeighborhoodContext] Setting neighborhood:", {
-            neighborhood: data.neighborhoods,
+          setIsLoading(false);
+          return;
+        }
+
+        if (!membershipData?.neighborhood_id) {
+          console.log("[NeighborhoodContext] No active neighborhood membership found", {
             userId: user.id,
             timestamp: new Date().toISOString()
           });
-          setCurrentNeighborhood(data.neighborhoods as Neighborhood);
+          setCurrentNeighborhood(null);
+          setIsLoading(false);
+          return;
         }
 
+        // Then fetch the neighborhood details
+        const { data: neighborhoodData, error: neighborhoodError } = await supabase
+          .from('neighborhoods')
+          .select('id, name, created_by')
+          .eq('id', membershipData.neighborhood_id)
+          .single();
+
+        if (neighborhoodError) {
+          console.error("[NeighborhoodContext] Neighborhood fetch error:", {
+            error: neighborhoodError,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          throw new Error(`Error fetching neighborhood: ${neighborhoodError.message}`);
+        }
+
+        console.log("[NeighborhoodContext] Setting neighborhood:", {
+          neighborhood: neighborhoodData,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
+        
+        setCurrentNeighborhood(neighborhoodData as Neighborhood);
       } catch (err) {
         console.error("[NeighborhoodContext] Critical error:", {
           error: err,
