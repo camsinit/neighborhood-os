@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -15,36 +16,74 @@ interface UserDirectoryProps {
 export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+  const { currentNeighborhood } = useNeighborhood();
 
   // Query to fetch users and their profiles
   const {
     data: users,
     isLoading
   } = useQuery({
-    queryKey: ['users-with-roles'],
+    // Include neighborhood in query key to refetch when it changes
+    queryKey: ['users-with-roles', currentNeighborhood?.id],
     queryFn: async () => {
-      // First get all users from auth.users through profiles
-      const {
-        data: profiles,
-        error: profilesError
-      } = await supabase
+      if (!currentNeighborhood?.id) {
+        console.log("[UserDirectory] No neighborhood found, skipping fetch");
+        return [];
+      }
+
+      console.log("[UserDirectory] Fetching users for neighborhood:", currentNeighborhood.id);
+
+      // First get all users from the same neighborhood
+      const { data: neighborhoodMembers, error: membersError } = await supabase
+        .from('neighborhood_members')
+        .select('user_id')
+        .eq('neighborhood_id', currentNeighborhood.id)
+        .eq('status', 'active');
+
+      if (membersError) {
+        console.error("[UserDirectory] Error fetching neighborhood members:", membersError);
+        throw membersError;
+      }
+
+      if (!neighborhoodMembers?.length) {
+        console.log("[UserDirectory] No members found in neighborhood");
+        return [];
+      }
+
+      const memberIds = neighborhoodMembers.map(member => member.user_id);
+
+      // Then get profiles for these users
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio');
-      if (profilesError) throw profilesError;
+        .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
+        .in('id', memberIds);
+
+      if (profilesError) {
+        console.error("[UserDirectory] Error fetching profiles:", profilesError);
+        throw profilesError;
+      }
 
       // Then get user emails from auth.users
-      const {
-        data: authUsers,
-        error: authError
-      } = await supabase.from('auth_users_view').select('id, email, created_at');
-      if (authError) throw authError;
+      const { data: authUsers, error: authError } = await supabase
+        .from('auth_users_view')
+        .select('id, email, created_at')
+        .in('id', memberIds);
+
+      if (authError) {
+        console.error("[UserDirectory] Error fetching auth users:", authError);
+        throw authError;
+      }
 
       // Then get user roles
-      const {
-        data: userRoles,
-        error: rolesError
-      } = await supabase.from('user_roles').select('user_id, role');
-      if (rolesError) throw rolesError;
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', memberIds);
+
+      if (rolesError) {
+        console.error("[UserDirectory] Error fetching user roles:", rolesError);
+        throw rolesError;
+      }
 
       // Combine the data
       const usersWithProfiles = profiles.map((profile: any) => {
@@ -73,8 +112,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
         };
       });
 
+      console.log("[UserDirectory] Found users:", usersWithProfiles.length);
       return usersWithProfiles as UserWithRole[];
-    }
+    },
+    enabled: !!currentNeighborhood?.id
   });
 
   // Filter users based on search query
