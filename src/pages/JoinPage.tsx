@@ -1,11 +1,12 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { useUser } from "@supabase/auth-helpers-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 // Define the shape of our invitation data
 interface Invitation {
@@ -22,8 +23,11 @@ const JoinPage = () => {
   const { inviteCode } = useParams();
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const user = useUser();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Fetch the invitation details
   useEffect(() => {
@@ -64,6 +68,70 @@ const JoinPage = () => {
     }
   }, [inviteCode]);
 
+  const handleJoin = async () => {
+    if (!user || !invitation) return;
+
+    setJoining(true);
+    try {
+      // First check if user is already a member
+      const { data: existingMember } = await supabase
+        .from('neighborhood_members')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('neighborhood_id', invitation.neighborhood_id)
+        .single();
+
+      if (existingMember) {
+        toast({
+          title: "Already a member",
+          description: "You are already a member of this neighborhood.",
+        });
+        navigate('/');
+        return;
+      }
+
+      // Add user to neighborhood
+      const { error: memberError } = await supabase
+        .from('neighborhood_members')
+        .insert({
+          user_id: user.id,
+          neighborhood_id: invitation.neighborhood_id,
+          status: 'active'
+        });
+
+      if (memberError) throw memberError;
+
+      // Update invitation status
+      const { error: inviteError } = await supabase
+        .from('invitations')
+        .update({
+          status: 'accepted',
+          accepted_by_id: user.id,
+          accepted_at: new Date().toISOString()
+        })
+        .eq('id', invitation.id);
+
+      if (inviteError) throw inviteError;
+
+      toast({
+        title: "Welcome!",
+        description: `You've successfully joined ${invitation.neighborhoods.name}!`,
+      });
+
+      // Redirect to home page
+      navigate('/');
+    } catch (err) {
+      console.error("[JoinPage] Error joining neighborhood:", err);
+      toast({
+        title: "Error",
+        description: "Failed to join neighborhood. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -80,7 +148,7 @@ const JoinPage = () => {
           <p className="text-center text-gray-600 mb-4">
             {error || "This invitation link is invalid or has expired."}
           </p>
-          <Button className="w-full" onClick={() => window.location.href = "/"}>
+          <Button className="w-full" onClick={() => navigate('/')}>
             Go Home
           </Button>
         </Card>
@@ -88,7 +156,6 @@ const JoinPage = () => {
     );
   }
 
-  // For now, just show the invitation details
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="p-6 max-w-md w-full">
@@ -100,7 +167,7 @@ const JoinPage = () => {
         </p>
         {!user ? (
           <div className="space-y-4">
-            <Button className="w-full" onClick={() => window.location.href = "/login"}>
+            <Button className="w-full" onClick={() => navigate('/login')}>
               Sign in to join
             </Button>
             <p className="text-center text-sm text-gray-500">
@@ -113,12 +180,10 @@ const JoinPage = () => {
         ) : (
           <Button 
             className="w-full"
-            onClick={async () => {
-              // We'll implement this in the next step
-              console.log("Join functionality coming soon");
-            }}
+            onClick={handleJoin}
+            disabled={joining}
           >
-            Join Neighborhood
+            {joining ? "Joining..." : "Join Neighborhood"}
           </Button>
         )}
       </Card>

@@ -918,6 +918,12 @@ export type Database = {
       }
     }
     Functions: {
+      add_initial_super_admin: {
+        Args: {
+          admin_email: string
+        }
+        Returns: undefined
+      }
       check_user_role: {
         Args: {
           user_id: string
