@@ -11,7 +11,7 @@ interface Neighborhood {
 }
 
 interface NeighborhoodContextType {
-  currentNeighborhood: Neighborhood | null;
+  currentNeighborhood: Neighborhood | null; // Still null for loading state
   isLoading: boolean;
   error: Error | null;
 }
@@ -45,18 +45,7 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       console.log("[NeighborhoodContext] Starting neighborhood fetch for user:", user.id);
 
       try {
-        // First, verify the neighborhood_members table exists
-        const { data: tableInfo, error: tableError } = await supabase
-          .from('neighborhood_members')
-          .select('*')
-          .limit(1);
-
-        if (tableError) {
-          console.error("[NeighborhoodContext] Table check error:", tableError);
-          throw new Error(`Database error: ${tableError.message}`);
-        }
-
-        // Now fetch the actual neighborhood data
+        // Fetch neighborhood data - use single() since every user must have a neighborhood
         const { data, error: fetchError } = await supabase
           .from('neighborhood_members')
           .select(`
@@ -67,25 +56,22 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
             )
           `)
           .eq('user_id', user.id)
-          .maybeSingle();
+          .single();
 
         if (fetchError) {
           console.error("[NeighborhoodContext] Fetch error:", fetchError);
-          throw new Error(`Failed to fetch neighborhood: ${fetchError.message}`);
+          throw new Error(`User has no assigned neighborhood. This should never happen. Error: ${fetchError.message}`);
         }
 
-        console.log("[NeighborhoodContext] Fetched data:", data);
-
-        if (data?.neighborhoods) {
-          console.log("[NeighborhoodContext] Setting neighborhood:", data.neighborhoods);
-          setCurrentNeighborhood(data.neighborhoods as Neighborhood);
-        } else {
-          console.log("[NeighborhoodContext] No neighborhood found for user");
-          setCurrentNeighborhood(null);
+        if (!data?.neighborhoods) {
+          throw new Error('Neighborhood data is missing. This should never happen.');
         }
+
+        console.log("[NeighborhoodContext] Setting neighborhood:", data.neighborhoods);
+        setCurrentNeighborhood(data.neighborhoods as Neighborhood);
 
       } catch (err) {
-        console.error("[NeighborhoodContext] Detailed error:", err);
+        console.error("[NeighborhoodContext] Critical error:", err);
         setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       } finally {
         setIsLoading(false);
