@@ -3,9 +3,11 @@ import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 const NeighborsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { currentNeighborhood } = useNeighborhood();
 
   useEffect(() => {
     const handleHighlightItem = (e: CustomEvent) => {
@@ -38,8 +40,8 @@ const NeighborsPage = () => {
           
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
             <p className="text-gray-700 text-sm">
-              Meet and connect with your neighbors. Browse profiles, discover shared interests, 
-              and build meaningful connections within your community.
+              Welcome to {currentNeighborhood?.name || 'your neighborhood'}! Meet and connect with your neighbors. 
+              Browse profiles, discover shared interests, and build meaningful connections within your community.
             </p>
           </div>
 
