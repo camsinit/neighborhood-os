@@ -11,7 +11,7 @@ interface Neighborhood {
 }
 
 interface NeighborhoodContextType {
-  currentNeighborhood: Neighborhood | null; // Still null for loading state
+  currentNeighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -37,15 +37,21 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       setIsLoading(true);
 
       if (!user) {
-        console.log("[NeighborhoodContext] No user found, skipping fetch");
+        console.log("[NeighborhoodContext] No user found, skipping fetch", {
+          userId: null,
+          timestamp: new Date().toISOString()
+        });
         setIsLoading(false);
         return;
       }
 
-      console.log("[NeighborhoodContext] Starting neighborhood fetch for user:", user.id);
+      console.log("[NeighborhoodContext] Starting neighborhood fetch for user:", {
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
 
       try {
-        // Fetch neighborhood data - use single() since every user must have a neighborhood
+        // Fetch neighborhood data - use maybeSingle() instead of single() to handle no results case
         const { data, error: fetchError } = await supabase
           .from('neighborhood_members')
           .select(`
@@ -56,22 +62,45 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
             )
           `)
           .eq('user_id', user.id)
-          .single();
+          .eq('status', 'active')
+          .maybeSingle();
 
         if (fetchError) {
-          console.error("[NeighborhoodContext] Fetch error:", fetchError);
-          throw new Error(`User has no assigned neighborhood. This should never happen. Error: ${fetchError.message}`);
+          console.error("[NeighborhoodContext] Fetch error:", {
+            error: fetchError,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          throw new Error(`Error fetching neighborhood: ${fetchError.message}`);
         }
+
+        console.log("[NeighborhoodContext] Fetch result:", {
+          data,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
 
         if (!data?.neighborhoods) {
-          throw new Error('Neighborhood data is missing. This should never happen.');
+          console.log("[NeighborhoodContext] No neighborhood found for user", {
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          setCurrentNeighborhood(null);
+        } else {
+          console.log("[NeighborhoodContext] Setting neighborhood:", {
+            neighborhood: data.neighborhoods,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          setCurrentNeighborhood(data.neighborhoods as Neighborhood);
         }
 
-        console.log("[NeighborhoodContext] Setting neighborhood:", data.neighborhoods);
-        setCurrentNeighborhood(data.neighborhoods as Neighborhood);
-
       } catch (err) {
-        console.error("[NeighborhoodContext] Critical error:", err);
+        console.error("[NeighborhoodContext] Critical error:", {
+          error: err,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
         setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       } finally {
         setIsLoading(false);
@@ -87,7 +116,8 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       currentNeighborhood,
       isLoading,
       error,
-      userId: user?.id
+      userId: user?.id,
+      timestamp: new Date().toISOString()
     });
   }, [currentNeighborhood, isLoading, error, user]);
 

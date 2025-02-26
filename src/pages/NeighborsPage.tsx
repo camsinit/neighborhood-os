@@ -7,7 +7,17 @@ import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 const NeighborsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { currentNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, isLoading, error } = useNeighborhood();
+
+  // Add debugging logs
+  useEffect(() => {
+    console.log("[NeighborsPage] Neighborhood state:", {
+      neighborhood: currentNeighborhood,
+      isLoading,
+      error,
+      timestamp: new Date().toISOString()
+    });
+  }, [currentNeighborhood, isLoading, error]);
 
   useEffect(() => {
     const handleHighlightItem = (e: CustomEvent) => {
@@ -37,6 +47,15 @@ const NeighborsPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
+          
+          {/* Add error state display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-2 mb-6">
+              <p className="text-red-700 text-sm">
+                Error loading neighborhood: {error.message}
+              </p>
+            </div>
+          )}
           
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
             <p className="text-gray-700 text-sm">
