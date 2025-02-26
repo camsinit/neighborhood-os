@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 // Component for displaying the invite dialog
 const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
@@ -20,10 +21,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const { toast } = useToast();
   const user = useUser();
+  const { currentNeighborhood, isLoading } = useNeighborhood();
 
   // Function to generate and copy invite link
   const generateAndCopyLink = async () => {
-    if (!user) return;
+    if (!user || !currentNeighborhood) return;
     
     setIsGeneratingLink(true);
     try {
@@ -34,8 +36,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
         inviter_id: user.id,
-        // TODO: Replace with actual neighborhood ID once implemented
-        neighborhood_id: "default", 
+        neighborhood_id: currentNeighborhood.id,
       });
 
       if (error) throw error;
@@ -70,11 +71,17 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     setEmail("");
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Invite a Neighbor</DialogTitle>
+          <DialogTitle>
+            Invite a Neighbor to {currentNeighborhood?.name || 'Your Neighborhood'}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid gap-2">
@@ -98,7 +105,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
               variant="outline"
               className="w-full"
               onClick={generateAndCopyLink}
-              disabled={isGeneratingLink}
+              disabled={isGeneratingLink || !currentNeighborhood}
             >
               <Copy className="mr-2 h-4 w-4" />
               {isGeneratingLink ? "Generating..." : "Generate and copy link"}
