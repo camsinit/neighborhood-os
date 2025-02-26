@@ -32,19 +32,34 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     async function fetchNeighborhood() {
+      // Reset states at the start of each fetch
+      setError(null);
+      setIsLoading(true);
+
       if (!user) {
         console.log("[NeighborhoodContext] No user found, skipping fetch");
         setIsLoading(false);
         return;
       }
 
-      console.log("[NeighborhoodContext] Fetching neighborhood for user:", user.id);
+      console.log("[NeighborhoodContext] Starting neighborhood fetch for user:", user.id);
 
       try {
-        const { data, error } = await supabase
+        // First, verify the neighborhood_members table exists
+        const { data: tableInfo, error: tableError } = await supabase
+          .from('neighborhood_members')
+          .select('*')
+          .limit(1);
+
+        if (tableError) {
+          console.error("[NeighborhoodContext] Table check error:", tableError);
+          throw new Error(`Database error: ${tableError.message}`);
+        }
+
+        // Now fetch the actual neighborhood data
+        const { data, error: fetchError } = await supabase
           .from('neighborhood_members')
           .select(`
-            neighborhood_id,
             neighborhoods:neighborhood_id (
               id,
               name,
@@ -52,11 +67,11 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
             )
           `)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) {
-          console.error("[NeighborhoodContext] Error fetching neighborhood:", error);
-          throw error;
+        if (fetchError) {
+          console.error("[NeighborhoodContext] Fetch error:", fetchError);
+          throw new Error(`Failed to fetch neighborhood: ${fetchError.message}`);
         }
 
         console.log("[NeighborhoodContext] Fetched data:", data);
@@ -68,8 +83,9 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           console.log("[NeighborhoodContext] No neighborhood found for user");
           setCurrentNeighborhood(null);
         }
+
       } catch (err) {
-        console.error("[NeighborhoodContext] Error:", err);
+        console.error("[NeighborhoodContext] Detailed error:", err);
         setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       } finally {
         setIsLoading(false);
@@ -84,9 +100,10 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
     console.log("[NeighborhoodContext] State updated:", {
       currentNeighborhood,
       isLoading,
-      error
+      error,
+      userId: user?.id
     });
-  }, [currentNeighborhood, isLoading, error]);
+  }, [currentNeighborhood, isLoading, error, user]);
 
   return (
     <NeighborhoodContext.Provider value={{ currentNeighborhood, isLoading, error }}>
