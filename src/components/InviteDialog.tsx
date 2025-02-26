@@ -2,6 +2,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -82,6 +83,9 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
           <DialogTitle>
             Invite a Neighbor to {currentNeighborhood?.name || 'Your Neighborhood'}
           </DialogTitle>
+          <DialogDescription>
+            Invite your neighbors to join your neighborhood community. You can send them an email invitation or share a direct link.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid gap-2">
