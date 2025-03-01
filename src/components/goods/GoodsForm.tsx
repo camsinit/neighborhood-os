@@ -205,11 +205,12 @@ const GoodsForm = ({
         const formattedData = {
           title: itemFormData.title,
           description: itemFormData.description,
-          goods_category: itemFormData.category,
+          goods_category: itemFormData.category, // Match the column name in the database
+          category: 'goods', // For compatibility with existing queries
           request_type: 'offer',
           user_id: user.id,
           valid_until: new Date(Date.now() + (itemFormData.availableDays || 30) * 24 * 60 * 60 * 1000).toISOString(),
-          images: itemFormData.images,
+          images: itemFormData.images, // Now matches the column name in database
           is_archived: false
         };
         
@@ -220,7 +221,10 @@ const GoodsForm = ({
           .from('goods_exchange')
           .insert(formattedData);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error submitting goods form:', error);
+          throw error;
+        }
         
       } else {
         // Validate required fields for item requests
@@ -233,12 +237,13 @@ const GoodsForm = ({
         const formattedData = {
           title: requestFormData.title,
           description: requestFormData.description,
-          goods_category: requestFormData.category || null,
+          goods_category: requestFormData.category || null, // Match column name
+          category: 'goods', // For compatibility with existing queries
           request_type: 'need',
           user_id: user.id,
           valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          image_url: requestFormData.image,
-          urgency: requestFormData.urgency,
+          image_url: requestFormData.image, // Keep for backward compatibility
+          urgency: requestFormData.urgency, // Match column name
           is_archived: false
         };
         
@@ -249,7 +254,10 @@ const GoodsForm = ({
           .from('goods_exchange')
           .insert(formattedData);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error submitting goods form:', error);
+          throw error;
+        }
       }
       
       // Update the UI and close the form

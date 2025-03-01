@@ -205,12 +205,15 @@ export type Database = {
           condition: string | null
           created_at: string
           description: string | null
+          goods_category: string | null
           id: string
           image_url: string | null
+          images: string[] | null
           is_archived: boolean | null
           is_read: boolean | null
           request_type: string
           title: string
+          urgency: string | null
           user_id: string
           valid_until: string
         }
@@ -220,12 +223,15 @@ export type Database = {
           condition?: string | null
           created_at?: string
           description?: string | null
+          goods_category?: string | null
           id?: string
           image_url?: string | null
+          images?: string[] | null
           is_archived?: boolean | null
           is_read?: boolean | null
           request_type: string
           title: string
+          urgency?: string | null
           user_id: string
           valid_until: string
         }
@@ -235,12 +241,15 @@ export type Database = {
           condition?: string | null
           created_at?: string
           description?: string | null
+          goods_category?: string | null
           id?: string
           image_url?: string | null
+          images?: string[] | null
           is_archived?: boolean | null
           is_read?: boolean | null
           request_type?: string
           title?: string
+          urgency?: string | null
           user_id?: string
           valid_until?: string
         }
