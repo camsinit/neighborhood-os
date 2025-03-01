@@ -8,6 +8,7 @@ import { ImageUploadButton } from "./ImageUploadButton";
 import { ImageCropDialog } from "./ImageCropDialog";
 import { getCroppedImg } from "@/utils/cropUtils";
 import { useQueryClient } from "@tanstack/react-query";
+import { Upload } from "lucide-react";
 
 export const ProfileImageUpload = () => {
   const user = useUser();
@@ -18,6 +19,7 @@ export const ProfileImageUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [finalCrop, setFinalCrop] = useState<PixelCrop | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 50,
@@ -26,6 +28,7 @@ export const ProfileImageUpload = () => {
     y: 25
   });
   const imgRef = useRef<HTMLImageElement>(null);
+  const dropAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -53,6 +56,11 @@ export const ProfileImageUpload = () => {
     }
 
     const file = event.target.files[0];
+    processImageFile(file);
+  };
+  
+  // Process image file for preview and cropping
+  const processImageFile = (file: File) => {
     const reader = new FileReader();
     
     reader.onload = () => {
@@ -122,14 +130,102 @@ export const ProfileImageUpload = () => {
   const handleCropComplete = (crop: PixelCrop) => {
     setFinalCrop(crop);
   };
+  
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only set isDragging to false if we're leaving the main drop area
+    // and not just moving between its children
+    if (e.currentTarget === dropAreaRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      // Check if the cursor is outside the drop area
+      if (
+        x < rect.left ||
+        x >= rect.right ||
+        y < rect.top ||
+        y >= rect.bottom
+      ) {
+        setIsDragging(false);
+      }
+    }
+  };
+  
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    // Get the files from the drop event
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    
+    // Check if the first file is an image
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please drop an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Process the dropped image
+    processImageFile(file);
+  };
 
   return (
     <>
-      <ImageUploadButton
-        onImageSelect={handleImageSelect}
-        uploading={uploading}
-        avatarUrl={avatarUrl}
-      />
+      <div 
+        ref={dropAreaRef}
+        className={`p-6 rounded-md transition-colors ${
+          isDragging ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''
+        }`}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className="absolute inset-0 flex items-center justify-center bg-blue-50 bg-opacity-70 rounded-md z-10">
+            <div className="text-center">
+              <Upload className="mx-auto h-10 w-10 text-blue-500" />
+              <p className="mt-2 text-sm font-medium text-blue-700">
+                Drop your profile image here
+              </p>
+            </div>
+          </div>
+        )}
+        
+        <div className="relative">
+          <ImageUploadButton
+            onImageSelect={handleImageSelect}
+            uploading={uploading}
+            avatarUrl={avatarUrl}
+          />
+          <p className="text-xs text-center text-gray-500 mt-2">
+            You can also drag and drop an image here
+          </p>
+        </div>
+      </div>
+      
       <ImageCropDialog
         open={cropDialogOpen}
         onOpenChange={(open) => {

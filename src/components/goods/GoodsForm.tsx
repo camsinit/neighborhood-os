@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -23,7 +22,7 @@ import {
   GoodsRequestUrgency
 } from "@/components/support/types/formTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Upload } from "lucide-react";
 
 // Common goods suggestions by category
 const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
@@ -113,6 +112,9 @@ const GoodsForm = ({
   
   // Determine whether this is an offer or request form
   const isOfferForm = initialRequestType === "offer";
+  
+  // State for drag and drop functionality
+  const [isDragging, setIsDragging] = useState(false);
   
   // Handle file uploads for images
   const handleImageUpload = async (file: File) => {
@@ -298,6 +300,61 @@ const GoodsForm = ({
     }
   };
   
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    // Get the files from the drop event
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    
+    // Process each dropped file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        toast.error(`File "${file.name}" is not an image`);
+        continue;
+      }
+      
+      // Upload the image
+      const imageUrl = await handleImageUpload(file);
+      if (imageUrl) {
+        if (isOfferForm) {
+          setItemFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), imageUrl]
+          }));
+        } else {
+          setRequestFormData(prev => ({
+            ...prev,
+            image: imageUrl
+          }));
+        }
+      }
+    }
+  };
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Category Selection (for offers and optionally for requests) */}
@@ -433,7 +490,13 @@ const GoodsForm = ({
             ? "Images (required)" 
             : "Image (optional)"}
         </Label>
-        <div className="border rounded-md p-4 bg-gray-50">
+        <div 
+          className={`border rounded-md p-4 bg-gray-50 transition-colors ${isDragging ? 'border-primary bg-blue-50' : ''}`}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           {/* Current Images */}
           {isOfferForm ? (
             <div className="grid grid-cols-3 gap-2 mb-4">
@@ -471,25 +534,34 @@ const GoodsForm = ({
             </div>
           ) : null}
           
-          {/* Upload Button */}
-          <div className="flex justify-center">
-            <label className="cursor-pointer">
-              <div className="flex flex-col items-center gap-1">
-                <div className="bg-gray-200 rounded-full p-2">
-                  <Plus className="h-4 w-4 text-gray-600" />
-                </div>
-                <span className="text-xs text-gray-500">
-                  {isOfferForm && itemFormData.images?.length 
-                    ? "Add another image" 
-                    : "Upload image"}
-                </span>
+          {/* Upload Area */}
+          <div className="flex flex-col items-center justify-center py-6">
+            <div className="flex flex-col items-center gap-2">
+              <div className={`bg-gray-200 rounded-full p-3 ${isDragging ? 'bg-blue-200' : ''}`}>
+                <Upload className="h-6 w-6 text-gray-600" />
               </div>
+              <span className="text-sm text-gray-600 text-center">
+                {isDragging 
+                  ? "Drop image(s) here" 
+                  : isOfferForm && itemFormData.images?.length 
+                    ? "Drag and drop more images here or click to browse" 
+                    : "Drag and drop image(s) here or click to browse"}
+              </span>
+              <span className="text-xs text-gray-500">
+                Supported formats: JPEG, PNG, GIF
+              </span>
+            </div>
+            <label className="cursor-pointer mt-4">
+              <Button type="button" variant="outline" size="sm">
+                Browse files
+              </Button>
               <input
                 type="file"
                 className="hidden"
                 accept="image/*"
                 onChange={handleAddImage}
                 disabled={uploading}
+                multiple={isOfferForm}
               />
             </label>
           </div>

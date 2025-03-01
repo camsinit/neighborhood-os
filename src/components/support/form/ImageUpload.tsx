@@ -5,7 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 
 // Updated interface to support multiple images
 interface ImageUploadProps {
@@ -26,6 +26,7 @@ const ImageUpload = ({
   multiple = false 
 }: ImageUploadProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Function to handle single image upload (for backward compatibility)
   const handleImageUpload = async (file: File) => {
@@ -113,6 +114,57 @@ const ImageUpload = ({
     }
   };
 
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    
+    // Filter for image files only
+    const imageFiles = Array.from(files).filter(file => 
+      file.type.startsWith('image/')
+    );
+    
+    if (imageFiles.length === 0) {
+      toast.error("Please drop image files only");
+      return;
+    }
+    
+    if (multiple) {
+      handleMultipleImageUpload(
+        // Convert the filtered array back to a FileList-like object
+        Object.assign(
+          new DataTransfer(), 
+          { files: imageFiles }
+        ).files
+      );
+    } else {
+      // Just take the first image if multiple aren't allowed
+      handleImageUpload(imageFiles[0]);
+    }
+  };
+
   // Only show the component for appropriate categories
   if (category !== 'goods') return null;
 
@@ -122,28 +174,54 @@ const ImageUpload = ({
         {multiple ? "Images (Upload up to 5 images)" : "Image"}
       </Label>
       
-      {/* File input */}
-      <div className="flex items-center gap-4">
-        <Input
-          id="image"
-          type="file"
-          accept="image/*"
-          multiple={multiple}
-          onChange={(e) => {
-            const files = e.target.files;
-            if (!files || files.length === 0) return;
+      {/* Drag and drop area */}
+      <div 
+        className={`border-2 border-dashed rounded-md p-6 ${
+          isDragging ? 'border-primary bg-blue-50' : 'border-gray-300'
+        } transition-all`}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div className="flex flex-col items-center justify-center">
+          <Upload className={`h-8 w-8 mb-2 ${isDragging ? 'text-primary' : 'text-gray-400'}`} />
+          <p className="text-sm text-center text-gray-600 mb-1">
+            {isDragging 
+              ? "Drop image(s) here" 
+              : "Drag and drop image(s) here or"}
+          </p>
+          <div className="mt-2">
+            <label htmlFor="image-upload" className="cursor-pointer">
+              <Button variant="outline" size="sm" disabled={isUploading}>
+                Browse files
+              </Button>
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                multiple={multiple}
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (!files || files.length === 0) return;
 
-            if (multiple && files.length > 1) {
-              // Handle multiple files
-              handleMultipleImageUpload(files);
-            } else {
-              // Handle single file
-              handleImageUpload(files[0]);
-            }
-          }}
-          className="flex-1"
-          disabled={isUploading}
-        />
+                  if (multiple && files.length > 1) {
+                    // Handle multiple files
+                    handleMultipleImageUpload(files);
+                  } else {
+                    // Handle single file
+                    handleImageUpload(files[0]);
+                  }
+                }}
+                className="hidden"
+                disabled={isUploading}
+              />
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Supported formats: JPEG, PNG, GIF
+          </p>
+        </div>
       </div>
 
       {/* Display single image preview (for backward compatibility) */}
