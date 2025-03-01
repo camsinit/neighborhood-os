@@ -45,6 +45,7 @@ const ArchiveButton = ({
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        // Display error if user is not logged in
         toast.error("You must be logged in to archive items");
         setIsArchiving(false);
         return;
@@ -69,21 +70,32 @@ const ArchiveButton = ({
       // Handle any errors
       if (error) {
         console.error("Error archiving request:", error);
-        toast.error("Failed to archive the item");
+        
+        // Show a more detailed error message based on the error type
+        if (error.code === '42501') { // Permission denied error
+          toast.error("You don't have permission to archive this item");
+        } else if (error.code === 'PGRST116') { // Record not found
+          toast.error("This item no longer exists or has already been archived");
+        } else {
+          toast.error("Failed to archive the item: " + error.message);
+        }
         throw error;
       }
       
       // Show success message
       toast.success("Item archived successfully");
       
+      // Trigger a refresh of relevant data by dispatching a custom event
+      console.log("Dispatching item-archived event");
+      document.dispatchEvent(new Event('goods-form-submitted'));
+      
       // Call the optional callback function if provided
       if (onArchiveComplete) {
         onArchiveComplete();
       }
     } catch (error) {
-      // Log and display any errors that occur
+      // Log the error for debugging
       console.error("Error archiving request:", error);
-      toast.error("Failed to archive the item");
     } finally {
       // Always reset loading state
       setIsArchiving(false);
@@ -100,7 +112,10 @@ const ArchiveButton = ({
       disabled={isArchiving}
       title="Archive this item"
     >
-      <Archive className="h-4 w-4" />
+      <Archive className={`h-4 w-4 ${isArchiving ? 'opacity-50' : ''}`} />
+      {isArchiving && (
+        <span className="sr-only">Archiving...</span>
+      )}
     </Button>
   );
 };
