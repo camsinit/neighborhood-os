@@ -185,12 +185,13 @@ export const useGoodsForm = ({
         // Update the UI and close the form
         console.log("Form submission successful, invalidating queries");
         queryClient.invalidateQueries({ queryKey: ['support-requests'] });
-        toast.success(isOfferForm ? "Item offered successfully!" : "Item request submitted successfully!");
+        // Removed toast.success here since it's now handled in submitGoodsForm
         onClose();
       }
     } catch (error) {
       console.error('Error submitting goods form:', error);
-      toast.error("Failed to submit. Please try again.");
+      // Don't duplicate toast errors - the submitGoodsForm function already shows an error toast
+      // toast.error("Failed to submit. Please try again.");
     }
   };
   

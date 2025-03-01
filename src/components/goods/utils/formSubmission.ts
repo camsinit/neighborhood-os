@@ -138,7 +138,8 @@ export const submitGoodsForm = async (
     
     // Dismiss the loading toast and show a success message
     toast.dismiss(loadingToast);
-    toast.success(`Your item was ${isOfferForm ? 'offered' : 'requested'} successfully!`);
+    // Only show one success message with specific wording based on the form type
+    toast.success(isOfferForm ? "Your item was offered successfully!" : "Your request was submitted successfully!");
     
     // Dispatch a custom event to signal that the form was submitted successfully
     // This will trigger a data refresh in the GoodsPage component
@@ -153,3 +154,4 @@ export const submitGoodsForm = async (
     throw error;
   }
 };
+

@@ -47,16 +47,15 @@ export const processFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, 
   }
   
   // Show a toast notification to indicate upload has started
-  toast.loading("Uploading image...");
+  const loadingToast = toast.loading("Uploading image...");
   
   // Upload the image
   const result = await handleImageUpload(file, userId);
   
   // Dismiss the loading toast and show success or failure
-  toast.dismiss();
-  if (result) {
-    toast.success("Image uploaded successfully");
-  }
+  toast.dismiss(loadingToast);
+  // Don't show the "Image uploaded successfully" toast - we'll only show one final success message
+  // when the entire form is submitted
   
   return result;
 };
@@ -81,19 +80,18 @@ export const processMultipleFileUploads = async (e: React.ChangeEvent<HTMLInputE
   }
   
   // Show a loading toast with the number of files
-  toast.loading(`Uploading ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
+  const loadingToast = toast.loading(`Uploading ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
   
   // Upload all images in parallel
   const uploadPromises = imageFiles.map(file => handleImageUpload(file, userId));
   const results = await Promise.all(uploadPromises);
   
   // Dismiss the loading toast and show success
-  toast.dismiss();
-  const successCount = results.filter(url => url !== null).length;
-  if (successCount > 0) {
-    toast.success(`${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`);
-  }
+  toast.dismiss(loadingToast);
+  // Don't show success message for image uploads - we'll only show one final success message
+  // when the entire form is submitted
   
   // Filter out any null results (failed uploads)
   return results.filter(url => url !== null) as string[];
 };
+
