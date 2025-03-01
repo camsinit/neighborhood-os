@@ -7,12 +7,12 @@ import GoodsForm from "./goods/GoodsForm";
 /**
  * AddSupportRequestDialog component
  * 
- * This dialog allows users to add various types of support requests:
- * - General support requests (using SupportRequestForm)
- * - Skill requests/offers (using SkillForm)
- * - Goods requests/offers (using GoodsForm)
+ * This dialog serves as a router to different form types based on the 'view' prop:
+ * - Generic support requests use the legacy SupportRequestForm
+ * - Skills use the dedicated SkillForm
+ * - Goods use the dedicated GoodsForm
  * 
- * The component selects the appropriate form based on the 'view' prop.
+ * Each form type saves to its own dedicated database table and uses its own logic.
  */
 interface AddSupportRequestDialogProps {
   open: boolean;
@@ -27,23 +27,23 @@ const AddSupportRequestDialog = ({
   initialRequestType,
   view 
 }: AddSupportRequestDialogProps) => {
-  // Determine which view to show based on the props
+  // Determine which specific form to show based on the view prop
   const isSkillsView = view === 'skills';
   const isGoodsView = view === 'goods';
   
   // Set the dialog title based on the view and request type
   const getDialogTitle = () => {
-    // For skills view
+    // For skills view - skills have their own dedicated form and database table
     if (isSkillsView) {
       return initialRequestType === 'need' ? 'Request a Skill' : 'Offer a Skill';
     }
     
-    // For goods view
+    // For goods view - goods have their own dedicated form and database table (goods_exchange)
     if (isGoodsView) {
       return initialRequestType === 'need' ? 'Request an Item' : 'Offer an Item';
     }
     
-    // For general support
+    // For generic support - this uses the legacy support_requests table
     return initialRequestType === 'need' ? 'Share Need' : 'Share Offer';
   };
   
@@ -55,6 +55,7 @@ const AddSupportRequestDialog = ({
       // Use a smaller width for forms to maintain readability
       maxWidth="sm"
     >
+      {/* Render the appropriate form based on the view prop */}
       {isSkillsView ? (
         <SkillForm 
           onClose={() => onOpenChange(false)}

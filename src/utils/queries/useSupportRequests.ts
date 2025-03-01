@@ -5,13 +5,20 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * This hook fetches all support requests from the database
  * 
- * The query fetches from both the support_requests table (for backward compatibility)
- * AND from the goods_exchange table for goods-specific items
+ * !!! DEPRECATED !!!
+ * This hook is maintained only for backward compatibility.
+ * New pages should use their own dedicated data fetching hooks:
+ * - For goods items, use useGoodsExchange
+ * - For skills, use useSkillsExchange
+ * 
+ * The legacy approach combined data from multiple tables, which created
+ * undesirable interdependencies between features.
  */
 export const useSupportRequests = () => {
   return useQuery({
     queryKey: ["support-requests"],
     queryFn: async () => {
+      console.log("DEPRECATED - useSupportRequests is being called. New components should use dedicated hooks.");
       console.log("Fetching support requests from support_requests and goods_exchange tables");
       
       // First, get support requests from the original table

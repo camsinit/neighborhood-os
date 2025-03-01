@@ -1,6 +1,9 @@
 
 // This file defines types used throughout the application
 
+/**
+ * User profile information
+ */
 export interface Profile {
   id?: string;  // Make id optional to match what comes from the database
   display_name: string;
@@ -8,6 +11,9 @@ export interface Profile {
   created_at?: string;
 }
 
+/**
+ * Safety update - used exclusively on the Safety page
+ */
 export interface SafetyUpdate {
   id: string;
   title: string;
@@ -15,9 +21,12 @@ export interface SafetyUpdate {
   type: string;
   author_id: string;
   created_at: string;
-  profiles?: Profile;
+  profiles?: Profile; // Profile of the author
 }
 
+/**
+ * Community event - used exclusively on the Calendar page
+ */
 export interface Event {
   id: string;
   title: string;
@@ -29,9 +38,15 @@ export interface Event {
   recurrence_pattern?: string;
   recurrence_end_date?: string;
   created_at: string;
-  profiles?: Profile;
+  profiles?: Profile; // Profile of the host
 }
 
+/**
+ * Legacy support request - maintained for backward compatibility
+ * New features should use their own dedicated interfaces and tables
+ * 
+ * @deprecated Use feature-specific interfaces instead: GoodsExchangeItem, SkillExchangeItem, etc.
+ */
 export interface SupportRequest {
   id: string;
   title: string;
@@ -51,9 +66,44 @@ export interface SupportRequest {
   profiles: Profile;
 }
 
-// GoodsExchangeItem interface for goods exchange items
-export interface GoodsExchangeItem extends SupportRequest {
+/**
+ * Goods exchange item - used exclusively on the Goods page
+ * This interface represents items in the goods_exchange table
+ */
+export interface GoodsExchangeItem {
+  id: string;
+  title: string;
+  description: string;
+  category: string; // Always 'goods'
+  request_type: 'need' | 'offer';
+  user_id: string;
+  valid_until: string;
+  created_at: string;
+  is_archived: boolean | null;
+  is_read: boolean | null;
   goods_category?: string;
   urgency?: 'low' | 'medium' | 'high' | 'critical';
-  images?: string[]; // Add support for multiple images
+  images?: string[]; // Support for multiple images
+  image_url?: string | null; // Single image URL (legacy support)
+  profiles?: Profile; // Profile of the provider/requester
+}
+
+/**
+ * Skills exchange item - used exclusively on the Skills page
+ * This interface represents items in the skills_exchange table
+ */
+export interface SkillExchangeItem {
+  id: string;
+  title: string;
+  description: string;
+  request_type: 'need' | 'offer';
+  user_id: string;
+  valid_until: string;
+  created_at: string;
+  is_archived: boolean | null;
+  is_read: boolean | null;
+  skill_category: string;
+  availability?: string;
+  time_preferences?: string[];
+  profiles?: Profile; // Profile of the provider/requester
 }

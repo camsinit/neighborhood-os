@@ -141,12 +141,19 @@ export const submitGoodsForm = async (
     // Only show one success message with specific wording based on the form type
     toast.success(isOfferForm ? "Your item was offered successfully!" : "Your request was submitted successfully!");
     
-    // Dispatch a custom event to signal that the form was submitted successfully
-    // This will trigger a data refresh in the GoodsPage component
-    // Updated to use the dedicated goods-exchange query key
+    // Trigger a refresh of the goods data by dispatching a custom event
+    // This will be caught by event listeners in GoodsPage to refresh the data
     console.log("Dispatching goods-form-submitted event");
     const customEvent = new Event('goods-form-submitted');
     document.dispatchEvent(customEvent);
+    
+    // Also directly invalidate the goods-exchange query for components using React Query
+    // This ensures components using the React Query cache will refresh
+    // Add this line to update the component using the new useGoodsExchange hook
+    const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_NAMESPACE?.get('queryClient');
+    if (queryClient) {
+      queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
+    }
     
     return data;
   } catch (error) {
