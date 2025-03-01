@@ -11,6 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 // Import popover components for click-to-expand functionality
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+// Import Link component for navigation
+import { Link } from "react-router-dom";
 
 /**
  * Helper function to create a contact email link for an item
@@ -102,34 +104,18 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               <PopoverTrigger asChild>
                 <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0">
                   <CardHeader className="pb-2">
-                    {/* Layout with profile image to the left of the title */}
-                    <div className="flex items-start gap-3">
-                      {/* Avatar component for profile image */}
-                      <Avatar className="h-8 w-8 mt-1">
-                        {/* Use the avatar URL from the profile if available */}
-                        <AvatarImage 
-                          src={request.profiles?.avatar_url} 
-                          alt={request.profiles?.display_name || "User"} 
-                        />
-                        {/* Fallback shows initials if no image is available */}
-                        <AvatarFallback>
-                          {(request.profiles?.display_name || "?").substring(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      
+                    <div className="flex flex-col">
                       {/* Title and urgency tag in a row */}
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          {/* Title on the left */}
-                          <CardTitle className="text-lg">{request.title}</CardTitle>
-                          
-                          {/* Urgency tag on the right of the title */}
-                          {request.urgency && (
-                            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-                              {getUrgencyLabel(request.urgency)}
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex items-center justify-between">
+                        {/* Title on the left */}
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                        
+                        {/* Urgency tag on the right of the title */}
+                        {request.urgency && (
+                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                            {getUrgencyLabel(request.urgency)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -144,33 +130,18 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               {/* 
               * Popover content shows the expanded details
               * This appears when the card is clicked
-              * It contains the same information as the previous hover overlay
               */}
               <PopoverContent className="w-[300px] p-0" sideOffset={5}>
                 <Card className="border-0 shadow-none">
                   <CardHeader className="pb-2">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8 mt-1">
-                        <AvatarImage 
-                          src={request.profiles?.avatar_url} 
-                          alt={request.profiles?.display_name || "User"} 
-                        />
-                        <AvatarFallback>
-                          {(request.profiles?.display_name || "?").substring(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      {/* Title and urgency in a row with space-between */}
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg">{request.title}</CardTitle>
-                          {request.urgency && (
-                            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-                              {getUrgencyLabel(request.urgency)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                    {/* Title and urgency in a row with space-between */}
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{request.title}</CardTitle>
+                      {request.urgency && (
+                        <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                          {getUrgencyLabel(request.urgency)}
+                        </span>
+                      )}
                     </div>
                   </CardHeader>
                   
@@ -178,24 +149,27 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                     {/* Full description with no truncation in the popover view */}
                     <p>{request.description}</p>
                     
-                    {/* Posted by section */}
+                    {/* Posted by section with clickable username */}
                     <div className="mt-4">
                       <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage 
-                            src={request.profiles?.avatar_url} 
-                            alt={request.profiles?.display_name || "User"} 
-                          />
-                          <AvatarFallback>
-                            {(request.profiles?.display_name || "?").substring(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
+                      {/* Make the username clickable if we have a user ID */}
+                      {request.user_id ? (
+                        <Link 
+                          to={`/neighbors?user=${request.user_id}`}
+                          className="text-sm text-primary hover:underline"
+                          onClick={(e) => {
+                            // Prevent the click from closing the popover
+                            e.stopPropagation();
+                          }}
+                        >
+                          {request.profiles?.display_name || "Anonymous"}
+                        </Link>
+                      ) : (
                         <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
-                      </div>
+                      )}
                     </div>
                     
-                    {/* Contact button */}
+                    {/* "I have this" button */}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
