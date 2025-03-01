@@ -5,6 +5,8 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dispatch, SetStateAction } from 'react';
+// Import Avatar component for profile pictures
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Define the component's props interface
 interface GoodsRequestsSectionProps {
@@ -76,23 +78,38 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
           {regularRequests.map((request) => (
             <Card key={request.id} className="flex-shrink-0 w-[250px]">
               <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{request.title}</CardTitle>
-                  {request.urgency && (
-                    <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full`}>
-                      {getUrgencyLabel(request.urgency)}
-                    </span>
-                  )}
+                {/* New layout with profile image to the left of the title */}
+                <div className="flex items-start gap-3">
+                  {/* Avatar component for profile image */}
+                  <Avatar className="h-8 w-8 mt-1">
+                    {/* Use the avatar URL from the profile if available */}
+                    <AvatarImage 
+                      src={request.profiles?.avatar_url} 
+                      alt={request.profiles?.display_name || "User"} 
+                    />
+                    {/* Fallback shows initials if no image is available */}
+                    <AvatarFallback>
+                      {(request.profiles?.display_name || "?").substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  {/* Title and urgency tag in a column */}
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{request.title}</CardTitle>
+                    {/* Moved urgency tag below the title */}
+                    {request.urgency && (
+                      <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
+                        {getUrgencyLabel(request.urgency)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <CardDescription>
-                  Posted by {request.profiles?.display_name || "Anonymous"}
-                </CardDescription>
               </CardHeader>
               <CardContent className="pb-2">
                 <p className="line-clamp-2">{request.description}</p>
               </CardContent>
-              <CardFooter className="flex justify-center pt-2">
-                {/* Removed the "View Details" button and centered the remaining button */}
+              <CardFooter className="flex justify-end pt-2">
+                {/* Moved button to the right side */}
                 <Button 
                   variant="default" 
                   size="sm"
