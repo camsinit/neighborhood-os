@@ -55,26 +55,41 @@ export const useGoodsExchange = () => {
           }
           
           // Create a map of user IDs to profile data for quick lookup
+          // Using a more explicit approach to avoid TypeScript null issues
           const profilesMap = {};
-          if (profilesData) {
-            profilesData.forEach(profile => {
-              // Carefully check that profile exists, is an object, and has an id property
-              // The extra check for null is explicit to satisfy TypeScript
-              if (profile && typeof profile === 'object' && profile !== null && 'id' in profile) {
-                // Now TypeScript knows profile.id is safe to use
-                const profileId = profile.id;
-                if (profileId) {
-                  profilesMap[profileId] = profile;
-                }
+          
+          // Only process profilesData if it exists and is an array
+          if (profilesData && Array.isArray(profilesData)) {
+            // Iterate through each profile
+            for (let i = 0; i < profilesData.length; i++) {
+              const profile = profilesData[i];
+              
+              // Very explicit check to satisfy TypeScript
+              if (profile && 
+                  typeof profile === 'object' && 
+                  profile !== null && 
+                  'id' in profile && 
+                  profile.id !== null && 
+                  profile.id !== undefined) {
+                
+                // Use string casting to ensure TypeScript knows this is a valid key
+                const profileId = String(profile.id);
+                profilesMap[profileId] = profile;
               }
-            });
+            }
           }
           
           // Attach profile data to each goods item
-          goodsWithProfiles = goodsData.map(item => ({
-            ...item,
-            profiles: profilesMap[item.user_id] || null
-          }));
+          goodsWithProfiles = goodsData.map(item => {
+            // For each item, look up its user's profile in our map
+            const userId = item.user_id ? String(item.user_id) : null;
+            const userProfile = userId && profilesMap[userId] ? profilesMap[userId] : null;
+            
+            return {
+              ...item,
+              profiles: userProfile
+            };
+          });
         } catch (error) {
           console.error("Error handling profiles for goods items:", error);
           // If there's an error with profiles, we'll still return the goods data without profiles
