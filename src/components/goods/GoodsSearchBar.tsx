@@ -60,14 +60,15 @@ const GoodsSearchBar = ({
       {/* Category filter */}
       <div className="w-full sm:w-auto">
         <Select
-          value={categoryFilter || ""}
-          onValueChange={(value) => onCategoryChange(value === "" ? null : value)}
+          value={categoryFilter || "all"} // Use "all" instead of empty string
+          onValueChange={(value) => onCategoryChange(value === "all" ? null : value)}
         >
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            {/* Change empty string to "all" */}
+            <SelectItem value="all">All Categories</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.value} value={category.value}>
                 {category.label}
