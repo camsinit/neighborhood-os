@@ -153,23 +153,7 @@ const GoodsPage = () => {
           {/* Page title and introduction */}
           <GoodsPageHeader />
           
-          {/* Display debug information while we're troubleshooting */}
-          <div className="bg-yellow-100 p-4 mb-4 rounded-lg border border-yellow-200">
-            <h3 className="font-medium">Debug Information</h3>
-            <p>Total goods exchange items loaded: {goodsExchangeItems?.length || 0}</p>
-            <p>Goods offers from data: {goodsItems.length}</p>
-            <p>Goods requests from data: {goodsRequests.length}</p>
-            <p className="mt-2 font-semibold">Direct database query results:</p>
-            <p>Direct goods_exchange items: {directDbData.length}</p>
-            <p>Direct goods_exchange offers: {directDbData.filter(item => item.request_type === 'offer').length}</p>
-            <p>Direct goods_exchange requests: {directDbData.filter(item => item.request_type === 'need').length}</p>
-            <button 
-              onClick={handleManualRefresh}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded mt-2"
-            >
-              Refresh Data
-            </button>
-          </div>
+          {/* Removed the debug information section that was here */}
           
           {/* Urgent requests section - Shows high-priority needs */}
           <UrgentRequestsSection 
