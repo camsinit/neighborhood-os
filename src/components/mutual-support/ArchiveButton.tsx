@@ -1,63 +1,106 @@
 
-// This component will be shared between CarePage and GoodsPage
+import { useState } from 'react';
+import { Archive } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Archive } from "lucide-react";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 
+/**
+ * ArchiveButton component
+ * 
+ * This component provides a UI element to archive/mark as completed various types of items
+ * like goods, skills, or care requests. 
+ * 
+ * @param requestId - The ID of the item to archive
+ * @param tableName - The database table where the item is stored
+ * @param onArchiveComplete - Callback function to run after successful archiving
+ */
 interface ArchiveButtonProps {
   requestId: string;
-  tableName: "care_requests" | "goods_exchange";
+  tableName: string;
   onArchiveComplete?: () => void;
 }
 
-const ArchiveButton = ({ requestId, tableName, onArchiveComplete }: ArchiveButtonProps) => {
+const ArchiveButton = ({ 
+  requestId, 
+  tableName,
+  onArchiveComplete 
+}: ArchiveButtonProps) => {
+  // State to track loading status during archiving operation
   const [isArchiving, setIsArchiving] = useState(false);
-  const user = useUser();
-
-  // Function to archive a request
-  const handleArchive = async () => {
-    if (!user) return;
+  
+  /**
+   * Handles the archive action
+   * Updates the database to mark the item as archived and records who archived it
+   */
+  const handleArchive = async (e: React.MouseEvent) => {
+    // Prevent event bubbling to parent elements
+    e.stopPropagation();
     
-    setIsArchiving(true);
     try {
-      const { error } = await supabase
+      // Start loading state
+      setIsArchiving(true);
+      
+      // Get the current authenticated user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in to archive items");
+        setIsArchiving(false);
+        return;
+      }
+      
+      // Log the archive attempt for debugging
+      console.log(`Attempting to archive ${tableName} item ${requestId} by user ${user.id}`);
+      
+      // Create the update data object with archived details
+      const updateData = {
+        is_archived: true,
+        archived_at: new Date().toISOString(),
+        archived_by: user.id
+      };
+      
+      // Update the database record
+      const { data, error } = await supabase
         .from(tableName)
-        .update({
-          archived_at: new Date().toISOString(),
-          archived_by: user.id,
-          is_archived: true
-        })
+        .update(updateData)
         .eq('id', requestId);
-
-      if (error) throw error;
-
-      toast.success('Request archived successfully');
+        
+      // Handle any errors
+      if (error) {
+        console.error("Error archiving request:", error);
+        toast.error("Failed to archive the item");
+        throw error;
+      }
+      
+      // Show success message
+      toast.success("Item archived successfully");
+      
+      // Call the optional callback function if provided
       if (onArchiveComplete) {
         onArchiveComplete();
       }
     } catch (error) {
-      console.error('Error archiving request:', error);
-      toast.error('Failed to archive request');
+      // Log and display any errors that occur
+      console.error("Error archiving request:", error);
+      toast.error("Failed to archive the item");
     } finally {
+      // Always reset loading state
       setIsArchiving(false);
     }
   };
-
+  
+  // Render a small archive button
   return (
     <Button
+      size="icon"
       variant="ghost"
-      size="sm"
-      onClick={(e) => {
-        e.stopPropagation(); // Prevent triggering parent click handlers
-        handleArchive();
-      }}
+      className="h-8 w-8 rounded-full"
+      onClick={handleArchive}
       disabled={isArchiving}
+      title="Archive this item"
     >
-      <Archive className="h-4 w-4 mr-2" />
-      {isArchiving ? 'Archiving...' : 'Archive'}
+      <Archive className="h-4 w-4" />
     </Button>
   );
 };
