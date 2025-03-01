@@ -33,16 +33,11 @@ export const useSupportRequests = () => {
       }
 
       // Next, get goods items from the goods_exchange table
+      // The key issue: We need to remove the profiles join as it's causing an error
+      // We'll manually join the profiles data below after fetching the goods items
       const { data: goodsData, error: goodsError } = await supabase
         .from("goods_exchange")
-        .select(`
-          *,
-          profiles: user_id (
-            id,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')  // Just select all columns without trying to join profiles
         .order("created_at", { ascending: false });
 
       if (goodsError) {
@@ -53,8 +48,42 @@ export const useSupportRequests = () => {
       console.log("Fetched support requests:", supportData ? supportData.length : 0, "items");
       console.log("Fetched goods exchange items:", goodsData ? goodsData.length : 0, "items");
       
+      // Now, if we have goods data, let's try to get the user profiles for each item
+      let goodsWithProfiles = [];
+      if (goodsData && goodsData.length > 0) {
+        // Get a unique list of user IDs from the goods data
+        const userIds = [...new Set(goodsData.map(item => item.user_id))];
+        
+        // Fetch profile data for these users
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select('id, display_name, avatar_url')
+          .in('id', userIds);
+          
+        if (profilesError) {
+          console.error("Error fetching profiles for goods items:", profilesError);
+          // Don't throw here, we'll just proceed with the goods data without profiles
+        }
+        
+        // Create a map of user IDs to profile data for quick lookup
+        const profilesMap = {};
+        if (profilesData) {
+          profilesData.forEach(profile => {
+            profilesMap[profile.id] = profile;
+          });
+        }
+        
+        // Attach profile data to each goods item
+        goodsWithProfiles = goodsData.map(item => ({
+          ...item,
+          profiles: profilesMap[item.user_id] || null
+        }));
+        
+        console.log("Added profiles to goods items:", goodsWithProfiles.length);
+      }
+      
       // Combine both sets of data
-      const combinedData = [...(supportData || []), ...(goodsData || [])];
+      const combinedData = [...(supportData || []), ...goodsWithProfiles];
       
       // Sort by created_at date (newest first)
       combinedData.sort((a, b) => {

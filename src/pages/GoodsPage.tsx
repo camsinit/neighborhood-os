@@ -31,6 +31,7 @@ const GoodsPage = () => {
   const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  const [directDbData, setDirectDbData] = useState<any[]>([]);
 
   // Fetch support requests data from the database
   const { 
@@ -81,11 +82,12 @@ const GoodsPage = () => {
         console.error("Error querying goods_exchange:", error);
       } else {
         console.log("Direct goods_exchange query result:", data);
+        setDirectDbData(data || []);
       }
     };
     
     debugGoods();
-  }, []);
+  }, [requests]);  // Re-run when requests changes to keep in sync
 
   // Filter goods items (offers)
   // This creates a list of items that people are offering to others
@@ -156,21 +158,23 @@ const GoodsPage = () => {
           <GoodsPageHeader />
           
           {/* Display debug information while we're troubleshooting */}
-          {requests && (
-            <div className="bg-yellow-100 p-4 mb-4 rounded-lg border border-yellow-200">
-              <h3 className="font-medium">Debug Information</h3>
-              <p>Total items loaded: {requests.length}</p>
-              <p>Goods category items: {requests.filter(req => req.category === 'goods').length}</p>
-              <p>Goods offers: {goodsItems.length}</p>
-              <p>Goods requests: {goodsRequests.length}</p>
-              <button 
-                onClick={handleManualRefresh}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded mt-2"
-              >
-                Refresh Data
-              </button>
-            </div>
-          )}
+          <div className="bg-yellow-100 p-4 mb-4 rounded-lg border border-yellow-200">
+            <h3 className="font-medium">Debug Information</h3>
+            <p>Total combined items loaded: {requests?.length || 0}</p>
+            <p>Goods category items from combined data: {requests?.filter(req => req.category === 'goods').length || 0}</p>
+            <p>Goods offers from combined data: {goodsItems.length}</p>
+            <p>Goods requests from combined data: {goodsRequests.length}</p>
+            <p className="mt-2 font-semibold">Direct database query results:</p>
+            <p>Direct goods_exchange items: {directDbData.length}</p>
+            <p>Direct goods_exchange offers: {directDbData.filter(item => item.request_type === 'offer').length}</p>
+            <p>Direct goods_exchange requests: {directDbData.filter(item => item.request_type === 'need').length}</p>
+            <button 
+              onClick={handleManualRefresh}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded mt-2"
+            >
+              Refresh Data
+            </button>
+          </div>
           
           {/* Urgent requests section - Shows high-priority needs */}
           <UrgentRequestsSection 
