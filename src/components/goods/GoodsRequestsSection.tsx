@@ -91,20 +91,14 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               <CardContent className="pb-2">
                 <p className="line-clamp-2">{request.description}</p>
               </CardContent>
-              <CardFooter className="flex justify-between pt-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => onRequestSelect(request)}
-                >
-                  View Details
-                </Button>
+              <CardFooter className="flex justify-center pt-2">
+                {/* Removed the "View Details" button and centered the remaining button */}
                 <Button 
                   variant="default" 
                   size="sm"
                   onClick={() => window.open(createContactEmailLink(request), '_blank')}
                 >
-                  I Can Help
+                  I have this!
                 </Button>
               </CardFooter>
             </Card>
