@@ -102,15 +102,19 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                       </AvatarFallback>
                     </Avatar>
                     
-                    {/* Title and urgency tag in a column */}
+                    {/* Title and urgency tag in a row - changed to flex-row */}
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{request.title}</CardTitle>
-                      {/* Urgency tag below the title */}
-                      {request.urgency && (
-                        <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
-                          {getUrgencyLabel(request.urgency)}
-                        </span>
-                      )}
+                      <div className="flex items-center justify-between">
+                        {/* Title on the left */}
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                        
+                        {/* Urgency tag moved to the right of the title */}
+                        {request.urgency && (
+                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                            {getUrgencyLabel(request.urgency)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -123,13 +127,12 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               
               {/* 
               * Expanded overlay card that appears on hover
-              * This has absolute positioning so it floats over other content
-              * Width increases and additional details are shown
-              * z-index ensures it's above other elements when expanded
+              * Fixed z-index to ensure it's above other content
+              * Changed position to absolute and increased z-index significantly
               */}
               <Card 
                 className="absolute left-0 top-0 w-[250px] opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                group-hover:w-[300px] group-hover:z-10 transition-all duration-300 shadow-xl"
+                group-hover:w-[300px] group-hover:z-50 transition-all duration-300 shadow-xl"
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start gap-3">
@@ -143,19 +146,23 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                       </AvatarFallback>
                     </Avatar>
                     
+                    {/* Changed to flex-row with space-between to move urgency tag to the right */}
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{request.title}</CardTitle>
-                      {request.urgency && (
-                        <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
-                          {getUrgencyLabel(request.urgency)}
-                        </span>
-                      )}
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                        {request.urgency && (
+                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                            {getUrgencyLabel(request.urgency)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
                 
                 <CardContent>
                   {/* Full description with no truncation in the expanded view */}
+                  {/* Removed the "Description:" heading as requested */}
                   <p>{request.description}</p>
                   
                   {/* Posted by section */}
