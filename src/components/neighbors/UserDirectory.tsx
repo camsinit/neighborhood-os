@@ -5,6 +5,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { NeighborCard } from "./NeighborCard";
 import { NeighborProfileDialog } from "./NeighborProfileDialog";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -16,6 +17,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   
   // Use our custom hook to fetch users
   const { data: users, isLoading } = useNeighborUsers();
+  
+  // Set up auto-refresh for neighbors data
+  // This will listen for profile update events and refresh the data
+  useAutoRefresh(['neighbor-users'], ['profile-updated']);
 
   // Filter users based on search query
   const filteredUsers = users?.filter(user => 

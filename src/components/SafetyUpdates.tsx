@@ -17,6 +17,7 @@ import { User, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
@@ -24,6 +25,10 @@ const SafetyUpdates = () => {
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   const { data: updates, isLoading } = useSafetyUpdates();
   const user = useUser();
+
+  // Set up auto-refresh for safety updates data
+  // This will listen for the safety-update-submitted event and refresh the data
+  useAutoRefresh(['safety-updates'], ['safety-update-submitted']);
 
   useEffect(() => {
     const handleOpenSafetyDialog = (event: CustomEvent<{ id: string }>) => {

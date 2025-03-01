@@ -16,6 +16,7 @@ import GoodsRequestsSection from "@/components/goods/GoodsRequestsSection";
 // Import urgency helper functions
 import { getUrgencyClass, getUrgencyLabel } from "@/components/goods/utils/urgencyHelpers";
 import { toast } from "sonner";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 /**
  * GoodsPage component
@@ -38,29 +39,9 @@ const GoodsPage = () => {
     refetch
   } = useSupportRequests();
 
-  // Automatically fetch fresh data when the component mounts or dialog closes
-  // This ensures new items appear in the list immediately after submission
-  useEffect(() => {
-    // Refetch data when component mounts
-    refetch();
-    
-    // Set up a listener for the dialog closing
-    const onDialogClose = () => {
-      // Short delay to ensure the database has time to update
-      setTimeout(() => {
-        console.log("Refreshing goods data after dialog close");
-        refetch();
-      }, 500);
-    };
-
-    // Add event listener to detect dialog close
-    document.addEventListener('goods-form-submitted', onDialogClose);
-    
-    // Clean up event listener when component unmounts
-    return () => {
-      document.removeEventListener('goods-form-submitted', onDialogClose);
-    };
-  }, [refetch]);
+  // Set up auto-refresh for goods data
+  // This will listen for the goods-form-submitted event and refresh the data
+  useAutoRefresh(['support-requests'], ['goods-form-submitted']);
 
   // Debug the requests coming from the database
   useEffect(() => {
@@ -116,12 +97,6 @@ const GoodsPage = () => {
   // Handler for when the dialog closes after submission
   const handleDialogChange = (open: boolean) => {
     setIsAddRequestOpen(open);
-    if (!open) {
-      // Refresh data after dialog closes
-      setTimeout(() => {
-        refetch();
-      }, 500);
-    }
   };
 
   return (

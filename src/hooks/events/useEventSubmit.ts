@@ -1,100 +1,103 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EventSubmitProps {
   onSuccess: () => void;
 }
 
-interface EventFormData {
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  isRecurring?: boolean;
-  recurrencePattern?: string;
-  recurrenceEndDate?: string;
-}
-
 export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
   const user = useUser();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = async (formData: EventFormData) => {
+  const handleSubmit = async (formData: any) => {
     if (!user) {
       toast.error("You must be logged in to create an event");
       return;
     }
 
     try {
-      const timestamp = new Date(`${formData.date}T${formData.time}`).toISOString();
-
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('events')
         .insert({
           title: formData.title,
           description: formData.description,
-          time: timestamp,
+          time: formData.time,
           location: formData.location,
           host_id: user.id,
-          is_recurring: formData.isRecurring || false,
-          recurrence_pattern: formData.recurrencePattern,
-          recurrence_end_date: formData.recurrenceEndDate ? new Date(`${formData.recurrenceEndDate}T23:59:59`).toISOString() : null,
-        });
+          is_recurring: formData.isRecurring,
+          recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
+          recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
+        })
+        .select();
 
       if (error) throw error;
 
+      // Success notification
       toast.success("Event created successfully");
+      
+      // Invalidate the events query to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      
+      // Dispatch a custom event to signal that an event was created
+      // This will trigger a data refresh in components listening for this event
+      const customEvent = new Event('event-submitted');
+      document.dispatchEvent(customEvent);
+      
       onSuccess();
+      
+      return data;
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
+      throw error;
     }
   };
 
-  const handleUpdate = async (eventId: string, formData: EventFormData) => {
+  const handleUpdate = async (eventId: string, formData: any) => {
     if (!user) {
       toast.error("You must be logged in to update an event");
       return;
     }
 
     try {
-      const timestamp = new Date(`${formData.date}T${formData.time}`).toISOString();
-
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('events')
         .update({
           title: formData.title,
           description: formData.description,
-          time: timestamp,
+          time: formData.time,
           location: formData.location,
-          is_recurring: formData.isRecurring || false,
-          recurrence_pattern: formData.recurrencePattern,
-          recurrence_end_date: formData.recurrenceEndDate ? new Date(`${formData.recurrenceEndDate}T23:59:59`).toISOString() : null,
+          is_recurring: formData.isRecurring,
+          recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
+          recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
         })
-        .eq('id', eventId);
+        .eq('id', eventId)
+        .eq('host_id', user.id)
+        .select();
 
       if (error) throw error;
 
-      // Notify RSVP'd users about the update
-      await fetch('/functions/v1/notify-event-changes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          eventId,
-          action: 'update',
-          eventTitle: formData.title,
-        }),
-      });
-
+      // Success notification
       toast.success("Event updated successfully");
+      
+      // Invalidate the events query to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      
+      // Dispatch a custom event to signal that an event was updated
+      // This will trigger a data refresh in components listening for this event
+      const customEvent = new Event('event-submitted');
+      document.dispatchEvent(customEvent);
+      
       onSuccess();
+      
+      return data;
     } catch (error) {
       console.error('Error updating event:', error);
       toast.error("Failed to update event. Please try again.");
+      throw error;
     }
   };
 

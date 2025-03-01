@@ -22,6 +22,7 @@ import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
 import { useToast } from "@/components/ui/use-toast";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -30,6 +31,10 @@ const CommunityCalendar = () => {
   const { data: events, isLoading, refetch } = useEvents();
   const { toast } = useToast();
   
+  // Set up auto-refresh for calendar events
+  // This will listen for the event-submitted event and refresh the data
+  useAutoRefresh(['events'], ['event-submitted']);
+
   useEffect(() => {
     const handleNavigateToEvent = (e: CustomEvent) => {
       const eventId = e.detail.eventId;
