@@ -1,11 +1,16 @@
+
 // Import React dependencies and types
-import React, { useState } from 'react';
+import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dispatch, SetStateAction } from 'react';
 // Import Avatar component for profile pictures
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// Import HoverCard components for hover functionality
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+// Import tooltip components for additional UI enhancement
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Helper function to create a contact email link for an item
@@ -61,16 +66,6 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
   );
   
-  // Track which request card is expanded - we'll only allow one at a time
-  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
-  
-  // Handle card click to expand/collapse
-  const handleCardClick = (id: string) => {
-    // If clicking the already expanded card, collapse it
-    // Otherwise, expand the clicked card
-    setExpandedCardId(expandedCardId === id ? null : id);
-  };
-  
   // If there are no regular requests, don't render this section
   if (regularRequests.length === 0) {
     return null;
@@ -85,98 +80,97 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
       <div className="p-4 rounded-lg overflow-x-auto">
         <div className="flex gap-4 pb-2">
           {regularRequests.map((request) => (
-            <Card 
-              key={request.id} 
-              className={`flex-shrink-0 transition-all duration-300 cursor-pointer ${
-                expandedCardId === request.id 
-                  ? 'w-[350px]' // Wider when expanded
-                  : 'w-[250px]' // Normal width when collapsed
-              }`}
-              onClick={() => handleCardClick(request.id)}
-            >
-              <CardHeader className="pb-2">
-                {/* Layout with profile image to the left of the title */}
-                <div className="flex items-start gap-3">
-                  {/* Avatar component for profile image */}
-                  <Avatar className="h-8 w-8 mt-1">
-                    {/* Use the avatar URL from the profile if available */}
-                    <AvatarImage 
-                      src={request.profiles?.avatar_url} 
-                      alt={request.profiles?.display_name || "User"} 
-                    />
-                    {/* Fallback shows initials if no image is available */}
-                    <AvatarFallback>
-                      {(request.profiles?.display_name || "?").substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
+            <HoverCard key={request.id}>
+              {/* The card that triggers the hover effect */}
+              <HoverCardTrigger asChild>
+                <Card className="flex-shrink-0 w-[250px] cursor-pointer hover:shadow-md transition-all duration-300">
+                  <CardHeader className="pb-2">
+                    {/* Layout with profile image to the left of the title */}
+                    <div className="flex items-start gap-3">
+                      {/* Avatar component for profile image */}
+                      <Avatar className="h-8 w-8 mt-1">
+                        {/* Use the avatar URL from the profile if available */}
+                        <AvatarImage 
+                          src={request.profiles?.avatar_url} 
+                          alt={request.profiles?.display_name || "User"} 
+                        />
+                        {/* Fallback shows initials if no image is available */}
+                        <AvatarFallback>
+                          {(request.profiles?.display_name || "?").substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Title and urgency tag in a column */}
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                        {/* Urgency tag below the title */}
+                        {request.urgency && (
+                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
+                            {getUrgencyLabel(request.urgency)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
                   
-                  {/* Title and urgency tag in a column */}
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{request.title}</CardTitle>
-                    {/* Urgency tag below the title */}
-                    {request.urgency && (
-                      <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
-                        {getUrgencyLabel(request.urgency)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                {/* Show preview or full description based on expanded state */}
-                <div className={`transition-all duration-300 ${
-                  expandedCardId === request.id 
-                    ? 'max-h-[500px] opacity-100' // Show full content when expanded
-                    : 'max-h-[60px] overflow-hidden' // Limit height when collapsed
-                }`}>
-                  {/* If collapsed, show truncated description */}
-                  {expandedCardId !== request.id ? (
+                  <CardContent>
+                    {/* Show a preview of the description */}
                     <p className="line-clamp-2">{request.description}</p>
-                  ) : (
-                    // If expanded, show full content
-                    <>
-                      {/* Full description without line clamping */}
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-1">Description:</h4>
-                        <p>{request.description}</p>
-                      </div>
-                      
-                      {/* Poster information */}
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-1">Posted by:</h4>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage 
-                              src={request.profiles?.avatar_url} 
-                              alt={request.profiles?.display_name || "User"} 
-                            />
-                            <AvatarFallback>
-                              {(request.profiles?.display_name || "?").substring(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{request.profiles?.display_name || "Anonymous"}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Action button */}
-                      <div className="flex justify-end mt-4">
+                  </CardContent>
+                </Card>
+              </HoverCardTrigger>
+              
+              {/* Content that appears on hover */}
+              <HoverCardContent className="w-80 p-4">
+                {/* Full request details in the hover card */}
+                <div className="space-y-4">
+                  {/* Request title with larger font */}
+                  <h4 className="text-lg font-semibold">{request.title}</h4>
+                  
+                  {/* Full description */}
+                  <div>
+                    <h5 className="text-sm font-semibold mb-1">Description:</h5>
+                    <p className="text-sm text-gray-700">{request.description}</p>
+                  </div>
+                  
+                  {/* Poster information */}
+                  <div>
+                    <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage 
+                          src={request.profiles?.avatar_url} 
+                          alt={request.profiles?.display_name || "User"} 
+                        />
+                        <AvatarFallback>
+                          {(request.profiles?.display_name || "?").substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Action button with tooltip */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
                         <Button 
                           variant="default" 
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent toggling the card when clicking the button
-                            window.open(createContactEmailLink(request), '_blank');
-                          }}
+                          className="w-full"
+                          onClick={() => window.open(createContactEmailLink(request), '_blank')}
                         >
                           I have this!
                         </Button>
-                      </div>
-                    </>
-                  )}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Contact {request.profiles?.display_name || "the neighbor"} about this item</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
-              </CardContent>
-            </Card>
+              </HoverCardContent>
+            </HoverCard>
           ))}
         </div>
       </div>
