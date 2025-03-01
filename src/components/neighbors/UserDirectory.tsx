@@ -6,6 +6,9 @@ import { NeighborCard } from "./NeighborCard";
 import { NeighborProfileDialog } from "./NeighborProfileDialog";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -14,6 +17,9 @@ interface UserDirectoryProps {
 export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+  
+  // Get neighborhood context to show appropriate messages
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
   
   // Use our custom hook to fetch users
   const { data: users, isLoading, error } = useNeighborUsers();
@@ -50,8 +56,23 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     });
   }, [searchQuery, users, filteredUsers]);
 
-  if (isLoading) {
+  // Show loading state while users or neighborhood are loading
+  if (isLoading || isLoadingNeighborhood) {
     return <LoadingSpinner />;
+  }
+
+  // If there's no neighborhood, show a message
+  if (!currentNeighborhood) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-5 w-5 mr-2" />
+          <AlertDescription>
+            You're not part of any neighborhood yet. Join or create a neighborhood to see residents.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   // Add debugging for the error state
@@ -59,7 +80,12 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     console.error("[UserDirectory] Error loading users:", error);
     return (
       <div className="p-6 text-center">
-        <p className="text-red-500">Error loading users: {error.message}</p>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-5 w-5 mr-2" />
+          <AlertDescription>
+            Error loading users: {error.message}
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -69,7 +95,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     console.log("[UserDirectory] No users found to display");
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-500">No users found in this neighborhood.</p>
+        <p className="text-gray-500">No users found in this neighborhood yet.</p>
       </div>
     );
   }
