@@ -7,8 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dispatch, SetStateAction } from 'react';
 // Import Avatar component for profile pictures
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// Import tooltip components for additional UI enhancement
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 // Import popover components for click-to-expand functionality
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 // Import Link component for navigation
@@ -169,28 +167,19 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                       )}
                     </div>
                     
-                    {/* "I have this" button */}
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            className="w-full mt-4"
-                            onClick={(e) => {
-                              // Prevent the click from closing the popover
-                              e.stopPropagation();
-                              window.open(createContactEmailLink(request), '_blank');
-                            }}
-                          >
-                            I have this!
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Contact {request.profiles?.display_name || "the neighbor"} about this item</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    {/* "I have this" button - remove tooltip wrapping */}
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      className="w-full mt-4"
+                      onClick={(e) => {
+                        // Prevent the click from closing the popover
+                        e.stopPropagation();
+                        window.open(createContactEmailLink(request), '_blank');
+                      }}
+                    >
+                      I have this!
+                    </Button>
                   </CardContent>
                 </Card>
               </PopoverContent>
