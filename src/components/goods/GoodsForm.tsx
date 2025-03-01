@@ -1,16 +1,8 @@
+
+// This is the main goods form component, refactored into smaller subcomponents
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -22,47 +14,17 @@ import {
   GoodsRequestUrgency
 } from "@/components/support/types/formTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, X, Upload } from "lucide-react";
 
-// Common goods suggestions by category
-const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
-  furniture: ["Couch", "Chair", "Table", "Desk", "Bookshelf"],
-  tools: ["Hammer", "Drill", "Saw", "Ladder", "Lawnmower"],
-  electronics: ["TV", "Laptop", "Phone", "Camera", "Speakers"],
-  kitchen: ["Blender", "Toaster", "Pots & Pans", "Dishes", "Utensils"],
-  clothing: ["Winter Clothes", "Jackets", "Shoes", "Children's Clothes"],
-  books: ["Fiction", "Non-fiction", "Textbooks", "Children's Books"],
-  toys: ["Board Games", "Puzzles", "Children's Toys", "Outdoor Play Equipment"],
-  sports: ["Bicycle", "Tennis Racket", "Basketball", "Camping Gear"],
-  garden: ["Plants", "Seeds", "Garden Tools", "Flower Pots"],
-  produce: ["Fruits", "Vegetables", "Herbs", "Homegrown Produce"],
-  household: ["Cleaning Supplies", "Home Decor", "Bedding", "Storage Containers"],
-  other: ["Art Supplies", "Craft Materials", "Musical Instruments"]
-};
+// Import our refactored components
+import CategorySelection from "./form/CategorySelection";
+import ItemSuggestions from "./form/ItemSuggestions";
+import TextFields from "./form/TextFields";
+import AvailabilityField from "./form/AvailabilityField";
+import UrgencyField from "./form/UrgencyField";
+import ImageDropzone from "./form/ImageDropzone";
 
-// List of goods categories with friendly names
-const CATEGORY_NAMES: Record<GoodsItemCategory, string> = {
-  furniture: "Furniture",
-  tools: "Tools & Equipment",
-  electronics: "Electronics",
-  kitchen: "Kitchen Items",
-  clothing: "Clothing & Accessories",
-  books: "Books & Media",
-  toys: "Toys & Games",
-  sports: "Sports & Recreation",
-  garden: "Garden & Plants",
-  produce: "Fresh Produce",
-  household: "Household Items",
-  other: "Other Items"
-};
-
-// List of urgency levels with friendly names
-const URGENCY_NAMES: Record<GoodsRequestUrgency, string> = {
-  low: "Low - When convenient",
-  medium: "Medium - Within a week",
-  high: "High - Within a few days",
-  critical: "Critical - Needed immediately"
-};
+// Import utility functions
+import { uploadImage } from "./utils/imageUpload";
 
 /**
  * GoodsForm component handles both offering and requesting goods items.
@@ -84,6 +46,7 @@ const GoodsForm = ({
   requestId,
   initialRequestType
 }: GoodsFormProps) => {
+  // Get the current user and query client
   const user = useUser();
   const queryClient = useQueryClient();
   
@@ -108,13 +71,12 @@ const GoodsForm = ({
   
   // State for image upload process
   const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>((initialValues as any)?.category || "furniture");
+  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>(
+    (initialValues as any)?.category || "furniture"
+  );
   
   // Determine whether this is an offer or request form
   const isOfferForm = initialRequestType === "offer";
-  
-  // State for drag and drop functionality
-  const [isDragging, setIsDragging] = useState(false);
   
   // Handle file uploads for images
   const handleImageUpload = async (file: File) => {
@@ -125,25 +87,8 @@ const GoodsForm = ({
     
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('mutual_aid_images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('mutual_aid_images')
-        .getPublicUrl(filePath);
-
-      toast.success("Image uploaded successfully");
-      return publicUrl;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error("Failed to upload image. Please try again.");
-      return null;
+      const imageUrl = await uploadImage(file, user.id);
+      return imageUrl;
     } finally {
       setUploading(false);
     }
@@ -182,6 +127,55 @@ const GoodsForm = ({
         ...prev,
         image: null
       }));
+    }
+  };
+  
+  // Helper for handling category change to update suggestions
+  const handleCategoryChange = (category: GoodsItemCategory) => {
+    setSelectedCategory(category);
+    if (isOfferForm) {
+      setItemFormData(prev => ({
+        ...prev,
+        category
+      }));
+    } else {
+      setRequestFormData(prev => ({
+        ...prev,
+        category
+      }));
+    }
+  };
+  
+  // Select a suggestion
+  const handleSelectSuggestion = (suggestion: string) => {
+    if (isOfferForm) {
+      setItemFormData(prev => ({
+        ...prev,
+        title: suggestion
+      }));
+    } else {
+      setRequestFormData(prev => ({
+        ...prev,
+        title: suggestion
+      }));
+    }
+  };
+  
+  // Handle title change
+  const handleTitleChange = (value: string) => {
+    if (isOfferForm) {
+      setItemFormData(prev => ({ ...prev, title: value }));
+    } else {
+      setRequestFormData(prev => ({ ...prev, title: value }));
+    }
+  };
+  
+  // Handle description change
+  const handleDescriptionChange = (value: string) => {
+    if (isOfferForm) {
+      setItemFormData(prev => ({ ...prev, description: value }));
+    } else {
+      setRequestFormData(prev => ({ ...prev, description: value }));
     }
   };
   
@@ -269,312 +263,62 @@ const GoodsForm = ({
     }
   };
   
-  // Select a suggestion
-  const handleSelectSuggestion = (suggestion: string) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    }
-  };
-  
-  // Helper for handling category change to update suggestions
-  const handleCategoryChange = (category: GoodsItemCategory) => {
-    setSelectedCategory(category);
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        category
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        category
-      }));
-    }
-  };
-  
-  // Drag and drop handlers
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) setIsDragging(true);
-  };
-  
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-  
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    
-    // Get the files from the drop event
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-    
-    // Process each dropped file
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      // Check if file is an image
-      if (!file.type.startsWith('image/')) {
-        toast.error(`File "${file.name}" is not an image`);
-        continue;
-      }
-      
-      // Upload the image
-      const imageUrl = await handleImageUpload(file);
-      if (imageUrl) {
-        if (isOfferForm) {
-          setItemFormData(prev => ({
-            ...prev,
-            images: [...(prev.images || []), imageUrl]
-          }));
-        } else {
-          setRequestFormData(prev => ({
-            ...prev,
-            image: imageUrl
-          }));
-        }
-      }
-    }
-  };
-  
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Category Selection (for offers and optionally for requests) */}
       {isOfferForm && (
-        <div className="space-y-2">
-          <Label htmlFor="category">Item Category</Label>
-          <Select 
-            value={itemFormData.category as string} 
-            onValueChange={(value) => handleCategoryChange(value as GoodsItemCategory)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(CATEGORY_NAMES).map(([value, label]) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <CategorySelection 
+          category={itemFormData.category as GoodsItemCategory}
+          onChange={handleCategoryChange}
+        />
       )}
       
       {/* Quick Suggestions */}
-      {GOODS_SUGGESTIONS[selectedCategory] && (
-        <div className="space-y-2">
-          <Label>Quick Suggestions</Label>
-          <div className="flex flex-wrap gap-2">
-            {GOODS_SUGGESTIONS[selectedCategory].map((suggestion) => (
-              <Button
-                key={suggestion}
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleSelectSuggestion(suggestion)}
-                className="text-xs"
-              >
-                {suggestion}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
+      <ItemSuggestions 
+        category={selectedCategory}
+        onSelectSuggestion={handleSelectSuggestion}
+      />
       
-      {/* Title */}
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={isOfferForm ? itemFormData.title : requestFormData.title}
-          onChange={(e) => {
-            if (isOfferForm) {
-              setItemFormData(prev => ({ ...prev, title: e.target.value }));
-            } else {
-              setRequestFormData(prev => ({ ...prev, title: e.target.value }));
-            }
-          }}
-          required
-          placeholder={`${isOfferForm ? 'What are you offering?' : 'What do you need?'}`}
-        />
-      </div>
-      
-      {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={isOfferForm ? itemFormData.description : requestFormData.description}
-          onChange={(e) => {
-            if (isOfferForm) {
-              setItemFormData(prev => ({ ...prev, description: e.target.value }));
-            } else {
-              setRequestFormData(prev => ({ ...prev, description: e.target.value }));
-            }
-          }}
-          required
-          placeholder={`${isOfferForm 
-            ? 'Provide details about the item (condition, size, etc.)' 
-            : 'Describe what you need and any specific requirements'}`}
-          className="min-h-[100px]"
-        />
-      </div>
+      {/* Title and Description Fields */}
+      <TextFields 
+        title={isOfferForm ? itemFormData.title || "" : requestFormData.title || ""}
+        description={isOfferForm ? itemFormData.description || "" : requestFormData.description || ""}
+        isOfferForm={isOfferForm}
+        onTitleChange={handleTitleChange}
+        onDescriptionChange={handleDescriptionChange}
+      />
       
       {/* Available Days (offers only) */}
       {isOfferForm && (
-        <div className="space-y-2">
-          <Label htmlFor="availableDays">Available For (days)</Label>
-          <Input
-            id="availableDays"
-            type="number"
-            min={1}
-            max={365}
-            value={itemFormData.availableDays || 30}
-            onChange={(e) => {
-              setItemFormData(prev => ({ 
-                ...prev, 
-                availableDays: parseInt(e.target.value) || 30 
-              }));
-            }}
-            required
-          />
-        </div>
+        <AvailabilityField 
+          availableDays={itemFormData.availableDays || 30}
+          onChange={(days) => {
+            setItemFormData(prev => ({ ...prev, availableDays: days }));
+          }}
+        />
       )}
       
       {/* Urgency (requests only) */}
       {!isOfferForm && (
-        <div className="space-y-2">
-          <Label htmlFor="urgency">Urgency</Label>
-          <Select 
-            value={requestFormData.urgency} 
-            onValueChange={(value) => {
-              setRequestFormData(prev => ({
-                ...prev,
-                urgency: value as GoodsRequestUrgency
-              }));
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select urgency" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(URGENCY_NAMES).map(([value, label]) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <UrgencyField 
+          urgency={requestFormData.urgency as GoodsRequestUrgency}
+          onChange={(urgency) => {
+            setRequestFormData(prev => ({ ...prev, urgency }));
+          }}
+        />
       )}
       
-      {/* Image Upload */}
-      <div className="space-y-2">
-        <Label>
-          {isOfferForm 
-            ? "Images (required)" 
-            : "Image (optional)"}
-        </Label>
-        <div 
-          className={`border rounded-md p-4 bg-gray-50 transition-colors ${isDragging ? 'border-primary bg-blue-50' : ''}`}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          {/* Current Images */}
-          {isOfferForm ? (
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {itemFormData.images?.map((image, index) => (
-                <div key={index} className="relative group">
-                  <img 
-                    src={image} 
-                    alt={`Item ${index+1}`} 
-                    className="w-full h-20 object-cover rounded-md"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveImage(index)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : requestFormData.image ? (
-            <div className="relative group mb-4">
-              <img 
-                src={requestFormData.image} 
-                alt="Request" 
-                className="w-full h-40 object-cover rounded-md"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveImage(0)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ) : null}
-          
-          {/* Upload Area */}
-          <div className="flex flex-col items-center justify-center py-6">
-            <div className="flex flex-col items-center gap-2">
-              <div className={`bg-gray-200 rounded-full p-3 ${isDragging ? 'bg-blue-200' : ''}`}>
-                <Upload className="h-6 w-6 text-gray-600" />
-              </div>
-              <span className="text-sm text-gray-600 text-center">
-                {isDragging 
-                  ? "Drop image(s) here" 
-                  : isOfferForm && itemFormData.images?.length 
-                    ? "Drag and drop more images here or click to browse" 
-                    : "Drag and drop image(s) here or click to browse"}
-              </span>
-              <span className="text-xs text-gray-500">
-                Supported formats: JPEG, PNG, GIF
-              </span>
-            </div>
-            <label className="cursor-pointer mt-4">
-              <Button type="button" variant="outline" size="sm">
-                Browse files
-              </Button>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleAddImage}
-                disabled={uploading}
-                multiple={isOfferForm}
-              />
-            </label>
-          </div>
-          
-          {/* Validation Message */}
-          {isOfferForm && !itemFormData.images?.length && (
-            <p className="text-xs text-red-500 mt-2 text-center">
-              Please upload at least one image of your item
-            </p>
-          )}
-        </div>
-      </div>
+      {/* Image Upload Area */}
+      <ImageDropzone 
+        isOfferForm={isOfferForm}
+        images={itemFormData.images}
+        image={requestFormData.image}
+        onAddImage={handleAddImage}
+        onRemoveImage={handleRemoveImage}
+        uploading={uploading}
+      />
       
+      {/* Form Submission Buttons */}
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
