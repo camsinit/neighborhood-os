@@ -14,32 +14,52 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+/**
+ * Dialog to display details of a support request
+ * 
+ * Shows full information about the selected request including:
+ * - Title and description
+ * - User profile information
+ * - Created date
+ * - Images (if any)
+ * 
+ * Also includes edit and delete options for the request owner
+ */
 interface SupportRequestDialogProps {
-  request: any;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  request: any;  // The request object to display
+  open: boolean;  // Whether the dialog is open
+  onOpenChange: (open: boolean) => void;  // Handler for dialog open/close
 }
 
 const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDialogProps) => {
+  // Get current user to determine if they can edit/delete
   const user = useUser();
 
-  // Add delete handler function
+  // Handle delete action
   const handleDelete = async () => {
     try {
+      // Determine which table to delete from based on the request type
+      const tableName = request?.category === 'skills' ? 'skills_exchange' : 'goods_exchange';
+      
+      // Delete the request from the appropriate table
       const { error } = await supabase
-        .from('skills_exchange')
+        .from(tableName)
         .delete()
         .eq('id', request?.id)
         .eq('user_id', user?.id);
 
       if (error) throw error;
       
-      toast.success("Skill request deleted successfully");
+      // Show success message and close dialog
+      toast.success(`${request?.category === 'skills' ? 'Skill' : 'Item'} deleted successfully`);
       onOpenChange(false); // Close the dialog
-      window.location.reload(); // Refresh the page to update the list
+      
+      // Dispatch event to refresh the list
+      const eventName = request?.category === 'skills' ? 'skills-request-updated' : 'goods-request-updated';
+      document.dispatchEvent(new Event(eventName));
     } catch (error) {
-      console.error('Error deleting skill request:', error);
-      toast.error("Failed to delete skill request");
+      console.error('Error deleting request:', error);
+      toast.error("Failed to delete request");
     }
   };
 
@@ -50,6 +70,7 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
           <DialogTitle>{request?.title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
+          {/* User profile information */}
           <div className="flex items-center gap-4">
             <Avatar className="h-6 w-6">
               <AvatarImage 
@@ -67,14 +88,34 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
               </p>
             </div>
           </div>
+          
+          {/* Description */}
           <p className="text-gray-700">{request?.description}</p>
-          {request?.image_url && request?.type === 'goods' && (
+          
+          {/* Image (if available) */}
+          {request?.image_url && (
             <img 
               src={request.image_url} 
               alt={request.title}
               className="w-full max-h-96 object-cover rounded-md"
             />
           )}
+          
+          {/* Multiple images (if available) */}
+          {request?.images && request.images.length > 0 && !request?.image_url && (
+            <div className="grid grid-cols-2 gap-2">
+              {request.images.slice(0, 4).map((img: string, i: number) => (
+                <img 
+                  key={i}
+                  src={img} 
+                  alt={`${request.title} - image ${i+1}`}
+                  className="w-full h-40 object-cover rounded-md"
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Action buttons */}
           <div className="flex justify-between items-center">
             {user && user.id === request?.user_id && (
               <div className="flex gap-2">

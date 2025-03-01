@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { useSupportRequests } from '@/utils/queries/useSupportRequests';
@@ -53,6 +54,20 @@ const GoodsPage = () => {
     }
   }, [allRequests]);
   
+  // Helper function to check if a request has the specified goods_category
+  const hasCategory = (request: any, category: string | null): boolean => {
+    // If no category filter is applied, return true
+    if (!category) return true;
+    
+    // Check if the request has the goods_category property and if it matches the filter
+    return request.goods_category === category;
+  };
+  
+  // Helper function to get urgency level (with fallback)
+  const getUrgency = (request: any): string => {
+    return request.urgency || 'low';
+  };
+  
   // Filter goods exchange items
   const goodsItems = allRequests
     ?.filter(req => 
@@ -60,7 +75,7 @@ const GoodsPage = () => {
       req.request_type === 'offer' &&
       !req.is_archived &&
       (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
-      (categoryFilter ? req.goods_category === categoryFilter : true)
+      hasCategory(req, categoryFilter)
     ) || [];
   
   // Filter goods requests
@@ -70,13 +85,14 @@ const GoodsPage = () => {
       req.request_type === 'need' &&
       !req.is_archived &&
       (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
-      (categoryFilter ? req.goods_category === categoryFilter : true)
+      hasCategory(req, categoryFilter)
     ) || [];
   
   // Filter urgent requests (high or critical urgency)
-  const urgentRequests = goodsRequests.filter(req => 
-    (req.urgency === 'high' || req.urgency === 'critical')
-  );
+  const urgentRequests = goodsRequests.filter(req => {
+    const urgency = getUrgency(req);
+    return urgency === 'high' || urgency === 'critical';
+  });
   
   // Helper functions
   const getUrgencyClass = (urgency: string) => {
@@ -173,11 +189,13 @@ const GoodsPage = () => {
         view='goods'
       />
       
-      <SupportRequestDialog 
-        open={isDetailsOpen}
-        onOpenChange={setIsDetailsOpen}
-        requestId={selectedRequest?.id}
-      />
+      {selectedRequest && (
+        <SupportRequestDialog 
+          open={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
+          request={selectedRequest}
+        />
+      )}
     </div>
   );
 };
