@@ -46,3 +46,10 @@ export interface SupportRequest {
   skill_category?: 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
   profiles: Profile;
 }
+
+// Add a new interface for the GoodsExchangeItem
+export interface GoodsExchangeItem extends SupportRequest {
+  goods_category?: string;
+  urgency?: 'low' | 'medium' | 'high' | 'critical';
+  images?: string[];
+}
