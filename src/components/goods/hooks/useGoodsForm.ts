@@ -35,7 +35,7 @@ export const useGoodsForm = ({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     category: (initialValues as any)?.category || "furniture",
-    requestType: initialRequestType,
+    requestType: initialRequestType || "offer",
     availableDays: (initialValues as any)?.availableDays || 30,
     images: (initialValues as any)?.images || []
   });
@@ -45,8 +45,9 @@ export const useGoodsForm = ({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     urgency: (initialValues as any)?.urgency || "medium",
-    category: (initialValues as any)?.category,
-    image: (initialValues as any)?.image
+    category: (initialValues as any)?.category || "furniture",
+    image: (initialValues as any)?.image,
+    requestType: initialRequestType || "need"
   });
   
   // State for image upload process
@@ -103,6 +104,7 @@ export const useGoodsForm = ({
   
   // Helper for handling category change to update suggestions
   const handleCategoryChange = (category: GoodsItemCategory) => {
+    console.log("Category changed to:", category);
     setSelectedCategory(category);
     if (isOfferForm) {
       setItemFormData(prev => ({
@@ -119,6 +121,7 @@ export const useGoodsForm = ({
   
   // Select a suggestion
   const handleSelectSuggestion = (suggestion: string) => {
+    console.log("Selected suggestion:", suggestion);
     if (isOfferForm) {
       setItemFormData(prev => ({
         ...prev,
@@ -159,6 +162,13 @@ export const useGoodsForm = ({
       return;
     }
     
+    // Debug data being submitted
+    if (isOfferForm) {
+      console.log("Submitting offer form data:", itemFormData);
+    } else {
+      console.log("Submitting request form data:", requestFormData);
+    }
+    
     try {
       // Submit the form
       const success = await submitGoodsForm(
@@ -170,6 +180,7 @@ export const useGoodsForm = ({
       
       if (success) {
         // Update the UI and close the form
+        console.log("Form submission successful, invalidating queries");
         queryClient.invalidateQueries({ queryKey: ['support-requests'] });
         toast.success(isOfferForm ? "Item offered successfully!" : "Item request submitted successfully!");
         onClose();

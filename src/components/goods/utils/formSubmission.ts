@@ -22,6 +22,16 @@ export const formatOfferSubmission = async (
   // Format the date to be 30 days from now (or whatever the user specified)
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + (itemFormData.availableDays || 30));
+  
+  // Debug log to verify what we're submitting
+  console.log('Formatting offer submission:', {
+    title: itemFormData.title,
+    description: itemFormData.description,
+    category: 'goods', 
+    goods_category: itemFormData.category,
+    request_type: 'offer',
+    images: itemFormData.images,
+  });
 
   // Create the data object for submission
   return {
@@ -54,6 +64,16 @@ export const formatRequestSubmission = async (
   // Format the date to be 30 days from now (default expiration)
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + 30);
+  
+  // Debug log to verify what we're submitting
+  console.log('Formatting request submission:', {
+    title: requestFormData.title,
+    description: requestFormData.description,
+    category: 'goods',
+    request_type: 'need',
+    urgency: requestFormData.urgency,
+    image: requestFormData.image,
+  });
 
   // Create the data object for submission
   return {
@@ -99,6 +119,8 @@ export const submitGoodsForm = async (
       ? await formatOfferSubmission(itemFormData, userId)
       : await formatRequestSubmission(requestFormData, userId);
     
+    console.log("Submitting to goods_exchange table:", formattedData);
+    
     // Submit the data to the goods_exchange table
     const { data, error } = await supabase
       .from('goods_exchange')
@@ -112,12 +134,15 @@ export const submitGoodsForm = async (
       throw error;
     }
     
+    console.log("Successfully saved goods item:", data);
+    
     // Dismiss the loading toast and show a success message
     toast.dismiss(loadingToast);
     toast.success(`Your item was ${isOfferForm ? 'offered' : 'requested'} successfully!`);
     
     // Dispatch a custom event to signal that the form was submitted successfully
     // This will trigger a data refresh in the GoodsPage component
+    console.log("Dispatching goods-form-submitted event");
     const customEvent = new Event('goods-form-submitted');
     document.dispatchEvent(customEvent);
     

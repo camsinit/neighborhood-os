@@ -3,10 +3,9 @@ import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
-import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
 import { GoodsExchangeItem } from '@/types/localTypes';
 
-// Import our newly created components
+// Import our components
 import GoodsPageHeader from "@/components/goods/GoodsPageHeader";
 import GoodsSearchBar from "@/components/goods/GoodsSearchBar";
 import UrgentRequestsSection from "@/components/goods/UrgentRequestsSection";
@@ -48,6 +47,23 @@ const GoodsPage = () => {
     if (requests) {
       console.log("Goods data loaded:", requests.length, "items", 
         requests.filter(req => req.category === 'goods').length, "goods items");
+      
+      // More detailed logging to debug what's in the data
+      const goodsItems = requests.filter(req => 
+        req.category === 'goods' && 
+        !req.is_archived &&
+        req.request_type === 'offer'
+      );
+      
+      console.log("Goods offers:", goodsItems.length, "items", goodsItems);
+      
+      const goodsRequests = requests.filter(req => 
+        req.category === 'goods' && 
+        !req.is_archived &&
+        req.request_type === 'need'
+      );
+      
+      console.log("Goods requests:", goodsRequests.length, "items", goodsRequests);
     }
   }, [requests]);
 
@@ -80,6 +96,12 @@ const GoodsPage = () => {
     return req.urgency === 'high' || req.urgency === 'critical';
   }) as GoodsExchangeItem[];
 
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    console.log("Manual refresh requested");
+    refetch();
+  };
+
   // Handler functions
   
   // Open the dialog to request an item
@@ -96,6 +118,13 @@ const GoodsPage = () => {
 
   // Handler for when the dialog closes after submission
   const handleDialogChange = (open: boolean) => {
+    if (!open) {
+      // When dialog closes, refresh the data after a short delay
+      setTimeout(() => {
+        console.log("Dialog closed, refreshing data");
+        refetch();
+      }, 500);
+    }
     setIsAddRequestOpen(open);
   };
 
@@ -129,7 +158,7 @@ const GoodsPage = () => {
               goodsItems={goodsItems}
               onRequestSelect={setSelectedRequest}
               onNewOffer={handleOfferItem}
-              onRefetch={refetch}
+              onRefetch={handleManualRefresh}
             />
             
             {/* Non-urgent requests section - Shows regular needs */}

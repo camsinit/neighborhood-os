@@ -21,13 +21,14 @@ export const useAutoRefresh = (
   
   useEffect(() => {
     // Create a handler function for the events
-    const handleRefresh = () => {
-      console.log(`Event triggered, refreshing queries: ${queryKeys.join(', ')}`);
+    const handleRefresh = (event: Event) => {
+      console.log(`Event "${event.type}" triggered, refreshing queries: ${queryKeys.join(', ')}`);
       
       // Add a small delay to ensure the database has time to update
       setTimeout(() => {
         // Invalidate each query key to trigger a refetch
         queryKeys.forEach(key => {
+          console.log(`Invalidating query: ${key}`);
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }, refreshDelay);
@@ -35,12 +36,14 @@ export const useAutoRefresh = (
 
     // Add event listeners for each event name
     eventNames.forEach(eventName => {
+      console.log(`Setting up listener for "${eventName}" event`);
       document.addEventListener(eventName, handleRefresh);
     });
     
     // Clean up event listeners when component unmounts
     return () => {
       eventNames.forEach(eventName => {
+        console.log(`Removing listener for "${eventName}" event`);
         document.removeEventListener(eventName, handleRefresh);
       });
     };
