@@ -9,6 +9,8 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import EmptyState from "@/components/ui/empty-state";
+import { UserPlus } from "lucide-react";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -19,7 +21,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   
   // Get neighborhood context to show appropriate messages
-  const { currentNeighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error: neighborhoodError } = useNeighborhood();
   
   // Use our custom hook to fetch users
   const { data: users, isLoading, error } = useNeighborUsers();
@@ -30,9 +32,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
       neighborhoodId: currentNeighborhood?.id,
       neighborhoodName: currentNeighborhood?.name,
       isLoading: isLoadingNeighborhood,
+      error: neighborhoodError ? neighborhoodError.message : null,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoadingNeighborhood]);
+  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError]);
   
   // Add debugging for tracking the query state
   useEffect(() => {
@@ -71,6 +74,21 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     return <LoadingSpinner />;
   }
 
+  // If there's a neighborhood error
+  if (neighborhoodError) {
+    console.error("[UserDirectory] Neighborhood error:", neighborhoodError);
+    return (
+      <div className="p-6">
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-5 w-5 mr-2" />
+          <AlertDescription>
+            Error loading neighborhood data: {neighborhoodError.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   // If there's no neighborhood, show a message
   if (!currentNeighborhood) {
     return (
@@ -81,6 +99,13 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
             You're not part of any neighborhood yet. Join or create a neighborhood to see residents.
           </AlertDescription>
         </Alert>
+        <EmptyState
+          icon={UserPlus}
+          title="Join a Neighborhood"
+          description="You need to join or create a neighborhood to connect with neighbors."
+          actionLabel="Create Neighborhood"
+          onAction={() => console.log("Create neighborhood clicked")}
+        />
       </div>
     );
   }

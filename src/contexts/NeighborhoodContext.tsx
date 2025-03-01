@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,103 +68,77 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       });
 
       try {
-        // First, let's check if the user is a member of any neighborhood
-        console.log("[NeighborhoodContext] Checking neighborhood_members table directly");
-        const { data: memberData, error: memberError } = await supabase
+        // Use a direct approach to get neighborhood ID first, then fetch details
+        // This avoids recursive RLS policies
+        console.log("[NeighborhoodContext] Getting user's neighborhood membership directly");
+        
+        // First get the neighborhood ID the user belongs to
+        const { data: membershipData, error: membershipError } = await supabase
           .from('neighborhood_members')
-          .select('neighborhood_id, status')
+          .select('neighborhood_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .order('joined_at', { ascending: false })
           .limit(1)
           .single();
 
-        if (memberError) {
-          if (memberError.code === 'PGRST116') {
-            // No data found is not a critical error, just means the user has no memberships
-            console.log("[NeighborhoodContext] No active neighborhood memberships found");
-          } else {
-            // Only log this error but continue with the flow to check if user created neighborhoods
-            console.error("[NeighborhoodContext] Error fetching membership:", {
-              error: memberError,
-              userId: user.id,
-              timestamp: new Date().toISOString()
-            });
-          }
-        } else if (memberData) {
-          console.log("[NeighborhoodContext] Found membership:", {
-            neighborhoodId: memberData.neighborhood_id,
-            status: memberData.status,
-            userId: user.id
-          });
-          
-          // Now fetch the neighborhood details
-          const { data: neighborhoodData, error: neighborhoodError } = await supabase
-            .from('neighborhoods')
-            .select('id, name, created_by')
-            .eq('id', memberData.neighborhood_id)
-            .single();
+        if (membershipError) {
+          if (membershipError.code === 'PGRST116') {
+            // No membership found - check if user created a neighborhood
+            console.log("[NeighborhoodContext] No active membership found, checking user-created neighborhoods");
             
-          if (neighborhoodError) {
-            console.error("[NeighborhoodContext] Error fetching neighborhood details:", {
-              error: neighborhoodError,
-              neighborhoodId: memberData.neighborhood_id
-            });
-          } else if (neighborhoodData) {
-            console.log("[NeighborhoodContext] Found neighborhood from membership:", {
-              neighborhood: neighborhoodData,
-              userId: user.id
-            });
+            const { data: createdNeighborhoods, error: creationError } = await supabase
+              .from('neighborhoods')
+              .select('id, name, created_by')
+              .eq('created_by', user.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
+              
+            if (creationError) {
+              throw creationError;
+            }
             
-            setCurrentNeighborhood(neighborhoodData as Neighborhood);
+            if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+              console.log("[NeighborhoodContext] Found user-created neighborhood:", {
+                neighborhood: createdNeighborhoods[0],
+                userId: user.id
+              });
+              
+              setCurrentNeighborhood(createdNeighborhoods[0]);
+              setIsLoading(false);
+              return;
+            }
+            
+            // User has no neighborhood
+            console.log("[NeighborhoodContext] User has no neighborhood");
+            setCurrentNeighborhood(null);
             setIsLoading(false);
             return;
           }
+          
+          // Real error, not just "no data"
+          throw membershipError;
         }
-
-        // As a fallback, check if the user created any neighborhoods
-        console.log("[NeighborhoodContext] Checking for user-created neighborhoods");
-        const { data: neighborhoods, error: neighborhoodsError } = await supabase
+        
+        // If we have a membership, get the neighborhood details
+        console.log("[NeighborhoodContext] Found membership with neighborhood:", membershipData.neighborhood_id);
+        
+        const { data: neighborhoodData, error: neighborhoodError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by')
-          .eq('created_by', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        // If there's an error fetching neighborhoods
-        if (neighborhoodsError) {
-          console.error("[NeighborhoodContext] Neighborhoods fetch error:", {
-            error: neighborhoodsError,
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          });
+          .eq('id', membershipData.neighborhood_id)
+          .single();
           
-          // Try to continue with a null neighborhood instead of throwing
-          setCurrentNeighborhood(null);
-          setIsLoading(false);
-          return;
+        if (neighborhoodError) {
+          throw neighborhoodError;
         }
-
-        // If the user has created a neighborhood, use the first one as their active neighborhood
-        if (neighborhoods && neighborhoods.length > 0) {
-          console.log("[NeighborhoodContext] Found user-created neighborhood:", {
-            neighborhood: neighborhoods[0],
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          });
-          
-          setCurrentNeighborhood(neighborhoods[0] as Neighborhood);
-          setIsLoading(false);
-          return;
-        }
-
-        // If we reach here, the user doesn't have a neighborhood
-        console.log("[NeighborhoodContext] No neighborhood found for user", {
-          userId: user.id,
-          timestamp: new Date().toISOString()
+        
+        console.log("[NeighborhoodContext] Neighborhood details loaded:", {
+          id: neighborhoodData.id,
+          name: neighborhoodData.name
         });
         
-        setCurrentNeighborhood(null);
+        setCurrentNeighborhood(neighborhoodData);
       } catch (err) {
         // Handle unexpected errors
         console.error("[NeighborhoodContext] Critical error:", {

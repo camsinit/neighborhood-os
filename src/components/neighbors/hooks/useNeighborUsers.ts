@@ -26,37 +26,37 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
 
       try {
-        // First, fetch all members of the current neighborhood
-        console.log("[useNeighborUsers] Step 1: Fetching members of the neighborhood");
-        const { data: members, error: membersError } = await supabase
+        // Use a two-step approach to avoid recursive RLS policies
+        // Step 1: First get all user IDs that belong to the neighborhood
+        console.log("[useNeighborUsers] Step 1: Getting user IDs from neighborhood_members directly");
+        const { data: memberIds, error: memberIdsError } = await supabase
           .from('neighborhood_members')
           .select('user_id')
           .eq('neighborhood_id', currentNeighborhood.id)
           .eq('status', 'active');
 
-        if (membersError) {
-          console.error("[useNeighborUsers] Error fetching neighborhood members:", {
-            error: membersError,
+        if (memberIdsError) {
+          console.error("[useNeighborUsers] Error fetching neighborhood member IDs:", {
+            error: memberIdsError,
             neighborhoodId: currentNeighborhood.id
           });
-          throw membersError;
+          throw memberIdsError;
         }
 
-        if (!members || members.length === 0) {
+        if (!memberIds || memberIds.length === 0) {
           console.log("[useNeighborUsers] No members found in this neighborhood");
           return [];
         }
 
-        console.log("[useNeighborUsers] Neighborhood members found:", {
-          count: members.length,
-          memberIds: members.map(m => m.user_id)
+        // Extract just the user IDs from the member results
+        const userIds = memberIds.map(member => member.user_id);
+        
+        console.log("[useNeighborUsers] Found user IDs:", {
+          count: userIds.length,
+          userIds
         });
 
-        // Get the list of user IDs from members
-        const userIds = members.map(member => member.user_id);
-
-        // Use a different approach to get users that avoids the recursive RLS policy
-        // First, get profiles for all users
+        // Step 2: Now fetch profiles for these specific user IDs
         console.log("[useNeighborUsers] Step 2: Fetching profiles for neighborhood members");
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
@@ -72,7 +72,7 @@ export const useNeighborUsers = () => {
           count: profiles?.length || 0
         });
 
-        // Then get user emails from auth_users_view
+        // Step 3: Fetch user emails
         console.log("[useNeighborUsers] Step 3: Fetching user emails");
         const { data: authUsers, error: authError } = await supabase
           .from('auth_users_view')
@@ -88,7 +88,7 @@ export const useNeighborUsers = () => {
           count: authUsers?.length || 0
         });
 
-        // Then get user roles
+        // Step 4: Fetch user roles
         console.log("[useNeighborUsers] Step 4: Fetching user roles");
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
@@ -104,7 +104,7 @@ export const useNeighborUsers = () => {
           count: userRoles?.length || 0
         });
 
-        // Combine the data
+        // Step 5: Combine the data
         console.log("[useNeighborUsers] Step 5: Combining data");
         const usersWithProfiles = profiles.map((profile: any) => {
           const authUser = authUsers.find((u: any) => u.id === profile.id);
@@ -134,7 +134,10 @@ export const useNeighborUsers = () => {
 
         console.log("[useNeighborUsers] Final combined users:", {
           count: usersWithProfiles.length,
-          users: usersWithProfiles.map(u => u.id)
+          users: usersWithProfiles.map(u => ({
+            id: u.id, 
+            displayName: u.profiles?.display_name
+          }))
         });
         
         return usersWithProfiles as UserWithRole[];
