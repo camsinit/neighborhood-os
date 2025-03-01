@@ -37,9 +37,11 @@ export const useGoodsExchange = () => {
         
         try {
           // Fetch profile data for these users
+          // Note: Make sure we only request columns that actually exist in the profiles table
+          // Removing 'email' since it appears this column doesn't exist directly in profiles
           const { data: profilesData, error: profilesError } = await supabase
             .from("profiles")
-            .select('id, display_name, avatar_url, email')
+            .select('id, display_name, avatar_url')
             .in('id', userIds);
             
           // Check if there was an error fetching profiles
@@ -55,23 +57,21 @@ export const useGoodsExchange = () => {
           }
           
           // Create a map of user IDs to profile data for quick lookup
-          // Using an explicit Record type to help TypeScript understand the structure
           const profilesMap: Record<string, any> = {};
           
           // Only process profilesData if it exists and is an array
           if (profilesData && Array.isArray(profilesData)) {
             // Process each profile safely
-            profilesData.forEach(profileItem => {
-              // Skip any null or invalid profiles
-              if (!profileItem) return;
+            profilesData.forEach(profile => {
+              // Skip any null profiles
+              if (!profile) return;
               
-              // Safely extract the ID
-              const profileId = profileItem.id;
-              
-              // Only add to map if we have a valid ID
-              if (profileId) {
-                // Convert ID to string to ensure it works as an object key
-                profilesMap[String(profileId)] = profileItem;
+              // We need to check if the profile has an id before using it
+              if (profile && typeof profile === 'object' && 'id' in profile) {
+                const profileId = profile.id;
+                if (profileId) {
+                  profilesMap[String(profileId)] = profile;
+                }
               }
             });
           }
