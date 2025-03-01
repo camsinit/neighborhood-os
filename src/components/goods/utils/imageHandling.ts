@@ -46,8 +46,19 @@ export const processFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, 
     return null;
   }
   
+  // Show a toast notification to indicate upload has started
+  toast.loading("Uploading image...");
+  
   // Upload the image
-  return await handleImageUpload(file, userId);
+  const result = await handleImageUpload(file, userId);
+  
+  // Dismiss the loading toast and show success or failure
+  toast.dismiss();
+  if (result) {
+    toast.success("Image uploaded successfully");
+  }
+  
+  return result;
 };
 
 /**
@@ -69,9 +80,19 @@ export const processMultipleFileUploads = async (e: React.ChangeEvent<HTMLInputE
     return [];
   }
   
+  // Show a loading toast with the number of files
+  toast.loading(`Uploading ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
+  
   // Upload all images in parallel
   const uploadPromises = imageFiles.map(file => handleImageUpload(file, userId));
   const results = await Promise.all(uploadPromises);
+  
+  // Dismiss the loading toast and show success
+  toast.dismiss();
+  const successCount = results.filter(url => url !== null).length;
+  if (successCount > 0) {
+    toast.success(`${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`);
+  }
   
   // Filter out any null results (failed uploads)
   return results.filter(url => url !== null) as string[];

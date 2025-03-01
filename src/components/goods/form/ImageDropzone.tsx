@@ -75,10 +75,12 @@ const ImageDropzone = ({
           : "Image (optional)"}
       </Label>
       
-      {/* Drop zone container */}
+      {/* Drop zone container with a highlight effect when being dragged over or during uploading */}
       <div 
         ref={dropZoneRef}
-        className={`border rounded-md p-4 bg-gray-50 transition-colors ${isDragging ? 'border-primary bg-blue-50' : ''}`}
+        className={`border rounded-md p-4 bg-gray-50 transition-colors 
+          ${isDragging ? 'border-primary bg-blue-50' : ''} 
+          ${uploading ? 'border-blue-300 bg-blue-50' : ''}`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -97,7 +99,7 @@ const ImageDropzone = ({
           />
         )}
         
-        {/* Upload Interface */}
+        {/* Upload Interface - passes the uploading state to show loading feedback */}
         <UploadArea 
           isDragging={isDragging}
           isOfferForm={isOfferForm}
@@ -108,7 +110,7 @@ const ImageDropzone = ({
         />
         
         {/* Validation Message - Only shown for offers when no images are uploaded */}
-        {isOfferForm && !images.length && (
+        {isOfferForm && !images.length && !uploading && (
           <p className="text-xs text-red-500 mt-2 text-center">
             Please upload at least one image of your item
           </p>

@@ -1,6 +1,5 @@
-
 // This component provides the interface for uploading images
-import { Upload } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Props for the UploadArea component
@@ -29,11 +28,20 @@ const UploadArea = ({
 }: UploadAreaProps) => {
   // Determine the appropriate message based on the current state
   const getMessage = () => {
-    if (isDragging) {
+    // If we're currently uploading an image, show a loading message
+    if (uploading) {
+      return "Uploading image...";
+    }
+    // If the user is dragging a file over the area
+    else if (isDragging) {
       return "Drop image(s) here";
-    } else if (isOfferForm && hasImages) {
+    } 
+    // If this is an offer form and we already have some images
+    else if (isOfferForm && hasImages) {
       return "Drag and drop more images here or click to browse";
-    } else {
+    } 
+    // Default message
+    else {
       return "Drag and drop image(s) here or click to browse";
     }
   };
@@ -41,12 +49,18 @@ const UploadArea = ({
   return (
     <div className="flex flex-col items-center justify-center py-6">
       <div className="flex flex-col items-center gap-2">
-        {/* Upload icon */}
-        <div className={`bg-gray-200 rounded-full p-3 ${isDragging ? 'bg-blue-200' : ''}`}>
-          <Upload className="h-6 w-6 text-gray-600" />
+        {/* Upload icon or loading spinner */}
+        <div className={`bg-gray-200 rounded-full p-3 ${isDragging ? 'bg-blue-200' : ''} ${uploading ? 'bg-blue-100' : ''}`}>
+          {uploading ? (
+            // Show a spinning loader when uploading
+            <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
+          ) : (
+            // Otherwise show the upload icon
+            <Upload className="h-6 w-6 text-gray-600" />
+          )}
         </div>
         
-        {/* Instructions text */}
+        {/* Instructions text - changes based on state */}
         <span className="text-sm text-gray-600 text-center">
           {getMessage()}
         </span>
@@ -57,10 +71,10 @@ const UploadArea = ({
         </span>
       </div>
       
-      {/* File browser button */}
-      <label className="cursor-pointer mt-4">
-        <Button type="button" variant="outline" size="sm">
-          Browse files
+      {/* File browser button - disabled when uploading */}
+      <label className={`cursor-pointer mt-4 ${uploading ? 'opacity-50' : ''}`}>
+        <Button type="button" variant="outline" size="sm" disabled={uploading}>
+          {uploading ? "Uploading..." : "Browse files"}
         </Button>
         <input
           type="file"
