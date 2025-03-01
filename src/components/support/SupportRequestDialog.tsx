@@ -169,7 +169,6 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
             <div className={`${images.length === 0 ? 'hidden' : ''}`}>
               {images.length > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-gray-500">Images</h3>
                   <div className="space-y-2">
                     {images.map((imgUrl: string, index: number) => (
                       <div 
