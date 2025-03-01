@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
@@ -15,6 +15,7 @@ import GoodsRequestsSection from "@/components/goods/GoodsRequestsSection";
 
 // Import urgency helper functions
 import { getUrgencyClass, getUrgencyLabel } from "@/components/goods/utils/urgencyHelpers";
+import { toast } from "sonner";
 
 /**
  * GoodsPage component
@@ -36,6 +37,38 @@ const GoodsPage = () => {
     isLoading,
     refetch
   } = useSupportRequests();
+
+  // Automatically fetch fresh data when the component mounts or dialog closes
+  // This ensures new items appear in the list immediately after submission
+  useEffect(() => {
+    // Refetch data when component mounts
+    refetch();
+    
+    // Set up a listener for the dialog closing
+    const onDialogClose = () => {
+      // Short delay to ensure the database has time to update
+      setTimeout(() => {
+        console.log("Refreshing goods data after dialog close");
+        refetch();
+      }, 500);
+    };
+
+    // Add event listener to detect dialog close
+    document.addEventListener('goods-form-submitted', onDialogClose);
+    
+    // Clean up event listener when component unmounts
+    return () => {
+      document.removeEventListener('goods-form-submitted', onDialogClose);
+    };
+  }, [refetch]);
+
+  // Debug the requests coming from the database
+  useEffect(() => {
+    if (requests) {
+      console.log("Goods data loaded:", requests.length, "items", 
+        requests.filter(req => req.category === 'goods').length, "goods items");
+    }
+  }, [requests]);
 
   // Filter goods items (offers)
   // This creates a list of items that people are offering to others
@@ -78,6 +111,17 @@ const GoodsPage = () => {
   const handleOfferItem = () => {
     setInitialRequestType("offer");
     setIsAddRequestOpen(true);
+  };
+
+  // Handler for when the dialog closes after submission
+  const handleDialogChange = (open: boolean) => {
+    setIsAddRequestOpen(open);
+    if (!open) {
+      // Refresh data after dialog closes
+      setTimeout(() => {
+        refetch();
+      }, 500);
+    }
   };
 
   return (
@@ -128,7 +172,7 @@ const GoodsPage = () => {
       {/* Dialog components for adding and viewing goods */}
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
-        onOpenChange={setIsAddRequestOpen}
+        onOpenChange={handleDialogChange}
         initialRequestType={initialRequestType}
         view="goods"
       />
