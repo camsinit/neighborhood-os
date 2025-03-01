@@ -1,12 +1,20 @@
 
 // Import React dependencies and types
-import React from 'react';
+import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dispatch, SetStateAction } from 'react';
 // Import Avatar component for profile pictures
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// Import icons for expanding/collapsing cards
+import { ChevronDown, ChevronUp } from "lucide-react";
+// Import components for creating expandable sections
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Define the component's props interface
 interface GoodsRequestsSectionProps {
@@ -62,6 +70,25 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
   );
   
+  // Track which request cards are expanded
+  const [expandedCardIds, setExpandedCardIds] = useState<Set<number>>(new Set());
+  
+  // Toggle the expanded state of a card
+  const toggleCardExpansion = (id: number) => {
+    // Create a new Set based on the current state
+    const newExpandedCards = new Set(expandedCardIds);
+    
+    // If the id exists in the set, remove it; otherwise add it
+    if (newExpandedCards.has(id)) {
+      newExpandedCards.delete(id);
+    } else {
+      newExpandedCards.add(id);
+    }
+    
+    // Update the state with the new Set
+    setExpandedCardIds(newExpandedCards);
+  };
+  
   // If there are no regular requests, don't render this section
   if (regularRequests.length === 0) {
     return null;
@@ -69,56 +96,119 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
 
   return (
     <div className="mt-10">
-      {/* Changed from h2 to h3 as requested */}
+      {/* Section title */}
       <h3 className="text-2xl font-bold mb-4">Requests from Neighbors</h3>
       
-      {/* Removed the bg-[#F8F8F8] class that gave the gray background */}
+      {/* Container for the horizontally scrollable cards */}
       <div className="p-4 rounded-lg overflow-x-auto">
         <div className="flex gap-4 pb-2">
           {regularRequests.map((request) => (
-            <Card key={request.id} className="flex-shrink-0 w-[250px]">
-              <CardHeader className="pb-2">
-                {/* New layout with profile image to the left of the title */}
-                <div className="flex items-start gap-3">
-                  {/* Avatar component for profile image */}
-                  <Avatar className="h-8 w-8 mt-1">
-                    {/* Use the avatar URL from the profile if available */}
-                    <AvatarImage 
-                      src={request.profiles?.avatar_url} 
-                      alt={request.profiles?.display_name || "User"} 
-                    />
-                    {/* Fallback shows initials if no image is available */}
-                    <AvatarFallback>
-                      {(request.profiles?.display_name || "?").substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
+            <Collapsible 
+              key={request.id} 
+              className="flex-shrink-0 w-[250px]"
+              open={expandedCardIds.has(request.id)}
+              onOpenChange={() => toggleCardExpansion(request.id)}
+            >
+              <Card className="transition-all duration-200">
+                {/* Card header section - always visible */}
+                <CollapsibleTrigger className="w-full text-left">
+                  <CardHeader className="pb-2">
+                    {/* Layout with profile image to the left of the title */}
+                    <div className="flex items-start gap-3">
+                      {/* Avatar component for profile image */}
+                      <Avatar className="h-8 w-8 mt-1">
+                        {/* Use the avatar URL from the profile if available */}
+                        <AvatarImage 
+                          src={request.profiles?.avatar_url} 
+                          alt={request.profiles?.display_name || "User"} 
+                        />
+                        {/* Fallback shows initials if no image is available */}
+                        <AvatarFallback>
+                          {(request.profiles?.display_name || "?").substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Title and urgency tag in a column */}
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{request.title}</CardTitle>
+                        {/* Urgency tag below the title */}
+                        {request.urgency && (
+                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
+                            {getUrgencyLabel(request.urgency)}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Expansion indicator icon */}
+                      <div className="flex items-center text-muted-foreground">
+                        {expandedCardIds.has(request.id) ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
                   
-                  {/* Title and urgency tag in a column */}
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{request.title}</CardTitle>
-                    {/* Moved urgency tag below the title */}
-                    {request.urgency && (
-                      <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
-                        {getUrgencyLabel(request.urgency)}
-                      </span>
-                    )}
+                  {/* Preview of description - always visible */}
+                  <CardContent className="pb-2">
+                    <p className="line-clamp-2">{request.description}</p>
+                  </CardContent>
+                </CollapsibleTrigger>
+                
+                {/* Expanded content - only visible when card is expanded */}
+                <CollapsibleContent>
+                  <div className="px-6 pb-4 pt-0">
+                    {/* Full description without line clamping */}
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold mb-1">Description:</h4>
+                      <p>{request.description}</p>
+                    </div>
+                    
+                    {/* Poster information */}
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold mb-1">Posted by:</h4>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage 
+                            src={request.profiles?.avatar_url} 
+                            alt={request.profiles?.display_name || "User"} 
+                          />
+                          <AvatarFallback>
+                            {(request.profiles?.display_name || "?").substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{request.profiles?.display_name || "Anonymous"}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Action buttons */}
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent toggling the card when clicking the button
+                          toggleCardExpansion(request.id); // Close the card
+                        }}
+                      >
+                        Close
+                      </Button>
+                      <Button 
+                        variant="default" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent toggling the card when clicking the button
+                          window.open(createContactEmailLink(request), '_blank');
+                        }}
+                      >
+                        I have this!
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <p className="line-clamp-2">{request.description}</p>
-              </CardContent>
-              <CardFooter className="flex justify-end pt-2">
-                {/* Moved button to the right side */}
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={() => window.open(createContactEmailLink(request), '_blank')}
-                >
-                  I have this!
-                </Button>
-              </CardFooter>
-            </Card>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           ))}
         </div>
       </div>
