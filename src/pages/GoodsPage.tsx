@@ -46,7 +46,7 @@ const GoodsPage = () => {
     (searchQuery === "" || 
      req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
      req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) || [];
+  ) as GoodsExchangeItem[] || [];
 
   // Filter goods requests (needs)
   // This creates a list of items that people are requesting from others
@@ -57,15 +57,14 @@ const GoodsPage = () => {
     (searchQuery === "" || 
      req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
      req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) || [];
+  ) as GoodsExchangeItem[] || [];
 
   // Filter for urgent requests
   // This creates a list of high-priority needs that should be displayed prominently
   const urgentRequests = goodsRequests.filter(req => {
     // Using as GoodsExchangeItem since we know these are goods items
-    const goodsReq = req as GoodsExchangeItem;
-    return goodsReq.urgency === 'high' || goodsReq.urgency === 'critical';
-  });
+    return req.urgency === 'high' || req.urgency === 'critical';
+  }) as GoodsExchangeItem[];
 
   // Handler functions
   

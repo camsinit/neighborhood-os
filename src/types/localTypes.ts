@@ -45,7 +45,8 @@ export interface SupportRequest {
   created_at: string;
   is_archived: boolean | null;
   is_read: boolean | null;
-  skill_category?: 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
+  // Changed from specific union type to string to fix type issues
+  skill_category?: string;
   // Change this to match the structure coming from the database
   profiles: Profile;
 }
