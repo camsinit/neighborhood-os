@@ -55,36 +55,40 @@ export const useGoodsExchange = () => {
           }
           
           // Create a map of user IDs to profile data for quick lookup
-          // Using a more explicit approach to avoid TypeScript null issues
-          const profilesMap = {};
+          // Using an explicit Record type to help TypeScript understand the structure
+          const profilesMap: Record<string, any> = {};
           
           // Only process profilesData if it exists and is an array
           if (profilesData && Array.isArray(profilesData)) {
-            // Iterate through each profile
-            for (let i = 0; i < profilesData.length; i++) {
-              const profile = profilesData[i];
+            // Process each profile safely
+            profilesData.forEach(profileItem => {
+              // Skip any null or invalid profiles
+              if (!profileItem) return;
               
-              // Very explicit check to satisfy TypeScript
-              if (profile && 
-                  typeof profile === 'object' && 
-                  profile !== null && 
-                  'id' in profile && 
-                  profile.id !== null && 
-                  profile.id !== undefined) {
-                
-                // Use string casting to ensure TypeScript knows this is a valid key
-                const profileId = String(profile.id);
-                profilesMap[profileId] = profile;
+              // Safely extract the ID
+              const profileId = profileItem.id;
+              
+              // Only add to map if we have a valid ID
+              if (profileId) {
+                // Convert ID to string to ensure it works as an object key
+                profilesMap[String(profileId)] = profileItem;
               }
-            }
+            });
           }
           
           // Attach profile data to each goods item
           goodsWithProfiles = goodsData.map(item => {
             // For each item, look up its user's profile in our map
-            const userId = item.user_id ? String(item.user_id) : null;
-            const userProfile = userId && profilesMap[userId] ? profilesMap[userId] : null;
+            let userProfile = null;
             
+            // Only try to get the profile if we have a user ID
+            if (item.user_id) {
+              // Convert to string for consistent lookup
+              const lookupKey = String(item.user_id);
+              userProfile = profilesMap[lookupKey] || null;
+            }
+            
+            // Return the item with the profile attached
             return {
               ...item,
               profiles: userProfile
