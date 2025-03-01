@@ -1,6 +1,6 @@
 
 // Import React dependencies and types
-import React from 'react';
+import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Dispatch, SetStateAction } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // Import tooltip components for additional UI enhancement
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// Import popover components for click-to-expand functionality
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 /**
  * Helper function to create a contact email link for an item
@@ -59,6 +61,10 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   getUrgencyClass,
   getUrgencyLabel
 }) => {
+  // State to track which popover is currently open (if any)
+  // We store the request ID as a string to track the open popover
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  
   // Filter out any requests that are already shown in the urgent section
   const regularRequests = goodsRequests.filter(
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
@@ -79,97 +85,72 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
         <div className="flex gap-4 pb-2 relative">
           {regularRequests.map((request) => (
             /* 
-            * Card with overlay hover effect
-            * Using relative/absolute positioning to create the floating overlay effect
-            * The z-index ensures that the hovered card appears above others
+            * Card with Popover for click-to-expand
+            * Each card is wrapped in a Popover component
+            * The card itself is the trigger for the popover
             */
-            <div className="relative flex-shrink-0 w-[250px] group" key={request.id}>
-              {/* Base card that's always visible */}
-              <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-full">
-                <CardHeader className="pb-2">
-                  {/* Layout with profile image to the left of the title */}
-                  <div className="flex items-start gap-3">
-                    {/* Avatar component for profile image */}
-                    <Avatar className="h-8 w-8 mt-1">
-                      {/* Use the avatar URL from the profile if available */}
-                      <AvatarImage 
-                        src={request.profiles?.avatar_url} 
-                        alt={request.profiles?.display_name || "User"} 
-                      />
-                      {/* Fallback shows initials if no image is available */}
-                      <AvatarFallback>
-                        {(request.profiles?.display_name || "?").substring(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    {/* Title and urgency tag in a row - changed to flex-row */}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        {/* Title on the left */}
-                        <CardTitle className="text-lg">{request.title}</CardTitle>
-                        
-                        {/* Urgency tag moved to the right of the title */}
-                        {request.urgency && (
-                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-                            {getUrgencyLabel(request.urgency)}
-                          </span>
-                        )}
+            <Popover 
+              key={request.id}
+              open={openPopoverId === request.id}
+              onOpenChange={(open) => {
+                // When opening, set this popover's ID as the open one
+                // When closing, clear the open popover ID
+                setOpenPopoverId(open ? request.id : null);
+              }}
+            >
+              {/* Use the Card as the trigger for the Popover */}
+              <PopoverTrigger asChild>
+                <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0">
+                  <CardHeader className="pb-2">
+                    {/* Layout with profile image to the left of the title */}
+                    <div className="flex items-start gap-3">
+                      {/* Avatar component for profile image */}
+                      <Avatar className="h-8 w-8 mt-1">
+                        {/* Use the avatar URL from the profile if available */}
+                        <AvatarImage 
+                          src={request.profiles?.avatar_url} 
+                          alt={request.profiles?.display_name || "User"} 
+                        />
+                        {/* Fallback shows initials if no image is available */}
+                        <AvatarFallback>
+                          {(request.profiles?.display_name || "?").substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Title and urgency tag in a row */}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          {/* Title on the left */}
+                          <CardTitle className="text-lg">{request.title}</CardTitle>
+                          
+                          {/* Urgency tag on the right of the title */}
+                          {request.urgency && (
+                            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                              {getUrgencyLabel(request.urgency)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  {/* Description is visible in the normal card view, but gets truncated */}
-                  <p className="line-clamp-2">{request.description}</p>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {/* Description is visible in the normal card view, but gets truncated */}
+                    <p className="line-clamp-2">{request.description}</p>
+                  </CardContent>
+                </Card>
+              </PopoverTrigger>
               
               {/* 
-              * Expanded overlay card that appears on hover
-              * Fixed z-index to ensure it's above other content
-              * Changed position to absolute and increased z-index significantly
+              * Popover content shows the expanded details
+              * This appears when the card is clicked
+              * It contains the same information as the previous hover overlay
               */}
-              <Card 
-                className="absolute left-0 top-0 w-[250px] opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-                group-hover:w-[300px] group-hover:z-50 transition-all duration-300 shadow-xl"
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8 mt-1">
-                      <AvatarImage 
-                        src={request.profiles?.avatar_url} 
-                        alt={request.profiles?.display_name || "User"} 
-                      />
-                      <AvatarFallback>
-                        {(request.profiles?.display_name || "?").substring(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    {/* Changed to flex-row with space-between to move urgency tag to the right */}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{request.title}</CardTitle>
-                        {request.urgency && (
-                          <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-                            {getUrgencyLabel(request.urgency)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  {/* Full description with no truncation in the expanded view */}
-                  {/* Removed the "Description:" heading as requested */}
-                  <p>{request.description}</p>
-                  
-                  {/* Posted by section */}
-                  <div className="mt-4">
-                    <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
+              <PopoverContent className="w-[300px] p-0" sideOffset={5}>
+                <Card className="border-0 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-8 w-8 mt-1">
                         <AvatarImage 
                           src={request.profiles?.avatar_url} 
                           alt={request.profiles?.display_name || "User"} 
@@ -178,31 +159,68 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                           {(request.profiles?.display_name || "?").substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
+                      
+                      {/* Title and urgency in a row with space-between */}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg">{request.title}</CardTitle>
+                          {request.urgency && (
+                            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
+                              {getUrgencyLabel(request.urgency)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </CardHeader>
                   
-                  {/* Contact button */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button 
-                          variant="default" 
-                          size="sm"
-                          className="w-full mt-4"
-                          onClick={() => window.open(createContactEmailLink(request), '_blank')}
-                        >
-                          I have this!
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Contact {request.profiles?.display_name || "the neighbor"} about this item</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </CardContent>
-              </Card>
-            </div>
+                  <CardContent>
+                    {/* Full description with no truncation in the popover view */}
+                    <p>{request.description}</p>
+                    
+                    {/* Posted by section */}
+                    <div className="mt-4">
+                      <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage 
+                            src={request.profiles?.avatar_url} 
+                            alt={request.profiles?.display_name || "User"} 
+                          />
+                          <AvatarFallback>
+                            {(request.profiles?.display_name || "?").substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Contact button */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            className="w-full mt-4"
+                            onClick={(e) => {
+                              // Prevent the click from closing the popover
+                              e.stopPropagation();
+                              window.open(createContactEmailLink(request), '_blank');
+                            }}
+                          >
+                            I have this!
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Contact {request.profiles?.display_name || "the neighbor"} about this item</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </CardContent>
+                </Card>
+              </PopoverContent>
+            </Popover>
           ))}
         </div>
       </div>
