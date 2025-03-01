@@ -7,12 +7,13 @@ import { GoodsFormProps } from "@/components/support/types/formTypes";
 // Import our refactored components
 import CategorySelection from "./form/CategorySelection";
 import ItemSuggestions from "./form/ItemSuggestions";
-import TextFields from "./form/TextFields";
+import TitleField from "./form/TitleField";
+import DescriptionField from "./form/DescriptionField";
 import AvailabilityField from "./form/AvailabilityField";
 import UrgencyField from "./form/UrgencyField";
 import ImageDropzone from "./form/ImageDropzone";
 
-// Import our new custom hook
+// Import our custom hook
 import { useGoodsForm } from "./hooks/useGoodsForm";
 
 /**
@@ -70,13 +71,18 @@ const GoodsForm = ({
         />
       )}
       
-      {/* Title and Description Fields */}
-      <TextFields 
-        title={isOfferForm ? itemFormData.title || "" : requestFormData.title || ""}
-        description={isOfferForm ? itemFormData.description || "" : requestFormData.description || ""}
-        isOfferForm={isOfferForm}
-        onTitleChange={handleTitleChange}
-        onDescriptionChange={handleDescriptionChange}
+      {/* Title Field */}
+      <TitleField 
+        mode={isOfferForm ? 'offer' : 'request'}
+        value={isOfferForm ? itemFormData.title : requestFormData.title}
+        onChange={handleTitleChange}
+      />
+      
+      {/* Description Field */}
+      <DescriptionField 
+        mode={isOfferForm ? 'offer' : 'request'}
+        value={isOfferForm ? itemFormData.description : requestFormData.description}
+        onChange={handleDescriptionChange}
       />
       
       {/* Available Days (offers only) */}
