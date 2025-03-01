@@ -11,6 +11,11 @@ export type SupportRequestFormData = {
   imageUrl?: string | null;
   skill_category?: string;
   care_category?: string;
+  // Add support for multiple images
+  images?: string[];
+  // Add support for goods-specific fields
+  goods_category?: GoodsItemCategory;
+  urgency?: GoodsRequestUrgency;
 };
 
 export type SupportRequestFormProps = {

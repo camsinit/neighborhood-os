@@ -55,5 +55,5 @@ export interface SupportRequest {
 export interface GoodsExchangeItem extends SupportRequest {
   goods_category?: string;
   urgency?: 'low' | 'medium' | 'high' | 'critical';
-  images?: string[];
+  images?: string[]; // Add support for multiple images
 }

@@ -11,16 +11,19 @@ const SupportRequestForm = ({
   onClose, 
   initialValues,
   mode = 'create',
-  requestId
+  requestId,
+  initialRequestType
 }: SupportRequestFormProps) => {
   const [formData, setFormData] = useState<Partial<SupportRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     category: initialValues?.category || "",
-    requestType: initialValues?.requestType || null,
+    requestType: initialValues?.requestType || initialRequestType || null,
     validUntil: initialValues?.validUntil?.split('T')[0] || "",
     supportType: initialValues?.supportType || "immediate",
     imageUrl: initialValues?.imageUrl || "",
+    // Add support for multiple images
+    images: initialValues?.images || [],
   });
 
   const { handleSubmit, handleUpdate } = useSupportRequestSubmit({
@@ -47,6 +50,9 @@ const SupportRequestForm = ({
     }
   };
 
+  // Determine if we should use multiple images upload
+  const shouldUseMultipleImages = formData.category === 'goods';
+
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <FormFields 
@@ -56,8 +62,11 @@ const SupportRequestForm = ({
 
       <ImageUpload
         imageUrl={formData.imageUrl}
+        images={formData.images}
         onImageUpload={(url) => handleFieldChange('imageUrl', url)}
+        onImagesUpdate={(urls) => handleFieldChange('images', urls)}
         category={formData.category}
+        multiple={shouldUseMultipleImages}
       />
 
       <DialogFooter>
