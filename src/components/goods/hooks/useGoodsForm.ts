@@ -184,7 +184,8 @@ export const useGoodsForm = ({
       if (success) {
         // Update the UI and close the form
         console.log("Form submission successful, invalidating queries");
-        queryClient.invalidateQueries({ queryKey: ['support-requests'] });
+        // Update to use the dedicated goods-exchange query key
+        queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
         // Removed toast.success here since it's now handled in submitGoodsForm
         onClose();
       }

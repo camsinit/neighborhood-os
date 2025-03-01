@@ -143,6 +143,7 @@ export const submitGoodsForm = async (
     
     // Dispatch a custom event to signal that the form was submitted successfully
     // This will trigger a data refresh in the GoodsPage component
+    // Updated to use the dedicated goods-exchange query key
     console.log("Dispatching goods-form-submitted event");
     const customEvent = new Event('goods-form-submitted');
     document.dispatchEvent(customEvent);

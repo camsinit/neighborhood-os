@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useSupportRequests } from "@/utils/queries/useSupportRequests";
+import { useGoodsExchange } from "@/utils/queries/useGoodsExchange"; // Import our new dedicated hook
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 import { GoodsExchangeItem } from '@/types/localTypes';
@@ -23,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
  * 
  * This page allows users to browse, offer, and request items in the community.
  * It's organized into sections for urgent requests, available items, and other requests.
+ * 
+ * Now it uses a dedicated data fetching hook (useGoodsExchange) specific to goods items.
  */
 const GoodsPage = () => {
   // Define our state variables
@@ -33,41 +35,38 @@ const GoodsPage = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [directDbData, setDirectDbData] = useState<any[]>([]);
 
-  // Fetch support requests data from the database
+  // Fetch goods data from the database using our dedicated hook
   const { 
-    data: requests, 
+    data: goodsExchangeItems, 
     isLoading,
     refetch
-  } = useSupportRequests();
+  } = useGoodsExchange();
 
   // Set up auto-refresh for goods data
   // This will listen for the goods-form-submitted event and refresh the data
-  useAutoRefresh(['support-requests'], ['goods-form-submitted']);
+  useAutoRefresh(['goods-exchange'], ['goods-form-submitted']);
 
-  // Debug the requests coming from the database
+  // Debug the goods data coming from the database
   useEffect(() => {
-    if (requests) {
-      console.log("Goods data loaded:", requests.length, "items", 
-        requests.filter(req => req.category === 'goods').length, "goods items");
+    if (goodsExchangeItems) {
+      console.log("Goods data loaded:", goodsExchangeItems.length, "items");
       
       // More detailed logging to debug what's in the data
-      const goodsItems = requests.filter(req => 
-        req.category === 'goods' && 
-        !req.is_archived &&
-        req.request_type === 'offer'
+      const goodsItems = goodsExchangeItems.filter(item => 
+        !item.is_archived &&
+        item.request_type === 'offer'
       );
       
       console.log("Goods offers:", goodsItems.length, "items", goodsItems);
       
-      const goodsRequests = requests.filter(req => 
-        req.category === 'goods' && 
-        !req.is_archived &&
-        req.request_type === 'need'
+      const goodsRequests = goodsExchangeItems.filter(item => 
+        !item.is_archived &&
+        item.request_type === 'need'
       );
       
       console.log("Goods requests:", goodsRequests.length, "items", goodsRequests);
     }
-  }, [requests]);
+  }, [goodsExchangeItems]);
 
   // For debugging - directly query the database to see what's in it
   useEffect(() => {
@@ -87,34 +86,31 @@ const GoodsPage = () => {
     };
     
     debugGoods();
-  }, [requests]);  // Re-run when requests changes to keep in sync
+  }, [goodsExchangeItems]);  // Re-run when goods data changes to keep in sync
 
   // Filter goods items (offers)
   // This creates a list of items that people are offering to others
-  const goodsItems = requests?.filter(req => 
-    req.category === 'goods' && 
-    !req.is_archived &&
-    req.request_type === 'offer' &&
+  const goodsItems = goodsExchangeItems?.filter(item => 
+    !item.is_archived &&
+    item.request_type === 'offer' &&
     (searchQuery === "" || 
-     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
   ) as GoodsExchangeItem[] || [];
 
   // Filter goods requests (needs)
   // This creates a list of items that people are requesting from others
-  const goodsRequests = requests?.filter(req => 
-    req.category === 'goods' && 
-    !req.is_archived &&
-    req.request_type === 'need' &&
+  const goodsRequests = goodsExchangeItems?.filter(item => 
+    !item.is_archived &&
+    item.request_type === 'need' &&
     (searchQuery === "" || 
-     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
   ) as GoodsExchangeItem[] || [];
 
   // Filter for urgent requests
   // This creates a list of high-priority needs that should be displayed prominently
   const urgentRequests = goodsRequests.filter(req => {
-    // Using as GoodsExchangeItem since we know these are goods items
     return req.urgency === 'high' || req.urgency === 'critical';
   }) as GoodsExchangeItem[];
 
@@ -160,10 +156,9 @@ const GoodsPage = () => {
           {/* Display debug information while we're troubleshooting */}
           <div className="bg-yellow-100 p-4 mb-4 rounded-lg border border-yellow-200">
             <h3 className="font-medium">Debug Information</h3>
-            <p>Total combined items loaded: {requests?.length || 0}</p>
-            <p>Goods category items from combined data: {requests?.filter(req => req.category === 'goods').length || 0}</p>
-            <p>Goods offers from combined data: {goodsItems.length}</p>
-            <p>Goods requests from combined data: {goodsRequests.length}</p>
+            <p>Total goods exchange items loaded: {goodsExchangeItems?.length || 0}</p>
+            <p>Goods offers from data: {goodsItems.length}</p>
+            <p>Goods requests from data: {goodsRequests.length}</p>
             <p className="mt-2 font-semibold">Direct database query results:</p>
             <p>Direct goods_exchange items: {directDbData.length}</p>
             <p>Direct goods_exchange offers: {directDbData.filter(item => item.request_type === 'offer').length}</p>
