@@ -33,8 +33,8 @@ interface GoodsSectionsProps {
  * This component organizes all the different sections of the Goods page:
  * - Urgent requests at the top
  * - Search bar and action buttons
+ * - Regular requests section (moved up above available items)
  * - Available items section
- * - Regular requests section
  */
 const GoodsSections = ({
   urgentRequests,
@@ -92,21 +92,21 @@ const GoodsSections = ({
           onCategoryFilter={setCategoryFilters}
         />
 
-        {/* Available items section - Shows offers from neighbors */}
-        <AvailableItemsSection 
-          goodsItems={filteredGoodsItems}
-          onRequestSelect={onRequestSelect}
-          onNewOffer={onOfferItem}
-          onRefetch={onRefresh}
-        />
-        
-        {/* Non-urgent requests section - Shows regular needs */}
+        {/* Non-urgent requests section - Shows regular needs (now above available items) */}
         <GoodsRequestsSection 
           goodsRequests={filteredGoodsRequests}
           urgentRequests={urgentRequests}
           onRequestSelect={onRequestSelect}
           getUrgencyClass={getUrgencyClass}
           getUrgencyLabel={getUrgencyLabel}
+        />
+        
+        {/* Available items section - Shows offers from neighbors (now below requests) */}
+        <AvailableItemsSection 
+          goodsItems={filteredGoodsItems}
+          onRequestSelect={onRequestSelect}
+          onNewOffer={onOfferItem}
+          onRefetch={onRefresh}
         />
       </div>
     </>
