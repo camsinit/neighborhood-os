@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
-import { Gift } from "lucide-react";
+import { Gift, ChevronLeft, ChevronRight } from "lucide-react";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
+import { useState } from "react";
 
 /**
  * Component to display available goods items offered by neighbors
@@ -16,6 +16,71 @@ interface AvailableItemsSectionProps {
   onNewOffer: () => void;
   onRefetch: () => void;
 }
+
+/**
+ * ImageCarousel - Component to display multiple images with navigation controls
+ * 
+ * This component handles cycling through multiple images for a single item
+ */
+const ImageCarousel = ({ images, title }: { images: string[], title: string }) => {
+  // State to keep track of which image is currently being shown
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Function to navigate to previous image
+  const showPreviousImage = (e: React.MouseEvent) => {
+    // Stop the click from bubbling up to parent elements
+    e.stopPropagation();
+    // Update the index, wrapping around to the end if at the first image
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+  
+  // Function to navigate to next image
+  const showNextImage = (e: React.MouseEvent) => {
+    // Stop the click from bubbling up to parent elements
+    e.stopPropagation();
+    // Update the index, wrapping around to the beginning if at the last image
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+  
+  return (
+    <div className="relative aspect-w-16 aspect-h-9 mb-4">
+      {/* Current visible image */}
+      <img 
+        src={images[currentImageIndex]} 
+        alt={`${title} - Image ${currentImageIndex + 1}`}
+        className="object-cover rounded-md h-48 w-full"
+      />
+      
+      {/* Image counter indicator */}
+      <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs">
+        {currentImageIndex + 1} / {images.length}
+      </div>
+      
+      {/* Only show navigation buttons if there are multiple images */}
+      {images.length > 1 && (
+        <>
+          {/* Previous image button */}
+          <button 
+            onClick={showPreviousImage}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 transition-colors"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          
+          {/* Next image button */}
+          <button 
+            onClick={showNextImage}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-1 transition-colors"
+            aria-label="Next image"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
 
 const AvailableItemsSection = ({ 
   goodsItems,
@@ -52,7 +117,8 @@ const AvailableItemsSection = ({
         >
           {/* Main content area that opens the item details */}
           <div onClick={() => onRequestSelect(request)}>
-            {/* Item image section - prioritize the main image_url first */}
+            {/* Determine which image display to use based on available images */}
+            {/* Case 1: Use the main image_url if available */}
             {request.image_url && (
               <div className="aspect-w-16 aspect-h-9 mb-4">
                 <img 
@@ -63,21 +129,12 @@ const AvailableItemsSection = ({
               </div>
             )}
             
-            {/* If there are multiple images in the images array, show the first one */}
+            {/* Case 2: If there are images in the images array, use the carousel */}
             {request.images && request.images.length > 0 && !request.image_url && (
-              <div className="aspect-w-16 aspect-h-9 mb-4">
-                <img 
-                  src={request.images[0]} 
-                  alt={request.title}
-                  className="object-cover rounded-md h-48 w-full"
-                />
-                {/* Badge showing how many more images are available */}
-                {request.images.length > 1 && (
-                  <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs">
-                    +{request.images.length - 1} more
-                  </div>
-                )}
-              </div>
+              <ImageCarousel 
+                images={request.images} 
+                title={request.title} 
+              />
             )}
             
             {/* Item details */}
