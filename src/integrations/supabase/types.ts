@@ -202,6 +202,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           archived_by: string | null
+          category: string
           condition: string | null
           created_at: string
           description: string | null
@@ -220,6 +221,7 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           archived_by?: string | null
+          category?: string
           condition?: string | null
           created_at?: string
           description?: string | null
@@ -238,6 +240,7 @@ export type Database = {
         Update: {
           archived_at?: string | null
           archived_by?: string | null
+          category?: string
           condition?: string | null
           created_at?: string
           description?: string | null
