@@ -1,6 +1,19 @@
 
-// Import the GoodsExchangeItem type
+// Import React dependencies and types
+import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dispatch, SetStateAction } from 'react';
+
+// Define the component's props interface
+interface GoodsRequestsSectionProps {
+  goodsRequests: GoodsExchangeItem[];
+  urgentRequests: GoodsExchangeItem[];
+  onRequestSelect: Dispatch<SetStateAction<GoodsExchangeItem | null>>;
+  getUrgencyClass: (urgency: string) => string;
+  getUrgencyLabel: (urgency: string) => string;
+}
 
 /**
  * Helper function to create a contact email link for an item
@@ -30,12 +43,73 @@ const createContactEmailLink = (request: GoodsExchangeItem) => {
   return `mailto:${email}?subject=${subject}&body=${body}`;
 };
 
+/**
+ * GoodsRequestsSection component
+ * 
+ * Displays a list of regular (non-urgent) requests for goods
+ */
+const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({ 
+  goodsRequests, 
+  urgentRequests, 
+  onRequestSelect,
+  getUrgencyClass,
+  getUrgencyLabel
+}) => {
+  // Filter out any requests that are already shown in the urgent section
+  const regularRequests = goodsRequests.filter(
+    req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
+  );
+  
+  // If there are no regular requests, don't render this section
+  if (regularRequests.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-10">
+      <h2 className="text-2xl font-bold mb-4">Requests from Neighbors</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {regularRequests.map((request) => (
+          <Card key={request.id}>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{request.title}</CardTitle>
+                {request.urgency && (
+                  <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full`}>
+                    {getUrgencyLabel(request.urgency)}
+                  </span>
+                )}
+              </div>
+              <CardDescription>
+                Posted by {request.profiles?.display_name || "Anonymous"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <p className="line-clamp-2">{request.description}</p>
+            </CardContent>
+            <CardFooter className="flex justify-between pt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onRequestSelect(request)}
+              >
+                View Details
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => window.open(createContactEmailLink(request), '_blank')}
+              >
+                I Can Help
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // Export the component and the helper function
 export { createContactEmailLink };
-
-// Need to export a default as well since it's being imported as default in GoodsPage.tsx
-const GoodsRequestsSection = () => {
-  return null; // This is a placeholder - the actual component should be implemented
-}
-
 export default GoodsRequestsSection;

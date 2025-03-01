@@ -34,30 +34,37 @@ export const useGoodsExchange = () => {
         // Get a unique list of user IDs from the goods data
         const userIds = [...new Set(goodsData.map(item => item.user_id))];
         
-        // Fetch profile data for these users, including email
-        const { data: profilesData, error: profilesError } = await supabase
-          .from("profiles")
-          .select('id, display_name, avatar_url, email')  // We need to ensure email exists in the profiles table
-          .in('id', userIds);
+        try {
+          // Fetch profile data for these users, including email
+          // Using a try-catch to handle potential issues with column mismatches
+          const { data: profilesData, error: profilesError } = await supabase
+            .from("profiles")
+            .select('id, display_name, avatar_url, email')
+            .in('id', userIds);
+            
+          if (profilesError) {
+            console.error("Error fetching profiles for goods items:", profilesError);
+            // Don't throw here, we'll just proceed without profiles
+          }
           
-        if (profilesError) {
-          console.error("Error fetching profiles for goods items:", profilesError);
-          // Don't throw here, we'll just proceed with the goods data without profiles
+          // Create a map of user IDs to profile data for quick lookup
+          const profilesMap = {};
+          if (profilesData) {
+            profilesData.forEach(profile => {
+              profilesMap[profile.id] = profile;
+            });
+          }
+          
+          // Attach profile data to each goods item
+          goodsWithProfiles = goodsData.map(item => ({
+            ...item,
+            profiles: profilesMap[item.user_id] || null
+          }));
+        } catch (error) {
+          console.error("Error handling profiles for goods items:", error);
+          // If there's an error with profiles, we'll still return the goods data without profiles
+          goodsWithProfiles = goodsData;
         }
-        
-        // Create a map of user IDs to profile data for quick lookup
-        const profilesMap = {};
-        if (profilesData) {
-          profilesData.forEach(profile => {
-            profilesMap[profile.id] = profile;
-          });
-        }
-        
-        // Attach profile data to each goods item
-        goodsWithProfiles = goodsData.map(item => ({
-          ...item,
-          profiles: profilesMap[item.user_id] || null
-        }));
         
         console.log("Added profiles to goods items:", goodsWithProfiles.length);
       }

@@ -1,4 +1,16 @@
 
+import React from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { GoodsExchangeItem } from '@/types/localTypes';
+
+// Define the component's props interface
+interface SupportRequestDialogProps {
+  request: GoodsExchangeItem | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 /**
  * Create a contact email link for the action button
  * This formats the email with a helpful subject and body text
@@ -29,12 +41,67 @@ const createContactEmailLink = (request: any) => {
   return `mailto:${email}?subject=${subject}&body=${body}`;
 };
 
-// Export the function and add default export
+/**
+ * SupportRequestDialog component
+ * 
+ * A dialog that shows the details of a support request when clicked
+ */
+const SupportRequestDialog: React.FC<SupportRequestDialogProps> = ({ 
+  request, 
+  open, 
+  onOpenChange 
+}) => {
+  if (!request) {
+    return null;
+  }
+
+  // Determine the text for the action button based on request type
+  const actionButtonText = request.request_type === 'need' 
+    ? 'I Can Help' 
+    : 'I\'m Interested';
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>{request.title}</DialogTitle>
+          <DialogDescription>
+            Posted by {request.profiles?.display_name || "Anonymous"}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="mt-4">
+          <p className="mb-4">{request.description}</p>
+          
+          {request.image_url && (
+            <div className="mb-4">
+              <img 
+                src={request.image_url} 
+                alt={request.title} 
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+          )}
+          
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={() => window.open(createContactEmailLink(request), '_blank')}
+            >
+              {actionButtonText}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Export the function and component
 export { createContactEmailLink };
-
-// Need to provide a default export since it's being imported as default
-const SupportRequestDialog = () => {
-  return null; // This is a placeholder - the actual component should be implemented
-}
-
 export default SupportRequestDialog;
