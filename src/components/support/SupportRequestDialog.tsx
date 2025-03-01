@@ -163,64 +163,71 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
             )}
           </div>
           
-          {/* Image gallery - only show if images exist */}
-          {images.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-500">Images</h3>
-              <div className={`grid ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                {images.map((imgUrl: string, index: number) => (
-                  <div 
-                    key={index}
-                    className="relative bg-gray-100 rounded-md overflow-hidden"
-                  >
-                    <img 
-                      src={imgUrl} 
-                      alt={`${request.title} - Image ${index + 1}`}
-                      className="w-full h-48 object-contain"
-                    />
+          {/* Split into two columns: Image gallery on left, details on right */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Left column: Image gallery - only show if images exist */}
+            <div className={`${images.length === 0 ? 'hidden' : ''}`}>
+              {images.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500">Images</h3>
+                  <div className="space-y-2">
+                    {images.map((imgUrl: string, index: number) => (
+                      <div 
+                        key={index}
+                        className="relative bg-gray-100 rounded-md overflow-hidden"
+                      >
+                        <img 
+                          src={imgUrl} 
+                          alt={`${request.title} - Image ${index + 1}`}
+                          className="w-full h-auto object-contain max-h-[200px]"
+                        />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Description card with improved styling */}
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
-              <p className="text-gray-700 whitespace-pre-line">{request?.description}</p>
-              
-              {/* Item details section for additional metadata */}
-              <div className="mt-4 space-y-2">
-                {/* Item type badge */}
-                <div className="flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
-                    {request.request_type === 'need' 
-                      ? 'Request' 
-                      : request.request_type === 'offer' 
-                        ? 'Offer' 
-                        : 'Item'
-                    }
-                    
-                    {/* Show category if available */}
-                    {request.goods_category && ` • ${request.goods_category}`}
-                    {request.skill_category && ` • ${request.skill_category}`}
-                  </span>
                 </div>
-                
-                {/* Valid until date if available */}
-                {request.valid_until && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      Valid until {format(new Date(request.valid_until), 'MMM d, yyyy')}
-                    </span>
+              )}
+            </div>
+            
+            {/* Right column: Description card with improved styling */}
+            <div className={`${images.length === 0 ? 'col-span-2' : ''}`}>
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Description</h3>
+                  <p className="text-gray-700 whitespace-pre-line">{request?.description}</p>
+                  
+                  {/* Item details section for additional metadata */}
+                  <div className="mt-4 space-y-2">
+                    {/* Item type badge */}
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {request.request_type === 'need' 
+                          ? 'Request' 
+                          : request.request_type === 'offer' 
+                            ? 'Offer' 
+                            : 'Item'
+                        }
+                        
+                        {/* Show category if available */}
+                        {request.goods_category && ` • ${request.goods_category}`}
+                        {request.skill_category && ` • ${request.skill_category}`}
+                      </span>
+                    </div>
+                    
+                    {/* Valid until date if available */}
+                    {request.valid_until && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          Valid until {format(new Date(request.valid_until), 'MMM d, yyyy')}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
           
           {/* Action buttons */}
           <div className="flex justify-between items-center">
