@@ -8,7 +8,21 @@ interface SupportRequestSubmitProps {
   onSuccess: () => void;
 }
 
+/**
+ * Custom hook for handling submission and updates of support requests
+ * 
+ * This hook provides two main functions:
+ * - handleSubmit: For creating new support requests
+ * - handleUpdate: For updating existing support requests
+ * 
+ * Both functions handle validation, database operations, and 
+ * triggering UI updates after successful operations
+ * 
+ * @param onSuccess - Callback function to execute after successful operations
+ * @returns Object containing submission handler functions
+ */
 export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps) => {
+  // Get current user and query client for cache invalidation
   const user = useUser();
   const queryClient = useQueryClient();
 
@@ -32,9 +46,8 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
         request_type: formData.requestType,
         category: formData.category,
         user_id: user.id,
-        // Add support_type with default or value from form
+        // CRITICAL: These fields are required by the database
         support_type: formData.supportType || 'immediate',
-        // Add valid_until with default or value from form
         valid_until: formData.validUntil || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         // Optional fields
         urgency: formData.urgency || 'normal',
@@ -58,6 +71,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
       // Dispatch a custom event to signal that a support request was submitted
       // The event name varies depending on the category (care, goods, etc.)
       const eventName = `${formData.category}-request-submitted`;
+      console.log(`Dispatching event: ${eventName}`); // Add logging to help debug
       const customEvent = new Event(eventName);
       document.dispatchEvent(customEvent);
       
@@ -115,6 +129,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
       
       // Dispatch a custom event to signal that a support request was updated
       const eventName = `${formData.category}-request-updated`;
+      console.log(`Dispatching event: ${eventName}`); // Add logging to help debug
       const customEvent = new Event(eventName);
       document.dispatchEvent(customEvent);
       

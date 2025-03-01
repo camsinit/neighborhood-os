@@ -9,9 +9,10 @@ import { useQueryClient } from '@tanstack/react-query';
  * and triggers a refetch of the specified query keys to update the UI.
  * 
  * Common event names in this application:
- * - 'goods-form-submitted' - When goods items are added/updated
- * - 'skills-exchange-submitted' - When skill offers/requests are added
- * - 'skills-exchange-updated' - When skill offers/requests are updated
+ * - 'goods-request-submitted' - When goods items are added
+ * - 'goods-request-updated' - When goods items are updated
+ * - 'skills-request-submitted' - When skill offers/requests are added
+ * - 'skills-request-updated' - When skill offers/requests are updated
  * - 'safety-update-submitted' - When safety updates are added/modified
  * - 'care-request-submitted' - When care requests are submitted
  * - 'profile-updated' - When user profiles are updated
@@ -29,13 +30,14 @@ export const useAutoRefresh = (
   
   useEffect(() => {
     // Create a handler function for the events
-    const handleRefresh = () => {
-      console.log(`Event triggered, refreshing queries: ${queryKeys.join(', ')}`);
+    const handleRefresh = (event: Event) => {
+      console.log(`Event triggered: ${event.type}, refreshing queries: ${queryKeys.join(', ')}`);
       
       // Add a small delay to ensure the database has time to update
       setTimeout(() => {
         // Invalidate each query key to trigger a refetch
         queryKeys.forEach(key => {
+          console.log(`Invalidating query key: ${key}`);
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }, refreshDelay);
@@ -43,6 +45,7 @@ export const useAutoRefresh = (
 
     // Add event listeners for each event name
     eventNames.forEach(eventName => {
+      console.log(`Adding event listener for: ${eventName}`);
       document.addEventListener(eventName, handleRefresh);
     });
     

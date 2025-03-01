@@ -1,161 +1,182 @@
-
-import { useState, useEffect } from 'react';
-import { useSupportRequests } from "@/utils/queries/useSupportRequests";
-import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
-import SupportRequestDialog from "@/components/support/SupportRequestDialog";
-import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
+import { useEffect, useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-
-// Import our newly created components
-import GoodsPageHeader from "@/components/goods/GoodsPageHeader";
-import GoodsSearchBar from "@/components/goods/GoodsSearchBar";
-import UrgentRequestsSection from "@/components/goods/UrgentRequestsSection";
-import AvailableItemsSection from "@/components/goods/AvailableItemsSection";
-import GoodsRequestsSection from "@/components/goods/GoodsRequestsSection";
-
-// Import urgency helper functions
-import { getUrgencyClass, getUrgencyLabel } from "@/components/goods/utils/urgencyHelpers";
-import { toast } from "sonner";
-import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { useSupportRequests } from '@/utils/queries/useSupportRequests';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { Button } from '@/components/ui/button';
+import { Package, Filter } from 'lucide-react';
+import { Dialog } from '@/components/ui/dialog';
+import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
+import UrgentRequestsSection from '@/components/goods/UrgentRequestsSection';
+import GoodsRequestsSection from '@/components/goods/GoodsRequestsSection';
+import AvailableItemsSection from '@/components/goods/AvailableItemsSection';
+import SupportRequestDialog from '@/components/support/SupportRequestDialog';
+import GoodsPageHeader from '@/components/goods/GoodsPageHeader';
+import GoodsSearchBar from '@/components/goods/GoodsSearchBar';
 
 /**
- * GoodsPage component
+ * GoodsPage displays items that community members are sharing, offering, or requesting
  * 
- * This page allows users to browse, offer, and request items in the community.
- * It's organized into sections for urgent requests, available items, and other requests.
+ * This page is structured into several sections:
+ * - Urgent requests (high priority needs)
+ * - Available items (things being offered)
+ * - General requests (non-urgent needs)
+ * 
+ * It also includes functionality for:
+ * - Filtering and searching items
+ * - Adding new items/requests
+ * - Viewing detailed information about items
  */
 const GoodsPage = () => {
-  // Define our state variables
-  // These variables control the dialog visibility and search functionality
-  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  // State variables
+  const [isAddingItem, setIsAddingItem] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
-
-  // Fetch support requests data from the database
-  const { 
-    data: requests, 
-    isLoading,
-    refetch
-  } = useSupportRequests();
-
-  // Set up auto-refresh for goods data
-  // This will listen for the goods-form-submitted event and refresh the data
-  useAutoRefresh(['support-requests'], ['goods-form-submitted']);
-
-  // Debug the requests coming from the database
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  
+  // Fetch support requests data
+  const { data: allRequests, isLoading, refetch } = useSupportRequests();
+  
+  // Setup auto-refresh with enhanced event names - this is critical for seeing new items
+  useAutoRefresh(
+    ['support-requests'],
+    ['goods-request-submitted', 'goods-request-updated', 'goods-form-submitted'], 
+    500
+  );
+  
+  // Log when data is loaded to help with debugging
   useEffect(() => {
-    if (requests) {
-      console.log("Goods data loaded:", requests.length, "items", 
-        requests.filter(req => req.category === 'goods').length, "goods items");
+    if (allRequests) {
+      console.log('Goods data loaded:', allRequests.length, 'items', 
+        allRequests.filter(req => req.category === 'goods').length, 'goods items');
     }
-  }, [requests]);
-
-  // Filter goods items (offers)
-  // This creates a list of items that people are offering to others
-  const goodsItems = requests?.filter(req => 
-    req.category === 'goods' && 
-    !req.is_archived &&
-    req.request_type === 'offer' &&
-    (searchQuery === "" || 
-     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) as GoodsExchangeItem[] || [];
-
-  // Filter goods requests (needs)
-  // This creates a list of items that people are requesting from others
-  const goodsRequests = requests?.filter(req => 
-    req.category === 'goods' && 
-    !req.is_archived &&
-    req.request_type === 'need' &&
-    (searchQuery === "" || 
-     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) as GoodsExchangeItem[] || [];
-
-  // Filter for urgent requests
-  // This creates a list of high-priority needs that should be displayed prominently
-  const urgentRequests = goodsRequests.filter(req => {
-    // Using as GoodsExchangeItem since we know these are goods items
-    return req.urgency === 'high' || req.urgency === 'critical';
-  }) as GoodsExchangeItem[];
-
-  // Handler functions
+  }, [allRequests]);
   
-  // Open the dialog to request an item
-  const handleRequestItem = () => {
-    setInitialRequestType("need");
-    setIsAddRequestOpen(true);
+  // Filter goods exchange items
+  const goodsItems = allRequests
+    ?.filter(req => 
+      req.category === 'goods' && 
+      req.request_type === 'offer' &&
+      !req.is_archived &&
+      (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
+      (categoryFilter ? req.goods_category === categoryFilter : true)
+    ) || [];
+  
+  // Filter goods requests
+  const goodsRequests = allRequests
+    ?.filter(req => 
+      req.category === 'goods' && 
+      req.request_type === 'need' &&
+      !req.is_archived &&
+      (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
+      (categoryFilter ? req.goods_category === categoryFilter : true)
+    ) || [];
+  
+  // Filter urgent requests (high or critical urgency)
+  const urgentRequests = goodsRequests.filter(req => 
+    (req.urgency === 'high' || req.urgency === 'critical')
+  );
+  
+  // Helper functions
+  const getUrgencyClass = (urgency: string) => {
+    switch(urgency) {
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'high': return 'bg-orange-100 text-orange-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-green-100 text-green-800';
+    }
   };
   
-  // Open the dialog to offer an item
-  const handleOfferItem = () => {
-    setInitialRequestType("offer");
-    setIsAddRequestOpen(true);
+  const getUrgencyLabel = (urgency: string) => {
+    switch(urgency) {
+      case 'critical': return 'Critical';
+      case 'high': return 'Urgent';
+      case 'medium': return 'Soon';
+      default: return 'Anytime';
+    }
   };
-
-  // Handler for when the dialog closes after submission
-  const handleDialogChange = (open: boolean) => {
-    setIsAddRequestOpen(open);
+  
+  const handleAddItem = (type: "need" | "offer") => {
+    setInitialRequestType(type);
+    setIsAddingItem(true);
   };
-
+  
+  const handleRequestSelect = (request: GoodsExchangeItem) => {
+    setSelectedRequest(request);
+    setIsDetailsOpen(true);
+  };
+  
+  // If loading, show a loading message
+  if (isLoading) {
+    return <div className="p-6">Loading goods exchange...</div>;
+  }
+  
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#FEC6A1] to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8">
-          {/* Page title and introduction */}
-          <GoodsPageHeader />
-          
-          {/* Urgent requests section - Shows high-priority needs */}
-          <UrgentRequestsSection 
-            urgentRequests={urgentRequests}
-            onRequestSelect={setSelectedRequest}
-            getUrgencyClass={getUrgencyClass}
-            getUrgencyLabel={getUrgencyLabel}
-          />
-
-          {/* Main content section - Contains search, action buttons, and items */}
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            {/* Search bar and action buttons */}
-            <GoodsSearchBar 
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onRequestItem={handleRequestItem}
-              onOfferItem={handleOfferItem}
-            />
-
-            {/* Available items section - Shows offers from neighbors */}
-            <AvailableItemsSection 
-              goodsItems={goodsItems}
-              onRequestSelect={setSelectedRequest}
-              onNewOffer={handleOfferItem}
-              onRefetch={refetch}
-            />
-            
-            {/* Non-urgent requests section - Shows regular needs */}
-            <GoodsRequestsSection 
-              goodsRequests={goodsRequests}
-              urgentRequests={urgentRequests}
-              onRequestSelect={setSelectedRequest}
-              getUrgencyClass={getUrgencyClass}
-              getUrgencyLabel={getUrgencyLabel}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Dialog components for adding and viewing goods */}
-      <AddSupportRequestDialog 
-        open={isAddRequestOpen}
-        onOpenChange={handleDialogChange}
-        initialRequestType={initialRequestType}
-        view="goods"
+    <div className="container py-6 max-w-6xl">
+      <GoodsPageHeader 
+        onAddOffer={() => handleAddItem("offer")}
+        onAddRequest={() => handleAddItem("need")}
       />
-
-      <SupportRequestDialog
-        request={selectedRequest}
-        open={!!selectedRequest}
-        onOpenChange={open => !open && setSelectedRequest(null)}
+      
+      <GoodsSearchBar 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        categoryFilter={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+      />
+      
+      {/* Urgent Requests Section */}
+      <UrgentRequestsSection 
+        urgentRequests={urgentRequests}
+        onRequestSelect={handleRequestSelect}
+        getUrgencyClass={getUrgencyClass}
+        getUrgencyLabel={getUrgencyLabel}
+      />
+      
+      {/* Available Items Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-medium">Available Items</h2>
+          <Button 
+            variant="outline" 
+            onClick={() => handleAddItem("offer")}
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Share an Item</span>
+          </Button>
+        </div>
+        
+        <AvailableItemsSection 
+          goodsItems={goodsItems}
+          onRequestSelect={handleRequestSelect}
+          onNewOffer={() => handleAddItem("offer")}
+          onRefetch={refetch}
+        />
+      </div>
+      
+      {/* Other Requests Section */}
+      <GoodsRequestsSection 
+        goodsRequests={goodsRequests}
+        urgentRequests={urgentRequests}
+        onRequestSelect={handleRequestSelect}
+        getUrgencyClass={getUrgencyClass}
+        getUrgencyLabel={getUrgencyLabel}
+      />
+      
+      {/* Modals */}
+      <AddSupportRequestDialog 
+        open={isAddingItem}
+        onOpenChange={setIsAddingItem}
+        initialRequestType={initialRequestType}
+        view='goods'
+      />
+      
+      <SupportRequestDialog 
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        requestId={selectedRequest?.id}
       />
     </div>
   );

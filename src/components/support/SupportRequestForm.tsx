@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
 import FormFields from "./form/FormFields";
 import ImageUpload from "./form/ImageUpload";
@@ -33,6 +33,11 @@ const SupportRequestForm = ({
     images: initialValues?.images || [],
   });
 
+  // Log form data changes for debugging
+  useEffect(() => {
+    console.log("SupportRequestForm formData:", formData);
+  }, [formData]);
+
   // Get submission handlers from the custom hook
   const { handleSubmit, handleUpdate } = useSupportRequestSubmit({
     onSuccess: () => {
@@ -49,6 +54,7 @@ const SupportRequestForm = ({
    * @param value - The new value for the field
    */
   const handleFieldChange = (field: keyof SupportRequestFormData, value: any) => {
+    console.log(`Field change: ${field}=${value}`);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -58,12 +64,19 @@ const SupportRequestForm = ({
    */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.requestType) return;
+    console.log("Submitting form:", formData);
+    
+    if (!formData.requestType) {
+      console.error("Missing requestType, cannot submit");
+      return;
+    }
     
     // Call the appropriate handler based on mode
     if (mode === 'edit' && requestId) {
+      console.log(`Updating request ${requestId}`);
       handleUpdate(requestId, formData);
     } else {
+      console.log("Creating new request");
       handleSubmit(formData);
     }
   };

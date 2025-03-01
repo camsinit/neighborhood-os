@@ -119,7 +119,13 @@ export const submitGoodsForm = async (
     // Dispatch a custom event to signal that the form was submitted successfully
     // This will trigger a data refresh in the GoodsPage component
     const customEvent = new Event('goods-form-submitted');
+    console.log('Dispatching goods-form-submitted event'); // Add for debugging
     document.dispatchEvent(customEvent);
+    
+    // Also dispatch the more specific event for consistency
+    const specificEvent = new Event('goods-request-submitted');
+    console.log('Dispatching goods-request-submitted event'); // Add for debugging
+    document.dispatchEvent(specificEvent);
     
     return data;
   } catch (error) {
