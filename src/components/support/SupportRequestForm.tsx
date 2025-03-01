@@ -1,18 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSupportRequestSubmit } from "@/hooks/support/useSupportRequestSubmit";
 import FormFields from "./form/FormFields";
 import ImageUpload from "./form/ImageUpload";
 import { SupportRequestFormProps, SupportRequestFormData } from "./types/formTypes";
 
-/**
- * SupportRequestForm component for creating and editing support requests
- * 
- * This form is used across different categories (care, goods, skills) and 
- * handles both creation and editing of support requests
- */
 const SupportRequestForm = ({ 
   onClose, 
   initialValues,
@@ -20,7 +14,6 @@ const SupportRequestForm = ({
   requestId,
   initialRequestType
 }: SupportRequestFormProps) => {
-  // Initialize form data with initial values or defaults
   const [formData, setFormData] = useState<Partial<SupportRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
@@ -33,12 +26,6 @@ const SupportRequestForm = ({
     images: initialValues?.images || [],
   });
 
-  // Log form data changes for debugging
-  useEffect(() => {
-    console.log("SupportRequestForm formData:", formData);
-  }, [formData]);
-
-  // Get submission handlers from the custom hook
   const { handleSubmit, handleUpdate } = useSupportRequestSubmit({
     onSuccess: () => {
       onClose();
@@ -48,35 +35,17 @@ const SupportRequestForm = ({
     }
   });
 
-  /**
-   * Handle changes to form fields
-   * @param field - The field name to update
-   * @param value - The new value for the field
-   */
   const handleFieldChange = (field: keyof SupportRequestFormData, value: any) => {
-    console.log(`Field change: ${field}=${value}`);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  /**
-   * Handle form submission
-   * @param e - Form submission event
-   */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting form:", formData);
+    if (!formData.requestType) return;
     
-    if (!formData.requestType) {
-      console.error("Missing requestType, cannot submit");
-      return;
-    }
-    
-    // Call the appropriate handler based on mode
     if (mode === 'edit' && requestId) {
-      console.log(`Updating request ${requestId}`);
       handleUpdate(requestId, formData);
     } else {
-      console.log("Creating new request");
       handleSubmit(formData);
     }
   };

@@ -40,12 +40,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
-      
-      // Dispatch a custom event to signal that a skill was added
-      // This will trigger the auto-refresh mechanism
-      const customEvent = new Event('skills-exchange-submitted');
-      document.dispatchEvent(customEvent);
-      
       onSuccess();
     } catch (error) {
       console.error('Error creating skill exchange:', error);
@@ -77,11 +71,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       toast.success('Skill exchange updated successfully!');
-      
-      // Dispatch a custom event to signal that a skill was updated
-      const customEvent = new Event('skills-exchange-updated');
-      document.dispatchEvent(customEvent);
-      
       onSuccess();
     } catch (error) {
       console.error('Error updating skill exchange:', error);

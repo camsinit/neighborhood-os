@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -7,17 +6,12 @@ import { Button } from "@/components/ui/button";
 import { HeartHandshake, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
-import { useAutoRefresh } from '@/hooks/useAutoRefresh'; // Add this import
 
 const CarePage = () => {
   const [hoveredRequestId, setHoveredRequestId] = useState<string | null>(null);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Set up auto-refresh for care requests data
-  // This will listen for care request submission events and refresh the data
-  useAutoRefresh(['support-requests'], ['care-request-submitted']);
 
   const {
     data: requests,

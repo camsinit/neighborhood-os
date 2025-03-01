@@ -1,201 +1,162 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSupportRequests } from "@/utils/queries/useSupportRequests";
+import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
+import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { useSupportRequests } from '@/utils/queries/useSupportRequests';
-import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-import { Button } from '@/components/ui/button';
-import { Package, Filter } from 'lucide-react';
-import { Dialog } from '@/components/ui/dialog';
-import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
-import UrgentRequestsSection from '@/components/goods/UrgentRequestsSection';
-import GoodsRequestsSection from '@/components/goods/GoodsRequestsSection';
-import AvailableItemsSection from '@/components/goods/AvailableItemsSection';
-import SupportRequestDialog from '@/components/support/SupportRequestDialog';
-import GoodsPageHeader from '@/components/goods/GoodsPageHeader';
-import GoodsSearchBar from '@/components/goods/GoodsSearchBar';
+
+// Import our newly created components
+import GoodsPageHeader from "@/components/goods/GoodsPageHeader";
+import GoodsSearchBar from "@/components/goods/GoodsSearchBar";
+import UrgentRequestsSection from "@/components/goods/UrgentRequestsSection";
+import AvailableItemsSection from "@/components/goods/AvailableItemsSection";
+import GoodsRequestsSection from "@/components/goods/GoodsRequestsSection";
+
+// Import urgency helper functions
+import { getUrgencyClass, getUrgencyLabel } from "@/components/goods/utils/urgencyHelpers";
+import { toast } from "sonner";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 /**
- * GoodsPage displays items that community members are sharing, offering, or requesting
+ * GoodsPage component
  * 
- * This page is structured into several sections:
- * - Urgent requests (high priority needs)
- * - Available items (things being offered)
- * - General requests (non-urgent needs)
- * 
- * It also includes functionality for:
- * - Filtering and searching items
- * - Adding new items/requests
- * - Viewing detailed information about items
+ * This page allows users to browse, offer, and request items in the community.
+ * It's organized into sections for urgent requests, available items, and other requests.
  */
 const GoodsPage = () => {
-  // State variables
-  const [isAddingItem, setIsAddingItem] = useState(false);
+  // Define our state variables
+  // These variables control the dialog visibility and search functionality
+  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  
-  // Fetch support requests data
-  const { data: allRequests, isLoading, refetch } = useSupportRequests();
-  
-  // Setup auto-refresh with enhanced event names - this is critical for seeing new items
-  useAutoRefresh(
-    ['support-requests'],
-    ['goods-request-submitted', 'goods-request-updated', 'goods-form-submitted'], 
-    500
-  );
-  
-  // Log when data is loaded to help with debugging
+
+  // Fetch support requests data from the database
+  const { 
+    data: requests, 
+    isLoading,
+    refetch
+  } = useSupportRequests();
+
+  // Set up auto-refresh for goods data
+  // This will listen for the goods-form-submitted event and refresh the data
+  useAutoRefresh(['support-requests'], ['goods-form-submitted']);
+
+  // Debug the requests coming from the database
   useEffect(() => {
-    if (allRequests) {
-      console.log('Goods data loaded:', allRequests.length, 'items', 
-        allRequests.filter(req => req.category === 'goods').length, 'goods items');
+    if (requests) {
+      console.log("Goods data loaded:", requests.length, "items", 
+        requests.filter(req => req.category === 'goods').length, "goods items");
     }
-  }, [allRequests]);
-  
-  // Helper function to check if a request has the specified goods_category
-  const hasCategory = (request: any, category: string | null): boolean => {
-    // If no category filter is applied, return true
-    if (!category) return true;
-    
-    // Check if the request has the goods_category property and if it matches the filter
-    return request.goods_category === category;
-  };
-  
-  // Helper function to get urgency level (with fallback)
-  const getUrgency = (request: any): string => {
-    return request.urgency || 'low';
-  };
-  
-  // Filter goods exchange items
-  const goodsItems = allRequests
-    ?.filter(req => 
-      req.category === 'goods' && 
-      req.request_type === 'offer' &&
-      !req.is_archived &&
-      (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
-      hasCategory(req, categoryFilter)
-    ) || [];
-  
-  // Filter goods requests
-  const goodsRequests = allRequests
-    ?.filter(req => 
-      req.category === 'goods' && 
-      req.request_type === 'need' &&
-      !req.is_archived &&
-      (searchTerm ? req.title.toLowerCase().includes(searchTerm.toLowerCase()) : true) &&
-      hasCategory(req, categoryFilter)
-    ) || [];
-  
-  // Filter urgent requests (high or critical urgency)
+  }, [requests]);
+
+  // Filter goods items (offers)
+  // This creates a list of items that people are offering to others
+  const goodsItems = requests?.filter(req => 
+    req.category === 'goods' && 
+    !req.is_archived &&
+    req.request_type === 'offer' &&
+    (searchQuery === "" || 
+     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+  ) as GoodsExchangeItem[] || [];
+
+  // Filter goods requests (needs)
+  // This creates a list of items that people are requesting from others
+  const goodsRequests = requests?.filter(req => 
+    req.category === 'goods' && 
+    !req.is_archived &&
+    req.request_type === 'need' &&
+    (searchQuery === "" || 
+     req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+     req.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+  ) as GoodsExchangeItem[] || [];
+
+  // Filter for urgent requests
+  // This creates a list of high-priority needs that should be displayed prominently
   const urgentRequests = goodsRequests.filter(req => {
-    const urgency = getUrgency(req);
-    return urgency === 'high' || urgency === 'critical';
-  });
+    // Using as GoodsExchangeItem since we know these are goods items
+    return req.urgency === 'high' || req.urgency === 'critical';
+  }) as GoodsExchangeItem[];
+
+  // Handler functions
   
-  // Helper functions
-  const getUrgencyClass = (urgency: string) => {
-    switch(urgency) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-green-100 text-green-800';
-    }
+  // Open the dialog to request an item
+  const handleRequestItem = () => {
+    setInitialRequestType("need");
+    setIsAddRequestOpen(true);
   };
   
-  const getUrgencyLabel = (urgency: string) => {
-    switch(urgency) {
-      case 'critical': return 'Critical';
-      case 'high': return 'Urgent';
-      case 'medium': return 'Soon';
-      default: return 'Anytime';
-    }
+  // Open the dialog to offer an item
+  const handleOfferItem = () => {
+    setInitialRequestType("offer");
+    setIsAddRequestOpen(true);
   };
-  
-  const handleAddItem = (type: "need" | "offer") => {
-    setInitialRequestType(type);
-    setIsAddingItem(true);
+
+  // Handler for when the dialog closes after submission
+  const handleDialogChange = (open: boolean) => {
+    setIsAddRequestOpen(open);
   };
-  
-  const handleRequestSelect = (request: GoodsExchangeItem) => {
-    setSelectedRequest(request);
-    setIsDetailsOpen(true);
-  };
-  
-  // If loading, show a loading message
-  if (isLoading) {
-    return <div className="p-6">Loading goods exchange...</div>;
-  }
-  
+
   return (
-    <div className="container py-6 max-w-6xl">
-      <GoodsPageHeader 
-        onAddOffer={() => handleAddItem("offer")}
-        onAddRequest={() => handleAddItem("need")}
-      />
-      
-      <GoodsSearchBar 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        categoryFilter={categoryFilter}
-        onCategoryChange={setCategoryFilter}
-      />
-      
-      {/* Urgent Requests Section */}
-      <UrgentRequestsSection 
-        urgentRequests={urgentRequests}
-        onRequestSelect={handleRequestSelect}
-        getUrgencyClass={getUrgencyClass}
-        getUrgencyLabel={getUrgencyLabel}
-      />
-      
-      {/* Available Items Section */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-medium">Available Items</h2>
-          <Button 
-            variant="outline" 
-            onClick={() => handleAddItem("offer")}
-            className="flex items-center gap-2"
-          >
-            <Package className="h-4 w-4" />
-            <span>Share an Item</span>
-          </Button>
+    <div className="min-h-full w-full bg-gradient-to-b from-[#FEC6A1] to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-8">
+          {/* Page title and introduction */}
+          <GoodsPageHeader />
+          
+          {/* Urgent requests section - Shows high-priority needs */}
+          <UrgentRequestsSection 
+            urgentRequests={urgentRequests}
+            onRequestSelect={setSelectedRequest}
+            getUrgencyClass={getUrgencyClass}
+            getUrgencyLabel={getUrgencyLabel}
+          />
+
+          {/* Main content section - Contains search, action buttons, and items */}
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            {/* Search bar and action buttons */}
+            <GoodsSearchBar 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onRequestItem={handleRequestItem}
+              onOfferItem={handleOfferItem}
+            />
+
+            {/* Available items section - Shows offers from neighbors */}
+            <AvailableItemsSection 
+              goodsItems={goodsItems}
+              onRequestSelect={setSelectedRequest}
+              onNewOffer={handleOfferItem}
+              onRefetch={refetch}
+            />
+            
+            {/* Non-urgent requests section - Shows regular needs */}
+            <GoodsRequestsSection 
+              goodsRequests={goodsRequests}
+              urgentRequests={urgentRequests}
+              onRequestSelect={setSelectedRequest}
+              getUrgencyClass={getUrgencyClass}
+              getUrgencyLabel={getUrgencyLabel}
+            />
+          </div>
         </div>
-        
-        <AvailableItemsSection 
-          goodsItems={goodsItems}
-          onRequestSelect={handleRequestSelect}
-          onNewOffer={() => handleAddItem("offer")}
-          onRefetch={refetch}
-        />
       </div>
-      
-      {/* Other Requests Section */}
-      <GoodsRequestsSection 
-        goodsRequests={goodsRequests}
-        urgentRequests={urgentRequests}
-        onRequestSelect={handleRequestSelect}
-        getUrgencyClass={getUrgencyClass}
-        getUrgencyLabel={getUrgencyLabel}
-      />
-      
-      {/* Modals */}
+
+      {/* Dialog components for adding and viewing goods */}
       <AddSupportRequestDialog 
-        open={isAddingItem}
-        onOpenChange={setIsAddingItem}
+        open={isAddRequestOpen}
+        onOpenChange={handleDialogChange}
         initialRequestType={initialRequestType}
-        view='goods'
+        view="goods"
       />
-      
-      {selectedRequest && (
-        <SupportRequestDialog 
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          request={selectedRequest}
-        />
-      )}
+
+      <SupportRequestDialog
+        request={selectedRequest}
+        open={!!selectedRequest}
+        onOpenChange={open => !open && setSelectedRequest(null)}
+      />
     </div>
   );
 };

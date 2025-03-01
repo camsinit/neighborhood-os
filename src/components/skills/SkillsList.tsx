@@ -9,7 +9,6 @@ import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
-import { useAutoRefresh } from '@/hooks/useAutoRefresh'; // Add this import
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -24,13 +23,6 @@ const SkillsList = ({
     title: string;
     requesterId: string;
   } | null>(null);
-
-  // Set up auto-refresh for skills data
-  // This will listen for skills form submission events and refresh the data
-  useAutoRefresh(
-    ['skills-exchange'], 
-    ['skills-exchange-submitted', 'skills-exchange-updated']
-  );
 
   const {
     data: skills,
