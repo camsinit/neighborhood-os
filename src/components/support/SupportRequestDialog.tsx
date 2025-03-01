@@ -81,16 +81,22 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
    */
   const handleDelete = async () => {
     try {
+      // Define a type for the valid table names to ensure type safety
+      type ValidTableName = "goods_exchange" | "skills_exchange" | "support_requests";
+      
       // Determine which table to delete from based on the request type
-      let tableName = 'support_requests'; // default
+      // Instead of using a string variable, we'll determine the table directly
+      let tableName: ValidTableName;
       
       if (request?.category === 'goods') {
-        tableName = 'goods_exchange';
+        tableName = "goods_exchange";
       } else if (request?.skill_category) {
-        tableName = 'skills_exchange';
+        tableName = "skills_exchange";
+      } else {
+        tableName = "support_requests"; // Default fallback
       }
       
-      // Make the delete request to Supabase
+      // Make the delete request to Supabase with the explicitly typed table name
       const { error } = await supabase
         .from(tableName)
         .delete()
