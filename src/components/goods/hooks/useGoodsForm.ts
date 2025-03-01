@@ -30,24 +30,30 @@ export const useGoodsForm = ({
   const user = useUser();
   const queryClient = useQueryClient();
   
+  // Determine whether this is an offer or request form
+  const isOfferForm = initialRequestType === "offer";
+  
   // State for the item form (when offering)
   const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     category: (initialValues as any)?.category || "furniture",
+    // Store the request type as part of the form data
     requestType: initialRequestType || "offer",
     availableDays: (initialValues as any)?.availableDays || 30,
     images: (initialValues as any)?.images || []
   });
   
   // State for the request form (when requesting)
+  // The error is here - 'requestType' is not in GoodsRequestFormData type
   const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     urgency: (initialValues as any)?.urgency || "medium",
     category: (initialValues as any)?.category || "furniture",
-    image: (initialValues as any)?.image,
-    requestType: initialRequestType || "need"
+    image: (initialValues as any)?.image
+    // Removed 'requestType' as it's not in the GoodsRequestFormData type
+    // We'll use the isOfferForm variable instead to determine the request type
   });
   
   // State for image upload process
@@ -55,9 +61,6 @@ export const useGoodsForm = ({
   const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>(
     (initialValues as any)?.category || "furniture"
   );
-  
-  // Determine whether this is an offer or request form
-  const isOfferForm = initialRequestType === "offer";
   
   // Handle adding images to the form data
   const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
