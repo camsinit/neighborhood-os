@@ -141,14 +141,7 @@ const AvailableItemsSection = ({
             <h3 className="font-medium text-lg">{request.title}</h3>
             <p className="text-gray-600 mt-1 line-clamp-2">{request.description}</p>
             
-            {/* Item category tag if available */}
-            {request.goods_category && (
-              <div className="mt-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  {request.goods_category}
-                </span>
-              </div>
-            )}
+            {/* Removed category tag as requested */}
           </div>
           
           {/* Archive button - positioned in the top right corner */}

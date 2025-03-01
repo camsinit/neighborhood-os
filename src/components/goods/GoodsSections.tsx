@@ -1,6 +1,7 @@
 
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
+import { GoodsItemCategory } from '@/components/support/types/formTypes';
 
 // Import Components
 import UrgentRequestsSection from "./UrgentRequestsSection";
@@ -46,11 +47,35 @@ const GoodsSections = ({
   onSearchChange,
   onRefresh
 }: GoodsSectionsProps) => {
+  // State to store selected category filters
+  const [categoryFilters, setCategoryFilters] = useState<GoodsItemCategory[]>([]);
+  
+  // Apply category filters to goods items
+  const filteredGoodsItems = categoryFilters.length === 0
+    ? goodsItems // If no filters selected, show all items
+    : goodsItems.filter(item => 
+        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
+      );
+  
+  // Apply category filters to goods requests
+  const filteredGoodsRequests = categoryFilters.length === 0
+    ? goodsRequests // If no filters selected, show all requests
+    : goodsRequests.filter(item => 
+        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
+      );
+  
+  // Apply category filters to urgent requests
+  const filteredUrgentRequests = categoryFilters.length === 0
+    ? urgentRequests // If no filters selected, show all urgent requests
+    : urgentRequests.filter(item => 
+        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
+      );
+
   return (
     <>
       {/* Urgent requests section - Shows high-priority needs */}
       <UrgentRequestsSection 
-        urgentRequests={urgentRequests}
+        urgentRequests={filteredUrgentRequests}
         onRequestSelect={onRequestSelect}
         getUrgencyClass={getUrgencyClass}
         getUrgencyLabel={getUrgencyLabel}
@@ -64,11 +89,12 @@ const GoodsSections = ({
           onSearchChange={onSearchChange}
           onRequestItem={onRequestItem}
           onOfferItem={onOfferItem}
+          onCategoryFilter={setCategoryFilters}
         />
 
         {/* Available items section - Shows offers from neighbors */}
         <AvailableItemsSection 
-          goodsItems={goodsItems}
+          goodsItems={filteredGoodsItems}
           onRequestSelect={onRequestSelect}
           onNewOffer={onOfferItem}
           onRefetch={onRefresh}
@@ -76,7 +102,7 @@ const GoodsSections = ({
         
         {/* Non-urgent requests section - Shows regular needs */}
         <GoodsRequestsSection 
-          goodsRequests={goodsRequests}
+          goodsRequests={filteredGoodsRequests}
           urgentRequests={urgentRequests}
           onRequestSelect={onRequestSelect}
           getUrgencyClass={getUrgencyClass}
