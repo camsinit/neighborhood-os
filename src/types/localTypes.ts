@@ -1,4 +1,3 @@
-
 // This file defines types used throughout the application
 
 /**
@@ -9,6 +8,7 @@ export interface Profile {
   display_name: string;
   avatar_url: string;
   created_at?: string;
+  email?: string;  // Add email field to the Profile interface
 }
 
 /**

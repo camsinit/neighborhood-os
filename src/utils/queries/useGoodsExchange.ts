@@ -34,10 +34,10 @@ export const useGoodsExchange = () => {
         // Get a unique list of user IDs from the goods data
         const userIds = [...new Set(goodsData.map(item => item.user_id))];
         
-        // Fetch profile data for these users
+        // Fetch profile data for these users, including email
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
-          .select('id, display_name, avatar_url')
+          .select('id, display_name, avatar_url, email')  // Added email to the selection
           .in('id', userIds);
           
         if (profilesError) {
