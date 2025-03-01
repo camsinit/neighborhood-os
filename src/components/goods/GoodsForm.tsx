@@ -209,7 +209,6 @@ const GoodsForm = ({
         const formattedData = {
           title: itemFormData.title,
           description: itemFormData.description,
-          category: 'goods',
           goods_category: itemFormData.category,
           request_type: 'offer',
           user_id: user.id,
@@ -217,6 +216,8 @@ const GoodsForm = ({
           images: itemFormData.images,
           is_archived: false
         };
+        
+        console.log("Submitting offer data:", formattedData);
         
         // Submit data to the database
         const { error } = await supabase
@@ -236,7 +237,6 @@ const GoodsForm = ({
         const formattedData = {
           title: requestFormData.title,
           description: requestFormData.description,
-          category: 'goods',
           goods_category: requestFormData.category || null,
           request_type: 'need',
           user_id: user.id,
@@ -245,6 +245,8 @@ const GoodsForm = ({
           urgency: requestFormData.urgency,
           is_archived: false
         };
+        
+        console.log("Submitting request data:", formattedData);
         
         // Submit data to the database
         const { error } = await supabase
