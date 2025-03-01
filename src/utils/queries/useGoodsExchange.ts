@@ -58,9 +58,14 @@ export const useGoodsExchange = () => {
           const profilesMap = {};
           if (profilesData) {
             profilesData.forEach(profile => {
-              // Safely access properties only if profile exists and has an id property
+              // Carefully check that profile exists, is an object, and has an id property
+              // The extra check for null is explicit to satisfy TypeScript
               if (profile && typeof profile === 'object' && profile !== null && 'id' in profile) {
-                profilesMap[profile.id] = profile;
+                // Now TypeScript knows profile.id is safe to use
+                const profileId = profile.id;
+                if (profileId) {
+                  profilesMap[profileId] = profile;
+                }
               }
             });
           }
