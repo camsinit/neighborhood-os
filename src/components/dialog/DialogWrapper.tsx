@@ -46,15 +46,18 @@ const DialogWrapper = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${maxWidthClass}`}>
+      {/* Add additional wrapper to ensure max width is respected */}
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {/* Add description to fix accessibility warning */}
-          <DialogDescription className="sr-only">
+          {/* Make description visible but accessible */}
+          <DialogDescription>
             {description}
           </DialogDescription>
         </DialogHeader>
-        {children}
+        <div className="mt-2">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
