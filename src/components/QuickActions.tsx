@@ -1,3 +1,4 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -5,13 +6,24 @@ import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 
+/**
+ * QuickActions component displays common actions for users to interact with the community.
+ * 
+ * This includes:
+ * - Adding events
+ * - Sharing or requesting items (goods)
+ * - Sharing or requesting skills
+ * - Adding safety updates
+ */
 const QuickActions = () => {
+  // State for controlling various dialogs
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<string | undefined>();
 
+  // Actions available to the user
   const actions = [{
     icon: Calendar,
     label: "Add Event",
@@ -22,7 +34,7 @@ const QuickActions = () => {
     label: "Share an item",
     onClick: () => {
       setInitialRequestType("offer");
-      setRequestView(undefined);
+      setRequestView('goods');  // Use the goods-specific form
       setIsAddRequestOpen(true);
     },
     className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
@@ -31,7 +43,7 @@ const QuickActions = () => {
     label: "Request an item",
     onClick: () => {
       setInitialRequestType("need");
-      setRequestView(undefined);
+      setRequestView('goods');  // Use the goods-specific form
       setIsAddRequestOpen(true);
     },
     className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
@@ -82,7 +94,12 @@ const QuickActions = () => {
         ))}
       </div>
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
-      <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
+      <AddSupportRequestDialog 
+        open={isAddRequestOpen} 
+        onOpenChange={setIsAddRequestOpen} 
+        initialRequestType={initialRequestType} 
+        view={requestView} 
+      />
       <AddSafetyUpdateDialog open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
     </div>
   );
