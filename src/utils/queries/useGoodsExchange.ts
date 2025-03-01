@@ -35,7 +35,7 @@ export const useGoodsExchange = () => {
         const userIds = [...new Set(goodsData.map(item => item.user_id))];
         
         try {
-          // Fetch profile data for these users, including email
+          // Fetch profile data for these users
           // Using a try-catch to handle potential issues with column mismatches
           const { data: profilesData, error: profilesError } = await supabase
             .from("profiles")
