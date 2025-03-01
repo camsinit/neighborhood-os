@@ -14,15 +14,16 @@ import { useQueryClient } from "@tanstack/react-query";
  * @returns The formatted data ready for database insertion
  */
 export const formatOfferData = (itemFormData: Partial<GoodsItemFormData>, userId: string) => {
+  // Create an object with all the necessary fields for a goods offer
   return {
     title: itemFormData.title,
     description: itemFormData.description,
     goods_category: itemFormData.category, // Match the column name in the database
-    category: 'goods', // For compatibility with existing queries
+    category: 'goods', // Required field that's always 'goods' for compatibility
     request_type: 'offer',
     user_id: userId,
     valid_until: new Date(Date.now() + (itemFormData.availableDays || 30) * 24 * 60 * 60 * 1000).toISOString(),
-    images: itemFormData.images, // Now matches the column name in database
+    images: itemFormData.images, // Array of image URLs
     is_archived: false
   };
 };
@@ -35,11 +36,12 @@ export const formatOfferData = (itemFormData: Partial<GoodsItemFormData>, userId
  * @returns The formatted data ready for database insertion
  */
 export const formatRequestData = (requestFormData: Partial<GoodsRequestFormData>, userId: string) => {
+  // Create an object with all the necessary fields for a goods request
   return {
     title: requestFormData.title,
     description: requestFormData.description,
     goods_category: requestFormData.category || null, // Match column name
-    category: 'goods', // For compatibility with existing queries
+    category: 'goods', // Required field that's always 'goods' for compatibility
     request_type: 'need',
     user_id: userId,
     valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -64,46 +66,51 @@ export const submitGoodsForm = async (
   requestFormData: Partial<GoodsRequestFormData>,
   userId: string
 ) => {
-  // Validate form data
-  if (isOfferForm) {
-    if (!validateItemForm(itemFormData)) {
-      return false;
-    }
-    
-    // Format data for submission
-    const formattedData = formatOfferData(itemFormData, userId);
-    
-    console.log("Submitting offer data:", formattedData);
-    
-    // Submit data to the database
-    const { error } = await supabase
-      .from('goods_exchange')
-      .insert(formattedData);
+  try {
+    // Validate form data
+    if (isOfferForm) {
+      if (!validateItemForm(itemFormData)) {
+        return false;
+      }
       
-    if (error) {
-      console.error('Error submitting goods form:', error);
-      throw error;
-    }
-  } else {
-    if (!validateRequestForm(requestFormData)) {
-      return false;
-    }
-    
-    // Format data for submission
-    const formattedData = formatRequestData(requestFormData, userId);
-    
-    console.log("Submitting request data:", formattedData);
-    
-    // Submit data to the database
-    const { error } = await supabase
-      .from('goods_exchange')
-      .insert(formattedData);
+      // Format data for submission
+      const formattedData = formatOfferData(itemFormData, userId);
       
-    if (error) {
-      console.error('Error submitting goods form:', error);
-      throw error;
+      console.log("Submitting offer data:", formattedData);
+      
+      // Submit data to the database
+      const { error } = await supabase
+        .from('goods_exchange')
+        .insert(formattedData);
+        
+      if (error) {
+        console.error('Error submitting goods form:', error);
+        throw error;
+      }
+    } else {
+      if (!validateRequestForm(requestFormData)) {
+        return false;
+      }
+      
+      // Format data for submission
+      const formattedData = formatRequestData(requestFormData, userId);
+      
+      console.log("Submitting request data:", formattedData);
+      
+      // Submit data to the database
+      const { error } = await supabase
+        .from('goods_exchange')
+        .insert(formattedData);
+        
+      if (error) {
+        console.error('Error submitting goods form:', error);
+        throw error;
+      }
     }
+    
+    return true;
+  } catch (error) {
+    console.error('Error submitting goods form:', error);
+    throw error;
   }
-  
-  return true;
 };
