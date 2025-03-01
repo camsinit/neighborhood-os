@@ -17,7 +17,8 @@ import { toast } from "sonner";
  */
 interface ArchiveButtonProps {
   requestId: string;
-  tableName: string;
+  // Make tableName a union type of valid table names instead of a generic string
+  tableName: "goods_exchange" | "care_requests" | "skills_exchange" | "support_requests";
   onArchiveComplete?: () => void;
 }
 
@@ -62,6 +63,7 @@ const ArchiveButton = ({
       };
       
       // Update the database record
+      // Now typescript knows tableName is a valid table name
       const { data, error } = await supabase
         .from(tableName)
         .update(updateData)
