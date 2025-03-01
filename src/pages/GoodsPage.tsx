@@ -12,12 +12,13 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 
 const GoodsPage = () => {
   // Define our state variables
+  // These variables control the dialog visibility and search functionality
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
 
-  // Fetch support requests data
+  // Fetch support requests data from the database
   const { 
     data: requests, 
     isLoading,
@@ -25,6 +26,7 @@ const GoodsPage = () => {
   } = useSupportRequests();
 
   // Filter goods items (offers)
+  // This creates a list of items that people are offering to others
   const goodsItems = requests?.filter(req => 
     req.category === 'goods' && 
     !req.is_archived &&
@@ -35,6 +37,7 @@ const GoodsPage = () => {
   ) || [];
 
   // Filter goods requests (needs)
+  // This creates a list of items that people are requesting from others
   const goodsRequests = requests?.filter(req => 
     req.category === 'goods' && 
     !req.is_archived &&
@@ -45,13 +48,15 @@ const GoodsPage = () => {
   ) || [];
 
   // Filter for urgent requests
+  // This creates a list of high-priority needs that should be displayed prominently
   const urgentRequests = goodsRequests.filter(req => {
-    // Cast req to GoodsExchangeItem to access the urgency property
+    // Using as GoodsExchangeItem since we know these are goods items
     const goodsReq = req as GoodsExchangeItem;
     return goodsReq.urgency === 'high' || goodsReq.urgency === 'critical';
   });
 
   // Helper function to get the CSS class for urgency badges
+  // This determines the color of the urgency indicator based on the level
   const getUrgencyClass = (urgency: GoodsRequestUrgency) => {
     switch(urgency) {
       case 'critical': return 'bg-red-100 text-red-800';
@@ -63,6 +68,7 @@ const GoodsPage = () => {
   };
 
   // Helper function to get the display label for urgency levels
+  // This converts the database value to a user-friendly display text
   const getUrgencyLabel = (urgency: GoodsRequestUrgency) => {
     switch(urgency) {
       case 'critical': return 'Critical';
@@ -79,7 +85,7 @@ const GoodsPage = () => {
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Goods</h2>
           
-          {/* Introduction card */}
+          {/* Introduction card - Explains the purpose of this page */}
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
             <p className="text-gray-700 text-sm">
               Share and request items within your community. From tools to furniture, 
@@ -87,7 +93,7 @@ const GoodsPage = () => {
             </p>
           </div>
 
-          {/* Urgent requests section */}
+          {/* Urgent requests section - Shows high-priority needs */}
           {urgentRequests.length > 0 && (
             <div className="bg-white rounded-lg p-6 shadow-lg mb-6">
               <div className="flex items-center gap-2 mb-4">
@@ -97,7 +103,7 @@ const GoodsPage = () => {
               
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {urgentRequests.map(request => {
-                  // Cast the request to GoodsExchangeItem to access the urgency property
+                  // Cast to GoodsExchangeItem to access goods-specific properties
                   const goodsRequest = request as GoodsExchangeItem;
                   return (
                     <div 
@@ -131,7 +137,7 @@ const GoodsPage = () => {
             </div>
           )}
 
-          {/* Main content section */}
+          {/* Main content section - Contains search, action buttons, and items */}
           <div className="bg-white rounded-lg p-6 shadow-lg">
             {/* Search bar and action buttons */}
             <div className="flex items-center justify-between mb-6">
@@ -171,7 +177,7 @@ const GoodsPage = () => {
               </div>
             </div>
 
-            {/* Available items section */}
+            {/* Available items section - Shows offers from neighbors */}
             {goodsItems.length === 0 ? (
               <div className="max-w-4xl mx-auto mt-8">
                 <Button 
@@ -192,7 +198,7 @@ const GoodsPage = () => {
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {goodsItems.map(request => {
-                  // Cast the request to GoodsExchangeItem to access the goods_category and images properties
+                  // Cast to GoodsExchangeItem to access goods-specific properties
                   const goodsItem = request as GoodsExchangeItem;
                   return (
                     <div 
@@ -250,19 +256,19 @@ const GoodsPage = () => {
               </div>
             )}
             
-            {/* Non-urgent requests section */}
+            {/* Non-urgent requests section - Shows regular needs */}
             {goodsRequests.length > 0 && urgentRequests.length < goodsRequests.length && (
               <div className="mt-8">
                 <h3 className="text-lg font-medium mb-4">Other Item Requests</h3>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {goodsRequests
                     .filter(req => {
-                      // Cast to GoodsExchangeItem to access urgency
+                      // Cast to GoodsExchangeItem to access goods-specific properties
                       const goodsReq = req as GoodsExchangeItem;
                       return goodsReq.urgency !== 'high' && goodsReq.urgency !== 'critical';
                     })
                     .map(request => {
-                      // Cast to GoodsExchangeItem to access urgency
+                      // Cast to GoodsExchangeItem to access goods-specific properties
                       const goodsReq = request as GoodsExchangeItem;
                       return (
                         <div 
@@ -301,7 +307,7 @@ const GoodsPage = () => {
         </div>
       </div>
 
-      {/* Dialog components */}
+      {/* Dialog components for adding and viewing goods */}
       <AddSupportRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}

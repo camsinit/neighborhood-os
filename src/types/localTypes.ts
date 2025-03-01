@@ -1,6 +1,8 @@
 
+// This file defines types used throughout the application
+
 export interface Profile {
-  id: string;
+  id?: string;  // Make id optional to match what comes from the database
   display_name: string;
   avatar_url: string;
   created_at?: string;
@@ -44,10 +46,11 @@ export interface SupportRequest {
   is_archived: boolean | null;
   is_read: boolean | null;
   skill_category?: 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
+  // Change this to match the structure coming from the database
   profiles: Profile;
 }
 
-// Add a new interface for the GoodsExchangeItem
+// GoodsExchangeItem interface for goods exchange items
 export interface GoodsExchangeItem extends SupportRequest {
   goods_category?: string;
   urgency?: 'low' | 'medium' | 'high' | 'critical';
