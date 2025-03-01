@@ -1,6 +1,5 @@
 // This component provides the interface for uploading images
 import { Loader2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 // Props for the UploadArea component
 interface UploadAreaProps {
@@ -71,20 +70,16 @@ const UploadArea = ({
         </span>
       </div>
       
-      {/* File browser button - disabled when uploading */}
-      <label className={`cursor-pointer mt-4 ${uploading ? 'opacity-50' : ''}`}>
-        <Button type="button" variant="outline" size="sm" disabled={uploading}>
-          {uploading ? "Uploading..." : "Browse files"}
-        </Button>
-        <input
-          type="file"
-          className="hidden"
-          accept="image/*"
-          onChange={onFileSelect}
-          disabled={uploading}
-          multiple={multiple}
-        />
-      </label>
+      {/* Hidden file input - still needed for functionality but no button UI */}
+      <input
+        type="file"
+        className="hidden"
+        accept="image/*"
+        onChange={onFileSelect}
+        disabled={uploading}
+        multiple={multiple}
+        id="file-upload-input"
+      />
     </div>
   );
 };

@@ -58,7 +58,10 @@ export const useGoodsExchange = () => {
           const profilesMap = {};
           if (profilesData) {
             profilesData.forEach(profile => {
-              profilesMap[profile.id] = profile;
+              // Safely access properties only if they exist
+              if (profile && typeof profile === 'object' && 'id' in profile) {
+                profilesMap[profile.id] = profile;
+              }
             });
           }
           
