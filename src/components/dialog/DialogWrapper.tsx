@@ -2,7 +2,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -50,10 +49,7 @@ const DialogWrapper = ({
       <DialogContent className={`${maxWidthClass} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {/* Make description visible but accessible */}
-          <DialogDescription>
-            {description}
-          </DialogDescription>
+          {/* We're removing the DialogDescription component here */}
         </DialogHeader>
         <div className="mt-2">
           {children}
