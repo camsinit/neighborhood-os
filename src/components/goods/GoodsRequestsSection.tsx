@@ -67,10 +67,11 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
 
   return (
     <div className="mt-10">
-      <h2 className="text-2xl font-bold mb-4">Requests from Neighbors</h2>
+      {/* Changed from h2 to h3 as requested */}
+      <h3 className="text-2xl font-bold mb-4">Requests from Neighbors</h3>
       
-      {/* Using horizontal scrolling layout similar to SkillsList */}
-      <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
+      {/* Removed the bg-[#F8F8F8] class that gave the gray background */}
+      <div className="p-4 rounded-lg overflow-x-auto">
         <div className="flex gap-4 pb-2">
           {regularRequests.map((request) => (
             <Card key={request.id} className="flex-shrink-0 w-[250px]">
