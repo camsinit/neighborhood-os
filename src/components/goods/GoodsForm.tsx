@@ -1,19 +1,8 @@
 
 // This is the main goods form component, refactored into smaller subcomponents
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useUser } from "@supabase/auth-helpers-react";
-import { toast } from "sonner";
-import { 
-  GoodsFormProps, 
-  GoodsItemFormData, 
-  GoodsRequestFormData, 
-  GoodsItemCategory,
-  GoodsRequestUrgency
-} from "@/components/support/types/formTypes";
-import { useQueryClient } from "@tanstack/react-query";
+import { GoodsFormProps } from "@/components/support/types/formTypes";
 
 // Import our refactored components
 import CategorySelection from "./form/CategorySelection";
@@ -23,8 +12,8 @@ import AvailabilityField from "./form/AvailabilityField";
 import UrgencyField from "./form/UrgencyField";
 import ImageDropzone from "./form/ImageDropzone";
 
-// Import utility functions
-import { uploadImage } from "./utils/imageUpload";
+// Import our new custom hook
+import { useGoodsForm } from "./hooks/useGoodsForm";
 
 /**
  * GoodsForm component handles both offering and requesting goods items.
@@ -46,237 +35,30 @@ const GoodsForm = ({
   requestId,
   initialRequestType
 }: GoodsFormProps) => {
-  // Get the current user and query client
-  const user = useUser();
-  const queryClient = useQueryClient();
-  
-  // State for the item form (when offering)
-  const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
-    title: initialValues?.title || "",
-    description: initialValues?.description || "",
-    category: (initialValues as any)?.category || "furniture",
-    requestType: initialRequestType,
-    availableDays: (initialValues as any)?.availableDays || 30,
-    images: (initialValues as any)?.images || []
-  });
-  
-  // State for the request form (when requesting)
-  const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
-    title: initialValues?.title || "",
-    description: initialValues?.description || "",
-    urgency: (initialValues as any)?.urgency || "medium",
-    category: (initialValues as any)?.category,
-    image: (initialValues as any)?.image
-  });
-  
-  // State for image upload process
-  const [uploading, setUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>(
-    (initialValues as any)?.category || "furniture"
-  );
-  
-  // Determine whether this is an offer or request form
-  const isOfferForm = initialRequestType === "offer";
-  
-  // Handle file uploads for images
-  const handleImageUpload = async (file: File) => {
-    if (!user) {
-      toast.error("You must be logged in to upload images");
-      return null;
-    }
-    
-    setUploading(true);
-    try {
-      const imageUrl = await uploadImage(file, user.id);
-      return imageUrl;
-    } finally {
-      setUploading(false);
-    }
-  };
-  
-  // Handle adding images to the form data
-  const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const imageUrl = await handleImageUpload(file);
-    if (imageUrl) {
-      if (isOfferForm) {
-        setItemFormData(prev => ({
-          ...prev,
-          images: [...(prev.images || []), imageUrl]
-        }));
-      } else {
-        setRequestFormData(prev => ({
-          ...prev,
-          image: imageUrl
-        }));
-      }
-    }
-  };
-  
-  // Handle removing an image from the form data
-  const handleRemoveImage = (index: number) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        images: prev.images?.filter((_, i) => i !== index) || []
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        image: null
-      }));
-    }
-  };
-  
-  // Helper for handling category change to update suggestions
-  const handleCategoryChange = (category: GoodsItemCategory) => {
-    setSelectedCategory(category);
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        category
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        category
-      }));
-    }
-  };
-  
-  // Select a suggestion
-  const handleSelectSuggestion = (suggestion: string) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    }
-  };
-  
-  // Handle title change
-  const handleTitleChange = (value: string) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({ ...prev, title: value }));
-    } else {
-      setRequestFormData(prev => ({ ...prev, title: value }));
-    }
-  };
-  
-  // Handle description change
-  const handleDescriptionChange = (value: string) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({ ...prev, description: value }));
-    } else {
-      setRequestFormData(prev => ({ ...prev, description: value }));
-    }
-  };
-  
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast.error("You must be logged in to submit a goods request");
-      return;
-    }
-    
-    try {
-      if (isOfferForm) {
-        // Validate required fields for item offers
-        if (!itemFormData.title || !itemFormData.description || !itemFormData.category) {
-          toast.error("Please fill in all required fields");
-          return;
-        }
-        
-        if (!itemFormData.images?.length) {
-          toast.error("Please upload at least one image of the item");
-          return;
-        }
-        
-        // Prepare data for submission
-        const formattedData = {
-          title: itemFormData.title,
-          description: itemFormData.description,
-          goods_category: itemFormData.category, // Match the column name in the database
-          category: 'goods', // For compatibility with existing queries
-          request_type: 'offer',
-          user_id: user.id,
-          valid_until: new Date(Date.now() + (itemFormData.availableDays || 30) * 24 * 60 * 60 * 1000).toISOString(),
-          images: itemFormData.images, // Now matches the column name in database
-          is_archived: false
-        };
-        
-        console.log("Submitting offer data:", formattedData);
-        
-        // Submit data to the database
-        const { error } = await supabase
-          .from('goods_exchange')
-          .insert(formattedData);
-          
-        if (error) {
-          console.error('Error submitting goods form:', error);
-          throw error;
-        }
-        
-      } else {
-        // Validate required fields for item requests
-        if (!requestFormData.title || !requestFormData.description || !requestFormData.urgency) {
-          toast.error("Please fill in all required fields");
-          return;
-        }
-        
-        // Prepare data for submission
-        const formattedData = {
-          title: requestFormData.title,
-          description: requestFormData.description,
-          goods_category: requestFormData.category || null, // Match column name
-          category: 'goods', // For compatibility with existing queries
-          request_type: 'need',
-          user_id: user.id,
-          valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          image_url: requestFormData.image, // Keep for backward compatibility
-          urgency: requestFormData.urgency, // Match column name
-          is_archived: false
-        };
-        
-        console.log("Submitting request data:", formattedData);
-        
-        // Submit data to the database
-        const { error } = await supabase
-          .from('goods_exchange')
-          .insert(formattedData);
-          
-        if (error) {
-          console.error('Error submitting goods form:', error);
-          throw error;
-        }
-      }
-      
-      // Update the UI and close the form
-      queryClient.invalidateQueries({ queryKey: ['support-requests'] });
-      toast.success(isOfferForm ? "Item offered successfully!" : "Item request submitted successfully!");
-      onClose();
-      
-    } catch (error) {
-      console.error('Error submitting goods form:', error);
-      toast.error("Failed to submit. Please try again.");
-    }
-  };
+  // Use our custom hook to manage the form state and handlers
+  const {
+    itemFormData,
+    requestFormData,
+    uploading,
+    selectedCategory,
+    isOfferForm,
+    handleAddImage,
+    handleRemoveImage,
+    handleCategoryChange,
+    handleSelectSuggestion,
+    handleTitleChange,
+    handleDescriptionChange,
+    handleSubmit,
+    setItemFormData,
+    setRequestFormData
+  } = useGoodsForm({ onClose, initialValues, initialRequestType });
   
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Category Selection (for offers and optionally for requests) */}
       {isOfferForm && (
         <CategorySelection 
-          category={itemFormData.category as GoodsItemCategory}
+          category={itemFormData.category!}
           onChange={handleCategoryChange}
         />
       )}
@@ -309,7 +91,7 @@ const GoodsForm = ({
       {/* Urgency (requests only) */}
       {!isOfferForm && (
         <UrgencyField 
-          urgency={requestFormData.urgency as GoodsRequestUrgency}
+          urgency={requestFormData.urgency!}
           onChange={(urgency) => {
             setRequestFormData(prev => ({ ...prev, urgency }));
           }}
