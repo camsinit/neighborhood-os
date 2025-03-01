@@ -21,6 +21,7 @@ export const useGoodsExchange = () => {
         .select('*')
         .order("created_at", { ascending: false });
 
+      // If there's an error fetching goods data, log it and throw
       if (goodsError) {
         console.error("Error fetching goods exchange items:", goodsError);
         throw goodsError;
@@ -36,15 +37,21 @@ export const useGoodsExchange = () => {
         
         try {
           // Fetch profile data for these users
-          // Using a try-catch to handle potential issues with column mismatches
           const { data: profilesData, error: profilesError } = await supabase
             .from("profiles")
             .select('id, display_name, avatar_url, email')
             .in('id', userIds);
             
+          // Check if there was an error fetching profiles
           if (profilesError) {
             console.error("Error fetching profiles for goods items:", profilesError);
             // Don't throw here, we'll just proceed without profiles
+            
+            // Still need to return the goods data without profiles
+            return goodsData.map(item => ({
+              ...item,
+              profiles: null // No profile data available
+            }));
           }
           
           // Create a map of user IDs to profile data for quick lookup
@@ -63,10 +70,16 @@ export const useGoodsExchange = () => {
         } catch (error) {
           console.error("Error handling profiles for goods items:", error);
           // If there's an error with profiles, we'll still return the goods data without profiles
-          goodsWithProfiles = goodsData;
+          goodsWithProfiles = goodsData.map(item => ({
+            ...item,
+            profiles: null // Error occurred, so no profile data
+          }));
         }
         
         console.log("Added profiles to goods items:", goodsWithProfiles.length);
+      } else {
+        // If there are no goods items, return an empty array
+        goodsWithProfiles = [];
       }
       
       // Sort by created_at date (newest first)
