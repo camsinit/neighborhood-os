@@ -68,43 +68,47 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   return (
     <div className="mt-10">
       <h2 className="text-2xl font-bold mb-4">Requests from Neighbors</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {regularRequests.map((request) => (
-          <Card key={request.id}>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{request.title}</CardTitle>
-                {request.urgency && (
-                  <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full`}>
-                    {getUrgencyLabel(request.urgency)}
-                  </span>
-                )}
-              </div>
-              <CardDescription>
-                Posted by {request.profiles?.display_name || "Anonymous"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pb-2">
-              <p className="line-clamp-2">{request.description}</p>
-            </CardContent>
-            <CardFooter className="flex justify-between pt-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => onRequestSelect(request)}
-              >
-                View Details
-              </Button>
-              <Button 
-                variant="default" 
-                size="sm"
-                onClick={() => window.open(createContactEmailLink(request), '_blank')}
-              >
-                I Can Help
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
+      
+      {/* Using horizontal scrolling layout similar to SkillsList */}
+      <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
+        <div className="flex gap-4 pb-2">
+          {regularRequests.map((request) => (
+            <Card key={request.id} className="flex-shrink-0 w-[250px]">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{request.title}</CardTitle>
+                  {request.urgency && (
+                    <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full`}>
+                      {getUrgencyLabel(request.urgency)}
+                    </span>
+                  )}
+                </div>
+                <CardDescription>
+                  Posted by {request.profiles?.display_name || "Anonymous"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <p className="line-clamp-2">{request.description}</p>
+              </CardContent>
+              <CardFooter className="flex justify-between pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onRequestSelect(request)}
+                >
+                  View Details
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  onClick={() => window.open(createContactEmailLink(request), '_blank')}
+                >
+                  I Can Help
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
