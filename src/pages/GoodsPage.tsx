@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -158,8 +157,7 @@ const GoodsPage = () => {
                     setInitialRequestType("need");
                     setIsAddRequestOpen(true);
                   }}
-                  variant="outline"
-                  className="border-[#FEC6A1] text-gray-700"
+                  className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
                 >
                   <AlertCircle className="h-5 w-5 mr-2" />
                   Request Item
