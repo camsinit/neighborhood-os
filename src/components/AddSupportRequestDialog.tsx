@@ -52,6 +52,8 @@ const AddSupportRequestDialog = ({
       open={open}
       onOpenChange={onOpenChange}
       title={getDialogTitle()}
+      // Use a smaller width for forms to maintain readability
+      maxWidth="sm"
     >
       {isSkillsView ? (
         <SkillForm 
