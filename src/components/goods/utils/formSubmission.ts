@@ -16,7 +16,7 @@ import { uploadImage } from './imageUpload';
  * @returns A formatted object ready for database insertion
  */
 export const formatOfferSubmission = async (
-  itemFormData: GoodsItemFormData, 
+  itemFormData: Partial<GoodsItemFormData>, 
   userId: string
 ) => {
   // Format the date to be 30 days from now (or whatever the user specified)
@@ -25,14 +25,14 @@ export const formatOfferSubmission = async (
 
   // Create the data object for submission
   return {
-    title: itemFormData.title,
-    description: itemFormData.description,
-    goods_category: itemFormData.category,
+    title: itemFormData.title || "Untitled Item", // Provide a default title if not provided
+    description: itemFormData.description || "", // Empty string as fallback
+    goods_category: itemFormData.category || "other", // Default to 'other' if not specified
     category: 'goods', // Default category is 'goods'
     request_type: 'offer',
     user_id: userId,
     valid_until: validUntil.toISOString(),
-    images: itemFormData.images,
+    images: itemFormData.images || [], // Empty array as fallback for images
     is_archived: false,
   };
 };
@@ -48,7 +48,7 @@ export const formatOfferSubmission = async (
  * @returns A formatted object ready for database insertion
  */
 export const formatRequestSubmission = async (
-  requestFormData: GoodsRequestFormData,
+  requestFormData: Partial<GoodsRequestFormData>,
   userId: string
 ) => {
   // Format the date to be 30 days from now (default expiration)
@@ -57,14 +57,14 @@ export const formatRequestSubmission = async (
 
   // Create the data object for submission
   return {
-    title: requestFormData.title,
-    description: requestFormData.description,
+    title: requestFormData.title || "Untitled Request", // Provide default title
+    description: requestFormData.description || "", // Empty string as fallback
     category: 'goods', // Default category is 'goods'
     request_type: 'need',
     user_id: userId,
     valid_until: validUntil.toISOString(),
-    image_url: requestFormData.image,
-    urgency: requestFormData.urgency,
+    image_url: requestFormData.image || null, // Null as fallback
+    urgency: requestFormData.urgency || "medium", // Default to medium urgency
     is_archived: false,
   };
 };
@@ -86,8 +86,8 @@ export const formatRequestSubmission = async (
  */
 export const submitGoodsForm = async (
   isOfferForm: boolean,
-  itemFormData: GoodsItemFormData,
-  requestFormData: GoodsRequestFormData,
+  itemFormData: Partial<GoodsItemFormData>,
+  requestFormData: Partial<GoodsRequestFormData>,
   userId: string
 ) => {
   try {
