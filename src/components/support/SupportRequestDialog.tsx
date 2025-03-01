@@ -194,6 +194,36 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
       toast.error("Failed to delete the item");
     }
   };
+  
+  /**
+   * Create a contact email link for the "I Can Help" button
+   * This formats the email with a helpful subject and body text
+   */
+  const createContactEmailLink = () => {
+    // If no request or no profile, return a basic mailto link
+    if (!request || !request.profiles) {
+      return "mailto:?subject=About your item on Neighborhood App";
+    }
+    
+    // Get display name and item details
+    const posterName = request.profiles.display_name || "Neighbor";
+    const itemTitle = request.title || "your posted item";
+    
+    // Create a well-formatted email subject
+    const subject = encodeURIComponent(`About your item: ${itemTitle}`);
+    
+    // Create a helpful email body with greeting and context
+    const body = encodeURIComponent(
+      `Hi ${posterName},\n\nI saw your post for "${itemTitle}" on our neighborhood app and I'd like to help. `+
+      `\n\nLet me know when would be a good time to connect about this.\n\nThanks!`
+    );
+    
+    // Use the poster's email if available, otherwise leave blank
+    const email = request.profiles.email || "";
+    
+    // Return the formatted mailto link
+    return `mailto:${email}?subject=${subject}&body=${body}`;
+  };
 
   // If there's no request, render nothing
   if (!request) return null;
@@ -323,10 +353,17 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
               </Button>
             )}
             
-            {/* Action button changes based on request type */}
-            <Button className="ml-auto">
-              {request?.request_type === 'need' ? "I Can Help" : "I'm Interested"}
-            </Button>
+            {/* Email Contact button - modified to open email client */}
+            <a 
+              href={createContactEmailLink()} 
+              className="ml-auto" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button>
+                {request?.request_type === 'need' ? "I Can Help" : "I'm Interested"}
+              </Button>
+            </a>
           </div>
         </div>
       </DialogContent>
