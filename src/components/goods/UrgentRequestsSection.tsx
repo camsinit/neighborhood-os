@@ -92,6 +92,7 @@ const createContactEmailLink = (request: GoodsExchangeItem) => {
   );
   
   // Use the poster's email if available, otherwise leave blank
+  // Safely access the email property which might not exist
   const email = request.profiles?.email || "";
   
   // Return the formatted mailto link

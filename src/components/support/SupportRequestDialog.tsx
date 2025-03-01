@@ -196,7 +196,7 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
   };
   
   /**
-   * Create a contact email link for the "I Can Help" button
+   * Create a contact email link for the action button
    * This formats the email with a helpful subject and body text
    */
   const createContactEmailLink = () => {
@@ -230,6 +230,11 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
 
   // Get images array from the request - handle both single and multiple images
   const images = request.images || (request.image_url ? [request.image_url] : []);
+
+  // Determine button text based on request type
+  // If it's a "need" request, show "I Can Help"
+  // If it's an "offer" request, show "I'm Interested"
+  const buttonText = request.request_type === 'need' ? "I Can Help" : "I'm Interested";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -361,7 +366,7 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
               rel="noopener noreferrer"
             >
               <Button>
-                {request?.request_type === 'need' ? "I Can Help" : "I'm Interested"}
+                {buttonText}
               </Button>
             </a>
           </div>
