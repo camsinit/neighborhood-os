@@ -24,6 +24,16 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // Use our custom hook to fetch users
   const { data: users, isLoading, error } = useNeighborUsers();
   
+  // Add detailed debugging for tracking the neighborhood state
+  useEffect(() => {
+    console.log("[UserDirectory] Neighborhood state updated:", { 
+      neighborhoodId: currentNeighborhood?.id,
+      neighborhoodName: currentNeighborhood?.name,
+      isLoading: isLoadingNeighborhood,
+      timestamp: new Date().toISOString()
+    });
+  }, [currentNeighborhood, isLoadingNeighborhood]);
+  
   // Add debugging for tracking the query state
   useEffect(() => {
     console.log("[UserDirectory] Query state updated:", { 

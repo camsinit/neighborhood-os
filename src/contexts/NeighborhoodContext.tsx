@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,24 +68,32 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
 
       try {
         // First, let's check if the user is a member of any neighborhood
-        console.log("[NeighborhoodContext] Checking neighborhood_members table");
+        console.log("[NeighborhoodContext] Checking neighborhood_members table directly");
         const { data: memberData, error: memberError } = await supabase
           .from('neighborhood_members')
-          .select('neighborhood_id')
+          .select('neighborhood_id, status')
           .eq('user_id', user.id)
           .eq('status', 'active')
+          .order('joined_at', { ascending: false })
+          .limit(1)
           .single();
 
         if (memberError) {
-          // Only log this error but continue with the flow to check if user created neighborhoods
-          console.error("[NeighborhoodContext] Error fetching membership:", {
-            error: memberError,
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          });
+          if (memberError.code === 'PGRST116') {
+            // No data found is not a critical error, just means the user has no memberships
+            console.log("[NeighborhoodContext] No active neighborhood memberships found");
+          } else {
+            // Only log this error but continue with the flow to check if user created neighborhoods
+            console.error("[NeighborhoodContext] Error fetching membership:", {
+              error: memberError,
+              userId: user.id,
+              timestamp: new Date().toISOString()
+            });
+          }
         } else if (memberData) {
           console.log("[NeighborhoodContext] Found membership:", {
             neighborhoodId: memberData.neighborhood_id,
+            status: memberData.status,
             userId: user.id
           });
           
@@ -119,7 +126,9 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
         const { data: neighborhoods, error: neighborhoodsError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by')
-          .eq('created_by', user.id);
+          .eq('created_by', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
 
         // If there's an error fetching neighborhoods
         if (neighborhoodsError) {

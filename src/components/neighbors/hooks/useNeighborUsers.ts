@@ -26,12 +26,42 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
 
       try {
+        // First, fetch all members of the current neighborhood
+        console.log("[useNeighborUsers] Step 1: Fetching members of the neighborhood");
+        const { data: members, error: membersError } = await supabase
+          .from('neighborhood_members')
+          .select('user_id')
+          .eq('neighborhood_id', currentNeighborhood.id)
+          .eq('status', 'active');
+
+        if (membersError) {
+          console.error("[useNeighborUsers] Error fetching neighborhood members:", {
+            error: membersError,
+            neighborhoodId: currentNeighborhood.id
+          });
+          throw membersError;
+        }
+
+        if (!members || members.length === 0) {
+          console.log("[useNeighborUsers] No members found in this neighborhood");
+          return [];
+        }
+
+        console.log("[useNeighborUsers] Neighborhood members found:", {
+          count: members.length,
+          memberIds: members.map(m => m.user_id)
+        });
+
+        // Get the list of user IDs from members
+        const userIds = members.map(member => member.user_id);
+
         // Use a different approach to get users that avoids the recursive RLS policy
         // First, get profiles for all users
-        console.log("[useNeighborUsers] Step 1: Fetching all user profiles");
+        console.log("[useNeighborUsers] Step 2: Fetching profiles for neighborhood members");
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio');
+          .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
+          .in('id', userIds);
 
         if (profilesError) {
           console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
@@ -43,10 +73,11 @@ export const useNeighborUsers = () => {
         });
 
         // Then get user emails from auth_users_view
-        console.log("[useNeighborUsers] Step 2: Fetching user emails");
+        console.log("[useNeighborUsers] Step 3: Fetching user emails");
         const { data: authUsers, error: authError } = await supabase
           .from('auth_users_view')
-          .select('id, email, created_at');
+          .select('id, email, created_at')
+          .in('id', userIds);
 
         if (authError) {
           console.error("[useNeighborUsers] Error fetching auth users:", authError);
@@ -58,10 +89,11 @@ export const useNeighborUsers = () => {
         });
 
         // Then get user roles
-        console.log("[useNeighborUsers] Step 3: Fetching user roles");
+        console.log("[useNeighborUsers] Step 4: Fetching user roles");
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
-          .select('user_id, role');
+          .select('user_id, role')
+          .in('user_id', userIds);
 
         if (rolesError) {
           console.error("[useNeighborUsers] Error fetching user roles:", rolesError);
@@ -73,7 +105,7 @@ export const useNeighborUsers = () => {
         });
 
         // Combine the data
-        console.log("[useNeighborUsers] Step 4: Combining data");
+        console.log("[useNeighborUsers] Step 5: Combining data");
         const usersWithProfiles = profiles.map((profile: any) => {
           const authUser = authUsers.find((u: any) => u.id === profile.id);
           const roles = userRoles
@@ -101,7 +133,8 @@ export const useNeighborUsers = () => {
         });
 
         console.log("[useNeighborUsers] Final combined users:", {
-          count: usersWithProfiles.length
+          count: usersWithProfiles.length,
+          users: usersWithProfiles.map(u => u.id)
         });
         
         return usersWithProfiles as UserWithRole[];
