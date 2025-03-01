@@ -76,49 +76,89 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
       
       {/* Container for the horizontally scrollable cards */}
       <div className="p-4 rounded-lg overflow-x-auto">
-        <div className="flex gap-4 pb-2">
+        <div className="flex gap-4 pb-2 relative">
           {regularRequests.map((request) => (
-            /* Self-expanding card - no additional hover card needed */
-            <Card 
-              key={request.id} 
-              className="flex-shrink-0 w-[250px] cursor-pointer hover:shadow-md transition-all duration-300 group hover:w-[300px]"
-            >
-              <CardHeader className="pb-2">
-                {/* Layout with profile image to the left of the title */}
-                <div className="flex items-start gap-3">
-                  {/* Avatar component for profile image */}
-                  <Avatar className="h-8 w-8 mt-1">
-                    {/* Use the avatar URL from the profile if available */}
-                    <AvatarImage 
-                      src={request.profiles?.avatar_url} 
-                      alt={request.profiles?.display_name || "User"} 
-                    />
-                    {/* Fallback shows initials if no image is available */}
-                    <AvatarFallback>
-                      {(request.profiles?.display_name || "?").substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  {/* Title and urgency tag in a column */}
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{request.title}</CardTitle>
-                    {/* Urgency tag below the title */}
-                    {request.urgency && (
-                      <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
-                        {getUrgencyLabel(request.urgency)}
-                      </span>
-                    )}
+            /* 
+            * Card with overlay hover effect
+            * Using relative/absolute positioning to create the floating overlay effect
+            * The z-index ensures that the hovered card appears above others
+            */
+            <div className="relative flex-shrink-0 w-[250px] group" key={request.id}>
+              {/* Base card that's always visible */}
+              <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-full">
+                <CardHeader className="pb-2">
+                  {/* Layout with profile image to the left of the title */}
+                  <div className="flex items-start gap-3">
+                    {/* Avatar component for profile image */}
+                    <Avatar className="h-8 w-8 mt-1">
+                      {/* Use the avatar URL from the profile if available */}
+                      <AvatarImage 
+                        src={request.profiles?.avatar_url} 
+                        alt={request.profiles?.display_name || "User"} 
+                      />
+                      {/* Fallback shows initials if no image is available */}
+                      <AvatarFallback>
+                        {(request.profiles?.display_name || "?").substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    {/* Title and urgency tag in a column */}
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{request.title}</CardTitle>
+                      {/* Urgency tag below the title */}
+                      {request.urgency && (
+                        <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
+                          {getUrgencyLabel(request.urgency)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                {/* Description is visible in the normal card view, but gets truncated */}
-                <p className="line-clamp-2 group-hover:line-clamp-none transition-all">{request.description}</p>
+                </CardHeader>
                 
-                {/* Additional content only visible on hover */}
-                <div className="mt-4 opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-[500px] transition-all duration-300">
-                  {/* Poster information */}
+                <CardContent>
+                  {/* Description is visible in the normal card view, but gets truncated */}
+                  <p className="line-clamp-2">{request.description}</p>
+                </CardContent>
+              </Card>
+              
+              {/* 
+              * Expanded overlay card that appears on hover
+              * This has absolute positioning so it floats over other content
+              * Width increases and additional details are shown
+              * z-index ensures it's above other elements when expanded
+              */}
+              <Card 
+                className="absolute left-0 top-0 w-[250px] opacity-0 invisible group-hover:opacity-100 group-hover:visible 
+                group-hover:w-[300px] group-hover:z-10 transition-all duration-300 shadow-xl"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-8 w-8 mt-1">
+                      <AvatarImage 
+                        src={request.profiles?.avatar_url} 
+                        alt={request.profiles?.display_name || "User"} 
+                      />
+                      <AvatarFallback>
+                        {(request.profiles?.display_name || "?").substring(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{request.title}</CardTitle>
+                      {request.urgency && (
+                        <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full mt-1 inline-block`}>
+                          {getUrgencyLabel(request.urgency)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  {/* Full description with no truncation in the expanded view */}
+                  <p>{request.description}</p>
+                  
+                  {/* Posted by section */}
                   <div className="mt-4">
                     <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
                     <div className="flex items-center gap-2">
@@ -153,9 +193,9 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
