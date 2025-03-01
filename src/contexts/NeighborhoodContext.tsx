@@ -68,8 +68,54 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       });
 
       try {
-        // First, let's directly check if we can read from the neighborhoods table
-        // This approach avoids the neighborhood_members table which seems to be causing problems
+        // First, let's check if the user is a member of any neighborhood
+        console.log("[NeighborhoodContext] Checking neighborhood_members table");
+        const { data: memberData, error: memberError } = await supabase
+          .from('neighborhood_members')
+          .select('neighborhood_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (memberError) {
+          // Only log this error but continue with the flow to check if user created neighborhoods
+          console.error("[NeighborhoodContext] Error fetching membership:", {
+            error: memberError,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+        } else if (memberData) {
+          console.log("[NeighborhoodContext] Found membership:", {
+            neighborhoodId: memberData.neighborhood_id,
+            userId: user.id
+          });
+          
+          // Now fetch the neighborhood details
+          const { data: neighborhoodData, error: neighborhoodError } = await supabase
+            .from('neighborhoods')
+            .select('id, name, created_by')
+            .eq('id', memberData.neighborhood_id)
+            .single();
+            
+          if (neighborhoodError) {
+            console.error("[NeighborhoodContext] Error fetching neighborhood details:", {
+              error: neighborhoodError,
+              neighborhoodId: memberData.neighborhood_id
+            });
+          } else if (neighborhoodData) {
+            console.log("[NeighborhoodContext] Found neighborhood from membership:", {
+              neighborhood: neighborhoodData,
+              userId: user.id
+            });
+            
+            setCurrentNeighborhood(neighborhoodData as Neighborhood);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // As a fallback, check if the user created any neighborhoods
+        console.log("[NeighborhoodContext] Checking for user-created neighborhoods");
         const { data: neighborhoods, error: neighborhoodsError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by')
@@ -102,9 +148,7 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           return;
         }
 
-        // If we reach here, the user doesn't have a created neighborhood
-        // We could try querying for memberships, but since that's causing 500 errors,
-        // we'll just set the neighborhood to null for now
+        // If we reach here, the user doesn't have a neighborhood
         console.log("[NeighborhoodContext] No neighborhood found for user", {
           userId: user.id,
           timestamp: new Date().toISOString()
