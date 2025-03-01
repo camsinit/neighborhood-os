@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Pencil, Trash2, Clock, Calendar, Tag } from "lucide-react";
+import { User, Pencil, Trash2, Clock, Calendar, Tag, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import EditSupportRequestDialog from "./EditSupportRequestDialog";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { GoodsExchangeItem, SkillExchangeItem } from "@/types/localTypes";
 import { GoodsRequestUrgency } from '../support/types/formTypes';
+import { useState } from "react";
 
 // Interface defining the props for the SupportRequestDialog component
 interface SupportRequestDialogProps {
@@ -26,6 +27,83 @@ interface SupportRequestDialogProps {
   // Function to handle opening/closing the dialog
   onOpenChange: (open: boolean) => void;
 }
+
+/**
+ * Image Carousel Component
+ * 
+ * This component displays a carousel of images with navigation controls
+ * It allows users to scroll through multiple images for a support request
+ */
+const ImageCarousel = ({ images }: { images: string[] }) => {
+  // State to track the current image index being shown
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Don't render anything if there are no images
+  if (!images || images.length === 0) return null;
+  
+  // Function to go to the next image
+  const nextImage = () => {
+    // If we're at the last image, go back to the first one (loop around)
+    setCurrentIndex((prevIndex) => 
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+  
+  // Function to go to the previous image
+  const prevImage = () => {
+    // If we're at the first image, go to the last one (loop around)
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+  
+  return (
+    <div className="relative">
+      {/* The image container with rounded corners */}
+      <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
+        <img 
+          src={images[currentIndex]} 
+          alt={`Image ${currentIndex + 1}`}
+          className="max-w-full max-h-full object-contain rounded-lg"
+        />
+      </div>
+      
+      {/* Only show navigation controls if there's more than one image */}
+      {images.length > 1 && (
+        <div className="absolute inset-0 flex items-center justify-between">
+          {/* Previous button */}
+          <Button 
+            onClick={prevImage} 
+            size="icon" 
+            variant="ghost" 
+            className="h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
+          {/* Next button */}
+          <Button 
+            onClick={nextImage} 
+            size="icon" 
+            variant="ghost" 
+            className="h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/50"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      
+      {/* Image counter/indicator */}
+      {images.length > 1 && (
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center">
+          <div className="bg-black/50 text-white text-xs rounded-full px-2 py-1">
+            {currentIndex + 1} / {images.length}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 /**
  * SupportRequestDialog Component
@@ -132,26 +210,44 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
         
         {/* Main content area */}
         <div className="space-y-6">
-          {/* User info section */}
-          <div className="flex items-center gap-4 border-b pb-4">
-            <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={request?.profiles?.avatar_url || ''} 
-                alt={request?.profiles?.display_name || 'User'} 
-              />
-              <AvatarFallback>
-                <User className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium text-base">{request?.profiles?.display_name || 'Anonymous'}</p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>
-                  {request?.created_at && format(new Date(request.created_at), 'MMM d, yyyy')}
-                </span>
+          {/* User info section with Edit button moved here */}
+          <div className="flex items-center justify-between gap-4 border-b pb-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-10 w-10">
+                <AvatarImage 
+                  src={request?.profiles?.avatar_url || ''} 
+                  alt={request?.profiles?.display_name || 'User'} 
+                />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-base">{request?.profiles?.display_name || 'Anonymous'}</p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>
+                    {request?.created_at && format(new Date(request.created_at), 'MMM d, yyyy')}
+                  </span>
+                </div>
               </div>
             </div>
+            
+            {/* Edit button moved here */}
+            {user && user.id === request?.user_id && (
+              <div className="flex items-center">
+                <EditSupportRequestDialog request={request}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="hover:bg-secondary"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </EditSupportRequestDialog>
+              </div>
+            )}
             
             {/* Add urgency badge for goods items with urgency */}
             {request.urgency && (
@@ -165,25 +261,10 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
           
           {/* Split into two columns: Image gallery on left, details on right */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Left column: Image gallery - only show if images exist */}
+            {/* Left column: Image carousel - only show if images exist */}
             <div className={`${images.length === 0 ? 'hidden' : ''}`}>
               {images.length > 0 && (
-                <div className="space-y-2">
-                  <div className="space-y-2">
-                    {images.map((imgUrl: string, index: number) => (
-                      <div 
-                        key={index}
-                        className="relative bg-gray-100 rounded-md overflow-hidden"
-                      >
-                        <img 
-                          src={imgUrl} 
-                          alt={`${request.title} - Image ${index + 1}`}
-                          className="w-full h-auto object-contain max-h-[200px]"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <ImageCarousel images={images} />
               )}
             </div>
             
@@ -230,27 +311,16 @@ const SupportRequestDialog = ({ request, open, onOpenChange }: SupportRequestDia
           
           {/* Action buttons */}
           <div className="flex justify-between items-center">
-            {/* Only show edit/delete buttons to the item owner */}
+            {/* Only show delete button to the item owner - Edit button was moved up */}
             {user && user.id === request?.user_id && (
-              <div className="flex gap-2">
-                <EditSupportRequestDialog request={request}>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </EditSupportRequestDialog>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={handleDelete}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
             )}
             
             {/* Action button changes based on request type */}

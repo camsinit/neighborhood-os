@@ -1,8 +1,75 @@
 
 import { Button } from "@/components/ui/button";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
+import { useState } from 'react';
+
+/**
+ * Simple Image Carousel Component
+ * 
+ * This component displays a small carousel of images in the goods card
+ */
+const SimpleImageCarousel = ({ images }: { images: string[] }) => {
+  // State to track the current image index
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Don't render if no images
+  if (!images || images.length === 0) return null;
+  
+  // Navigate to next image
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    setCurrentIndex((prevIndex) => 
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+  
+  // Navigate to previous image
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+  
+  return (
+    <div className="relative h-32 mb-2 rounded-md overflow-hidden">
+      <img 
+        src={images[currentIndex]} 
+        alt="Item image"
+        className="w-full h-full object-cover rounded-md"
+      />
+      
+      {/* Only show navigation if more than one image */}
+      {images.length > 1 && (
+        <>
+          <Button 
+            onClick={prevImage} 
+            size="icon" 
+            variant="ghost" 
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/30 text-white hover:bg-black/50"
+          >
+            <ChevronLeft className="h-3 w-3" />
+          </Button>
+          <Button 
+            onClick={nextImage} 
+            size="icon" 
+            variant="ghost" 
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-black/30 text-white hover:bg-black/50"
+          >
+            <ChevronRight className="h-3 w-3" />
+          </Button>
+          <div className="absolute bottom-1 left-0 right-0 flex justify-center">
+            <div className="bg-black/50 text-white text-xs rounded-full px-1.5 py-0.5 text-[10px]">
+              {currentIndex + 1}/{images.length}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 /**
  * Component to display non-urgent goods requests
@@ -45,6 +112,13 @@ const GoodsRequestsSection = ({
               className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer relative"
               onClick={() => onRequestSelect(request)}
             >
+              {/* Add carousel for images */}
+              {request.images || request.image_url ? (
+                <SimpleImageCarousel 
+                  images={request.images || (request.image_url ? [request.image_url] : [])} 
+                />
+              ) : null}
+              
               <div className="flex justify-between">
                 <h3 className="font-medium text-lg">{request.title}</h3>
                 {request.urgency && (
