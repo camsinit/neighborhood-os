@@ -45,15 +45,12 @@ export const useGoodsForm = ({
   });
   
   // State for the request form (when requesting)
-  // The error is here - 'requestType' is not in GoodsRequestFormData type
   const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     urgency: (initialValues as any)?.urgency || "medium",
     category: (initialValues as any)?.category || "furniture",
-    image: (initialValues as any)?.image
-    // Removed 'requestType' as it's not in the GoodsRequestFormData type
-    // We'll use the isOfferForm variable instead to determine the request type
+    // Note: We've removed the image field for requests per the user's request
   });
   
   // State for image upload process
@@ -64,6 +61,9 @@ export const useGoodsForm = ({
   
   // Handle adding images to the form data
   const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Skip for request forms since we've removed image upload for requests
+    if (!isOfferForm) return;
+    
     if (!user) {
       toast.error("You must be logged in to upload images");
       return;
@@ -73,17 +73,10 @@ export const useGoodsForm = ({
     try {
       const imageUrl = await processFileUpload(e, user.id);
       if (imageUrl) {
-        if (isOfferForm) {
-          setItemFormData(prev => ({
-            ...prev,
-            images: [...(prev.images || []), imageUrl]
-          }));
-        } else {
-          setRequestFormData(prev => ({
-            ...prev,
-            image: imageUrl
-          }));
-        }
+        setItemFormData(prev => ({
+          ...prev,
+          images: [...(prev.images || []), imageUrl]
+        }));
       }
     } finally {
       setUploading(false);
@@ -92,17 +85,13 @@ export const useGoodsForm = ({
   
   // Handle removing an image from the form data
   const handleRemoveImage = (index: number) => {
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        images: prev.images?.filter((_, i) => i !== index) || []
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        image: null
-      }));
-    }
+    // Skip for request forms since we've removed image upload for requests
+    if (!isOfferForm) return;
+    
+    setItemFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter((_, i) => i !== index) || []
+    }));
   };
   
   // Helper for handling category change to update suggestions
@@ -124,18 +113,14 @@ export const useGoodsForm = ({
   
   // Select a suggestion
   const handleSelectSuggestion = (suggestion: string) => {
+    // Skip for request forms since we've removed quick suggestions for requests
+    if (!isOfferForm) return;
+    
     console.log("Selected suggestion:", suggestion);
-    if (isOfferForm) {
-      setItemFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    } else {
-      setRequestFormData(prev => ({
-        ...prev,
-        title: suggestion
-      }));
-    }
+    setItemFormData(prev => ({
+      ...prev,
+      title: suggestion
+    }));
   };
   
   // Handle title change
@@ -192,7 +177,6 @@ export const useGoodsForm = ({
     } catch (error) {
       console.error('Error submitting goods form:', error);
       // Don't duplicate toast errors - the submitGoodsForm function already shows an error toast
-      // toast.error("Failed to submit. Please try again.");
     }
   };
   

@@ -26,7 +26,6 @@ import { useGoodsForm } from "./hooks/useGoodsForm";
  * For requests, it collects:
  * - Title, description
  * - Urgency level
- * - Optional category and image
  */
 const GoodsForm = ({ 
   onClose, 
@@ -55,7 +54,7 @@ const GoodsForm = ({
   
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Category Selection (for offers and optionally for requests) */}
+      {/* Category Selection (for offers only) */}
       {isOfferForm && (
         <CategorySelection 
           category={itemFormData.category!}
@@ -63,11 +62,13 @@ const GoodsForm = ({
         />
       )}
       
-      {/* Quick Suggestions */}
-      <ItemSuggestions 
-        category={selectedCategory}
-        onSelectSuggestion={handleSelectSuggestion}
-      />
+      {/* Quick Suggestions (for offers only) */}
+      {isOfferForm && (
+        <ItemSuggestions 
+          category={selectedCategory}
+          onSelectSuggestion={handleSelectSuggestion}
+        />
+      )}
       
       {/* Title and Description Fields */}
       <TextFields 
@@ -98,15 +99,17 @@ const GoodsForm = ({
         />
       )}
       
-      {/* Image Upload Area */}
-      <ImageDropzone 
-        isOfferForm={isOfferForm}
-        images={itemFormData.images}
-        image={requestFormData.image}
-        onAddImage={handleAddImage}
-        onRemoveImage={handleRemoveImage}
-        uploading={uploading}
-      />
+      {/* Image Upload Area (for offers only) */}
+      {isOfferForm && (
+        <ImageDropzone 
+          isOfferForm={isOfferForm}
+          images={itemFormData.images}
+          image={requestFormData.image}
+          onAddImage={handleAddImage}
+          onRemoveImage={handleRemoveImage}
+          uploading={uploading}
+        />
+      )}
       
       {/* Form Submission Buttons */}
       <DialogFooter>
