@@ -70,11 +70,11 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
   );
   
-  // Track which request cards are expanded
-  const [expandedCardIds, setExpandedCardIds] = useState<Set<number>>(new Set());
+  // Track which request cards are expanded - use string type to match request.id type
+  const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(new Set());
   
   // Toggle the expanded state of a card
-  const toggleCardExpansion = (id: number) => {
+  const toggleCardExpansion = (id: string) => {
     // Create a new Set based on the current state
     const newExpandedCards = new Set(expandedCardIds);
     
