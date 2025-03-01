@@ -16,6 +16,7 @@ import GoodsRequestsSection from "@/components/goods/GoodsRequestsSection";
 import { getUrgencyClass, getUrgencyLabel } from "@/components/goods/utils/urgencyHelpers";
 import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * GoodsPage component
@@ -66,6 +67,25 @@ const GoodsPage = () => {
       console.log("Goods requests:", goodsRequests.length, "items", goodsRequests);
     }
   }, [requests]);
+
+  // For debugging - directly query the database to see what's in it
+  useEffect(() => {
+    const debugGoods = async () => {
+      // Query goods_exchange directly to see what's there
+      const { data, error } = await supabase
+        .from('goods_exchange')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        console.error("Error querying goods_exchange:", error);
+      } else {
+        console.log("Direct goods_exchange query result:", data);
+      }
+    };
+    
+    debugGoods();
+  }, []);
 
   // Filter goods items (offers)
   // This creates a list of items that people are offering to others
@@ -134,6 +154,23 @@ const GoodsPage = () => {
         <div className="py-8">
           {/* Page title and introduction */}
           <GoodsPageHeader />
+          
+          {/* Display debug information while we're troubleshooting */}
+          {requests && (
+            <div className="bg-yellow-100 p-4 mb-4 rounded-lg border border-yellow-200">
+              <h3 className="font-medium">Debug Information</h3>
+              <p>Total items loaded: {requests.length}</p>
+              <p>Goods category items: {requests.filter(req => req.category === 'goods').length}</p>
+              <p>Goods offers: {goodsItems.length}</p>
+              <p>Goods requests: {goodsRequests.length}</p>
+              <button 
+                onClick={handleManualRefresh}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded mt-2"
+              >
+                Refresh Data
+              </button>
+            </div>
+          )}
           
           {/* Urgent requests section - Shows high-priority needs */}
           <UrgentRequestsSection 
