@@ -147,13 +147,19 @@ export const submitGoodsForm = async (
     const customEvent = new Event('goods-form-submitted');
     document.dispatchEvent(customEvent);
     
-    // Also directly invalidate the goods-exchange query for components using React Query
-    // This ensures components using the React Query cache will refresh
-    // Add this line to update the component using the new useGoodsExchange hook
-    const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_NAMESPACE?.get('queryClient');
-    if (queryClient) {
-      queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
-    }
+    // Instead of trying to access the React Query client through the window object,
+    // which causes a TypeScript error, we'll rely solely on the custom event
+    // This is more reliable anyway, as it doesn't depend on the React Query devtools
+    // being installed or configured in a specific way
+    
+    // NOTE: The previous code attempted to do this:
+    // const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_NAMESPACE?.get('queryClient');
+    // if (queryClient) {
+    //   queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
+    // }
+    
+    // But since that's causing a TypeScript error, we'll rely on the custom event
+    // which is picked up by the useAutoRefresh hook in GoodsPage.tsx
     
     return data;
   } catch (error) {
