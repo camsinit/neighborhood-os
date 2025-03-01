@@ -1,4 +1,7 @@
 
+// Import the GoodsExchangeItem type
+import { GoodsExchangeItem } from '@/types/localTypes';
+
 /**
  * Helper function to create a contact email link for an item
  * 
@@ -26,3 +29,13 @@ const createContactEmailLink = (request: GoodsExchangeItem) => {
   // Return the formatted mailto link
   return `mailto:${email}?subject=${subject}&body=${body}`;
 };
+
+// Export the component and the helper function
+export { createContactEmailLink };
+
+// Need to export a default as well since it's being imported as default in GoodsPage.tsx
+const GoodsRequestsSection = () => {
+  return null; // This is a placeholder - the actual component should be implemented
+}
+
+export default GoodsRequestsSection;

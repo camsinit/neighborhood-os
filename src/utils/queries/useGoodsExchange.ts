@@ -37,7 +37,7 @@ export const useGoodsExchange = () => {
         // Fetch profile data for these users, including email
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
-          .select('id, display_name, avatar_url, email')  // Added email to the selection
+          .select('id, display_name, avatar_url, email')  // We need to ensure email exists in the profiles table
           .in('id', userIds);
           
         if (profilesError) {

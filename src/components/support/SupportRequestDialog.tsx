@@ -3,7 +3,7 @@
  * Create a contact email link for the action button
  * This formats the email with a helpful subject and body text
  */
-const createContactEmailLink = () => {
+const createContactEmailLink = (request: any) => {
   // If no request or no profile, return a basic mailto link
   if (!request || !request.profiles) {
     return "mailto:?subject=About your item on Neighborhood App";
@@ -28,3 +28,13 @@ const createContactEmailLink = () => {
   // Return the formatted mailto link
   return `mailto:${email}?subject=${subject}&body=${body}`;
 };
+
+// Export the function and add default export
+export { createContactEmailLink };
+
+// Need to provide a default export since it's being imported as default
+const SupportRequestDialog = () => {
+  return null; // This is a placeholder - the actual component should be implemented
+}
+
+export default SupportRequestDialog;
