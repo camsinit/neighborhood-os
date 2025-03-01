@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -5,6 +6,7 @@ import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
+import { useAutoRefresh } from '@/hooks/useAutoRefresh'; // Add this import
 
 const categoryIcons = {
   creative: Palette,
@@ -17,6 +19,13 @@ const categoryIcons = {
 const SkillsPage = () => {
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+  
+  // Set up auto-refresh for skills data at the page level to ensure consistency
+  // This is in addition to the component-level refresh in SkillsList
+  useAutoRefresh(
+    ['skills-exchange'], 
+    ['skills-exchange-submitted', 'skills-exchange-updated']
+  );
 
   useEffect(() => {
     const handleHighlightItem = (e: CustomEvent) => {

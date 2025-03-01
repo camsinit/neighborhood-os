@@ -8,6 +8,14 @@ import { useQueryClient } from '@tanstack/react-query';
  * This hook listens for custom events dispatched after form submissions
  * and triggers a refetch of the specified query keys to update the UI.
  * 
+ * Common event names in this application:
+ * - 'goods-form-submitted' - When goods items are added/updated
+ * - 'skills-exchange-submitted' - When skill offers/requests are added
+ * - 'skills-exchange-updated' - When skill offers/requests are updated
+ * - 'safety-update-submitted' - When safety updates are added/modified
+ * - 'care-request-submitted' - When care requests are submitted
+ * - 'profile-updated' - When user profiles are updated
+ * 
  * @param queryKeys - Array of React Query keys to invalidate on event
  * @param eventNames - Array of event names to listen for
  * @param refreshDelay - Optional delay in ms before refetching (default: 500ms)
