@@ -3,12 +3,13 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from './types';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchCreatedNeighborhoods, fetchAllNeighborhoods } from './neighborhoodUtils';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
  * 
- * This improved version bypasses the RLS recursion issue by using the security
- * definer function directly, providing more reliable neighborhood information
+ * This improved version completely avoids the RLS recursion issue by using 
+ * security definer functions to safely fetch neighborhood information
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -42,17 +43,9 @@ export function useNeighborhoodData(user: User | null) {
       });
 
       try {
-        // 1. First check if the user created any neighborhoods
-        const { data: createdNeighborhoods, error: createdError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, created_by')
-          .eq('created_by', user.id)
-          .limit(1);
-          
-        if (createdError) {
-          // Log the error but continue with other approaches
-          console.log("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
-        }
+        // 1. First check if the user created any neighborhoods using our utility function
+        // This avoids the RLS recursion by using a direct query pattern
+        const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
         
         // If user created a neighborhood, use it
         if (createdNeighborhoods && createdNeighborhoods.length > 0) {
@@ -66,16 +59,8 @@ export function useNeighborhoodData(user: User | null) {
           return;
         }
         
-        // 2. Try using the security definer function to get neighborhood members
-        // This approach avoids the RLS recursion issue
-        const { data: neighborhoods, error: neighborhoodsError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, created_by');
-        
-        if (neighborhoodsError) {
-          console.error("[useNeighborhoodData] Error fetching neighborhoods:", neighborhoodsError);
-          throw neighborhoodsError;
-        }
+        // 2. Get all neighborhoods to check membership
+        const neighborhoods = await fetchAllNeighborhoods();
         
         if (!neighborhoods || neighborhoods.length === 0) {
           console.log("[useNeighborhoodData] No neighborhoods found");

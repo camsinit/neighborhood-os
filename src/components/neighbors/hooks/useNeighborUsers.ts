@@ -7,8 +7,8 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * This improved version uses a security definer function to avoid the RLS recursion
- * issue and provides more reliable neighbor information
+ * This improved version uses security definer functions to completely avoid 
+ * the RLS recursion issue when fetching neighbor information
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -89,14 +89,11 @@ export const useNeighborUsers = () => {
         }
       }
 
-      // For neighborhoods, use our security definer function to get members
+      // For neighborhoods, use security definer function to get members
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // Get the creator ID which we know is a member
-        const creatorId = currentNeighborhood.created_by;
-        
-        // Use the security definer function to get members
+        // Get member IDs using the security definer function
         const { data: memberIds, error: memberError } = await supabase
           .rpc('get_neighborhood_members_safe', {
             neighborhood_uuid: currentNeighborhood.id
@@ -107,23 +104,28 @@ export const useNeighborUsers = () => {
           throw memberError;
         }
         
-        // Combine creator with members, removing duplicates
-        let userIds = memberIds || [];
-        if (!userIds.includes(creatorId)) {
-          userIds.push(creatorId);
-        }
-        
-        // No members found (unlikely but possible)
-        if (userIds.length === 0) {
+        // If no members found, return empty array
+        if (!memberIds || memberIds.length === 0) {
           console.log("[useNeighborUsers] No members found, returning empty array");
           return [];
         }
+        
+        // Also add creator as a member if not already included
+        const creatorId = currentNeighborhood.created_by;
+        if (creatorId && !memberIds.includes(creatorId)) {
+          memberIds.push(creatorId);
+        }
+        
+        console.log("[useNeighborUsers] Found neighborhood members:", {
+          memberCount: memberIds.length,
+          neighborhoodId: currentNeighborhood.id
+        });
         
         // Fetch profiles for all members
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
-          .in('id', userIds);
+          .in('id', memberIds);
           
         if (profilesError) {
           console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
@@ -134,7 +136,7 @@ export const useNeighborUsers = () => {
         const { data: authUsers, error: authError } = await supabase
           .from('auth_users_view')
           .select('id, email, created_at')
-          .in('id', userIds);
+          .in('id', memberIds);
           
         if (authError) {
           console.error("[useNeighborUsers] Error fetching auth users:", authError);
@@ -143,7 +145,7 @@ export const useNeighborUsers = () => {
         
         // Debug log 
         console.log("[useNeighborUsers] Found neighbors:", {
-          memberCount: userIds.length,
+          memberCount: memberIds.length,
           profilesCount: profiles?.length || 0,
           authUsersCount: authUsers?.length || 0
         });
