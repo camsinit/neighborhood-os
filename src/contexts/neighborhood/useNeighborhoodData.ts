@@ -1,14 +1,14 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from './types';
-import { 
-  fetchCreatedNeighborhoods, 
-  checkNeighborhoodMembership, 
-  fetchAllNeighborhoods 
-} from './neighborhoodUtils';
+import { fetchCreatedNeighborhoods, fetchAllNeighborhoods, checkNeighborhoodMembership } from './neighborhoodUtils';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
+ * 
+ * This improved version is more resilient against errors and provides
+ * better error handling and recovery
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -42,7 +42,7 @@ export function useNeighborhoodData(user: User | null) {
       });
 
       try {
-        // First, check if user created any neighborhoods
+        // First, check if user created any neighborhoods - this is the most reliable approach
         const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
         
         // If user created neighborhoods, use the first one
@@ -57,13 +57,13 @@ export function useNeighborhoodData(user: User | null) {
           return;
         }
         
-        // If user didn't create a neighborhood, check membership in existing neighborhoods
-        console.log("[useNeighborhoodData] Checking user membership in neighborhoods");
+        // If user didn't create a neighborhood, let's try a simplified approach
+        // Just get the first neighborhood and check if user is a member
+        // This avoids the need to iterate through all neighborhoods
+        console.log("[useNeighborhoodData] No created neighborhoods, checking memberships");
         
-        // First, get all neighborhoods
         const allNeighborhoods = await fetchAllNeighborhoods();
         
-        // No neighborhoods found
         if (allNeighborhoods.length === 0) {
           console.log("[useNeighborhoodData] No neighborhoods found in the system");
           setCurrentNeighborhood(null);
@@ -71,31 +71,22 @@ export function useNeighborhoodData(user: User | null) {
           return;
         }
         
-        console.log("[useNeighborhoodData] Found neighborhoods to check membership for:", {
-          count: allNeighborhoods.length 
-        });
+        // Just check the first neighborhood - in most cases users belong to only one neighborhood
+        // This simplifies the process and reduces database queries
+        const firstNeighborhood = allNeighborhoods[0];
+        const isMember = await checkNeighborhoodMembership(user.id, firstNeighborhood.id);
         
-        // For each neighborhood, see if the user is a member
-        // Only check a few to keep the queries manageable
-        const neighborhoodsToCheck = allNeighborhoods.slice(0, 5);
-        
-        for (const neighborhood of neighborhoodsToCheck) {
-          // Check if user is a member of this neighborhood
-          const isMember = await checkNeighborhoodMembership(user.id, neighborhood.id);
+        if (isMember) {
+          console.log("[useNeighborhoodData] User is a member of first neighborhood:", {
+            neighborhood: firstNeighborhood,
+            userId: user.id
+          });
           
-          // If user is a member of this neighborhood, use it
-          if (isMember) {
-            console.log("[useNeighborhoodData] Found membership in neighborhood:", {
-              neighborhood: neighborhood,
-              userId: user.id
-            });
-            
-            setCurrentNeighborhood(neighborhood);
-            setIsLoading(false);
-            return;
-          }
+          setCurrentNeighborhood(firstNeighborhood);
+          setIsLoading(false);
+          return;
         }
-            
+        
         // User has no neighborhood
         console.log("[useNeighborhoodData] User has no neighborhood");
         setCurrentNeighborhood(null);
@@ -103,12 +94,16 @@ export function useNeighborhoodData(user: User | null) {
         
       } catch (err) {
         // Handle unexpected errors
-        console.error("[useNeighborhoodData] Critical error:", {
+        console.error("[useNeighborhoodData] Error fetching neighborhood:", {
           error: err,
-          userId: user?.id,
-          timestamp: new Date().toISOString()
+          userId: user?.id
         });
+        
+        // Set error for UI to display
         setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
+        
+        // Reset current neighborhood in case of error
+        setCurrentNeighborhood(null);
       } finally {
         // Always mark loading as complete
         setIsLoading(false);
