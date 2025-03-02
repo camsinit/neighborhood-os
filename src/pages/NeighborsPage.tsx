@@ -2,12 +2,13 @@
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Users, RefreshCw } from "lucide-react"; // Added more icons
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * NeighborsPage Component
@@ -18,6 +19,9 @@ import { useNavigate } from "react-router-dom";
 const NeighborsPage = () => {
   // State for the search functionality
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // State to handle manual refreshing
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Get neighborhood context and navigation
   const { currentNeighborhood, isLoading, error } = useNeighborhood();
@@ -35,6 +39,8 @@ const NeighborsPage = () => {
 
   // Setup event listener for highlighting neighbors
   useEffect(() => {
+    // This effect sets up an event listener to highlight neighbors in the directory
+    // when triggered from other parts of the application
     const handleHighlightItem = (e: CustomEvent) => {
       if (e.detail.type === 'neighbors') {
         setTimeout(() => {
@@ -57,47 +63,142 @@ const NeighborsPage = () => {
     };
   }, []);
 
+  // Handle manual refresh action
+  const handleRefresh = () => {
+    // Set refreshing state to show loading indicator
+    setIsRefreshing(true);
+    
+    // Show toast to notify user
+    toast({
+      title: "Refreshing...",
+      description: "Updating your neighborhood information"
+    });
+    
+    // Force revalidation by reloading the page
+    // In a more sophisticated implementation, we could use
+    // React Query's refetch or a context refresh method
+    window.location.reload();
+  };
+
   // Show loading state while fetching neighborhood data
   if (isLoading) {
     return (
-      <div className="min-h-full w-full flex items-center justify-center">
+      <div className="min-h-full w-full flex flex-col items-center justify-center p-8">
         <LoadingSpinner />
+        <p className="mt-4 text-gray-600 text-center">
+          Loading your neighborhood information...
+        </p>
+        <p className="text-sm text-gray-500 max-w-md text-center mt-2">
+          We're connecting you with your neighbors. This should only take a moment.
+        </p>
       </div>
     );
   }
 
-  // If not in a neighborhood, show a message to redirect user
+  // If not in a neighborhood, show a message with helpful information
   if (error || !currentNeighborhood) {
     return (
       <div className="min-h-full w-full flex items-center justify-center p-4">
         <Card className="p-6 max-w-md w-full">
-          <h2 className="text-2xl font-bold text-center mb-4">No Neighborhood Access</h2>
-          <p className="text-center text-gray-600 mb-6">
-            You need an invitation to join a neighborhood. Please contact someone you know who is already 
-            in a neighborhood and ask them for an invitation link.
-          </p>
-          <div className="flex flex-col space-y-4">
-            <Button onClick={() => navigate('/')} className="w-full">
-              Go to Home Page
-            </Button>
-          </div>
+          <CardHeader className="text-center">
+            <div className="mx-auto bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-2">
+              <Users className="h-6 w-6 text-blue-600" />
+            </div>
+            <CardTitle className="text-2xl">No Neighborhood Found</CardTitle>
+            <CardDescription className="text-gray-600">
+              {error ? (
+                <>
+                  There was an error loading your neighborhood data. 
+                  {error.message.includes("RLS") ? " This appears to be a permission issue." : ""}
+                </>
+              ) : (
+                "You aren't currently part of any neighborhood community."
+              )}
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <div className="space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+                <p className="text-sm text-amber-800">
+                  Neighborhoods are invitation-only communities. You need an invitation from an existing member to join.
+                </p>
+              </div>
+              
+              <div className="flex flex-col space-y-3">
+                <Button onClick={() => navigate('/')} className="w-full">
+                  Go to Home Page
+                </Button>
+                
+                {error && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleRefresh}
+                    className="w-full"
+                    disabled={isRefreshing}
+                  >
+                    {isRefreshing ? (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Try Again
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
-  // User has a neighborhood, show the neighbors directory
+  // User has a neighborhood, show the neighbors directory with enhanced UI
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#D3E4FD] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
+            
+            {/* Add refresh button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Refreshing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+                </>
+              )}
+            </Button>
+          </div>
           
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
-            <p className="text-gray-700 text-sm">
-              Welcome to {currentNeighborhood.name}! Meet and connect with your neighbors. 
-              Browse profiles, discover shared interests, and build meaningful connections within your community.
-            </p>
+            <div className="flex items-start">
+              <div className="mr-3 mt-1 bg-blue-100 p-2 rounded-full">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-medium text-gray-900">{currentNeighborhood.name}</h3>
+                <p className="text-gray-700 text-sm mt-1">
+                  Welcome to your neighborhood community! Connect with neighbors, discover shared interests, and build meaningful connections.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
