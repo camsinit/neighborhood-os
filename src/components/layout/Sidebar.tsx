@@ -2,7 +2,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -10,8 +9,20 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import InviteDialog from "@/components/InviteDialog";
 
-// Component to handle sidebar navigation for Neighborhood OS
-const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
+/**
+ * Sidebar component props
+ * onOpenSettings is a function that will be called when the settings button is clicked
+ */
+interface SidebarProps {
+  onOpenSettings: () => void;
+}
+
+/**
+ * Sidebar component
+ * 
+ * Displays the navigation sidebar with links to different sections of the app
+ */
+const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get current location to determine which nav item is active
   const location = useLocation();
   // State to control the invite dialog visibility
@@ -48,7 +59,7 @@ const Sidebar = ({ onOpenSettings }: { onOpenSettings: () => void }) => {
     { 
       icon: Calendar, 
       label: "Calendar", 
-      href: "/dashboard/calendar", // Updated to include /dashboard prefix
+      href: "/dashboard/events", // Updated to include /dashboard prefix
       color: "#0EA5E9" // Calendar uses a bright blue theme
     },
     { 

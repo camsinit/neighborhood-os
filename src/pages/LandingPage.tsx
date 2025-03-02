@@ -30,9 +30,15 @@ const LandingPage = () => {
         description="Share skills, exchange goods, and build resilient communities together."
         badge={{
           text: "Early Access",
-          action: {
-            text: "Sign up now",
+        }}
+        actions={{ // Added the required actions prop
+          primary: {
+            text: "Join Waitlist",
             href: "#waitlist",
+          },
+          secondary: {
+            text: "Learn More",
+            href: "#features",
           },
         }}
         waitlistForm={<WaitlistForm />}

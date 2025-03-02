@@ -10,10 +10,9 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/Login";
 import JoinPage from "./pages/JoinPage";
-import Dashboard from "./pages/Dashboard";
-import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
-import MainContent from "./components/MainContent";
+import Header from "./components/layout/Header";
+import Sidebar from "./components/layout/Sidebar";
+import MainContent from "./components/layout/MainContent";
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 import SafetyPage from "./pages/SafetyPage";
@@ -52,22 +51,19 @@ function App() {
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
       
       <Routes>
-        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/join/:inviteCode?" element={<JoinPage />} />
         
-        {/* Admin routes */}
         <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
         
-        {/* Dashboard routes */}
         <Route 
           path="/dashboard" 
           element={
             <ProtectedRoute>
-              <Header />
+              <Header onOpenSettings={() => {}} />
               <div className="flex flex-1 overflow-hidden">
-                <Sidebar />
+                <Sidebar onOpenSettings={() => {}} />
                 <MainContent />
               </div>
             </ProtectedRoute>
@@ -82,7 +78,6 @@ function App() {
           <Route path="neighbors" element={<NeighborsPage />} />
         </Route>
         
-        {/* Redirects from old URLs to new dashboard structure */}
         <Route path="/events" element={<Navigate to="/dashboard/events" replace />} />
         <Route path="/safety" element={<Navigate to="/dashboard/safety" replace />} />
         <Route path="/care" element={<Navigate to="/dashboard/care" replace />} />
