@@ -105,16 +105,18 @@ export function HeroSection({
           )}
 
           {/* Image with Glow - Featured image in a stylized mockup frame */}
-          <div className="relative pt-12">
-            <MockupFrame className="opacity-100" size="small">
+          {/* Adjusted container div to better accommodate the image */}
+          <div className="relative pt-12 w-full max-w-5xl">
+            {/* Updated MockupFrame to be larger and more flexible */}
+            <MockupFrame className="opacity-100" size="large">
               <Mockup type="responsive">
                 <img
                   src={image.src}
                   alt={image.alt}
                   width={1248}
                   height={765}
-                  // Make sure the image fills the container appropriately while maintaining aspect ratio
-                  className="w-full h-auto max-w-full object-contain"
+                  // Enhanced image styling to ensure proper scaling and aspect ratio
+                  className="w-full h-auto object-contain max-h-[80vh]"
                 />
               </Mockup>
             </MockupFrame>
