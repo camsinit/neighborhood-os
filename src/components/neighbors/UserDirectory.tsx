@@ -8,9 +8,9 @@ import { useNeighborUsers } from "./hooks/useNeighborUsers";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, UserPlus, RefreshCw } from "lucide-react";
 import EmptyState from "@/components/ui/empty-state";
-import { UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -24,7 +24,12 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   const { currentNeighborhood, isLoading: isLoadingNeighborhood, error: neighborhoodError } = useNeighborhood();
   
   // Use our custom hook to fetch users
-  const { data: users, isLoading, error } = useNeighborUsers();
+  const { 
+    data: users, 
+    isLoading, 
+    error,
+    refetch 
+  } = useNeighborUsers();
   
   // Add detailed debugging for tracking the neighborhood state
   useEffect(() => {
@@ -51,6 +56,12 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // This will listen for profile update events and refresh the data
   useAutoRefresh(['neighbor-users'], ['profile-updated']);
 
+  // Handle manual refresh of the neighbors list
+  const handleRefresh = () => {
+    console.log("[UserDirectory] Manual refresh triggered");
+    refetch();
+  };
+
   // Filter users based on search query
   const filteredUsers = users?.filter(user => 
     searchQuery === "" || 
@@ -71,7 +82,12 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
 
   // Show loading state while users or neighborhood are loading
   if (isLoading || isLoadingNeighborhood) {
-    return <LoadingSpinner />;
+    return (
+      <div className="p-6 text-center">
+        <LoadingSpinner />
+        <p className="mt-4 text-gray-500">Loading neighborhood data...</p>
+      </div>
+    );
   }
 
   // If there's a neighborhood error
@@ -85,6 +101,12 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
             Error loading neighborhood data: {neighborhoodError.message}
           </AlertDescription>
         </Alert>
+        <div className="mt-4 flex justify-center">
+          <Button onClick={handleRefresh} variant="outline" className="flex items-center">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
@@ -110,7 +132,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     );
   }
 
-  // Add debugging for the error state
+  // If there's an error loading users
   if (error) {
     console.error("[UserDirectory] Error loading users:", error);
     return (
@@ -121,22 +143,47 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
             Error loading users: {error.message}
           </AlertDescription>
         </Alert>
+        <div className="mt-4 flex justify-center">
+          <Button onClick={handleRefresh} variant="outline" className="flex items-center">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
 
-  // Add debugging for empty state
+  // If no users found
   if (!users?.length) {
     console.log("[UserDirectory] No users found to display");
     return (
-      <div className="p-6 text-center">
-        <p className="text-gray-500">No users found in this neighborhood yet.</p>
+      <div className="p-6">
+        <div className="text-center bg-white rounded-lg p-8 shadow">
+          <h3 className="text-lg font-medium mb-2">No neighbors found</h3>
+          <p className="text-gray-500 mb-4">Your neighborhood "{currentNeighborhood.name}" doesn't have any members yet.</p>
+          <Button onClick={handleRefresh} variant="outline" className="flex items-center mx-auto">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="p-6">
+      {/* Show neighborhood info */}
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">Current Neighborhood:</h3>
+          <p className="text-base font-semibold">{currentNeighborhood.name}</p>
+        </div>
+        <Button onClick={handleRefresh} variant="outline" size="sm" className="flex items-center">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+      </div>
+      
       {/* Grid of neighbor cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {filteredUsers?.map(user => (

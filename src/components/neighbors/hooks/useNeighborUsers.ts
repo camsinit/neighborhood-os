@@ -5,9 +5,10 @@ import { UserWithRole } from "@/types/roles";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 export const useNeighborUsers = () => {
+  // Get the current neighborhood from context
   const { currentNeighborhood } = useNeighborhood();
 
-  // Add initial debugging for neighborhood context
+  // Log initial neighborhood context for debugging
   console.log("[useNeighborUsers] Starting hook with neighborhood:", {
     neighborhoodId: currentNeighborhood?.id,
     neighborhoodName: currentNeighborhood?.name,
@@ -15,49 +16,55 @@ export const useNeighborUsers = () => {
   });
 
   return useQuery({
+    // Include neighborhood ID in query key for automatic refetching when it changes
     queryKey: ['users-with-roles', currentNeighborhood?.id],
     queryFn: async () => {
+      // If no neighborhood found, return empty array
       if (!currentNeighborhood?.id) {
-        // No neighborhood found, return empty array early
         console.log("[useNeighborUsers] No neighborhood found, skipping fetch");
         return [];
       }
 
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
-
+      
       try {
-        // Use a two-step approach to avoid recursive RLS policies
-        // Step 1: First get all user IDs that belong to the neighborhood
-        console.log("[useNeighborUsers] Step 1: Getting user IDs from neighborhood_members directly");
-        const { data: memberIds, error: memberIdsError } = await supabase
+        // With our improved RLS policies, we can now directly query neighborhood_members
+        // Our security definer functions prevent recursion issues
+        console.log("[useNeighborUsers] Querying neighborhood members with new RLS policies");
+        
+        // Get all active members in the current neighborhood
+        const { data: members, error: membersError } = await supabase
           .from('neighborhood_members')
-          .select('user_id')
+          .select('user_id, joined_at')
           .eq('neighborhood_id', currentNeighborhood.id)
           .eq('status', 'active');
 
-        if (memberIdsError) {
-          console.error("[useNeighborUsers] Error fetching neighborhood member IDs:", {
-            error: memberIdsError,
-            neighborhoodId: currentNeighborhood.id
+        if (membersError) {
+          console.error("[useNeighborUsers] Error fetching neighborhood members:", {
+            error: membersError,
+            message: membersError.message,
+            details: membersError.details,
+            hint: membersError.hint,
+            code: membersError.code
           });
-          throw memberIdsError;
+          throw membersError;
         }
 
-        if (!memberIds || memberIds.length === 0) {
+        // If no members found, return empty array
+        if (!members || members.length === 0) {
           console.log("[useNeighborUsers] No members found in this neighborhood");
           return [];
         }
 
-        // Extract just the user IDs from the member results
-        const userIds = memberIds.map(member => member.user_id);
+        // Extract user IDs from members
+        const userIds = members.map(member => member.user_id);
         
         console.log("[useNeighborUsers] Found user IDs:", {
           count: userIds.length,
-          userIds
+          firstFewIds: userIds.slice(0, 3) // Log first few for debugging
         });
 
-        // Step 2: Now fetch profiles for these specific user IDs
-        console.log("[useNeighborUsers] Step 2: Fetching profiles for neighborhood members");
+        // Fetch profiles for these users
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
@@ -68,12 +75,11 @@ export const useNeighborUsers = () => {
           throw profilesError;
         }
 
-        console.log("[useNeighborUsers] Profiles result:", {
+        console.log("[useNeighborUsers] Profiles fetched:", {
           count: profiles?.length || 0
         });
 
-        // Step 3: Fetch user emails
-        console.log("[useNeighborUsers] Step 3: Fetching user emails");
+        // Fetch user emails
         const { data: authUsers, error: authError } = await supabase
           .from('auth_users_view')
           .select('id, email, created_at')
@@ -84,12 +90,11 @@ export const useNeighborUsers = () => {
           throw authError;
         }
 
-        console.log("[useNeighborUsers] Auth users result:", {
+        console.log("[useNeighborUsers] Auth users fetched:", {
           count: authUsers?.length || 0
         });
 
-        // Step 4: Fetch user roles
-        console.log("[useNeighborUsers] Step 4: Fetching user roles");
+        // Fetch user roles
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('user_id, role')
@@ -100,18 +105,17 @@ export const useNeighborUsers = () => {
           throw rolesError;
         }
 
-        console.log("[useNeighborUsers] User roles result:", {
-          count: userRoles?.length || 0
-        });
-
-        // Step 5: Combine the data
-        console.log("[useNeighborUsers] Step 5: Combining data");
+        // Combine all the data
         const usersWithProfiles = profiles.map((profile: any) => {
+          // Find the matching auth user data for this profile
           const authUser = authUsers.find((u: any) => u.id === profile.id);
+          
+          // Find all roles for this user
           const roles = userRoles
             .filter((r: any) => r.user_id === profile.id)
             .map((r: any) => r.role as UserWithRole['roles'][0]);
 
+          // Create the combined user object
           return {
             id: profile.id,
             email: authUser?.email,
@@ -133,20 +137,17 @@ export const useNeighborUsers = () => {
         });
 
         console.log("[useNeighborUsers] Final combined users:", {
-          count: usersWithProfiles.length,
-          users: usersWithProfiles.map(u => ({
-            id: u.id, 
-            displayName: u.profiles?.display_name
-          }))
+          count: usersWithProfiles.length
         });
         
         return usersWithProfiles as UserWithRole[];
       } catch (error) {
-        // Log the error and rethrow for the query to handle
+        // Log detailed error information and rethrow
         console.error("[useNeighborUsers] Critical error in data fetching:", error);
         throw error;
       }
     },
+    // Only enable the query when we have a neighborhood ID
     enabled: !!currentNeighborhood?.id
   });
 };

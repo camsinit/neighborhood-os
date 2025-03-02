@@ -68,11 +68,11 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       });
 
       try {
-        // Use a direct approach to get neighborhood ID first, then fetch details
-        // This avoids recursive RLS policies
-        console.log("[NeighborhoodContext] Getting user's neighborhood membership directly");
+        // Now that we have fixed RLS policies, we can directly query neighborhood_members
+        // Our security definer functions prevent recursion issues
+        console.log("[NeighborhoodContext] Querying neighborhood_members with new RLS policies");
         
-        // First get the neighborhood ID the user belongs to
+        // First try to get the user's neighborhood membership
         const { data: membershipData, error: membershipError } = await supabase
           .from('neighborhood_members')
           .select('neighborhood_id')
@@ -82,11 +82,13 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           .limit(1)
           .single();
 
+        // Check for membership error
         if (membershipError) {
-          if (membershipError.code === 'PGRST116') {
-            // No membership found - check if user created a neighborhood
-            console.log("[NeighborhoodContext] No active membership found, checking user-created neighborhoods");
+          // If no membership found (common case), check if user created a neighborhood
+          if (membershipError.code === 'PGRST116') { // No data found error code
+            console.log("[NeighborhoodContext] No active membership found, checking created neighborhoods");
             
+            // Check if user created any neighborhoods
             const { data: createdNeighborhoods, error: creationError } = await supabase
               .from('neighborhoods')
               .select('id, name, created_by')
@@ -95,9 +97,11 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
               .limit(1);
               
             if (creationError) {
+              console.error("[NeighborhoodContext] Error checking created neighborhoods:", creationError);
               throw creationError;
             }
             
+            // If user created neighborhoods, use the first one
             if (createdNeighborhoods && createdNeighborhoods.length > 0) {
               console.log("[NeighborhoodContext] Found user-created neighborhood:", {
                 neighborhood: createdNeighborhoods[0],
@@ -117,12 +121,19 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           }
           
           // Real error, not just "no data"
+          console.error("[NeighborhoodContext] Error fetching neighborhood membership:", {
+            error: membershipError,
+            code: membershipError.code,
+            message: membershipError.message,
+            details: membershipError.details
+          });
           throw membershipError;
         }
         
         // If we have a membership, get the neighborhood details
         console.log("[NeighborhoodContext] Found membership with neighborhood:", membershipData.neighborhood_id);
         
+        // Get details of the neighborhood the user belongs to
         const { data: neighborhoodData, error: neighborhoodError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by')
@@ -130,6 +141,7 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           .single();
           
         if (neighborhoodError) {
+          console.error("[NeighborhoodContext] Error fetching neighborhood details:", neighborhoodError);
           throw neighborhoodError;
         }
         
@@ -138,6 +150,7 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           name: neighborhoodData.name
         });
         
+        // Update state with the fetched neighborhood
         setCurrentNeighborhood(neighborhoodData);
       } catch (err) {
         // Handle unexpected errors

@@ -928,6 +928,33 @@ export type Database = {
         }
         Relationships: []
       }
+      debug_neighborhood_members: {
+        Row: {
+          id: string | null
+          joined_at: string | null
+          neighborhood_id: string | null
+          neighborhood_name: string | null
+          status: string | null
+          user_display_name: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighborhood_members_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "neighborhood_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_initial_super_admin: {
@@ -940,6 +967,20 @@ export type Database = {
         Args: {
           user_id: string
           required_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
+      user_created_neighborhood: {
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      user_is_neighborhood_member: {
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
         }
         Returns: boolean
       }
