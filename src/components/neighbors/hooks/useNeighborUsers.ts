@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
-import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { useNeighborhood } from "@/contexts/neighborhood";
 
 /**
  * Custom hook that fetches users in the current neighborhood
