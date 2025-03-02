@@ -1,4 +1,7 @@
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
 import { Button } from "@/components/ui/button";
@@ -10,8 +13,22 @@ import { Link } from "react-router-dom";
  * 
  * This page displays the authentication form and header,
  * allowing users to sign in to access the Neighborhood OS dashboard.
+ * It also redirects authenticated users to the dashboard.
  */
 const Login = () => {
+  // Get navigation and session context
+  const navigate = useNavigate();
+  const { session, isLoading } = useSessionContext();
+  
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!isLoading && session) {
+      console.log("[Login] User is already authenticated, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [session, isLoading, navigate]);
+
+  // If user is not authenticated, show the login page
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Back button to return to landing page */}

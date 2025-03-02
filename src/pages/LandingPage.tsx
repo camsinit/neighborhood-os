@@ -1,8 +1,10 @@
-
 import { HeroSection } from "@/components/ui/hero-section";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 /**
  * LandingPage - The main entry point for new visitors
@@ -11,6 +13,27 @@ import { Link } from "react-router-dom";
  * Neighborhood OS dashboard and providing a path to login.
  */
 const LandingPage = () => {
+  // Get navigation and session context
+  const navigate = useNavigate();
+  const { session, isLoading } = useSessionContext();
+  
+  // Check if user is authenticated and redirect to dashboard if they are
+  useEffect(() => {
+    // Only perform the redirect check after auth state is loaded
+    if (!isLoading) {
+      console.log("[LandingPage] Checking authentication state:", { 
+        hasSession: !!session, 
+        isLoading 
+      });
+      
+      // Redirect to dashboard if user is authenticated
+      if (session) {
+        console.log("[LandingPage] User is authenticated, redirecting to dashboard");
+        navigate("/dashboard");
+      }
+    }
+  }, [session, isLoading, navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top navigation bar with login button */}

@@ -21,8 +21,9 @@ const AuthForm = () => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
       if (event === 'SIGNED_IN' && session) {
-        console.log("[AuthForm] Valid SIGNED_IN event received, attempting navigation to /");
-        navigate("/");
+        // Redirect to dashboard instead of root when signed in
+        console.log("[AuthForm] Valid SIGNED_IN event received, navigating to dashboard");
+        navigate("/dashboard");
       }
     });
 
