@@ -113,7 +113,8 @@ export function HeroSection({
                   alt={image.alt}
                   width={1248}
                   height={765}
-                  className="w-full h-auto max-w-[800px]"
+                  // Make sure the image fills the container appropriately while maintaining aspect ratio
+                  className="w-full h-auto max-w-full object-contain"
                 />
               </Mockup>
             </MockupFrame>
