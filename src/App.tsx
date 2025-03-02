@@ -1,5 +1,5 @@
+
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -27,6 +27,15 @@ function App() {
   const session = useSession();
   const supabase = useSupabaseClient();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  // Added state for settings dialog
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Handle opening settings dialog
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+    console.log("Opening settings dialog");
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -61,9 +70,9 @@ function App() {
           path="/dashboard" 
           element={
             <ProtectedRoute>
-              <Header onOpenSettings={() => {}} />
+              <Header onOpenSettings={handleOpenSettings} />
               <div className="flex flex-1 overflow-hidden">
-                <Sidebar onOpenSettings={() => {}} />
+                <Sidebar onOpenSettings={handleOpenSettings} />
                 <MainContent />
               </div>
             </ProtectedRoute>
