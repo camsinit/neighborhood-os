@@ -976,6 +976,12 @@ export type Database = {
         }
         Returns: string[]
       }
+      get_neighborhood_members_safe: {
+        Args: {
+          neighborhood_uuid: string
+        }
+        Returns: string[]
+      }
       user_created_neighborhood: {
         Args: {
           user_uuid: string
