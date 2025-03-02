@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
@@ -93,6 +93,15 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/join/:inviteCode" element={<JoinPage />} />
+                
+                {/* Add redirects for direct page access */}
+                <Route path="/goods" element={<Navigate to="/dashboard/goods" replace />} />
+                <Route path="/skills" element={<Navigate to="/dashboard/skills" replace />} />
+                <Route path="/calendar" element={<Navigate to="/dashboard/calendar" replace />} />
+                <Route path="/care" element={<Navigate to="/dashboard/care" replace />} />
+                <Route path="/safety" element={<Navigate to="/dashboard/safety" replace />} />
+                <Route path="/neighbors" element={<Navigate to="/dashboard/neighbors" replace />} />
+                
                 <Route
                   path="/dashboard"
                   element={
