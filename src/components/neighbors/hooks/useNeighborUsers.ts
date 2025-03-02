@@ -28,38 +28,37 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // With our improved RLS policies, we can now directly query neighborhood_members
-        // Our security definer functions prevent recursion issues
-        console.log("[useNeighborUsers] Querying neighborhood members with new RLS policies");
+        // ALTERNATIVE APPROACH: Directly check for neighborhood creator first
+        // since we know they're definitely a member
+        const creatorId = currentNeighborhood.created_by;
+        let userIds = [creatorId]; // Start with the creator
         
-        // Get all active members in the current neighborhood
-        const { data: members, error: membersError } = await supabase
-          .from('neighborhood_members')
-          .select('user_id, joined_at')
-          .eq('neighborhood_id', currentNeighborhood.id)
-          .eq('status', 'active');
-
-        if (membersError) {
-          console.error("[useNeighborUsers] Error fetching neighborhood members:", {
-            error: membersError,
-            message: membersError.message,
-            details: membersError.details,
-            hint: membersError.hint,
-            code: membersError.code
+        console.log("[useNeighborUsers] Adding neighborhood creator to member list:", creatorId);
+        
+        // Then find other members by querying neighborhoods
+        // This is our workaround for the neighborhood_members table RLS issue
+        try {
+          // We'll try to use the RPC function if available
+          const { data: memberIds, error: rpcError } = await supabase.rpc('get_neighborhood_members', {
+            neighborhood_uuid: currentNeighborhood.id
           });
-          throw membersError;
+          
+          if (rpcError) {
+            console.warn("[useNeighborUsers] RPC call failed, using fallback approach:", rpcError);
+            // Fallback - at least we have the creator
+          } else if (memberIds && memberIds.length > 0) {
+            // We got member IDs from the RPC function
+            console.log("[useNeighborUsers] Found members via RPC:", {
+              count: memberIds.length
+            });
+            userIds = [...new Set([...userIds, ...memberIds])]; // Combine and deduplicate
+          }
+        } catch (rpcError) {
+          console.warn("[useNeighborUsers] Error calling RPC:", rpcError);
+          // Continue with just the creator as fallback
         }
-
-        // If no members found, return empty array
-        if (!members || members.length === 0) {
-          console.log("[useNeighborUsers] No members found in this neighborhood");
-          return [];
-        }
-
-        // Extract user IDs from members
-        const userIds = members.map(member => member.user_id);
         
-        console.log("[useNeighborUsers] Found user IDs:", {
+        console.log("[useNeighborUsers] Final list of user IDs to fetch:", {
           count: userIds.length,
           firstFewIds: userIds.slice(0, 3) // Log first few for debugging
         });

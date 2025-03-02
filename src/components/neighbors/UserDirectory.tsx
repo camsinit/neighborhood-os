@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, UserPlus, RefreshCw } from "lucide-react";
 import EmptyState from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
 interface UserDirectoryProps {
   searchQuery?: string;
@@ -59,6 +60,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   // Handle manual refresh of the neighbors list
   const handleRefresh = () => {
     console.log("[UserDirectory] Manual refresh triggered");
+    toast({
+      title: "Refreshing...",
+      description: "Updating neighbor data"
+    });
     refetch();
   };
 
