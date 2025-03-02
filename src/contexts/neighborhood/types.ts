@@ -21,4 +21,8 @@ export interface NeighborhoodContextType {
   currentNeighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
+  // New fields for God Mode
+  isCoreContributor: boolean;
+  allNeighborhoods: Neighborhood[];
+  setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
 }

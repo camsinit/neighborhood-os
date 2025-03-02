@@ -9,6 +9,9 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
   currentNeighborhood: null,
   isLoading: true,
   error: null,
+  isCoreContributor: false,
+  allNeighborhoods: [],
+  setCurrentNeighborhood: () => {},
 });
 
 /**

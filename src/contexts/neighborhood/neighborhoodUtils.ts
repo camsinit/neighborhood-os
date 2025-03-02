@@ -92,3 +92,56 @@ export async function checkNeighborhoodMembership(
     return false;
   }
 }
+
+/**
+ * Utility function to check if a user is a core contributor with access to all neighborhoods
+ * 
+ * @param userId - The ID of the user to check
+ * @returns Promise that resolves to true if the user is a core contributor with access, false otherwise
+ */
+export async function checkCoreContributorAccess(userId: string): Promise<boolean> {
+  try {
+    // Use our security definer function to check if the user is a core contributor with access
+    const { data: hasAccess, error } = await supabase
+      .rpc('user_is_core_contributor_with_access', {
+        user_uuid: userId
+      });
+      
+    if (error) {
+      console.error("[NeighborhoodUtils] Error checking core contributor access:", error);
+      return false;
+    }
+      
+    return !!hasAccess;
+  } catch (err) {
+    console.error("[NeighborhoodUtils] Error in checkCoreContributorAccess:", err);
+    return false;
+  }
+}
+
+/**
+ * Utility function to fetch all neighborhoods for a core contributor
+ * This is only accessible to users with core contributor access
+ * 
+ * @param userId - The ID of the core contributor
+ * @returns Promise that resolves to an array of all neighborhoods if the user has access
+ */
+export async function fetchAllNeighborhoodsForCoreContributor(userId: string): Promise<Neighborhood[]> {
+  try {
+    // Use our security definer function to get all neighborhoods for a core contributor
+    const { data, error } = await supabase
+      .rpc('get_all_neighborhoods_for_core_contributor', {
+        user_uuid: userId
+      });
+      
+    if (error) {
+      console.error("[NeighborhoodUtils] Error fetching neighborhoods for core contributor:", error);
+      return [];
+    }
+      
+    return data || [];
+  } catch (err) {
+    console.error("[NeighborhoodUtils] Error in fetchAllNeighborhoodsForCoreContributor:", err);
+    return [];
+  }
+}

@@ -7,7 +7,7 @@ import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { toast } from "@/components/ui/use-toast";
 import { NeighborProfileDialog } from "./NeighborProfileDialog";
 
-// Import our new components
+// Import our components
 import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
 import { NeighborhoodError } from "./components/NeighborhoodError";
@@ -15,6 +15,7 @@ import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
 import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
+import GodModeSelector from "./GodModeSelector";
 
 /**
  * UserDirectory Component
@@ -36,7 +37,8 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   const { 
     currentNeighborhood, 
     isLoading: isLoadingNeighborhood, 
-    error: neighborhoodError 
+    error: neighborhoodError,
+    isCoreContributor
   } = useNeighborhood();
   
   // Use our custom hook to fetch users
@@ -54,9 +56,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
       neighborhoodName: currentNeighborhood?.name,
       isLoading: isLoadingNeighborhood,
       error: neighborhoodError ? neighborhoodError.message : null,
+      isCoreContributor,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError]);
+  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError, isCoreContributor]);
   
   // Add debugging for tracking the query state
   useEffect(() => {
@@ -134,10 +137,19 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   return (
     <div className="p-6">
       {/* Show neighborhood info */}
-      <NeighborhoodHeader 
-        neighborhoodName={currentNeighborhood.name}
-        onRefresh={handleRefresh}
-      />
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <NeighborhoodHeader 
+          neighborhoodName={currentNeighborhood.name}
+          onRefresh={handleRefresh} 
+        />
+        
+        {/* Show God Mode selector if user is a core contributor */}
+        {isCoreContributor && (
+          <div className="flex justify-end">
+            <GodModeSelector />
+          </div>
+        )}
+      </div>
       
       {/* Grid of neighbor cards */}
       <UserGrid 

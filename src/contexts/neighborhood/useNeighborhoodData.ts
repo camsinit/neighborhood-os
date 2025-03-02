@@ -3,7 +3,12 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchCreatedNeighborhoods, fetchAllNeighborhoods } from './neighborhoodUtils';
+import { 
+  fetchCreatedNeighborhoods, 
+  fetchAllNeighborhoods, 
+  checkCoreContributorAccess,
+  fetchAllNeighborhoodsForCoreContributor 
+} from './neighborhoodUtils';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
@@ -19,6 +24,10 @@ export function useNeighborhoodData(user: User | null) {
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // New state for God Mode functionality
+  const [isCoreContributor, setIsCoreContributor] = useState(false);
+  const [allNeighborhoods, setAllNeighborhoods] = useState<Neighborhood[]>([]);
 
   useEffect(() => {
     // Function to fetch the user's active neighborhood
@@ -26,6 +35,8 @@ export function useNeighborhoodData(user: User | null) {
       // Reset states at the start of each fetch
       setError(null);
       setIsLoading(true);
+      setIsCoreContributor(false);
+      setAllNeighborhoods([]);
 
       // If no user is logged in, we can't fetch neighborhood data
       if (!user) {
@@ -43,6 +54,27 @@ export function useNeighborhoodData(user: User | null) {
       });
 
       try {
+        // First check if the user is a core contributor with access to all neighborhoods
+        const isContributor = await checkCoreContributorAccess(user.id);
+        setIsCoreContributor(isContributor);
+        
+        // If they are a core contributor, fetch all neighborhoods
+        if (isContributor) {
+          console.log("[useNeighborhoodData] User is a core contributor with access to all neighborhoods");
+          
+          // Fetch all neighborhoods using the security definer function
+          const neighborhoods = await fetchAllNeighborhoodsForCoreContributor(user.id);
+          setAllNeighborhoods(neighborhoods);
+          
+          // If we have neighborhoods and no current one is set, set the first one as current
+          if (neighborhoods.length > 0 && !currentNeighborhood) {
+            setCurrentNeighborhood(neighborhoods[0]);
+          }
+          
+          // Even if the user is a core contributor, we still want to proceed with the normal flow
+          // to get their primary neighborhood, but we won't return early
+        }
+
         // 1. First check if the user created any neighborhoods using our utility function
         // This avoids the RLS recursion by using a direct query pattern
         const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
@@ -95,9 +127,11 @@ export function useNeighborhoodData(user: User | null) {
           }
         }
         
-        // If we get here, user has no neighborhood
-        console.log("[useNeighborhoodData] User has no neighborhood");
-        setCurrentNeighborhood(null);
+        // If we get here, user has no neighborhood (but might be a core contributor with access)
+        if (!isCoreContributor) {
+          console.log("[useNeighborhoodData] User has no neighborhood");
+          setCurrentNeighborhood(null);
+        }
         
       } catch (err) {
         // Handle unexpected errors
@@ -127,10 +161,19 @@ export function useNeighborhoodData(user: User | null) {
       currentNeighborhood,
       isLoading,
       error,
+      isCoreContributor,
+      neighborhoodCount: allNeighborhoods.length,
       userId: user?.id,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoading, error, user]);
+  }, [currentNeighborhood, isLoading, error, isCoreContributor, allNeighborhoods, user]);
 
-  return { currentNeighborhood, isLoading, error };
+  return { 
+    currentNeighborhood, 
+    isLoading, 
+    error,
+    isCoreContributor,
+    allNeighborhoods,
+    setCurrentNeighborhood
+  };
 }

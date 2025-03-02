@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import GodModeSelector from "@/components/neighbors/GodModeSelector";
 
 /**
  * InviteDialog Component
@@ -30,7 +31,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   // Get required hooks
   const { toast } = useToast();
   const user = useUser();
-  const { currentNeighborhood, isLoading, error } = useNeighborhood();
+  const { currentNeighborhood, isLoading, error, isCoreContributor } = useNeighborhood();
 
   // Debug log when component renders
   console.log("[InviteDialog] Render state:", {
@@ -38,7 +39,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     currentNeighborhood,
     isLoading,
     error,
-    isGeneratingLink
+    isGeneratingLink,
+    isCoreContributor
   });
 
   /**
@@ -203,6 +205,18 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
                 </Button>
               </div>
             </>
+          )}
+          
+          {/* Only show God Mode if user is a core contributor */}
+          {isCoreContributor && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex justify-center">
+                <GodModeSelector />
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                As a core contributor, you can access all neighborhoods in God Mode.
+              </p>
+            </div>
           )}
         </div>
       </DialogContent>
