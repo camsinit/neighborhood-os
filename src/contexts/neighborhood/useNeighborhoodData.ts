@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from './types';
-import { fetchCreatedNeighborhoods, fetchAllNeighborhoods, checkNeighborhoodMembership } from './neighborhoodUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
  * 
- * This improved version is more resilient against errors and provides
- * better error handling and recovery
+ * This improved version bypasses the RLS recursion issue by using the security
+ * definer function directly, providing more reliable neighborhood information
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -42,11 +42,20 @@ export function useNeighborhoodData(user: User | null) {
       });
 
       try {
-        // First, check if user created any neighborhoods - this is the most reliable approach
-        const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
+        // 1. First check if the user created any neighborhoods
+        const { data: createdNeighborhoods, error: createdError } = await supabase
+          .from('neighborhoods')
+          .select('id, name, created_by')
+          .eq('created_by', user.id)
+          .limit(1);
+          
+        if (createdError) {
+          // Log the error but continue with other approaches
+          console.log("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
+        }
         
-        // If user created neighborhoods, use the first one
-        if (createdNeighborhoods.length > 0) {
+        // If user created a neighborhood, use it
+        if (createdNeighborhoods && createdNeighborhoods.length > 0) {
           console.log("[useNeighborhoodData] Found user-created neighborhood:", {
             neighborhood: createdNeighborhoods[0],
             userId: user.id
@@ -57,40 +66,53 @@ export function useNeighborhoodData(user: User | null) {
           return;
         }
         
-        // If user didn't create a neighborhood, let's try a simplified approach
-        // Just get the first neighborhood and check if user is a member
-        // This avoids the need to iterate through all neighborhoods
-        console.log("[useNeighborhoodData] No created neighborhoods, checking memberships");
+        // 2. Try using the security definer function to get neighborhood members
+        // This approach avoids the RLS recursion issue
+        const { data: neighborhoods, error: neighborhoodsError } = await supabase
+          .from('neighborhoods')
+          .select('id, name, created_by');
         
-        const allNeighborhoods = await fetchAllNeighborhoods();
+        if (neighborhoodsError) {
+          console.error("[useNeighborhoodData] Error fetching neighborhoods:", neighborhoodsError);
+          throw neighborhoodsError;
+        }
         
-        if (allNeighborhoods.length === 0) {
-          console.log("[useNeighborhoodData] No neighborhoods found in the system");
+        if (!neighborhoods || neighborhoods.length === 0) {
+          console.log("[useNeighborhoodData] No neighborhoods found");
           setCurrentNeighborhood(null);
           setIsLoading(false);
           return;
         }
         
-        // Just check the first neighborhood - in most cases users belong to only one neighborhood
-        // This simplifies the process and reduces database queries
-        const firstNeighborhood = allNeighborhoods[0];
-        const isMember = await checkNeighborhoodMembership(user.id, firstNeighborhood.id);
-        
-        if (isMember) {
-          console.log("[useNeighborhoodData] User is a member of first neighborhood:", {
-            neighborhood: firstNeighborhood,
-            userId: user.id
-          });
-          
-          setCurrentNeighborhood(firstNeighborhood);
-          setIsLoading(false);
-          return;
+        // For each neighborhood, check if user is a member using our safe function
+        for (const neighborhood of neighborhoods) {
+          // Use the security definer function to check membership
+          const { data: isMember, error: membershipError } = await supabase
+            .rpc('user_is_neighborhood_member', {
+              user_uuid: user.id,
+              neighborhood_uuid: neighborhood.id
+            });
+            
+          if (membershipError) {
+            console.error(`[useNeighborhoodData] Error checking membership for ${neighborhood.id}:`, membershipError);
+            continue;
+          }
+            
+          if (isMember) {
+            console.log("[useNeighborhoodData] Found user membership in neighborhood:", {
+              neighborhood: neighborhood,
+              userId: user.id
+            });
+              
+            setCurrentNeighborhood(neighborhood);
+            setIsLoading(false);
+            return;
+          }
         }
         
-        // User has no neighborhood
+        // If we get here, user has no neighborhood
         console.log("[useNeighborhoodData] User has no neighborhood");
         setCurrentNeighborhood(null);
-        setIsLoading(false);
         
       } catch (err) {
         // Handle unexpected errors
