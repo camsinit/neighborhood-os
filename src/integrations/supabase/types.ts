@@ -109,6 +109,45 @@ export type Database = {
           },
         ]
       }
+      core_contributors: {
+        Row: {
+          can_access_all_neighborhoods: boolean | null
+          created_at: string
+          created_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          can_access_all_neighborhoods?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          can_access_all_neighborhoods?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_contributors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_contributors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -970,6 +1009,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_all_neighborhoods_for_core_contributor: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string
+          geo_boundary: Json | null
+          id: string
+          name: string
+          state: string | null
+          zip: string | null
+        }[]
+      }
       get_neighborhood_members: {
         Args: {
           neighborhood_uuid: string
@@ -986,6 +1041,12 @@ export type Database = {
         Args: {
           user_uuid: string
           neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      user_is_core_contributor_with_access: {
+        Args: {
+          user_uuid: string
         }
         Returns: boolean
       }
