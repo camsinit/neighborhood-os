@@ -74,47 +74,46 @@ const Header = ({ onOpenSettings }: HeaderProps) => {
 
   return (
     <header className="bg-white border-b">
-      <div className="px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-end gap-4">
-          {/* Notifications popover button */}
-          <NotificationsPopover />
-          
-          {/* User profile dropdown */}
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger className="focus:outline-none">
-              <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
-                <AvatarImage 
-                  src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
-                  alt={profile?.display_name || user?.email}
-                />
-                <AvatarFallback>
-                  {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {profile?.display_name || user?.user_metadata?.full_name}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onOpenSettings}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      {/* Removed the div with className="px-4 sm:px-6 lg:px-8 py-4" and moved content up */}
+      <div className="flex items-center justify-end gap-4 px-4 sm:px-6 lg:px-8 py-4">
+        {/* Notifications popover button */}
+        <NotificationsPopover />
+        
+        {/* User profile dropdown */}
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger className="focus:outline-none">
+            <Avatar className="h-9 w-9 ring-offset-background transition-colors hover:bg-gray-100">
+              <AvatarImage 
+                src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
+                alt={profile?.display_name || user?.email}
+              />
+              <AvatarFallback>
+                {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-6 w-6" />}
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {profile?.display_name || user?.user_metadata?.full_name}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onOpenSettings}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
