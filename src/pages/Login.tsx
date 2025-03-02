@@ -24,7 +24,8 @@ const Login = () => {
   useEffect(() => {
     if (!isLoading && session) {
       console.log("[Login] User is already authenticated, redirecting to dashboard");
-      navigate("/dashboard");
+      // Use replace to prevent going back to login page after redirection
+      navigate("/dashboard", { replace: true });
     }
   }, [session, isLoading, navigate]);
 

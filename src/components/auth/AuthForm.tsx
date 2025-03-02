@@ -6,33 +6,51 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Authentication Form Component
+ * 
+ * This component provides both sign in and sign up functionality.
+ * It manages user authentication state, form submission, and navigation
+ * to the dashboard upon successful authentication.
+ */
 const AuthForm = () => {
+  // State for form fields and loading state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  
+  // Hook for programmatic navigation
   const navigate = useNavigate();
+  
+  // Toast hook for displaying notifications
   const { toast } = useToast();
 
   // Listen for auth state changes
   useEffect(() => {
     console.log("[AuthForm] Setting up auth state change listener");
+    
+    // Subscribe to authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
+      // When user is signed in and has a valid session, navigate to the dashboard
       if (event === 'SIGNED_IN' && session) {
-        // Redirect to dashboard instead of root when signed in
         console.log("[AuthForm] Valid SIGNED_IN event received, navigating to dashboard");
-        navigate("/dashboard");
+        
+        // Force navigation to dashboard with replace (prevents going back to login)
+        navigate("/dashboard", { replace: true });
       }
     });
 
+    // Clean up the subscription when the component unmounts
     return () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate]); // Only re-run if navigate changes
   
+  // Form submission handler for both login and signup
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -40,6 +58,7 @@ const AuthForm = () => {
 
     try {
       if (isSignUp) {
+        // Signup process
         console.log("[AuthForm] Attempting signup");
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -57,6 +76,7 @@ const AuthForm = () => {
           description: "We've sent you a verification link",
         });
       } else {
+        // Signin process
         console.log("[AuthForm] Attempting signin");
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -78,10 +98,16 @@ const AuthForm = () => {
         }
 
         console.log("[AuthForm] Signin successful", { user: data.user?.id });
+        
+        // Show success toast
         toast({
           title: "Welcome back!",
           description: "Successfully signed in",
         });
+        
+        // Force navigation to dashboard immediately after successful login
+        // This is a backup in case the auth state change listener doesn't trigger
+        navigate("/dashboard", { replace: true });
       }
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);
@@ -96,6 +122,7 @@ const AuthForm = () => {
     }
   };
 
+  // Render the authentication form
   return (
     <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
       <form onSubmit={handleSubmit} className="space-y-6">
