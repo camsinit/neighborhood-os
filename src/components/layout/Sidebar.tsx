@@ -94,6 +94,23 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     },
   ];
 
+  // Function to handle opening the settings dialog
+  const handleOpenSettings = () => {
+    // Call the provided callback function to open settings
+    if (onOpenSettings) {
+      console.log("Opening settings dialog");
+      onOpenSettings();
+    } else {
+      console.error("onOpenSettings function not provided to Sidebar component");
+    }
+  };
+
+  // Function to handle opening the invite dialog
+  const handleOpenInvite = () => {
+    console.log("Opening invite dialog");
+    setIsInviteOpen(true);
+  };
+
   return (
     <div className="w-48 border-r bg-white flex flex-col">
       {/* Logo section at the top of sidebar */}
@@ -169,7 +186,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-base font-medium"
-            onClick={onOpenSettings}
+            onClick={handleOpenSettings} // Now calling our handler function
+            type="button" // Explicitly set button type
           >
             <Settings className="h-5 w-5" />
             Settings
@@ -177,7 +195,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-base font-medium"
-            onClick={() => setIsInviteOpen(true)}
+            onClick={handleOpenInvite} // Now calling our handler function
+            type="button" // Explicitly set button type
           >
             <UserPlus className="h-5 w-5" />
             Invite Neighbor
