@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus } from "lucide-react";
+import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus, RefreshCw } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import InviteDialog from "@/components/InviteDialog";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Sidebar component props
@@ -27,6 +29,16 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const location = useLocation();
   // State to control the invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  // Get the toast notification function
+  const { toast } = useToast();
+  
+  // Get neighborhood context to help with troubleshooting
+  const { 
+    currentNeighborhood, 
+    isLoading: isNeighborhoodLoading, 
+    error: neighborhoodError,
+    refreshNeighborhoodData // Use the refresh function from context
+  } = useNeighborhood();
   
   // Fetch user profile data using React Query
   const { data: profile } = useQuery({
@@ -110,6 +122,22 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     console.log("Opening invite dialog");
     setIsInviteOpen(true);
   };
+  
+  // Function to force refresh neighborhood data
+  const handleRefreshNeighborhood = () => {
+    console.log("Manually refreshing neighborhood data");
+    refreshNeighborhoodData();
+    
+    // Show toast to let user know refresh is happening
+    toast({
+      title: "Refreshing neighborhood data",
+      description: "Please wait while we reconnect to your neighborhood...",
+    });
+  };
+
+  // Determine if we're in a stuck loading state
+  // This happens if isNeighborhoodLoading is true for too long
+  const isStuckLoading = isNeighborhoodLoading && !currentNeighborhood;
 
   return (
     <div className="w-48 border-r bg-white flex flex-col">
@@ -201,6 +229,34 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
             <UserPlus className="h-5 w-5" />
             Invite Neighbor
           </Button>
+          
+          {/* Show refresh button if neighborhood data is stuck loading */}
+          {isStuckLoading && (
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 text-base font-medium text-amber-600 border-amber-200 bg-amber-50 mt-2"
+              onClick={handleRefreshNeighborhood}
+              type="button"
+            >
+              <RefreshCw className="h-5 w-5 animate-spin" />
+              Refresh Connection
+            </Button>
+          )}
+          
+          {/* Display error message if there's an error with neighborhood data */}
+          {neighborhoodError && (
+            <div className="p-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-md mt-2">
+              Error: {neighborhoodError.message}
+              <Button
+                variant="link"
+                className="w-full text-red-600 p-0 h-auto text-xs mt-1"
+                onClick={handleRefreshNeighborhood}
+                type="button"
+              >
+                Try again
+              </Button>
+            </div>
+          )}
         </div>
       </nav>
       

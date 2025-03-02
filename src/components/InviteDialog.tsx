@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -7,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Mail } from "lucide-react";
+import { Copy, Mail, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -31,7 +30,13 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   // Get required hooks
   const { toast } = useToast();
   const user = useUser();
-  const { currentNeighborhood, isLoading, error, isCoreContributor } = useNeighborhood();
+  const { 
+    currentNeighborhood, 
+    isLoading, 
+    error, 
+    isCoreContributor,
+    refreshNeighborhoodData // Get the refresh function 
+  } = useNeighborhood();
 
   // Debug log when component renders
   console.log("[InviteDialog] Render state:", {
@@ -136,17 +141,22 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     });
     setEmail("");
   };
+  
+  /**
+   * Handle manual refresh of neighborhood data
+   */
+  const handleRefreshData = () => {
+    console.log("[InviteDialog] Manually refreshing neighborhood data");
+    refreshNeighborhoodData();
+    
+    toast({
+      title: "Refreshing neighborhood data",
+      description: "Please wait while we reconnect to your neighborhood...",
+    });
+  };
 
-  // Don't render anything while loading
-  if (isLoading) {
-    console.log("[InviteDialog] Still loading...");
-    return null;
-  }
-
-  // Log error state if any
-  if (error) {
-    console.error("[InviteDialog] Error state:", error);
-  }
+  // Calculate if we're in a stuck loading state (loading for too long)
+  const isStuckLoading = isLoading && open;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,8 +170,44 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
+          {/* Loading state indicator */}
+          {isStuckLoading && (
+            <div className="bg-amber-50 border border-amber-200 p-3 rounded-md">
+              <p className="text-sm text-amber-800 mb-2">
+                Still loading your neighborhood data...
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-amber-600 border-amber-200 bg-amber-50"
+                onClick={handleRefreshData}
+              >
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Refresh Neighborhood Data
+              </Button>
+            </div>
+          )}
+          
+          {/* If error, show error message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded-md">
+              <p className="text-sm text-red-800 mb-2">
+                Error loading neighborhood: {error.message}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-red-600 border-red-200 bg-red-50"
+                onClick={handleRefreshData}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          )}
+          
           {/* If no neighborhood, show message */}
-          {!currentNeighborhood && (
+          {!isLoading && !currentNeighborhood && (
             <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
               <p className="text-sm text-yellow-800">
                 You need to be part of a neighborhood before you can invite others.
