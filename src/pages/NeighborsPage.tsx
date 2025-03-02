@@ -24,7 +24,7 @@ const NeighborsPage = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Get neighborhood context and navigation
-  const { currentNeighborhood, isLoading, error } = useNeighborhood();
+  const { currentNeighborhood, isLoading, error, refreshNeighborhoodData } = useNeighborhood();
   const navigate = useNavigate();
 
   // Add debugging logs
@@ -32,7 +32,7 @@ const NeighborsPage = () => {
     console.log("[NeighborsPage] Neighborhood state:", {
       neighborhood: currentNeighborhood,
       isLoading,
-      error,
+      error: error ? error.message : null,
       timestamp: new Date().toISOString()
     });
   }, [currentNeighborhood, isLoading, error]);
@@ -74,10 +74,13 @@ const NeighborsPage = () => {
       description: "Updating your neighborhood information"
     });
     
-    // Force revalidation by reloading the page
-    // In a more sophisticated implementation, we could use
-    // React Query's refetch or a context refresh method
-    window.location.reload();
+    // Use our new refresh function from the context
+    refreshNeighborhoodData();
+    
+    // Reset refreshing state after a delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 2000);
   };
 
   // Show loading state while fetching neighborhood data
@@ -91,6 +94,16 @@ const NeighborsPage = () => {
         <p className="text-sm text-gray-500 max-w-md text-center mt-2">
           We're connecting you with your neighbors. This should only take a moment.
         </p>
+        
+        {/* Add a button to retry after some time */}
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh}
+          className="mt-6"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Refresh
+        </Button>
       </div>
     );
   }
@@ -130,26 +143,24 @@ const NeighborsPage = () => {
                   Go to Home Page
                 </Button>
                 
-                {error && (
-                  <Button 
-                    variant="outline" 
-                    onClick={handleRefresh}
-                    className="w-full"
-                    disabled={isRefreshing}
-                  >
-                    {isRefreshing ? (
-                      <>
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        Refreshing...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Try Again
-                      </>
-                    )}
-                  </Button>
-                )}
+                <Button 
+                  variant="outline" 
+                  onClick={handleRefresh}
+                  className="w-full"
+                  disabled={isRefreshing}
+                >
+                  {isRefreshing ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Refreshing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Try Again
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
           </CardContent>

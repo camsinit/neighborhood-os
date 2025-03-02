@@ -12,6 +12,7 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
   isCoreContributor: false,
   allNeighborhoods: [],
   setCurrentNeighborhood: () => {},
+  refreshNeighborhoodData: () => {} // Add default for new function
 });
 
 /**

@@ -18,6 +18,12 @@ import { Neighborhood } from './types';
  */
 export async function fetchCreatedNeighborhoods(userId: string): Promise<Neighborhood[]> {
   try {
+    // Validate supabase client
+    if (!supabase) {
+      console.error("[NeighborhoodUtils] Supabase client is not available");
+      return [];
+    }
+
     // This query is safe because we're filtering by created_by which is not subject to RLS recursion
     const { data, error } = await supabase
       .from('neighborhoods')
@@ -46,6 +52,12 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<Neighbo
  */
 export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
   try {
+    // Validate supabase client
+    if (!supabase) {
+      console.error("[NeighborhoodUtils] Supabase client is not available");
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id, name, created_by');
@@ -75,6 +87,12 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
+    // Validate supabase client
+    if (!supabase || !supabase.rpc) {
+      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+      return false;
+    }
+
     // Type assertion to use the RPC function without TypeScript errors
     // This is necessary because TypeScript doesn't automatically know about our custom RPC functions
     const { data: isMember, error } = await supabase
@@ -103,6 +121,12 @@ export async function checkNeighborhoodMembership(
  */
 export async function checkCoreContributorAccess(userId: string): Promise<boolean> {
   try {
+    // Validate supabase client
+    if (!supabase || !supabase.rpc) {
+      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+      return false;
+    }
+
     // Use our security definer function to check if the user is a core contributor with access
     // Using type assertion to make TypeScript happy
     const { data: hasAccess, error } = await supabase
@@ -131,6 +155,12 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
  */
 export async function fetchAllNeighborhoodsForCoreContributor(userId: string): Promise<Neighborhood[]> {
   try {
+    // Validate supabase client
+    if (!supabase || !supabase.rpc) {
+      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+      return [];
+    }
+
     // Use our security definer function to get all neighborhoods for a core contributor
     // Using type assertion to make TypeScript happy
     const { data, error } = await supabase
