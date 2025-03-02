@@ -75,11 +75,13 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
+    // Type assertion to use the RPC function without TypeScript errors
+    // This is necessary because TypeScript doesn't automatically know about our custom RPC functions
     const { data: isMember, error } = await supabase
       .rpc('user_is_neighborhood_member', {
         user_uuid: userId,
         neighborhood_uuid: neighborhoodId
-      });
+      }) as { data: boolean | null, error: any };
             
     if (error) {
       console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
@@ -102,10 +104,11 @@ export async function checkNeighborhoodMembership(
 export async function checkCoreContributorAccess(userId: string): Promise<boolean> {
   try {
     // Use our security definer function to check if the user is a core contributor with access
+    // Using type assertion to make TypeScript happy
     const { data: hasAccess, error } = await supabase
       .rpc('user_is_core_contributor_with_access', {
         user_uuid: userId
-      });
+      }) as { data: boolean | null, error: any };
       
     if (error) {
       console.error("[NeighborhoodUtils] Error checking core contributor access:", error);
@@ -129,16 +132,18 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
 export async function fetchAllNeighborhoodsForCoreContributor(userId: string): Promise<Neighborhood[]> {
   try {
     // Use our security definer function to get all neighborhoods for a core contributor
+    // Using type assertion to make TypeScript happy
     const { data, error } = await supabase
       .rpc('get_all_neighborhoods_for_core_contributor', {
         user_uuid: userId
-      });
+      }) as { data: Neighborhood[] | null, error: any };
       
     if (error) {
       console.error("[NeighborhoodUtils] Error fetching neighborhoods for core contributor:", error);
       return [];
     }
       
+    // Make sure we always return an array of Neighborhood objects
     return data || [];
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in fetchAllNeighborhoodsForCoreContributor:", err);
