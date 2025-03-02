@@ -34,11 +34,9 @@ const AuthForm = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
-      // When user is signed in and has a valid session, navigate to the dashboard
-      if (event === 'SIGNED_IN' && session) {
-        console.log("[AuthForm] Valid SIGNED_IN event received, navigating to dashboard");
-        
-        // Force navigation to dashboard with replace (prevents going back to login)
+      // When user is signed in, navigate to the dashboard
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        console.log("[AuthForm] Valid session detected, navigating to dashboard");
         navigate("/dashboard", { replace: true });
       }
     });
@@ -105,9 +103,8 @@ const AuthForm = () => {
           description: "Successfully signed in",
         });
         
-        // Force navigation to dashboard immediately after successful login
-        // This is a backup in case the auth state change listener doesn't trigger
-        navigate("/dashboard", { replace: true });
+        // Navigation is now handled by the auth state change listener
+        // This ensures we don't have competing navigation attempts
       }
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);

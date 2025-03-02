@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -33,9 +34,12 @@ function App() {
   // Get the current user session and Supabase client
   const session = useSession();
   const supabase = useSupabaseClient();
+  const navigate = useNavigate();
   
   // State to track authentication checking status
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // State to track if user is authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Added state for settings dialog
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -48,24 +52,64 @@ function App() {
 
   // Check authentication status when the component mounts
   useEffect(() => {
-    const checkAuth = async () => {
-      setIsCheckingAuth(true);
-      // You can add any additional auth checks here if needed
+    console.log("[App] Setting up auth state change listener");
+    
+    // Subscribe to authentication state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[App] Auth state changed:", { event, sessionExists: !!session });
+      
       setIsCheckingAuth(false);
-    };
+      setIsAuthenticated(!!session);
+      
+      // When user is signed in and event is SIGNED_IN, redirect to dashboard
+      if (event === 'SIGNED_IN' && session) {
+        console.log("[App] User is signed in, redirecting to dashboard");
+        navigate("/dashboard", { replace: true });
+      } else if (event === 'SIGNED_OUT') {
+        console.log("[App] User signed out, redirecting to login");
+        navigate("/login", { replace: true });
+      }
+    });
 
-    checkAuth();
-  }, [session, supabase]);
+    // Initial check for existing session
+    const checkSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        console.log("[App] Initial session check:", { hasSession: !!data.session });
+        setIsAuthenticated(!!data.session);
+        setIsCheckingAuth(false);
+      } catch (error) {
+        console.error("[App] Error checking session:", error);
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkSession();
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      console.log("[App] Cleaning up auth state change listener");
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth, navigate]); // Add navigate to dependency array
 
   // Component to protect routes that require authentication
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    // If no session and not checking auth, redirect to login
-    if (!session && !isCheckingAuth) {
-      console.log("No authenticated session, redirecting to login page");
+    console.log("[ProtectedRoute] Checking auth:", { isAuthenticated, isCheckingAuth });
+    
+    // If checking auth, show loading state or nothing
+    if (isCheckingAuth) {
+      return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+    
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      console.log("[ProtectedRoute] User not authenticated, redirecting to login");
       return <Navigate to="/login" replace />;
     }
 
-    // If authenticated or still checking, render the children
+    // If authenticated, render the children
+    console.log("[ProtectedRoute] User is authenticated, rendering protected content");
     return <>{children}</>;
   };
 

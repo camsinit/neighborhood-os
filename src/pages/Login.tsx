@@ -22,6 +22,7 @@ const Login = () => {
   
   // Redirect authenticated users to dashboard
   useEffect(() => {
+    // Only redirect if we're not loading AND we have a session
     if (!isLoading && session) {
       console.log("[Login] User is already authenticated, redirecting to dashboard");
       // Use replace to prevent going back to login page after redirection
@@ -29,7 +30,7 @@ const Login = () => {
     }
   }, [session, isLoading, navigate]);
 
-  // If user is not authenticated, show the login page
+  // If still loading or user is not authenticated, show the login page
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       {/* Back button to return to landing page */}
