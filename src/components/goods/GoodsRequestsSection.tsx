@@ -11,6 +11,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 // Import Link component for navigation
 import { Link } from "react-router-dom";
+// Import Trash2 icon for delete functionality and useUser hook to check permissions
+import { Trash2 } from "lucide-react";
+import { useUser } from "@supabase/auth-helpers-react";
+// Import supabase client for delete operations
+import { supabase } from "@/integrations/supabase/client";
+// Import toast for notifications
+import { toast } from "sonner";
 
 /**
  * Helper function to create a contact email link for an item
@@ -65,6 +72,9 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   // We store the request ID as a string to track the open popover
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   
+  // Get the current user to check if they're the creator of a request
+  const currentUser = useUser();
+  
   // Filter out any requests that are already shown in the urgent section
   const regularRequests = goodsRequests.filter(
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
@@ -74,6 +84,40 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   if (regularRequests.length === 0) {
     return null;
   }
+  
+  /**
+   * Function to handle deleting a request
+   * Only the creator of the request can delete it
+   */
+  const handleDeleteRequest = async (requestId: string, event: React.MouseEvent) => {
+    // Prevent event bubbling to parent elements
+    event.stopPropagation();
+    event.preventDefault();
+    
+    try {
+      // Delete the request from the database
+      const { error } = await supabase
+        .from('goods_exchange')
+        .delete()
+        .eq('id', requestId);
+        
+      // Handle any errors
+      if (error) {
+        console.error("Error deleting request:", error);
+        toast.error("Failed to delete request");
+        return;
+      }
+      
+      // Show success message
+      toast.success("Request successfully deleted");
+      
+      // Close the popover if it was open
+      setOpenPopoverId(null);
+    } catch (err) {
+      console.error("Error in delete operation:", err);
+      toast.error("An unexpected error occurred");
+    }
+  };
 
   return (
     <div className="mt-10">
@@ -100,7 +144,20 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
             >
               {/* Use the Card as the trigger for the Popover */}
               <PopoverTrigger asChild>
-                <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0">
+                <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0 relative group">
+                  {/* Delete button - only shown for the creator when hovering */}
+                  {currentUser && currentUser.id === request.user_id && (
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-8 w-8"
+                      onClick={(e) => handleDeleteRequest(request.id, e)}
+                      aria-label="Delete request"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  
                   <CardHeader className="pb-2">
                     <div className="flex flex-col">
                       {/* Title and urgency tag in a row */}
@@ -130,7 +187,20 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               * This appears when the card is clicked
               */}
               <PopoverContent className="w-[300px] p-0" sideOffset={5}>
-                <Card className="border-0 shadow-none">
+                <Card className="border-0 shadow-none relative">
+                  {/* Add delete button in the expanded view too */}
+                  {currentUser && currentUser.id === request.user_id && (
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 z-10 h-8 w-8"
+                      onClick={(e) => handleDeleteRequest(request.id, e)}
+                      aria-label="Delete request"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  
                   <CardHeader className="pb-2">
                     {/* Title and urgency in a row with space-between */}
                     <div className="flex items-center justify-between">
