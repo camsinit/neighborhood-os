@@ -26,9 +26,16 @@ const AuthForm = () => {
   // Toast hook for displaying notifications
   const { toast } = useToast();
 
-  // Listen for auth state changes
+  // Listen for auth state changes - we're using the supabase client directly here
+  // to ensure we're not depending on the context which might not be initialized properly
   useEffect(() => {
     console.log("[AuthForm] Setting up auth state change listener");
+    
+    // Guard against supabase being undefined
+    if (!supabase || !supabase.auth) {
+      console.error("[AuthForm] Supabase client or auth is not available");
+      return;
+    }
     
     // Subscribe to authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -44,7 +51,7 @@ const AuthForm = () => {
     // Clean up the subscription when the component unmounts
     return () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
-      subscription.unsubscribe();
+      subscription?.unsubscribe?.();
     };
   }, [navigate]); // Only re-run if navigate changes
   
@@ -103,8 +110,7 @@ const AuthForm = () => {
           description: "Successfully signed in",
         });
         
-        // Navigation is now handled by the auth state change listener
-        // This ensures we don't have competing navigation attempts
+        // No need to navigate here as the auth state change listener will handle that
       }
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);

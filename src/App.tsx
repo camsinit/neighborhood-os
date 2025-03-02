@@ -52,46 +52,58 @@ function App() {
 
   // Check authentication status when the component mounts
   useEffect(() => {
+    // Guard against supabase being undefined
+    if (!supabase || !supabase.auth) {
+      console.error("[App] Supabase client or auth is not available");
+      setIsCheckingAuth(false);
+      return;
+    }
+
     console.log("[App] Setting up auth state change listener");
     
-    // Subscribe to authentication state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[App] Auth state changed:", { event, sessionExists: !!session });
+    try {
+      // Subscribe to authentication state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log("[App] Auth state changed:", { event, sessionExists: !!session });
+        
+        setIsCheckingAuth(false);
+        setIsAuthenticated(!!session);
+        
+        // When user is signed in and event is SIGNED_IN, redirect to dashboard
+        if (event === 'SIGNED_IN' && session) {
+          console.log("[App] User is signed in, redirecting to dashboard");
+          navigate("/dashboard", { replace: true });
+        } else if (event === 'SIGNED_OUT') {
+          console.log("[App] User signed out, redirecting to login");
+          navigate("/login", { replace: true });
+        }
+      });
+
+      // Initial check for existing session
+      const checkSession = async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          console.log("[App] Initial session check:", { hasSession: !!data.session });
+          setIsAuthenticated(!!data.session);
+          setIsCheckingAuth(false);
+        } catch (error) {
+          console.error("[App] Error checking session:", error);
+          setIsCheckingAuth(false);
+        }
+      };
       
+      checkSession();
+
+      // Clean up the subscription when the component unmounts
+      return () => {
+        console.log("[App] Cleaning up auth state change listener");
+        subscription?.unsubscribe?.();
+      };
+    } catch (error) {
+      console.error("[App] Error setting up auth listener:", error);
       setIsCheckingAuth(false);
-      setIsAuthenticated(!!session);
-      
-      // When user is signed in and event is SIGNED_IN, redirect to dashboard
-      if (event === 'SIGNED_IN' && session) {
-        console.log("[App] User is signed in, redirecting to dashboard");
-        navigate("/dashboard", { replace: true });
-      } else if (event === 'SIGNED_OUT') {
-        console.log("[App] User signed out, redirecting to login");
-        navigate("/login", { replace: true });
-      }
-    });
-
-    // Initial check for existing session
-    const checkSession = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        console.log("[App] Initial session check:", { hasSession: !!data.session });
-        setIsAuthenticated(!!data.session);
-        setIsCheckingAuth(false);
-      } catch (error) {
-        console.error("[App] Error checking session:", error);
-        setIsCheckingAuth(false);
-      }
-    };
-    
-    checkSession();
-
-    // Clean up the subscription when the component unmounts
-    return () => {
-      console.log("[App] Cleaning up auth state change listener");
-      subscription.unsubscribe();
-    };
-  }, [supabase.auth, navigate]); // Add navigate to dependency array
+    }
+  }, [supabase, navigate]); // Add navigate to dependency array
 
   // Component to protect routes that require authentication
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
