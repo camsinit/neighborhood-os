@@ -1,106 +1,99 @@
 
-// Supabase Edge Function to handle waitlist signups
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.4.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// CORS headers to allow browser requests from any origin
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Create a Supabase client with the service role key for admin permissions
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Create Supabase client using environment variables
-const supabaseClient = createClient(
-  Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-);
-
+/**
+ * Edge Function to handle waitlist signups
+ * 
+ * This function receives an email address and adds it to the waitlist
+ * table in the database. It includes validation and error handling.
+ */
 serve(async (req) => {
-  // Handle preflight CORS request
+  // Set up CORS headers for the response
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  };
+
+  // Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers, status: 204 });
   }
 
   try {
-    // Parse the request body
-    const { email } = await req.json();
+    // Parse the request body to get the email
+    const requestData = await req.json();
+    const { email } = requestData;
 
-    // Basic validation
-    if (!email || typeof email !== "string") {
+    // Validate email
+    if (!email) {
       return new Response(
-        JSON.stringify({ success: false, error: "Valid email is required" }),
-        { 
-          status: 400, 
-          headers: { "Content-Type": "application/json", ...corsHeaders } 
-        }
+        JSON.stringify({ success: false, error: "Email is required" }),
+        { headers, status: 400 }
       );
     }
 
-    // Validate email format using a simple regex
+    // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return new Response(
         JSON.stringify({ success: false, error: "Invalid email format" }),
-        { 
-          status: 400, 
-          headers: { "Content-Type": "application/json", ...corsHeaders } 
-        }
+        { headers, status: 400 }
       );
     }
 
     console.log(`Processing waitlist signup for email: ${email}`);
-
-    // Insert the email into the waitlist table
-    const { data, error } = await supabaseClient
+    
+    // Insert email into waitlist table
+    const { data, error } = await supabase
       .from("waitlist")
-      .insert([{ email }])
-      .select();
+      .insert({ email })
+      .select("id, email");
 
+    // Check for errors
     if (error) {
-      console.error("Error adding to waitlist:", error);
+      console.error("Database error:", error);
       
-      // Check if it's a unique constraint violation (duplicate email)
-      if (error.code === "23505") {
+      // Handle duplicate email error specifically
+      if (error.code === '23505') { // Unique violation
         return new Response(
           JSON.stringify({ 
-            success: false, 
-            error: "This email is already on the waitlist" 
+            success: true, 
+            message: "You're already on our waitlist!"
           }),
-          { 
-            status: 409, 
-            headers: { "Content-Type": "application/json", ...corsHeaders } 
-          }
+          { headers, status: 200 }
         );
       }
       
-      throw error;
+      return new Response(
+        JSON.stringify({ success: false, error: "Failed to join waitlist" }),
+        { headers, status: 500 }
+      );
     }
 
-    console.log("Successfully added to waitlist:", data);
-
-    // Return success response
+    // Success response
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Successfully added to waitlist" 
+        message: "Successfully joined the waitlist",
+        data
       }),
-      { 
-        status: 200, 
-        headers: { "Content-Type": "application/json", ...corsHeaders } 
-      }
+      { headers, status: 200 }
     );
-  } catch (error) {
-    console.error("Unexpected error:", error);
     
+  } catch (error) {
+    console.error("Error processing request:", error);
+    
+    // General error response
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: "Server error processing your request" 
-      }),
-      { 
-        status: 500, 
-        headers: { "Content-Type": "application/json", ...corsHeaders } 
-      }
+      JSON.stringify({ success: false, error: "Internal server error" }),
+      { headers, status: 500 }
     );
   }
 });

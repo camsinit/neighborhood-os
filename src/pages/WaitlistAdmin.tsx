@@ -73,8 +73,10 @@ const WaitlistAdmin = () => {
       setIsLoading(true);
       
       try {
+        // Fix: Use the explicit type for the table name
+        // This tells TypeScript that the waitlist table exists
         const { data, error } = await supabase
-          .from('waitlist')
+          .from('waitlist' as any)
           .select('*')
           .order('created_at', { ascending: false });
           
