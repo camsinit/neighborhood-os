@@ -22,6 +22,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { NeighborhoodProvider } from "@/contexts/NeighborhoodContext";
 import LandingPage from "@/pages/LandingPage";
+import WaitlistAdmin from "@/pages/WaitlistAdmin";
 
 // Create a new query client for React Query
 const queryClient = new QueryClient();
@@ -42,6 +43,17 @@ const Layout = () => {
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
       />
+    </div>
+  );
+};
+
+// Simple admin layout component that doesn't include the sidebar
+const AdminLayout = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 };
@@ -93,6 +105,18 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/join/:inviteCode" element={<JoinPage />} />
+                
+                {/* Admin routes */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="waitlist" element={<WaitlistAdmin />} />
+                </Route>
                 
                 {/* Add redirects for direct page access */}
                 <Route path="/goods" element={<Navigate to="/dashboard/goods" replace />} />

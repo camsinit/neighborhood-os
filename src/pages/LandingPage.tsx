@@ -1,3 +1,4 @@
+
 import { HeroSection } from "@/components/ui/hero-section";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
@@ -5,12 +6,13 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
+import WaitlistForm from "@/components/waitlist/WaitlistForm";
 
 /**
  * LandingPage - The main entry point for new visitors
  * 
  * This page serves as the public-facing homepage, showcasing the 
- * Neighborhood OS dashboard and providing a path to login.
+ * Neighborhood OS dashboard and providing a path to login or join the waitlist.
  */
 const LandingPage = () => {
   // Get navigation and session context
@@ -58,21 +60,11 @@ const LandingPage = () => {
         }}
         title="Connect and strengthen your neighborhood"
         description="Neighborhood OS helps communities share resources, coordinate events, and build resilience through simple digital tools designed for real-world connections."
-        actions={[
-          {
-            text: "Get Started",
-            href: "/login",
-            variant: "default",
-          },
-          {
-            text: "Learn More",
-            href: "/login",
-            variant: "outline",
-          },
-        ]}
+        actions={[]}
+        waitlistForm={<WaitlistForm />}
         image={{
-          src: "/placeholder.svg", // Using the placeholder image that's available in the project
-          alt: "Neighborhood OS Dashboard Preview",
+          src: "/lovable-uploads/8acd3fdc-b0aa-4f2d-92f4-1b2de294ea38.png", 
+          alt: "Neighborhood OS Skills Exchange Screenshot",
         }}
       />
 
@@ -107,10 +99,10 @@ const LandingPage = () => {
       <section className="py-16 px-6 bg-muted/20">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-semibold mb-4">Ready to strengthen your neighborhood?</h2>
-          <p className="text-muted-foreground mb-8">Join Neighborhood OS today and discover the power of connected communities.</p>
-          <Button asChild size="lg">
-            <Link to="/login">Get Started</Link>
-          </Button>
+          <p className="text-muted-foreground mb-8">Join our waitlist today and discover the power of connected communities.</p>
+          <div className="max-w-md mx-auto">
+            <WaitlistForm />
+          </div>
         </div>
       </section>
     </div>

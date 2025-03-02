@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { Mockup, MockupFrame } from "@/components/ui/mockup";
 import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 /**
  * Interface defining the structure of a call-to-action button
@@ -30,6 +31,7 @@ interface HeroProps {
   title: string; // The main headline
   description: string; // Subheading or description text
   actions: HeroAction[]; // Array of call-to-action buttons
+  waitlistForm?: React.ReactNode; // Optional waitlist form component
   image: {
     src: string; // Image source URL
     alt: string; // Image alt text for accessibility
@@ -40,13 +42,14 @@ interface HeroProps {
  * HeroSection - A full-width hero component for landing pages
  * 
  * This component creates an attractive hero section with title, description,
- * call-to-action buttons, and a featured image with visual effects.
+ * call-to-action buttons or waitlist form, and a featured image with visual effects.
  */
 export function HeroSection({
   badge,
   title,
   description,
   actions,
+  waitlistForm,
   image,
 }: HeroProps) {
   return (
@@ -81,7 +84,7 @@ export function HeroSection({
           </p>
 
           {/* Actions - Call-to-action buttons */}
-          <div className="relative z-10 flex justify-center gap-4">
+          {actions.length > 0 && (
             <div className="relative z-10 flex justify-center gap-4">
               {actions.map((action, index) => (
                 <Button key={index} variant={action.variant || "default"} size="lg" asChild>
@@ -92,7 +95,14 @@ export function HeroSection({
                 </Button>
               ))}
             </div>
-          </div>
+          )}
+
+          {/* Waitlist Form - Alternative to action buttons */}
+          {waitlistForm && (
+            <div className="relative z-10 flex justify-center w-full max-w-md">
+              {waitlistForm}
+            </div>
+          )}
 
           {/* Image with Glow - Featured image in a stylized mockup frame */}
           <div className="relative pt-12">
