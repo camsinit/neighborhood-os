@@ -4,6 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
+/**
+ * Custom hook that fetches users in the current neighborhood
+ * 
+ * This hook handles querying all the necessary user data (profiles, emails, roles)
+ * and combines them into a single UserWithRole object for display in the directory
+ */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
   const { currentNeighborhood } = useNeighborhood();
@@ -28,17 +34,15 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // ALTERNATIVE APPROACH: Directly check for neighborhood creator first
-        // since we know they're definitely a member
+        // Start with the neighborhood creator since we know they're definitely a member
         const creatorId = currentNeighborhood.created_by;
         let userIds = [creatorId]; // Start with the creator
         
         console.log("[useNeighborUsers] Adding neighborhood creator to member list:", creatorId);
         
-        // Then find other members by querying neighborhoods
-        // This is our workaround for the neighborhood_members table RLS issue
+        // Then use our security definer function to get other members
         try {
-          // We'll try to use the RPC function if available
+          // We need to use the rpc approach to call our custom database function
           const { data: memberIds, error: rpcError } = await supabase.rpc('get_neighborhood_members', {
             neighborhood_uuid: currentNeighborhood.id
           });
@@ -46,12 +50,14 @@ export const useNeighborUsers = () => {
           if (rpcError) {
             console.warn("[useNeighborUsers] RPC call failed, using fallback approach:", rpcError);
             // Fallback - at least we have the creator
-          } else if (memberIds && memberIds.length > 0) {
-            // We got member IDs from the RPC function
+          } else if (memberIds && Array.isArray(memberIds) && memberIds.length > 0) {
+            // We got member IDs from the RPC function - they come as an array
             console.log("[useNeighborUsers] Found members via RPC:", {
               count: memberIds.length
             });
             userIds = [...new Set([...userIds, ...memberIds])]; // Combine and deduplicate
+          } else {
+            console.log("[useNeighborUsers] No additional members found via RPC");
           }
         } catch (rpcError) {
           console.warn("[useNeighborUsers] Error calling RPC:", rpcError);

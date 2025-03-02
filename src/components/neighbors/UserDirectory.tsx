@@ -8,7 +8,7 @@ import { useNeighborUsers } from "./hooks/useNeighborUsers";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, UserPlus, RefreshCw } from "lucide-react";
+import { AlertCircle, UserPlus, RefreshCw, Users } from "lucide-react";
 import EmptyState from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -104,6 +104,11 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
           <AlertCircle className="h-5 w-5 mr-2" />
           <AlertDescription>
             Error loading neighborhood data: {neighborhoodError.message}
+            {neighborhoodError.message.includes("recursion") && (
+              <span className="block mt-2 text-sm">
+                There is a database policy issue. Please contact support.
+              </span>
+            )}
           </AlertDescription>
         </Alert>
         <div className="mt-4 flex justify-center">
@@ -120,8 +125,8 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   if (!currentNeighborhood) {
     return (
       <div className="p-6">
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-5 w-5 mr-2" />
+        <Alert className="mb-4">
+          <Users className="h-5 w-5 mr-2" />
           <AlertDescription>
             You're not part of any neighborhood yet. Join or create a neighborhood to see residents.
           </AlertDescription>
@@ -207,4 +212,4 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
       />
     </div>
   );
-};
+}

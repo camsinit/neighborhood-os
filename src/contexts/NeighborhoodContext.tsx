@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,11 +67,8 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       });
 
       try {
-        // ALTERNATIVE APPROACH: Instead of directly querying neighborhood_members,
-        // we'll query the neighborhoods table and find ones created by the user
-        // This avoids the recursive RLS issue on the neighborhood_members table
-        
         // First, check if user created any neighborhoods
+        // This is safe because we're not using the problematic neighborhood_members table
         const { data: createdNeighborhoods, error: creationError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by')
@@ -97,12 +93,11 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           return;
         }
         
-        // If user didn't create a neighborhood, try to find one they joined
-        // We'll use a more direct approach to query neighborhoods they might be in
-        // This is a workaround to avoid the recursive RLS issue
+        // If user didn't create a neighborhood, we'll use an RPC call to check membership
+        // instead of querying the neighborhood_members table directly
+        console.log("[NeighborhoodContext] Checking user membership in neighborhoods");
         
-        // Query all neighborhoods and try to see if the user is a member
-        // Note: In a production scenario with many neighborhoods, this would need pagination
+        // First, get all neighborhoods (this won't trigger the RLS recursion)
         const { data: allNeighborhoods, error: neighborhoodsError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_by');
@@ -125,13 +120,12 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
         });
         
         // For each neighborhood, see if the user is a member
-        // For demonstration purposes, we'll just check the first few neighborhoods
-        // to avoid potentially large queries
+        // Only check a few to keep the queries manageable
         const neighborhoodsToCheck = allNeighborhoods.slice(0, 5);
         
         for (const neighborhood of neighborhoodsToCheck) {
-          // This uses our fixed RLS policy with the security definer function
-          const { data: membershipCheck, error: membershipError } = await supabase
+          // Use our security definer function that avoids the RLS recursion
+          const { data: isMember, error: membershipError } = await supabase
             .rpc('user_is_neighborhood_member', {
               user_uuid: user.id,
               neighborhood_uuid: neighborhood.id
@@ -143,7 +137,7 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
           }
           
           // If user is a member of this neighborhood, use it
-          if (membershipCheck === true) {
+          if (isMember === true) {
             console.log("[NeighborhoodContext] Found membership in neighborhood:", {
               neighborhood: neighborhood,
               userId: user.id

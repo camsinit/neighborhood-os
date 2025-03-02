@@ -970,6 +970,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_neighborhood_members: {
+        Args: {
+          neighborhood_uuid: string
+        }
+        Returns: string[]
+      }
       user_created_neighborhood: {
         Args: {
           user_uuid: string
