@@ -21,9 +21,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { NeighborhoodProvider } from "@/contexts/NeighborhoodContext";
+import LandingPage from "@/pages/LandingPage";
 
+// Create a new query client for React Query
 const queryClient = new QueryClient();
 
+// Layout component for authenticated pages with sidebar
 const Layout = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
@@ -44,8 +47,10 @@ const Layout = () => {
 };
 
 const App = () => {
+  // State to track initial authentication loading
   const [isInitializing, setIsInitializing] = useState(true);
 
+  // Check authentication state on app load
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -71,6 +76,7 @@ const App = () => {
     initializeAuth();
   }, []);
 
+  // Show loading spinner while checking authentication
   if (isInitializing) {
     console.log("[App] Showing loading state while initializing");
     return <LoadingSpinner />;
@@ -83,10 +89,12 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <TooltipProvider>
               <Routes>
+                {/* Landing page as the root route */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/join/:inviteCode" element={<JoinPage />} />
                 <Route
-                  path="/"
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Layout />
