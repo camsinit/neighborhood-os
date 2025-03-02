@@ -4,7 +4,14 @@ import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { LoadingSpinner } from "@/components/ui/loading";
 
+/**
+ * NeighborsPage Component
+ * 
+ * This page displays a directory of neighbors in the user's neighborhood.
+ * It ensures users are part of a neighborhood by checking the context.
+ */
 const NeighborsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { currentNeighborhood, isLoading, error } = useNeighborhood();
@@ -19,6 +26,7 @@ const NeighborsPage = () => {
     });
   }, [currentNeighborhood, isLoading, error]);
 
+  // Setup event listener for highlighting neighbors
   useEffect(() => {
     const handleHighlightItem = (e: CustomEvent) => {
       if (e.detail.type === 'neighbors') {
@@ -42,6 +50,15 @@ const NeighborsPage = () => {
     };
   }, []);
 
+  // Show loading state while fetching neighborhood data
+  if (isLoading) {
+    return (
+      <div className="min-h-full w-full flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#D3E4FD] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,12 +74,14 @@ const NeighborsPage = () => {
             </div>
           )}
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
-            <p className="text-gray-700 text-sm">
-              Welcome to {currentNeighborhood?.name || 'your neighborhood'}! Meet and connect with your neighbors. 
-              Browse profiles, discover shared interests, and build meaningful connections within your community.
-            </p>
-          </div>
+          {currentNeighborhood && (
+            <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+              <p className="text-gray-700 text-sm">
+                Welcome to {currentNeighborhood.name}! Meet and connect with your neighbors. 
+                Browse profiles, discover shared interests, and build meaningful connections within your community.
+              </p>
+            </div>
+          )}
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">

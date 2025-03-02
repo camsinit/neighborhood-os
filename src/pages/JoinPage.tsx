@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the shape of our invitation data
 interface Invitation {
   id: string;
   neighborhood_id: string;
@@ -29,7 +27,6 @@ const JoinPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch the invitation details
   useEffect(() => {
     async function fetchInvitation() {
       try {
@@ -68,12 +65,20 @@ const JoinPage = () => {
     }
   }, [inviteCode]);
 
+  const handleJoinComplete = () => {
+    toast({
+      title: "Welcome!",
+      description: `You've successfully joined. Let's meet your neighbors!`,
+    });
+    
+    navigate('/neighbors');
+  };
+
   const handleJoin = async () => {
     if (!user || !invitation) return;
 
     setJoining(true);
     try {
-      // First check if user is already a member
       const { data: existingMember } = await supabase
         .from('neighborhood_members')
         .select('id')
@@ -86,11 +91,10 @@ const JoinPage = () => {
           title: "Already a member",
           description: "You are already a member of this neighborhood.",
         });
-        navigate('/');
+        navigate('/neighbors');
         return;
       }
 
-      // Add user to neighborhood
       const { error: memberError } = await supabase
         .from('neighborhood_members')
         .insert({
@@ -101,7 +105,6 @@ const JoinPage = () => {
 
       if (memberError) throw memberError;
 
-      // Update invitation status
       const { error: inviteError } = await supabase
         .from('invitations')
         .update({
@@ -113,13 +116,8 @@ const JoinPage = () => {
 
       if (inviteError) throw inviteError;
 
-      toast({
-        title: "Welcome!",
-        description: `You've successfully joined ${invitation.neighborhoods.name}!`,
-      });
-
-      // Redirect to home page
-      navigate('/');
+      handleJoinComplete();
+      
     } catch (err) {
       console.error("[JoinPage] Error joining neighborhood:", err);
       toast({
