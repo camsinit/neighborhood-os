@@ -4,13 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StarBorder } from "@/components/ui/star-border"; // Import the new StarBorder component
+import { StarBorder } from "@/components/ui/star-border"; // Import the StarBorder component
 
 /**
  * WaitlistForm component
  * 
  * This component renders a form for users to join the waitlist
- * by submitting their email address. It now uses the StarBorder component
+ * by submitting their email address. It uses the StarBorder component
  * for a more decorative, animated appearance.
  */
 const WaitlistForm = () => {
@@ -55,10 +55,10 @@ const WaitlistForm = () => {
         throw new Error(data.error || "Failed to join waitlist");
       }
       
-      // Show success message
+      // Show success message with updated text
       toast({
-        title: "Success!",
-        description: "You've been added to our waitlist. We'll be in touch soon!",
+        title: "We'll be in touch!",
+        description: "You've been added to our waitlist. Thank you for your interest!",
       });
       
       // Clear the email input
@@ -82,23 +82,23 @@ const WaitlistForm = () => {
     // Wrap the form with the StarBorder component
     <StarBorder as="div" className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
-        {/* Email input field with more rounded corners */}
+        {/* Email input field with rounded corners */}
         <Input
           type="email"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="flex-grow rounded-full" // Added rounded-full for oval shape
+          className="flex-grow rounded-full" // Oval shape for the input
           disabled={isLoading}
           aria-label="Email for waitlist"
         />
         
-        {/* Submit button with more rounded corners */}
+        {/* Submit button with rounded corners */}
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="rounded-full" // Added rounded-full for oval shape
+          className="rounded-full" // Oval shape for the button
         >
           {isLoading ? "Joining..." : "Join Waitlist"}
         </Button>
