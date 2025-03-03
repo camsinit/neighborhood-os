@@ -24,53 +24,67 @@ const QuickActions = () => {
   const [requestView, setRequestView] = useState<string | undefined>();
 
   // Actions available to the user
-  const actions = [{
-    icon: Calendar,
-    label: "Add Event",
-    onClick: () => setIsAddEventOpen(true),
-    className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
-  }, {
-    icon: Package,
-    label: "Share an item",
-    onClick: () => {
-      setInitialRequestType("offer");
-      setRequestView('goods');  // Use the goods-specific form
-      setIsAddRequestOpen(true);
+  // Reorganized to group actions with the same color theme together
+  const actions = [
+    // Calendar - blue theme
+    { 
+      icon: Calendar, 
+      label: "Add Event", 
+      onClick: () => setIsAddEventOpen(true),
+      className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
     },
-    className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
-  }, {
-    icon: Package,
-    label: "Request an item",
-    onClick: () => {
-      setInitialRequestType("need");
-      setRequestView('goods');  // Use the goods-specific form
-      setIsAddRequestOpen(true);
+    // Safety - red theme
+    { 
+      icon: AlertTriangle, 
+      label: "Add Safety Update", 
+      onClick: () => setIsSafetyUpdateOpen(true),
+      className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
     },
-    className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
-  }, {
-    icon: Wrench,
-    label: "Share a Skill",
-    onClick: () => {
-      setInitialRequestType("offer");
-      setRequestView('skills');
-      setIsAddRequestOpen(true);
+    // Goods - orange theme (Share item)
+    { 
+      icon: Package, 
+      label: "Share an item", 
+      onClick: () => {
+        setInitialRequestType("offer");
+        setRequestView('goods');  // Use the goods-specific form
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
     },
-    className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
-  }, {
-    icon: HelpCircle,
-    label: "Request a Skill",
-    onClick: () => {
-      setInitialRequestType("need");
-      setRequestView('skills');
-      setIsAddRequestOpen(true);
+    // Goods - orange theme (Request item)
+    { 
+      icon: Package, 
+      label: "Request an item", 
+      onClick: () => {
+        setInitialRequestType("need");
+        setRequestView('goods');  // Use the goods-specific form
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
     },
-    className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
-  }, {
-    icon: AlertTriangle,
-    label: "Add Safety Update",
-    onClick: () => setIsSafetyUpdateOpen(true),
-    className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
-  }];
+    // Skills - purple theme (Share skill)
+    { 
+      icon: Wrench, 
+      label: "Share a Skill", 
+      onClick: () => {
+        setInitialRequestType("offer");
+        setRequestView('skills');
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
+    },
+    // Skills - purple theme (Request skill)
+    { 
+      icon: HelpCircle, 
+      label: "Request a Skill", 
+      onClick: () => {
+        setInitialRequestType("need");
+        setRequestView('skills');
+        setIsAddRequestOpen(true);
+      },
+      className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
+    }
+  ];
 
   return (
     <div className="w-full">
