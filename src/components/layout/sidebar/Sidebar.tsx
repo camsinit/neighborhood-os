@@ -43,8 +43,24 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   
   // Function to handle opening the invite dialog
   const handleOpenInvite = () => {
-    console.log("Opening invite dialog");
+    console.log("[Sidebar] Opening invite dialog");
     setIsInviteOpen(true);
+  };
+
+  // Function to handle opening settings dialog
+  const handleOpenSettings = () => {
+    // Add more debugging to help track the issue
+    console.log("[Sidebar] Opening settings dialog from Sidebar component");
+    if (typeof onOpenSettings !== 'function') {
+      console.error("[Sidebar] onOpenSettings is not a function:", onOpenSettings);
+    } else {
+      try {
+        onOpenSettings();
+        console.log("[Sidebar] Settings dialog callback executed from Sidebar");
+      } catch (error) {
+        console.error("[Sidebar] Error executing settings callback:", error);
+      }
+    }
   };
 
   return (
@@ -68,7 +84,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
         {/* Settings and Invite buttons */}
         <ActionButtons 
-          onOpenSettings={onOpenSettings}
+          onOpenSettings={handleOpenSettings}
           onOpenInvite={handleOpenInvite}
           isNeighborhoodLoading={isNeighborhoodLoading}
           neighborhoodError={neighborhoodError}

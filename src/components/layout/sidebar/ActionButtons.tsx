@@ -57,10 +57,16 @@ const ActionButtons = ({
   const handleOpenSettings = () => {
     // Call the provided callback function to open settings
     if (onOpenSettings) {
-      console.log("Opening settings dialog");
-      onOpenSettings();
+      // Add extra debugging to track if the function is actually called
+      console.log("[ActionButtons] Opening settings dialog - triggering callback");
+      try {
+        onOpenSettings();
+        console.log("[ActionButtons] Settings callback executed successfully");
+      } catch (error) {
+        console.error("[ActionButtons] Error executing settings callback:", error);
+      }
     } else {
-      console.error("onOpenSettings function not provided to Sidebar component");
+      console.error("[ActionButtons] onOpenSettings function not provided or is undefined");
     }
   };
 
