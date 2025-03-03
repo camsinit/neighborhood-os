@@ -1,10 +1,10 @@
 
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
-import { RainbowButton } from "@/components/ui/rainbow-button"; // Import RainbowButton instead of Button
+import { Button } from "@/components/ui/button"; // Added Button import
 
 /**
  * LandingPage component
@@ -40,12 +40,12 @@ const LandingPage = () => {
           />
         </div>
         
-        {/* Login button in the top right - now using RainbowButton */}
-        <RainbowButton asChild>
+        {/* Login button in the top right */}
+        <Button asChild>
           <Link to="/login" className="hover:bg-primary/90 transition-colors">
             Login
           </Link>
-        </RainbowButton>
+        </Button>
       </header>
       
       {/* Hero section with waitlist form and app preview */}
