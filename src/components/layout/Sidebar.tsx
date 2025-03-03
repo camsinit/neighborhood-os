@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus, RefreshCw } from "lucide-react";
+import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus, RefreshCw, AlertTriangle, Wrench } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const location = useLocation();
   // State to control the invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  // State to control the debug dialog visibility 
+  const [isDebugOpen, setIsDebugOpen] = useState(false);
   // Get the toast notification function
   const { toast } = useToast();
   
@@ -40,11 +42,13 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     refreshNeighborhoodData // Use the refresh function from context
   } = useNeighborhood();
   
+  // Get current user
+  const user = useUser();
+  
   // Fetch user profile data using React Query
   const { data: profile } = useQuery({
-    queryKey: ['profile', useUser()?.id],
+    queryKey: ['profile', user?.id],
     queryFn: async () => {
-      const user = useUser();
       if (!user?.id) return null;
       const { data } = await supabase
         .from('profiles')
@@ -53,7 +57,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         .single();
       return data;
     },
-    enabled: !!useUser()?.id, // Only run query when user is logged in
+    enabled: !!user?.id, // Only run query when user is logged in
   });
 
   // Main navigation item (Home/Dashboard) - This is the main entry point
@@ -133,6 +137,85 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       title: "Refreshing neighborhood data",
       description: "Please wait while we reconnect to your neighborhood...",
     });
+  };
+  
+  // Function to run neighborhood diagnostics
+  const runNeighborhoodDiagnostics = async () => {
+    if (!user) {
+      console.log("[Diagnostics] No user found");
+      toast({
+        title: "No user found",
+        description: "Please login again to resolve this issue.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
+      
+      // Check if user has created neighborhoods
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from("neighborhoods")
+        .select("id, name")
+        .eq("created_by", user.id);
+        
+      if (createdError) throw createdError;
+      
+      // Check neighborhood memberships
+      const { data: memberships, error: membershipError } = await supabase
+        .from("neighborhood_members")
+        .select("neighborhood_id, status")
+        .eq("user_id", user.id);
+        
+      if (membershipError) throw membershipError;
+      
+      // Get neighborhood details for memberships
+      let neighborhoodDetails = [];
+      if (memberships && memberships.length > 0) {
+        const { data: details, error: detailsError } = await supabase
+          .from("neighborhoods")
+          .select("id, name")
+          .in("id", memberships.map(m => m.neighborhood_id));
+          
+        if (detailsError) throw detailsError;
+        neighborhoodDetails = details || [];
+      }
+      
+      // Log diagnostic information
+      const diagnosticInfo = {
+        userId: user.id,
+        createdNeighborhoods: createdNeighborhoods || [],
+        memberships: memberships || [],
+        neighborhoods: neighborhoodDetails,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log("[Diagnostics] Results:", diagnosticInfo);
+      
+      // Show diagnostic info to user
+      toast({
+        title: "Diagnostic Information",
+        description: `Found ${createdNeighborhoods?.length || 0} created neighborhoods and ${memberships?.length || 0} memberships.`,
+      });
+      
+      // If no neighborhoods found, show how to debug
+      if ((!createdNeighborhoods || createdNeighborhoods.length === 0) && 
+          (!memberships || memberships.length === 0)) {
+        toast({
+          title: "No neighborhood association found",
+          description: "Check your Supabase database to verify your user's neighborhood linkage.",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error("[Diagnostics] Error:", error);
+      toast({
+        title: "Diagnostic error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   // Determine if we're in a stuck loading state
@@ -230,6 +313,17 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
             Invite Neighbor
           </Button>
           
+          {/* Diagnostics button - always visible but subtle */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-base font-medium text-gray-500"
+            onClick={runNeighborhoodDiagnostics}
+            type="button"
+          >
+            <Wrench className="h-5 w-5" />
+            Run Diagnostics
+          </Button>
+          
           {/* Show refresh button if neighborhood data is stuck loading */}
           {isStuckLoading && (
             <Button
@@ -238,7 +332,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
               onClick={handleRefreshNeighborhood}
               type="button"
             >
-              <RefreshCw className="h-5 w-5 animate-spin" />
+              <RefreshCw className="h-5 w-4 animate-spin" />
               Refresh Connection
             </Button>
           )}
@@ -246,7 +340,10 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           {/* Display error message if there's an error with neighborhood data */}
           {neighborhoodError && (
             <div className="p-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-md mt-2">
-              Error: {neighborhoodError.message}
+              <div className="flex items-center gap-1 mb-1">
+                <AlertTriangle className="h-3 w-3" />
+                <span>Error: {neighborhoodError.message}</span>
+              </div>
               <Button
                 variant="link"
                 className="w-full text-red-600 p-0 h-auto text-xs mt-1"

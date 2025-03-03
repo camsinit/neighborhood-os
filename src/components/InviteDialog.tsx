@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect for timeout detection
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -26,6 +27,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   // State for the email input and link generation process
   const [email, setEmail] = useState("");
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  // New state to detect stuck loading state
+  const [loadingTooLong, setLoadingTooLong] = useState(false);
   
   // Get required hooks
   const { toast } = useToast();
@@ -38,15 +41,47 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     refreshNeighborhoodData // Get the refresh function 
   } = useNeighborhood();
 
+  // Use effect to detect if we're stuck in a loading state for too long
+  useEffect(() => {
+    // Only start timer if dialog is open and we're loading
+    if (open && isLoading) {
+      console.log("[InviteDialog] Starting loading timeout detection");
+      
+      // Set a timeout to detect if loading takes too long
+      const timeoutId = setTimeout(() => {
+        if (isLoading) {
+          console.log("[InviteDialog] Loading timeout triggered - loading took too long");
+          setLoadingTooLong(true);
+        }
+      }, 3000); // 3 seconds is a reasonable time for data to load
+      
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    } else if (!isLoading) {
+      // Reset the loading too long flag when we're no longer loading
+      setLoadingTooLong(false);
+    }
+  }, [open, isLoading]);
+
   // Debug log when component renders
-  console.log("[InviteDialog] Render state:", {
-    user: !!user,
-    currentNeighborhood,
-    isLoading,
-    error,
-    isGeneratingLink,
-    isCoreContributor
-  });
+  useEffect(() => {
+    if (open) {
+      console.log("[InviteDialog] Render state:", {
+        user: !!user,
+        currentNeighborhood,
+        isLoading,
+        error,
+        isGeneratingLink,
+        isCoreContributor,
+        loadingTooLong
+      });
+      
+      if (isLoading) {
+        console.log("[InviteDialog] Still loading...");
+      }
+    }
+  }, [open, user, currentNeighborhood, isLoading, error, isGeneratingLink, isCoreContributor, loadingTooLong]);
 
   /**
    * Generates a unique invitation link and copies it to clipboard
@@ -148,6 +183,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const handleRefreshData = () => {
     console.log("[InviteDialog] Manually refreshing neighborhood data");
     refreshNeighborhoodData();
+    setLoadingTooLong(false); // Reset our loading timeout detection
     
     toast({
       title: "Refreshing neighborhood data",
@@ -155,8 +191,98 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     });
   };
 
+  /**
+   * Diagnose the current state and provide debugging information
+   */
+  const runNeighborhoodDiagnostics = async () => {
+    if (!user) {
+      console.log("[Diagnostics] No user found");
+      toast({
+        title: "No user found",
+        description: "Please login again to resolve this issue.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
+      
+      // Check if user has created neighborhoods
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from("neighborhoods")
+        .select("id, name")
+        .eq("created_by", user.id);
+        
+      if (createdError) throw createdError;
+      
+      // Check neighborhood memberships
+      const { data: memberships, error: membershipError } = await supabase
+        .from("neighborhood_members")
+        .select("neighborhood_id, status")
+        .eq("user_id", user.id);
+        
+      if (membershipError) throw membershipError;
+      
+      // Get neighborhood details for memberships
+      let neighborhoodDetails = [];
+      if (memberships && memberships.length > 0) {
+        const { data: details, error: detailsError } = await supabase
+          .from("neighborhoods")
+          .select("id, name")
+          .in("id", memberships.map(m => m.neighborhood_id));
+          
+        if (detailsError) throw detailsError;
+        neighborhoodDetails = details || [];
+      }
+      
+      // Check if user is a core contributor
+      const { data: coreContributor, error: coreError } = await supabase
+        .from("core_contributors")
+        .select("*")
+        .eq("user_id", user.id);
+        
+      if (coreError) throw coreError;
+      
+      // Log diagnostic information
+      const diagnosticInfo = {
+        userId: user.id,
+        createdNeighborhoods: createdNeighborhoods || [],
+        memberships: memberships || [],
+        neighborhoods: neighborhoodDetails,
+        isCoreContributor: (coreContributor && coreContributor.length > 0),
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log("[Diagnostics] Results:", diagnosticInfo);
+      
+      // Show diagnostic info to user
+      toast({
+        title: "Diagnostic Information",
+        description: `Found ${createdNeighborhoods?.length || 0} created neighborhoods and ${memberships?.length || 0} memberships.`,
+      });
+      
+      // If no neighborhoods found, show a more detailed message
+      if ((!createdNeighborhoods || createdNeighborhoods.length === 0) && 
+          (!memberships || memberships.length === 0)) {
+        toast({
+          title: "No neighborhood association found",
+          description: "You don't appear to be connected to any neighborhood. Try joining with an invite link.",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      console.error("[Diagnostics] Error:", error);
+      toast({
+        title: "Diagnostic error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   // Calculate if we're in a stuck loading state (loading for too long)
-  const isStuckLoading = isLoading && open;
+  const isStuckLoading = isLoading && open && loadingTooLong;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -176,15 +302,25 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
               <p className="text-sm text-amber-800 mb-2">
                 Still loading your neighborhood data...
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-amber-600 border-amber-200 bg-amber-50"
-                onClick={handleRefreshData}
-              >
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Refresh Neighborhood Data
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-amber-600 border-amber-200 bg-amber-50"
+                  onClick={handleRefreshData}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Refresh Neighborhood Data
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-blue-600 border-blue-200 bg-blue-50"
+                  onClick={runNeighborhoodDiagnostics}
+                >
+                  Run Diagnostics
+                </Button>
+              </div>
             </div>
           )}
           
@@ -194,25 +330,43 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
               <p className="text-sm text-red-800 mb-2">
                 Error loading neighborhood: {error.message}
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-red-600 border-red-200 bg-red-50"
-                onClick={handleRefreshData}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Try Again
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-red-600 border-red-200 bg-red-50"
+                  onClick={handleRefreshData}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-blue-600 border-blue-200 bg-blue-50"
+                  onClick={runNeighborhoodDiagnostics}
+                >
+                  Run Diagnostics
+                </Button>
+              </div>
             </div>
           )}
           
-          {/* If no neighborhood, show message */}
+          {/* If no neighborhood, show message and diagnostic button */}
           {!isLoading && !currentNeighborhood && (
             <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-yellow-800 mb-2">
                 You need to be part of a neighborhood before you can invite others.
                 Please use an invitation link from an existing member to join a neighborhood.
               </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-blue-600 border-blue-200 bg-blue-50 mt-2"
+                onClick={runNeighborhoodDiagnostics}
+              >
+                Check Neighborhood Status
+              </Button>
             </div>
           )}
           
