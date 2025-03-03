@@ -36,7 +36,7 @@ const LandingPage = () => {
           <img 
             src="/lovable-uploads/efc842e4-4adc-4085-8062-5465882c2788.png" 
             alt="Neighborhood OS Logo" 
-            className="h-12" // Set an appropriate height for the logo
+            className="h-36" // Changed from h-12 to h-36 (3x bigger: 12px × 3 = 36px)
           />
         </div>
         
