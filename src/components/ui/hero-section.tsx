@@ -57,10 +57,12 @@ export function HeroSection({
       className={cn(
         "bg-background text-foreground",
         "py-12 sm:py-24 md:py-32 px-4",
-        "overflow-hidden pb-0"
+        // Remove the overflow-hidden class to allow shadows to extend outside the container
+        "pb-0"
       )}
     >
-      <div className="mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24">
+      {/* Added extra padding to ensure there's space for the shadow */}
+      <div className="mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24 pb-24">
         <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
           {/* Badge - Optional promotional badge or tag */}
           {badge && (
@@ -104,23 +106,29 @@ export function HeroSection({
             </div>
           )}
 
-          {/* Image with Glow - Featured image in a stylized mockup frame */}
-          {/* Adjusted container div to better accommodate the image */}
-          <div className="relative pt-12 w-full max-w-5xl">
-            {/* Updated MockupFrame to be larger and more flexible */}
-            <MockupFrame className="opacity-100" size="large">
-              <Mockup type="responsive">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  width={1248}
-                  height={765}
-                  // Enhanced image styling to ensure proper scaling and aspect ratio
-                  className="w-full h-auto object-contain max-h-[80vh]"
-                />
-              </Mockup>
-            </MockupFrame>
-            <Glow variant="top" className="opacity-70" />
+          {/* 
+            Image with Glow - Featured image in a stylized mockup frame 
+            Added padding and margin to give more space for the shadow
+            Removed any max-height constraints that might clip the shadow
+          */}
+          <div className="relative pt-12 w-full max-w-5xl mb-16">
+            {/* Updated container to allow shadow to extend beyond boundaries */}
+            <div className="relative px-8 pb-8">
+              <MockupFrame className="opacity-100" size="large">
+                <Mockup type="responsive">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    width={1248}
+                    height={765}
+                    // Enhanced image styling to ensure proper scaling
+                    className="w-full h-auto object-contain"
+                  />
+                </Mockup>
+              </MockupFrame>
+              {/* Increased opacity for more visible glow effect */}
+              <Glow variant="top" className="opacity-80" />
+            </div>
           </div>
         </div>
       </div>

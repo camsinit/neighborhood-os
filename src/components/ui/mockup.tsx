@@ -8,7 +8,9 @@ import { cva, type VariantProps } from "class-variance-authority";
  * Used to showcase screenshots or UI examples within a frame
  */
 const mockupVariants = cva(
-  "flex relative z-10 overflow-hidden shadow-2xl border border-border/5 border-t-border/15",
+  // Enhanced shadow properties with larger blur radius and spread
+  // Removed overflow-hidden to prevent shadow clipping
+  "flex relative z-10 border border-border/5 border-t-border/15",
   {
     variants: {
       type: {
@@ -33,7 +35,11 @@ const Mockup = React.forwardRef<HTMLDivElement, MockupProps>(
   ({ className, type, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(mockupVariants({ type, className }))}
+      // Added custom shadow classes for a softer, more spread out shadow
+      className={cn(
+        mockupVariants({ type, className }),
+        "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)]"
+      )}
       {...props}
     />
   ),
@@ -44,7 +50,8 @@ Mockup.displayName = "Mockup";
  * The outer frame that contains the mockup, providing background and padding
  */
 const frameVariants = cva(
-  "bg-accent/5 flex relative z-10 overflow-hidden rounded-2xl",
+  // Removed overflow-hidden to allow shadow to extend naturally
+  "bg-accent/5 flex relative z-10 rounded-2xl",
   {
     variants: {
       size: {
@@ -66,7 +73,11 @@ const MockupFrame = React.forwardRef<HTMLDivElement, MockupFrameProps>(
   ({ className, size, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(frameVariants({ size, className }))}
+      // Added custom shadow class for the frame
+      className={cn(
+        frameVariants({ size, className }),
+        "shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)]"
+      )}
       {...props}
     />
   ),
