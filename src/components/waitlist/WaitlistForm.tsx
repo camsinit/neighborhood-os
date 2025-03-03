@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { RainbowButton } from "@/components/ui/rainbow-button"; // Import the RainbowButton component
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StarBorder } from "@/components/ui/star-border"; // Import the new StarBorder component
+import { StarBorder } from "@/components/ui/star-border"; // Import the StarBorder component
 
 /**
  * WaitlistForm component
@@ -94,14 +95,14 @@ const WaitlistForm = () => {
           aria-label="Email for waitlist"
         />
         
-        {/* Submit button with more rounded corners */}
-        <Button 
+        {/* Submit button with RainbowButton component */}
+        <RainbowButton 
           type="submit" 
           disabled={isLoading}
-          className="rounded-full" // Added rounded-full for oval shape
+          className="min-w-[140px] rounded-full" // Ensure minimum width for text
         >
           {isLoading ? "Joining..." : "Join Waitlist"}
-        </Button>
+        </RainbowButton>
       </form>
     </StarBorder>
   );
