@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 /**
  * Authentication Form Component
@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
  * This component provides both sign in and sign up functionality.
  * It manages user authentication state, form submission, and navigation
  * to the dashboard upon successful authentication.
+ * 
+ * Updated with styling to match the landing page aesthetics.
  */
 const AuthForm = () => {
   // State for form fields and loading state
@@ -125,9 +127,14 @@ const AuthForm = () => {
     }
   };
 
-  // Render the authentication form
+  // Render the authentication form with updated styling
   return (
-    <div className="mt-8 bg-white/80 backdrop-blur-sm py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+    <div className={cn(
+      "mt-8 py-8 px-4 sm:rounded-lg sm:px-10", 
+      "bg-white/80 backdrop-blur-sm",
+      "shadow-xl rounded-2xl",
+      "relative z-10"
+    )}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -158,7 +165,11 @@ const AuthForm = () => {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full rounded-full" 
+            disabled={isLoading}
+          >
             {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
           </Button>
           <Button 
