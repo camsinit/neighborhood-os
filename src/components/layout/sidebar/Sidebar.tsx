@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import InviteDialog from "@/components/InviteDialog";
+import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
 
 // Import sidebar components
 import Logo from './Logo';
@@ -17,7 +18,7 @@ import DiagnosticsPanel from './DiagnosticsPanel';
  * onOpenSettings is a function that will be called when the settings button is clicked
  */
 interface SidebarProps {
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void; // Make this optional since we're managing state internally
 }
 
 /**
@@ -28,6 +29,9 @@ interface SidebarProps {
 const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // State to control the invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  
+  // State to control the settings dialog visibility
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Get current user
   const user = useUser();
@@ -49,16 +53,19 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   // Function to handle opening settings dialog
   const handleOpenSettings = () => {
-    // Add more debugging to help track the issue
+    // Add debugging to track the settings dialog opening
     console.log("[Sidebar] Opening settings dialog from Sidebar component");
-    if (typeof onOpenSettings !== 'function') {
-      console.error("[Sidebar] onOpenSettings is not a function:", onOpenSettings);
-    } else {
+    
+    // Set local state to open the dialog
+    setIsSettingsOpen(true);
+    
+    // Also call the optional callback if provided (for backward compatibility)
+    if (typeof onOpenSettings === 'function') {
       try {
         onOpenSettings();
-        console.log("[Sidebar] Settings dialog callback executed from Sidebar");
+        console.log("[Sidebar] External settings callback executed from Sidebar");
       } catch (error) {
-        console.error("[Sidebar] Error executing settings callback:", error);
+        console.error("[Sidebar] Error executing external settings callback:", error);
       }
     }
   };
@@ -103,6 +110,12 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       <InviteDialog 
         open={isInviteOpen} 
         onOpenChange={setIsInviteOpen} 
+      />
+      
+      {/* Settings dialog wrapper component (shown when isSettingsOpen is true) */}
+      <SettingsDialogWrapper
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
       />
     </div>
   );
