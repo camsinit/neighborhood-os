@@ -40,8 +40,8 @@ const LandingPage = () => {
           />
         </div>
         
-        {/* Login button in the top right */}
-        <Button asChild>
+        {/* Login button in the top right - updated to have rounded-full class for oval shape */}
+        <Button asChild className="rounded-full">
           <Link to="/login" className="hover:bg-primary/90 transition-colors">
             Login
           </Link>
