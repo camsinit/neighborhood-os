@@ -42,8 +42,8 @@ const LandingPage = () => {
         ]}
         waitlistForm={<WaitlistForm />}
         image={{
-          // Using the new uploaded image
-          src: "/lovable-uploads/15af60e3-9fa6-4d99-9ea1-42415d5bd14b.png",
+          // Using the newly uploaded image
+          src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
           alt: "Skills exchange platform preview",
         }}
       />
