@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { Mockup } from "@/components/ui/mockup"; // Keep Mockup, remove MockupFrame
-import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
-import React, { useEffect, useRef } from "react"; // Added useEffect and useRef for animations
+import React from "react"; // Removed useEffect and useRef since we're removing the animations
 
 /**
  * Interface defining the structure of a call-to-action button
@@ -52,43 +51,7 @@ export function HeroSection({
   waitlistForm,
   image,
 }: HeroProps) {
-  // References to the animated gradient elements
-  const gradient1Ref = useRef<HTMLDivElement>(null);
-  const gradient2Ref = useRef<HTMLDivElement>(null);
-
-  // Effect to animate the gradients with mouse movement
-  useEffect(() => {
-    // Function to move gradients based on mouse position
-    const moveGradients = (e: MouseEvent) => {
-      // Get window dimensions for relative positioning
-      const { innerWidth, innerHeight } = window;
-      
-      // Calculate position as percentage of window (inverted for parallax effect)
-      const moveX1 = (innerWidth - e.clientX * 1.5) / 100;
-      const moveY1 = (innerHeight - e.clientY * 1.5) / 100;
-      
-      // Second gradient moves in opposite direction for dynamic effect
-      const moveX2 = (e.clientX * 1.5) / 100;
-      const moveY2 = (e.clientY * 1.5) / 100;
-
-      // Apply transforms to the gradient elements if they exist
-      if (gradient1Ref.current) {
-        gradient1Ref.current.style.transform = `translate(${moveX1}px, ${moveY1}px)`;
-      }
-      
-      if (gradient2Ref.current) {
-        gradient2Ref.current.style.transform = `translate(${moveX2}px, ${moveY2}px)`;
-      }
-    };
-
-    // Add mouse move event listener
-    window.addEventListener('mousemove', moveGradients);
-
-    // Cleanup function to remove event listener
-    return () => {
-      window.removeEventListener('mousemove', moveGradients);
-    };
-  }, []);
+  // Removed the gradient refs and useEffect for mouse movement
 
   return (
     <section
@@ -98,31 +61,23 @@ export function HeroSection({
         "py-4 sm:py-12 md:py-16 px-4", // Reduced from py-12/24/32 to py-4/12/16
         // Remove the overflow-hidden class to allow shadows to extend outside the container
         "pb-0",
-        "relative" // Added relative positioning for absolute positioned gradients
+        "relative" // Keep relative positioning for the background gradient
       )}
     >
-      {/* First animated gradient blob - positioned on the left */}
+      {/* 
+        Adding a more diffused, evenly spread rainbow gradient background 
+        that covers the entire section with reduced opacity
+      */}
       <div 
-        ref={gradient1Ref}
-        className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full opacity-20 filter blur-[80px] transition-transform duration-300"
+        className="absolute inset-0 opacity-10 filter blur-[120px]" // Increased blur and reduced opacity
         style={{
-          background: "linear-gradient(45deg, #3b82f6, #8b5cf6, #d946ef)",
-          transform: "translate(0, 0)"
-        }}
-      />
-      
-      {/* Second animated gradient blob - positioned on the right */}
-      <div 
-        ref={gradient2Ref}
-        className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] rounded-full opacity-20 filter blur-[80px] transition-transform duration-300"
-        style={{
-          background: "linear-gradient(45deg, #f59e0b, #ef4444, #ec4899)",
-          transform: "translate(0, 0)"
+          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+          zIndex: 0
         }}
       />
       
       {/* Added extra padding to ensure there's space for the shadow */}
-      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10"> {/* Added z-10 to keep content above gradient blobs */}
+      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10"> {/* Kept z-10 to ensure content stays above gradient */}
         <div className="flex flex-col items-center gap-4 text-center sm:gap-8"> {/* Reduced gap from 6/12 to 4/8 */}
           {/* Badge - Optional promotional badge or tag */}
           {badge && (
@@ -174,10 +129,10 @@ export function HeroSection({
           <div className="relative pt-8 w-full max-w-5xl mb-16"> {/* Reduced pt from 12 to 8 */}
             {/* Updated container to allow shadow to extend beyond boundaries */}
             <div className="relative px-8 pb-8">
-              {/* Rainbow gradient effect behind the image */}
-              <div className="absolute inset-0 rounded-3xl blur-xl opacity-60"
+              {/* Rainbow gradient effect behind the image - made more diffused */}
+              <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40" // Increased blur and reduced opacity
                 style={{
-                  background: "linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6)",
+                  background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
                   transform: "scale(1.05)", // Slightly larger than the image
                   zIndex: 0
                 }}
@@ -194,8 +149,6 @@ export function HeroSection({
                   className="w-full h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" // Added z-10 to stay above gradient
                 />
               </Mockup>
-              
-              {/* Remove the original glow effect since we're using the rainbow gradient */}
             </div>
           </div>
         </div>
