@@ -23,24 +23,9 @@ const QuickActions = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<string | undefined>();
 
-  // Actions available to the user
-  // Reorganized to group actions with the same color theme together
-  const actions = [
-    // Calendar - blue theme
-    { 
-      icon: Calendar, 
-      label: "Add Event", 
-      onClick: () => setIsAddEventOpen(true),
-      className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
-    },
-    // Safety - red theme
-    { 
-      icon: AlertTriangle, 
-      label: "Add Safety Update", 
-      onClick: () => setIsSafetyUpdateOpen(true),
-      className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
-    },
-    // Goods - orange theme (Share item)
+  // Group actions into columns by type
+  // Column 1: Goods (orange)
+  const goodsActions = [
     { 
       icon: Package, 
       label: "Share an item", 
@@ -51,7 +36,6 @@ const QuickActions = () => {
       },
       className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
     },
-    // Goods - orange theme (Request item)
     { 
       icon: Package, 
       label: "Request an item", 
@@ -61,8 +45,11 @@ const QuickActions = () => {
         setIsAddRequestOpen(true);
       },
       className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
-    },
-    // Skills - purple theme (Share skill)
+    }
+  ];
+
+  // Column 2: Skills (purple)
+  const skillsActions = [
     { 
       icon: Wrench, 
       label: "Share a Skill", 
@@ -73,7 +60,6 @@ const QuickActions = () => {
       },
       className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
     },
-    // Skills - purple theme (Request skill)
     { 
       icon: HelpCircle, 
       label: "Request a Skill", 
@@ -86,6 +72,22 @@ const QuickActions = () => {
     }
   ];
 
+  // Column 3: Events & Safety (blue and red)
+  const otherActions = [
+    { 
+      icon: Calendar, 
+      label: "Add Event", 
+      onClick: () => setIsAddEventOpen(true),
+      className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
+    },
+    { 
+      icon: AlertTriangle, 
+      label: "Add Safety Update", 
+      onClick: () => setIsSafetyUpdateOpen(true),
+      className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
+    }
+  ];
+
   return (
     <div className="w-full">
       <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6">
@@ -94,19 +96,56 @@ const QuickActions = () => {
           to connect, share, and engage with your neighbors.
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {actions.map(action => (
-          <Button 
-            key={action.label} 
-            variant="outline" 
-            className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} 
-            onClick={action.onClick}
-          >
-            <action.icon className="h-5 w-5 mr-2" />
-            <span className="text-sm">{action.label}</span>
-          </Button>
-        ))}
+
+      {/* Using grid with 3 columns to stack related actions */}
+      <div className="grid grid-cols-3 gap-4">
+        {/* Column 1: Goods Actions */}
+        <div className="flex flex-col gap-4">
+          {goodsActions.map(action => (
+            <Button 
+              key={action.label} 
+              variant="outline" 
+              className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} 
+              onClick={action.onClick}
+            >
+              <action.icon className="h-5 w-5 mr-2" />
+              <span className="text-sm">{action.label}</span>
+            </Button>
+          ))}
+        </div>
+
+        {/* Column 2: Skills Actions */}
+        <div className="flex flex-col gap-4">
+          {skillsActions.map(action => (
+            <Button 
+              key={action.label} 
+              variant="outline" 
+              className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} 
+              onClick={action.onClick}
+            >
+              <action.icon className="h-5 w-5 mr-2" />
+              <span className="text-sm">{action.label}</span>
+            </Button>
+          ))}
+        </div>
+
+        {/* Column 3: Other Actions */}
+        <div className="flex flex-col gap-4">
+          {otherActions.map(action => (
+            <Button 
+              key={action.label} 
+              variant="outline" 
+              className={`flex flex-row items-center justify-start h-12 px-2 border-2 ${action.className}`} 
+              onClick={action.onClick}
+            >
+              <action.icon className="h-5 w-5 mr-2" />
+              <span className="text-sm">{action.label}</span>
+            </Button>
+          ))}
+        </div>
       </div>
+
+      {/* Dialog components */}
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       <AddSupportRequestDialog 
         open={isAddRequestOpen} 
