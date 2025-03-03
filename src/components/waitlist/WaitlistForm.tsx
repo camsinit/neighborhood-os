@@ -18,6 +18,8 @@ const WaitlistForm = () => {
   const [email, setEmail] = useState("");
   // State to track loading status during submission
   const [isLoading, setIsLoading] = useState(false);
+  // State to track if form was successfully submitted
+  const [isSubmitted, setIsSubmitted] = useState(false);
   // Get toast notification function
   const { toast } = useToast();
 
@@ -63,6 +65,8 @@ const WaitlistForm = () => {
       
       // Clear the email input
       setEmail("");
+      // Set the form as submitted to show confirmation message
+      setIsSubmitted(true);
       
     } catch (error: any) {
       // Show error message
@@ -82,26 +86,36 @@ const WaitlistForm = () => {
     // Wrap the form with the StarBorder component
     <StarBorder as="div" className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
-        {/* Email input field with rounded corners */}
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="flex-grow rounded-full" // Oval shape for the input
-          disabled={isLoading}
-          aria-label="Email for waitlist"
-        />
+        {/* If submitted, show confirmation message. Otherwise, show email input field */}
+        {isSubmitted ? (
+          // Confirmation message displayed in place of the input
+          <div className="flex-grow py-2 px-4 text-center text-primary font-medium">
+            We'll be in touch!
+          </div>
+        ) : (
+          // Email input field with rounded corners
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="flex-grow rounded-full" // Oval shape for the input
+            disabled={isLoading}
+            aria-label="Email for waitlist"
+          />
+        )}
         
-        {/* Submit button with rounded corners */}
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="rounded-full" // Oval shape for the button
-        >
-          {isLoading ? "Joining..." : "Join Waitlist"}
-        </Button>
+        {/* Submit button with rounded corners - hidden after successful submission */}
+        {!isSubmitted && (
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="rounded-full" // Oval shape for the button
+          >
+            {isLoading ? "Joining..." : "Join Waitlist"}
+          </Button>
+        )}
       </form>
     </StarBorder>
   );
