@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Add rainbow color variables
+				// Adding color variables for the rainbow effect
 				"color-1": "hsl(var(--color-1))",
 				"color-2": "hsl(var(--color-2))",
 				"color-3": "hsl(var(--color-3))",
@@ -93,7 +93,7 @@ export default {
 					'0%': { transform: 'translate(0%, 0%)', opacity: '1' },
 					'100%': { transform: 'translate(100%, 0%)', opacity: '0' },
 				},
-				// Add rainbow animation
+				// Adding rainbow animation keyframes
 				rainbow: {
 					"0%": { "background-position": "0%" },
 					"100%": { "background-position": "200%" },
@@ -105,7 +105,7 @@ export default {
 				// New animations for the star border
 				'star-movement-bottom': 'star-movement-bottom linear infinite alternate',
 				'star-movement-top': 'star-movement-top linear infinite alternate',
-				// Add rainbow animation
+				// Adding rainbow animation
 				'rainbow': 'rainbow var(--speed, 2s) infinite linear',
 			}
 		}

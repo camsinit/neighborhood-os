@@ -1,4 +1,5 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,7 +21,7 @@
 
 @layer base {
   :root {
-    /* Existing CSS variables */
+    /* Base theme colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -50,8 +51,8 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 215 27.9% 16.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    /* Rainbow gradient color variables */
+
+    /* Rainbow button colors */
     --color-1: 0 100% 63%;
     --color-2: 270 100% 63%;
     --color-3: 210 100% 63%;
@@ -111,3 +112,4 @@
 .animate-appear-zoom {
   animation: appear-zoom 0.5s ease-out forwards;
 }
+
