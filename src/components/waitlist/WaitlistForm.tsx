@@ -1,17 +1,17 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StarBorder } from "@/components/ui/star-border"; // Import the new StarBorder component
+import { StarBorder } from "@/components/ui/star-border"; 
+import { RainbowButton } from "@/components/ui/rainbow-button"; // Import the new RainbowButton component
 
 /**
  * WaitlistForm component
  * 
  * This component renders a form for users to join the waitlist
  * by submitting their email address. It now uses the StarBorder component
- * for a more decorative, animated appearance.
+ * for a more decorative, animated appearance and the RainbowButton for submission.
  */
 const WaitlistForm = () => {
   // State to track the email input value
@@ -94,14 +94,14 @@ const WaitlistForm = () => {
           aria-label="Email for waitlist"
         />
         
-        {/* Submit button with more rounded corners */}
-        <Button 
+        {/* Replace Button with RainbowButton */}
+        <RainbowButton 
           type="submit" 
           disabled={isLoading}
-          className="rounded-full" // Added rounded-full for oval shape
+          className="rounded-full min-w-[140px] text-black" // Added min-width to prevent text scrunching
         >
           {isLoading ? "Joining..." : "Join Waitlist"}
-        </Button>
+        </RainbowButton>
       </form>
     </StarBorder>
   );

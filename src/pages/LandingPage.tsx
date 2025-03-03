@@ -1,10 +1,10 @@
 
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Added Link import
+import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
-import { Button } from "@/components/ui/button"; // Added Button import
+import { RainbowButton } from "@/components/ui/rainbow-button"; // Import RainbowButton
 
 /**
  * LandingPage component
@@ -36,16 +36,14 @@ const LandingPage = () => {
           <img 
             src="/lovable-uploads/efc842e4-4adc-4085-8062-5465882c2788.png" 
             alt="Neighborhood OS Logo" 
-            className="h-24" // Changed from h-36 to h-24 (reduced to 2/3: 36px × 2/3 = 24px)
+            className="h-24" // Changed from h-36 to h-24
           />
         </div>
         
-        {/* Login button in the top right */}
-        <Button asChild>
-          <Link to="/login" className="hover:bg-primary/90 transition-colors">
-            Login
-          </Link>
-        </Button>
+        {/* Replace Button with RainbowButton for login */}
+        <RainbowButton onClick={() => navigate("/login")} className="min-w-[100px] text-black">
+          Login
+        </RainbowButton>
       </header>
       
       {/* Hero section with waitlist form and app preview */}

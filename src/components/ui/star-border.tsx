@@ -1,86 +1,144 @@
 
-import { cn } from "@/lib/utils"
-import { ElementType, ComponentPropsWithoutRef } from "react"
+import { cn } from "@/lib/utils";
+import React from "react";
+import { IconProps } from "lucide-react";
 
 /**
- * StarBorder component properties
- * 
- * This interface defines the props for creating a decorated border with
- * animated star-like particles moving along the edges
+ * Interface for the StarBorderIcon component props
  */
-interface StarBorderProps<T extends ElementType> {
-  as?: T                // The HTML element to render (button by default)
-  color?: string        // The color of the stars/particles
-  speed?: string        // Animation duration/speed
-  className?: string    // Additional CSS classes
-  children: React.ReactNode  // Content within the border
-}
+type StarBorderIconProps = IconProps & {
+  className?: string;
+};
 
 /**
- * StarBorder component
+ * StarBorderIcon - A star-shaped icon for the border animation
  * 
- * Creates a decorative border with animated particles that move along
- * the top and bottom edges, creating a playful, engaging UI element
+ * This component renders a star SVG that will be used in the animated border
  */
-export function StarBorder<T extends ElementType = "button">({
-  as,
-  className,
-  color,
-  speed = "6s",
-  children,
-  ...props
-}: StarBorderProps<T> & Omit<ComponentPropsWithoutRef<T>, keyof StarBorderProps<T>>) {
-  // Determine which HTML element to render (defaults to button)
-  const Component = as || "button"
-  
-  // Use provided color or fall back to the foreground color from CSS variables
-  const defaultColor = color || "hsl(var(--foreground))"
-  
-  // Rainbow gradient colors representing the 5 dashboard sections
-  const rainbowGradient = "linear-gradient(90deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6)"
-
+const StarBorderIcon = ({ className, ...props }: StarBorderIconProps) => {
   return (
-    <Component 
-      className={cn(
-        "relative inline-block py-[1px] overflow-hidden rounded-[30px]", // More oval shape with 30px border radius
-        className
-      )} 
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("", className)}
       {...props}
     >
-      {/* Bottom stars/particles animation */}
-      <div
-        className={cn(
-          "absolute w-[300%] h-[50%] bottom-[-11px] right-[-250%] rounded-full animate-star-movement-bottom z-0",
-          "opacity-20 dark:opacity-70" 
-        )}
-        style={{
-          // Using rainbow gradient instead of single color
-          background: `radial-gradient(circle, ${rainbowGradient}, transparent 10%)`,
-          animationDuration: speed,
-        }}
+      <path
+        d="M5.40636 0.909819C5.66349 0.380132 6.33651 0.380131 6.59364 0.909819L7.88163 3.56439C7.98255 3.77045 8.17646 3.91343 8.40233 3.94713L11.3646 4.37659C11.9611 4.45599 12.1954 5.19201 11.7704 5.60311L9.66801 7.64445C9.504 7.80328 9.42941 8.02705 9.46956 8.24718L9.9742 11.1937C10.0663 11.7875 9.44082 12.2432 8.90838 11.958L6.24646 10.5439C6.04785 10.4372 5.81535 10.4372 5.61675 10.5439L2.95482 11.958C2.42238 12.2432 1.79688 11.7875 1.889 11.1937L2.39365 8.24718C2.43379 8.02705 2.3592 7.80328 2.19519 7.64445L0.0928115 5.60311C-0.332165 5.19201 -0.0978454 4.45599 0.498707 4.37659L3.46096 3.94713C3.68683 3.91343 3.88075 3.77045 3.98167 3.56439L5.26965 0.909819L5.40636 0.909819Z"
+        fill="currentColor"
       />
-      
-      {/* Top stars/particles animation */}
-      <div
-        className={cn(
-          "absolute w-[300%] h-[50%] top-[-10px] left-[-250%] rounded-full animate-star-movement-top z-0",
-          "opacity-20 dark:opacity-70"
-        )}
-        style={{
-          // Using rainbow gradient instead of single color
-          background: `radial-gradient(circle, ${rainbowGradient}, transparent 10%)`,
-          animationDuration: speed,
-        }}
-      />
-      
-      {/* Main content container */}
-      <div className={cn(
-        "relative z-1 border text-foreground text-center text-base py-4 px-6 rounded-[30px]", // More oval shape with 30px border radius
-        "bg-gradient-to-b from-background/90 to-muted/90 border-border/40",
-        "dark:from-background dark:to-muted dark:border-border"
-      )}>
-        {children}
-      </div>
-    </Component>
-  )
+    </svg>
+  );
+};
+
+/**
+ * Interface for the StarBorder component props
+ */
+interface StarBorderProps extends React.HTMLAttributes<HTMLDivElement> {
+  as?: React.ElementType;
+  children: React.ReactNode;
 }
+
+/**
+ * StarBorder Component
+ * 
+ * A component that wraps its children with an animated border of stars.
+ * The stars move along the top and bottom edges, creating a dynamic border effect.
+ * This is a purely decorative component that adds visual interest to UI elements.
+ */
+export const StarBorder = React.forwardRef<HTMLDivElement, StarBorderProps>(
+  ({ as: Component = "div", className, children, ...props }, ref) => {
+    return (
+      <Component
+        ref={ref}
+        className={cn(
+          "relative rounded-xl border border-primary/20 bg-white p-6",
+          className
+        )}
+        {...props}
+      >
+        {/* Top border stars */}
+        <div className="absolute -top-[6px] left-0 h-3 w-full overflow-hidden">
+          <div className="flex items-center justify-between">
+            {/* This creates a row of stars that moves from right to left */}
+            <div className="flex animate-star-movement-top items-center gap-1 duration-[2000ms]">
+              {/* Generate 12 stars for the top border */}
+              {Array.from({ length: 12 }).map((_, i) => (
+                <StarBorderIcon
+                  key={`top-1-${i}`}
+                  className={cn(
+                    "text-primary",
+                    i % 3 === 0 && "animate-pulse delay-100",
+                    i % 3 === 1 && "animate-pulse delay-300",
+                    i % 3 === 2 && "animate-pulse delay-700"
+                  )}
+                />
+              ))}
+            </div>
+            
+            {/* This creates a duplicate row for continuous animation */}
+            <div className="flex animate-star-movement-top items-center gap-1 duration-[2500ms]">
+              {/* Generate 12 more stars with slightly different animation timing */}
+              {Array.from({ length: 12 }).map((_, i) => (
+                <StarBorderIcon
+                  key={`top-2-${i}`}
+                  className={cn(
+                    "text-primary",
+                    i % 3 === 0 && "animate-pulse delay-300",
+                    i % 3 === 1 && "animate-pulse delay-700",
+                    i % 3 === 2 && "animate-pulse delay-1000"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Bottom border stars */}
+        <div className="absolute -bottom-[6px] left-0 h-3 w-full overflow-hidden">
+          <div className="flex items-center justify-between">
+            {/* Bottom row of stars moving from left to right */}
+            <div className="flex animate-star-movement-bottom items-center gap-1 duration-[2000ms]">
+              {/* Generate 12 stars for the bottom border */}
+              {Array.from({ length: 12 }).map((_, i) => (
+                <StarBorderIcon
+                  key={`bottom-1-${i}`}
+                  className={cn(
+                    "text-primary",
+                    i % 3 === 0 && "animate-pulse delay-100",
+                    i % 3 === 1 && "animate-pulse delay-300",
+                    i % 3 === 2 && "animate-pulse delay-700"
+                  )}
+                />
+              ))}
+            </div>
+            
+            {/* Duplicate bottom row for continuous animation */}
+            <div className="flex animate-star-movement-bottom items-center gap-1 duration-[2500ms]">
+              {/* Generate 12 more stars with slightly different animation timing */}
+              {Array.from({ length: 12 }).map((_, i) => (
+                <StarBorderIcon
+                  key={`bottom-2-${i}`}
+                  className={cn(
+                    "text-primary",
+                    i % 3 === 0 && "animate-pulse delay-300",
+                    i % 3 === 1 && "animate-pulse delay-700",
+                    i % 3 === 2 && "animate-pulse delay-1000"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* The actual content inside the star border */}
+        {children}
+      </Component>
+    );
+  }
+);
+
+StarBorder.displayName = "StarBorder";
