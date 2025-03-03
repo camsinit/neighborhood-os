@@ -33,6 +33,9 @@ export function StarBorder<T extends ElementType = "button">({
   // Use provided color or default to the theme's foreground color
   const defaultColor = color || "hsl(var(--foreground))"
 
+  // Helper function to determine if the color is a gradient
+  const isGradient = (color: string) => color.includes('gradient');
+
   return (
     <Component 
       className={cn(
@@ -48,7 +51,11 @@ export function StarBorder<T extends ElementType = "button">({
           "opacity-20 dark:opacity-70" 
         )}
         style={{
-          background: `radial-gradient(circle, ${defaultColor}, transparent 10%)`,
+          // Use background image for gradients, radial-gradient for solid colors
+          background: isGradient(defaultColor) 
+            ? defaultColor 
+            : `radial-gradient(circle, ${defaultColor}, transparent 10%)`,
+          backgroundSize: isGradient(defaultColor) ? "10px 10px" : "auto",
           animationDuration: speed,
         }}
       />
@@ -59,13 +66,17 @@ export function StarBorder<T extends ElementType = "button">({
           "opacity-20 dark:opacity-70"
         )}
         style={{
-          background: `radial-gradient(circle, ${defaultColor}, transparent 10%)`,
+          // Use background image for gradients, radial-gradient for solid colors
+          background: isGradient(defaultColor) 
+            ? defaultColor 
+            : `radial-gradient(circle, ${defaultColor}, transparent 10%)`,
+          backgroundSize: isGradient(defaultColor) ? "10px 10px" : "auto",
           animationDuration: speed,
         }}
       />
-      {/* Main content container with glass-like styling */}
+      {/* Main content container with glass-like styling and more rounded corners */}
       <div className={cn(
-        "relative z-1 border text-foreground text-center text-base py-4 px-6 rounded-[20px]",
+        "relative z-1 border text-foreground text-center text-base py-4 px-6 rounded-[30px]", // More rounded corners for oval shape
         "bg-gradient-to-b from-background/90 to-muted/90 border-border/40",
         "dark:from-background dark:to-muted dark:border-border"
       )}>
