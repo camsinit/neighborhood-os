@@ -94,11 +94,11 @@ const WaitlistForm = () => {
           aria-label="Email for waitlist"
         />
         
-        {/* Submit button with rainbow effect - now with min-width to prevent text from scrunching */}
+        {/* Submit button with rainbow effect */}
         <RainbowButton 
           type="submit" 
           disabled={isLoading}
-          className="rounded-full min-w-[140px]" // Added min-width to prevent text from being scrunched
+          className="rounded-full" // Added rounded-full for oval shape
         >
           {isLoading ? "Joining..." : "Join Waitlist"}
         </RainbowButton>
