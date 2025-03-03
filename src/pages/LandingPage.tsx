@@ -40,8 +40,8 @@ const LandingPage = () => {
           />
         </div>
         
-        {/* Login button in the top right - now using RainbowButton */}
-        <RainbowButton asChild>
+        {/* Login button in the top right - now using RainbowButton with asChild prop */}
+        <RainbowButton asChild className="min-w-[100px]">
           <Link to="/login" className="hover:bg-primary/90 transition-colors">
             Login
           </Link>
