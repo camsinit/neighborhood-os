@@ -50,7 +50,7 @@ const LandingPage = () => {
       
       {/* Hero section with waitlist form and app preview */}
       <HeroSection
-        title="Connect and care for your neighborhood"
+        title="Your neighborhood dashboard"
         description="Share skills, exchange goods, and build resilient communities together."
         // No actions array - removing the "Join Waitlist" button below the description
         actions={[]}
