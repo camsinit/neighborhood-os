@@ -1,11 +1,19 @@
 
-import { Settings, UserPlus, RefreshCw, AlertTriangle, Database } from "lucide-react";
+import { Settings, UserPlus, RefreshCw, AlertTriangle, Database, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * ActionButtons component props
@@ -36,6 +44,9 @@ const ActionButtons = ({
   // Get current user for diagnostics
   const user = useUser();
   
+  // Get navigation for logout redirect
+  const navigate = useNavigate();
+  
   // State to track loading timeout
   const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
   
@@ -57,6 +68,42 @@ const ActionButtons = ({
   const handleOpenInvite = () => {
     // Call the provided callback function to open invite dialog
     onOpenInvite();
+  };
+  
+  // Function to handle user logout
+  const handleLogout = async () => {
+    try {
+      // Display a logout notification
+      toast({
+        title: "Logging out",
+        description: "You are being signed out...",
+      });
+      
+      // Sign out the user using Supabase auth
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Redirect to login page
+      navigate("/login");
+      
+      // Show success message
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account",
+      });
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      
+      // Show error toast
+      toast({
+        title: "Logout failed",
+        description: error.message || "There was a problem signing out",
+        variant: "destructive"
+      });
+    }
   };
   
   // Function to force refresh neighborhood data
@@ -188,15 +235,35 @@ const ActionButtons = ({
 
   return (
     <div className="space-y-1">
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
-        onClick={handleOpenSettings}
-        type="button"
-      >
-        <Settings className="h-5 w-5" />
-        Settings
-      </Button>
+      {/* Settings button with dropdown menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-base font-medium"
+            type="button"
+          >
+            <Settings className="h-5 w-5" />
+            Settings
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          {/* Settings option */}
+          <DropdownMenuItem onClick={handleOpenSettings}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Account Settings</span>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          {/* Logout option */}
+          <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Logout</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
       <Button
         variant="ghost"
         className="w-full justify-start gap-3 text-base font-medium"
