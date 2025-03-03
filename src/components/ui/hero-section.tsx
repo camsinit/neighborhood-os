@@ -56,14 +56,15 @@ export function HeroSection({
     <section
       className={cn(
         "bg-background text-foreground",
-        "py-12 sm:py-24 md:py-32 px-4",
+        // Reduced top padding to bring content closer to the header
+        "py-4 sm:py-12 md:py-16 px-4", // Reduced from py-12/24/32 to py-4/12/16
         // Remove the overflow-hidden class to allow shadows to extend outside the container
         "pb-0"
       )}
     >
       {/* Added extra padding to ensure there's space for the shadow */}
-      <div className="mx-auto flex max-w-container flex-col gap-12 pt-16 sm:gap-24 pb-24">
-        <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
+      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24"> {/* Reduced gap from 12/24 to 8/16 and pt from 16 to 8 */}
+        <div className="flex flex-col items-center gap-4 text-center sm:gap-8"> {/* Reduced gap from 6/12 to 4/8 */}
           {/* Badge - Optional promotional badge or tag */}
           {badge && (
             <Badge variant="outline" className="gap-2 animate-pulse">
@@ -111,7 +112,7 @@ export function HeroSection({
             Added padding and margin to give more space for the shadow
             Removed any max-height constraints that might clip the shadow
           */}
-          <div className="relative pt-12 w-full max-w-5xl mb-16">
+          <div className="relative pt-8 w-full max-w-5xl mb-16"> {/* Reduced pt from 12 to 8 */}
             {/* Updated container to allow shadow to extend beyond boundaries */}
             <div className="relative px-8 pb-8">
               <MockupFrame className="opacity-100" size="large">
