@@ -1,9 +1,10 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
+import { Button } from "@/components/ui/button"; // Added Button import
 
 /**
  * LandingPage component
@@ -28,6 +29,25 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Navigation header with logo and login button */}
+      <header className="w-full py-4 px-6 flex justify-between items-center">
+        {/* Logo in the top left */}
+        <div className="flex items-center">
+          <img 
+            src="/lovable-uploads/efc842e4-4adc-4085-8062-5465882c2788.png" 
+            alt="Neighborhood OS Logo" 
+            className="h-12" // Set an appropriate height for the logo
+          />
+        </div>
+        
+        {/* Login button in the top right */}
+        <Button asChild>
+          <Link to="/login" className="hover:bg-primary/90 transition-colors">
+            Login
+          </Link>
+        </Button>
+      </header>
+      
       {/* Hero section with waitlist form and app preview */}
       <HeroSection
         title="Connect and care for your neighborhood"
