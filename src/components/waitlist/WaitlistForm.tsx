@@ -78,30 +78,25 @@ const WaitlistForm = () => {
   };
 
   return (
-    <StarBorder 
-      as="div" 
-      className="w-full max-w-md"
-      // Custom rainbow gradient that combines colors from the 5 dashboard sections
-      color="linear-gradient(90deg, #0EA5E9, #8B5CF6, #D946EF, #F97316, #10B981)"
-    >
+    <StarBorder as="div" className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
-        {/* Email input field with enhanced oval styling */}
+        {/* Email input field with enhanced styling */}
         <Input
           type="email"
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="flex-grow bg-background/50 border-border/30 rounded-full" // Adding rounded-full for oval shape
+          className="flex-grow bg-background/50 border-border/30"
           disabled={isLoading}
           aria-label="Email for waitlist"
         />
         
-        {/* Submit button with enhanced oval styling */}
+        {/* Submit button with enhanced styling */}
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full" // Adding rounded-full for oval shape
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {isLoading ? "Joining..." : "Join Waitlist"}
         </Button>
