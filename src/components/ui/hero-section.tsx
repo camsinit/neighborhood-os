@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
-import { Mockup, MockupFrame } from "@/components/ui/mockup";
+import { Mockup } from "@/components/ui/mockup"; // Keep Mockup, remove MockupFrame
 import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -108,25 +108,24 @@ export function HeroSection({
           )}
 
           {/* 
-            Image with Glow - Featured image in a stylized mockup frame 
-            Added padding and margin to give more space for the shadow
-            Removed any max-height constraints that might clip the shadow
+            Image with Glow - Featured image with rounded corners and drop shadow
+            The MockupFrame is removed but we keep the Mockup wrapper
+            Added rounded corners and drop shadow to make the image pop
           */}
           <div className="relative pt-8 w-full max-w-5xl mb-16"> {/* Reduced pt from 12 to 8 */}
             {/* Updated container to allow shadow to extend beyond boundaries */}
             <div className="relative px-8 pb-8">
-              <MockupFrame className="opacity-100" size="large">
-                <Mockup type="responsive">
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    width={1248}
-                    height={765}
-                    // Enhanced image styling to ensure proper scaling
-                    className="w-full h-auto object-contain"
-                  />
-                </Mockup>
-              </MockupFrame>
+              {/* Removed MockupFrame wrapper and kept only the Mockup component */}
+              <Mockup type="responsive">
+                {/* Added rounded-2xl for curved corners and drop-shadow-xl for the pop effect */}
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  width={1248}
+                  height={765}
+                  className="w-full h-auto object-contain rounded-2xl drop-shadow-xl"
+                />
+              </Mockup>
               {/* Increased opacity for more visible glow effect */}
               <Glow variant="top" className="opacity-80" />
             </div>
