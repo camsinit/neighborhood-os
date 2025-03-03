@@ -1,12 +1,12 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus, RefreshCw, AlertTriangle, Wrench } from "lucide-react";
+import { Home, Calendar, Heart, Gift, Brain, Shield, Settings, Users, UserPlus, RefreshCw, AlertTriangle, Wrench, Database } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import InviteDialog from "@/components/InviteDialog";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { useToast } from "@/hooks/use-toast";
@@ -27,10 +27,16 @@ interface SidebarProps {
 const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get current location to determine which nav item is active
   const location = useLocation();
+  
   // State to control the invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  // State to control the debug dialog visibility 
-  const [isDebugOpen, setIsDebugOpen] = useState(false);
+  
+  // State to control the diagnostics dialog visibility
+  const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
+  
+  // State to track diagnostics data
+  const [diagnosticsData, setDiagnosticsData] = useState<any>(null);
+  
   // Get the toast notification function
   const { toast } = useToast();
   
@@ -39,11 +45,35 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     currentNeighborhood, 
     isLoading: isNeighborhoodLoading, 
     error: neighborhoodError,
-    refreshNeighborhoodData // Use the refresh function from context
+    refreshNeighborhoodData, // Use the refresh function from context
+    isCoreContributor // Check if user is a core contributor for diagnostics
   } = useNeighborhood();
   
   // Get current user
   const user = useUser();
+  const supabaseClient = useSupabaseClient();
+  
+  // Add a state to track loading timeout
+  const [isLoadingTimeout, setIsLoadingTimeout] = useState(false);
+  
+  // Monitor for stuck loading state
+  useEffect(() => {
+    // If we're loading neighborhood data, set a timeout to detect stuck state
+    if (isNeighborhoodLoading) {
+      const timeoutId = setTimeout(() => {
+        // Only set timeout flag if still loading after delay
+        if (isNeighborhoodLoading) {
+          setIsLoadingTimeout(true);
+          console.log("[Sidebar] Neighborhood loading timeout detected");
+        }
+      }, 8000); // 8 seconds should be plenty of time
+      
+      return () => clearTimeout(timeoutId);
+    } else {
+      // Reset timeout flag if no longer loading
+      setIsLoadingTimeout(false);
+    }
+  }, [isNeighborhoodLoading]);
   
   // Fetch user profile data using React Query
   const { data: profile } = useQuery({
@@ -124,6 +154,15 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Function to handle opening the invite dialog
   const handleOpenInvite = () => {
     console.log("Opening invite dialog");
+    // Show a toast if no neighborhood is available
+    if (!currentNeighborhood && !isNeighborhoodLoading) {
+      toast({
+        title: "No neighborhood found",
+        description: "You need to be part of a neighborhood to invite others.",
+        variant: "destructive"
+      });
+      return;
+    }
     setIsInviteOpen(true);
   };
   
@@ -131,6 +170,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const handleRefreshNeighborhood = () => {
     console.log("Manually refreshing neighborhood data");
     refreshNeighborhoodData();
+    setIsLoadingTimeout(false); // Reset timeout flag
     
     // Show toast to let user know refresh is happening
     toast({
@@ -153,6 +193,10 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     
     try {
       console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
+      setDiagnosticsData({
+        status: "running",
+        userId: user.id
+      });
       
       // Check if user has created neighborhoods
       const { data: createdNeighborhoods, error: createdError } = await supabase
@@ -182,16 +226,39 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         neighborhoodDetails = details || [];
       }
       
+      // Check if user is a core contributor
+      const { data: coreContributor, error: coreError } = await supabase
+        .from("core_contributors")
+        .select("*")
+        .eq("user_id", user.id);
+      
+      if (coreError) throw coreError;
+      
+      // Also check authentication state
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      
       // Log diagnostic information
       const diagnosticInfo = {
         userId: user.id,
+        email: user.email,
         createdNeighborhoods: createdNeighborhoods || [],
         memberships: memberships || [],
         neighborhoods: neighborhoodDetails,
+        isCoreContributor: coreContributor && coreContributor.length > 0,
+        hasSession: !!session?.session,
+        contextData: {
+          isLoading: isNeighborhoodLoading,
+          hasError: !!neighborhoodError,
+          errorMessage: neighborhoodError?.message,
+          currentNeighborhood: currentNeighborhood,
+          isLoadingTimeout: isLoadingTimeout
+        },
         timestamp: new Date().toISOString()
       };
       
       console.log("[Diagnostics] Results:", diagnosticInfo);
+      setDiagnosticsData(diagnosticInfo);
       
       // Show diagnostic info to user
       toast({
@@ -210,6 +277,11 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       }
     } catch (error: any) {
       console.error("[Diagnostics] Error:", error);
+      setDiagnosticsData({
+        status: "error",
+        error: error.message,
+        userId: user.id
+      });
       toast({
         title: "Diagnostic error",
         description: error.message,
@@ -220,7 +292,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   // Determine if we're in a stuck loading state
   // This happens if isNeighborhoodLoading is true for too long
-  const isStuckLoading = isNeighborhoodLoading && !currentNeighborhood;
+  const isStuckLoading = isLoadingTimeout || (isNeighborhoodLoading && !currentNeighborhood);
 
   return (
     <div className="w-48 border-r bg-white flex flex-col">
@@ -313,15 +385,15 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
             Invite Neighbor
           </Button>
           
-          {/* Diagnostics button - always visible but subtle */}
+          {/* Database Diagnostics button - always visible but subtle */}
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-base font-medium text-gray-500"
+            className="w-full justify-start gap-3 text-xs font-medium text-gray-500"
             onClick={runNeighborhoodDiagnostics}
             type="button"
           >
-            <Wrench className="h-5 w-5" />
-            Run Diagnostics
+            <Database className="h-4 w-4" />
+            Database Status
           </Button>
           
           {/* Show refresh button if neighborhood data is stuck loading */}
@@ -332,7 +404,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
               onClick={handleRefreshNeighborhood}
               type="button"
             >
-              <RefreshCw className="h-5 w-4 animate-spin" />
+              <RefreshCw className={cn("h-5 w-4", isNeighborhoodLoading && "animate-spin")} />
               Refresh Connection
             </Button>
           )}
@@ -352,6 +424,40 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
               >
                 Try again
               </Button>
+            </div>
+          )}
+          
+          {/* Display user ID for troubleshooting */}
+          {user && (
+            <div className="mt-4 px-2 py-1 bg-gray-50 rounded text-xs text-gray-500 break-all">
+              <div className="font-semibold mb-1">User ID:</div>
+              <div>{user.id}</div>
+            </div>
+          )}
+          
+          {/* Display current neighborhood info if available */}
+          {currentNeighborhood && (
+            <div className="mt-2 px-2 py-1 bg-green-50 rounded text-xs text-green-600">
+              <div className="font-semibold mb-1">Neighborhood:</div>
+              <div>{currentNeighborhood.name}</div>
+            </div>
+          )}
+          
+          {/* Show diagnostics data if available */}
+          {diagnosticsData && (
+            <div className="mt-2 px-2 py-1 bg-blue-50 rounded text-xs text-blue-600 max-h-40 overflow-y-auto">
+              <div className="font-semibold mb-1">Diagnostics:</div>
+              {diagnosticsData.status === "running" ? (
+                <div>Running diagnostics...</div>
+              ) : diagnosticsData.status === "error" ? (
+                <div className="text-red-500">{diagnosticsData.error}</div>
+              ) : (
+                <>
+                  <div>Neighborhoods: {diagnosticsData.neighborhoods?.length || 0}</div>
+                  <div>Memberships: {diagnosticsData.memberships?.length || 0}</div>
+                  <div>Core Contributor: {diagnosticsData.isCoreContributor ? "Yes" : "No"}</div>
+                </>
+              )}
             </div>
           )}
         </div>

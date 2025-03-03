@@ -1,30 +1,26 @@
 
 /**
- * Types for the Neighborhood context and related functionality
+ * Neighborhood data types
  */
 
-/**
- * Define the structure for a neighborhood
- * This represents a community that users can belong to
- */
+// Neighborhood type
 export interface Neighborhood {
-  id: string;
+  id: string; 
   name: string;
-  created_by: string;
+  created_by?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
 }
 
-/**
- * Define the structure for our context
- * This provides neighborhood data to all components that need it
- */
+// Neighborhood context type
 export interface NeighborhoodContextType {
   currentNeighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
-  // Fields for God Mode
   isCoreContributor: boolean;
   allNeighborhoods: Neighborhood[];
   setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
-  // New field for manually refreshing neighborhood data
-  refreshNeighborhoodData: () => void;
+  refreshNeighborhoodData: () => void; // Added this function type
 }
