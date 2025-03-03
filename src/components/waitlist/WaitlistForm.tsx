@@ -4,12 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { StarBorder } from "@/components/ui/star-border"; // Import the new StarBorder component
 
 /**
  * WaitlistForm component
  * 
  * This component renders a form for users to join the waitlist
- * by submitting their email address.
+ * by submitting their email address. It now uses the StarBorder component
+ * for a more decorative, animated appearance.
  */
 const WaitlistForm = () => {
   // State to track the email input value
@@ -77,24 +79,31 @@ const WaitlistForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
-      {/* Email input field */}
-      <Input
-        type="email"
-        placeholder="Enter your email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        className="flex-grow"
-        disabled={isLoading}
-        aria-label="Email for waitlist"
-      />
-      
-      {/* Submit button */}
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Joining..." : "Join Waitlist"}
-      </Button>
-    </form>
+    // Wrap the form with the StarBorder component
+    <StarBorder as="div" className="w-full max-w-md">
+      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
+        {/* Email input field with more rounded corners */}
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="flex-grow rounded-full" // Added rounded-full for oval shape
+          disabled={isLoading}
+          aria-label="Email for waitlist"
+        />
+        
+        {/* Submit button with more rounded corners */}
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          className="rounded-full" // Added rounded-full for oval shape
+        >
+          {isLoading ? "Joining..." : "Join Waitlist"}
+        </Button>
+      </form>
+    </StarBorder>
   );
 };
 

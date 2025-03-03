@@ -32,17 +32,10 @@ const LandingPage = () => {
       <HeroSection
         title="Connect and care for your neighborhood"
         description="Share skills, exchange goods, and build resilient communities together."
-        // Removed the badge property entirely as requested
-        actions={[ // Only keeping the "Join Waitlist" button
-          {
-            text: "Join Waitlist",
-            href: "#waitlist",
-          }
-          // Removed "Learn More" button as requested
-        ]}
+        // No actions array - removing the "Join Waitlist" button below the description
+        actions={[]}
         waitlistForm={<WaitlistForm />}
         image={{
-          // Using the newly uploaded image
           src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
           alt: "Skills exchange platform preview",
         }}
