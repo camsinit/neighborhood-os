@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Added Link import
 import { useSessionContext } from "@supabase/auth-helpers-react";
@@ -44,12 +45,15 @@ const LandingPage = () => {
       </header>
       
       {/* Hero section with waitlist form and app preview */}
-      <HeroSection title="Your neighborhood dashboard" description="Everything you need to built a connected and caring community wherever you live"
-    // No actions array - removing the "Join Waitlist" button below the description
-    actions={[]} waitlistForm={<WaitlistForm />} image={{
-      src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
-      alt: "Skills exchange platform preview"
-    }} />
+      <HeroSection title="Your neighborhood dashboard" 
+        description="Everything you need for a connected and caring community near you"
+        // No actions array - removing the "Join Waitlist" button below the description
+        actions={[]} 
+        waitlistForm={<WaitlistForm />} 
+        image={{
+          src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
+          alt: "Skills exchange platform preview"
+        }} />
       
       {/* You could add more sections here for features, testimonials, etc. */}
     </div>;
