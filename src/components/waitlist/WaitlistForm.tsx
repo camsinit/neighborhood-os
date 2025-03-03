@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { StarBorder } from "@/components/ui/star-border";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -78,30 +77,24 @@ const WaitlistForm = () => {
   };
 
   return (
-    <StarBorder as="div" className="w-full max-w-md">
-      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
-        {/* Email input field with enhanced styling */}
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="flex-grow bg-background/50 border-border/30"
-          disabled={isLoading}
-          aria-label="Email for waitlist"
-        />
-        
-        {/* Submit button with enhanced styling */}
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          {isLoading ? "Joining..." : "Join Waitlist"}
-        </Button>
-      </form>
-    </StarBorder>
+    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
+      {/* Email input field */}
+      <Input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        className="flex-grow"
+        disabled={isLoading}
+        aria-label="Email for waitlist"
+      />
+      
+      {/* Submit button */}
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Joining..." : "Join Waitlist"}
+      </Button>
+    </form>
   );
 };
 

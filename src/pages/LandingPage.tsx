@@ -33,8 +33,13 @@ const LandingPage = () => {
         title="Connect and care for your neighborhood"
         description="Share skills, exchange goods, and build resilient communities together."
         // Removed the badge property entirely as requested
-        // Removed all action buttons as requested
-        actions={[]}
+        actions={[ // Only keeping the "Join Waitlist" button
+          {
+            text: "Join Waitlist",
+            href: "#waitlist",
+          }
+          // Removed "Learn More" button as requested
+        ]}
         waitlistForm={<WaitlistForm />}
         image={{
           // Using the newly uploaded image
