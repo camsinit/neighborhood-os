@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
@@ -49,20 +48,16 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   // Function to handle opening settings dialog
   const handleOpenSettings = () => {
-    // Add debugging to track the settings dialog opening
-    console.log("[Sidebar] Opening settings dialog from Sidebar component");
+    // Log for debugging
+    console.log("[Sidebar] Opening settings dialog");
     
-    // Set local state to open the dialog
+    // Simply set the state to true - no conditional check needed
     setIsSettingsOpen(true);
     
-    // Also call the optional callback if provided (for backward compatibility)
+    // We'll keep the external callback for backward compatibility
+    // but we don't need to rely on it for the dialog to open
     if (typeof onOpenSettings === 'function') {
-      try {
-        onOpenSettings();
-        console.log("[Sidebar] External settings callback executed from Sidebar");
-      } catch (error) {
-        console.error("[Sidebar] Error executing external settings callback:", error);
-      }
+      onOpenSettings();
     }
   };
 

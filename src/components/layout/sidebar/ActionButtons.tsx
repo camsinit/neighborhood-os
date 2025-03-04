@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 /**
  * ActionButtons component props
@@ -18,7 +11,6 @@ import {
 interface ActionButtonsProps {
   onOpenSettings: () => void;
   onOpenInvite: () => void;
-  // Removed unused props related to neighborhood diagnostics
 }
 
 /**
@@ -37,16 +29,10 @@ const ActionButtons = ({
   const navigate = useNavigate();
   
   // Function to handle opening the settings dialog
+  // Simplified to directly call the callback without additional logic
   const handleOpenSettings = () => {
-    // Call the provided callback function to open settings directly
-    // This will skip the dropdown menu and open the dialog immediately
-    console.log("[ActionButtons] Opening settings dialog - triggering callback directly");
-    try {
-      onOpenSettings();
-      console.log("[ActionButtons] Settings callback executed successfully");
-    } catch (error) {
-      console.error("[ActionButtons] Error executing settings callback:", error);
-    }
+    // Just call the callback directly - this will open the settings dialog
+    onOpenSettings();
   };
 
   // Function to handle opening the invite dialog
@@ -93,7 +79,7 @@ const ActionButtons = ({
 
   return (
     <div className="space-y-1">
-      {/* Settings button - now opens the settings dialog directly without dropdown */}
+      {/* Settings button - opens the settings dialog directly */}
       <Button
         variant="ghost"
         className="w-full justify-start gap-3 text-base font-medium"

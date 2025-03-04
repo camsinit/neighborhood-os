@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import SettingsDialog from "@/components/SettingsDialog";
 
@@ -29,12 +29,12 @@ const SettingsDialogWrapper: React.FC<SettingsDialogWrapperProps> = ({
   onOpenChange 
 }) => {
   // Log when the dialog opens or closes for debugging
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("[SettingsDialogWrapper] Dialog open state changed:", open);
   }, [open]);
 
   return (
-    // We're using the base Dialog component from shadcn/ui
+    // Use the base Dialog component from shadcn/ui
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -42,13 +42,13 @@ const SettingsDialogWrapper: React.FC<SettingsDialogWrapperProps> = ({
             <Settings className="h-5 w-5" /> 
             Account Settings
           </DialogTitle>
+          {/* Add DialogDescription to fix the accessibility warning */}
+          <DialogDescription className="sr-only">
+            Manage your account settings and preferences
+          </DialogDescription>
         </DialogHeader>
         
         {/* Render the actual settings dialog content */}
-        {/* 
-          Pass the same open and onOpenChange props to the SettingsDialog 
-          component instead of onClose, as that's what it expects according to the error
-        */}
         <SettingsDialog 
           open={open}
           onOpenChange={onOpenChange}
