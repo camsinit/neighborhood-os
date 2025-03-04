@@ -15,23 +15,15 @@ interface DiagnosticsPanelProps {
  * DiagnosticsPanel component
  * 
  * Displays diagnostic information in the sidebar
+ * Now with user ID and other diagnostic elements removed
  */
 const DiagnosticsPanel = ({ 
-  user, 
   currentNeighborhood,
   isCoreContributor
 }: DiagnosticsPanelProps) => {
   return (
     <div className="space-y-2 mt-4">
-      {/* Display user ID for troubleshooting */}
-      {user && (
-        <div className="px-2 py-1 bg-gray-50 rounded text-xs text-gray-500 break-all">
-          <div className="font-semibold mb-1">User ID:</div>
-          <div>{user.id}</div>
-        </div>
-      )}
-      
-      {/* Display current neighborhood info if available */}
+      {/* Only display current neighborhood info if available */}
       {currentNeighborhood && (
         <div className="px-2 py-1 bg-green-50 rounded text-xs text-green-600">
           <div className="font-semibold mb-1">Neighborhood:</div>

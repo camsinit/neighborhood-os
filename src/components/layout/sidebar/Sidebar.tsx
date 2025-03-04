@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Link, useLocation } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import InviteDialog from "@/components/InviteDialog";
@@ -39,9 +38,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get neighborhood context for diagnostics data
   const { 
     currentNeighborhood, 
-    isLoading: isNeighborhoodLoading, 
-    error: neighborhoodError,
-    refreshNeighborhoodData,
     isCoreContributor
   } = useNeighborhood();
   
@@ -93,12 +89,9 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         <ActionButtons 
           onOpenSettings={handleOpenSettings}
           onOpenInvite={handleOpenInvite}
-          isNeighborhoodLoading={isNeighborhoodLoading}
-          neighborhoodError={neighborhoodError}
-          refreshNeighborhoodData={refreshNeighborhoodData}
         />
         
-        {/* Diagnostics information panel */}
+        {/* Diagnostics information panel - with reduced content */}
         <DiagnosticsPanel 
           user={user}
           currentNeighborhood={currentNeighborhood}
