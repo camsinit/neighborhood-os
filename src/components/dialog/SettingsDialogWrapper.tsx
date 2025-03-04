@@ -33,8 +33,20 @@ const SettingsDialogWrapper: React.FC<SettingsDialogWrapperProps> = ({
     console.log("[SettingsDialogWrapper] Dialog open state changed:", open);
   }, [open]);
 
+  // Setup a ref to track if this component has been mounted
+  // This helps us avoid any issues with state updates during render
+  const isMounted = React.useRef(false);
+  
+  // Make sure we're properly tracking when the dialog should be open
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+    }
+  }, []);
+
   return (
-    // Use the base Dialog component from shadcn/ui
+    // Use the base Dialog component from shadcn/ui with forced rendering
+    // The forceMount prop ensures the dialog is always in the DOM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
@@ -16,7 +17,7 @@ import DiagnosticsPanel from './DiagnosticsPanel';
  * onOpenSettings is a function that will be called when the settings button is clicked
  */
 interface SidebarProps {
-  onOpenSettings?: () => void; // Make this optional since we're managing state internally
+  onOpenSettings?: () => void; // This is now completely optional and unused
 }
 
 /**
@@ -29,6 +30,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
   // State to control the settings dialog visibility
+  // This is the ONLY state that controls whether the dialog is open
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Get current user
@@ -47,18 +49,12 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   };
 
   // Function to handle opening settings dialog
+  // This is the ONLY function that controls opening the dialog
   const handleOpenSettings = () => {
-    // Log for debugging
-    console.log("[Sidebar] Opening settings dialog");
-    
-    // Simply set the state to true - no conditional check needed
+    console.log("[Sidebar] Opening settings dialog - setting state to true");
+    // Directly open the dialog by setting state to true
     setIsSettingsOpen(true);
-    
-    // We'll keep the external callback for backward compatibility
-    // but we don't need to rely on it for the dialog to open
-    if (typeof onOpenSettings === 'function') {
-      onOpenSettings();
-    }
+    // We've removed the external callback completely to avoid any interference
   };
 
   return (

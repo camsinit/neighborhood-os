@@ -9,14 +9,14 @@ import { useNavigate } from "react-router-dom";
  * ActionButtons component props
  */
 interface ActionButtonsProps {
-  onOpenSettings: () => void;
-  onOpenInvite: () => void;
+  onOpenSettings: () => void; // Function to open settings dialog
+  onOpenInvite: () => void;   // Function to open invite dialog
 }
 
 /**
  * ActionButtons component
  * 
- * Displays the settings and invite action buttons
+ * Displays the settings and invite action buttons in the sidebar
  */
 const ActionButtons = ({ 
   onOpenSettings, 
@@ -27,19 +27,6 @@ const ActionButtons = ({
   
   // Get navigation for logout redirect
   const navigate = useNavigate();
-  
-  // Function to handle opening the settings dialog
-  // Simplified to directly call the callback without additional logic
-  const handleOpenSettings = () => {
-    // Just call the callback directly - this will open the settings dialog
-    onOpenSettings();
-  };
-
-  // Function to handle opening the invite dialog
-  const handleOpenInvite = () => {
-    // Call the provided callback function to open invite dialog
-    onOpenInvite();
-  };
   
   // Function to handle user logout
   const handleLogout = async () => {
@@ -79,12 +66,16 @@ const ActionButtons = ({
 
   return (
     <div className="space-y-1">
-      {/* Settings button - opens the settings dialog directly */}
+      {/* 
+        Settings button - directly calls the provided callback function
+        This is a direct event handler with no conditions or state checks
+      */}
       <Button
         variant="ghost"
         className="w-full justify-start gap-3 text-base font-medium"
-        onClick={handleOpenSettings}
+        onClick={onOpenSettings}
         type="button"
+        aria-label="Open settings dialog"
       >
         <Settings className="h-5 w-5" />
         Settings
@@ -94,8 +85,9 @@ const ActionButtons = ({
       <Button
         variant="ghost"
         className="w-full justify-start gap-3 text-base font-medium"
-        onClick={handleOpenInvite}
+        onClick={onOpenInvite}
         type="button"
+        aria-label="Invite a neighbor"
       >
         <UserPlus className="h-5 w-5" />
         Invite Neighbor
@@ -107,6 +99,7 @@ const ActionButtons = ({
         className="w-full justify-start gap-3 text-base font-medium text-red-500"
         onClick={handleLogout}
         type="button"
+        aria-label="Log out of your account"
       >
         <LogOut className="h-5 w-5" />
         Logout
