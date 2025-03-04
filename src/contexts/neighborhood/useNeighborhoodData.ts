@@ -7,7 +7,8 @@ import {
   fetchCreatedNeighborhoods, 
   fetchAllNeighborhoods, 
   checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor 
+  fetchAllNeighborhoodsForCoreContributor,
+  checkNeighborhoodMembership
 } from './neighborhoodUtils';
 
 /**
@@ -106,9 +107,6 @@ export function useNeighborhoodData(user: User | null) {
           });
           setCurrentNeighborhood(neighborhoods[0]);
         }
-        
-        // Even if the user is a core contributor, we still want to proceed with the normal flow
-        // to get their primary neighborhood, but we won't return early
       }
 
       // 1. First check if the user created any neighborhoods using our utility function
@@ -152,43 +150,22 @@ export function useNeighborhoodData(user: User | null) {
       // For each neighborhood, check if user is a member using our safe function
       for (const neighborhood of neighborhoods) {
         console.log(`[useNeighborhoodData] Checking membership for neighborhood ${neighborhood.id} (attempt ${currentAttempt})`);
-        try {
-          // Use the security definer function to check membership
-          const { data: isMember, error: membershipError } = await supabase
-            .rpc('user_is_neighborhood_member', {
-              user_uuid: user.id,
-              neighborhood_uuid: neighborhood.id
-            });
+        const isMember = await checkNeighborhoodMembership(user.id, neighborhood.id);
               
-          if (membershipError) {
-            console.error(`[useNeighborhoodData] Error checking membership for ${neighborhood.id}:`, {
-              error: membershipError,
-              fetchAttempt: currentAttempt
-            });
-            continue;
-          }
-              
-          if (isMember) {
-            console.log("[useNeighborhoodData] Found user membership in neighborhood:", {
-              neighborhood: neighborhood,
-              userId: user.id,
-              fetchAttempt: currentAttempt
-            });
-                
-            setCurrentNeighborhood(neighborhood);
-            setIsLoading(false);
-            
-            // Calculate fetch duration for performance logging
-            const duration = Date.now() - startTime;
-            console.log(`[useNeighborhoodData] Fetch completed with membership found (duration: ${duration}ms)`);
-            return;
-          }
-        } catch (memberError) {
-          console.error(`[useNeighborhoodData] Exception checking membership for ${neighborhood.id}:`, {
-            error: memberError,
+        if (isMember) {
+          console.log("[useNeighborhoodData] Found user membership in neighborhood:", {
+            neighborhood: neighborhood,
+            userId: user.id,
             fetchAttempt: currentAttempt
           });
-          continue;
+              
+          setCurrentNeighborhood(neighborhood);
+          setIsLoading(false);
+          
+          // Calculate fetch duration for performance logging
+          const duration = Date.now() - startTime;
+          console.log(`[useNeighborhoodData] Fetch completed with membership found (duration: ${duration}ms)`);
+          return;
         }
       }
       
@@ -251,7 +228,7 @@ export function useNeighborhoodData(user: User | null) {
       clearTimeout(safetyTimer);
     };
     
-  }, [user, fetchAttempts, fetchNeighborhood]); // Added fetchNeighborhood to dependencies
+  }, [user, fetchAttempts, fetchNeighborhood]);
 
   // Log state changes for debugging
   useEffect(() => {

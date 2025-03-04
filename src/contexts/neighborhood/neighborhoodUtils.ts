@@ -3,7 +3,7 @@
  * Utility functions for neighborhood data
  * 
  * These functions handle API calls to Supabase for neighborhood-related operations
- * in a way that avoids RLS recursion issues
+ * that avoid RLS recursion issues
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -93,8 +93,8 @@ export async function checkNeighborhoodMembership(
       return false;
     }
 
-    // Type assertion to use the RPC function without TypeScript errors
-    // This is necessary because TypeScript doesn't automatically know about our custom RPC functions
+    // Instead of directly querying neighborhood_members table which causes recursion
+    // Use the security definer function we created
     const { data: isMember, error } = await supabase
       .rpc('user_is_neighborhood_member', {
         user_uuid: userId,
@@ -128,7 +128,6 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
     }
 
     // Use our security definer function to check if the user is a core contributor with access
-    // Using type assertion to make TypeScript happy
     const { data: hasAccess, error } = await supabase
       .rpc('user_is_core_contributor_with_access', {
         user_uuid: userId
@@ -162,7 +161,6 @@ export async function fetchAllNeighborhoodsForCoreContributor(userId: string): P
     }
 
     // Use our security definer function to get all neighborhoods for a core contributor
-    // Using type assertion to make TypeScript happy
     const { data, error } = await supabase
       .rpc('get_all_neighborhoods_for_core_contributor', {
         user_uuid: userId
@@ -173,7 +171,6 @@ export async function fetchAllNeighborhoodsForCoreContributor(userId: string): P
       return [];
     }
       
-    // Make sure we always return an array of Neighborhood objects
     return data || [];
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in fetchAllNeighborhoodsForCoreContributor:", err);
