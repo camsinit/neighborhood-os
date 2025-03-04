@@ -111,7 +111,11 @@ export function useNeighborhoodData(user: User | null) {
 
       // 1. First check if the user created any neighborhoods using our utility function
       console.log(`[useNeighborhoodData] Checking if user created neighborhoods (attempt ${currentAttempt})`);
-      const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
+      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
+      
+      if (createdError) {
+        console.warn("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
+      }
       
       // If user created a neighborhood, use it
       if (createdNeighborhoods && createdNeighborhoods.length > 0) {

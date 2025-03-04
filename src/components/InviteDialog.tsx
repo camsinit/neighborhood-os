@@ -16,6 +16,12 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
+import { Neighborhood } from "@/contexts/neighborhood/types";
+import { 
+  fetchCreatedNeighborhoods, 
+  fetchAllNeighborhoods, 
+  checkCoreContributorAccess
+} from "@/contexts/neighborhood/neighborhoodUtils";
 
 /**
  * InviteDialog Component
@@ -209,7 +215,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
       
       // Check if user has created neighborhoods - using security definer functions
-      const createdNeighborhoods = await fetchCreatedNeighborhoods(user.id);
+      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
       // Check if user is a core contributor
       const isCoreContrib = await checkCoreContributorAccess(user.id);
@@ -231,7 +237,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       // Show diagnostic info to user
       toast({
         title: "Diagnostic Information",
-        description: `Found ${createdNeighborhoods?.length || 0} created neighborhoods and ${allNeighborhoods?.length || 0} total neighborhoods.`,
+        description: `Found ${(createdNeighborhoods || []).length} created neighborhoods and ${(allNeighborhoods || []).length} total neighborhoods.`,
       });
       
       // If no neighborhoods found, show a more detailed message
@@ -252,44 +258,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       });
     }
   };
-  
-  // Helper functions to get neighborhoods data safely without RLS recursion
-  async function fetchCreatedNeighborhoods(userId: string) {
-    const { data, error } = await supabase
-      .rpc('get_user_created_neighborhoods', { user_uuid: userId });
-    
-    if (error) {
-      console.error("[Diagnostics] Error fetching created neighborhoods:", error);
-      return [];
-    }
-    
-    return data || [];
-  }
-  
-  async function checkCoreContributorAccess(userId: string) {
-    const { data, error } = await supabase
-      .rpc('user_is_core_contributor_with_access', { user_uuid: userId });
-    
-    if (error) {
-      console.error("[Diagnostics] Error checking core contributor:", error);
-      return false;
-    }
-    
-    return !!data;
-  }
-  
-  async function fetchAllNeighborhoods() {
-    const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('id, name');
-    
-    if (error) {
-      console.error("[Diagnostics] Error fetching all neighborhoods:", error);
-      return [];
-    }
-    
-    return data || [];
-  }
 
   // Calculate if we're in a stuck loading state (loading for too long)
   const isStuckLoading = isLoading && open && loadingTooLong;

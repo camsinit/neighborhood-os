@@ -16,12 +16,12 @@ import { Neighborhood } from './types';
  * @param userId - The ID of the user to check
  * @returns Promise that resolves to an array of neighborhoods created by the user
  */
-export async function fetchCreatedNeighborhoods(userId: string): Promise<Neighborhood[]> {
+export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data: Neighborhood[] | null, error: any }> {
   try {
     // Validate supabase client
     if (!supabase) {
       console.error("[NeighborhoodUtils] Supabase client is not available");
-      return [];
+      return { data: null, error: new Error("Supabase client is not available") };
     }
 
     // This query is safe because we're filtering by created_by which is not subject to RLS recursion
@@ -34,14 +34,14 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<Neighbo
           
     if (error) {
       console.error("[NeighborhoodUtils] Error checking created neighborhoods:", error);
-      // Don't throw, just return empty array
-      return [];
+      // Don't throw, just return the error
+      return { data: null, error };
     }
     
-    return data || [];
+    return { data, error: null };
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in fetchCreatedNeighborhoods:", err);
-    return [];
+    return { data: null, error: err };
   }
 }
 
