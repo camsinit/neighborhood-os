@@ -45,8 +45,13 @@ const SettingsDialogWrapper: React.FC<SettingsDialogWrapperProps> = ({
         </DialogHeader>
         
         {/* Render the actual settings dialog content */}
+        {/* 
+          Pass the same open and onOpenChange props to the SettingsDialog 
+          component instead of onClose, as that's what it expects according to the error
+        */}
         <SettingsDialog 
-          onClose={() => onOpenChange(false)} 
+          open={open}
+          onOpenChange={onOpenChange}
         />
       </DialogContent>
     </Dialog>
