@@ -1,8 +1,12 @@
 
+/**
+ * Updated useSafetyUpdateSubmit hook to include neighborhood_id
+ */
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNeighborhood } from "@/hooks/useNeighborhood";
 
 interface SafetyUpdateSubmitProps {
   onSuccess: () => void;
@@ -17,10 +21,17 @@ interface SafetyUpdateFormData {
 export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
+  // Get the current neighborhood
+  const { neighborhood } = useNeighborhood();
 
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
       toast.error("You must be logged in to create a safety update");
+      return;
+    }
+
+    if (!neighborhood?.id) {
+      toast.error("You must be in a neighborhood to create a safety update");
       return;
     }
 
@@ -32,6 +43,8 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
           description: formData.description,
           type: formData.type,
           author_id: user.id,
+          // Add the neighborhood_id
+          neighborhood_id: neighborhood.id
         })
         .select();
 
@@ -43,7 +56,6 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
       // Dispatch a custom event to signal that the update was submitted
-      // This will trigger a data refresh in the SafetyUpdates component
       const customEvent = new Event('safety-update-submitted');
       document.dispatchEvent(customEvent);
       
@@ -70,6 +82,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
           title: formData.title,
           description: formData.description,
           type: formData.type,
+          // We don't update neighborhood_id during update
         })
         .eq('id', updateId)
         .eq('author_id', user.id)
@@ -83,7 +96,6 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
       // Dispatch a custom event to signal that the update was submitted
-      // This will trigger a data refresh in the SafetyUpdates component
       const customEvent = new Event('safety-update-submitted');
       document.dispatchEvent(customEvent);
       

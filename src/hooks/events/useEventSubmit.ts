@@ -1,8 +1,12 @@
 
+/**
+ * Updated useEventSubmit hook to include neighborhood_id
+ */
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNeighborhood } from "@/hooks/useNeighborhood";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -11,10 +15,17 @@ interface EventSubmitProps {
 export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
+  // Get the current neighborhood
+  const { neighborhood } = useNeighborhood();
 
   const handleSubmit = async (formData: any) => {
     if (!user) {
       toast.error("You must be logged in to create an event");
+      return;
+    }
+
+    if (!neighborhood?.id) {
+      toast.error("You must be in a neighborhood to create an event");
       return;
     }
 
@@ -30,6 +41,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           is_recurring: formData.isRecurring,
           recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
           recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
+          // Add the neighborhood_id
+          neighborhood_id: neighborhood.id
         })
         .select();
 
@@ -42,7 +55,6 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       // Dispatch a custom event to signal that an event was created
-      // This will trigger a data refresh in components listening for this event
       const customEvent = new Event('event-submitted');
       document.dispatchEvent(customEvent);
       
@@ -73,6 +85,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           is_recurring: formData.isRecurring,
           recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
           recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
+          // We don't update neighborhood_id during update as that would move the event
+          // between neighborhoods which is probably not intended
         })
         .eq('id', eventId)
         .eq('host_id', user.id)
@@ -87,7 +101,6 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       // Dispatch a custom event to signal that an event was updated
-      // This will trigger a data refresh in components listening for this event
       const customEvent = new Event('event-submitted');
       document.dispatchEvent(customEvent);
       

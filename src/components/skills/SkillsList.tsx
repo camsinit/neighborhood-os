@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory } from './types/skillTypes';
@@ -9,6 +8,7 @@ import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { useNeighborhood } from '@/hooks/useNeighborhood';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -23,20 +23,29 @@ const SkillsList = ({
     title: string;
     requesterId: string;
   } | null>(null);
+  
+  const { neighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
 
   const {
     data: skills,
     isLoading
   } = useQuery({
-    queryKey: ['skills-exchange', selectedCategory],
+    queryKey: ['skills-exchange', selectedCategory, neighborhood?.id],
     queryFn: async () => {
+      if (!neighborhood?.id) {
+        console.log("[SkillsList] No neighborhood selected, returning empty array");
+        return [];
+      }
+      
       let query = supabase.from('skills_exchange').select(`
         *,
         profiles:user_id (
           avatar_url,
           display_name
         )
-      `).order('created_at', { ascending: false });
+      `)
+      .eq('neighborhood_id', neighborhood.id)
+      .order('created_at', { ascending: false });
       
       if (selectedCategory) {
         query = query.eq('skill_category', selectedCategory);
@@ -45,13 +54,24 @@ const SkillsList = ({
       const { data, error } = await query;
       if (error) throw error;
       return data as (Skill & { profiles: { avatar_url: string | null; display_name: string | null } })[];
-    }
+    },
+    enabled: !!neighborhood?.id && !isLoadingNeighborhood
   });
 
-  if (isLoading) {
+  if (isLoading || isLoadingNeighborhood) {
     return <div className="space-y-4">
       {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
     </div>;
+  }
+  
+  if (!neighborhood) {
+    return (
+      <EmptyState
+        icon={Sparkles}
+        title="No Neighborhood Selected"
+        description="You need to join a neighborhood to view and share skills"
+      />
+    );
   }
 
   const requests = skills?.filter(skill => skill.request_type === 'need') || [];
