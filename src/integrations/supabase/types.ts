@@ -1023,6 +1023,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      add_neighborhood_member: {
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
       check_user_role: {
         Args: {
           user_id: string
@@ -1057,6 +1064,16 @@ export type Database = {
           neighborhood_uuid: string
         }
         Returns: string[]
+      }
+      get_user_neighborhoods: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: {
+          id: string
+          name: string
+          joined_at: string
+        }[]
       }
       user_created_neighborhood: {
         Args: {

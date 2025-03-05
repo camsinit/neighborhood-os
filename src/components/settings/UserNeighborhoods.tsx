@@ -78,10 +78,14 @@ export const UserNeighborhoods = () => {
         
         // USING RPC FUNCTION: Call our security definer function that safely checks membership
         // This avoids the RLS recursion issue
+        // NOTE: We need to use explicit typing because the TypeScript definitions don't include our custom RPC functions
         const { data: membershipData, error: membershipError } = await supabase
           .rpc('get_user_neighborhoods', {
             user_uuid: user.id
-          });
+          }) as { 
+            data: Neighborhood[] | null; 
+            error: Error | null;
+          };
         
         if (membershipError) {
           throw membershipError;
@@ -142,11 +146,15 @@ export const UserNeighborhoods = () => {
       }
       
       // UPDATED: Use RPC function to safely add a member
+      // NOTE: We need to use explicit typing because the TypeScript definitions don't include our custom RPC functions
       const { error: addError } = await supabase
         .rpc('add_neighborhood_member', {
           user_uuid: userId,
           neighborhood_uuid: neighborhoodId
-        });
+        }) as {
+          data: boolean | null;
+          error: Error | null;
+        };
       
       if (addError) throw addError;
       
@@ -158,10 +166,14 @@ export const UserNeighborhoods = () => {
         // Refresh neighborhoods using the safer approach
         setIsLoading(true);
         
+        // NOTE: We need to use explicit typing because the TypeScript definitions don't include our custom RPC functions
         const { data: refreshedData, error: refreshError } = await supabase
           .rpc('get_user_neighborhoods', {
             user_uuid: user.id
-          });
+          }) as {
+            data: Neighborhood[] | null;
+            error: Error | null;
+          };
 
         if (refreshError) throw refreshError;
         

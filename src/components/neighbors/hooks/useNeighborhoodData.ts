@@ -65,10 +65,14 @@ export function useNeighborhoodData() {
         }
 
         // Call our RPC function that safely checks membership
+        // NOTE: We need to use explicit typing because TypeScript doesn't know about our custom RPC functions
         const { data: membershipData, error: membershipError } = await supabase
           .rpc('get_user_neighborhoods', {
             user_uuid: user.id
-          });
+          }) as {
+            data: Neighborhood[] | null;
+            error: Error | null;
+          };
         
         if (membershipError) {
           throw membershipError;
