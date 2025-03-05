@@ -9,56 +9,55 @@ import { useNeighborhood } from '@/contexts/NeighborhoodContext';
  * DashboardPage Component
  * 
  * This is the main dashboard page after login.
- * It redirects to different pages depending on the user's neighborhood status.
- * It's designed to gracefully handle loading states and errors.
+ * It handles redirection based on neighborhood status
+ * and provides meaningful loading/error states.
  */
 const DashboardPage = () => {
-  // Get navigation and session context
+  // Get navigation and authentication context
   const navigate = useNavigate();
   const { isLoading: sessionLoading } = useSessionContext();
   
-  // Get neighborhood data
+  // Get neighborhood data from context
   const { 
     currentNeighborhood, 
     isLoading: neighborhoodLoading, 
-    error: neighborhoodError 
+    error: neighborhoodError,
+    refreshNeighborhoodData
   } = useNeighborhood();
   
-  // Overall loading state
+  // Combined loading state
   const isLoading = sessionLoading || neighborhoodLoading;
   
-  // Log debugging information
+  // Log component mounting and state for debugging
   useEffect(() => {
-    console.log('[DashboardPage] Component state:', {
+    console.log("[DashboardPage] Mounting component", {
       sessionLoading,
       neighborhoodLoading,
-      hasNeighborhood: !!currentNeighborhood,
-      hasError: !!neighborhoodError,
-      errorMessage: neighborhoodError?.message
+      hasNeighborhood: !!currentNeighborhood
     });
-  }, [sessionLoading, neighborhoodLoading, currentNeighborhood, neighborhoodError]);
+  }, [sessionLoading, neighborhoodLoading, currentNeighborhood]);
   
-  // Redirect based on neighborhood status when data is loaded
+  // Handle redirection based on neighborhood status
   useEffect(() => {
-    // Only take action when we're done loading all data
+    // Only proceed when we're done loading
     if (!isLoading) {
       if (neighborhoodError) {
-        // If there's an error, log it and stay on the dashboard
-        console.error('[DashboardPage] Error loading neighborhood data:', neighborhoodError);
-        // We don't redirect here - will show error state in the UI
+        // If there's an error, log it but don't redirect
+        console.error("[DashboardPage] Error loading neighborhood data:", neighborhoodError);
+        // Stay on dashboard to show error state
       } else if (currentNeighborhood) {
         // If user has a neighborhood, go to neighbors page
-        console.log('[DashboardPage] User has neighborhood, redirecting to neighbors page');
+        console.log("[DashboardPage] User has neighborhood, redirecting to neighbors page");
         navigate('/neighbors', { replace: true });
       } else {
         // If no neighborhood, prompt user to create one or join one
-        console.log('[DashboardPage] User has no neighborhood, redirecting to settings page');
+        console.log("[DashboardPage] User has no neighborhood, redirecting to settings page");
         navigate('/settings', { replace: true });
       }
     }
   }, [isLoading, neighborhoodError, currentNeighborhood, navigate]);
   
-  // Error state - show a message if there was an error
+  // Error state - show error message with retry button
   if (!isLoading && neighborhoodError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -77,10 +76,10 @@ const DashboardPage = () => {
               <div className="mt-4">
                 <button
                   type="button"
-                  onClick={() => window.location.reload()}
+                  onClick={() => refreshNeighborhoodData()}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  Refresh Page
+                  Retry
                 </button>
               </div>
             </div>
@@ -90,7 +89,7 @@ const DashboardPage = () => {
     );
   }
   
-  // Show loading spinner while checking neighborhood status
+  // Loading state - show spinner with helpful message
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="text-center">

@@ -3,7 +3,7 @@
  * Utility functions for neighborhood data
  * 
  * These functions handle API calls to Supabase for neighborhood-related operations
- * that avoid RLS recursion issues
+ * and are designed to avoid RLS recursion issues
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -24,18 +24,23 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
       return { data: null, error: new Error("Supabase client is not available") };
     }
 
-    // This query is safe with our updated RLS policies - filtering by created_by is not subject to recursion
+    // Use a direct query approach to avoid RLS recursion
+    // This query directly checks the created_by field which has simpler RLS
     const { data, error } = await supabase
       .from('neighborhoods')
-      .select('id, name, created_by')
+      .select('id, name, created_by, created_at, geo_boundary, address, city, state, zip')
       .eq('created_by', userId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .order('created_at', { ascending: false });
           
     if (error) {
       console.error("[NeighborhoodUtils] Error checking created neighborhoods:", error);
       return { data: null, error };
     }
+    
+    console.log("[NeighborhoodUtils] Successfully fetched created neighborhoods:", {
+      count: data?.length || 0,
+      userId
+    });
     
     return { data, error: null };
   } catch (err) {
@@ -46,6 +51,7 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
 
 /**
  * Utility function to fetch all neighborhoods in the system
+ * Uses a safer approach to avoid RLS recursion
  * 
  * @returns Promise that resolves to an array of all neighborhoods
  */
@@ -57,15 +63,21 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
       return [];
     }
 
-    // With our fixed RLS policies, core contributors and neighborhood creators can access this
+    // Use a simple direct query that doesn't involve complex relationships
+    // This avoids the RLS recursion issues
     const { data, error } = await supabase
       .from('neighborhoods')
-      .select('id, name, created_by');
+      .select('id, name, created_by, created_at, geo_boundary, address, city, state, zip')
+      .order('name');
     
     if (error) {
       console.error("[NeighborhoodUtils] Error fetching all neighborhoods:", error);
       return [];
     }
+    
+    console.log("[NeighborhoodUtils] Successfully fetched all neighborhoods:", {
+      count: data?.length || 0
+    });
     
     return data || [];
   } catch (err) {
@@ -76,7 +88,7 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses our safe approach to avoid RLS recursion
+ * Uses a fallback approach to avoid RLS recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -88,24 +100,33 @@ export async function checkNeighborhoodMembership(
 ): Promise<boolean> {
   try {
     // Validate supabase client
-    if (!supabase || !supabase.rpc) {
-      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+    if (!supabase) {
+      console.error("[NeighborhoodUtils] Supabase client is not available");
       return false;
     }
 
-    // Use the security definer function we created
-    const { data: isMember, error } = await supabase
-      .rpc('user_is_neighborhood_member', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      }) as { data: boolean | null, error: any };
+    // Use simple direct query on the neighborhood_members table
+    // This avoids complex joins that might trigger recursion
+    const { data, error } = await supabase
+      .from('neighborhood_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active')
+      .maybeSingle();
             
     if (error) {
-      console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
+      // If we get a recursion error, try the fallback approach
+      if (error.message?.includes('recursion')) {
+        console.log("[NeighborhoodUtils] Recursion detected, using fallback method for membership check");
+        return await checkIsMemberFallback(userId, neighborhoodId);
+      }
+      
+      console.error("[NeighborhoodUtils] Error checking membership:", error);
       return false;
     }
             
-    return !!isMember;
+    return !!data;
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in checkNeighborhoodMembership:", err);
     return false;
@@ -113,7 +134,35 @@ export async function checkNeighborhoodMembership(
 }
 
 /**
+ * Fallback method to check membership that avoids complex queries
+ * This is used when the primary method encounters recursion errors
+ */
+async function checkIsMemberFallback(userId: string, neighborhoodId: string): Promise<boolean> {
+  try {
+    // Use the simpler debug_neighborhood_members view which may have different RLS settings
+    const { data, error } = await supabase
+      .from('debug_neighborhood_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active')
+      .maybeSingle();
+      
+    if (error) {
+      console.error("[NeighborhoodUtils] Fallback method error:", error);
+      return false;
+    }
+    
+    return !!data;
+  } catch (err) {
+    console.error("[NeighborhoodUtils] Error in fallback method:", err);
+    return false;
+  }
+}
+
+/**
  * Utility function to check if a user is a core contributor with access to all neighborhoods
+ * Uses a direct query approach to avoid RLS issues
  * 
  * @param userId - The ID of the user to check
  * @returns Promise that resolves to true if the user is a core contributor with access, false otherwise
@@ -121,23 +170,24 @@ export async function checkNeighborhoodMembership(
 export async function checkCoreContributorAccess(userId: string): Promise<boolean> {
   try {
     // Validate supabase client
-    if (!supabase || !supabase.rpc) {
-      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+    if (!supabase) {
+      console.error("[NeighborhoodUtils] Supabase client is not available");
       return false;
     }
 
-    // Use our security definer function to check if the user is a core contributor with access
-    const { data: hasAccess, error } = await supabase
-      .rpc('user_is_core_contributor_with_access', {
-        user_uuid: userId
-      }) as { data: boolean | null, error: any };
+    // Use a direct query on the core_contributors table
+    const { data, error } = await supabase
+      .from('core_contributors')
+      .select('id, can_access_all_neighborhoods')
+      .eq('user_id', userId)
+      .maybeSingle();
       
     if (error) {
       console.error("[NeighborhoodUtils] Error checking core contributor access:", error);
       return false;
     }
       
-    return !!hasAccess;
+    return !!data?.can_access_all_neighborhoods;
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in checkCoreContributorAccess:", err);
     return false;
@@ -146,31 +196,23 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
 
 /**
  * Utility function to fetch all neighborhoods for a core contributor
- * This is only accessible to users with core contributor access
+ * This provides a direct data fetching approach for authorized users
  * 
  * @param userId - The ID of the core contributor
  * @returns Promise that resolves to an array of all neighborhoods if the user has access
  */
 export async function fetchAllNeighborhoodsForCoreContributor(userId: string): Promise<Neighborhood[]> {
   try {
-    // Validate supabase client
-    if (!supabase || !supabase.rpc) {
-      console.error("[NeighborhoodUtils] Supabase client or RPC method is not available");
+    // First check if user has core contributor access
+    const hasAccess = await checkCoreContributorAccess(userId);
+    
+    if (!hasAccess) {
+      console.log("[NeighborhoodUtils] User is not a core contributor with access");
       return [];
     }
-
-    // Use our security definer function to get all neighborhoods for a core contributor
-    const { data, error } = await supabase
-      .rpc('get_all_neighborhoods_for_core_contributor', {
-        user_uuid: userId
-      }) as { data: Neighborhood[] | null, error: any };
-      
-    if (error) {
-      console.error("[NeighborhoodUtils] Error fetching neighborhoods for core contributor:", error);
-      return [];
-    }
-      
-    return data || [];
+    
+    // If they have access, fetch all neighborhoods
+    return await fetchAllNeighborhoods();
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in fetchAllNeighborhoodsForCoreContributor:", err);
     return [];

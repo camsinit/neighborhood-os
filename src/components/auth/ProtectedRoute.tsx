@@ -8,8 +8,7 @@ import { useEffect, useState } from "react";
  * ProtectedRoute Component
  * 
  * This component protects routes that require authentication.
- * It handles the loading state while checking authentication
- * and redirects to the login page if the user is not authenticated.
+ * It handles loading states and redirects unauthenticated users.
  * 
  * @param children - The components to render if the user is authenticated
  */
@@ -23,7 +22,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const user = useUser();
   const location = useLocation();
   
-  // Add state to handle initial loading with a small delay for better UX
+  // Add state to handle initial loading with a delay for better UX
   const [showLoading, setShowLoading] = useState(false);
   
   // Only show the loading spinner after a short delay to prevent flashing
@@ -37,16 +36,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return () => clearTimeout(timer);
   }, [isLoading]);
   
-  // Clear loading state when not loading anymore
+  // Reset loading state when not loading anymore
   useEffect(() => {
     if (!isLoading) {
       setShowLoading(false);
     }
   }, [isLoading]);
 
-  // Add more detailed logging for debugging authentication issues
+  // Add detailed logging for debugging
   useEffect(() => {
-    console.log("[ProtectedRoute] Authentication state:", {
+    console.log("[ProtectedRoute] Component mounted/updated:", {
       isLoading,
       hasUser: !!user,
       hasSession: !!session,
@@ -56,7 +55,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     });
   }, [isLoading, user, session, location.pathname]);
 
-  // Handle the loading state while authentication is being checked
+  // Handle loading state
   if (isLoading) {
     console.log("[ProtectedRoute] Still loading authentication state, session context loading:", isLoading);
     
@@ -72,18 +71,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       );
     }
     
-    // During the initial load delay, return an empty div to prevent flashing
+    // Return an empty div during the initial delay
     return <div className="min-h-screen"></div>;
   }
 
-  // If user is not authenticated, redirect to login
+  // If not authenticated, redirect to login
   if (!user || !session) {
-    console.log("[ProtectedRoute] No authenticated user found, redirecting to login", {
-      hasUser: !!user,
-      hasSession: !!session
-    });
-    
-    // Navigate to login, save the current location for redirect after login
+    console.log("[ProtectedRoute] No authenticated user found, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
