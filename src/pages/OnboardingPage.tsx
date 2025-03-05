@@ -32,7 +32,7 @@ const OnboardingPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <LoadingSpinner className="mb-4" />
+        <LoadingSpinner />
         <p className="text-gray-600">Loading your account information...</p>
       </div>
     );
@@ -57,7 +57,7 @@ const OnboardingPage = () => {
 
   // If authenticated, show the onboarding flow
   if (user && session) {
-    return <NewNeighborOnboarding />;
+    return <NewNeighborOnboarding inviteCode={inviteCode} />;
   }
 
   // Fallback state - should not reach here if redirecting works

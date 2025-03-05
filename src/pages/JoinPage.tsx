@@ -105,14 +105,16 @@ const JoinPage = () => {
         navigate('/neighbors');
         return;
       }
+      
+      // Use our security definer function to safely add member
       const { error: memberError } = await supabase
-        .from('neighborhood_members')
-        .insert({
-          user_id: user.id,
-          neighborhood_id: invitation.neighborhood_id,
-          status: 'active'
+        .rpc('add_neighborhood_member', {
+          user_uuid: user.id,
+          neighborhood_uuid: invitation.neighborhood_id
         });
+      
       if (memberError) throw memberError;
+      
       const { error: inviteError } = await supabase
         .from('invitations')
         .update({
@@ -121,6 +123,7 @@ const JoinPage = () => {
           accepted_at: new Date().toISOString()
         })
         .eq('id', invitation.id);
+        
       if (inviteError) throw inviteError;
       handleJoinComplete();
     } catch (err) {

@@ -60,7 +60,7 @@ const DashboardPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <LoadingSpinner className="w-12 h-12 mb-4" />
+        <LoadingSpinner />
         <h1 className="text-xl font-bold mb-2">Loading Your Neighborhood</h1>
         <p className="text-gray-600 max-w-md text-center mb-8">
           We're connecting you with your neighborhood information.

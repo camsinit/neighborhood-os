@@ -1,23 +1,21 @@
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { useTheme } from "@/components/ui/use-theme";
-import { LandingPage } from "@/pages/LandingPage";
-import { LoginPage as Login } from "@/pages/LoginPage";
-import { NeighborsPage } from "@/pages/NeighborsPage";
-import { CalendarPage } from "@/pages/CalendarPage";
-import { SafetyPage } from "@/pages/SafetyPage";
-import { CarePage } from "@/pages/CarePage";
-import { SkillsPage } from "@/pages/SkillsPage";
-import { GoodsPage } from "@/pages/GoodsPage";
-import { AdminPage } from "@/pages/AdminPage";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { JoinPage } from "@/pages/JoinPage";
+import LandingPage from "@/pages/LandingPage";
+import Login from "@/pages/LoginPage";
+import NeighborsPage from "@/pages/NeighborsPage";
+import CalendarPage from "@/pages/CalendarPage";
+import SafetyPage from "@/pages/SafetyPage";
+import CarePage from "@/pages/CarePage";
+import SkillsPage from "@/pages/SkillsPage";
+import GoodsPage from "@/pages/GoodsPage";
+import AdminPage from "@/pages/AdminPage";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import JoinPage from "@/pages/JoinPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
 
 function App() {
-  const { theme } = useTheme();
-
   return (
     <div className="app min-h-screen">
       <Toaster />
