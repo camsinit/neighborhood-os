@@ -1,199 +1,140 @@
-
 /**
- * Refactored hook for fetching neighborhood data
+ * Hook to handle neighborhood data fetching
  * 
- * This hook coordinates the neighborhood fetch process using
- * smaller, more focused hooks
+ * This module centralizes the logic for fetching neighborhood data.
  */
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useFetchState } from './useFetchState';
+import { useFetchStrategy } from './useFetchStrategy';
+import { useFetchErrorHandler } from './useFetchErrorHandler';
 import { Neighborhood } from '../../types';
 import { supabase } from '@/integrations/supabase/client';
-import { useFetchState } from './useFetchState';
-import { useFetchErrorHandler } from './useFetchErrorHandler';
-import { 
-  checkCreatedNeighborhoodStrategy,
-  checkMembershipStrategy
-} from './useFetchStrategy';
 
 /**
- * Hook containing the core neighborhood fetching logic
+ * Custom hook for fetching neighborhood data
  * 
- * This hook extracts the main fetching functionality from useNeighborhoodData
- * to make it more maintainable and testable.
- * 
- * @param user The current user
- * @param currentNeighborhood The currently selected neighborhood
- * @param fetchAttempts Counter for fetch attempts
- * @returns Object containing fetch function and state setters
+ * @param user - The current authenticated user
+ * @param currentNeighborhood - The current neighborhood
+ * @param currentAttempt - The current fetch attempt count
+ * @returns Fetch function and state
  */
-export function useFetchNeighborhood(
+export const useFetchNeighborhood = (
   user: User | null,
   currentNeighborhood: Neighborhood | null,
-  fetchAttempts: number
-) {
-  // Get state management functions
+  currentAttempt: number
+) => {
+  // State for error handling
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Import strategies from helper hooks
+  const { fetchUserNeighborhoods } = useFetchStrategy();
+  const { handleFetchError } = useFetchErrorHandler();
+  
+  // Import state handling functions
   const { 
-    error, 
+    resetStates, 
     hasFetchAttempted, 
-    setError, 
-    setHasFetchAttempted,
-    resetStates 
+    setHasFetchAttempted 
   } = useFetchState();
   
-  // Get error handling functions
-  const { handleFetchError, handleClientError } = useFetchErrorHandler();
-
-  // The main fetch function that gets neighborhood data
+  /**
+   * The main fetch function that orchestrates the neighborhood data fetching
+   * 
+   * @param startFetchTimer - Function to start safety timeout 
+   * @param endFetchTimer - Function to end safety timeout
+   * @param setIsLoading - Function to update loading state
+   * @param setAllNeighborhoods - Function to update all neighborhoods state
+   * @param setCurrentNeighborhood - Function to update current neighborhood state
+   */
   const fetchNeighborhood = useCallback(async (
-    startFetchTimer: () => number,
-    endFetchTimer: (startTime: number) => void,
+    startFetchTimer: () => void,
+    endFetchTimer: () => void,
     setIsLoading: (loading: boolean) => void,
     setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void,
     setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void
   ) => {
-    // Track fetch attempts and start time
-    const currentAttempt = fetchAttempts + 1;
-    const startTime = startFetchTimer();
+    // Start timer for safety timeout
+    startFetchTimer();
     
+    // Log fetch attempt
     console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
     
     // Reset states at the start of each fetch
-    // We need to remove the setIsCoreContributor parameter since we no longer need it
     resetStates(setIsLoading, setAllNeighborhoods);
 
     // If no user is logged in, we can't fetch neighborhood data
     if (!user) {
-      console.log("[useFetchNeighborhood] No user found, skipping fetch", {
-        userId: null,
-        fetchAttempt: currentAttempt,
-        timestamp: new Date().toISOString()
-      });
+      console.log("[useFetchNeighborhood] No user logged in, clearing neighborhood data");
+      setCurrentNeighborhood(null);
       setIsLoading(false);
+      endFetchTimer();
       return;
     }
-
-    console.log("[useFetchNeighborhood] Starting neighborhood fetch for user:", {
-      userId: user.id,
-      fetchAttempt: currentAttempt,
-      timestamp: new Date().toISOString()
-    });
-
+    
     try {
-      // Check if supabase client is valid
-      if (!handleClientError(supabase, currentAttempt, setError, setIsLoading)) {
-        return;
-      }
-
-      // Try a direct, simplified approach first - this helps us debug
-      console.log("[useFetchNeighborhood] TESTING: Making direct query to diagnose the issue");
-      
-      try {
-        // First, try a simple direct query to see if basic auth works
-        const { data: authTest, error: authError } = await supabase.auth.getUser();
-        console.log("[useFetchNeighborhood] Auth test result:", { 
-          success: !!authTest?.user, 
-          userId: authTest?.user?.id,
-          error: authError ? authError.message : null
-        });
-        
-        // Next, try direct query to neighborhoods (should work for everyone)
-        const { data: nbTest, error: nbError } = await supabase
-          .from('neighborhoods')
-          .select('id, name')
-          .limit(1);
-          
-        console.log("[useFetchNeighborhood] Neighborhoods query test:", { 
-          success: !!nbTest, 
-          count: nbTest?.length,
-          error: nbError ? nbError.message : null
-        });
-          
-        // Finally, try direct query to neighborhood_members (this is likely where the recursion happens)
-        const { data: nmTest, error: nmError } = await supabase
-          .from('neighborhood_members')
-          .select('id, neighborhood_id, user_id')
-          .eq('user_id', user.id)
-          .limit(1);
-          
-        console.log("[useFetchNeighborhood] Neighborhood members query test:", { 
-          success: !!nmTest, 
-          count: nmTest?.length,
-          error: nmError ? nmError.message : null,
-          errorDetails: nmError
-        });
-      } catch (diagError) {
-        console.error("[useFetchNeighborhood] Diagnostic query error:", diagError);
-      }
-
-      // Check if user created any neighborhoods
-      const foundCreatedNeighborhood = await checkCreatedNeighborhoodStrategy(
-        user.id,
-        setCurrentNeighborhood,
-        currentAttempt
-      );
-      
-      // If we found a created neighborhood, we're done
-      if (foundCreatedNeighborhood) {
+      // Validate supabase client (safety check)
+      if (!supabase || !supabase.rpc) {
+        const clientError = new Error("Supabase client is not properly initialized");
+        console.error("[useFetchNeighborhood] Supabase client error:", clientError);
+        setError(clientError);
         setIsLoading(false);
-        endFetchTimer(startTime);
+        endFetchTimer();
         return;
       }
       
-      // Check if user is a member of any neighborhoods
-      const foundMembership = await checkMembershipStrategy(
-        user.id,
-        setCurrentNeighborhood,
-        currentAttempt
-      );
+      // Fetch neighborhoods the user is a member of
+      const fetchedNeighborhoods = await fetchUserNeighborhoods(user.id);
       
-      // If we get here, user has no neighborhood
-      console.log(`[useFetchNeighborhood] Completed neighborhood check (attempt ${currentAttempt}):`, {
-        hasNeighborhood: foundMembership
-      });
+      // Update the available neighborhoods list
+      setAllNeighborhoods(fetchedNeighborhoods);
       
-      if (!foundMembership) {
-        console.log(`[useFetchNeighborhood] User has no neighborhood (attempt ${currentAttempt})`);
+      // If no neighborhoods found, clear current neighborhood
+      if (fetchedNeighborhoods.length === 0) {
+        console.log("[useFetchNeighborhood] No neighborhoods found for user");
         setCurrentNeighborhood(null);
+      } 
+      // If we already have a current neighborhood, try to find it in the new list
+      else if (currentNeighborhood) {
+        const stillExists = fetchedNeighborhoods.find(n => n.id === currentNeighborhood.id);
+        // If the current neighborhood still exists, keep it
+        if (stillExists) {
+          console.log("[useFetchNeighborhood] Current neighborhood still valid");
+          setCurrentNeighborhood(stillExists);
+        } else {
+          // Otherwise, use the first neighborhood in the list
+          console.log("[useFetchNeighborhood] Current neighborhood no longer valid, using first available");
+          setCurrentNeighborhood(fetchedNeighborhoods[0]);
+        }
+      } 
+      // If no current neighborhood, use the first one in the list
+      else {
+        console.log("[useFetchNeighborhood] Setting first neighborhood as current");
+        setCurrentNeighborhood(fetchedNeighborhoods[0]);
       }
-      
-      // Always ensure loading is set to false when done
+    } catch (err: any) {
+      // Handle fetch errors
+      handleFetchError(err, setError);
+    } finally {
+      // End the timer and mark loading as complete
+      endFetchTimer();
       setIsLoading(false);
-      
-      // Calculate fetch duration for performance logging  
-      endFetchTimer(startTime);
-      
-    } catch (err) {
-      // Handle unexpected errors
-      console.error("[useFetchNeighborhood] Top-level error:", err);
-      handleFetchError(
-        err, 
-        user?.id, 
-        currentAttempt, 
-        setError, 
-        setCurrentNeighborhood,
-        setIsLoading
-      );
-      
-      // Calculate fetch duration for performance logging
-      endFetchTimer(startTime);
+      setHasFetchAttempted(true);
     }
   }, [
-    currentNeighborhood, 
-    fetchAttempts, 
     user, 
+    currentNeighborhood, 
+    currentAttempt, 
+    fetchUserNeighborhoods, 
+    handleFetchError,
     resetStates, 
-    handleClientError, 
-    handleFetchError
+    hasFetchAttempted, 
+    setHasFetchAttempted
   ]);
-
+  
   return {
     fetchNeighborhood,
     error,
-    hasFetchAttempted,
     setError
   };
-}
-
-// Re-export the core fetch hook for backward compatibility
-export default useFetchNeighborhood;
+};

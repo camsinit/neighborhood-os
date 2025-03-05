@@ -2,7 +2,7 @@
 /**
  * NeighborhoodSwitcher Component
  * 
- * This component allows core contributors to switch between neighborhoods.
+ * This component allows users to switch between neighborhoods.
  * It displays a dropdown of available neighborhoods and allows switching
  * between them.
  */
@@ -20,21 +20,20 @@ import {
 /**
  * NeighborhoodSwitcher component
  * 
- * Allows core contributors to switch between available neighborhoods.
- * Only appears if the user is a core contributor with access to multiple neighborhoods.
+ * Allows users to switch between available neighborhoods.
+ * Only appears if the user has access to multiple neighborhoods.
  */
 export default function NeighborhoodSwitcher() {
   const { 
     neighborhood, 
-    availableNeighborhoods, 
-    isCoreContributor, 
+    availableNeighborhoods,
     setCurrentNeighborhood 
   } = useNeighborhood();
   
   const [isOpen, setIsOpen] = useState(false);
   
-  // If user is not a core contributor or has no neighborhoods, don't render
-  if (!isCoreContributor || availableNeighborhoods.length === 0) {
+  // If user has no neighborhoods, don't render
+  if (availableNeighborhoods.length === 0) {
     return null;
   }
   
