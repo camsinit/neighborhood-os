@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useUser, useSessionContext } from '@supabase/auth-helpers-react';
+import { useUser } from '@supabase/auth-helpers-react';
 import { NeighborhoodContextType } from './types';
 import { useNeighborhoodData } from './useNeighborhoodData';
 
@@ -25,35 +25,32 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
  * @param children - Child components that will have access to the context
  */
 export function NeighborhoodProvider({ children }: { children: React.ReactNode }) {
-  // Get the current authenticated user and session information
+  // Get the current authenticated user
   const user = useUser();
-  const { isLoading: sessionLoading } = useSessionContext();
   
   // State to track authentication stabilizing
   const [isAuthStable, setIsAuthStable] = useState(false);
   
   // Wait for auth to stabilize before fetching neighborhood data
   useEffect(() => {
-    // If we have a definite user state (either logged in or definitely not logged in)
-    // and session loading is complete, mark auth as stable
-    if (!sessionLoading) {
+    // If we have a definite user state (either logged in or definitely not logged in),
+    // mark auth as stable
+    if (user !== undefined) {
       // Small delay to ensure auth is fully processed
       const timer = setTimeout(() => {
         setIsAuthStable(true);
         console.log("[NeighborhoodProvider] Auth state stabilized:", { 
           isLoggedIn: !!user, 
-          userId: user?.id,
-          sessionLoading
+          userId: user?.id
         });
       }, 300);
       
       return () => clearTimeout(timer);
     }
-  }, [user, sessionLoading]);
+  }, [user]);
   
   // Use our custom hook to fetch and manage neighborhood data
-  // Only pass the user when auth is stable AND we have a user
-  const neighborhoodData = useNeighborhoodData(isAuthStable && user ? user : null);
+  const neighborhoodData = useNeighborhoodData(isAuthStable ? user : null);
   
   // Log provider state for debugging
   useEffect(() => {
@@ -61,12 +58,10 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
       isAuthStable,
       hasUser: !!user,
       userId: user?.id,
-      sessionLoading,
       neighborhoodLoading: neighborhoodData.isLoading,
-      hasNeighborhood: !!neighborhoodData.currentNeighborhood,
-      error: neighborhoodData.error?.message
+      hasNeighborhood: !!neighborhoodData.currentNeighborhood
     });
-  }, [isAuthStable, user, sessionLoading, neighborhoodData]);
+  }, [isAuthStable, user, neighborhoodData]);
 
   // Provide the context values to child components
   return (
