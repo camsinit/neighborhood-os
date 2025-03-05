@@ -15,6 +15,9 @@ import { useNeighborhoodQueries } from './neighborhood/useNeighborhoodQueries';
 import { useBackgroundRefresh } from './neighborhood/useBackgroundRefresh';
 import { useNeighborhoodDebug } from './neighborhood/useNeighborhoodDebug';
 
+// Re-export the type so components can import it directly from useNeighborhood
+export type { UseNeighborhoodReturn } from './neighborhood/types';
+
 /**
  * Custom hook for working with neighborhood data
  * 

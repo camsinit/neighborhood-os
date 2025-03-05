@@ -7,7 +7,8 @@
  * without having to pass props through multiple levels.
  */
 import { createContext, useContext, ReactNode } from 'react';
-import { useNeighborhood, UseNeighborhoodReturn } from '@/hooks/useNeighborhood';
+import { useNeighborhood } from '@/hooks/useNeighborhood';
+import { UseNeighborhoodReturn } from '@/hooks/neighborhood/types';
 
 // Create the context with a default value
 const NeighborhoodContext = createContext<UseNeighborhoodReturn | undefined>(undefined);

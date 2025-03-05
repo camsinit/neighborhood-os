@@ -7,6 +7,7 @@
 
 // Main hook
 export { default as useNeighborhood } from '../useNeighborhood';
+export type { UseNeighborhoodReturn } from './types';
 
 // Core functionality
 export * from './useNeighborhoodQueries';
