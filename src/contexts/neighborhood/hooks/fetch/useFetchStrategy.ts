@@ -12,7 +12,8 @@ import {
   checkCoreContributorAccess,
   fetchAllNeighborhoodsForCoreContributor,
   checkNeighborhoodMembership,
-  fetchAllNeighborhoods
+  fetchAllNeighborhoods,
+  getUserNeighborhoods 
 } from '../../neighborhoodUtils';
 
 /**
@@ -98,7 +99,8 @@ export const checkCreatedNeighborhoodStrategy = async (
 };
 
 /**
- * Checks all neighborhoods to find if user is a member of any
+ * Simplified strategy - check all neighborhood memberships in one go
+ * This is our new approach to avoid recursion issues
  * 
  * @param userId - The user's ID
  * @param setCurrentNeighborhood - Function to update current neighborhood
@@ -106,6 +108,37 @@ export const checkCreatedNeighborhoodStrategy = async (
  * @returns True if membership found, false otherwise
  */
 export const checkMembershipStrategy = async (
+  userId: string,
+  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
+  currentAttempt: number
+): Promise<boolean> => {
+  console.log(`[useFetchStrategy] Using simplified membership check (attempt ${currentAttempt})`);
+
+  // Get all neighborhoods in one go using our new helper
+  const neighborhoods = await getUserNeighborhoods(userId);
+  
+  if (!neighborhoods || neighborhoods.length === 0) {
+    console.log(`[useFetchStrategy] No neighborhoods found for user (attempt ${currentAttempt})`);
+    setCurrentNeighborhood(null);
+    return false;
+  }
+  
+  console.log(`[useFetchStrategy] Found ${neighborhoods.length} neighborhoods for user (attempt ${currentAttempt})`);
+  
+  // Just use the first one as the current neighborhood
+  setCurrentNeighborhood(neighborhoods[0]);
+  return true;
+};
+
+/**
+ * Legacy membership check strategy - kept for fallback
+ * 
+ * @param userId - The user's ID
+ * @param setCurrentNeighborhood - Function to update current neighborhood
+ * @param currentAttempt - Current fetch attempt number for logging
+ * @returns True if membership found, false otherwise
+ */
+export const legacyCheckMembershipStrategy = async (
   userId: string,
   setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
   currentAttempt: number

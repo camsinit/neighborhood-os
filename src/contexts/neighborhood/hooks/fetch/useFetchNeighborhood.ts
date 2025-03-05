@@ -86,6 +86,47 @@ export function useFetchNeighborhood(
         return;
       }
 
+      // Try a direct, simplified approach first - this helps us debug
+      console.log("[useFetchNeighborhood] TESTING: Making direct query to diagnose the issue");
+      
+      try {
+        // First, try a simple direct query to see if basic auth works
+        const { data: authTest, error: authError } = await supabase.auth.getUser();
+        console.log("[useFetchNeighborhood] Auth test result:", { 
+          success: !!authTest?.user, 
+          userId: authTest?.user?.id,
+          error: authError ? authError.message : null
+        });
+        
+        // Next, try direct query to neighborhoods (should work for everyone)
+        const { data: nbTest, error: nbError } = await supabase
+          .from('neighborhoods')
+          .select('id, name')
+          .limit(1);
+          
+        console.log("[useFetchNeighborhood] Neighborhoods query test:", { 
+          success: !!nbTest, 
+          count: nbTest?.length,
+          error: nbError ? nbError.message : null
+        });
+          
+        // Finally, try direct query to neighborhood_members (this is likely where the recursion happens)
+        const { data: nmTest, error: nmError } = await supabase
+          .from('neighborhood_members')
+          .select('id, neighborhood_id, user_id')
+          .eq('user_id', user.id)
+          .limit(1);
+          
+        console.log("[useFetchNeighborhood] Neighborhood members query test:", { 
+          success: !!nmTest, 
+          count: nmTest?.length,
+          error: nmError ? nmError.message : null,
+          errorDetails: nmError
+        });
+      } catch (diagError) {
+        console.error("[useFetchNeighborhood] Diagnostic query error:", diagError);
+      }
+
       // First check if the user is a core contributor with access to all neighborhoods
       const isContributor = await checkCoreContributorStrategy(
         user.id,
@@ -136,6 +177,7 @@ export function useFetchNeighborhood(
       
     } catch (err) {
       // Handle unexpected errors
+      console.error("[useFetchNeighborhood] Top-level error:", err);
       handleFetchError(
         err, 
         user?.id, 
