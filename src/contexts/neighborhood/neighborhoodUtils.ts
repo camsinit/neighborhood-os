@@ -24,7 +24,7 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
       return { data: null, error: new Error("Supabase client is not available") };
     }
 
-    // This query is safe because we're filtering by created_by which is not subject to RLS recursion
+    // This query is safe with our updated RLS policies - filtering by created_by is not subject to recursion
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id, name, created_by')
@@ -34,7 +34,6 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
           
     if (error) {
       console.error("[NeighborhoodUtils] Error checking created neighborhoods:", error);
-      // Don't throw, just return the error
       return { data: null, error };
     }
     
@@ -58,6 +57,7 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
       return [];
     }
 
+    // With our fixed RLS policies, core contributors and neighborhood creators can access this
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id, name, created_by');
@@ -93,7 +93,6 @@ export async function checkNeighborhoodMembership(
       return false;
     }
 
-    // Instead of directly querying neighborhood_members table which causes recursion
     // Use the security definer function we created
     const { data: isMember, error } = await supabase
       .rpc('user_is_neighborhood_member', {

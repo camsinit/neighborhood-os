@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react"; // Added useEffect for timeout detection
+import { useState, useEffect } from "react"; 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -237,11 +237,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       // Show diagnostic info to user
       toast({
         title: "Diagnostic Information",
-        description: `Found ${(createdNeighborhoods || []).length} created neighborhoods and ${(allNeighborhoods || []).length} total neighborhoods.`,
+        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods and ${Array.isArray(allNeighborhoods) ? allNeighborhoods.length : 0} total neighborhoods.`,
       });
       
       // If no neighborhoods found, show a more detailed message
-      if ((!createdNeighborhoods || createdNeighborhoods.length === 0) && 
+      if ((!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) && 
           (!allNeighborhoods || allNeighborhoods.length === 0)) {
         toast({
           title: "No neighborhood association found",
