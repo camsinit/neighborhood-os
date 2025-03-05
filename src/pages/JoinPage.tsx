@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,9 +80,11 @@ const JoinPage = () => {
   const handleJoinComplete = () => {
     toast({
       title: "Welcome!",
-      description: `You've successfully joined. Let's meet your neighbors!`,
+      description: `You've successfully joined. Would you like to set up your profile?`,
     });
-    navigate('/neighbors');
+    
+    // Offer to continue to onboarding
+    navigate(`/onboarding/${inviteCode}`);
   };
 
   const handleJoin = async () => {
@@ -132,6 +135,17 @@ const JoinPage = () => {
     }
   };
 
+  const handleQuickJoin = () => {
+    handleJoin();
+  };
+
+  const handleFullOnboarding = () => {
+    // Redirect to onboarding flow with the same invite code
+    if (inviteCode) {
+      navigate(`/onboarding/${inviteCode}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -178,13 +192,36 @@ const JoinPage = () => {
             </p>
           </div>
         ) : (
-          <Button 
-            className="w-full"
-            onClick={handleJoin}
-            disabled={joining}
-          >
-            {joining ? "Joining..." : "Join Neighborhood"}
-          </Button>
+          <div className="space-y-4">
+            <Button 
+              className="w-full"
+              onClick={handleQuickJoin}
+              disabled={joining}
+            >
+              {joining ? "Joining..." : "Join Now"}
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">or</span>
+              </div>
+            </div>
+            
+            <Button 
+              variant="outline"
+              className="w-full"
+              onClick={handleFullOnboarding}
+            >
+              Join & Complete Profile
+            </Button>
+            
+            <p className="text-center text-xs text-gray-500 mt-2">
+              The complete profile option will guide you through setting up your neighborhood profile
+            </p>
+          </div>
         )}
       </Card>
     </div>

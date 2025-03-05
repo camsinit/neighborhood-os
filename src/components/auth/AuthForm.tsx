@@ -15,18 +15,32 @@ import { cn } from "@/lib/utils";
  * 
  * Updated with styling to match the landing page aesthetics.
  */
-const AuthForm = () => {
+const AuthForm = ({ mode = "login", onSuccess }: AuthFormProps) => {
   // State for form fields and loading state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
-  
+  const [formState, setFormState] = useState<AuthFormState>({
+    email: "",
+    password: "",
+    errors: null,
+    message: null,
+    loading: false,
+    redirectTo: getReturnToPath() || "/dashboard"
+  });
+
   // Hook for programmatic navigation
   const navigate = useNavigate();
   
   // Toast hook for displaying notifications
   const { toast } = useToast();
+
+  // Helper function to get return path from URL query parameters
+  function getReturnToPath() {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = params.get('returnTo');
+      return returnTo ? decodeURIComponent(returnTo) : null;
+    }
+    return null;
+  }
 
   // Listen for auth state changes - we're using the supabase client directly here
   // to ensure we're not depending on the context which might not be initialized properly
@@ -58,72 +72,58 @@ const AuthForm = () => {
   }, [navigate]); // Only re-run if navigate changes
   
   // Form submission handler for both login and signup
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    console.log("[AuthForm] Starting authentication process", { isSignUp });
+    setFormState({
+      ...formState,
+      errors: null,
+      message: null,
+      loading: true,
+    });
 
     try {
-      if (isSignUp) {
-        // Signup process
-        console.log("[AuthForm] Attempting signup");
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/login`,
-          },
+      if (mode === "login") {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formState.email,
+          password: formState.password,
         });
 
         if (error) throw error;
-        console.log("[AuthForm] Signup successful");
-
-        toast({
-          title: "Check your email",
-          description: "We've sent you a verification link",
-        });
-      } else {
-        // Signin process
-        console.log("[AuthForm] Attempting signin");
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          console.error("[AuthForm] Signin error:", error);
-          if (error.message.includes('credentials')) {
-            toast({
-              title: "Invalid credentials",
-              description: "Please check your email and password",
-              variant: "destructive",
-            });
-          } else {
-            throw error;
-          }
-          return;
+        
+        console.log("[AuthForm] Login successful, navigating to:", formState.redirectTo);
+        navigate(formState.redirectTo);
+        
+        if (onSuccess) {
+          onSuccess(data.user);
         }
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email: formState.email,
+          password: formState.password,
+        });
 
-        console.log("[AuthForm] Signin successful", { user: data.user?.id });
-        
-        // Show success toast
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in",
+        if (error) throw error;
+
+        setFormState({
+          ...formState,
+          loading: false,
+          message:
+            "Success! Please check your email for a confirmation link.",
         });
         
-        // No need to navigate here as the auth state change listener will handle that
+        if (data.user && onSuccess) {
+          onSuccess(data.user);
+        }
       }
     } catch (error: any) {
-      console.error("[AuthForm] Authentication error:", error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+      console.error("[AuthForm] Error:", error);
+      setFormState({
+        ...formState,
+        loading: false,
+        errors: {
+          form: error.message || "An error occurred during authentication.",
+        },
       });
-    } finally {
-      console.log("[AuthForm] Completing authentication process");
-      setIsLoading(false);
     }
   };
 
@@ -143,11 +143,11 @@ const AuthForm = () => {
           <Input
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formState.email}
+            onChange={(e) => setFormState({ ...formState, email: e.target.value })}
             required
             className="mt-1"
-            disabled={isLoading}
+            disabled={formState.loading}
           />
         </div>
         <div>
@@ -157,29 +157,29 @@ const AuthForm = () => {
           <Input
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formState.password}
+            onChange={(e) => setFormState({ ...formState, password: e.target.value })}
             required
             className="mt-1"
-            disabled={isLoading}
+            disabled={formState.loading}
           />
         </div>
         <div className="flex flex-col gap-2">
           <Button 
             type="submit" 
             className="w-full rounded-full" 
-            disabled={isLoading}
+            disabled={formState.loading}
           >
-            {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
+            {formState.loading ? "Loading..." : mode === "login" ? "Sign in" : "Sign up"}
           </Button>
           <Button 
             type="button" 
             variant="ghost" 
             className="w-full"
-            onClick={() => setIsSignUp(!isSignUp)}
-            disabled={isLoading}
+            onClick={() => setFormState({ ...formState, mode: mode === "login" ? "signup" : "login" })}
+            disabled={formState.loading}
           >
-            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+            {mode === "login" ? "Already have an account? Sign up" : "Need an account? Sign in"}
           </Button>
         </div>
       </form>
