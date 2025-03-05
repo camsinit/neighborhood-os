@@ -1,48 +1,68 @@
 
 /**
- * Hook to manage safety timeouts for neighborhood data fetching
+ * Custom hook to manage safety timeouts for neighborhood data fetching
  * 
- * This module provides timeout functionality to prevent infinite loading states
+ * This hook helps prevent infinite loading states by setting timeouts
+ * that will force loading states to complete after a set period
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 /**
- * Safety timeout hook for neighborhood fetching
+ * Hook that provides functions for managing fetch timeouts
  * 
- * @param isLoading - Current loading state
- * @param hasFetchAttempted - Whether a fetch has been attempted
- * @returns Functions to start and end fetch timers
+ * @param isLoading - Whether the app is currently in a loading state
+ * @param hasFetchAttempted - Whether a fetch attempt has been made
+ * @returns Object containing timer control functions
  */
 export const useNeighborhoodSafetyTimeout = (
   isLoading: boolean,
   hasFetchAttempted: boolean
 ) => {
-  // Track the safety timeout
-  const [safetyTimeout, setSafetyTimeout] = useState<NodeJS.Timeout | null>(null);
-
-  // Start a safety timer
+  // Track the current timer ID
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+  
+  // Function to start the safety timer
   const startFetchTimer = useCallback(() => {
     // Clear any existing timer first
-    if (safetyTimeout) {
-      clearTimeout(safetyTimeout);
+    if (timerId) {
+      clearTimeout(timerId);
+      setTimerId(null);
     }
     
     // Set a new timer that will force loading to false after 10 seconds
-    const timer = setTimeout(() => {
-      console.warn('[useNeighborhoodSafetyTimeout] Safety timeout triggered - fetch is taking too long');
-    }, 10000); // 10 second timeout
+    // This prevents infinite loading states if something goes wrong
+    const newTimerId = setTimeout(() => {
+      console.warn("[useNeighborhoodSafetyTimeout] Safety timeout triggered - forcing loading state to complete");
+    }, 10000);
     
-    setSafetyTimeout(timer);
-  }, [safetyTimeout]);
-
-  // End the safety timer
+    setTimerId(newTimerId);
+  }, [timerId]);
+  
+  // Function to end the safety timer
   const endFetchTimer = useCallback(() => {
-    if (safetyTimeout) {
-      clearTimeout(safetyTimeout);
-      setSafetyTimeout(null);
+    if (timerId) {
+      clearTimeout(timerId);
+      setTimerId(null);
     }
-  }, [safetyTimeout]);
-
+  }, [timerId]);
+  
+  // Clean up timers when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+    };
+  }, [timerId]);
+  
+  // Clear timer if loading completes naturally
+  useEffect(() => {
+    if (!isLoading && hasFetchAttempted && timerId) {
+      clearTimeout(timerId);
+      setTimerId(null);
+    }
+  }, [isLoading, hasFetchAttempted, timerId]);
+  
   return {
     startFetchTimer,
     endFetchTimer
