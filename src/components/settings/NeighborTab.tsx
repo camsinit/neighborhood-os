@@ -10,12 +10,19 @@ import { X } from "lucide-react";
 import { ProfileFormValues } from "./types";
 import { SkillCategory } from "../skills/types/skillTypes";
 import { Button } from "@/components/ui/button";
+import { UserNeighborhoods } from "./UserNeighborhoods";
 
 export const NeighborTab = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
   const skillCategories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
 
   return (
     <div className="space-y-6">
+      {/* Neighborhoods Section - New section added */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Your Neighborhoods</h3>
+        <UserNeighborhoods />
+      </div>
+
       {/* Listed Skills Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Skills & Expertise</h3>
