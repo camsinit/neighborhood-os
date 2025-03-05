@@ -1,22 +1,23 @@
 
 /**
- * Neighborhood hooks module index
+ * Index file for the neighborhood hooks
  * 
- * This file exports all the neighborhood-related hooks and utilities
+ * This file exports all the neighborhood hooks and types for easy importing
  */
 
-// Main hook
+// Re-export the main hook and its types
 export { default as useNeighborhood } from '../useNeighborhood';
 export type { UseNeighborhoodReturn } from './types';
 
-// Core functionality
-export * from './useNeighborhoodQueries';
-export * from './useBackgroundRefresh';
-export * from './useNeighborhoodDebug';
+// Export utility hooks for direct use if needed
+export { useNeighborhoodQueries } from './useNeighborhoodQueries';
+export { useBackgroundRefresh } from './useBackgroundRefresh';
+export { useNeighborhoodDebug } from './useNeighborhoodDebug';
 
-// Types
-export * from './types';
-
-// Utilities
-export * from './utils/errorLogging';
-export * from './utils/fetchers';
+// Export utility functions if needed by other components
+export { 
+  checkCoreContributorStatus,
+  fetchCreatedNeighborhoods,
+  fetchNeighborhoodMembership,
+  fetchAllNeighborhoodsForContributor 
+} from './utils/fetchers';
