@@ -35,6 +35,9 @@ export function useNeighborhoodData(user: User | null) {
   
   // Add a state to track fetch duration for performance monitoring
   const [fetchStartTime, setFetchStartTime] = useState<number | null>(null);
+  
+  // Add a state to track if we have attempted a fetch
+  const [hasFetchAttempted, setHasFetchAttempted] = useState(false);
 
   // Create a memoized refresh function that can be called from outside components
   const refreshNeighborhoodData = useCallback(() => {
@@ -56,6 +59,7 @@ export function useNeighborhoodData(user: User | null) {
     setIsLoading(true);
     setIsCoreContributor(false);
     setAllNeighborhoods([]);
+    setHasFetchAttempted(true); // Mark that we have attempted a fetch
 
     // If no user is logged in, we can't fetch neighborhood data
     if (!user) {
@@ -233,6 +237,23 @@ export function useNeighborhoodData(user: User | null) {
     };
     
   }, [user, fetchAttempts, fetchNeighborhood]);
+
+  // Add an additional safety check to ensure we don't stay in loading state indefinitely
+  useEffect(() => {
+    // If we've attempted a fetch, but we're still loading after 5 seconds, force loading to false
+    if (hasFetchAttempted && isLoading) {
+      const forceLoadingOffTimer = setTimeout(() => {
+        if (isLoading) {
+          console.warn("[useNeighborhoodData] Forcing loading state to false after timeout");
+          setIsLoading(false);
+        }
+      }, 5000); // 5 second backup timeout
+      
+      return () => {
+        clearTimeout(forceLoadingOffTimer);
+      };
+    }
+  }, [hasFetchAttempted, isLoading]);
 
   // Log state changes for debugging
   useEffect(() => {
