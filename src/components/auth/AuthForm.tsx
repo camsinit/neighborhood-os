@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ const AuthForm = () => {
       // When user is signed in, navigate to the dashboard
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         console.log("[AuthForm] Valid session detected, navigating to dashboard");
+        // Changed 'dashboard' to '/dashboard' to ensure proper routing
         navigate("/dashboard", { replace: true });
       }
     });

@@ -11,6 +11,7 @@ import NeighborsPage from "@/pages/NeighborsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import JoinPage from "@/pages/JoinPage";
 import OnboardingPage from "@/pages/OnboardingPage";
+import DashboardPage from "@/pages/DashboardPage"; // New import for dashboard
 
 /**
  * App Component
@@ -41,6 +42,11 @@ function App() {
             <Route
               path="/onboarding"
               element={<OnboardingPage />}
+            />
+            {/* Add the dashboard route */}
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
             />
             {/* Protected routes requiring auth */}
             <Route

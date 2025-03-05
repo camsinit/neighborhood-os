@@ -15,12 +15,28 @@ import './index.css';
  * - SessionContextProvider for Supabase auth
  * - QueryClientProvider for data fetching
  */
+
+// Create a new React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Mount the application
 createRoot(document.getElementById("root")!).render(
   // BrowserRouter enables routing functionality
   <BrowserRouter>
     {/* SessionContextProvider gives access to Supabase authentication */}
     <SessionContextProvider supabaseClient={supabase}>
-      <App />
+      {/* QueryClientProvider enables React Query data fetching */}
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </SessionContextProvider>
   </BrowserRouter>
 );
