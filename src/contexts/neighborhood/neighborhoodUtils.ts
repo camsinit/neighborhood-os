@@ -27,13 +27,13 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
     // Log that we're making this request
     console.log("[NeighborhoodUtils] Checking if user created neighborhoods", { userId });
 
-    // This query is safe with our updated RLS policies - filtering by created_by is not subject to recursion
+    // Use direct query to neighborhoods - this avoids the recursion issues with policies
+    // since we're filtering by created_by which is indexed and simpler to query
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id, name, created_by')
       .eq('created_by', userId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .order('created_at', { ascending: false });
           
     if (error) {
       console.error("[NeighborhoodUtils] Error checking created neighborhoods:", error);
@@ -114,7 +114,7 @@ export async function checkNeighborhoodMembership(
       neighborhoodId
     });
 
-    // Try direct query first - this is where we typically see recursion
+    // Try direct query first - using auth.uid() should avoid recursion issues
     const { data: membershipData, error: membershipError } = await supabase
       .from('neighborhood_members')
       .select('id')
@@ -166,8 +166,8 @@ export async function checkNeighborhoodMembership(
 }
 
 /**
- * SIMPLIFIED approach - try to get user's neighborhoods directly
- * This avoids the neighbor check loop
+ * SIMPLIFIED approach - try to get user's neighborhoods directly using our new RPC function
+ * This avoids the neighbor check loop and recursion issues
  * 
  * @param userId - The ID of the user to check
  * @returns Promise that resolves to array of neighborhoods
@@ -180,9 +180,9 @@ export async function getUserNeighborhoods(userId: string): Promise<Neighborhood
       return [];
     }
 
-    console.log("[NeighborhoodUtils] Trying simpler approach: direct fetch of user neighborhoods", { userId });
+    console.log("[NeighborhoodUtils] Using get_user_neighborhoods RPC function", { userId });
     
-    // Try the RPC function first if it exists
+    // Try the RPC function that we just created in our SQL migration
     if (supabase.rpc) {
       try {
         const { data, error } = await supabase.rpc('get_user_neighborhoods', {
@@ -190,11 +190,12 @@ export async function getUserNeighborhoods(userId: string): Promise<Neighborhood
         });
         
         if (!error && data) {
-          console.log("[NeighborhoodUtils] Successfully got neighborhoods using RPC function", {
+          console.log("[NeighborhoodUtils] Successfully got neighborhoods using get_user_neighborhoods RPC function", {
             count: data.length,
             neighborhoods: data
           });
-          return data;
+          // The RPC function returns the proper data structure, so we can directly cast to Neighborhood[]
+          return data as Neighborhood[];
         } else if (error) {
           console.error("[NeighborhoodUtils] RPC error:", error);
         }
@@ -203,76 +204,63 @@ export async function getUserNeighborhoods(userId: string): Promise<Neighborhood
       }
     }
 
-    // Direct query as fallback - JOIN approach
-    console.log("[NeighborhoodUtils] Trying JOIN approach");
+    // Fall back to direct query if RPC fails
+    console.log("[NeighborhoodUtils] RPC function failed, falling back to direct queries");
+    
+    // Try to get neighborhoods user created
     try {
-      const { data: joinData, error: joinError } = await supabase
+      const { data: createdData, error: createdError } = await supabase
         .from('neighborhoods')
-        .select(`
-          id, 
-          name, 
-          created_by
-        `)
+        .select('id, name, created_by')
         .eq('created_by', userId);
       
-      // Also try to get neighborhoods where user is a member
-      // This is a separate query to avoid recursion in the JOIN
-      const { data: memberData, error: memberError } = await supabase
+      if (createdError) {
+        console.error("[NeighborhoodUtils] Error fetching created neighborhoods:", createdError);
+      } else if (createdData && createdData.length > 0) {
+        console.log("[NeighborhoodUtils] Found neighborhoods created by user:", {
+          count: createdData.length
+        });
+        return createdData as Neighborhood[];
+      }
+      
+      // Try to get memberships directly
+      const { data: membershipData, error: membershipError } = await supabase
         .from('neighborhood_members')
-        .select(`
-          neighborhood_id
-        `)
+        .select('neighborhood_id')
         .eq('user_id', userId)
         .eq('status', 'active');
-        
-      if (joinError) {
-        console.error("[NeighborhoodUtils] JOIN query error:", joinError);
+      
+      if (membershipError) {
+        console.error("[NeighborhoodUtils] Error fetching memberships:", membershipError);
+        return [];
       }
       
-      if (memberError) {
-        console.error("[NeighborhoodUtils] Member query error:", memberError);
+      if (!membershipData || membershipData.length === 0) {
+        console.log("[NeighborhoodUtils] No neighborhood memberships found");
+        return [];
       }
       
-      // Combine results from both queries
-      const createdNeighborhoods = joinData || [];
+      // Get neighborhood details for the memberships
+      const neighborhoodIds = membershipData.map(m => m.neighborhood_id);
+      const { data: neighborhoods, error: nhError } = await supabase
+        .from('neighborhoods')
+        .select('id, name, created_by')
+        .in('id', neighborhoodIds);
       
-      // Get full neighborhood details for memberships
-      let memberNeighborhoods: Neighborhood[] = [];
-      if (memberData && memberData.length > 0) {
-        const neighborhoodIds = memberData.map(m => m.neighborhood_id);
-        
-        const { data: neighborhoods, error: nhError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, created_by')
-          .in('id', neighborhoodIds);
-          
-        if (neighborhoods) {
-          // Fix here: Use type assertion to handle the optional created_by property
-          memberNeighborhoods = neighborhoods as Neighborhood[];
-        }
-        
-        if (nhError) {
-          console.error("[NeighborhoodUtils] Error fetching member neighborhoods:", nhError);
-        }
+      if (nhError) {
+        console.error("[NeighborhoodUtils] Error fetching member neighborhoods:", nhError);
+        return [];
       }
       
-      // Combine the results, ensuring no duplicates
-      const allNeighborhoods = [...createdNeighborhoods];
-      memberNeighborhoods.forEach(nh => {
-        if (!allNeighborhoods.some(existing => existing.id === nh.id)) {
-          allNeighborhoods.push(nh);
-        }
-      });
-      
-      console.log("[NeighborhoodUtils] Combined neighborhood results:", {
-        created: createdNeighborhoods.length,
-        member: memberNeighborhoods.length,
-        total: allNeighborhoods.length
-      });
-      
-      return allNeighborhoods;
-    } catch (joinQueryError) {
-      console.error("[NeighborhoodUtils] JOIN query execution error:", joinQueryError);
+      if (neighborhoods) {
+        console.log("[NeighborhoodUtils] Found membership neighborhoods:", {
+          count: neighborhoods.length
+        });
+        // Use type assertion since we know the structure matches
+        return neighborhoods as Neighborhood[];
+      }
+    } catch (directQueryError) {
+      console.error("[NeighborhoodUtils] Direct query execution error:", directQueryError);
     }
     
     // If all else fails, return empty array

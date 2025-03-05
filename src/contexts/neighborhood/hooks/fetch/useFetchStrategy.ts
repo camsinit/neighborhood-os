@@ -65,7 +65,7 @@ export const checkCoreContributorStrategy = async (
 /**
  * Checks if user created any neighborhoods and uses the first one found
  * 
- * @param userId - The user's ID
+ * @param userId - The ID of the user to check
  * @param setCurrentNeighborhood - Function to update current neighborhood
  * @param currentAttempt - Current fetch attempt number for logging
  * @returns True if a created neighborhood was found, false otherwise
@@ -100,9 +100,9 @@ export const checkCreatedNeighborhoodStrategy = async (
 
 /**
  * Simplified strategy - check all neighborhood memberships in one go
- * This is our new approach to avoid recursion issues
+ * This is our updated approach to avoid recursion issues using RPC
  * 
- * @param userId - The user's ID
+ * @param userId - The ID of the user to check
  * @param setCurrentNeighborhood - Function to update current neighborhood
  * @param currentAttempt - Current fetch attempt number for logging
  * @returns True if membership found, false otherwise
@@ -112,9 +112,9 @@ export const checkMembershipStrategy = async (
   setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
   currentAttempt: number
 ): Promise<boolean> => {
-  console.log(`[useFetchStrategy] Using simplified membership check (attempt ${currentAttempt})`);
+  console.log(`[useFetchStrategy] Using RPC-based membership check (attempt ${currentAttempt})`);
 
-  // Get all neighborhoods in one go using our new helper
+  // Get all neighborhoods in one go using our RPC helper function
   const neighborhoods = await getUserNeighborhoods(userId);
   
   if (!neighborhoods || neighborhoods.length === 0) {
@@ -133,7 +133,7 @@ export const checkMembershipStrategy = async (
 /**
  * Legacy membership check strategy - kept for fallback
  * 
- * @param userId - The user's ID
+ * @param userId - The ID of the user to check
  * @param setCurrentNeighborhood - Function to update current neighborhood
  * @param currentAttempt - Current fetch attempt number for logging
  * @returns True if membership found, false otherwise
