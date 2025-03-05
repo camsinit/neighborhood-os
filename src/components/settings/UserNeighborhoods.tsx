@@ -52,36 +52,46 @@ export const UserNeighborhoods = () => {
         
         console.log("[UserNeighborhoods] Fetching neighborhoods for user:", user.id);
         
-        // Query to get neighborhoods the user is a member of
-        const { data, error } = await supabase
-          .from('neighborhood_members')
-          .select(`
-            neighborhood_id,
-            joined_at,
-            neighborhoods:neighborhood_id (
-              id,
-              name
-            )
-          `)
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+        // UPDATED: Use a safer approach that avoids RLS recursion
+        // First check if the user created any neighborhoods directly 
+        const { data: createdNeighborhoods, error: createdError } = await supabase
+          .from('neighborhoods')
+          .select('id, name')
+          .eq('created_by', user.id);
 
-        // Handle any query errors
-        if (error) {
-          throw error;
+        if (createdError) {
+          console.warn("[UserNeighborhoods] Error checking created neighborhoods:", createdError);
         }
-
-        // Transform the data to a more usable format
-        const formattedNeighborhoods = data.map(item => ({
-          id: item.neighborhoods.id,
-          name: item.neighborhoods.name,
-          joined_at: item.joined_at
-        }));
-
-        console.log("[UserNeighborhoods] Found neighborhoods:", formattedNeighborhoods);
         
-        // Update state with the neighborhoods
-        setNeighborhoods(formattedNeighborhoods);
+        // If user created neighborhoods, use those
+        if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+          const formattedNeighborhoods = createdNeighborhoods.map(item => ({
+            id: item.id,
+            name: item.name,
+            joined_at: new Date().toISOString() // Default value since we don't have joined_at for creators
+          }));
+          
+          setNeighborhoods(formattedNeighborhoods);
+          setIsLoading(false);
+          return;
+        }
+        
+        // USING RPC FUNCTION: Call our security definer function that safely checks membership
+        // This avoids the RLS recursion issue
+        const { data: membershipData, error: membershipError } = await supabase
+          .rpc('get_user_neighborhoods', {
+            user_uuid: user.id
+          });
+        
+        if (membershipError) {
+          throw membershipError;
+        }
+        
+        if (membershipData) {
+          setNeighborhoods(membershipData);
+        } else {
+          setNeighborhoods([]);
+        }
       } catch (err) {
         // Log and set error for UI display
         console.error("[UserNeighborhoods] Error fetching neighborhoods:", err);
@@ -97,7 +107,7 @@ export const UserNeighborhoods = () => {
   }, [user]);
 
   /**
-   * Helper function to add a user to a neighborhood
+   * Helper function to add a user to a neighborhood safely
    * This is used for development/testing purposes
    */
   const addUserToNeighborhood = async (userId: string, neighborhoodName: string) => {
@@ -117,62 +127,48 @@ export const UserNeighborhoods = () => {
 
       const neighborhoodId = neighborhoods[0].id;
       
-      // Check if the user is already a member of this neighborhood
-      const { data: existingMembership, error: membershipCheckError } = await supabase
-        .from('neighborhood_members')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('status', 'active')
-        .limit(1);
+      // UPDATED: Use our RPC function to safely check membership
+      const { data: isMember, error: membershipCheckError } = await supabase
+        .rpc('user_is_neighborhood_member', {
+          user_uuid: userId,
+          neighborhood_uuid: neighborhoodId
+        });
       
       if (membershipCheckError) throw membershipCheckError;
       
-      if (existingMembership && existingMembership.length > 0) {
+      if (isMember) {
         toast.info(`User is already a member of "${neighborhoodName}"`);
         return;
       }
       
-      // Add the user to the neighborhood
-      const { error: insertError } = await supabase
-        .from('neighborhood_members')
-        .insert({
-          user_id: userId,
-          neighborhood_id: neighborhoodId,
-          status: 'active'
+      // UPDATED: Use RPC function to safely add a member
+      const { error: addError } = await supabase
+        .rpc('add_neighborhood_member', {
+          user_uuid: userId,
+          neighborhood_uuid: neighborhoodId
         });
       
-      if (insertError) throw insertError;
+      if (addError) throw addError;
       
       // Show success message
       toast.success(`User added to "${neighborhoodName}" successfully!`);
       
       // If the current user is the one being added, refresh the neighborhoods list
       if (user && user.id === userId) {
-        // Refetch neighborhoods to show the updated list
+        // Refresh neighborhoods using the safer approach
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from('neighborhood_members')
-          .select(`
-            neighborhood_id,
-            joined_at,
-            neighborhoods:neighborhood_id (
-              id,
-              name
-            )
-          `)
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+        
+        const { data: refreshedData, error: refreshError } = await supabase
+          .rpc('get_user_neighborhoods', {
+            user_uuid: user.id
+          });
 
-        if (error) throw error;
+        if (refreshError) throw refreshError;
         
-        const formattedNeighborhoods = data.map(item => ({
-          id: item.neighborhoods.id,
-          name: item.neighborhoods.name,
-          joined_at: item.joined_at
-        }));
+        if (refreshedData) {
+          setNeighborhoods(refreshedData);
+        }
         
-        setNeighborhoods(formattedNeighborhoods);
         setIsLoading(false);
       }
       
