@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Import our refactored hooks
 import { useNeighborhoodRefresh } from './hooks/useNeighborhoodRefresh';
 import { useNeighborhoodSafetyTimeout } from './hooks/useNeighborhoodSafetyTimeout';
-import { useFetchNeighborhood } from './hooks/useFetchNeighborhood';
+import { useFetchNeighborhood } from './hooks/fetch/useFetchNeighborhood'; // Updated path to the refactored module
 import { useNeighborhoodLogging } from './hooks/useNeighborhoodLogging';
 import { useSafetyTimeouts } from './hooks/useSafetyTimeouts';
 
