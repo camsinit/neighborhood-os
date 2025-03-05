@@ -182,7 +182,7 @@ export async function getUserNeighborhoods(userId: string): Promise<Neighborhood
 
     console.log("[NeighborhoodUtils] Trying simpler approach: direct fetch of user neighborhoods", { userId });
     
-    // Try the RPF function first if it exists
+    // Try the RPC function first if it exists
     if (supabase.rpc) {
       try {
         const { data, error } = await supabase.rpc('get_user_neighborhoods', {
@@ -247,7 +247,8 @@ export async function getUserNeighborhoods(userId: string): Promise<Neighborhood
           .in('id', neighborhoodIds);
           
         if (neighborhoods) {
-          memberNeighborhoods = neighborhoods;
+          // Fix here: Use type assertion to handle the optional created_by property
+          memberNeighborhoods = neighborhoods as Neighborhood[];
         }
         
         if (nhError) {
