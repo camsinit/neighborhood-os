@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 interface Invitation {
   id: string;
@@ -24,16 +26,23 @@ interface Invitation {
  * It validates the invite code, shows relevant UI states, and processes the join request.
  */
 const JoinPage = () => {
+  // Get the invite code from the URL
   const { inviteCode } = useParams();
+  
+  // State variables for component
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [joinSuccess, setJoinSuccess] = useState(false);
+  
+  // Get user, toast, navigation and neighborhood context
   const user = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { refreshNeighborhoodData } = useNeighborhood();
 
+  // Fetch invitation details when component mounts
   useEffect(() => {
     async function fetchInvitation() {
       try {
@@ -77,6 +86,7 @@ const JoinPage = () => {
     }
   }, [inviteCode]);
 
+  // Handle completion of joining
   const handleJoinComplete = () => {
     // Set success state before navigating
     setJoinSuccess(true);
@@ -96,6 +106,7 @@ const JoinPage = () => {
     }, 1500); // Small delay to ensure context refresh has time to complete
   };
 
+  // Handle join button click
   const handleJoin = async () => {
     if (!user || !invitation) return;
     setJoining(true);
@@ -144,6 +155,7 @@ const JoinPage = () => {
     }
   };
 
+  // Show loading spinner while fetching data
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -152,6 +164,7 @@ const JoinPage = () => {
     );
   }
 
+  // Show error message if invitation is invalid or not found
   if (error || !invitation) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -168,6 +181,7 @@ const JoinPage = () => {
     );
   }
 
+  // Show join page with invitation details
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="p-6 max-w-md w-full">

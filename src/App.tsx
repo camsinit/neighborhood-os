@@ -1,15 +1,16 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SupabaseProvider } from "./providers/SupabaseProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { Index } from "@/pages";
-import { Login } from "@/pages/Login";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import Layout from "@/components/layout";
-import { NeighborsPage } from "@/pages/NeighborsPage";
-import { SettingsPage } from "@/pages/SettingsPage";
-import { JoinPage } from "@/pages/JoinPage";
-import { OnboardingPage } from "@/pages/OnboardingPage";
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Layout from "@/components/layout/MainContent";
+import NeighborsPage from "@/pages/NeighborsPage";
+import SettingsPage from "@/pages/SettingsPage";
+import JoinPage from "@/pages/JoinPage";
+import OnboardingPage from "@/pages/OnboardingPage";
 
 const queryClient = new QueryClient();
 
