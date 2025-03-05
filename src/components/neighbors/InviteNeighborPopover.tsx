@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Copy, Check, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Copy, Check, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -25,11 +25,23 @@ const InviteNeighborPopover = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  // Add a state to track errors for better display
+  const [error, setError] = useState<string | null>(null);
 
   // Get required hooks
   const { toast } = useToast();
   const user = useUser();
   const { currentNeighborhood } = useNeighborhood();
+
+  // Debug effect to track neighborhood data changes
+  useEffect(() => {
+    // Log when neighborhood data changes for debugging
+    console.log("[InvitePopover] Neighborhood data updated:", {
+      hasNeighborhood: !!currentNeighborhood,
+      neighborhoodId: currentNeighborhood?.id,
+      hasUser: !!user
+    });
+  }, [currentNeighborhood, user]);
 
   /**
    * Generates a new invite code and stores it in the database
@@ -38,27 +50,44 @@ const InviteNeighborPopover = () => {
     // Reset states at the beginning
     setIsCopied(false);
     setIsGenerating(true);
+    setError(null); // Clear any previous errors
     
     try {
-      // Validate required data is present
-      if (!user || !currentNeighborhood) {
-        throw new Error("Missing user or neighborhood data");
+      // Validate required data is present with more detailed logging
+      if (!user) {
+        console.error("[InvitePopover] Cannot generate invite: No user is logged in");
+        setError("You must be logged in to generate invites");
+        throw new Error("You must be logged in to generate invites");
+      }
+      
+      if (!currentNeighborhood) {
+        console.error("[InvitePopover] Cannot generate invite: No neighborhood selected");
+        setError("You need to join a neighborhood before inviting others");
+        throw new Error("No neighborhood selected");
       }
       
       // Generate a unique UUID for the invite
       const newInviteCode = crypto.randomUUID();
       
-      console.log("[InvitePopover] Generating invite for neighborhood:", currentNeighborhood.id);
+      console.log("[InvitePopover] Generating invite for neighborhood:", {
+        neighborhoodId: currentNeighborhood.id,
+        neighborhoodName: currentNeighborhood.name,
+        userId: user.id
+      });
       
       // Create a new invitation record in the database
-      const { error } = await supabase.from("invitations").insert({
+      const { error: dbError } = await supabase.from("invitations").insert({
         invite_code: newInviteCode,
         inviter_id: user.id,
         neighborhood_id: currentNeighborhood.id,
       });
 
       // Handle database errors
-      if (error) throw error;
+      if (dbError) {
+        console.error("[InvitePopover] Database error:", dbError);
+        setError("Unable to create invitation in database");
+        throw dbError;
+      }
 
       // Update state with the new code
       setInviteCode(newInviteCode);
@@ -71,11 +100,16 @@ const InviteNeighborPopover = () => {
     } catch (error: any) {
       // Log and handle any errors
       console.error("[InvitePopover] Error generating invite:", error);
-      toast({
-        title: "Error generating invite code",
-        description: error.message,
-        variant: "destructive",
-      });
+      
+      // Don't show toast for expected errors (no neighborhood/user)
+      if (!error.message.includes("No neighborhood") && 
+          !error.message.includes("logged in")) {
+        toast({
+          title: "Error generating invite code",
+          description: error.message || "Unknown error occurred",
+          variant: "destructive",
+        });
+      }
     } finally {
       // End the generation process
       setIsGenerating(false);
@@ -121,9 +155,17 @@ const InviteNeighborPopover = () => {
    */
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    // When opening and no code exists, generate one automatically
+    
+    // When opening, clear any previous errors
+    if (open) {
+      setError(null);
+    }
+    
+    // Only try to generate a code if we have both user and neighborhood data
     if (open && !inviteCode && !isGenerating) {
-      generateInviteCode();
+      if (user && currentNeighborhood) {
+        generateInviteCode();
+      }
     }
   };
   
@@ -161,12 +203,15 @@ const InviteNeighborPopover = () => {
             </div>
           )}
           
-          {/* Error state when no neighborhood */}
-          {!currentNeighborhood && !isGenerating && (
+          {/* Error state when no neighborhood or other errors */}
+          {(error || !currentNeighborhood) && !isGenerating && (
             <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
-              <p className="text-sm text-yellow-800">
-                You need to join a neighborhood before inviting others.
-              </p>
+              <div className="flex items-start">
+                <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+                <p className="text-sm text-yellow-800">
+                  {error || "You need to join a neighborhood before inviting others."}
+                </p>
+              </div>
             </div>
           )}
           
