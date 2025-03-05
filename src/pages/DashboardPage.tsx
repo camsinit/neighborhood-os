@@ -1,10 +1,11 @@
 
 import { useNavigate } from "react-router-dom";
 import { useDashboardState } from "@/hooks/dashboard/useDashboardState";
-import LoadingState from "@/components/dashboard/LoadingState";
+import { LoadingState } from "@/components/ui/loading-state";
 import ErrorState from "@/components/dashboard/ErrorState";
 import NoNeighborhoodState from "@/components/dashboard/NoNeighborhoodState";
 import DashboardContent from "@/components/dashboard/DashboardContent";
+import { useEffect } from "react";
 
 /**
  * DashboardPage Component
@@ -27,18 +28,38 @@ const DashboardPage = () => {
     error,
     isRefreshing,
     hasAttemptedRefresh,
-    handleRefresh
+    handleRefresh,
+    isLoadingTimeout
   } = useDashboardState();
+
+  // Log render information for debugging
+  useEffect(() => {
+    console.log("[DashboardPage] Rendering with state:", {
+      hasNeighborhood: !!currentNeighborhood,
+      neighborhoodName: currentNeighborhood?.name,
+      isLoading,
+      hasError: !!error,
+      errorMessage: error?.message,
+      isRefreshing,
+      hasAttemptedRefresh,
+      isLoadingTimeout,
+      timestamp: new Date().toISOString()
+    });
+  }, [currentNeighborhood, isLoading, error, isRefreshing, hasAttemptedRefresh, isLoadingTimeout]);
 
   // Handle navigation to home page
   const handleNavigateHome = () => navigate('/');
 
-  // If still loading, show loading state
+  // If still loading, show improved loading state with timeout detection
   if (isLoading) {
     return (
       <LoadingState 
+        title="Loading Your Neighborhood"
+        description="We're connecting you with your neighborhood information."
         isRefreshing={isRefreshing} 
         onRefresh={handleRefresh} 
+        showTimeout={true}
+        timeoutDelay={10000} // Show timeout message after 10 seconds
       />
     );
   }

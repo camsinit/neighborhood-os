@@ -9,7 +9,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Neighborhood } from '@/contexts/neighborhood/types';
 
@@ -27,7 +27,22 @@ export interface UseNeighborhoodReturn {
   // Admin/contributor functionality
   isCoreContributor: boolean;
   availableNeighborhoods: Neighborhood[];
+  
+  // Additional status information
+  isBackgroundRefreshing: boolean;
 }
+
+// Helper function to add more detailed error logging
+const logError = (context: string, error: any, additionalInfo?: Record<string, any>) => {
+  console.error(`[useNeighborhood] Error in ${context}:`, 
+    error?.message || error,
+    {
+      errorCode: error?.code,
+      errorDetails: error?.details,
+      ...additionalInfo
+    }
+  );
+};
 
 /**
  * Custom hook for working with neighborhood data
@@ -47,82 +62,118 @@ export function useNeighborhood(): UseNeighborhoodReturn {
   
   // Track if we're a core contributor with access to all neighborhoods
   const [isCoreContributor, setIsCoreContributor] = useState(false);
+  
+  // Track if a background refresh is happening
+  const [isBackgroundRefreshing, setIsBackgroundRefreshing] = useState(false);
+
+  // Helper function to fetch neighborhood data
+  const fetchNeighborhoodData = useCallback(async () => {
+    if (!user) {
+      console.log("[useNeighborhood] No user found, skipping neighborhood fetch");
+      return null;
+    }
+
+    try {
+      // First check if user is a core contributor with access to all neighborhoods
+      console.log("[useNeighborhood] Checking core contributor access for user:", user.id);
+      const { data: hasAccess, error: coreError } = await supabase
+        .rpc('user_is_core_contributor_with_access', {
+          user_uuid: user.id
+        });
+        
+      if (coreError) {
+        logError("checking core contributor access", coreError, { userId: user.id });
+        throw coreError;
+      }
+      
+      // Set core contributor status
+      setIsCoreContributor(!!hasAccess);
+      console.log("[useNeighborhood] Core contributor status:", !!hasAccess);
+      
+      // Check if the user created a neighborhood
+      console.log("[useNeighborhood] Checking if user created neighborhoods");
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from('neighborhoods')
+        .select('*')
+        .eq('created_by', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+        
+      if (createdError) {
+        logError("checking created neighborhoods", createdError, { userId: user.id });
+        throw createdError;
+      }
+      
+      // If they created a neighborhood, return it
+      if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+        console.log("[useNeighborhood] Found neighborhood created by user:", {
+          neighborhoodId: createdNeighborhoods[0].id,
+          neighborhoodName: createdNeighborhoods[0].name
+        });
+        return createdNeighborhoods[0] as Neighborhood;
+      }
+      
+      // Otherwise, check neighborhood membership
+      console.log("[useNeighborhood] Checking neighborhood membership");
+      const { data: memberNeighborhoods, error: memberError } = await supabase
+        .rpc('get_user_neighborhoods', {
+          user_uuid: user.id
+        });
+        
+      if (memberError) {
+        logError("checking neighborhood membership", memberError, { userId: user.id });
+        throw memberError;
+      }
+      
+      // Return the first neighborhood they're a member of
+      if (memberNeighborhoods && memberNeighborhoods.length > 0) {
+        console.log("[useNeighborhood] Found neighborhood membership:", {
+          neighborhoodId: memberNeighborhoods[0].id,
+          neighborhoodName: memberNeighborhoods[0].name
+        });
+        return memberNeighborhoods[0] as Neighborhood;
+      }
+      
+      // If no neighborhood found, return null
+      console.log("[useNeighborhood] No neighborhood found for user");
+      return null;
+    } catch (err) {
+      logError("fetching neighborhood", err, { userId: user?.id });
+      throw err;
+    }
+  }, [user]);
 
   // Main query to fetch the current user's neighborhood
   const {
     data: neighborhoodData,
     isLoading,
-    refetch
+    refetch,
+    isRefetching
   } = useQuery({
     queryKey: ['current-neighborhood', user?.id],
-    queryFn: async () => {
-      if (!user) {
-        console.log("[useNeighborhood] No user found, skipping neighborhood fetch");
-        return null;
-      }
-
-      try {
-        // First check if user is a core contributor with access to all neighborhoods
-        const { data: hasAccess, error: coreError } = await supabase
-          .rpc('user_is_core_contributor_with_access', {
-            user_uuid: user.id
-          });
-          
-        if (coreError) {
-          console.error("[useNeighborhood] Error checking core contributor access:", coreError);
-          throw coreError;
-        }
-        
-        // Set core contributor status
-        setIsCoreContributor(!!hasAccess);
-        
-        // Check if the user created a neighborhood
-        const { data: createdNeighborhoods, error: createdError } = await supabase
-          .from('neighborhoods')
-          .select('*')
-          .eq('created_by', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-          
-        if (createdError) {
-          console.error("[useNeighborhood] Error checking created neighborhoods:", createdError);
-          throw createdError;
-        }
-        
-        // If they created a neighborhood, return it
-        if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-          return createdNeighborhoods[0] as Neighborhood;
-        }
-        
-        // Otherwise, check neighborhood membership
-        const { data: memberNeighborhoods, error: memberError } = await supabase
-          .rpc('get_user_neighborhoods', {
-            user_uuid: user.id
-          });
-          
-        if (memberError) {
-          console.error("[useNeighborhood] Error checking neighborhood membership:", memberError);
-          throw memberError;
-        }
-        
-        // Return the first neighborhood they're a member of
-        if (memberNeighborhoods && memberNeighborhoods.length > 0) {
-          return memberNeighborhoods[0] as Neighborhood;
-        }
-        
-        // If no neighborhood found, return null
-        return null;
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
-        console.error("[useNeighborhood] Error fetching neighborhood:", err);
-        throw err;
-      }
-    },
+    queryFn: fetchNeighborhoodData,
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    gcTime: 10 * 60 * 1000,   // Keep unused data in cache for 10 minutes
+    retry: 2,                 // Retry failed requests twice
+    // Error handling
+    onError: (err: Error) => {
+      setError(err);
+      console.error("[useNeighborhood] Error fetching neighborhood:", err.message);
+      
+      // Show toast notification for user feedback
+      toast.error("Unable to load neighborhood data", {
+        description: "Please try refreshing the page or contact support if the problem persists.",
+        duration: 5000
+      });
+    }
   });
 
   // Query to get all available neighborhoods (for core contributors)
-  const { data: availableNeighborhoods = [] } = useQuery({
+  const { 
+    data: availableNeighborhoods = [],
+    refetch: refetchAvailableNeighborhoods 
+  } = useQuery({
     queryKey: ['available-neighborhoods', user?.id, isCoreContributor],
     queryFn: async () => {
       if (!user || !isCoreContributor) {
@@ -130,6 +181,7 @@ export function useNeighborhood(): UseNeighborhoodReturn {
       }
 
       try {
+        console.log("[useNeighborhood] Fetching all neighborhoods for core contributor");
         // Fetch all neighborhoods for core contributors
         const { data, error } = await supabase
           .rpc('get_all_neighborhoods_for_core_contributor', {
@@ -137,17 +189,18 @@ export function useNeighborhood(): UseNeighborhoodReturn {
           });
           
         if (error) {
-          console.error("[useNeighborhood] Error fetching all neighborhoods:", error);
+          logError("fetching all neighborhoods", error, { userId: user.id });
           throw error;
         }
         
         return data || [] as Neighborhood[];
       } catch (err) {
-        console.error("[useNeighborhood] Error fetching available neighborhoods:", err);
+        logError("fetching available neighborhoods", err, { userId: user?.id });
         return [];
       }
     },
     enabled: !!user && isCoreContributor,
+    staleTime: 5 * 60 * 1000
   });
 
   // Mutation to set the current neighborhood
@@ -172,6 +225,40 @@ export function useNeighborhood(): UseNeighborhoodReturn {
     },
   });
 
+  // Background refresh function that doesn't trigger loading state
+  const backgroundRefresh = useCallback(async () => {
+    if (isBackgroundRefreshing) return;
+    
+    setIsBackgroundRefreshing(true);
+    console.log("[useNeighborhood] Starting background refresh");
+    
+    try {
+      await refetch({ cancelRefetch: false });
+      if (isCoreContributor) {
+        await refetchAvailableNeighborhoods({ cancelRefetch: false });
+      }
+      console.log("[useNeighborhood] Background refresh completed successfully");
+    } catch (err) {
+      console.error("[useNeighborhood] Background refresh failed:", err);
+    } finally {
+      setIsBackgroundRefreshing(false);
+    }
+  }, [refetch, refetchAvailableNeighborhoods, isCoreContributor, isBackgroundRefreshing]);
+
+  // Set up periodic background refresh
+  useEffect(() => {
+    if (!user) return;
+    
+    // Refresh data in the background every 5 minutes
+    const intervalId = setInterval(() => {
+      backgroundRefresh();
+    }, 5 * 60 * 1000);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, backgroundRefresh]);
+
   // Debugging helper - log state changes
   useEffect(() => {
     console.log("[useNeighborhood] Current neighborhood state:", {
@@ -182,8 +269,10 @@ export function useNeighborhood(): UseNeighborhoodReturn {
       availableNeighborhoodCount: availableNeighborhoods?.length || 0,
       hasError: !!error,
       userId: user?.id,
+      isRefetching,
+      isBackgroundRefreshing
     });
-  }, [neighborhoodData, isLoading, isCoreContributor, availableNeighborhoods, error, user]);
+  }, [neighborhoodData, isLoading, isCoreContributor, availableNeighborhoods, error, user, isRefetching, isBackgroundRefreshing]);
 
   // Return a cleaned-up, simple interface
   return {
@@ -194,6 +283,7 @@ export function useNeighborhood(): UseNeighborhoodReturn {
     setCurrentNeighborhood: setCurrentNeighborhoodMutation.mutate,
     isCoreContributor,
     availableNeighborhoods,
+    isBackgroundRefreshing
   };
 }
 

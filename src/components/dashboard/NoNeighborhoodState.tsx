@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Home } from "lucide-react";
+import { Home, RefreshCw, Mail, HelpCircle } from "lucide-react";
+import { useState } from "react";
 
 /**
  * NoNeighborhoodState Component
@@ -29,9 +30,19 @@ const NoNeighborhoodState = ({
   onRefresh, 
   onNavigateHome 
 }: NoNeighborhoodStateProps) => {
+  // State to track if FAQ is shown
+  const [showFAQ, setShowFAQ] = useState(false);
+  
+  // Log when this component renders
+  console.log("[NoNeighborhoodState] Rendering with state:", { 
+    hasAttemptedRefresh, 
+    isRefreshing,
+    timestamp: new Date().toISOString()
+  });
+  
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="max-w-md w-full">
+      <Card className="max-w-md w-full shadow-lg">
         {/* Card header with icon and title */}
         <CardHeader>
           <div className="flex justify-center mb-4">
@@ -46,8 +57,8 @@ const NoNeighborhoodState = ({
         </CardHeader>
         
         {/* Card content with information and alerts */}
-        <CardContent>
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4">
+        <CardContent className="space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
             <p className="text-sm text-amber-800">
               Neighborhoods are invitation-only communities. You need an invitation from 
               an existing member to join.
@@ -64,24 +75,65 @@ const NoNeighborhoodState = ({
               </AlertDescription>
             </Alert>
           )}
+          
+          {/* FAQ section */}
+          <div className="pt-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs flex items-center w-full justify-between"
+              onClick={() => setShowFAQ(!showFAQ)}
+            >
+              <span>Frequently Asked Questions</span>
+              <HelpCircle className="h-3 w-3 ml-1" />
+            </Button>
+            
+            {showFAQ && (
+              <div className="mt-2 text-xs bg-gray-50 p-3 rounded border border-gray-200 space-y-3">
+                <div>
+                  <h4 className="font-bold">How do I join a neighborhood?</h4>
+                  <p>You need an invitation from an existing member. They'll send you a link to join.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold">I have an invitation but can't join</h4>
+                  <p>Check your invitation link and make sure you're logged in with the correct email address.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold">Can I create my own neighborhood?</h4>
+                  <p>Neighborhood creation is currently by approval only. Contact support for more information.</p>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
         
         {/* Footer with action buttons */}
         <CardFooter className="flex flex-col space-y-2">
           <Button 
             onClick={onRefresh} 
-            className="w-full"
+            className="w-full flex items-center justify-center"
             disabled={isRefreshing}
           >
+            <RefreshCw className="h-4 w-4 mr-2" />
             {isRefreshing ? "Refreshing..." : "Refresh"}
           </Button>
           
           <Button 
             variant="outline" 
-            className="w-full"
+            className="w-full flex items-center justify-center"
             onClick={onNavigateHome}
           >
+            <Home className="h-4 w-4 mr-2" />
             Return Home
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            className="w-full flex items-center justify-center mt-4"
+            onClick={() => window.location.href = "mailto:support@neighborly.com?subject=Neighborhood Access Request"}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Contact Support
           </Button>
         </CardFooter>
       </Card>

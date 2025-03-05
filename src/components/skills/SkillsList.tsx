@@ -8,8 +8,9 @@ import SkillContributionDialog from './SkillContributionDialog';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNeighborhood } from '@/hooks/useNeighborhood';
+import { toast } from 'sonner';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -27,9 +28,22 @@ const SkillsList = ({
   
   const { neighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
 
+  // Log component rendering for debugging
+  useEffect(() => {
+    console.log("[SkillsList] Rendering with state:", {
+      hasNeighborhood: !!neighborhood,
+      neighborhoodId: neighborhood?.id,
+      neighborhoodName: neighborhood?.name,
+      selectedCategory,
+      isLoadingNeighborhood,
+      timestamp: new Date().toISOString()
+    });
+  }, [neighborhood, selectedCategory, isLoadingNeighborhood]);
+
   const {
     data: skills,
-    isLoading
+    isLoading,
+    error
   } = useQuery({
     queryKey: ['skills-exchange', selectedCategory, neighborhood?.id],
     queryFn: async () => {
@@ -37,6 +51,8 @@ const SkillsList = ({
         console.log("[SkillsList] No neighborhood selected, returning empty array");
         return [];
       }
+      
+      console.log("[SkillsList] Fetching skills for neighborhood:", neighborhood.id);
       
       let query = supabase.from('skills_exchange').select(`
         *,
@@ -53,11 +69,55 @@ const SkillsList = ({
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error("[SkillsList] Error fetching skills:", error);
+        throw error;
+      }
+      
+      console.log("[SkillsList] Fetched skills count:", data?.length || 0);
       return data as (Skill & { profiles: { avatar_url: string | null; display_name: string | null } })[];
     },
-    enabled: !!neighborhood?.id && !isLoadingNeighborhood
+    enabled: !!neighborhood?.id && !isLoadingNeighborhood,
+    onError: (err) => {
+      console.error("[SkillsList] Query error:", err);
+      toast.error("Failed to load skills", {
+        description: "Please try refreshing the page"
+      });
+    }
   });
+
+  // Show error state if there's an error
+  if (error) {
+    console.error("[SkillsList] Rendering error state:", error);
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+        <h3 className="text-red-700 font-medium">Error loading skills</h3>
+        <p className="text-red-600 text-sm mt-1">{(error as Error).message}</p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="mt-2" 
+          onClick={() => window.location.reload()}
+        >
+          Refresh Page
+        </Button>
+      </div>
+    );
+  }
+
+  // Handle request to create a new skill
+  const handleRequestSkill = () => {
+    console.log("[SkillsList] User wants to request a skill", { selectedCategory });
+    // This would typically open your skill request form
+    // Placeholder for now
+  };
+  
+  // Handle offer to share a skill
+  const handleShareSkill = () => {
+    console.log("[SkillsList] User wants to share a skill", { selectedCategory });
+    // This would typically open your skill offering form
+    // Placeholder for now
+  };
 
   if (isLoading || isLoadingNeighborhood) {
     return <div className="space-y-4">
@@ -113,10 +173,7 @@ const SkillsList = ({
             title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skill Requests Yet`}
             description={`Be the first to request ${selectedCategory || 'a'} skill from the community`}
             actionLabel={`Request ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => {
-              // This would typically open your skill request form
-              console.log("User wants to request a skill");
-            }}
+            onAction={handleRequestSkill}
           />
         </div>
       )}
@@ -139,10 +196,7 @@ const SkillsList = ({
             title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`}
             description={`Be the first to share your ${selectedCategory || ''} skills with the community`}
             actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => {
-              // This would typically open your skill offering form
-              console.log("User wants to share a skill");
-            }}
+            onAction={handleShareSkill}
           />
         )}
       </div>
@@ -159,5 +213,8 @@ const SkillsList = ({
     </div>
   );
 };
+
+// Importing Button for the error state
+import { Button } from "@/components/ui/button";
 
 export default SkillsList;
