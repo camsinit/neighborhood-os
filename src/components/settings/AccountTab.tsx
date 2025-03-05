@@ -1,4 +1,3 @@
-
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -6,19 +5,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProfileImageUpload } from "./ProfileImageUpload";
 import { ProfileFormValues } from "./types";
-
-export const AccountTab = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
-  return (
-    <div className="space-y-6">
+export const AccountTab = ({
+  form
+}: {
+  form: UseFormReturn<ProfileFormValues>;
+}) => {
+  return <div className="space-y-6">
       <ProfileImageUpload />
       
       {/* Basic Info */}
       <div className="space-y-4">
-        <FormField
-          control={form.control}
-          name="display_name"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="display_name" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Display Name</FormLabel>
               <FormControl>
                 <Input placeholder="Your display name" {...field} />
@@ -27,43 +26,29 @@ export const AccountTab = ({ form }: { form: UseFormReturn<ProfileFormValues> })
                 This is your public display name.
               </FormDescription>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
 
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
+        <FormField control={form.control} name="bio" render={({
+        field
+      }) => <FormItem>
               <FormLabel>Bio</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Tell us about yourself"
-                  className="resize-none"
-                  {...field}
-                />
+                <Textarea placeholder="Tell us about yourself" className="resize-none" {...field} />
               </FormControl>
               <FormDescription>
                 Write a brief bio about yourself.
               </FormDescription>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
 
         {/* Preferences */}
-        <FormField
-          control={form.control}
-          name="language"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Language</FormLabel>
+        <FormField control={form.control} name="language" render={({
+        field
+      }) => <FormItem>
+              
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a language" />
-                  </SelectTrigger>
+                  
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="en">English</SelectItem>
@@ -72,21 +57,15 @@ export const AccountTab = ({ form }: { form: UseFormReturn<ProfileFormValues> })
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
 
-        <FormField
-          control={form.control}
-          name="timezone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Timezone</FormLabel>
+        <FormField control={form.control} name="timezone" render={({
+        field
+      }) => <FormItem>
+              
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a timezone" />
-                  </SelectTrigger>
+                  
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="UTC">UTC</SelectItem>
@@ -97,21 +76,15 @@ export const AccountTab = ({ form }: { form: UseFormReturn<ProfileFormValues> })
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
 
-        <FormField
-          control={form.control}
-          name="theme"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Theme</FormLabel>
+        <FormField control={form.control} name="theme" render={({
+        field
+      }) => <FormItem>
+              
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a theme" />
-                  </SelectTrigger>
+                  
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="light">Light</SelectItem>
@@ -120,10 +93,7 @@ export const AccountTab = ({ form }: { form: UseFormReturn<ProfileFormValues> })
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
-          )}
-        />
+            </FormItem>} />
       </div>
-    </div>
-  );
+    </div>;
 };
