@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation import
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  * It manages user authentication state, form submission, and navigation
  * to the dashboard upon successful authentication.
  * 
- * Updated with styling to match the landing page aesthetics.
+ * Updated with styling to match the landing page aesthetics and improved redirects.
  */
 const AuthForm = () => {
   // State for form fields and loading state
@@ -23,16 +23,21 @@ const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   
-  // Hook for programmatic navigation
+  // Hooks for programmatic navigation and location
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Toast hook for displaying notifications
   const { toast } = useToast();
+
+  // Get the redirect path from location state or default to dashboard
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/dashboard";
 
   // Listen for auth state changes - we're using the supabase client directly here
   // to ensure we're not depending on the context which might not be initialized properly
   useEffect(() => {
     console.log("[AuthForm] Setting up auth state change listener");
+    console.log("[AuthForm] Redirect target after login:", from);
     
     // Guard against supabase being undefined
     if (!supabase || !supabase.auth) {
@@ -45,10 +50,10 @@ const AuthForm = () => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
       // When user is signed in, navigate to the dashboard
-      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        console.log("[AuthForm] Valid session detected, navigating to dashboard");
-        // Changed 'dashboard' to '/dashboard' to ensure proper routing
-        navigate("/dashboard", { replace: true });
+      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
+        console.log("[AuthForm] Valid session detected, navigating to:", from);
+        // Use the from path or default to dashboard
+        navigate(from, { replace: true });
       }
     });
 
@@ -57,7 +62,7 @@ const AuthForm = () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
       subscription?.unsubscribe?.();
     };
-  }, [navigate]); // Only re-run if navigate changes
+  }, [navigate, from]); // Re-run if navigate or from changes
   
   // Form submission handler for both login and signup
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +111,10 @@ const AuthForm = () => {
           return;
         }
 
-        console.log("[AuthForm] Signin successful", { user: data.user?.id });
+        console.log("[AuthForm] Signin successful", { 
+          user: data.user?.id,
+          redirectTo: from
+        });
         
         // Show success toast
         toast({

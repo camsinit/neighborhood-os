@@ -1,24 +1,26 @@
 
-// This file implements the SupabaseProvider component
-// It provides Supabase authentication context to the entire application
-
-import { createContext, useContext, useState, useEffect } from 'react';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { supabase } from "@/integrations/supabase/client";
+import { ReactNode } from 'react';
+import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 
 /**
  * SupabaseProvider Component
  * 
- * This component wraps the application with Supabase authentication context
- * It handles session management and user authentication state
+ * This component provides a single wrapper for all Supabase-related providers.
+ * Currently, it includes the NeighborhoodProvider.
  * 
- * @param children - The child components to be wrapped with the provider
+ * @param children - The components that will have access to the providers
  */
-export const SupabaseProvider = ({ children }: { children: React.ReactNode }) => {
-  // Use Supabase's SessionContextProvider to provide authentication context
+interface SupabaseProviderProps {
+  children: ReactNode;
+}
+
+export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
-      {children}
-    </SessionContextProvider>
+    // This wrapper is maintained for backward compatibility
+    // The actual NeighborhoodProvider is now in the main.tsx file
+    // so we just pass children through
+    <>{children}</>
   );
 };
+
+export default SupabaseProvider;

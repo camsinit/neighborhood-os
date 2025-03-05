@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { NeighborhoodProvider } from '@/contexts/NeighborhoodContext';
 import App from './App.tsx';
 import './index.css';
 
@@ -14,9 +15,10 @@ import './index.css';
  * - BrowserRouter for navigation
  * - SessionContextProvider for Supabase auth
  * - QueryClientProvider for data fetching
+ * - NeighborhoodProvider for neighborhood data
  */
 
-// Create a new React Query client
+// Create a new React Query client with configured defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// Mount the application
+// Mount the application with all providers
 createRoot(document.getElementById("root")!).render(
   // BrowserRouter enables routing functionality
   <BrowserRouter>
@@ -35,7 +37,10 @@ createRoot(document.getElementById("root")!).render(
     <SessionContextProvider supabaseClient={supabase}>
       {/* QueryClientProvider enables React Query data fetching */}
       <QueryClientProvider client={queryClient}>
-        <App />
+        {/* NeighborhoodProvider gives access to neighborhood data */}
+        <NeighborhoodProvider>
+          <App />
+        </NeighborhoodProvider>
       </QueryClientProvider>
     </SessionContextProvider>
   </BrowserRouter>
