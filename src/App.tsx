@@ -2,18 +2,18 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import LandingPage from "@/pages/LandingPage";
-import Login from "@/pages/LoginPage";
+import Login from "@/pages/Login";  // Changed from LoginPage to Login
 import NeighborsPage from "@/pages/NeighborsPage";
 import CalendarPage from "@/pages/CalendarPage";
 import SafetyPage from "@/pages/SafetyPage";
 import CarePage from "@/pages/CarePage";
 import SkillsPage from "@/pages/SkillsPage";
 import GoodsPage from "@/pages/GoodsPage";
-import AdminPage from "@/pages/AdminPage";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import JoinPage from "@/pages/JoinPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
+import WaitlistAdmin from "./pages/WaitlistAdmin"; // Using WaitlistAdmin instead of AdminPage
 
 function App() {
   return (
@@ -83,12 +83,12 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Admin routes */}
+        {/* Admin route with WaitlistAdmin */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute>
-              <AdminPage />
+              <WaitlistAdmin />
             </ProtectedRoute>
           }
         />
