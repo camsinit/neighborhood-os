@@ -26,8 +26,7 @@ export function useNeighborhoodData(user: User | null) {
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // State for God Mode functionality
-  const [isCoreContributor, setIsCoreContributor] = useState(false);
+  // State for available neighborhoods
   const [allNeighborhoods, setAllNeighborhoods] = useState<Neighborhood[]>([]);
   
   // Use our refresh hook to manage refresh functionality
@@ -71,7 +70,6 @@ export function useNeighborhoodData(user: User | null) {
       startFetchTimer,
       endFetchTimer,
       setIsLoading,
-      setIsCoreContributor,
       setAllNeighborhoods,
       setCurrentNeighborhood
     );
@@ -105,7 +103,6 @@ export function useNeighborhoodData(user: User | null) {
     currentNeighborhood,
     isLoading,
     error,
-    isCoreContributor,
     allNeighborhoods,
     user,
     fetchAttempts
@@ -116,7 +113,6 @@ export function useNeighborhoodData(user: User | null) {
     currentNeighborhood, 
     isLoading, 
     error,
-    isCoreContributor,
     allNeighborhoods,
     setCurrentNeighborhood,
     refreshNeighborhoodData

@@ -8,10 +8,8 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { Neighborhood } from '@/contexts/neighborhood/types';
 import { toast } from 'sonner';
 import { 
-  checkCoreContributorStatus, 
   fetchCreatedNeighborhoods, 
-  fetchNeighborhoodMembership,
-  fetchAllNeighborhoodsForContributor 
+  fetchNeighborhoodMembership
 } from './utils/fetchers';
 import { logError, logDebug } from './utils/errorLogging';
 
@@ -35,9 +33,6 @@ export const useNeighborhoodQueries = () => {
     }
 
     try {
-      // Check if user is a core contributor
-      const isCoreContributor = await checkCoreContributorStatus(user.id);
-      
       // Check if the user created a neighborhood
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
         
@@ -86,29 +81,16 @@ export const useNeighborhoodQueries = () => {
     retry: 2                  // Retry failed requests twice
   });
 
-  // Function to check if user is a core contributor
-  const checkCoreContributor = async () => {
-    if (!user) return false;
-    return checkCoreContributorStatus(user.id);
-  };
-
-  // Query to check if user is a core contributor
-  const coreContributorQuery = useQuery({
-    queryKey: ['core-contributor', user?.id],
-    queryFn: checkCoreContributor,
-    enabled: !!user
-  });
-
-  // Query to get all available neighborhoods for core contributors
+  // Query to get all available neighborhoods for the user
   const availableNeighborhoodsQuery = useQuery({
-    queryKey: ['available-neighborhoods', user?.id, coreContributorQuery.data],
+    queryKey: ['available-neighborhoods', user?.id],
     queryFn: async () => {
-      if (!user || !coreContributorQuery.data) {
+      if (!user) {
         return [];
       }
-      return fetchAllNeighborhoodsForContributor(user.id);
+      return fetchNeighborhoodMembership(user.id);
     },
-    enabled: !!user && !!coreContributorQuery.data
+    enabled: !!user
   });
 
   // Mutation to set the current neighborhood
@@ -135,7 +117,6 @@ export const useNeighborhoodQueries = () => {
 
   return {
     neighborhoodQuery,
-    coreContributorQuery,
     availableNeighborhoodsQuery,
     setCurrentNeighborhoodMutation
   };

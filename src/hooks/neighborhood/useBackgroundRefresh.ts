@@ -1,65 +1,45 @@
 
 /**
- * Hook for background refreshing of neighborhood data
+ * Hook for background refresh functionality
  * 
- * This hook provides functionality to refresh neighborhood data in the background
- * without disrupting the user experience
+ * This hook manages the background refresh logic for neighborhood data
  */
-import { useState, useCallback, useEffect } from 'react';
-import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
-import { logDebug } from './utils/errorLogging';
-import { Neighborhood } from '@/contexts/neighborhood/types';
+import { useState } from 'react';
 
 /**
- * Hook to manage background refresh of neighborhood data
- * 
- * @param refetch - Refetch function from React Query
- * @param refetchAvailableNeighborhoods - Function to refetch available neighborhoods
- * @param isCoreContributor - Whether the user is a core contributor
- * @returns Object containing background refresh state and functions
+ * Custom hook to handle background refreshes
+ * @param refetchNeighborhood - Function to refetch the current neighborhood
+ * @param refetchAvailable - Function to refetch available neighborhoods
+ * @returns Object with refresh functions and state
  */
-export const useBackgroundRefresh = (
-  refetch: (options?: RefetchOptions) => Promise<QueryObserverResult>,
-  refetchAvailableNeighborhoods: (options?: RefetchOptions) => Promise<QueryObserverResult>,
-  isCoreContributor: boolean
-) => {
-  // Track if a background refresh is happening
+export function useBackgroundRefresh(
+  refetchNeighborhood: () => void,
+  refetchAvailable: () => void
+) {
+  // Track if we're currently doing a background refresh
   const [isBackgroundRefreshing, setIsBackgroundRefreshing] = useState(false);
-
-  // Background refresh function that doesn't trigger loading state
-  const backgroundRefresh = useCallback(async () => {
-    if (isBackgroundRefreshing) return;
-    
+  
+  // Function to refresh both neighborhood data and available neighborhoods
+  const backgroundRefresh = async () => {
     setIsBackgroundRefreshing(true);
-    logDebug("Starting background refresh");
     
     try {
-      await refetch({ cancelRefetch: false });
-      if (isCoreContributor) {
-        await refetchAvailableNeighborhoods({ cancelRefetch: false });
-      }
-      logDebug("Background refresh completed successfully");
-    } catch (err) {
-      console.error("[useNeighborhood] Background refresh failed:", err);
+      // Refetch both in parallel
+      await Promise.all([
+        refetchNeighborhood(),
+        refetchAvailable()
+      ]);
+    } catch (error) {
+      console.error("[useBackgroundRefresh] Error during background refresh:", error);
     } finally {
       setIsBackgroundRefreshing(false);
     }
-  }, [refetch, refetchAvailableNeighborhoods, isCoreContributor, isBackgroundRefreshing]);
-
-  // Set up periodic background refresh
-  useEffect(() => {
-    // Refresh data in the background every 5 minutes
-    const intervalId = setInterval(() => {
-      backgroundRefresh();
-    }, 5 * 60 * 1000);
-    
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [backgroundRefresh]);
-
+  };
+  
   return {
     isBackgroundRefreshing,
     backgroundRefresh
   };
-};
+}
+
+export default useBackgroundRefresh;

@@ -9,7 +9,6 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
   currentNeighborhood: null,
   isLoading: true,
   error: null,
-  isCoreContributor: false,
   allNeighborhoods: [],
   setCurrentNeighborhood: () => {},
   refreshNeighborhoodData: () => {} // Added default for refresh function
@@ -20,7 +19,6 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
  * 
  * This component fetches the user's active neighborhood membership
  * and provides it to all child components through the context.
- * It also provides "God Mode" access for core contributors.
  * 
  * @param children - Child components that will have access to the context
  */
@@ -76,7 +74,6 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
  * 
  * A custom hook for consuming the NeighborhoodContext
  * Components can use this to access information about the user's neighborhood
- * and, for core contributors, the God Mode functionality
  */
 export function useNeighborhood() {
   const context = useContext(NeighborhoodContext);

@@ -34,7 +34,6 @@ export function useNeighborhood(): UseNeighborhoodReturn {
   // Get all neighborhood queries
   const {
     neighborhoodQuery,
-    coreContributorQuery,
     availableNeighborhoodsQuery,
     setCurrentNeighborhoodMutation
   } = useNeighborhoodQueries();
@@ -47,14 +46,12 @@ export function useNeighborhood(): UseNeighborhoodReturn {
     isRefetching
   } = neighborhoodQuery;
   
-  const isCoreContributor = coreContributorQuery.data || false;
   const availableNeighborhoods = availableNeighborhoodsQuery.data || [];
   
   // Set up background refresh
   const { isBackgroundRefreshing, backgroundRefresh } = useBackgroundRefresh(
     refetch,
-    availableNeighborhoodsQuery.refetch,
-    isCoreContributor
+    availableNeighborhoodsQuery.refetch
   );
   
   // Log debugging information
@@ -62,7 +59,6 @@ export function useNeighborhood(): UseNeighborhoodReturn {
     neighborhood: neighborhoodData || null,
     isLoading,
     error,
-    isCoreContributor,
     availableNeighborhoods,
     user,
     isRefetching,
@@ -90,7 +86,6 @@ export function useNeighborhood(): UseNeighborhoodReturn {
     error,
     refreshNeighborhood: backgroundRefresh,
     setCurrentNeighborhood: setCurrentNeighborhoodMutation.mutate,
-    isCoreContributor,
     availableNeighborhoods,
     isBackgroundRefreshing
   };

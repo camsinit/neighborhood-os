@@ -3,64 +3,16 @@
  * Hook for neighborhood fetch strategies
  * 
  * This module contains the core logic for how to fetch neighborhood data
- * in different scenarios (core contributor, neighborhood creator, member)
+ * in different scenarios (neighborhood creator, member)
  */
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../../types';
 import { 
   fetchCreatedNeighborhoods, 
-  checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor,
-  checkNeighborhoodMembership,
   fetchAllNeighborhoods,
+  checkNeighborhoodMembership,
   getUserNeighborhoods 
 } from '../../neighborhoodUtils';
-
-/**
- * Checks if user is a core contributor and fetches all neighborhoods if they are
- * 
- * @param userId - The user's ID
- * @param setIsCoreContributor - Function to update core contributor status
- * @param setAllNeighborhoods - Function to update available neighborhoods
- * @param setCurrentNeighborhood - Function to update current neighborhood
- * @param currentNeighborhood - Current neighborhood state
- * @param currentAttempt - Current fetch attempt number for logging
- * @returns Whether the user is a core contributor
- */
-export const checkCoreContributorStrategy = async (
-  userId: string,
-  setIsCoreContributor: (isCore: boolean) => void,
-  setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void,
-  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
-  currentNeighborhood: Neighborhood | null,
-  currentAttempt: number
-): Promise<boolean> => {
-  // Check if the user is a core contributor with access to all neighborhoods
-  console.log(`[useFetchStrategy] Checking if user is core contributor (attempt ${currentAttempt})`);
-  const isContributor = await checkCoreContributorAccess(userId);
-  setIsCoreContributor(isContributor);
-  
-  // If they are a core contributor, fetch all neighborhoods
-  if (isContributor) {
-    console.log("[useFetchStrategy] User is a core contributor with access to all neighborhoods", {
-      fetchAttempt: currentAttempt
-    });
-    
-    // Fetch all neighborhoods using the security definer function
-    const neighborhoods = await fetchAllNeighborhoodsForCoreContributor(userId);
-    setAllNeighborhoods(neighborhoods);
-    
-    // If we have neighborhoods and no current one is set, set the first one as current
-    if (neighborhoods.length > 0 && !currentNeighborhood) {
-      console.log(`[useFetchStrategy] Setting first neighborhood for core contributor (attempt ${currentAttempt})`, {
-        neighborhood: neighborhoods[0]
-      });
-      setCurrentNeighborhood(neighborhoods[0]);
-    }
-  }
-  
-  return isContributor;
-};
 
 /**
  * Checks if user created any neighborhoods and uses the first one found

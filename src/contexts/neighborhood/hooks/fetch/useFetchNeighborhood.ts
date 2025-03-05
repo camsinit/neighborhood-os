@@ -12,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useFetchState } from './useFetchState';
 import { useFetchErrorHandler } from './useFetchErrorHandler';
 import { 
-  checkCoreContributorStrategy,
   checkCreatedNeighborhoodStrategy,
   checkMembershipStrategy
 } from './useFetchStrategy';
@@ -50,7 +49,6 @@ export function useFetchNeighborhood(
     startFetchTimer: () => number,
     endFetchTimer: (startTime: number) => void,
     setIsLoading: (loading: boolean) => void,
-    setIsCoreContributor: (isCore: boolean) => void,
     setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void,
     setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void
   ) => {
@@ -61,7 +59,7 @@ export function useFetchNeighborhood(
     console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
     
     // Reset states at the start of each fetch
-    resetStates(setIsLoading, setIsCoreContributor, setAllNeighborhoods);
+    resetStates(setIsLoading, setAllNeighborhoods);
 
     // If no user is logged in, we can't fetch neighborhood data
     if (!user) {
@@ -127,16 +125,6 @@ export function useFetchNeighborhood(
         console.error("[useFetchNeighborhood] Diagnostic query error:", diagError);
       }
 
-      // First check if the user is a core contributor with access to all neighborhoods
-      const isContributor = await checkCoreContributorStrategy(
-        user.id,
-        setIsCoreContributor,
-        setAllNeighborhoods,
-        setCurrentNeighborhood,
-        currentNeighborhood,
-        currentAttempt
-      );
-      
       // Check if user created any neighborhoods
       const foundCreatedNeighborhood = await checkCreatedNeighborhoodStrategy(
         user.id,
@@ -158,13 +146,12 @@ export function useFetchNeighborhood(
         currentAttempt
       );
       
-      // If we get here, user has no neighborhood (but might be a core contributor with access)
+      // If we get here, user has no neighborhood
       console.log(`[useFetchNeighborhood] Completed neighborhood check (attempt ${currentAttempt}):`, {
-        isCoreContributor: isContributor,
         hasNeighborhood: foundMembership
       });
       
-      if (!isContributor && !foundMembership) {
+      if (!foundMembership) {
         console.log(`[useFetchNeighborhood] User has no neighborhood (attempt ${currentAttempt})`);
         setCurrentNeighborhood(null);
       }

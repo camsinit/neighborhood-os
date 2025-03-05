@@ -17,8 +17,7 @@ export interface UseNeighborhoodReturn {
   refreshNeighborhood: () => void;
   setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
   
-  // Admin/contributor functionality
-  isCoreContributor: boolean;
+  // Available neighborhoods for this user
   availableNeighborhoods: Neighborhood[];
   
   // Additional status information

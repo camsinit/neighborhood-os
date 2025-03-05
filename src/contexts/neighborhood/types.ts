@@ -21,7 +21,6 @@ export interface NeighborhoodContextType {
   currentNeighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
-  isCoreContributor: boolean;
   allNeighborhoods: Neighborhood[];
   setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
   refreshNeighborhoodData: () => void; // Added this function type
