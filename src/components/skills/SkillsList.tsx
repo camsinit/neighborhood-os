@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory } from './types/skillTypes';
@@ -70,6 +71,11 @@ const SkillsList = ({
         icon={Sparkles}
         title="No Neighborhood Selected"
         description="You need to join a neighborhood to view and share skills"
+        actionLabel="Join a Neighborhood"
+        onAction={() => {
+          // Placeholder action - could navigate to neighborhood joining page
+          console.log("User clicked to join a neighborhood");
+        }}
       />
     );
   }
@@ -107,7 +113,10 @@ const SkillsList = ({
             title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skill Requests Yet`}
             description={`Be the first to request ${selectedCategory || 'a'} skill from the community`}
             actionLabel={`Request ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => setSelectedSkill(null)}
+            onAction={() => {
+              // This would typically open your skill request form
+              console.log("User wants to request a skill");
+            }}
           />
         </div>
       )}
@@ -130,7 +139,10 @@ const SkillsList = ({
             title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`}
             description={`Be the first to share your ${selectedCategory || ''} skills with the community`}
             actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => setSelectedSkill(null)}
+            onAction={() => {
+              // This would typically open your skill offering form
+              console.log("User wants to share a skill");
+            }}
           />
         )}
       </div>

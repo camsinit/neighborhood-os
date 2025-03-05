@@ -11,18 +11,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-
-// Define Neighborhood type 
-export interface Neighborhood {
-  id: string;
-  name: string;
-  created_by: string;
-  created_at: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-}
+import { Neighborhood } from '@/contexts/neighborhood/types';
 
 // Define the return type of the hook
 export interface UseNeighborhoodReturn {
@@ -102,7 +91,7 @@ export function useNeighborhood(): UseNeighborhoodReturn {
         
         // If they created a neighborhood, return it
         if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-          return createdNeighborhoods[0];
+          return createdNeighborhoods[0] as Neighborhood;
         }
         
         // Otherwise, check neighborhood membership
@@ -118,7 +107,7 @@ export function useNeighborhood(): UseNeighborhoodReturn {
         
         // Return the first neighborhood they're a member of
         if (memberNeighborhoods && memberNeighborhoods.length > 0) {
-          return memberNeighborhoods[0];
+          return memberNeighborhoods[0] as Neighborhood;
         }
         
         // If no neighborhood found, return null
@@ -152,7 +141,7 @@ export function useNeighborhood(): UseNeighborhoodReturn {
           throw error;
         }
         
-        return data || [];
+        return data || [] as Neighborhood[];
       } catch (err) {
         console.error("[useNeighborhood] Error fetching available neighborhoods:", err);
         return [];
