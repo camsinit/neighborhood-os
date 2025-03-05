@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Import our refactored hooks
 import { useNeighborhoodRefresh } from './hooks/useNeighborhoodRefresh';
 import { useNeighborhoodSafetyTimeout } from './hooks/useNeighborhoodSafetyTimeout';
-import { useFetchNeighborhood } from './hooks/fetch/useFetchNeighborhood'; // Updated path to the refactored module
+import { useFetchNeighborhood } from './hooks/fetch/useFetchNeighborhood'; 
 import { useNeighborhoodLogging } from './hooks/useNeighborhoodLogging';
 import { useSafetyTimeouts } from './hooks/useSafetyTimeouts';
 
@@ -43,6 +43,7 @@ export function useNeighborhoodData(user: User | null) {
   );
   
   // Use our safety timeout hook to manage fetch timeouts
+  // Fixed startFetchTimer to be a nullary function (no parameters)
   const { startFetchTimer, endFetchTimer } = useNeighborhoodSafetyTimeout(
     isLoading,
     hasFetchAttempted

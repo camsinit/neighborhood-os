@@ -15,6 +15,36 @@ import {
 } from '../../neighborhoodUtils';
 
 /**
+ * Hook to provide neighborhood fetch strategies
+ * 
+ * @returns Object containing neighborhood fetch strategy functions
+ */
+export const useFetchStrategy = () => {
+  /**
+   * Fetch all neighborhoods a user is a member of using the RPC function
+   * 
+   * @param userId - The ID of the user to fetch neighborhoods for
+   * @returns Array of neighborhoods the user is a member of
+   */
+  const fetchUserNeighborhoods = async (userId: string): Promise<Neighborhood[]> => {
+    // Get all neighborhoods in one go using our RPC helper function
+    console.log(`[useFetchStrategy] Using RPC-based neighborhood fetch for user ${userId}`);
+    return await getUserNeighborhoods(userId);
+  };
+
+  return {
+    fetchUserNeighborhoods
+  };
+};
+
+// Also export the standalone strategy functions for direct use
+export { 
+  checkCreatedNeighborhoodStrategy,
+  checkMembershipStrategy,
+  legacyCheckMembershipStrategy
+};
+
+/**
  * Checks if user created any neighborhoods and uses the first one found
  * 
  * @param userId - The ID of the user to check

@@ -1,3 +1,4 @@
+
 /**
  * Hook to handle neighborhood data fetching
  * 
@@ -6,7 +7,7 @@
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useFetchState } from './useFetchState';
-import { useFetchStrategy } from './useFetchStrategy';
+import { useFetchStrategy } from './useFetchStrategy'; // Import should now work with updated file
 import { useFetchErrorHandler } from './useFetchErrorHandler';
 import { Neighborhood } from '../../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,7 +61,7 @@ export const useFetchNeighborhood = (
     // Log fetch attempt
     console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
     
-    // Reset states at the start of each fetch
+    // Reset states at the start of each fetch - removing isCoreContributor parameter
     resetStates(setIsLoading, setAllNeighborhoods);
 
     // If no user is logged in, we can't fetch neighborhood data

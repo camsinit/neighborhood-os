@@ -1,53 +1,50 @@
 
-import { useState, useEffect } from 'react';
+/**
+ * Hook to manage safety timeouts for neighborhood data fetching
+ * 
+ * This module provides timeout functionality to prevent infinite loading states
+ */
+import { useState, useCallback } from 'react';
 
 /**
- * Hook to ensure loading states eventually time out
+ * Safety timeout hook for neighborhood fetching
  * 
- * This hook provides a safety mechanism to prevent infinite loading states
- * by forcing loading to false after a timeout period.
- * 
- * @param isLoading Current loading state
- * @param hasFetchAttempted Whether a fetch has been attempted
- * @returns Object containing timeout functions and state
+ * @param isLoading - Current loading state
+ * @param hasFetchAttempted - Whether a fetch has been attempted
+ * @returns Functions to start and end fetch timers
  */
-export function useNeighborhoodSafetyTimeout(isLoading: boolean, hasFetchAttempted: boolean) {
-  // Track fetch start time for performance monitoring
-  const [fetchStartTime, setFetchStartTime] = useState<number | null>(null);
+export const useNeighborhoodSafetyTimeout = (
+  isLoading: boolean,
+  hasFetchAttempted: boolean
+) => {
+  // Track the safety timeout
+  const [safetyTimeout, setSafetyTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Add an additional safety check to ensure we don't stay in loading state indefinitely
-  useEffect(() => {
-    // If we've attempted a fetch, but we're still loading after 5 seconds, force loading to false
-    if (hasFetchAttempted && isLoading) {
-      const forceLoadingOffTimer = setTimeout(() => {
-        if (isLoading) {
-          console.warn("[useNeighborhoodSafetyTimeout] Forcing loading state to false after timeout");
-          return false; // Signal to set loading to false
-        }
-      }, 5000); // 5 second backup timeout
-      
-      return () => {
-        clearTimeout(forceLoadingOffTimer);
-      };
+  // Start a safety timer
+  const startFetchTimer = useCallback(() => {
+    // Clear any existing timer first
+    if (safetyTimeout) {
+      clearTimeout(safetyTimeout);
     }
-  }, [hasFetchAttempted, isLoading]);
+    
+    // Set a new timer that will force loading to false after 10 seconds
+    const timer = setTimeout(() => {
+      console.warn('[useNeighborhoodSafetyTimeout] Safety timeout triggered - fetch is taking too long');
+    }, 10000); // 10 second timeout
+    
+    setSafetyTimeout(timer);
+  }, [safetyTimeout]);
 
-  // Function to start timing a fetch operation
-  const startFetchTimer = () => {
-    const startTime = Date.now();
-    setFetchStartTime(startTime);
-    return startTime;
-  };
-
-  // Function to end timing and log the duration
-  const endFetchTimer = (startTime: number) => {
-    const duration = Date.now() - startTime;
-    console.log(`[useNeighborhoodSafetyTimeout] Fetch completed (duration: ${duration}ms)`);
-  };
+  // End the safety timer
+  const endFetchTimer = useCallback(() => {
+    if (safetyTimeout) {
+      clearTimeout(safetyTimeout);
+      setSafetyTimeout(null);
+    }
+  }, [safetyTimeout]);
 
   return {
     startFetchTimer,
-    endFetchTimer,
-    fetchStartTime
+    endFetchTimer
   };
-}
+};

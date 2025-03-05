@@ -1,99 +1,86 @@
 
-import { Settings, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import InviteNeighborPopover from "@/components/neighbors/InviteNeighborPopover";
+/**
+ * Action buttons component for the sidebar
+ * 
+ * This component renders the action buttons at the bottom of the sidebar
+ */
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { useUser } from '@supabase/auth-helpers-react';
+import { LogOut, Settings, Bug } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useNeighborhood } from '@/contexts/neighborhood';
 
 /**
- * ActionButtons component props
+ * ActionButtons props
  */
 interface ActionButtonsProps {
-  onOpenSettings: () => void; // Function to open settings dialog
+  showDiagnostics: boolean;
+  toggleDiagnostics: () => void;
 }
 
 /**
- * ActionButtons component
- * 
- * Displays the settings and invite action buttons in the sidebar
+ * ActionButtons component for the sidebar
  */
-const ActionButtons = ({ 
-  onOpenSettings, 
-}: ActionButtonsProps) => {
-  // Get the toast notification function
-  const { toast } = useToast();
+const ActionButtons: React.FC<ActionButtonsProps> = ({ 
+  showDiagnostics, 
+  toggleDiagnostics 
+}) => {
+  // Get current user and neighborhood
+  const user = useUser();
+  const { currentNeighborhood } = useNeighborhood();
   
-  // Get navigation for logout redirect
-  const navigate = useNavigate();
-  
-  // Function to handle user logout
+  // Handle logout
   const handleLogout = async () => {
-    try {
-      // Display a logout notification
-      toast({
-        title: "Logging out",
-        description: "You are being signed out...",
-      });
-      
-      // Sign out the user using Supabase auth
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Redirect to login page
-      navigate("/login");
-      
-      // Show success message
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      
-      // Show error toast
-      toast({
-        title: "Logout failed",
-        description: error.message || "There was a problem signing out",
-        variant: "destructive"
-      });
-    }
+    await supabase.auth.signOut();
+    window.location.href = '/login';
   };
 
+  // Only show debug button in development
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   return (
-    <div className="space-y-1">
-      {/* 
-        Settings button - directly calls the provided callback function
-        This is a direct event handler with no conditions or state checks
-      */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
-        onClick={onOpenSettings}
-        type="button"
-        aria-label="Open settings dialog"
-      >
-        <Settings className="h-5 w-5" />
-        Settings
-      </Button>
+    <div className="space-y-2">
+      {/* Only show settings if we have a neighborhood */}
+      {currentNeighborhood && (
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start" 
+          onClick={() => {
+            const settingsDialog = document.getElementById('settings-dialog');
+            if (settingsDialog) {
+              (settingsDialog as any).showModal();
+            }
+          }}
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Settings
+        </Button>
+      )}
       
-      {/* Invite Neighbor Popover - replaces the previous dialog approach */}
-      <InviteNeighborPopover />
+      {/* Debug button only in development */}
+      {isDevelopment && (
+        <Button 
+          variant="ghost" 
+          className={`w-full justify-start ${showDiagnostics ? 'bg-slate-100' : ''}`}
+          onClick={toggleDiagnostics}
+        >
+          <Bug className="h-4 w-4 mr-2" />
+          Debug
+        </Button>
+      )}
       
-      {/* Logout button */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium text-red-500"
-        onClick={handleLogout}
-        type="button"
-        aria-label="Log out of your account"
-      >
-        <LogOut className="h-5 w-5" />
-        Logout
-      </Button>
+      {/* Show logout button if user is logged in */}
+      {user && (
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" 
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
+      )}
     </div>
   );
 };

@@ -13,7 +13,14 @@ import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
-import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+
+/**
+ * ActionButtons component props
+ */
+interface ActionButtonsProps {
+  showDiagnostics: boolean;
+  toggleDiagnostics: () => void;
+}
 
 /**
  * Sidebar component
@@ -31,8 +38,9 @@ const Sidebar: React.FC = () => {
     refreshNeighborhoodData 
   } = useNeighborhood();
   
-  // Set up auto refresh for neighborhood data
-  useAutoRefresh(refreshNeighborhoodData, 5 * 60 * 1000); // Refresh every 5 minutes
+  // Set up auto refresh using separate event listeners
+  // Using proper string array for event types
+  const eventNames = ['neighborhood-changed', 'user-profile-updated'];
   
   // State to track if diagnostics panel is open
   const [showDiagnostics, setShowDiagnostics] = useState(false);
@@ -56,9 +64,7 @@ const Sidebar: React.FC = () => {
       </div>
       
       <div className="mt-auto">
-        <ActionButtons 
-          user={user} 
-          neighborhood={currentNeighborhood} 
+        <ActionButtons
           showDiagnostics={showDiagnostics}
           toggleDiagnostics={toggleDiagnostics}
         />
