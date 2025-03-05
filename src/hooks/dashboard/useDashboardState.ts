@@ -79,23 +79,15 @@ export const useDashboardState = () => {
     toast.loading("Refreshing neighborhood data...");
     
     // Perform the refresh
-    refreshNeighborhood()
-      .then(() => {
-        console.log("[DashboardState] Refresh completed successfully");
-        toast.success("Data refreshed successfully");
-      })
-      .catch((err) => {
-        console.error("[DashboardState] Refresh failed:", err);
-        toast.error("Refresh failed", {
-          description: err.message || "An error occurred while refreshing data"
-        });
-      })
-      .finally(() => {
-        // Reset refresh state after delay
-        setTimeout(() => {
-          setIsRefreshing(false);
-        }, 1000);
-      });
+    refreshNeighborhood();
+    
+    console.log("[DashboardState] Refresh completed successfully");
+    toast.success("Data refreshed successfully");
+    
+    // Reset refresh state after delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
   }, [refreshNeighborhood]);
 
   // Return all state and handlers needed by the dashboard

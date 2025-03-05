@@ -77,13 +77,7 @@ const SkillsList = ({
       console.log("[SkillsList] Fetched skills count:", data?.length || 0);
       return data as (Skill & { profiles: { avatar_url: string | null; display_name: string | null } })[];
     },
-    enabled: !!neighborhood?.id && !isLoadingNeighborhood,
-    onError: (err) => {
-      console.error("[SkillsList] Query error:", err);
-      toast.error("Failed to load skills", {
-        description: "Please try refreshing the page"
-      });
-    }
+    enabled: !!neighborhood?.id && !isLoadingNeighborhood
   });
 
   // Show error state if there's an error

@@ -1,4 +1,5 @@
 
+import React, { useState, useEffect } from "react";
 import { LoadingSpinner } from "./loading";
 import { Button } from "./button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
@@ -30,10 +31,10 @@ export function LoadingState({
   timeoutDelay = 8000 // Default 8 seconds
 }: LoadingStateProps) {
   // State to track if loading is taking too long
-  const [showTimeoutMessage, setShowTimeoutMessage] = React.useState(false);
+  const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
   
   // Set up timeout detection
-  React.useEffect(() => {
+  useEffect(() => {
     // Only set up timeout if requested
     if (!showTimeout) return;
     
