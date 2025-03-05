@@ -79,9 +79,9 @@ const AuthForm = () => {
         throw error;
       } else {
         // If successful, show success message and redirect
-        toast({
-          description: "Successfully signed in!",
-        });
+        // Fix: Using toast from sonner which accepts a string directly or
+        // can take a title and description
+        toast("Successfully signed in!");
         navigate(returnTo, { replace: true });
       }
     } catch (error) {
