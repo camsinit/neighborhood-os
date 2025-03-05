@@ -31,7 +31,7 @@ const InviteNeighborPopover = () => {
   // Get required hooks
   const { toast } = useToast();
   const user = useUser();
-  const { currentNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
 
   // Debug effect to track neighborhood data changes
   useEffect(() => {
@@ -260,6 +260,19 @@ const InviteNeighborPopover = () => {
             >
               <RefreshCw className="h-3 w-3 mr-1" />
               Generate New Code
+            </Button>
+          )}
+
+          {/* Add refresh button for updating neighborhood data */}
+          {(!currentNeighborhood || error) && !isGenerating && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refreshNeighborhoodData()}
+              className="w-full text-sm"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Refresh Neighborhood Data
             </Button>
           )}
         </div>

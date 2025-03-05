@@ -29,6 +29,7 @@ const JoinPage = () => {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [joinSuccess, setJoinSuccess] = useState(false);
   const user = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -77,11 +78,22 @@ const JoinPage = () => {
   }, [inviteCode]);
 
   const handleJoinComplete = () => {
+    // Set success state before navigating
+    setJoinSuccess(true);
+    
+    // Show success message
     toast({
       title: "Welcome!",
-      description: `You've successfully joined. Let's meet your neighbors!`,
+      description: `You've successfully joined. Let's complete your profile!`,
     });
-    navigate('/neighbors');
+    
+    // Refresh the neighborhood context to load the new membership
+    refreshNeighborhoodData();
+    
+    // Redirect to onboarding page instead of neighbors
+    setTimeout(() => {
+      navigate('/onboarding');
+    }, 1500); // Small delay to ensure context refresh has time to complete
   };
 
   const handleJoin = async () => {
