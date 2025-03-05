@@ -18,7 +18,6 @@ export const useNeighborhoodDebug = (state: {
   neighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
-  isCoreContributor: boolean;
   availableNeighborhoods: Neighborhood[];
   user: User | null;
   isRefetching: boolean;
@@ -28,7 +27,6 @@ export const useNeighborhoodDebug = (state: {
     neighborhood, 
     isLoading, 
     error, 
-    isCoreContributor, 
     availableNeighborhoods, 
     user,
     isRefetching,
@@ -41,12 +39,11 @@ export const useNeighborhoodDebug = (state: {
       neighborhoodId: neighborhood?.id,
       neighborhoodName: neighborhood?.name,
       isLoading,
-      isCoreContributor,
       availableNeighborhoodCount: availableNeighborhoods?.length || 0,
       hasError: !!error,
       userId: user?.id,
       isRefetching,
       isBackgroundRefreshing
     });
-  }, [neighborhood, isLoading, isCoreContributor, availableNeighborhoods, error, user, isRefetching, isBackgroundRefreshing]);
+  }, [neighborhood, isLoading, availableNeighborhoods, error, user, isRefetching, isBackgroundRefreshing]);
 };

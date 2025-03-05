@@ -59,6 +59,7 @@ export function useFetchNeighborhood(
     console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
     
     // Reset states at the start of each fetch
+    // We need to remove the setIsCoreContributor parameter since we no longer need it
     resetStates(setIsLoading, setAllNeighborhoods);
 
     // If no user is logged in, we can't fetch neighborhood data

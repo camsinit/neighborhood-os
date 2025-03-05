@@ -15,7 +15,6 @@ export function useNeighborhoodLogging(state: {
   currentNeighborhood: Neighborhood | null;
   isLoading: boolean;
   error: Error | null;
-  isCoreContributor: boolean;
   allNeighborhoods: Neighborhood[];
   user: User | null;
   fetchAttempts: number;
@@ -24,7 +23,6 @@ export function useNeighborhoodLogging(state: {
     currentNeighborhood, 
     isLoading, 
     error, 
-    isCoreContributor, 
     allNeighborhoods, 
     user, 
     fetchAttempts 
@@ -36,11 +34,10 @@ export function useNeighborhoodLogging(state: {
       currentNeighborhood,
       isLoading,
       error: error?.message || null,
-      isCoreContributor,
       neighborhoodCount: allNeighborhoods.length,
       userId: user?.id,
       fetchAttempts,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoading, error, isCoreContributor, allNeighborhoods, user, fetchAttempts]);
+  }, [currentNeighborhood, isLoading, error, allNeighborhoods, user, fetchAttempts]);
 }

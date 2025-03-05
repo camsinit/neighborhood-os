@@ -17,7 +17,6 @@ export interface UseFetchStateReturn {
   setHasFetchAttempted: (value: boolean) => void;
   resetStates: (
     setIsLoading: (loading: boolean) => void,
-    setIsCoreContributor: (isCore: boolean) => void,
     setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void
   ) => void;
 }
@@ -37,12 +36,10 @@ export const useFetchState = (): UseFetchStateReturn => {
   // Function to reset states at the start of each fetch
   const resetStates = (
     setIsLoading: (loading: boolean) => void,
-    setIsCoreContributor: (isCore: boolean) => void,
     setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void
   ) => {
     setError(null);
     setIsLoading(true);
-    setIsCoreContributor(false);
     setAllNeighborhoods([]);
     setHasFetchAttempted(true); // Mark that we have attempted a fetch
   };
