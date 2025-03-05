@@ -1,16 +1,16 @@
 
-import { Settings, UserPlus, LogOut } from "lucide-react";
+import { Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import InviteNeighborPopover from "@/components/neighbors/InviteNeighborPopover";
 
 /**
  * ActionButtons component props
  */
 interface ActionButtonsProps {
   onOpenSettings: () => void; // Function to open settings dialog
-  onOpenInvite: () => void;   // Function to open invite dialog
 }
 
 /**
@@ -20,7 +20,6 @@ interface ActionButtonsProps {
  */
 const ActionButtons = ({ 
   onOpenSettings, 
-  onOpenInvite,
 }: ActionButtonsProps) => {
   // Get the toast notification function
   const { toast } = useToast();
@@ -81,17 +80,8 @@ const ActionButtons = ({
         Settings
       </Button>
       
-      {/* Invite button */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
-        onClick={onOpenInvite}
-        type="button"
-        aria-label="Invite a neighbor"
-      >
-        <UserPlus className="h-5 w-5" />
-        Invite Neighbor
-      </Button>
+      {/* Invite Neighbor Popover - replaces the previous dialog approach */}
+      <InviteNeighborPopover />
       
       {/* Logout button */}
       <Button
