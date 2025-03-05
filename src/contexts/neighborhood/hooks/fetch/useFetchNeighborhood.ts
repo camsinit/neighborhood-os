@@ -1,4 +1,3 @@
-
 /**
  * Hook to handle neighborhood data fetching
  * 
@@ -7,7 +6,7 @@
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useFetchState } from './useFetchState';
-import { useFetchStrategy } from './useFetchStrategy'; // Import should now work with updated file
+import { useFetchStrategy } from './useFetchStrategy'; 
 import { useFetchErrorHandler } from './useFetchErrorHandler';
 import { Neighborhood } from '../../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,7 +60,7 @@ export const useFetchNeighborhood = (
     // Log fetch attempt
     console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
     
-    // Reset states at the start of each fetch - removing isCoreContributor parameter
+    // Reset states at the start of each fetch
     resetStates(setIsLoading, setAllNeighborhoods);
 
     // If no user is logged in, we can't fetch neighborhood data
@@ -114,8 +113,11 @@ export const useFetchNeighborhood = (
         setCurrentNeighborhood(fetchedNeighborhoods[0]);
       }
     } catch (err: any) {
-      // Handle fetch errors
-      handleFetchError(err, setError);
+      // Handle fetch errors with appropriate parameters
+      console.error("[useFetchNeighborhood] Error fetching neighborhoods:", err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
+      setCurrentNeighborhood(null);
+      setIsLoading(false);
     } finally {
       // End the timer and mark loading as complete
       endFetchTimer();
@@ -127,7 +129,6 @@ export const useFetchNeighborhood = (
     currentNeighborhood, 
     currentAttempt, 
     fetchUserNeighborhoods, 
-    handleFetchError,
     resetStates, 
     hasFetchAttempted, 
     setHasFetchAttempted

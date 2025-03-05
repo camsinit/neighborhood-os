@@ -43,7 +43,6 @@ export function useNeighborhoodData(user: User | null) {
   );
   
   // Use our safety timeout hook to manage fetch timeouts
-  // Fixed startFetchTimer to be a nullary function (no parameters)
   const { startFetchTimer, endFetchTimer } = useNeighborhoodSafetyTimeout(
     isLoading,
     hasFetchAttempted

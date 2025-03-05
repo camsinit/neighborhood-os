@@ -5,7 +5,6 @@
  * This module contains the core logic for how to fetch neighborhood data
  * in different scenarios (neighborhood creator, member)
  */
-import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../../types';
 import { 
   fetchCreatedNeighborhoods, 
@@ -35,13 +34,6 @@ export const useFetchStrategy = () => {
   return {
     fetchUserNeighborhoods
   };
-};
-
-// Also export the standalone strategy functions for direct use
-export { 
-  checkCreatedNeighborhoodStrategy,
-  checkMembershipStrategy,
-  legacyCheckMembershipStrategy
 };
 
 /**
