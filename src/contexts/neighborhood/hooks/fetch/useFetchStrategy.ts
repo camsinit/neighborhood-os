@@ -1,4 +1,3 @@
-
 /**
  * Hook that provides neighborhood fetch strategies
  * 
@@ -49,8 +48,8 @@ export const useFetchStrategy = () => {
       // Log before making the RPC call
       console.log("[useFetchStrategy] Calling get_user_neighborhoods RPC with user_uuid:", userId);
       
-      // Call the special security definer function that bypasses RLS policies
-      // This is critical for avoiding the infinite recursion issue
+      // IMPORTANT: Use ONLY the RPC method to avoid RLS recursion issues
+      // We completely skip any direct queries to the neighborhood_members table
       const { data, error } = await supabase
         .rpc('get_user_neighborhoods', { 
           user_uuid: userId 
