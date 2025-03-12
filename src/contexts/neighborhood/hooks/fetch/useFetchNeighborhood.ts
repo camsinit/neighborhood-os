@@ -66,8 +66,14 @@ export const useFetchNeighborhood = (
     // Start timer for safety timeout
     startFetchTimer();
     
-    // Log fetch attempt
-    console.log(`[useFetchNeighborhood] Fetch attempt ${currentAttempt} starting`);
+    // Log detailed information about fetch attempt
+    console.log(`[useFetchNeighborhood] Fetch attempt #${currentAttempt} starting`, {
+      hasUser: !!user,
+      userId: user?.id,
+      hasCurrentNeighborhood: !!currentNeighborhood,
+      currentNeighborhoodId: currentNeighborhood?.id,
+      timestamp: new Date().toISOString()
+    });
     
     // Reset states at the start of each fetch
     resetStates(setIsLoading, setAllNeighborhoods);
@@ -83,31 +89,31 @@ export const useFetchNeighborhood = (
     }
     
     try {
-      // Validate supabase client (safety check)
-      if (!supabase || !supabase.rpc) {
-        const clientError = new Error("Supabase client is not properly initialized");
-        console.error("[useFetchNeighborhood] Supabase client error:", clientError);
-        setError(clientError);
+      // CRITICAL: Validate supabase client is available
+      // We need to check this before attempting any database operations
+      if (!supabase) {
+        console.error("[useFetchNeighborhood] CRITICAL: Supabase client is undefined");
+        setError(new Error("Supabase client is not initialized"));
         setIsLoading(false);
         endFetchTimer();
         setHasFetchAttempted(true);
         return;
       }
       
-      // Use the security definer RPC function to avoid RLS recursion
-      console.log("[useFetchNeighborhood] Calling get_user_neighborhoods RPC function");
-      const { data: neighborhoods, error: rpcError } = await supabase
-        .rpc('get_user_neighborhoods', { user_uuid: user.id });
-        
-      // Handle RPC error
-      if (rpcError) {
-        console.error("[useFetchNeighborhood] RPC error fetching neighborhoods:", rpcError);
-        setError(new Error(`Failed to fetch neighborhoods: ${rpcError.message}`));
+      if (!supabase.rpc) {
+        console.error("[useFetchNeighborhood] CRITICAL: Supabase client is missing rpc method");
+        setError(new Error("Supabase client is not properly initialized"));
         setIsLoading(false);
         endFetchTimer();
         setHasFetchAttempted(true);
         return;
       }
+      
+      console.log("[useFetchNeighborhood] Supabase client validated, proceeding with fetch");
+      
+      // Instead of direct database access, we use the RPC function that bypasses RLS
+      console.log("[useFetchNeighborhood] Calling fetchUserNeighborhoods for user:", user.id);
+      const neighborhoods = await fetchUserNeighborhoods(user.id);
       
       // Check if we got neighborhoods back
       if (!neighborhoods || neighborhoods.length === 0) {
@@ -146,6 +152,7 @@ export const useFetchNeighborhood = (
     } catch (err: any) {
       // Handle fetch errors with appropriate parameters
       console.error("[useFetchNeighborhood] Error fetching neighborhoods:", err);
+      console.error("[useFetchNeighborhood] Error stack:", err.stack);
       setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       setCurrentNeighborhood(null);
     } finally {
@@ -153,6 +160,12 @@ export const useFetchNeighborhood = (
       endFetchTimer();
       setIsLoading(false);
       setHasFetchAttempted(true);
+      
+      console.log("[useFetchNeighborhood] Fetch attempt completed", {
+        attempt: currentAttempt,
+        success: !!currentNeighborhood,
+        timestamp: new Date().toISOString()
+      });
     }
   }, [
     user, 
