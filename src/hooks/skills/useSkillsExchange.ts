@@ -1,9 +1,9 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 interface SkillsExchangeProps {
   onSuccess: () => void;
@@ -12,6 +12,7 @@ interface SkillsExchangeProps {
 export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
+  const neighborhoodId = useCurrentNeighborhood();
 
   const handleSubmit = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     if (!user) {
@@ -20,16 +21,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
-      // Format the availability data properly
       const formattedData = {
-        title: formData.title,
-        description: formData.description,
+        ...formData,
         request_type: mode === 'offer' ? 'offer' : 'need',
-        skill_category: formData.category,
         user_id: user.id,
+        neighborhood_id: neighborhoodId,
         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        availability: formData.availability || null,
-        time_preferences: formData.timePreference || [],
       };
 
       const { error } = await supabase

@@ -1,9 +1,7 @@
-
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-// Fix the incorrect type imports by using the correct types from formTypes.ts
+import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from '@/components/support/types/formTypes';
-import { uploadImage } from './imageUpload';
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 /**
  * Helper function to format the offer form data for submission
@@ -102,22 +100,28 @@ export const formatRequestSubmission = async (
  * @param itemFormData - The data from the offer form (if applicable)
  * @param requestFormData - The data from the request form (if applicable)
  * @param userId - The ID of the current user
+ * @param neighborhoodId - The ID of the current neighborhood
  * @returns The data returned from the database insertion
  */
 export const submitGoodsForm = async (
   isOfferForm: boolean,
   itemFormData: Partial<GoodsItemFormData>,
   requestFormData: Partial<GoodsRequestFormData>,
-  userId: string
+  userId: string,
+  neighborhoodId: string
 ) => {
   try {
-    // Show a loading toast to indicate form submission is in progress
     const loadingToast = toast.loading("Submitting your item...");
     
-    // Format the data based on whether it's an offer or request
     const formattedData = isOfferForm
-      ? await formatOfferSubmission(itemFormData, userId)
-      : await formatRequestSubmission(requestFormData, userId);
+      ? {
+          ...await formatOfferSubmission(itemFormData, userId),
+          neighborhood_id: neighborhoodId
+        }
+      : {
+          ...await formatRequestSubmission(requestFormData, userId),
+          neighborhood_id: neighborhoodId
+        };
     
     console.log("Submitting to goods_exchange table:", formattedData);
     
