@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -233,28 +232,18 @@ export const UserNeighborhoods = () => {
     );
   }
 
-  // Render the list of neighborhoods
+  // Render neighborhoods inline
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Your Neighborhoods</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-lg">Your Neighborhoods:</CardTitle>
+          <span className="text-blue-500">{neighborhoods.map(n => n.name).join(", ")}</span>
+        </div>
         <CardDescription>
           Neighborhoods you are a member of
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {neighborhoods.map((neighborhood) => (
-            <Badge 
-              key={neighborhood.id} 
-              variant="secondary"
-              className="text-sm py-1"
-            >
-              {neighborhood.name}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
     </Card>
   );
 };
