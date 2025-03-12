@@ -1,10 +1,12 @@
 
 import { useState, useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
+import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
 
 const CalendarPage = () => {
-  // No longer need to check for core contributor status
+  // Get neighborhood context to check for core contributor status
+  const { isCoreContributor } = useNeighborhood();
   
   useEffect(() => {
     const handleHighlightItem = (e: CustomEvent) => {
@@ -32,7 +34,8 @@ const CalendarPage = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
             
-            {/* We removed the GodModeSelector component */}
+            {/* Only show God Mode for core contributors */}
+            {isCoreContributor && <GodModeSelector />}
           </div>
           
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">

@@ -63,7 +63,6 @@ export type Database = {
           id: string
           is_archived: boolean | null
           is_read: boolean | null
-          neighborhood_id: string
           request_type: string
           support_type: string
           title: string
@@ -79,7 +78,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id: string
           request_type: string
           support_type: string
           title: string
@@ -95,7 +93,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id?: string
           request_type?: string
           support_type?: string
           title?: string
@@ -108,13 +105,6 @@ export type Database = {
             columns: ["archived_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "care_requests_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
         ]
@@ -204,7 +194,6 @@ export type Database = {
           is_read: boolean | null
           is_recurring: boolean | null
           location: string
-          neighborhood_id: string
           recurrence_end_date: string | null
           recurrence_pattern: string | null
           time: string
@@ -219,7 +208,6 @@ export type Database = {
           is_read?: boolean | null
           is_recurring?: boolean | null
           location: string
-          neighborhood_id: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
           time: string
@@ -234,7 +222,6 @@ export type Database = {
           is_read?: boolean | null
           is_recurring?: boolean | null
           location?: string
-          neighborhood_id?: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
           time?: string
@@ -246,13 +233,6 @@ export type Database = {
             columns: ["host_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "events_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
         ]
@@ -271,7 +251,6 @@ export type Database = {
           images: string[] | null
           is_archived: boolean | null
           is_read: boolean | null
-          neighborhood_id: string
           request_type: string
           title: string
           urgency: string | null
@@ -291,7 +270,6 @@ export type Database = {
           images?: string[] | null
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id: string
           request_type: string
           title: string
           urgency?: string | null
@@ -311,7 +289,6 @@ export type Database = {
           images?: string[] | null
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id?: string
           request_type?: string
           title?: string
           urgency?: string | null
@@ -324,13 +301,6 @@ export type Database = {
             columns: ["archived_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "goods_exchange_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
         ]
@@ -660,7 +630,6 @@ export type Database = {
           id: string
           is_archived: boolean | null
           is_read: boolean | null
-          neighborhood_id: string
           title: string
           type: string
         }
@@ -671,7 +640,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id: string
           title: string
           type: string
         }
@@ -682,7 +650,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id?: string
           title?: string
           type?: string
         }
@@ -692,13 +659,6 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "safety_updates_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
         ]
@@ -851,7 +811,6 @@ export type Database = {
           id: string
           is_archived: boolean | null
           is_read: boolean | null
-          neighborhood_id: string
           request_type: string
           skill_category: string
           time_preferences: string[] | null
@@ -866,7 +825,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id: string
           request_type: string
           skill_category: string
           time_preferences?: string[] | null
@@ -881,7 +839,6 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           is_read?: boolean | null
-          neighborhood_id?: string
           request_type?: string
           skill_category?: string
           time_preferences?: string[] | null
@@ -890,13 +847,6 @@ export type Database = {
           valid_until?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "skills_exchange_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "skills_exchange_user_id_fkey"
             columns: ["user_id"]
@@ -1065,53 +1015,6 @@ export type Database = {
           },
         ]
       }
-      neighborhood_content: {
-        Row: {
-          content_id: string | null
-          content_type: string | null
-          created_at: string | null
-          description: string | null
-          neighborhood_id: string | null
-          title: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      neighborhood_members_with_profiles: {
-        Row: {
-          access_needs: string | null
-          address: string | null
-          address_visible: boolean | null
-          avatar_url: string | null
-          bio: string | null
-          display_name: string | null
-          email_visible: boolean | null
-          joined_at: string | null
-          membership_id: string | null
-          needs_visible: boolean | null
-          neighborhood_id: string | null
-          phone_number: string | null
-          phone_visible: boolean | null
-          status: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "neighborhood_members_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "neighborhood_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Functions: {
       add_initial_super_admin: {
@@ -1126,10 +1029,6 @@ export type Database = {
           neighborhood_uuid: string
         }
         Returns: boolean
-      }
-      backfill_neighborhood_ids: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
       check_user_role: {
         Args: {
@@ -1166,12 +1065,6 @@ export type Database = {
         }
         Returns: string[]
       }
-      get_user_current_neighborhood: {
-        Args: {
-          user_uuid: string
-        }
-        Returns: string
-      }
       get_user_neighborhoods: {
         Args: {
           user_uuid: string
@@ -1181,13 +1074,6 @@ export type Database = {
           name: string
           joined_at: string
         }[]
-      }
-      is_user_in_neighborhood: {
-        Args: {
-          user_uuid: string
-          neighborhood_uuid: string
-        }
-        Returns: boolean
       }
       user_created_neighborhood: {
         Args: {

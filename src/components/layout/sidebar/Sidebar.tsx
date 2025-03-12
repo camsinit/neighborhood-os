@@ -1,13 +1,10 @@
 
-/**
- * Main Sidebar component for the application
- * 
- * This component renders the sidebar with navigation items,
- * logo, and action buttons.
- */
-import React, { useState } from 'react';
-import { useNeighborhood } from '@/contexts/neighborhood';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useState } from 'react';
+import { useUser } from "@supabase/auth-helpers-react";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
+
+// Import sidebar components
 import Logo from './Logo';
 import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
@@ -15,70 +12,77 @@ import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
 
 /**
- * ActionButtons component props
+ * Sidebar component props
+ * onOpenSettings is a function that will be called when the settings button is clicked
  */
-interface ActionButtonsProps {
-  showDiagnostics: boolean;
-  toggleDiagnostics: () => void;
+interface SidebarProps {
+  onOpenSettings?: () => void; // This is now completely optional and unused
 }
 
 /**
  * Sidebar component
  * 
- * This component renders the sidebar with navigation items,
- * logo, and action buttons.
+ * Displays the navigation sidebar with links to different sections of the app
  */
-const Sidebar: React.FC = () => {
-  // Get the current user and neighborhood information
+const Sidebar = ({ onOpenSettings }: SidebarProps) => {
+  // State to control the settings dialog visibility
+  // This is the ONLY state that controls whether the dialog is open
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // Get current user
   const user = useUser();
+  
+  // Get neighborhood context for diagnostics data
   const { 
     currentNeighborhood, 
-    isLoading, 
-    error, 
-    refreshNeighborhoodData 
+    isCoreContributor
   } = useNeighborhood();
-  
-  // Set up auto refresh using separate event listeners
-  // Using proper string array for event types
-  const eventNames = ['neighborhood-changed', 'user-profile-updated'];
-  
-  // State to track if diagnostics panel is open
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
-  
-  // Toggle diagnostics panel 
-  const toggleDiagnostics = () => {
-    setShowDiagnostics(!showDiagnostics);
+
+  // Function to handle opening settings dialog
+  // This is the ONLY function that controls opening the dialog
+  const handleOpenSettings = () => {
+    console.log("[Sidebar] Opening settings dialog - setting state to true");
+    // Directly open the dialog by setting state to true
+    setIsSettingsOpen(true);
   };
 
   return (
-    <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col py-5 px-4">
+    <div className="w-48 border-r bg-white flex flex-col">
+      {/* Logo section at the top of sidebar */}
       <Logo />
       
-      <div className="mt-8 flex-1 overflow-y-auto">
+      {/* Navigation menu section */}
+      <nav className="flex-1 px-2">
+        {/* Home/Dashboard navigation */}
         <MainNavigation />
-        
-        {/* Only show feature navigation if we have a neighborhood */}
-        {currentNeighborhood && !isLoading && (
-          <FeatureNavigation />
-        )}
-      </div>
-      
-      <div className="mt-auto">
-        <ActionButtons
-          showDiagnostics={showDiagnostics}
-          toggleDiagnostics={toggleDiagnostics}
+
+        {/* Divider between navigation groups */}
+        <div className="my-4 h-px bg-gray-200" />
+
+        {/* Feature navigation items */}
+        <FeatureNavigation />
+
+        {/* Divider before bottom actions */}
+        <div className="my-4 h-px bg-gray-200" />
+
+        {/* Settings and Invite buttons */}
+        <ActionButtons 
+          onOpenSettings={handleOpenSettings}
         />
         
-        {/* Show diagnostics panel if toggled on */}
-        {showDiagnostics && (
-          <DiagnosticsPanel 
-            user={user} 
-            neighborhood={currentNeighborhood}
-            error={error}
-            isLoading={isLoading}
-          />
-        )}
-      </div>
+        {/* Diagnostics information panel - with reduced content */}
+        <DiagnosticsPanel 
+          user={user}
+          currentNeighborhood={currentNeighborhood}
+          isCoreContributor={isCoreContributor}
+        />
+      </nav>
+      
+      {/* Settings dialog wrapper component (shown when isSettingsOpen is true) */}
+      <SettingsDialogWrapper
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
     </div>
   );
 };

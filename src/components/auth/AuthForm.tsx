@@ -1,153 +1,189 @@
-
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-
-// Define the form schema using Zod
-// This schema specifies validation rules for our form fields
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-})
+import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 /**
- * AuthForm Component
+ * Authentication Form Component
  * 
- * This component handles user authentication with email and password.
- * It uses react-hook-form with zod validation to manage form state and validation.
+ * This component provides both sign in and sign up functionality.
+ * It manages user authentication state, form submission, and navigation
+ * to the dashboard upon successful authentication.
+ * 
+ * Updated with styling to match the landing page aesthetics.
  */
 const AuthForm = () => {
-  // State for tracking loading state and errors
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // State for form fields and loading state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   
-  // Hooks for navigation and authentication
-  const supabaseClient = useSupabaseClient();
+  // Hook for programmatic navigation
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   
-  // Get the return URL from query parameters, default to dashboard
-  const returnTo = searchParams.get('returnTo') || '/dashboard';
+  // Toast hook for displaying notifications
+  const { toast } = useToast();
 
-  // Initialize react-hook-form with zod validation
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  })
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // Prevent default form submission behavior
-    e.preventDefault();
+  // Listen for auth state changes - we're using the supabase client directly here
+  // to ensure we're not depending on the context which might not be initialized properly
+  useEffect(() => {
+    console.log("[AuthForm] Setting up auth state change listener");
     
-    // Update UI state to show loading
-    setLoading(true);
-    setErrorMsg(null);
+    // Guard against supabase being undefined
+    if (!supabase || !supabase.auth) {
+      console.error("[AuthForm] Supabase client or auth is not available");
+      return;
+    }
+    
+    // Subscribe to authentication state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
+      
+      // When user is signed in, navigate to the dashboard
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        console.log("[AuthForm] Valid session detected, navigating to dashboard");
+        navigate("/dashboard", { replace: true });
+      }
+    });
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      console.log("[AuthForm] Cleaning up auth state change listener");
+      subscription?.unsubscribe?.();
+    };
+  }, [navigate]); // Only re-run if navigate changes
+  
+  // Form submission handler for both login and signup
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    console.log("[AuthForm] Starting authentication process", { isSignUp });
 
     try {
-      // Get values from the form
-      const formData = form.getValues();
-      
-      // Attempt to sign in with Supabase
-      const { error } = await supabaseClient.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      if (isSignUp) {
+        // Signup process
+        console.log("[AuthForm] Attempting signup");
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/login`,
+          },
+        });
 
-      // Handle authentication result
-      if (error) {
-        // If error, throw it to be caught by catch block
-        throw error;
+        if (error) throw error;
+        console.log("[AuthForm] Signup successful");
+
+        toast({
+          title: "Check your email",
+          description: "We've sent you a verification link",
+        });
       } else {
-        // If successful, show success message and redirect
-        // Fix: Using toast from sonner which accepts a string directly or
-        // can take a title and description
-        toast("Successfully signed in!");
-        navigate(returnTo, { replace: true });
+        // Signin process
+        console.log("[AuthForm] Attempting signin");
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          console.error("[AuthForm] Signin error:", error);
+          if (error.message.includes('credentials')) {
+            toast({
+              title: "Invalid credentials",
+              description: "Please check your email and password",
+              variant: "destructive",
+            });
+          } else {
+            throw error;
+          }
+          return;
+        }
+
+        console.log("[AuthForm] Signin successful", { user: data.user?.id });
+        
+        // Show success toast
+        toast({
+          title: "Welcome back!",
+          description: "Successfully signed in",
+        });
+        
+        // No need to navigate here as the auth state change listener will handle that
       }
-    } catch (error) {
-      // Log error for debugging
-      console.error("Authentication error:", error);
-      
-      // Display error message to user
-      setErrorMsg(error instanceof Error ? error.message : "An error occurred during authentication");
+    } catch (error: any) {
+      console.error("[AuthForm] Authentication error:", error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
-      // Reset loading state regardless of outcome
-      setLoading(false);
+      console.log("[AuthForm] Completing authentication process");
+      setIsLoading(false);
     }
   };
 
+  // Render the authentication form with updated styling
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Enter your email and password to login</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <Form {...form}>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email input field */}
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="mail@example.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Password input field */}
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Submit button */}
-            <Button disabled={loading} type="submit" className="w-full">
-              {loading ? "Loading" : "Sign In"}
-            </Button>
-          </form>
-        </Form>
-        
-        {/* Error message display */}
-        {errorMsg && (
-          <p className="text-red-500 text-sm">{errorMsg}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className={cn(
+      "mt-8 py-8 px-4 sm:rounded-lg sm:px-10", 
+      "bg-white/80 backdrop-blur-sm",
+      "shadow-xl rounded-2xl",
+      "relative z-10"
+    )}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email address
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="mt-1"
+            disabled={isLoading}
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="mt-1"
+            disabled={isLoading}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button 
+            type="submit" 
+            className="w-full rounded-full" 
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
+          </Button>
+          <Button 
+            type="button" 
+            variant="ghost" 
+            className="w-full"
+            onClick={() => setIsSignUp(!isSignUp)}
+            disabled={isLoading}
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

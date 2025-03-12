@@ -15,6 +15,7 @@ import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
 import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
+import GodModeSelector from "./GodModeSelector";
 
 /**
  * UserDirectory Component
@@ -36,7 +37,8 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
   const { 
     currentNeighborhood, 
     isLoading: isLoadingNeighborhood, 
-    error: neighborhoodError
+    error: neighborhoodError,
+    isCoreContributor
   } = useNeighborhood();
   
   // Use our custom hook to fetch users
@@ -54,9 +56,10 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
       neighborhoodName: currentNeighborhood?.name,
       isLoading: isLoadingNeighborhood,
       error: neighborhoodError ? neighborhoodError.message : null,
+      isCoreContributor,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError]);
+  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError, isCoreContributor]);
   
   // Add debugging for tracking the query state
   useEffect(() => {
@@ -139,6 +142,13 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
           neighborhoodName={currentNeighborhood.name}
           onRefresh={handleRefresh} 
         />
+        
+        {/* Show God Mode selector if user is a core contributor */}
+        {isCoreContributor && (
+          <div className="flex justify-end">
+            <GodModeSelector />
+          </div>
+        )}
       </div>
       
       {/* Grid of neighbor cards */}
