@@ -234,16 +234,9 @@ export const UserNeighborhoods = () => {
 
   // Render neighborhoods inline
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg">Your Neighborhoods:</CardTitle>
-          <span className="text-blue-500">{neighborhoods.map(n => n.name).join(", ")}</span>
-        </div>
-        <CardDescription>
-          Neighborhoods you are a member of
-        </CardDescription>
-      </CardHeader>
-    </Card>
+    <div className="flex items-center gap-2">
+      <span className="font-semibold">Your Neighborhoods:</span>
+      <span className="text-blue-500">{neighborhoods.map(n => n.name).join(", ")}</span>
+    </div>
   );
 };
