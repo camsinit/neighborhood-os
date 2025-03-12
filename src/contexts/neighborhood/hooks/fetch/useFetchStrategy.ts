@@ -1,150 +1,112 @@
 
 /**
- * Hook for neighborhood fetch strategies
+ * Hook that provides neighborhood fetch strategies
  * 
- * This module contains the core logic for how to fetch neighborhood data
- * in different scenarios (neighborhood creator, member)
+ * This hook centralizes different methods for fetching neighborhood data,
+ * focusing on approaches that avoid RLS recursion issues.
  */
+import { useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Neighborhood } from '../../types';
-import { 
-  fetchCreatedNeighborhoods, 
-  fetchAllNeighborhoods,
-  checkNeighborhoodMembership,
-  getUserNeighborhoods 
-} from '../../neighborhoodUtils';
 
 /**
- * Hook to provide neighborhood fetch strategies
+ * Custom hook that provides neighborhood fetch strategies
  * 
- * @returns Object containing neighborhood fetch strategy functions
+ * @returns Object with various fetch strategy functions
  */
 export const useFetchStrategy = () => {
   /**
-   * Fetch all neighborhoods a user is a member of using the RPC function
+   * Fetch neighborhoods for a user using the security definer RPC function
+   * 
+   * This is the primary strategy that avoids RLS recursion by using a
+   * database function with elevated privileges.
    * 
    * @param userId - The ID of the user to fetch neighborhoods for
-   * @returns Array of neighborhoods the user is a member of
+   * @returns Promise resolving to an array of neighborhoods
    */
-  const fetchUserNeighborhoods = async (userId: string): Promise<Neighborhood[]> => {
-    // Get all neighborhoods in one go using our RPC helper function
-    console.log(`[useFetchStrategy] Using RPC-based neighborhood fetch for user ${userId}`);
-    return await getUserNeighborhoods(userId);
-  };
-
-  return {
-    fetchUserNeighborhoods
-  };
-};
-
-/**
- * Checks if user created any neighborhoods and uses the first one found
- * 
- * @param userId - The ID of the user to check
- * @param setCurrentNeighborhood - Function to update current neighborhood
- * @param currentAttempt - Current fetch attempt number for logging
- * @returns True if a created neighborhood was found, false otherwise
- */
-export const checkCreatedNeighborhoodStrategy = async (
-  userId: string,
-  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
-  currentAttempt: number
-): Promise<boolean> => {
-  // Check if the user created any neighborhoods using our utility function
-  console.log(`[useFetchStrategy] Checking if user created neighborhoods (attempt ${currentAttempt})`);
-  const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(userId);
-  
-  if (createdError) {
-    console.warn("[useFetchStrategy] Error checking created neighborhoods:", createdError);
-  }
-  
-  // If user created a neighborhood, use it
-  if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-    console.log("[useFetchStrategy] Found user-created neighborhood:", {
-      neighborhood: createdNeighborhoods[0],
-      userId,
-      fetchAttempt: currentAttempt
-    });
-    
-    setCurrentNeighborhood(createdNeighborhoods[0]);
-    return true;
-  }
-  
-  return false;
-};
-
-/**
- * Simplified strategy - check all neighborhood memberships in one go
- * This is our updated approach to avoid recursion issues using RPC
- * 
- * @param userId - The ID of the user to check
- * @param setCurrentNeighborhood - Function to update current neighborhood
- * @param currentAttempt - Current fetch attempt number for logging
- * @returns True if membership found, false otherwise
- */
-export const checkMembershipStrategy = async (
-  userId: string,
-  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
-  currentAttempt: number
-): Promise<boolean> => {
-  console.log(`[useFetchStrategy] Using RPC-based membership check (attempt ${currentAttempt})`);
-
-  // Get all neighborhoods in one go using our RPC helper function
-  const neighborhoods = await getUserNeighborhoods(userId);
-  
-  if (!neighborhoods || neighborhoods.length === 0) {
-    console.log(`[useFetchStrategy] No neighborhoods found for user (attempt ${currentAttempt})`);
-    setCurrentNeighborhood(null);
-    return false;
-  }
-  
-  console.log(`[useFetchStrategy] Found ${neighborhoods.length} neighborhoods for user (attempt ${currentAttempt})`);
-  
-  // Just use the first one as the current neighborhood
-  setCurrentNeighborhood(neighborhoods[0]);
-  return true;
-};
-
-/**
- * Legacy membership check strategy - kept for fallback
- * 
- * @param userId - The ID of the user to check
- * @param setCurrentNeighborhood - Function to update current neighborhood
- * @param currentAttempt - Current fetch attempt number for logging
- * @returns True if membership found, false otherwise
- */
-export const legacyCheckMembershipStrategy = async (
-  userId: string,
-  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
-  currentAttempt: number
-): Promise<boolean> => {
-  // Get all neighborhoods to check membership
-  console.log(`[useFetchStrategy] Fetching all neighborhoods to check membership (attempt ${currentAttempt})`);
-  const neighborhoods = await fetchAllNeighborhoods();
-  
-  if (!neighborhoods || neighborhoods.length === 0) {
-    console.log(`[useFetchStrategy] No neighborhoods found (attempt ${currentAttempt})`);
-    setCurrentNeighborhood(null);
-    return false;
-  }
-  
-  console.log(`[useFetchStrategy] Found ${neighborhoods.length} neighborhoods, checking membership (attempt ${currentAttempt})`);
-  
-  // For each neighborhood, check if user is a member using our safe function
-  for (const neighborhood of neighborhoods) {
-    console.log(`[useFetchStrategy] Checking membership for neighborhood ${neighborhood.id} (attempt ${currentAttempt})`);
-    const isMember = await checkNeighborhoodMembership(userId, neighborhood.id);
-          
-    if (isMember) {
-      console.log("[useFetchStrategy] Found user membership in neighborhood:", {
-        neighborhood: neighborhood,
-        userId: userId,
-        fetchAttempt: currentAttempt
+  const fetchUserNeighborhoods = useCallback(async (userId: string): Promise<Neighborhood[]> => {
+    try {
+      console.log("[useFetchStrategy] Fetching neighborhoods for user:", userId);
+      
+      // Call the get_user_neighborhoods RPC function
+      const { data, error } = await supabase
+        .rpc('get_user_neighborhoods', { 
+          user_uuid: userId 
+        });
+      
+      // Handle errors
+      if (error) {
+        console.error("[useFetchStrategy] Error fetching neighborhoods with RPC:", error);
+        throw new Error(`Failed to fetch neighborhoods: ${error.message}`);
+      }
+      
+      // Log success
+      console.log("[useFetchStrategy] Successfully fetched neighborhoods:", {
+        count: data?.length || 0
       });
-          
-      setCurrentNeighborhood(neighborhood);
-      return true;
+      
+      return data || [];
+    } catch (err) {
+      console.error("[useFetchStrategy] Error in fetchUserNeighborhoods:", err);
+      throw err;
     }
-  }
+  }, []);
   
-  return false;
+  /**
+   * Alternative strategy to check if a user is a core contributor
+   * with access to all neighborhoods
+   * 
+   * @param userId - The ID of the user to check
+   * @returns Promise resolving to a boolean indicating if they have access
+   */
+  const checkCoreContributorAccess = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .rpc('user_is_core_contributor_with_access', {
+          user_uuid: userId
+        });
+      
+      if (error) {
+        console.error("[useFetchStrategy] Error checking core contributor status:", error);
+        return false;
+      }
+      
+      return !!data;
+    } catch (err) {
+      console.error("[useFetchStrategy] Error in checkCoreContributorAccess:", err);
+      return false;
+    }
+  }, []);
+  
+  /**
+   * Fetch all neighborhoods if the user is a core contributor
+   * with access to all neighborhoods
+   * 
+   * @param userId - The ID of the user to fetch for
+   * @returns Promise resolving to an array of neighborhoods
+   */
+  const fetchAllNeighborhoodsForContributor = useCallback(async (userId: string): Promise<Neighborhood[]> => {
+    try {
+      const { data, error } = await supabase
+        .rpc('get_all_neighborhoods_for_core_contributor', {
+          user_uuid: userId
+        });
+      
+      if (error) {
+        console.error("[useFetchStrategy] Error fetching all neighborhoods for contributor:", error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (err) {
+      console.error("[useFetchStrategy] Error in fetchAllNeighborhoodsForContributor:", err);
+      return [];
+    }
+  }, []);
+  
+  return {
+    fetchUserNeighborhoods,
+    checkCoreContributorAccess,
+    fetchAllNeighborhoodsForContributor
+  };
 };

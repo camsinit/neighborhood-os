@@ -71,7 +71,8 @@ export function useNeighborhoodData(user: User | null) {
       endFetchTimer,
       setIsLoading,
       setAllNeighborhoods,
-      setCurrentNeighborhood
+      setCurrentNeighborhood,
+      setHasFetchAttempted // Pass the function to update fetch attempt state
     );
   }, [
     user, 

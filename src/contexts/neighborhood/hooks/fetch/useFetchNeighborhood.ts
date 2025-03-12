@@ -1,7 +1,8 @@
 /**
  * Hook to handle neighborhood data fetching
  * 
- * This module centralizes the logic for fetching neighborhood data.
+ * This module centralizes the logic for fetching neighborhood data using
+ * security definer functions to avoid RLS recursion issues.
  */
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -13,6 +14,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Custom hook for fetching neighborhood data
+ * 
+ * This hook uses RPC functions to safely fetch neighborhood data without triggering
+ * RLS recursion errors.
  * 
  * @param user - The current authenticated user
  * @param currentNeighborhood - The current neighborhood
@@ -41,18 +45,23 @@ export const useFetchNeighborhood = (
   /**
    * The main fetch function that orchestrates the neighborhood data fetching
    * 
+   * This implementation uses the get_user_neighborhoods RPC function to safely
+   * fetch neighborhood data without triggering RLS recursion.
+   * 
    * @param startFetchTimer - Function to start safety timeout 
    * @param endFetchTimer - Function to end safety timeout
    * @param setIsLoading - Function to update loading state
    * @param setAllNeighborhoods - Function to update all neighborhoods state
    * @param setCurrentNeighborhood - Function to update current neighborhood state
+   * @param setHasFetchAttempted - Function to update fetch attempt state
    */
   const fetchNeighborhood = useCallback(async (
     startFetchTimer: () => void,
     endFetchTimer: () => void,
     setIsLoading: (loading: boolean) => void,
     setAllNeighborhoods: (neighborhoods: Neighborhood[]) => void,
-    setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void
+    setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void,
+    setHasFetchAttempted: (hasAttempted: boolean) => void
   ) => {
     // Start timer for safety timeout
     startFetchTimer();
@@ -69,6 +78,7 @@ export const useFetchNeighborhood = (
       setCurrentNeighborhood(null);
       setIsLoading(false);
       endFetchTimer();
+      setHasFetchAttempted(true);
       return;
     }
     
@@ -80,23 +90,44 @@ export const useFetchNeighborhood = (
         setError(clientError);
         setIsLoading(false);
         endFetchTimer();
+        setHasFetchAttempted(true);
         return;
       }
       
-      // Fetch neighborhoods the user is a member of
-      const fetchedNeighborhoods = await fetchUserNeighborhoods(user.id);
+      // Use the security definer RPC function to avoid RLS recursion
+      console.log("[useFetchNeighborhood] Calling get_user_neighborhoods RPC function");
+      const { data: neighborhoods, error: rpcError } = await supabase
+        .rpc('get_user_neighborhoods', { user_uuid: user.id });
+        
+      // Handle RPC error
+      if (rpcError) {
+        console.error("[useFetchNeighborhood] RPC error fetching neighborhoods:", rpcError);
+        setError(new Error(`Failed to fetch neighborhoods: ${rpcError.message}`));
+        setIsLoading(false);
+        endFetchTimer();
+        setHasFetchAttempted(true);
+        return;
+      }
       
-      // Update the available neighborhoods list
-      setAllNeighborhoods(fetchedNeighborhoods);
-      
-      // If no neighborhoods found, clear current neighborhood
-      if (fetchedNeighborhoods.length === 0) {
+      // Check if we got neighborhoods back
+      if (!neighborhoods || neighborhoods.length === 0) {
         console.log("[useFetchNeighborhood] No neighborhoods found for user");
         setCurrentNeighborhood(null);
-      } 
+        setAllNeighborhoods([]);
+        setIsLoading(false);
+        endFetchTimer();
+        setHasFetchAttempted(true);
+        return;
+      }
+      
+      console.log("[useFetchNeighborhood] Neighborhoods found:", neighborhoods.length);
+      
+      // Update the available neighborhoods list
+      setAllNeighborhoods(neighborhoods);
+      
       // If we already have a current neighborhood, try to find it in the new list
-      else if (currentNeighborhood) {
-        const stillExists = fetchedNeighborhoods.find(n => n.id === currentNeighborhood.id);
+      if (currentNeighborhood) {
+        const stillExists = neighborhoods.find(n => n.id === currentNeighborhood.id);
         // If the current neighborhood still exists, keep it
         if (stillExists) {
           console.log("[useFetchNeighborhood] Current neighborhood still valid");
@@ -104,20 +135,19 @@ export const useFetchNeighborhood = (
         } else {
           // Otherwise, use the first neighborhood in the list
           console.log("[useFetchNeighborhood] Current neighborhood no longer valid, using first available");
-          setCurrentNeighborhood(fetchedNeighborhoods[0]);
+          setCurrentNeighborhood(neighborhoods[0]);
         }
       } 
       // If no current neighborhood, use the first one in the list
       else {
         console.log("[useFetchNeighborhood] Setting first neighborhood as current");
-        setCurrentNeighborhood(fetchedNeighborhoods[0]);
+        setCurrentNeighborhood(neighborhoods[0]);
       }
     } catch (err: any) {
       // Handle fetch errors with appropriate parameters
       console.error("[useFetchNeighborhood] Error fetching neighborhoods:", err);
       setError(err instanceof Error ? err : new Error('Failed to fetch neighborhood'));
       setCurrentNeighborhood(null);
-      setIsLoading(false);
     } finally {
       // End the timer and mark loading as complete
       endFetchTimer();
