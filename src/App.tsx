@@ -4,9 +4,10 @@ import {
   Route,
   Navigate,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useSession, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/Login";
@@ -35,6 +36,8 @@ function App() {
   const session = useSession();
   const supabase = useSupabaseClient();
   const navigate = useNavigate();
+  const location = useLocation(); // Add location to track route changes
+  const user = useUser(); // Add user to log authentication status
   
   // State to track authentication checking status
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -50,6 +53,21 @@ function App() {
     console.log("Opening settings dialog");
   };
 
+  // Log authentication status on route changes
+  useEffect(() => {
+    // Only log for dashboard routes
+    if (location.pathname.includes('/dashboard')) {
+      console.log("[App] Authentication status on dashboard route:", {
+        path: location.pathname,
+        hasSession: !!session,
+        isAuthenticated,
+        userId: user?.id,
+        userEmail: user?.email,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [location.pathname, session, isAuthenticated, user]);
+
   // Check authentication status when the component mounts
   useEffect(() => {
     // Guard against supabase being undefined
@@ -64,7 +82,12 @@ function App() {
     try {
       // Subscribe to authentication state changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log("[App] Auth state changed:", { event, sessionExists: !!session });
+        console.log("[App] Auth state changed:", { 
+          event, 
+          sessionExists: !!session,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email
+        });
         
         setIsCheckingAuth(false);
         setIsAuthenticated(!!session);
@@ -83,7 +106,11 @@ function App() {
       const checkSession = async () => {
         try {
           const { data } = await supabase.auth.getSession();
-          console.log("[App] Initial session check:", { hasSession: !!data.session });
+          console.log("[App] Initial session check:", { 
+            hasSession: !!data.session,
+            userId: data.session?.user.id,
+            userEmail: data.session?.user.email 
+          });
           setIsAuthenticated(!!data.session);
           setIsCheckingAuth(false);
         } catch (error) {
@@ -107,7 +134,14 @@ function App() {
 
   // Component to protect routes that require authentication
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    console.log("[ProtectedRoute] Checking auth:", { isAuthenticated, isCheckingAuth });
+    // Enhanced logging for protected route access
+    console.log("[ProtectedRoute] Checking auth:", { 
+      isAuthenticated, 
+      isCheckingAuth,
+      path: location.pathname,
+      userId: user?.id,
+      timestamp: new Date().toISOString()
+    });
     
     // If checking auth, show loading state or nothing
     if (isCheckingAuth) {
