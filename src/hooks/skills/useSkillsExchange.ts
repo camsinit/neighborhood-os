@@ -45,11 +45,45 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         time_preferences: formData.timePreference || []
       };
 
-      const { error } = await supabase
-        .from('skills_exchange')
-        .insert(formattedData);
+      // Add detailed logging before insert operation
+      console.log("[useSkillsExchange] Attempting to insert skill exchange:", {
+        userId: user.id,
+        neighborhoodId,
+        mode,
+        formData: { ...formattedData, description: formattedData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
 
-      if (error) throw error;
+      const { error, data } = await supabase
+        .from('skills_exchange')
+        .insert(formattedData)
+        .select();
+
+      if (error) {
+        // Log detailed error information
+        console.error("[useSkillsExchange] Error inserting skill exchange:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          userId: user.id,
+          neighborhoodId,
+          mode,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useSkillsExchange] Skill exchange created successfully:", {
+        skillId: data?.[0]?.id,
+        userId: user.id,
+        neighborhoodId,
+        mode,
+        timestamp: new Date().toISOString()
+      });
 
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -73,7 +107,16 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
-      const { error } = await supabase
+      // Add detailed logging before update operation
+      console.log("[useSkillsExchange] Attempting to update skill exchange:", {
+        skillId,
+        userId: user.id,
+        mode,
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
+
+      const { error, data } = await supabase
         .from('skills_exchange')
         .update({
           title: formData.title,
@@ -84,9 +127,33 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
           time_preferences: formData.timePreference || []
         })
         .eq('id', skillId)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        // Log detailed error information
+        console.error("[useSkillsExchange] Error updating skill exchange:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          skillId,
+          userId: user.id,
+          mode,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useSkillsExchange] Skill exchange updated successfully:", {
+        skillId,
+        userId: user.id,
+        mode,
+        timestamp: new Date().toISOString()
+      });
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       toast.success('Skill exchange updated successfully!');

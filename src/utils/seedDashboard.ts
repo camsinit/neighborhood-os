@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 interface MockSafetyUpdate {
@@ -49,13 +50,46 @@ const mockEvents: MockEvent[] = [
 
 export const seedDashboardData = async (userId: string, neighborhoodId: string) => {
   try {
+    console.log("[seedDashboardData] Starting dashboard seeding:", {
+      userId,
+      neighborhoodId,
+      timestamp: new Date().toISOString()
+    });
+
     // Add safety updates
     const safetyUpdates = mockSafetyUpdates.map(update => ({
       ...update,
       author_id: userId,
       neighborhood_id: neighborhoodId
     }));
-    await supabase.from('safety_updates').insert(safetyUpdates);
+
+    console.log("[seedDashboardData] Inserting safety updates:", {
+      updateCount: safetyUpdates.length,
+      samples: safetyUpdates.map(u => ({ title: u.title, type: u.type })),
+    });
+
+    const { error: safetyError, data: safetyData } = await supabase
+      .from('safety_updates')
+      .insert(safetyUpdates)
+      .select();
+
+    if (safetyError) {
+      console.error("[seedDashboardData] Error inserting safety updates:", {
+        error: {
+          message: safetyError.message,
+          details: safetyError.details,
+          hint: safetyError.hint,
+          code: safetyError.code
+        },
+        userId,
+        neighborhoodId
+      });
+    } else {
+      console.log("[seedDashboardData] Safety updates inserted successfully:", {
+        insertedCount: safetyData?.length || 0,
+        ids: safetyData?.map(item => item.id) || []
+      });
+    }
 
     // Add events
     const events = mockEvents.map(event => ({
@@ -63,11 +97,38 @@ export const seedDashboardData = async (userId: string, neighborhoodId: string) 
       host_id: userId,
       neighborhood_id: neighborhoodId
     }));
-    await supabase.from('events').insert(events);
 
-    console.log('Dashboard seeded successfully');
+    console.log("[seedDashboardData] Inserting events:", {
+      eventCount: events.length,
+      samples: events.map(e => ({ title: e.title, location: e.location })),
+    });
+
+    const { error: eventsError, data: eventsData } = await supabase
+      .from('events')
+      .insert(events)
+      .select();
+
+    if (eventsError) {
+      console.error("[seedDashboardData] Error inserting events:", {
+        error: {
+          message: eventsError.message,
+          details: eventsError.details,
+          hint: eventsError.hint,
+          code: eventsError.code
+        },
+        userId,
+        neighborhoodId
+      });
+    } else {
+      console.log("[seedDashboardData] Events inserted successfully:", {
+        insertedCount: eventsData?.length || 0,
+        ids: eventsData?.map(item => item.id) || []
+      });
+    }
+
+    console.log('[seedDashboardData] Dashboard seeding completed successfully');
   } catch (error) {
-    console.error('Error seeding dashboard:', error);
+    console.error('[seedDashboardData] Error seeding dashboard:', error);
     throw error;
   }
 };

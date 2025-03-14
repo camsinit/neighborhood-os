@@ -18,15 +18,20 @@ export const useCurrentNeighborhood = () => {
     timestamp: new Date().toISOString()
   });
   
-  // If no neighborhood is selected, throw an error
+  // If no neighborhood is selected, log detailed error information and throw an error
   if (!currentNeighborhood?.id) {
-    console.error("[useCurrentNeighborhood] No neighborhood selected, throwing error");
+    console.error("[useCurrentNeighborhood] No neighborhood selected, throwing error", {
+      neighborhoodContext: JSON.stringify(currentNeighborhood, null, 2),
+      stack: new Error().stack,
+      timestamp: new Date().toISOString()
+    });
     throw new Error("No neighborhood selected");
   }
   
-  // If we get here, we have a valid neighborhood ID, so return it
+  // If we get here, we have a valid neighborhood ID, so log success and return it
   console.log("[useCurrentNeighborhood] Valid neighborhood found:", { 
     neighborhoodId: currentNeighborhood.id,
+    neighborhoodName: currentNeighborhood.name,
     timestamp: new Date().toISOString()
   });
   

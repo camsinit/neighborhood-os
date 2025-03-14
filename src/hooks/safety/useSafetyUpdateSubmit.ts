@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -26,6 +27,14 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     }
 
     try {
+      // Add detailed logging before insert operation
+      console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
+        userId: user.id,
+        neighborhoodId,
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
+
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -35,7 +44,29 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // Log detailed error information
+        console.error("[useSafetyUpdateSubmit] Error inserting safety update:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          userId: user.id,
+          neighborhoodId,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useSafetyUpdateSubmit] Safety update created successfully:", {
+        updateId: data?.[0]?.id,
+        userId: user.id,
+        neighborhoodId,
+        timestamp: new Date().toISOString()
+      });
 
       toast.success("Safety update created successfully");
       
@@ -64,6 +95,14 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     }
 
     try {
+      // Add detailed logging before update operation
+      console.log("[useSafetyUpdateSubmit] Attempting to update safety update:", {
+        updateId,
+        userId: user.id,
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
+
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -75,7 +114,28 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
         .eq('author_id', user.id)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // Log detailed error information
+        console.error("[useSafetyUpdateSubmit] Error updating safety update:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          updateId,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useSafetyUpdateSubmit] Safety update updated successfully:", {
+        updateId,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
 
       toast.success("Safety update updated successfully");
       

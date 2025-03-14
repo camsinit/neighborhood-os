@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -20,6 +21,14 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
     }
 
     try {
+      // Add detailed logging before the insert operation
+      console.log("[useEventSubmit] Attempting to insert event:", {
+        userId: user.id,
+        neighborhoodId,
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
+
       const { error, data } = await supabase
         .from('events')
         .insert({
@@ -29,7 +38,29 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // Log detailed error information
+        console.error("[useEventSubmit] Error inserting event:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          userId: user.id,
+          neighborhoodId,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useEventSubmit] Event created successfully:", {
+        eventId: data?.[0]?.id,
+        userId: user.id,
+        neighborhoodId,
+        timestamp: new Date().toISOString()
+      });
 
       // Success notification
       toast.success("Event created successfully");
@@ -46,7 +77,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       
       return data;
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('[useEventSubmit] Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
       throw error;
     }
@@ -59,6 +90,14 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
     }
 
     try {
+      // Add detailed logging before the update operation
+      console.log("[useEventSubmit] Attempting to update event:", {
+        eventId,
+        userId: user.id,
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        timestamp: new Date().toISOString()
+      });
+
       const { error, data } = await supabase
         .from('events')
         .update({
@@ -74,7 +113,28 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         .eq('host_id', user.id)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        // Log detailed error information
+        console.error("[useEventSubmit] Error updating event:", {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          },
+          eventId,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      // Log success information
+      console.log("[useEventSubmit] Event updated successfully:", {
+        eventId,
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      });
 
       // Success notification
       toast.success("Event updated successfully");
@@ -91,7 +151,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       
       return data;
     } catch (error) {
-      console.error('Error updating event:', error);
+      console.error('[useEventSubmit] Error updating event:', error);
       toast.error("Failed to update event. Please try again.");
       throw error;
     }
