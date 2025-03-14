@@ -1,8 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -11,6 +11,7 @@ interface EventSubmitProps {
 export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
+  const neighborhoodId = useCurrentNeighborhood();
 
   const handleSubmit = async (formData: any) => {
     if (!user) {
@@ -22,14 +23,9 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       const { error, data } = await supabase
         .from('events')
         .insert({
-          title: formData.title,
-          description: formData.description,
-          time: formData.time,
-          location: formData.location,
+          ...formData,
           host_id: user.id,
-          is_recurring: formData.isRecurring,
-          recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
-          recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
+          neighborhood_id: neighborhoodId
         })
         .select();
 

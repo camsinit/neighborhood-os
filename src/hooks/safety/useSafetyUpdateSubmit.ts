@@ -1,8 +1,8 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 interface SafetyUpdateSubmitProps {
   onSuccess: () => void;
@@ -17,6 +17,7 @@ interface SafetyUpdateFormData {
 export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
   const user = useUser();
   const queryClient = useQueryClient();
+  const neighborhoodId = useCurrentNeighborhood();
 
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
@@ -28,10 +29,9 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
-          title: formData.title,
-          description: formData.description,
-          type: formData.type,
+          ...formData,
           author_id: user.id,
+          neighborhood_id: neighborhoodId
         })
         .select();
 
