@@ -12,7 +12,6 @@ import {
 } from "@/components/support/types/formTypes";
 import { processFileUpload } from "../utils/imageHandling";
 import { submitGoodsForm } from "../utils/formSubmission";
-import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 /**
  * Custom hook for managing the goods form state and handlers
@@ -30,7 +29,6 @@ export const useGoodsForm = ({
   // Get the current user and query client
   const user = useUser();
   const queryClient = useQueryClient();
-  const neighborhoodId = useCurrentNeighborhood();
   
   // Determine whether this is an offer or request form
   const isOfferForm = initialRequestType === "offer";
@@ -160,14 +158,12 @@ export const useGoodsForm = ({
     }
     
     try {
-      // Submit the form with the correct number of arguments
-      // Make sure to pass the neighborhood ID as the 5th argument
+      // Submit the form
       const success = await submitGoodsForm(
         isOfferForm,
         itemFormData,
         requestFormData,
-        user.id,
-        neighborhoodId
+        user.id
       );
       
       if (success) {

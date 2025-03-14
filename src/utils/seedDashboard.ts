@@ -1,73 +1,103 @@
 import { supabase } from "@/integrations/supabase/client";
+import { addDays, addHours } from "date-fns";
 
-interface MockSafetyUpdate {
-  type: string;
-  title: string;
-  description: string;
-  author_id: string;
-}
+export const seedDashboard = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
-interface MockEvent {
-  title: string;
-  description: string;
-  time: string;
-  location: string;
-  host_id: string;
-}
+  // Safety Updates
+  const safetyUpdates = [
+    {
+      type: "Updates",
+      title: "New Street Lights Installation",
+      description: "The city will be installing LED street lights on Oak Avenue next week to improve nighttime visibility.",
+      author_id: user.id
+    },
+    {
+      type: "Maintenance",
+      title: "Community Garden Water System",
+      description: "The irrigation system in the community garden will be upgraded this weekend. Please hand-water your plants on Saturday.",
+      author_id: user.id
+    },
+    {
+      type: "Alerts",
+      title: "Temporary Road Closure",
+      description: "Maple Street will be closed for repaving between 9 AM and 4 PM tomorrow. Please use alternate routes.",
+      author_id: user.id
+    }
+  ];
 
-const mockSafetyUpdates: MockSafetyUpdate[] = [
-  {
-    type: 'alerts',
-    title: 'Be aware of suspicious activity',
-    description: 'There have been reports of suspicious individuals in the neighborhood. Please be vigilant and report any concerns to the authorities.',
-    author_id: '',
-  },
-  {
-    type: 'maintenance',
-    title: 'Street cleaning scheduled for next week',
-    description: 'Please move your vehicles off the street on Tuesday for street cleaning.',
-    author_id: '',
-  },
-];
+  // Support Requests
+  const supportRequests = [
+    {
+      category: "goods",
+      request_type: "offer",
+      title: "Free Moving Boxes",
+      description: "Just finished moving and have about 20 sturdy boxes of various sizes. Available for pickup this weekend.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 7).toISOString(),
+      support_type: "immediate"
+    },
+    {
+      category: "skills",
+      request_type: "need",
+      title: "Help with Basic Phone Setup",
+      description: "Looking for someone to help my elderly neighbor set up her new smartphone. Should take about an hour.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 14).toISOString(),
+      support_type: "immediate"
+    },
+    {
+      category: "resources",
+      request_type: "offer",
+      title: "Pet Sitting Available",
+      description: "Experienced pet sitter available for the next month. Can do daily visits or overnight stays.",
+      user_id: user.id,
+      valid_until: addDays(new Date(), 30).toISOString(),
+      support_type: "ongoing"
+    }
+  ];
 
-const mockEvents: MockEvent[] = [
-  {
-    title: 'Neighborhood BBQ',
-    description: 'Join us for a neighborhood BBQ at the park. Bring a dish to share!',
-    time: '2024-07-20T14:00:00',
-    location: 'Central Park',
-    host_id: '',
-  },
-  {
-    title: 'Community Meeting',
-    description: 'Discuss important neighborhood issues and upcoming projects.',
-    time: '2024-08-05T19:00:00',
-    location: 'Community Center',
-    host_id: '',
-  },
-];
+  // Events
+  const events = [
+    {
+      title: "Monthly Neighborhood Cleanup",
+      description: "Join us for our monthly neighborhood cleanup! Bring gloves if you have them. Tools and bags provided.",
+      time: addDays(new Date(), 3).toISOString(),
+      location: "Meet at Central Park entrance",
+      host_id: user.id
+    },
+    {
+      title: "Community Garden Workshop",
+      description: "Learn about seasonal planting and composting. Perfect for beginners!",
+      time: addDays(addHours(new Date(), 4), 5).toISOString(),
+      location: "Community Garden on Pine Street",
+      host_id: user.id
+    },
+    {
+      title: "Block Party Planning Meeting",
+      description: "Help us plan the upcoming summer block party. All neighbors welcome!",
+      time: addDays(addHours(new Date(), 2), 1).toISOString(),
+      location: "Community Center",
+      host_id: user.id
+    }
+  ];
 
-export const seedDashboardData = async (userId: string, neighborhoodId: string) => {
   try {
-    // Add safety updates
-    const safetyUpdates = mockSafetyUpdates.map(update => ({
-      ...update,
-      author_id: userId,
-      neighborhood_id: neighborhoodId
-    }));
+    // Insert safety updates
     await supabase.from('safety_updates').insert(safetyUpdates);
-
-    // Add events
-    const events = mockEvents.map(event => ({
-      ...event,
-      host_id: userId,
-      neighborhood_id: neighborhoodId
-    }));
+    
+    // Insert support requests
+    await supabase.from('support_requests').insert(supportRequests);
+    
+    // Insert events
     await supabase.from('events').insert(events);
 
-    console.log('Dashboard seeded successfully');
+    console.log('Dashboard populated successfully!');
   } catch (error) {
-    console.error('Error seeding dashboard:', error);
-    throw error;
+    console.error('Error populating dashboard:', error);
   }
 };
+
+// Execute the seeding
+seedDashboard();
