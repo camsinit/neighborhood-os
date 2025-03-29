@@ -2,21 +2,20 @@
 /**
  * Hook for fetching neighborhood data
  *
- * This hook handles the actual data fetching logic for neighborhoods
- * and contains the core neighborhood data retrieval functionality.
+ * This is a simplified version with more robust error handling and
+ * better resilience against RLS issues.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from './types';
-import { 
-  fetchCreatedNeighborhoods, 
-  checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor
-} from './utils';
+import { fetchAllNeighborhoodsForCoreContributor, checkCoreContributorAccess } from './utils';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Custom hook that focuses on fetching neighborhood data
+ * Simplified hook for fetching neighborhood data
+ * 
+ * This version has been streamlined to reduce complexity and avoid
+ * recursion issues with RLS policies.
  * 
  * @param user - The current authenticated user
  * @param fetchAttempts - Counter that triggers new fetch attempts
@@ -87,56 +86,49 @@ export function useFetchNeighborhood(
         return;
       }
 
-      // Check if the user has created any neighborhoods
-      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
-      
-      if (createdError) {
-        console.warn("[useFetchNeighborhood] Error getting created neighborhoods:", createdError);
-      } else if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-        // Found created neighborhoods
-        console.log("[useFetchNeighborhood] Found created neighborhoods:", createdNeighborhoods);
-        setCurrentNeighborhood(createdNeighborhoods[0]);
-        completeFetch(startTime);
-        return;
+      // Look for neighborhoods the user created directly
+      // This avoids using complex RLS policies
+      try {
+        const { data: neighborhoods, error } = await supabase
+          .from('neighborhoods')
+          .select('id, name, created_at, created_by')
+          .eq('created_by', user.id)
+          .limit(1);
+        
+        if (error) throw error;
+        
+        if (neighborhoods && neighborhoods.length > 0) {
+          console.log("[useFetchNeighborhood] Found neighborhood created by user:", neighborhoods[0]);
+          setCurrentNeighborhood(neighborhoods[0]);
+          completeFetch(startTime);
+          return;
+        }
+      } catch (err) {
+        console.warn("[useFetchNeighborhood] Error checking created neighborhoods:", err);
+        // Continue to the next approach
       }
       
-      // SAFE FALLBACK: Try direct membership
+      // SIMPLIFIED FALLBACK: Try to get memberships directly with a simpler query
       try {
-        // Get direct membership
         const { data: memberships, error: membershipError } = await supabase
-          .from('neighborhood_members')
-          .select('neighborhood_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+          .rpc('get_user_neighborhoods_simple', { user_uuid: user.id });
         
         if (membershipError) {
-          console.warn("[useFetchNeighborhood] Error getting neighborhood memberships:", membershipError);
+          console.warn("[useFetchNeighborhood] Error getting memberships via RPC:", membershipError);
         } else if (memberships && memberships.length > 0) {
-          // Found membership - now get the neighborhood details
-          const { data: neighborhood, error: neighborhoodError } = await supabase
-            .from('neighborhoods')
-            .select('id, name')
-            .eq('id', memberships[0].neighborhood_id)
-            .single();
-          
-          if (neighborhoodError) {
-            console.warn("[useFetchNeighborhood] Error getting neighborhood details:", neighborhoodError);
-          } else if (neighborhood) {
-            console.log("[useFetchNeighborhood] Found neighborhood via membership:", neighborhood);
-            setCurrentNeighborhood(neighborhood as Neighborhood);
-            completeFetch(startTime);
-            return;
-          }
+          console.log("[useFetchNeighborhood] Found neighborhood via membership:", memberships[0]);
+          setCurrentNeighborhood(memberships[0]);
+          completeFetch(startTime);
+          return;
         }
       } catch (memErr) {
         console.warn("[useFetchNeighborhood] Exception in membership check:", memErr);
-        // Continue to fallback methods
       }
       
       console.log("[useFetchNeighborhood] No neighborhoods found (attempt " + fetchAttempts + ")");
       setCurrentNeighborhood(null);
       
-      // Always ensure loading is set to false when done
+      // Complete the fetch operation
       completeFetch(startTime);
       
     } catch (err) {
