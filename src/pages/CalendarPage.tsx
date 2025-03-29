@@ -29,7 +29,7 @@ const CalendarPage = () => {
   }, []);
 
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#F2FCE2] to-white">
+    <div className="min-h-full w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           <div className="flex justify-between items-center mb-4">

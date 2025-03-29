@@ -33,7 +33,7 @@ const SafetyPage = () => {
   }, []);
 
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#FDE1D3] to-white">
+    <div className="min-h-full w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>

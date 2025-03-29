@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
-// Fix import statement to use default import instead of named import
+// Fixed import statement to use default import
 import GoodsSections from './GoodsSections';
 import GoodsPageHeader from './GoodsPageHeader';
 import GoodsSearchBar from './GoodsSearchBar';
-// Fix import statement to use default import instead of named import
+// Fixed import statement to use default import
 import GoodsDialogs from './GoodsDialogs';
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
@@ -43,7 +43,7 @@ const GoodsPageContainer = () => {
   };
 
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#FFEFD5] to-white">
+    <div className="min-h-full w-full bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           {/* Page header with title and action buttons */}
