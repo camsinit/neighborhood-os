@@ -54,43 +54,63 @@ const SkillsPage = () => {
   };
 
   return (
-    <div className="min-h-full w-full bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8">
-          <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
-          
-          <GlowingDescriptionBox colorClass="skills-color">
-            <p className="text-gray-700 text-sm">
-              Share your expertise and learn from others. Connect with neighbors to exchange 
-              skills, teach, learn, and grow together as a community.
-            </p>
-          </GlowingDescriptionBox>
+    // Wrapper div with relative positioning for the gradient
+    <div className="relative min-h-screen">
+      {/* 
+        Background gradient using the skills-color CSS variable
+        The gradient starts with the section color at reduced opacity at the top
+        and fades to completely transparent toward the bottom
+      */}
+      <div 
+        className="absolute inset-0 pointer-events-none" 
+        style={{ 
+          background: `linear-gradient(to bottom, hsla(var(--skills-color), 0.15) 0%, hsla(var(--skills-color), 0) 60%)`,
+          zIndex: 0 
+        }}
+        aria-hidden="true"
+      />
+      
+      {/* Content div placed above the gradient background */}
+      <div className="relative z-10">
+        <div className="min-h-full w-full bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-8">
+              <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
+              
+              <GlowingDescriptionBox colorClass="skills-color">
+                <p className="text-gray-700 text-sm">
+                  Share your expertise and learn from others. Connect with neighbors to exchange 
+                  skills, teach, learn, and grow together as a community.
+                </p>
+              </GlowingDescriptionBox>
 
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <SkillsHeader 
-              showCategories={showCategories}
-              onViewChange={() => {
-                setShowCategories(!showCategories);
-                setSelectedCategory(null);
-              }}
-            />
-            
-            <div className="flex items-center gap-2 mb-6">
-              {React.createElement(getCategoryIcon(selectedCategory), {
-                className: "h-5 w-5 text-gray-700"
-              })}
-              <h3 className="text-lg font-semibold text-gray-900">
-                {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'All Skills')}
-              </h3>
+              <div className="bg-white rounded-lg p-6 shadow-lg">
+                <SkillsHeader 
+                  showCategories={showCategories}
+                  onViewChange={() => {
+                    setShowCategories(!showCategories);
+                    setSelectedCategory(null);
+                  }}
+                />
+                
+                <div className="flex items-center gap-2 mb-6">
+                  {React.createElement(getCategoryIcon(selectedCategory), {
+                    className: "h-5 w-5 text-gray-700"
+                  })}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'All Skills')}
+                  </h3>
+                </div>
+                
+                {showCategories ? (
+                  <CategoryView onCategoryClick={handleCategoryClick} />
+                ) : (
+                  <SkillsList 
+                    selectedCategory={selectedCategory}
+                  />
+                )}
+              </div>
             </div>
-            
-            {showCategories ? (
-              <CategoryView onCategoryClick={handleCategoryClick} />
-            ) : (
-              <SkillsList 
-                selectedCategory={selectedCategory}
-              />
-            )}
           </div>
         </div>
       </div>
