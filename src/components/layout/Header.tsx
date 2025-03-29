@@ -1,4 +1,3 @@
-
 import { Settings } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
@@ -68,44 +67,6 @@ const Header = ({
       });
     }
   };
-
-  return (
-    <header className="bg-white border-b px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-end">
-      {/* User profile dropdown - now aligned to the right */}
-      <div className="flex items-center">
-        {/* User profile dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger className="focus:outline-none">
-            <Avatar className="h-8 w-8 cursor-pointer">
-              <AvatarImage src={profile?.avatar_url || ''} alt="Profile" />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {profile?.display_name ? profile.display_name[0] : user?.email?.[0] || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              <div className="font-medium">
-                {profile?.display_name || user?.email?.split('@')[0] || 'User'}
-              </div>
-              <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                {user?.email}
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onOpenSettings}>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
-  );
+  return;
 };
-
 export default Header;
