@@ -22,6 +22,8 @@ import WaitlistAdmin from './pages/WaitlistAdmin';
 import { checkAuthState } from './utils/authStateCheck';
 
 // Create a client
+// We're actually not using this one now - we're using the one from main.tsx
+// But we'll keep it for now to avoid breaking existing code
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -33,7 +35,16 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * Main Application Component
+ * 
+ * This component:
+ * 1. Sets up authentication state tracking
+ * 2. Provides the NeighborhoodProvider context
+ * 3. Defines all application routes
+ */
 function App() {
+  // Track the user's authentication session
   const [session, setSession] = useState<Session | null>(null);
 
   // Set up auth state change listener when the app loads
@@ -80,33 +91,32 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // We KEEP the BrowserRouter (Router) only in App.tsx, not in main.tsx
   return (
-    <QueryClientProvider client={queryClient}>
-      <NeighborhoodProvider>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/join" element={<JoinPage />} />
+    <NeighborhoodProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/join" element={<JoinPage />} />
 
-            {/* Protected routes */}
-            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-            <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
-            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
-            <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
-            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-            <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
-            <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+          {/* Protected routes */}
+          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
+          <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+          <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+          <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+          <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+          <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
 
-            {/* Default to Index */}
-            <Route path="*" element={<Index />} />
-          </Routes>
-        </Router>
+          {/* Default to Index */}
+          <Route path="*" element={<Index />} />
+        </Routes>
         <Toaster position="top-center" />
-      </NeighborhoodProvider>
-    </QueryClientProvider>
+      </Router>
+    </NeighborhoodProvider>
   );
 }
 
