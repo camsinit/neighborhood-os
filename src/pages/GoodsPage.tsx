@@ -8,6 +8,9 @@ import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
  * 
  * The actual implementation has been moved to the GoodsPageContainer component
  * to keep this file clean and focused on routing concerns.
+ * 
+ * The GlowingDescriptionBox is used in the GoodsPageContainer to maintain
+ * consistency with other feature pages.
  */
 const GoodsPage = () => {
   // Simply render the container component which handles all the logic
