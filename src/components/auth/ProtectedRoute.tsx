@@ -26,6 +26,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
           <p className="text-gray-600">Verifying your account...</p>
+          <p className="text-gray-400 text-sm mt-2">Please wait while we check your credentials.</p>
         </div>
       </div>
     );

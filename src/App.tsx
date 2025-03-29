@@ -90,12 +90,17 @@ function App() {
         <NeighborhoodProvider>
           <Router>
             <Routes>
-              {/* Public routes */}
+              {/* Public routes - fixed duplicated routes issue */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/join" element={<JoinPage />} />
+              
+              {/* Dashboard route - will redirect to /home if authenticated */}
+              <Route path="/dashboard" element={
+                session ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+              } />
 
-              {/* Wildcard route that redirects to index for proper routing logic */}
+              {/* Index route now properly redirects based on auth state */}
               <Route path="/index" element={<Index />} />
 
               {/* Protected routes */}
@@ -108,8 +113,8 @@ function App() {
               <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
               <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
 
-              {/* Default to Index for all other routes */}
-              <Route path="*" element={<Index />} />
+              {/* Catch-all route redirects to landing page for better UX */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster position="top-center" />
           </Router>
