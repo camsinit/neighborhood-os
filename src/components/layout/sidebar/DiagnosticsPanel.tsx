@@ -1,36 +1,55 @@
 
-import { User } from "@supabase/supabase-js";
-import { Neighborhood } from "@/contexts/neighborhood/types";
-
 /**
- * DiagnosticsPanel component props
+ * DiagnosticsPanel component (SIMPLIFIED VERSION)
+ * 
+ * A diagnostic panel shown at the bottom of the sidebar with reduced information
+ * for debugging purposes. Core contributor mode has been simplified.
  */
+import { User } from '@supabase/supabase-js';
+import { Neighborhood } from '@/contexts/neighborhood';
+
+// Define the component props interface
 interface DiagnosticsPanelProps {
-  user: User | null;
+  user: User | null | undefined;
   currentNeighborhood: Neighborhood | null;
-  isCoreContributor: boolean; // We keep this prop to avoid breaking changes
+  isCoreContributor: boolean;
 }
 
 /**
- * DiagnosticsPanel component - SIMPLIFIED VERSION
- * 
- * Displays diagnostic information in the sidebar
- * Core contributor status display has been removed
+ * DiagnosticsPanel displays debugging information in the sidebar
+ * This simplified version has removed the core contributor functionality
  */
 const DiagnosticsPanel = ({ 
-  currentNeighborhood
+  user,
+  currentNeighborhood,
+  isCoreContributor
 }: DiagnosticsPanelProps) => {
+  // Only show diagnostics in development mode
+  if (import.meta.env.PROD) {
+    return null;
+  }
+  
   return (
-    <div className="space-y-2 mt-4">
-      {/* Only display current neighborhood info if available */}
-      {currentNeighborhood && (
-        <div className="px-2 py-1 bg-green-50 rounded text-xs text-green-600">
-          <div className="font-semibold mb-1">Neighborhood:</div>
-          <div>{currentNeighborhood.name}</div>
-        </div>
-      )}
+    <div className="mt-4 p-2 text-xs text-gray-500 bg-gray-50 rounded border border-gray-100">
+      <h6 className="font-medium mb-1">Diagnostics</h6>
       
-      {/* Core contributor status display removed */}
+      {/* User information */}
+      <div className="mb-1">
+        {user ? (
+          <span>👤 {user.email?.split('@')[0] || 'User'}</span>
+        ) : (
+          <span className="text-amber-700">⚠️ No user</span>
+        )}
+      </div>
+      
+      {/* Neighborhood information */}
+      <div>
+        {currentNeighborhood ? (
+          <span>🏘️ {currentNeighborhood.name}</span>
+        ) : (
+          <span className="text-amber-700">⚠️ No neighborhood</span>
+        )}
+      </div>
     </div>
   );
 };
