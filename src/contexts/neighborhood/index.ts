@@ -14,4 +14,3 @@ export type { Neighborhood, NeighborhoodContextType } from './types';
 
 // Export utility functions for direct access if needed
 export * from './utils';
-
