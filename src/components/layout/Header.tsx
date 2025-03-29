@@ -1,3 +1,4 @@
+
 import { Settings } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
@@ -67,6 +68,48 @@ const Header = ({
       });
     }
   };
-  return;
+
+  return (
+    <header className="h-16 px-4 border-b flex items-center justify-end">
+      {/* User profile dropdown menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-md p-1 transition-colors">
+            {/* User avatar */}
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={profile?.avatar_url || ''} alt={profile?.display_name || 'User'} />
+              <AvatarFallback>
+                {profile?.display_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Display name (only show on larger screens) */}
+            <span className="text-sm font-medium hidden md:inline-block">
+              {profile?.display_name || user?.email?.split('@')[0] || 'User'}
+            </span>
+          </button>
+        </DropdownMenuTrigger>
+        
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          
+          {/* Settings option */}
+          <DropdownMenuItem onClick={onOpenSettings} className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
+          {/* Sign out option */}
+          <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </header>
+  );
 };
+
 export default Header;
