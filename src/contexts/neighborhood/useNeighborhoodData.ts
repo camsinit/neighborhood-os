@@ -45,26 +45,6 @@ export function useNeighborhoodData(user: User | null) {
     setFetchAttempts(prev => prev + 1);
   }, []);
 
-  // Function to safely get core contributor status without triggering RLS recursion
-  const getCoreContributorStatus = useCallback(async (userId: string): Promise<boolean> => {
-    try {
-      return await checkCoreContributorAccess(userId);
-    } catch (err) {
-      console.error("[useNeighborhoodData] Error checking core contributor status:", err);
-      return false;
-    }
-  }, []);
-
-  // Function to safely get neighborhoods for a core contributor
-  const getNeighborhoodsForCoreContributor = useCallback(async (userId: string): Promise<Neighborhood[]> => {
-    try {
-      return await fetchAllNeighborhoodsForCoreContributor(userId);
-    } catch (err) {
-      console.error("[useNeighborhoodData] Error fetching neighborhoods for core contributor:", err);
-      return [];
-    }
-  }, []);
-
   // Function to fetch the user's active neighborhood
   const fetchNeighborhood = useCallback(async () => {
     // Skip if no user is logged in
@@ -86,7 +66,7 @@ export function useNeighborhoodData(user: User | null) {
     try {
       // First check if the user is a core contributor with access to all neighborhoods
       console.log(`[useNeighborhoodData] Checking if user is core contributor (attempt ${fetchAttempts})`);
-      const isContributor = await getCoreContributorStatus(user.id);
+      const isContributor = await checkCoreContributorAccess(user.id);
       setIsCoreContributor(isContributor);
       
       // If they are a core contributor, fetch all neighborhoods
@@ -95,8 +75,8 @@ export function useNeighborhoodData(user: User | null) {
           fetchAttempt: fetchAttempts
         });
         
-        // Fetch all neighborhoods using the security definer function
-        const neighborhoods = await getNeighborhoodsForCoreContributor(user.id);
+        // Fetch all neighborhoods
+        const neighborhoods = await fetchAllNeighborhoodsForCoreContributor(user.id);
         setAllNeighborhoods(neighborhoods);
         
         // If we have neighborhoods and no current one is set, set the first one as current
@@ -116,32 +96,49 @@ export function useNeighborhoodData(user: User | null) {
         return;
       }
 
-      // SAFE FALLBACK: If RPC functions fail or don't exist yet, try direct approach with error handling
+      // Check if the user has created any neighborhoods
+      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
+      
+      if (createdError) {
+        console.warn("[useNeighborhoodData] Error getting created neighborhoods:", createdError);
+      } else if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+        // Found created neighborhoods
+        console.log("[useNeighborhoodData] Found created neighborhoods:", createdNeighborhoods);
+        setCurrentNeighborhood(createdNeighborhoods[0]);
+        setIsLoading(false);
+        return;
+      }
+      
+      // SAFE FALLBACK: Try direct membership
       try {
-        // Get direct membership via RPC function (safe approach)
+        // Get direct membership
         const { data: memberships, error: membershipError } = await supabase
-          .rpc('get_user_neighborhoods', { user_uuid: user.id }) as { 
-            data: { id: string, name: string, joined_at: string }[] | null, 
-            error: any 
-          };
+          .from('neighborhood_members')
+          .select('neighborhood_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active');
         
         if (membershipError) {
-          console.warn("[useNeighborhoodData] Error getting user neighborhoods via RPC:", membershipError);
+          console.warn("[useNeighborhoodData] Error getting neighborhood memberships:", membershipError);
         } else if (memberships && memberships.length > 0) {
-          // Found membership via RPC
-          console.log("[useNeighborhoodData] Found neighborhoods via RPC:", memberships);
+          // Found membership - now get the neighborhood details
+          const { data: neighborhood, error: neighborhoodError } = await supabase
+            .from('neighborhoods')
+            .select('id, name')
+            .eq('id', memberships[0].neighborhood_id)
+            .single();
           
-          const firstNeighborhood: Neighborhood = {
-            id: memberships[0].id,
-            name: memberships[0].name
-          };
-          
-          setCurrentNeighborhood(firstNeighborhood);
-          setIsLoading(false);
-          return;
+          if (neighborhoodError) {
+            console.warn("[useNeighborhoodData] Error getting neighborhood details:", neighborhoodError);
+          } else if (neighborhood) {
+            console.log("[useNeighborhoodData] Found neighborhood via membership:", neighborhood);
+            setCurrentNeighborhood(neighborhood as Neighborhood);
+            setIsLoading(false);
+            return;
+          }
         }
-      } catch (rpcErr) {
-        console.warn("[useNeighborhoodData] Exception in RPC call:", rpcErr);
+      } catch (memErr) {
+        console.warn("[useNeighborhoodData] Exception in membership check:", memErr);
         // Continue to fallback methods
       }
       
@@ -183,9 +180,7 @@ export function useNeighborhoodData(user: User | null) {
   }, [
     user, 
     fetchAttempts, 
-    currentNeighborhood, 
-    getCoreContributorStatus,
-    getNeighborhoodsForCoreContributor
+    currentNeighborhood
   ]);
 
   // Effect for auto-retrying with exponential backoff

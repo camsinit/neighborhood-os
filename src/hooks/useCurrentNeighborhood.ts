@@ -25,22 +25,25 @@ export const useCurrentNeighborhood = () => {
   useEffect(() => {
     const checkAuthContext = async () => {
       try {
-        // Verify Supabase authentication context with direct query instead of RPC
+        // Verify Supabase authentication context with direct query
         const { data: authResult } = await supabase
           .from('auth_users_view')
           .select('id')
           .limit(1);
         
-        // Check if the user is associated with the neighborhood
-        const { data: membershipCheck } = await supabase.rpc('user_is_neighborhood_member', {
-          user_uuid: user?.id || '',
-          neighborhood_uuid: currentNeighborhood?.id || ''
-        });
+        // Check if the user is associated with the neighborhood using direct query
+        const { data: membershipCheck } = await supabase
+          .from('neighborhood_members')
+          .select('user_id') 
+          .eq('user_id', user?.id || '')
+          .eq('neighborhood_id', currentNeighborhood?.id || '')
+          .eq('status', 'active')
+          .maybeSingle();
         
         // Store debug information
         setDebugInfo({
           authContext: authResult?.[0]?.id === user?.id ? 'Valid' : 'Mismatch',
-          membership: membershipCheck,
+          membership: !!membershipCheck,
           userID: user?.id,
           neighborhoodID: currentNeighborhood?.id,
           timestamp: new Date().toISOString()

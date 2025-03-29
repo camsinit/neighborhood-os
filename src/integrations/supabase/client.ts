@@ -25,18 +25,7 @@ export const supabase = createClient<Database>(
     global: {
       headers: {
         'x-application-name': 'neighborhood-app'
-      },
-      fetch: (...args) => {
-        return fetch(...args).catch(err => {
-          // Log network errors but don't crash the app
-          console.error("[Supabase Client] Network error:", err);
-          throw err;
-        });
       }
-    },
-    // Add retry configuration to handle temporary errors
-    db: {
-      schema: 'public'
     },
     // Add reasonable timeouts to prevent hanging requests
     realtime: {
