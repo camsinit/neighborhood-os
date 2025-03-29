@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
-import { Search, Users, RefreshCw } from "lucide-react"; // Added more icons
+import { Search, Users, RefreshCw } from "lucide-react"; 
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { toast } from "@/components/ui/use-toast";
  * NeighborsPage Component
  * 
  * This page displays a directory of neighbors in the user's neighborhood.
- * It ensures users are part of a neighborhood and redirects to home if they aren't.
+ * SIMPLIFIED: Now more resilient to missing neighborhood data
  */
 const NeighborsPage = () => {
   // State for the search functionality
@@ -108,7 +108,7 @@ const NeighborsPage = () => {
     );
   }
 
-  // If not in a neighborhood, show a message with helpful information
+  // SIMPLIFIED: More helpful UI when no neighborhood is found
   if (error || !currentNeighborhood) {
     return (
       <div className="min-h-full w-full flex items-center justify-center p-4">
@@ -134,7 +134,7 @@ const NeighborsPage = () => {
             <div className="space-y-4">
               <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
                 <p className="text-sm text-amber-800">
-                  Neighborhoods are invitation-only communities. You need an invitation from an existing member to join.
+                  You can continue using the app without a neighborhood. Some features may be limited.
                 </p>
               </div>
               

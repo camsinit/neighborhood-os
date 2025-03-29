@@ -30,8 +30,6 @@ export const useCurrentNeighborhood = () => {
           .select('id')
           .limit(1);
         
-        // Simplified: Skip the membership check to avoid potential RLS recursion
-        
         // Store debug information
         setDebugInfo({
           authContext: authResult?.[0]?.id === user?.id ? 'Valid' : 'Mismatch',
