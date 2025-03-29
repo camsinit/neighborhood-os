@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -5,6 +6,7 @@ import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
 const categoryIcons = {
   creative: Palette,
@@ -57,12 +59,12 @@ const SkillsPage = () => {
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+          <GlowingDescriptionBox colorClass="skills-color">
             <p className="text-gray-700 text-sm">
               Share your expertise and learn from others. Connect with neighbors to exchange 
               skills, teach, learn, and grow together as a community.
             </p>
-          </div>
+          </GlowingDescriptionBox>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <SkillsHeader 

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { HeartHandshake, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
 const CarePage = () => {
   const [hoveredRequestId, setHoveredRequestId] = useState<string | null>(null);
@@ -33,12 +35,12 @@ const CarePage = () => {
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+          <GlowingDescriptionBox colorClass="care-color">
             <p className="text-gray-700 text-sm">
               Connect with neighbors for mutual care and support. Whether offering or seeking 
               assistance, build a stronger community through compassionate connections.
             </p>
-          </div>
+          </GlowingDescriptionBox>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">

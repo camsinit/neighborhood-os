@@ -1,175 +1,76 @@
 
-import { useState, useEffect } from 'react';
-import { useGoodsExchange } from "@/utils/queries/useGoodsExchange";
-import { GoodsExchangeItem } from '@/types/localTypes';
-import { useAutoRefresh } from "@/hooks/useAutoRefresh";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState } from 'react';
+import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
+import { GoodsSections } from './GoodsSections';
+import GoodsPageHeader from './GoodsPageHeader';
+import GoodsSearchBar from './GoodsSearchBar';
+import { GoodsDialogs } from './GoodsDialogs';
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
-// Import Components
-import GoodsPageHeader from "./GoodsPageHeader";
-import GoodsSearchBar from "./GoodsSearchBar";
-import GoodsSections from "./GoodsSections";
-import GoodsDialogs from "./GoodsDialogs";
-
-/**
- * Main container component for the Goods page
- * 
- * This component handles:
- * - State management for the entire Goods page
- * - Data fetching through the useGoodsExchange hook
- * - Filtering of goods items based on search query
- * - Dialog management for adding/viewing goods items
- */
 const GoodsPageContainer = () => {
-  // Define our state variables
-  // These variables control the dialog visibility and search functionality
-  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
-  const [directDbData, setDirectDbData] = useState<any[]>([]);
-
-  // Fetch goods data from the database using our dedicated hook
-  const { 
-    data: goodsExchangeItems, 
-    isLoading,
-    refetch
-  } = useGoodsExchange();
-
-  // Set up auto-refresh for goods data
-  // This will listen for the goods-form-submitted event and refresh the data
-  useAutoRefresh(['goods-exchange'], ['goods-form-submitted']);
-
-  // Debug the goods data coming from the database
-  useEffect(() => {
-    if (goodsExchangeItems) {
-      console.log("Goods data loaded:", goodsExchangeItems.length, "items");
-      
-      // More detailed logging to debug what's in the data
-      const goodsItems = goodsExchangeItems.filter(item => 
-        !item.is_archived &&
-        item.request_type === 'offer'
-      );
-      
-      console.log("Goods offers:", goodsItems.length, "items", goodsItems);
-      
-      const goodsRequests = goodsExchangeItems.filter(item => 
-        !item.is_archived &&
-        item.request_type === 'need'
-      );
-      
-      console.log("Goods requests:", goodsRequests.length, "items", goodsRequests);
-    }
-  }, [goodsExchangeItems]);
-
-  // For debugging - directly query the database to see what's in it
-  useEffect(() => {
-    const debugGoods = async () => {
-      // Query goods_exchange directly to see what's there
-      const { data, error } = await supabase
-        .from('goods_exchange')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        console.error("Error querying goods_exchange:", error);
-      } else {
-        console.log("Direct goods_exchange query result:", data);
-        setDirectDbData(data || []);
-      }
-    };
-    
-    debugGoods();
-  }, [goodsExchangeItems]);  // Re-run when goods data changes to keep in sync
-
-  // Filter goods items (offers)
-  // This creates a list of items that people are offering to others
-  const goodsItems = goodsExchangeItems?.filter(item => 
-    !item.is_archived &&
-    item.request_type === 'offer' &&
-    (searchQuery === "" || 
-     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) as GoodsExchangeItem[] || [];
-
-  // Filter goods requests (needs)
-  // This creates a list of items that people are requesting from others
-  const goodsRequests = goodsExchangeItems?.filter(item => 
-    !item.is_archived &&
-    item.request_type === 'need' &&
-    (searchQuery === "" || 
-     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-     item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-  ) as GoodsExchangeItem[] || [];
-
-  // Filter for urgent requests
-  // This creates a list of high-priority needs that should be displayed prominently
-  const urgentRequests = goodsRequests.filter(req => {
-    return req.urgency === 'high' || req.urgency === 'critical';
-  }) as GoodsExchangeItem[];
-
-  // Manual refresh function
-  const handleManualRefresh = () => {
-    console.log("Manual refresh requested");
-    refetch();
-  };
-
-  // Handler functions
+  const [showUrgent, setShowUrgent] = useState(true);
+  const [showRequests, setShowRequests] = useState(true);
+  const [showAvailable, setShowAvailable] = useState(true);
   
-  // Open the dialog to request an item
-  const handleRequestItem = () => {
-    setInitialRequestType("need");
-    setIsAddRequestOpen(true);
-  };
+  // Add some new states for dialogs
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'offer' | 'request'>('offer');
   
-  // Open the dialog to offer an item
-  const handleOfferItem = () => {
-    setInitialRequestType("offer");
-    setIsAddRequestOpen(true);
-  };
-
-  // Handler for when the dialog closes after submission
-  const handleDialogChange = (open: boolean) => {
-    if (!open) {
-      // When dialog closes, refresh the data after a short delay
-      setTimeout(() => {
-        console.log("Dialog closed, refreshing data");
-        refetch();
-      }, 500);
-    }
-    setIsAddRequestOpen(open);
-  };
+  // Fetch goods data
+  const { data: goodsData, isLoading } = useGoodsExchange();
 
   return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#FEC6A1] to-white">
+    <div className="min-h-full w-full bg-gradient-to-b from-[#FFEFD5] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          {/* Page title and introduction */}
-          <GoodsPageHeader />
+          <GoodsPageHeader 
+            onAddItem={() => {
+              setViewMode('offer');
+              setAddDialogOpen(true);
+            }} 
+            onAddRequest={() => {
+              setViewMode('request');
+              setAddDialogOpen(true);
+            }}
+          />
           
-          {/* Main content - Contains all goods sections */}
-          <GoodsSections 
-            urgentRequests={urgentRequests}
-            goodsRequests={goodsRequests}
-            goodsItems={goodsItems}
-            onRequestSelect={setSelectedRequest}
-            onOfferItem={handleOfferItem}
-            onRequestItem={handleRequestItem}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onRefresh={handleManualRefresh}
+          <GlowingDescriptionBox colorClass="goods-color">
+            <p className="text-gray-700 text-sm">
+              Share resources with your neighbors through our community exchange. 
+              Offer items you no longer need, or find things you're looking for.
+            </p>
+          </GlowingDescriptionBox>
+
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <GoodsSearchBar 
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              showUrgent={showUrgent}
+              onToggleUrgent={() => setShowUrgent(!showUrgent)}
+              showRequests={showRequests}
+              onToggleRequests={() => setShowRequests(!showRequests)}
+              showAvailable={showAvailable}
+              onToggleAvailable={() => setShowAvailable(!showAvailable)}
+            />
+            
+            <GoodsSections 
+              goodsData={goodsData}
+              isLoading={isLoading}
+              searchQuery={searchQuery}
+              showUrgent={showUrgent}
+              showRequests={showRequests}
+              showAvailable={showAvailable}
+            />
+          </div>
+          
+          <GoodsDialogs 
+            addDialogOpen={addDialogOpen}
+            onAddDialogOpenChange={setAddDialogOpen}
+            viewMode={viewMode}
           />
         </div>
       </div>
-
-      {/* Dialogs for adding and viewing goods */}
-      <GoodsDialogs 
-        isAddRequestOpen={isAddRequestOpen}
-        selectedRequest={selectedRequest}
-        onAddRequestOpenChange={handleDialogChange}
-        onSelectedRequestChange={(open) => !open && setSelectedRequest(null)}
-        initialRequestType={initialRequestType}
-      />
     </div>
   );
 };

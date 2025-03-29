@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import SafetyUpdates from "@/components/SafetyUpdates";
 import { useToast } from "@/components/ui/use-toast";
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
 const SafetyPage = () => {
   const { toast } = useToast();
@@ -37,12 +38,12 @@ const SafetyPage = () => {
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+          <GlowingDescriptionBox colorClass="safety-color">
             <p className="text-gray-700 text-sm">
               Stay informed about safety matters in your community. Share updates, receive alerts, 
               and work together to maintain a secure neighborhood environment.
             </p>
-          </div>
+          </GlowingDescriptionBox>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <SafetyUpdates />

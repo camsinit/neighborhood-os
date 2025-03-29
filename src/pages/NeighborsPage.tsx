@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
 /**
  * NeighborsPage Component
@@ -159,12 +161,9 @@ const NeighborsPage = () => {
         <div className="py-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
-            
-            {/* Add refresh button */}
-            
           </div>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+          <GlowingDescriptionBox colorClass="neighbors-color">
             <div className="flex items-start">
               <div className="mr-3 mt-1 bg-blue-100 p-2 rounded-full">
                 <Users className="h-5 w-5 text-blue-600" />
@@ -176,7 +175,7 @@ const NeighborsPage = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </GlowingDescriptionBox>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">

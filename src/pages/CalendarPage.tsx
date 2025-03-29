@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
+import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
 const CalendarPage = () => {
   // Get neighborhood context - removed isCoreContributor reference
@@ -38,12 +39,12 @@ const CalendarPage = () => {
             <GodModeSelector />
           </div>
           
-          <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
+          <GlowingDescriptionBox colorClass="calendar-color">
             <p className="text-gray-700 text-sm">
               Stay connected with your community through local events. View upcoming gatherings, 
               create new events, and join your neighbors in building stronger connections.
             </p>
-          </div>
+          </GlowingDescriptionBox>
 
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <CommunityCalendar />
