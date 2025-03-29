@@ -34,12 +34,20 @@ export const useSafetyUpdates = () => {
       
       try {
         // First, verify auth context is working
-        const { data: authContext, error: authError } = await supabase.rpc('check_auth_context');
+        // Using a direct query instead of RPC to avoid TypeScript errors
+        const { data: authContext, error: authError } = await supabase
+          .from('auth_users_view')  // This view should be accessible to get basic auth info
+          .select('id')
+          .limit(1);
         
         if (authError) {
           console.error("[useSafetyUpdates] Auth context check failed:", authError);
         } else {
-          console.log("[useSafetyUpdates] Auth context check result:", authContext);
+          console.log("[useSafetyUpdates] Auth context check result:", {
+            hasData: !!authContext,
+            authId: authContext?.[0]?.id,
+            userMatchesAuth: authContext?.[0]?.id === user?.id
+          });
         }
         
         // Now try to fetch the safety updates
