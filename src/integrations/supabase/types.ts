@@ -1180,6 +1180,12 @@ export type Database = {
         }
         Returns: string[]
       }
+      get_neighborhood_members_simple: {
+        Args: {
+          neighborhood_uuid: string
+        }
+        Returns: string[]
+      }
       get_user_current_neighborhood: {
         Args: {
           user_uuid: string
@@ -1207,6 +1213,15 @@ export type Database = {
           joined_at: string
         }[]
       }
+      get_user_neighborhoods_simple: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       is_super_admin: {
         Args: {
           user_uuid: string
@@ -1214,6 +1229,13 @@ export type Database = {
         Returns: boolean
       }
       is_user_in_neighborhood: {
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      simple_membership_check: {
         Args: {
           user_uuid: string
           neighborhood_uuid: string

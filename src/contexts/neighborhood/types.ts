@@ -1,12 +1,12 @@
-
 /**
- * Neighborhood data types
+ * Types for the neighborhood context and related functions
  */
 
-// Neighborhood type
+// Basic neighborhood data structure
 export interface Neighborhood {
-  id: string; 
+  id: string;
   name: string;
+  // Other fields that might be present but not required for basic functionality
   created_by?: string;
   address?: string;
   city?: string;
@@ -14,13 +14,24 @@ export interface Neighborhood {
   zip?: string;
 }
 
-// Neighborhood context type
+// Type for the neighborhood context
 export interface NeighborhoodContextType {
+  // Current selected neighborhood
   currentNeighborhood: Neighborhood | null;
+  
+  // Loading and error states
   isLoading: boolean;
   error: Error | null;
+  
+  // Core contributor status (for "God Mode")
   isCoreContributor: boolean;
+  
+  // All available neighborhoods for this user
   allNeighborhoods: Neighborhood[];
+  
+  // Function to change the selected neighborhood
   setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
-  refreshNeighborhoodData: () => void; // Added this function type
+  
+  // Function to manually refresh neighborhood data
+  refreshNeighborhoodData: () => void;
 }

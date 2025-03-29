@@ -1,71 +1,79 @@
 
 /**
- * Utility function to check and log the current authentication state
- * This can be used for debugging issues with RLS policies
+ * Auth state checking utilities
+ * 
+ * These functions help diagnose authentication state issues
  */
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Checks the current authentication state and returns diagnostic information
- * @returns Object with authentication state information
+ * Check the current authentication context
+ * 
+ * This is useful for diagnosing RLS-related issues
+ * 
+ * @param context - Optional context name for logging
+ * @returns Promise resolving to an object with auth state information
  */
-export async function checkAuthState() {
+export async function checkAuthState(context: string = 'general') {
   try {
-    // Get the current session
-    const { data: { session }, error } = await supabase.auth.getSession();
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
     
-    // Check if we can get user data
-    const { data: userData, error: userError } = await supabase
+    // Check context by attempting a simple query on the auth_users_view
+    const { data: authContext, error: authError } = await supabase
       .from('auth_users_view')
-      .select('id, email')
+      .select('id')
       .limit(1);
     
-    // Log detailed debug information
-    console.log("[Auth Check] Current authentication state:", {
-      hasSession: !!session,
-      userId: session?.user?.id,
-      accessToken: session?.access_token ? "Present" : "Missing",
-      tokenExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : "Unknown",
-      error: error?.message,
-      userData: userData,
-      userDataError: userError?.message,
+    const state = {
+      context,
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      hasAuthContext: !!authContext,
+      authContextError: authError ? authError.message : null,
       timestamp: new Date().toISOString()
-    });
-    
-    return {
-      authenticated: !!session,
-      userId: session?.user?.id,
-      accessToken: !!session?.access_token,
-      dbAccess: !!userData && !userError,
-      error: error?.message || userError?.message
     };
-  } catch (err) {
-    console.error("[Auth Check] Error checking auth state:", err);
-    return {
-      authenticated: false,
-      error: err instanceof Error ? err.message : "Unknown error checking auth state"
+    
+    console.info("[AuthStateCheck]", state);
+    return state;
+  } catch (error) {
+    console.error("[AuthStateCheck] Error checking auth state:", error);
+    return { 
+      context, 
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString() 
     };
   }
 }
 
 /**
- * A wrapper function to run a Supabase query with enhanced error logging
+ * Run a function with authentication context checking
+ * 
+ * This wraps a function with auth state checking before and after
  * to help diagnose RLS issues
+ * 
+ * @param fn - The function to run
+ * @param context - Context name for logging
+ * @returns Result of the function
  */
-export async function runWithAuthCheck(queryFn: () => Promise<any>, context: string = "unknown") {
-  const authState = await checkAuthState();
-  console.log(`[Auth Check] Running query in context "${context}" with auth state:`, authState);
-  
+export async function runWithAuthCheck<T>(
+  fn: () => Promise<T>,
+  context: string
+): Promise<T> {
   try {
-    const result = await queryFn();
-    console.log(`[Auth Check] Query success in "${context}":`, {
-      hasData: !!result.data,
-      dataCount: Array.isArray(result.data) ? result.data.length : (result.data ? 1 : 0),
-      hasError: !!result.error
-    });
+    // Check auth state before function
+    await checkAuthState(`${context}-before`);
+    
+    // Run the function
+    const result = await fn();
+    
+    // Check auth state after function
+    await checkAuthState(`${context}-after`);
+    
     return result;
   } catch (error) {
-    console.error(`[Auth Check] Query failed in "${context}":`, error);
+    console.error(`[${context}] Error with auth check:`, error);
     throw error;
   }
 }

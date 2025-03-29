@@ -1,4 +1,9 @@
 
+/**
+ * Custom hook to get the current neighborhood ID
+ * 
+ * This simplified version handles cases where no neighborhood is selected gracefully
+ */
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
