@@ -39,10 +39,20 @@ export async function checkNeighborhoodMembership(
         return !!data;
       }
     } catch (rpcErr) {
-      console.warn("[NeighborhoodUtils] RPC user_is_neighborhood_member failed:", rpcErr);
+      console.warn("[NeighborhoodUtils] RPC user_is_neighborhood_member failed, falling back to direct query:", rpcErr);
     }
     
-    // Fall back to direct query with RLS
+    // Fall back to checking created neighborhoods
+    try {
+      const isCreator = await checkUserCreatedNeighborhood(userId, neighborhoodId);
+      if (isCreator) {
+        return true;
+      }
+    } catch (creatorErr) {
+      console.warn("[NeighborhoodUtils] Error checking if user created neighborhood:", creatorErr);
+    }
+    
+    // Final fallback to direct query with RLS
     const { data, error } = await supabase
       .from('neighborhood_members')
       .select('id')
@@ -135,7 +145,7 @@ export async function checkUserCreatedNeighborhood(
         return !!data;
       }
     } catch (rpcErr) {
-      console.warn("[NeighborhoodUtils] RPC user_created_neighborhood failed:", rpcErr);
+      console.warn("[NeighborhoodUtils] RPC user_created_neighborhood failed, falling back to direct query:", rpcErr);
     }
 
     // Fall back to direct query
@@ -144,12 +154,9 @@ export async function checkUserCreatedNeighborhood(
       .select('id')
       .eq('id', neighborhoodId)
       .eq('created_by', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') { // Not found error
-        return false;
-      }
       console.error("[NeighborhoodUtils] Error checking if user created neighborhood:", error);
       return false;
     }
