@@ -1,208 +1,112 @@
+import { useEffect, useState } from 'react';
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
+import { NeighborhoodProvider } from './contexts/neighborhood';
+import { Session } from '@supabase/supabase-js';
+import { supabase } from './integrations/supabase/client';
+import HomePage from './pages/HomePage';
+import NeighborsPage from './pages/NeighborsPage';
+import SkillsPage from './pages/SkillsPage';
+import GoodsPage from './pages/GoodsPage';
+import CalendarPage from './pages/CalendarPage';
+import SafetyPage from './pages/SafetyPage';
+import CarePage from './pages/CarePage';
+import JoinPage from './pages/JoinPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import WaitlistAdmin from './pages/WaitlistAdmin';
+import { checkAuthState } from './utils/authStateCheck';
 
-import {
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useSession, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Login from "./pages/Login";
-import JoinPage from "./pages/JoinPage";
-import Header from "./components/layout/Header";
-import Sidebar from "./components/layout/Sidebar";
-import MainContent from "./components/layout/MainContent";
-import HomePage from "./pages/HomePage";
-import CalendarPage from "./pages/CalendarPage";
-import SafetyPage from "./pages/SafetyPage";
-import CarePage from "./pages/CarePage";
-import GoodsPage from "./pages/GoodsPage";
-import SkillsPage from "./pages/SkillsPage";
-import NeighborsPage from "./pages/NeighborsPage";
-import LandingPage from "./pages/LandingPage";
-import WaitlistAdmin from "./pages/WaitlistAdmin";
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Retry failed queries up to 2 times
+      retry: 2,
+      // Keep cached data for 5 minutes
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
-/**
- * Main App component
- * 
- * Handles routing, authentication protection, and application layout.
- * Includes routes for public pages and protected dashboard routes.
- */
 function App() {
-  // Get the current user session and Supabase client
-  const session = useSession();
-  const supabase = useSupabaseClient();
-  const navigate = useNavigate();
-  const location = useLocation(); // Add location to track route changes
-  const user = useUser(); // Add user to log authentication status
-  
-  // State to track authentication checking status
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  // State to track if user is authenticated
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // Added state for settings dialog
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
-  // Handle opening settings dialog
-  const handleOpenSettings = () => {
-    setIsSettingsOpen(true);
-    console.log("Opening settings dialog");
-  };
-
-  // Log authentication status on route changes
+  // Set up auth state change listener when the app loads
   useEffect(() => {
-    // Only log for dashboard routes
-    if (location.pathname.includes('/dashboard')) {
-      console.log("[App] Authentication status on dashboard route:", {
-        path: location.pathname,
+    console.info("[App] Setting up auth state change listener");
+    
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      console.info("[App] Initial session check:", {
         hasSession: !!session,
-        isAuthenticated,
-        userId: user?.id,
-        userEmail: user?.email,
-        timestamp: new Date().toISOString()
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
       });
-    }
-  }, [location.pathname, session, isAuthenticated, user]);
-
-  // Check authentication status when the component mounts
-  useEffect(() => {
-    // Guard against supabase being undefined
-    if (!supabase || !supabase.auth) {
-      console.error("[App] Supabase client or auth is not available");
-      setIsCheckingAuth(false);
-      return;
-    }
-
-    console.log("[App] Setting up auth state change listener");
-    
-    try {
-      // Subscribe to authentication state changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log("[App] Auth state changed:", { 
-          event, 
-          sessionExists: !!session,
-          userId: session?.user?.id,
-          userEmail: session?.user?.email
-        });
-        
-        setIsCheckingAuth(false);
-        setIsAuthenticated(!!session);
-        
-        // When user is signed in and event is SIGNED_IN, redirect to dashboard
-        if (event === 'SIGNED_IN' && session) {
-          console.log("[App] User is signed in, redirecting to dashboard");
-          navigate("/dashboard", { replace: true });
-        } else if (event === 'SIGNED_OUT') {
-          console.log("[App] User signed out, redirecting to login");
-          navigate("/login", { replace: true });
-        }
-      });
-
-      // Initial check for existing session
-      const checkSession = async () => {
-        try {
-          const { data } = await supabase.auth.getSession();
-          console.log("[App] Initial session check:", { 
-            hasSession: !!data.session,
-            userId: data.session?.user.id,
-            userEmail: data.session?.user.email 
-          });
-          setIsAuthenticated(!!data.session);
-          setIsCheckingAuth(false);
-        } catch (error) {
-          console.error("[App] Error checking session:", error);
-          setIsCheckingAuth(false);
-        }
-      };
       
-      checkSession();
-
-      // Clean up the subscription when the component unmounts
-      return () => {
-        console.log("[App] Cleaning up auth state change listener");
-        subscription?.unsubscribe?.();
-      };
-    } catch (error) {
-      console.error("[App] Error setting up auth listener:", error);
-      setIsCheckingAuth(false);
-    }
-  }, [supabase, navigate]); // Add navigate to dependency array
-
-  // Component to protect routes that require authentication
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    // Enhanced logging for protected route access
-    console.log("[ProtectedRoute] Checking auth:", { 
-      isAuthenticated, 
-      isCheckingAuth,
-      path: location.pathname,
-      userId: user?.id,
-      timestamp: new Date().toISOString()
+      // If we have a session, run a diagnostic check
+      if (session) {
+        checkAuthState().then(state => {
+          console.info("[App] Auth diagnostic check:", state);
+        });
+      }
     });
-    
-    // If checking auth, show loading state or nothing
-    if (isCheckingAuth) {
-      return <div className="flex items-center justify-center h-screen">Loading...</div>;
-    }
-    
-    // If not authenticated, redirect to login
-    if (!isAuthenticated) {
-      console.log("[ProtectedRoute] User not authenticated, redirecting to login");
-      return <Navigate to="/login" replace />;
-    }
 
-    // If authenticated, render the children
-    console.log("[ProtectedRoute] User is authenticated, rendering protected content");
-    return <>{children}</>;
-  };
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.info("[App] Auth state changed:", {
+        event: _event,
+        sessionExists: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
+      });
+      setSession(session);
+      
+      // Run diagnostic check on auth changes
+      if (session) {
+        checkAuthState().then(state => {
+          console.info("[App] Auth state change diagnostic:", state);
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Toast container for notifications */}
-      <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
-      
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/join/:inviteCode?" element={<JoinPage />} />
-        
-        <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
-        
-        {/* Protected dashboard routes */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Header onOpenSettings={handleOpenSettings} />
-              <div className="flex flex-1 overflow-hidden">
-                <Sidebar onOpenSettings={handleOpenSettings} />
-                <MainContent />
-              </div>
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<HomePage />} />
-          <Route path="events" element={<CalendarPage />} />
-          <Route path="safety" element={<SafetyPage />} />
-          <Route path="care" element={<CarePage />} />
-          <Route path="goods" element={<GoodsPage />} />
-          <Route path="skills" element={<SkillsPage />} />
-          <Route path="neighbors" element={<NeighborsPage />} />
-        </Route>
-        
-        {/* Redirect routes for easy access */}
-        <Route path="/events" element={<Navigate to="/dashboard/events" replace />} />
-        <Route path="/safety" element={<Navigate to="/dashboard/safety" replace />} />
-        <Route path="/care" element={<Navigate to="/dashboard/care" replace />} />
-        <Route path="/goods" element={<Navigate to="/dashboard/goods" replace />} />
-        <Route path="/skills" element={<Navigate to="/dashboard/skills" replace />} />
-        <Route path="/neighbors" element={<Navigate to="/dashboard/neighbors" replace />} />
-      </Routes>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <NeighborhoodProvider>
+        <Router>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/join" element={<JoinPage />} />
+
+            {/* Protected routes */}
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
+            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+            <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+            <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+            <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+
+            {/* Default to Index */}
+            <Route path="*" element={<Index />} />
+          </Routes>
+        </Router>
+        <Toaster position="top-center" />
+      </NeighborhoodProvider>
+    </QueryClientProvider>
   );
 }
 

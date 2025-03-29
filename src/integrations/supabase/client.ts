@@ -12,12 +12,32 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 }
 
 // Create and export the Supabase client
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(
+  SUPABASE_URL, 
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
+);
 
 // Add validation check to ensure client was created correctly
 if (!supabase || !supabase.auth || !supabase.rpc) {
   console.error("Supabase client initialization failed. Check your environment variables and network connection.");
 }
+
+// Check auth state and log it for debugging
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log("[Supabase Client] Auth state changed:", {
+    event,
+    hasSession: !!session,
+    userId: session?.user?.id,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Export it for use throughout the application
 // Import the supabase client like this:
