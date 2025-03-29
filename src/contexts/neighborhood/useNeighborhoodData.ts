@@ -106,6 +106,8 @@ export function useNeighborhoodData(user: User | null) {
             neighborhood: neighborhoods[0]
           });
           setCurrentNeighborhood(neighborhoods[0]);
+          setIsLoading(false);
+          return;
         }
       }
 
@@ -114,7 +116,11 @@ export function useNeighborhoodData(user: User | null) {
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
       if (createdError) {
-        console.warn("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
+        console.warn("[useNeighborhoodData] Error checking created neighborhoods:", {
+          error: createdError,
+          message: createdError.message,
+          userId: user.id
+        });
       }
       
       // If user created a neighborhood, use it
@@ -150,6 +156,43 @@ export function useNeighborhoodData(user: User | null) {
       }
       
       console.log(`[useNeighborhoodData] Found ${neighborhoods.length} neighborhoods, checking membership (attempt ${currentAttempt})`);
+      
+      // Debug: Print all neighborhood IDs being checked
+      console.log("[useNeighborhoodData] All neighborhood IDs:", neighborhoods.map(n => n.id));
+
+      // Add direct database check for membership as a fallback
+      console.log(`[useNeighborhoodData] Performing direct membership check for user ${user.id}`);
+      try {
+        const { data: directMemberships, error: directError } = await supabase
+          .from('neighborhood_members')
+          .select('neighborhood_id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+          
+        if (directError) {
+          console.error("[useNeighborhoodData] Error in direct membership check:", directError);
+        } else {
+          console.log("[useNeighborhoodData] Direct membership check results:", {
+            count: directMemberships?.length || 0,
+            memberships: directMemberships
+          });
+          
+          // If we found direct memberships, use the first one
+          if (directMemberships && directMemberships.length > 0) {
+            const directNeighborhoodId = directMemberships[0].neighborhood_id;
+            const directNeighborhood = neighborhoods.find(n => n.id === directNeighborhoodId);
+            
+            if (directNeighborhood) {
+              console.log("[useNeighborhoodData] Found neighborhood via direct check:", directNeighborhood);
+              setCurrentNeighborhood(directNeighborhood);
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+      } catch (directErr) {
+        console.error("[useNeighborhoodData] Exception in direct membership check:", directErr);
+      }
       
       // For each neighborhood, check if user is a member using our safe function
       for (const neighborhood of neighborhoods) {
@@ -195,6 +238,8 @@ export function useNeighborhoodData(user: User | null) {
       // Handle unexpected errors
       console.error("[useNeighborhoodData] Error fetching neighborhood:", {
         error: err,
+        errorMessage: err instanceof Error ? err.message : String(err),
+        errorStack: err instanceof Error ? err.stack : "No stack trace",
         userId: user?.id,
         fetchAttempt: currentAttempt
       });
