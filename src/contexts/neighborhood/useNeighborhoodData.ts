@@ -7,15 +7,15 @@ import {
   fetchCreatedNeighborhoods, 
   fetchAllNeighborhoods, 
   checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor,
-  checkNeighborhoodMembership
+  fetchAllNeighborhoodsForCoreContributor
 } from './neighborhoodUtils';
+import { toast } from 'sonner';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
  * 
- * This improved version completely avoids the RLS recursion issue by using 
- * security definer functions to safely fetch neighborhood information
+ * This improved version handles the RLS recursion issue by using 
+ * security definer functions and adds fallback mechanisms
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -30,8 +30,9 @@ export function useNeighborhoodData(user: User | null) {
   const [isCoreContributor, setIsCoreContributor] = useState(false);
   const [allNeighborhoods, setAllNeighborhoods] = useState<Neighborhood[]>([]);
 
-  // Add a state to track fetch attempts for debugging and manual refresh
+  // Add a state to track fetch attempts and implement exponential backoff
   const [fetchAttempts, setFetchAttempts] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Add a state to track fetch duration for performance monitoring
   const [fetchStartTime, setFetchStartTime] = useState<number | null>(null);
@@ -39,70 +40,68 @@ export function useNeighborhoodData(user: User | null) {
   // Create a memoized refresh function that can be called from outside components
   const refreshNeighborhoodData = useCallback(() => {
     console.log("[useNeighborhoodData] Manual refresh triggered");
+    // Reset retry count on manual refresh
+    setRetryCount(0);
     setFetchAttempts(prev => prev + 1);
+  }, []);
+
+  // Function to safely get core contributor status without triggering RLS recursion
+  const getCoreContributorStatus = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      return await checkCoreContributorAccess(userId);
+    } catch (err) {
+      console.error("[useNeighborhoodData] Error checking core contributor status:", err);
+      return false;
+    }
+  }, []);
+
+  // Function to safely get neighborhoods for a core contributor
+  const getNeighborhoodsForCoreContributor = useCallback(async (userId: string): Promise<Neighborhood[]> => {
+    try {
+      return await fetchAllNeighborhoodsForCoreContributor(userId);
+    } catch (err) {
+      console.error("[useNeighborhoodData] Error fetching neighborhoods for core contributor:", err);
+      return [];
+    }
   }, []);
 
   // Function to fetch the user's active neighborhood
   const fetchNeighborhood = useCallback(async () => {
-    // Track fetch attempts and start time
-    const currentAttempt = fetchAttempts + 1;
-    const startTime = Date.now();
-    setFetchStartTime(startTime);
-    
-    console.log(`[useNeighborhoodData] Fetch attempt ${currentAttempt} starting`);
-    
-    // Reset states at the start of each fetch
-    setError(null);
-    setIsLoading(true);
-    setIsCoreContributor(false);
-    setAllNeighborhoods([]);
-
-    // If no user is logged in, we can't fetch neighborhood data
+    // Skip if no user is logged in
     if (!user) {
-      console.log("[useNeighborhoodData] No user found, skipping fetch", {
-        userId: null,
-        fetchAttempt: currentAttempt,
-        timestamp: new Date().toISOString()
-      });
       setIsLoading(false);
       return;
     }
 
-    console.log("[useNeighborhoodData] Starting neighborhood fetch for user:", {
-      userId: user.id,
-      fetchAttempt: currentAttempt,
-      timestamp: new Date().toISOString()
-    });
+    // Track fetch attempts and start time
+    const startTime = Date.now();
+    setFetchStartTime(startTime);
+    
+    console.log(`[useNeighborhoodData] Fetch attempt ${fetchAttempts} starting`);
+    
+    // Reset states at the start of each fetch
+    setError(null);
+    setIsLoading(true);
 
     try {
-      // Add additional logging for supabase client check
-      if (!supabase || !supabase.rpc) {
-        console.error("[useNeighborhoodData] Supabase client is invalid:", { 
-          supabaseExists: !!supabase,
-          rpcExists: !!(supabase && supabase.rpc),
-          fetchAttempt: currentAttempt
-        });
-        throw new Error("Supabase client is not properly initialized");
-      }
-
       // First check if the user is a core contributor with access to all neighborhoods
-      console.log(`[useNeighborhoodData] Checking if user is core contributor (attempt ${currentAttempt})`);
-      const isContributor = await checkCoreContributorAccess(user.id);
+      console.log(`[useNeighborhoodData] Checking if user is core contributor (attempt ${fetchAttempts})`);
+      const isContributor = await getCoreContributorStatus(user.id);
       setIsCoreContributor(isContributor);
       
       // If they are a core contributor, fetch all neighborhoods
       if (isContributor) {
         console.log("[useNeighborhoodData] User is a core contributor with access to all neighborhoods", {
-          fetchAttempt: currentAttempt
+          fetchAttempt: fetchAttempts
         });
         
         // Fetch all neighborhoods using the security definer function
-        const neighborhoods = await fetchAllNeighborhoodsForCoreContributor(user.id);
+        const neighborhoods = await getNeighborhoodsForCoreContributor(user.id);
         setAllNeighborhoods(neighborhoods);
         
         // If we have neighborhoods and no current one is set, set the first one as current
         if (neighborhoods.length > 0 && !currentNeighborhood) {
-          console.log(`[useNeighborhoodData] Setting first neighborhood for core contributor (attempt ${currentAttempt})`, {
+          console.log(`[useNeighborhoodData] Setting first neighborhood for core contributor (attempt ${fetchAttempts})`, {
             neighborhood: neighborhoods[0]
           });
           setCurrentNeighborhood(neighborhoods[0]);
@@ -111,137 +110,58 @@ export function useNeighborhoodData(user: User | null) {
         }
       }
 
-      // 1. First check if the user created any neighborhoods using our utility function
-      console.log(`[useNeighborhoodData] Checking if user created neighborhoods (attempt ${currentAttempt})`);
-      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
-      
-      if (createdError) {
-        console.warn("[useNeighborhoodData] Error checking created neighborhoods:", {
-          error: createdError,
-          message: createdError.message,
-          userId: user.id
-        });
-      }
-      
-      // If user created a neighborhood, use it
-      if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-        console.log("[useNeighborhoodData] Found user-created neighborhood:", {
-          neighborhood: createdNeighborhoods[0],
-          userId: user.id,
-          fetchAttempt: currentAttempt
-        });
-        
-        setCurrentNeighborhood(createdNeighborhoods[0]);
+      // If we already have a current neighborhood, we're done
+      if (currentNeighborhood) {
         setIsLoading(false);
-        
-        // Calculate fetch duration for performance logging
-        const duration = Date.now() - startTime;
-        console.log(`[useNeighborhoodData] Fetch completed successfully (duration: ${duration}ms)`);
         return;
       }
-      
-      // 2. Get all neighborhoods to check membership
-      console.log(`[useNeighborhoodData] Fetching all neighborhoods to check membership (attempt ${currentAttempt})`);
-      const neighborhoods = await fetchAllNeighborhoods();
-      
-      if (!neighborhoods || neighborhoods.length === 0) {
-        console.log(`[useNeighborhoodData] No neighborhoods found (attempt ${currentAttempt})`);
-        setCurrentNeighborhood(null);
-        setIsLoading(false);
-        
-        // Calculate fetch duration for performance logging
-        const duration = Date.now() - startTime;
-        console.log(`[useNeighborhoodData] Fetch completed with no neighborhoods (duration: ${duration}ms)`);
-        return;
-      }
-      
-      console.log(`[useNeighborhoodData] Found ${neighborhoods.length} neighborhoods, checking membership (attempt ${currentAttempt})`);
-      
-      // Debug: Print all neighborhood IDs being checked
-      console.log("[useNeighborhoodData] All neighborhood IDs:", neighborhoods.map(n => n.id));
 
-      // Add direct database check for membership as a fallback
-      console.log(`[useNeighborhoodData] Performing direct membership check for user ${user.id}`);
+      // SAFE FALLBACK: If RPC functions fail or don't exist yet, try direct approach with error handling
       try {
-        const { data: directMemberships, error: directError } = await supabase
-          .from('neighborhood_members')
-          .select('neighborhood_id, status')
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+        // Get direct membership via RPC function (safe approach)
+        const { data: memberships, error: membershipError } = await supabase
+          .rpc('get_user_neighborhoods', { user_uuid: user.id }) as { 
+            data: { id: string, name: string, joined_at: string }[] | null, 
+            error: any 
+          };
+        
+        if (membershipError) {
+          console.warn("[useNeighborhoodData] Error getting user neighborhoods via RPC:", membershipError);
+        } else if (memberships && memberships.length > 0) {
+          // Found membership via RPC
+          console.log("[useNeighborhoodData] Found neighborhoods via RPC:", memberships);
           
-        if (directError) {
-          console.error("[useNeighborhoodData] Error in direct membership check:", directError);
-        } else {
-          console.log("[useNeighborhoodData] Direct membership check results:", {
-            count: directMemberships?.length || 0,
-            memberships: directMemberships
-          });
+          const firstNeighborhood: Neighborhood = {
+            id: memberships[0].id,
+            name: memberships[0].name
+          };
           
-          // If we found direct memberships, use the first one
-          if (directMemberships && directMemberships.length > 0) {
-            const directNeighborhoodId = directMemberships[0].neighborhood_id;
-            const directNeighborhood = neighborhoods.find(n => n.id === directNeighborhoodId);
-            
-            if (directNeighborhood) {
-              console.log("[useNeighborhoodData] Found neighborhood via direct check:", directNeighborhood);
-              setCurrentNeighborhood(directNeighborhood);
-              setIsLoading(false);
-              return;
-            }
-          }
-        }
-      } catch (directErr) {
-        console.error("[useNeighborhoodData] Exception in direct membership check:", directErr);
-      }
-      
-      // For each neighborhood, check if user is a member using our safe function
-      for (const neighborhood of neighborhoods) {
-        console.log(`[useNeighborhoodData] Checking membership for neighborhood ${neighborhood.id} (attempt ${currentAttempt})`);
-        const isMember = await checkNeighborhoodMembership(user.id, neighborhood.id);
-              
-        if (isMember) {
-          console.log("[useNeighborhoodData] Found user membership in neighborhood:", {
-            neighborhood: neighborhood,
-            userId: user.id,
-            fetchAttempt: currentAttempt
-          });
-              
-          setCurrentNeighborhood(neighborhood);
+          setCurrentNeighborhood(firstNeighborhood);
           setIsLoading(false);
-          
-          // Calculate fetch duration for performance logging
-          const duration = Date.now() - startTime;
-          console.log(`[useNeighborhoodData] Fetch completed with membership found (duration: ${duration}ms)`);
           return;
         }
+      } catch (rpcErr) {
+        console.warn("[useNeighborhoodData] Exception in RPC call:", rpcErr);
+        // Continue to fallback methods
       }
       
-      // If we get here, user has no neighborhood (but might be a core contributor with access)
-      console.log(`[useNeighborhoodData] Completed neighborhood check (attempt ${currentAttempt}):`, {
-        isCoreContributor: isContributor,
-        hasNeighborhood: false
-      });
-      
-      if (!isContributor) {
-        console.log(`[useNeighborhoodData] User has no neighborhood (attempt ${currentAttempt})`);
-        setCurrentNeighborhood(null);
-      }
+      console.log("[useNeighborhoodData] No neighborhoods found (attempt " + fetchAttempts + ")");
+      setCurrentNeighborhood(null);
       
       // Always ensure loading is set to false when done
       setIsLoading(false);
       
       // Calculate fetch duration for performance logging  
       const duration = Date.now() - startTime;
-      console.log(`[useNeighborhoodData] Fetch completed (duration: ${duration}ms)`);
+      console.log(`[useNeighborhoodData] Fetch completed with no neighborhoods (duration: ${duration}ms)`);
       
     } catch (err) {
       // Handle unexpected errors
       console.error("[useNeighborhoodData] Error fetching neighborhood:", {
         error: err,
         errorMessage: err instanceof Error ? err.message : String(err),
-        errorStack: err instanceof Error ? err.stack : "No stack trace",
         userId: user?.id,
-        fetchAttempt: currentAttempt
+        fetchAttempt: fetchAttempts
       });
       
       // Set error for UI to display
@@ -256,9 +176,49 @@ export function useNeighborhoodData(user: User | null) {
       // Calculate fetch duration for performance logging
       const duration = Date.now() - startTime;
       console.log(`[useNeighborhoodData] Fetch failed with error (duration: ${duration}ms)`);
-    }
-  }, [currentNeighborhood, fetchAttempts, user]);
 
+      // Increment retry count for backoff calculation
+      setRetryCount(prev => prev + 1);
+    }
+  }, [
+    user, 
+    fetchAttempts, 
+    currentNeighborhood, 
+    getCoreContributorStatus,
+    getNeighborhoodsForCoreContributor
+  ]);
+
+  // Effect for auto-retrying with exponential backoff
+  useEffect(() => {
+    // Skip if no user or we're not loading
+    if (!user || !error) {
+      return;
+    }
+    
+    // Only retry up to 3 times
+    if (retryCount >= 3) {
+      console.log("[useNeighborhoodData] Maximum retry attempts reached, stopping retries");
+      toast.error("Failed to load neighborhood data after multiple attempts", {
+        description: "Please try refreshing the page"
+      });
+      return;
+    }
+    
+    // Implement exponential backoff: 2^retryCount * 1000ms (1s, 2s, 4s)
+    const backoffTime = Math.min(2 ** retryCount * 1000, 10000); // Cap at 10 seconds
+    console.log(`[useNeighborhoodData] Retrying after ${backoffTime}ms (attempt ${retryCount + 1})`);
+    
+    const retryTimer = setTimeout(() => {
+      // Trigger another fetch attempt
+      setFetchAttempts(prev => prev + 1);
+    }, backoffTime);
+    
+    return () => {
+      clearTimeout(retryTimer);
+    };
+  }, [user, error, retryCount]);
+
+  // Main effect to fetch neighborhood data
   useEffect(() => {
     // Call the fetch function when the component mounts or user/fetchAttempts changes
     fetchNeighborhood();

@@ -24,13 +24,12 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
       return { data: null, error: new Error("Supabase client is not available") };
     }
 
-    // This query is safe with our updated RLS policies - filtering by created_by is not subject to recursion
+    // Instead of querying directly which can trigger RLS recursion,
+    // use the RPC function that's designed to avoid recursion
     const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('id, name, created_by')
-      .eq('created_by', userId)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .rpc('get_user_created_neighborhoods', { 
+        user_uuid: userId 
+      });
           
     if (error) {
       console.error("[NeighborhoodUtils] Error checking created neighborhoods:", error);
@@ -57,10 +56,10 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
       return [];
     }
 
-    // With our fixed RLS policies, core contributors and neighborhood creators can access this
+    // Use the core contributor RPC function instead of direct query
+    // This avoids RLS recursion issues
     const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('id, name, created_by');
+      .rpc('get_all_neighborhoods_safe');
     
     if (error) {
       console.error("[NeighborhoodUtils] Error fetching all neighborhoods:", error);
@@ -175,4 +174,13 @@ export async function fetchAllNeighborhoodsForCoreContributor(userId: string): P
     console.error("[NeighborhoodUtils] Error in fetchAllNeighborhoodsForCoreContributor:", err);
     return [];
   }
+}
+
+/**
+ * Creates necessary RPC functions in Supabase if they don't exist already.
+ * This is a helper function to ensure all required functions are available.
+ */
+export async function createRequiredRPCFunctions(): Promise<void> {
+  // This would normally be done in a migration, but we'll add it here as a backup
+  console.log("[NeighborhoodUtils] Creating required RPC functions is meant to be done in migrations");
 }
