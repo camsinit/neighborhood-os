@@ -1,3 +1,4 @@
+
 /**
  * Combined neighborhood utility exports
  * 
@@ -13,5 +14,5 @@ export * from './neighborhoodFetchUtils';
 
 // Export any other utility files
 
-// Maintaining backward compatibility with old imports
-export { createRequiredRPCFunctions } from './neighborhoodFetchUtils';
+// Remove the incorrect backward compatibility export that doesn't exist
+// This line was causing the error: export { createRequiredRPCFunctions } from './neighborhoodFetchUtils';
