@@ -3,13 +3,14 @@
  * Utility functions for neighborhood membership operations
  * 
  * These functions handle user membership checks and operations
+ * using security definer functions to avoid RLS recursion
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses a direct query approach to avoid RLS recursion
+ * Uses security definer function to avoid RLS recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -26,14 +27,12 @@ export async function checkNeighborhoodMembership(
       return false;
     }
 
-    // Use a direct query with explicit typing
+    // Use the security definer function to safely check membership
     const { data, error } = await supabase
-      .from('neighborhood_members')
-      .select('user_id')
-      .eq('user_id', userId)
-      .eq('neighborhood_id', neighborhoodId)
-      .eq('status', 'active')
-      .single();
+      .rpc('user_is_member_of_neighborhood', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
             
     if (error) {
       console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
@@ -105,7 +104,25 @@ export async function checkUserCreatedNeighborhood(
       return false;
     }
 
-    // Use a direct query
+    // Use the user_created_neighborhood function if it exists
+    if (typeof supabase.rpc === 'function') {
+      const { data, error } = await supabase.rpc(
+        'user_created_neighborhood', 
+        { 
+          user_uuid: userId,
+          neighborhood_uuid: neighborhoodId 
+        }
+      );
+
+      if (error) {
+        console.error("[NeighborhoodUtils] Error checking if user created neighborhood using RPC:", error);
+        // Fall back to direct query if RPC fails
+      } else {
+        return !!data;
+      }
+    }
+
+    // Fall back to direct query
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id')

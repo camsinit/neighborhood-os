@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborhood } from "@/contexts/neighborhood";
+import { fetchNeighborhoodMembers } from "@/contexts/neighborhood/utils/neighborhoodFetchUtils";
 
 /**
  * Custom hook that fetches users in the current neighborhood
@@ -94,16 +95,8 @@ export const useNeighborUsers = () => {
       
       try {
         // Get member IDs using the security definer function
-        const { data: memberIds, error: memberError } = await supabase
-          .rpc('get_neighborhood_members_safe', {
-            neighborhood_uuid: currentNeighborhood.id
-          });
+        const memberIds = await fetchNeighborhoodMembers(currentNeighborhood.id);
           
-        if (memberError) {
-          console.error("[useNeighborUsers] Error getting members:", memberError);
-          throw memberError;
-        }
-        
         // If no members found, return empty array
         if (!memberIds || memberIds.length === 0) {
           console.log("[useNeighborUsers] No members found, returning empty array");
