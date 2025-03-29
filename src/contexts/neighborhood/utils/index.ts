@@ -8,8 +8,13 @@
 // Export membership utilities
 export * from './neighborhoodMemberUtils';
 
-// Export core contributor utilities
-export * from './coreContributorUtils';
+// Import and re-export specific functions from coreContributorUtils
+// to avoid naming conflicts with neighborhoodFetchUtils
+import {
+  // We don't re-export these since they come from neighborhoodFetchUtils too
+  // checkCoreContributorAccess,
+  // fetchAllNeighborhoodsForCoreContributor
+} from './coreContributorUtils';
 
 // Export neighborhood fetch utilities
 export * from './neighborhoodFetchUtils';

@@ -23,7 +23,12 @@ const SafetyUpdates = () => {
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
-  const { data: updates, isLoading } = useSafetyUpdates();
+  
+  // Properly destructure data to ensure it's always an array we can work with
+  const { data: safetyUpdatesResponse, isLoading } = useSafetyUpdates();
+  // Extract the data array safely, ensuring it's always an array even if there's an error
+  const safetyUpdates = safetyUpdatesResponse?.data || [];
+  
   const user = useUser();
 
   // Set up auto-refresh for safety updates data
@@ -32,7 +37,8 @@ const SafetyUpdates = () => {
 
   useEffect(() => {
     const handleOpenSafetyDialog = (event: CustomEvent<{ id: string }>) => {
-      const update = updates?.find(u => u.id === event.detail.id);
+      // Now we're safely working with the array of updates
+      const update = safetyUpdates.find(u => u.id === event.detail.id);
       if (update) {
         setSelectedUpdate(update);
       }
@@ -43,7 +49,7 @@ const SafetyUpdates = () => {
     return () => {
       window.removeEventListener('opensafetyDialog', handleOpenSafetyDialog as EventListener);
     };
-  }, [updates]);
+  }, [safetyUpdates]); // Use the array directly
   
   return (
     <>
@@ -56,8 +62,9 @@ const SafetyUpdates = () => {
       </Button>
       
       <div className="bg-transparent">
+        {/* Pass the array directly - not the PostgrestResponse object */}
         <SafetyUpdatesList
-          updates={updates || []}
+          updates={safetyUpdates}
           isLoading={isLoading}
           onUpdateClick={setSelectedUpdate}
         />

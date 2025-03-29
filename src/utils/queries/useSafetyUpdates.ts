@@ -7,21 +7,14 @@ import { runWithAuthCheck } from "@/utils/authStateCheck";
 
 /**
  * Hook to fetch safety updates for the current neighborhood
- * With enhanced error logging for debugging RLS issues
+ * With enhanced error handling for TypeScript correctness and debugging RLS issues
  */
 export const useSafetyUpdates = () => {
   // Get the current user for auth context debugging
   const user = useUser();
   
-  // Get the current neighborhood ID - this will throw if none is selected
-  let neighborhoodId;
-  
-  try {
-    neighborhoodId = useCurrentNeighborhood();
-  } catch (error) {
-    console.error("[useSafetyUpdates] Failed to get neighborhood context:", error);
-    // We'll let the query run but it will likely fail due to RLS
-  }
+  // Get the current neighborhood ID - this will return null if none is selected
+  const neighborhoodId = useCurrentNeighborhood();
 
   return useQuery({
     queryKey: ['safety-updates', neighborhoodId],
@@ -51,7 +44,8 @@ export const useSafetyUpdates = () => {
         }, 'safety_updates_query');
       } catch (err) {
         console.error("[useSafetyUpdates] Unexpected error:", err);
-        throw err;
+        // Return an empty data structure to prevent errors
+        return { data: [], error: err instanceof Error ? err : new Error(String(err)) };
       }
     },
     enabled: !!neighborhoodId && !!user, // Only run query if we have BOTH a neighborhood ID AND authenticated user
