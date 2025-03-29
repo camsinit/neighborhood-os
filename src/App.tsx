@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -19,25 +20,19 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import WaitlistAdmin from './pages/WaitlistAdmin';
+import { checkAuthState } from './utils/authStateCheck';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
-/**
- * Create a Query Client with conservative settings
- * 
- * Using shorter staleTime and fewer retries to avoid request storms
- * when there are issues with permissions or database access
- */
+// Create a client
+// We're actually not using this one now - we're using the one from main.tsx
+// But we'll keep it for now to avoid breaking existing code
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Reduce retries to prevent hammering the server with failing requests
-      retry: 1,
-      // Keep cached data for 1 minute only to ensure freshness
-      staleTime: 1 * 60 * 1000,
-      // Add better error handling
-      onError: (error) => {
-        console.error("[QueryClient] Request failed:", error);
-      }
+      // Retry failed queries up to 2 times
+      retry: 2,
+      // Keep cached data for 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -45,72 +40,87 @@ const queryClient = new QueryClient({
 /**
  * Main Application Component
  * 
- * This component handles:
- * 1. Basic authentication state setup
- * 2. Providing context providers 
- * 3. Defining routes
- * 
- * Simplified to reduce startup complexity
+ * This component:
+ * 1. Sets up authentication state tracking
+ * 2. Provides the NeighborhoodProvider context
+ * 3. Defines all application routes
  */
 function App() {
-  // Track session state
+  // Track the user's authentication session
   const [session, setSession] = useState<Session | null>(null);
 
-  // Set up minimal auth state listener
+  // Set up auth state change listener when the app loads
   useEffect(() => {
-    console.log("[App] Setting up auth state listener");
+    console.info("[App] Setting up auth state change listener");
     
-    // Initial session check - keep this simple
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      console.log("[App] Initial auth check:", {
+      console.info("[App] Initial session check:", {
         hasSession: !!session,
-        userId: session?.user?.id
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
       });
+      
+      // If we have a session, run a diagnostic check
+      if (session) {
+        checkAuthState().then(state => {
+          console.info("[App] Auth diagnostic check:", state);
+        });
+      }
     });
 
-    // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[App] Auth state changed:", {
-        event,
-        hasSession: !!session,
-        userId: session?.user?.id
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.info("[App] Auth state changed:", {
+        event: _event,
+        sessionExists: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
       });
       setSession(session);
+      
+      // Run diagnostic check on auth changes
+      if (session) {
+        checkAuthState().then(state => {
+          console.info("[App] Auth state change diagnostic:", state);
+        });
+      }
     });
 
-    // Clean up subscription
     return () => subscription.unsubscribe();
   }, []);
 
+  // Moved SessionContextProvider here from main.tsx and wrapped it around Router
+  // This ensures we don't have nested Router components
   return (
     <SessionContextProvider supabaseClient={supabase}>
-      <QueryClientProvider client={queryClient}>
-        <NeighborhoodProvider>
-          <Router>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/join" element={<JoinPage />} />
+      <NeighborhoodProvider>
+        <Router>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/join" element={<JoinPage />} />
 
-              {/* Protected routes */}
-              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-              <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
-              <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
-              <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-              <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-              <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
-              <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+            {/* Protected routes */}
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
+            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+            <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+            <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+            <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
 
-              {/* Default to Index */}
-              <Route path="*" element={<Index />} />
-            </Routes>
-            <Toaster position="top-center" />
-          </Router>
-        </NeighborhoodProvider>
-      </QueryClientProvider>
+            {/* Default to Index */}
+            <Route path="*" element={<Index />} />
+          </Routes>
+          <Toaster position="top-center" />
+        </Router>
+      </NeighborhoodProvider>
     </SessionContextProvider>
   );
 }
