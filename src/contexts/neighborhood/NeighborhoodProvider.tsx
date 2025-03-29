@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { NeighborhoodContextType } from './types';
 import { useNeighborhoodData } from './useNeighborhoodData';
@@ -12,7 +12,7 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
   isCoreContributor: false,
   allNeighborhoods: [],
   setCurrentNeighborhood: () => {},
-  refreshNeighborhoodData: () => {} // Added default for refresh function
+  refreshNeighborhoodData: () => {} 
 });
 
 /**
@@ -28,40 +28,8 @@ export function NeighborhoodProvider({ children }: { children: React.ReactNode }
   // Get the current authenticated user
   const user = useUser();
   
-  // State to track authentication stabilizing
-  const [isAuthStable, setIsAuthStable] = useState(false);
-  
-  // Wait for auth to stabilize before fetching neighborhood data
-  useEffect(() => {
-    // If we have a definite user state (either logged in or definitely not logged in),
-    // mark auth as stable
-    if (user !== undefined) {
-      // Small delay to ensure auth is fully processed
-      const timer = setTimeout(() => {
-        setIsAuthStable(true);
-        console.log("[NeighborhoodProvider] Auth state stabilized:", { 
-          isLoggedIn: !!user, 
-          userId: user?.id
-        });
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [user]);
-  
-  // Use our custom hook to fetch and manage neighborhood data
-  const neighborhoodData = useNeighborhoodData(isAuthStable ? user : null);
-  
-  // Log provider state for debugging
-  useEffect(() => {
-    console.log("[NeighborhoodProvider] Current state:", {
-      isAuthStable,
-      hasUser: !!user,
-      userId: user?.id,
-      neighborhoodLoading: neighborhoodData.isLoading,
-      hasNeighborhood: !!neighborhoodData.currentNeighborhood
-    });
-  }, [isAuthStable, user, neighborhoodData]);
+  // Use our refactored hook to fetch and manage neighborhood data
+  const neighborhoodData = useNeighborhoodData(user);
 
   // Provide the context values to child components
   return (
