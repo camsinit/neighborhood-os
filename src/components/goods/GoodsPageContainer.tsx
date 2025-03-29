@@ -43,7 +43,7 @@ const GoodsPageContainer = () => {
   };
 
   return (
-    <div className="min-h-full w-full bg-white">
+    <div className="min-h-full w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           {/* Page header with title and action buttons */}

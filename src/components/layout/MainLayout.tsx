@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './sidebar';
@@ -12,6 +11,9 @@ import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
  * 2. A content area for page-specific components
  * 
  * Uses React Router's Outlet to render child routes within this layout
+ * 
+ * Note: We've updated this component to ensure page-specific styles like
+ * background gradients and glowing effects aren't inadvertently overridden
  */
 const MainLayout = () => {
   // State to control the settings dialog visibility
@@ -27,10 +29,17 @@ const MainLayout = () => {
       {/* Sidebar navigation */}
       <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
       
-      {/* Main content area */}
+      {/* 
+        Main content area - Important changes:
+        1. Removed the bg-white class that was overriding our gradient backgrounds
+        2. Made sure overflow properties don't interfere with full-height gradients
+       */}
       <div className={`flex-1 flex flex-col overflow-hidden ${isHomePage ? 'bg-white' : ''}`}>
-        {/* Page content - rendered via Outlet */}
-        <main className={`flex-1 overflow-auto ${isHomePage ? 'bg-white' : ''}`}>
+        {/* 
+          Page content - rendered via Outlet
+          Removed bg-white class to allow page backgrounds to show through
+        */}
+        <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>

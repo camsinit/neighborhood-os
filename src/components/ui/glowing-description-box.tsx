@@ -23,7 +23,7 @@ const GlowingDescriptionBox = ({
   colorClass,
   className 
 }: GlowingDescriptionBoxProps) => {
-  // Using a simple console log to verify the component is rendering with the correct colorClass
+  // Using a console log to help debug the rendering with the correct colorClass
   console.log(`Rendering GlowingDescriptionBox with color: ${colorClass}`);
   
   return (

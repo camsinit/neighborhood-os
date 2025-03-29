@@ -9,8 +9,8 @@ import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
  * The actual implementation has been moved to the GoodsPageContainer component
  * to keep this file clean and focused on routing concerns.
  * 
- * The GlowingDescriptionBox is used in the GoodsPageContainer to maintain
- * consistency with other feature pages.
+ * We've ensured the background gradient is properly applied with CSS variables
+ * and z-index management to make sure it shows beneath the content.
  */
 const GoodsPage = () => {
   return (
@@ -20,6 +20,8 @@ const GoodsPage = () => {
         Background gradient using the goods-color CSS variable
         The gradient starts with the section color at reduced opacity at the top
         and fades to completely transparent toward the bottom
+        
+        We ensure z-index is explicitly set to 0 to position behind content
       */}
       <div 
         className="absolute inset-0 pointer-events-none" 
@@ -30,7 +32,7 @@ const GoodsPage = () => {
         aria-hidden="true"
       />
       
-      {/* Content div placed above the gradient background */}
+      {/* Content div placed above the gradient background with explicit z-index */}
       <div className="relative z-10">
         <GoodsPageContainer />
       </div>
