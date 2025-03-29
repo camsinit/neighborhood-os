@@ -1,13 +1,13 @@
 
 /**
- * GodModeSelector component (DISABLED VERSION)
+ * GodModeSelector - DISABLED
  * 
- * This component has been entirely disabled and returns null.
- * It no longer provides any functionality.
+ * This component previously allowed core contributors to switch between neighborhoods
+ * but has been disabled as part of the core contributor functionality removal
  */
-
 const GodModeSelector = () => {
-  // Return null to render nothing
+  // This component has been disabled and returns null
+  console.log("[GodModeSelector] Component disabled");
   return null;
 };
 

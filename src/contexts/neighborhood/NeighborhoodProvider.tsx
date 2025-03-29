@@ -1,52 +1,64 @@
 
-import { createContext, useContext } from 'react';
-import { useUser } from '@supabase/auth-helpers-react';
-import { NeighborhoodContextType } from './types';
+/**
+ * Simplified Neighborhood Context Provider
+ * 
+ * This provider has been streamlined to remove core contributor functionality
+ * and work with the simplified database security model.
+ */
+import React, { createContext, useContext } from 'react';
+import { User } from '@supabase/supabase-js';
 import { useNeighborhoodData } from './useNeighborhoodData';
+import { Neighborhood, NeighborhoodContextType } from './types';
+import { useUser } from '@supabase/auth-helpers-react';
 
-// Create the context with default values - removed isCoreContributor and allNeighborhoods
+// Create the context with a default value
 const NeighborhoodContext = createContext<NeighborhoodContextType>({
   currentNeighborhood: null,
   isLoading: true,
   error: null,
   setCurrentNeighborhood: () => {},
-  refreshNeighborhoodData: () => {} 
+  refreshNeighborhoodData: () => {},
 });
 
 /**
- * NeighborhoodProvider component
- * 
- * This component fetches the user's active neighborhood membership
- * and provides it to all child components through the context.
- * Core contributor "God Mode" functionality has been removed.
- * 
- * @param children - Child components that will have access to the context
+ * Custom hook to access the neighborhood context
+ * @returns The neighborhood context
  */
-export function NeighborhoodProvider({ children }: { children: React.ReactNode }) {
+export const useNeighborhood = () => useContext(NeighborhoodContext);
+
+/**
+ * Neighborhood provider component
+ * 
+ * Manages neighborhood data and provides it to child components
+ */
+export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({ 
+  children 
+}) => {
   // Get the current authenticated user
   const user = useUser();
   
-  // Use our refactored hook to fetch and manage neighborhood data
-  const neighborhoodData = useNeighborhoodData(user);
+  // Initialize the neighborhood data hook
+  const { 
+    currentNeighborhood, 
+    isLoading, 
+    error,
+    setCurrentNeighborhood,
+    refreshNeighborhoodData,
+  } = useNeighborhoodData(user);
 
-  // Provide the context values to child components
+  // Create the context value with the simplified data model
+  const contextValue: NeighborhoodContextType = {
+    currentNeighborhood,
+    isLoading,
+    error,
+    setCurrentNeighborhood,
+    refreshNeighborhoodData,
+  };
+
   return (
-    <NeighborhoodContext.Provider value={neighborhoodData}>
+    <NeighborhoodContext.Provider value={contextValue}>
       {children}
     </NeighborhoodContext.Provider>
   );
-}
+};
 
-/**
- * useNeighborhood hook
- * 
- * A custom hook for consuming the NeighborhoodContext
- * Components can use this to access information about the user's neighborhood
- */
-export function useNeighborhood() {
-  const context = useContext(NeighborhoodContext);
-  if (context === undefined) {
-    throw new Error('useNeighborhood must be used within a NeighborhoodProvider');
-  }
-  return context;
-}

@@ -1,142 +1,119 @@
 
 /**
- * Neighborhood fetch utility functions
+ * Neighborhood fetching utilities
  * 
- * These utilities handle safe fetching of neighborhood data using
- * the security definer functions to avoid RLS recursion issues
+ * These utilities have been simplified to work without Row Level Security (RLS)
+ * and core contributor functionality.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
 
 /**
- * Fetch neighborhoods created by a user
+ * Fetch a specific neighborhood by ID
  * 
- * Uses a security definer function to safely get neighborhoods without RLS recursion
- * 
- * @param userId - The ID of the user to check
- * @returns Promise resolving to the user's created neighborhoods
+ * @param neighborhoodId The ID of the neighborhood to fetch
+ * @returns The neighborhood data or null if not found
  */
-export async function fetchCreatedNeighborhoods(userId: string) {
-  // This function fetches neighborhoods that were created by this user
+export const fetchNeighborhoodById = async (neighborhoodId: string): Promise<Neighborhood | null> => {
   try {
-    // Direct query - this is safe because the neighborhoods table has a policy for created_by
-    return await supabase
-      .from('neighborhoods')
-      .select('id, name')
-      .eq('created_by', userId);
+    console.log("[fetchNeighborhoodById] Fetching neighborhood:", neighborhoodId);
+    
+    // Simple direct query now that RLS is disabled
+    const { data, error } = await supabase
+      .from("neighborhoods")
+      .select("*")
+      .eq("id", neighborhoodId)
+      .single();
+    
+    if (error) {
+      console.error("[fetchNeighborhoodById] Error:", error.message);
+      return null;
+    }
+    
+    if (!data) {
+      console.log("[fetchNeighborhoodById] No neighborhood found with ID:", neighborhoodId);
+      return null;
+    }
+    
+    console.log("[fetchNeighborhoodById] Success, found neighborhood:", data.name);
+    
+    return {
+      id: data.id,
+      name: data.name,
+      created_by: data.created_by
+    };
   } catch (error) {
-    console.error("[NeighborhoodFetchUtils] Error fetching created neighborhoods:", error);
-    throw error;
+    console.error("[fetchNeighborhoodById] Unexpected error:", error);
+    return null;
   }
-}
+};
 
 /**
- * Check if a user is a core contributor with access to all neighborhoods
+ * Fetch neighborhood members
  * 
- * @param userId - The ID of the user to check
- * @returns Promise resolving to true if the user is a core contributor
+ * @param neighborhoodId The ID of the neighborhood to fetch members for
+ * @returns Array of member user IDs
  */
-export async function checkCoreContributorAccess(userId: string): Promise<boolean> {
+export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
   try {
-    // Use the new function we created in the migration
-    const { data, error } = await supabase.rpc(
-      'user_is_core_contributor_with_access',
-      { user_uuid: userId }
-    );
+    console.log("[fetchNeighborhoodMembers] Fetching members for:", neighborhoodId);
+    
+    // Direct query since RLS is disabled
+    const { data, error } = await supabase
+      .from("neighborhood_members")
+      .select("user_id")
+      .eq("neighborhood_id", neighborhoodId)
+      .eq("status", "active");
+    
+    if (error) {
+      console.error("[fetchNeighborhoodMembers] Error:", error.message);
+      return [];
+    }
+    
+    const memberIds = data.map(item => item.user_id);
+    console.log(`[fetchNeighborhoodMembers] Found ${memberIds.length} members`);
+    
+    return memberIds;
+  } catch (error) {
+    console.error("[fetchNeighborhoodMembers] Unexpected error:", error);
+    return [];
+  }
+};
 
-    if (error) throw error;
-    return !!data;
-  } catch (err) {
-    // Log error but don't halt execution
-    console.warn("[NeighborhoodFetchUtils] Error checking core contributor status:", err);
+/**
+ * Check if a user is a member of a neighborhood
+ * 
+ * @param userId The user ID to check
+ * @param neighborhoodId The neighborhood ID to check
+ * @returns Boolean indicating if the user is a member
+ */
+export const isUserMemberOfNeighborhood = async (userId: string, neighborhoodId: string): Promise<boolean> => {
+  if (!userId || !neighborhoodId) return false;
+  
+  try {
+    // Check if user is the creator
+    const { data: neighborhood, error: neighborhoodError } = await supabase
+      .from("neighborhoods")
+      .select("created_by")
+      .eq("id", neighborhoodId)
+      .single();
+      
+    if (neighborhood && neighborhood.created_by === userId) {
+      return true;
+    }
+    
+    // Check if user is a member
+    const { data, error } = await supabase
+      .from("neighborhood_members")
+      .select("id")
+      .eq("neighborhood_id", neighborhoodId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .limit(1);
+    
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("[isUserMemberOfNeighborhood] Error:", error);
     return false;
   }
-}
-
-/**
- * Fetch all neighborhoods (for core contributors)
- * 
- * This is safe because it uses a security definer function
- * 
- * @returns Promise resolving to all neighborhoods
- */
-export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
-  try {
-    const { data, error } = await supabase.rpc('get_all_neighborhoods_safe');
-    
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error("[NeighborhoodFetchUtils] Error fetching all neighborhoods:", err);
-    return [];
-  }
-}
-
-/**
- * Fetch all neighborhoods for a core contributor
- * 
- * @param userId - The ID of the core contributor
- * @returns Promise resolving to all neighborhoods if the user is a core contributor
- */
-export async function fetchAllNeighborhoodsForCoreContributor(
-  userId: string
-): Promise<Neighborhood[]> {
-  try {
-    const { data, error } = await supabase.rpc(
-      'get_all_neighborhoods_for_core_contributor',
-      { user_uuid: userId }
-    );
-    
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error("[NeighborhoodFetchUtils] Error fetching neighborhoods for core contributor:", err);
-    return [];
-  }
-}
-
-/**
- * Fetch members of a neighborhood
- * 
- * Uses a security definer function to avoid RLS recursion
- * 
- * @param neighborhoodId - The ID of the neighborhood
- * @returns Promise resolving to an array of user IDs
- */
-export async function fetchNeighborhoodMembers(neighborhoodId: string): Promise<string[]> {
-  try {
-    // Use our new simple member function from the migration
-    const { data, error } = await supabase.rpc(
-      'get_neighborhood_members_simple',
-      { neighborhood_uuid: neighborhoodId }
-    );
-    
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error("[NeighborhoodFetchUtils] Error fetching neighborhood members:", err);
-    return [];
-  }
-}
-
-/**
- * Get user's neighborhoods using the new simplified RPC function
- * 
- * @param userId - The ID of the user
- * @returns Promise resolving to the user's neighborhoods
- */
-export async function fetchUserNeighborhoods(userId: string): Promise<Neighborhood[]> {
-  try {
-    // Use our new simple neighborhood function from the migration
-    const { data, error } = await supabase.rpc(
-      'get_user_neighborhoods_simple',
-      { user_uuid: userId }
-    );
-    
-    if (error) throw error;
-    return data || [];
-  } catch (err) {
-    console.error("[NeighborhoodFetchUtils] Error fetching user neighborhoods:", err);
-    return [];
-  }
-}
+};

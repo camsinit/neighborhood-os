@@ -1,79 +1,49 @@
 
 /**
- * Auth state checking utilities
+ * Authentication state checking utilities
  * 
- * These functions help diagnose authentication state issues
+ * Simplified to work with the direct data access model without RLS
  */
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+type QueryFunction<T> = () => Promise<T>;
 
 /**
- * Check the current authentication context
+ * Run a query with auth check to handle missing auth context
  * 
- * This is useful for diagnosing RLS-related issues
- * 
- * @param context - Optional context name for logging
- * @returns Promise resolving to an object with auth state information
+ * @param queryFn Function that performs the actual Supabase query
+ * @param operationName Name of the operation (for logging)
+ * @returns The query result
  */
-export async function checkAuthState(context: string = 'general') {
+export const runWithAuthCheck = async <T>(
+  queryFn: QueryFunction<T>, 
+  operationName = 'query'
+): Promise<T> => {
   try {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // Check context by attempting a simple query on the auth_users_view
-    const { data: authContext, error: authError } = await supabase
+    // First check if auth context is available
+    const { data: authCheck, error: authError } = await supabase
       .from('auth_users_view')
       .select('id')
       .limit(1);
+      
+    if (authError) {
+      console.warn(`[${operationName}] Auth check failed:`, authError);
+      
+      // Try refreshing the session if auth check fails
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error(`[${operationName}] Could not refresh session:`, refreshError);
+        toast.error("Authentication error. Try refreshing the page.");
+        throw new Error("Authentication context lost");
+      }
+    }
     
-    const state = {
-      context,
-      hasUser: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      hasAuthContext: !!authContext,
-      authContextError: authError ? authError.message : null,
-      timestamp: new Date().toISOString()
-    };
-    
-    console.info("[AuthStateCheck]", state);
-    return state;
+    // If we get here, auth should be good - run the actual query
+    return await queryFn();
   } catch (error) {
-    console.error("[AuthStateCheck] Error checking auth state:", error);
-    return { 
-      context, 
-      error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date().toISOString() 
-    };
-  }
-}
-
-/**
- * Run a function with authentication context checking
- * 
- * This wraps a function with auth state checking before and after
- * to help diagnose RLS issues
- * 
- * @param fn - The function to run
- * @param context - Context name for logging
- * @returns Result of the function
- */
-export async function runWithAuthCheck<T>(
-  fn: () => Promise<T>,
-  context: string
-): Promise<T> {
-  try {
-    // Check auth state before function
-    await checkAuthState(`${context}-before`);
-    
-    // Run the function
-    const result = await fn();
-    
-    // Check auth state after function
-    await checkAuthState(`${context}-after`);
-    
-    return result;
-  } catch (error) {
-    console.error(`[${context}] Error with auth check:`, error);
+    console.error(`[${operationName}] Query failed:`, error);
     throw error;
   }
-}
+};
