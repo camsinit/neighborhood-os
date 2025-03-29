@@ -27,12 +27,29 @@ export async function checkNeighborhoodMembership(
       return false;
     }
 
-    // Use the security definer function to safely check membership
+    // First try using the existing "user_is_neighborhood_member" RPC
+    try {
+      const { data, error } = await supabase
+        .rpc('user_is_neighborhood_member', {
+          user_uuid: userId,
+          neighborhood_uuid: neighborhoodId
+        });
+              
+      if (!error) {
+        return !!data;
+      }
+    } catch (rpcErr) {
+      console.warn("[NeighborhoodUtils] RPC user_is_neighborhood_member failed:", rpcErr);
+    }
+    
+    // Fall back to direct query with RLS
     const { data, error } = await supabase
-      .rpc('user_is_member_of_neighborhood', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
+      .from('neighborhood_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active')
+      .maybeSingle();
             
     if (error) {
       console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
@@ -104,8 +121,8 @@ export async function checkUserCreatedNeighborhood(
       return false;
     }
 
-    // Use the user_created_neighborhood function if it exists
-    if (typeof supabase.rpc === 'function') {
+    // Try using the user_created_neighborhood function if available
+    try {
       const { data, error } = await supabase.rpc(
         'user_created_neighborhood', 
         { 
@@ -114,12 +131,11 @@ export async function checkUserCreatedNeighborhood(
         }
       );
 
-      if (error) {
-        console.error("[NeighborhoodUtils] Error checking if user created neighborhood using RPC:", error);
-        // Fall back to direct query if RPC fails
-      } else {
+      if (!error) {
         return !!data;
       }
+    } catch (rpcErr) {
+      console.warn("[NeighborhoodUtils] RPC user_created_neighborhood failed:", rpcErr);
     }
 
     // Fall back to direct query

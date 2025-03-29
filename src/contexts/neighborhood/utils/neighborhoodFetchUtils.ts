@@ -56,18 +56,18 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
       return [];
     }
 
-    // Try to use the get_all_neighborhoods_safe RPC function if it exists
-    if (typeof supabase.rpc === 'function') {
-      try {
-        const { data, error } = await supabase.rpc('get_all_neighborhoods_safe');
-        
-        if (!error && data) {
-          return data as Neighborhood[];
-        }
-        // If RPC fails, fall back to direct query
-      } catch (rpcErr) {
-        console.warn("[NeighborhoodUtils] RPC function not available, falling back to direct query:", rpcErr);
+    // First, try to use the get_all_neighborhoods_for_core_contributor function
+    try {
+      const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
+        await supabase.rpc('get_all_neighborhoods_for_core_contributor', {
+          user_uuid: supabase.auth.getUser().then(res => res.data.user?.id) || ''
+        });
+      
+      if (!allNeighborhoodsError && allNeighborhoodsData) {
+        return allNeighborhoodsData as Neighborhood[];
       }
+    } catch (rpcErr) {
+      console.warn("[NeighborhoodUtils] RPC function get_all_neighborhoods_for_core_contributor failed, falling back:", rpcErr);
     }
 
     // Fall back to direct query
@@ -110,38 +110,35 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
     }
     
     // If no created neighborhoods, try to get neighborhoods via the get_user_neighborhoods RPC function
-    if (typeof supabase.rpc === 'function') {
-      try {
-        const { data, error } = await supabase.rpc(
-          'get_user_neighborhoods',
-          { user_uuid: userId }
-        );
-        
-        if (error) {
-          console.error("[NeighborhoodUtils] Error fetching user neighborhoods via RPC:", error);
-        } else if (data) {
-          return data as Neighborhood[];
-        }
-      } catch (rpcErr) {
-        console.warn("[NeighborhoodUtils] RPC function not available:", rpcErr);
+    try {
+      const { data: userNeighborhoods, error: userNeighborhoodsError } = 
+        await supabase.rpc('get_user_neighborhoods', { 
+          user_uuid: userId 
+        });
+      
+      if (!userNeighborhoodsError && userNeighborhoods) {
+        return userNeighborhoods as Neighborhood[];
       }
+    } catch (rpcErr) {
+      console.warn("[NeighborhoodUtils] RPC function get_user_neighborhoods failed:", rpcErr);
     }
     
     // As a last resort, try direct query to neighborhood_members
     console.log("[NeighborhoodUtils] Falling back to direct query for user neighborhoods");
     
-    // Use the get_user_neighborhood_memberships function which is safer
+    // Direct query to find memberships
     const { data: memberships, error: membershipError } = await supabase
-      .rpc('get_user_neighborhood_memberships', { 
-        user_uuid: userId 
-      });
+      .from('neighborhood_members')
+      .select('neighborhood_id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
       
     if (membershipError) {
       console.error("[NeighborhoodUtils] Error fetching user memberships:", membershipError);
       return [];
     }
     
-    if (!memberships || !Array.isArray(memberships) || memberships.length === 0) {
+    if (!memberships || memberships.length === 0) {
       return [];
     }
     
@@ -166,7 +163,7 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
 }
 
 /**
- * Fetch neighborhood members using the security definer function to avoid RLS recursion
+ * Fetch neighborhood members using direct query to avoid RLS recursion
  * 
  * @param neighborhoodId - The ID of the neighborhood to get members for
  * @returns Promise that resolves to an array of user IDs
@@ -179,18 +176,33 @@ export async function fetchNeighborhoodMembers(neighborhoodId: string): Promise<
       return [];
     }
     
-    // Use the get_neighborhood_members_by_neighborhood function to safely get members
+    // First try using the get_neighborhood_members function
+    try {
+      const { data: memberIds, error: membersError } = 
+        await supabase.rpc('get_neighborhood_members', {
+          neighborhood_uuid: neighborhoodId
+        });
+      
+      if (!membersError && memberIds) {
+        return Array.isArray(memberIds) ? memberIds : [];
+      }
+    } catch (rpcErr) {
+      console.warn("[NeighborhoodUtils] RPC function get_neighborhood_members failed:", rpcErr);
+    }
+    
+    // Fall back to direct query
     const { data, error } = await supabase
-      .rpc('get_neighborhood_members_by_neighborhood', {
-        neighborhood_uuid: neighborhoodId
-      });
+      .from('neighborhood_members')
+      .select('user_id')
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active');
     
     if (error) {
       console.error("[NeighborhoodUtils] Error fetching neighborhood members:", error);
       return [];
     }
     
-    return data || [];
+    return data.map(member => member.user_id);
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in fetchNeighborhoodMembers:", err);
     return [];
