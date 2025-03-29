@@ -19,20 +19,9 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   error: Error | null;
 }> => {
   try {
-    // Try using the RPC function first if available
-    try {
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc("get_user_created_neighborhoods", { user_uuid: userId });
-        
-      if (!rpcError && rpcData) {
-        console.log(`[fetchCreatedNeighborhoods] Successfully fetched ${rpcData.length || 0} created neighborhoods via RPC`);
-        return { data: rpcData as Neighborhood[], error: null };
-      }
-    } catch (rpcErr) {
-      console.warn("[fetchCreatedNeighborhoods] RPC function not available, falling back to direct query");
-    }
+    // Try direct query with the user_created_neighborhood function to avoid recursion
+    console.log(`[fetchCreatedNeighborhoods] Fetching neighborhoods created by user ${userId}`);
     
-    // Fall back to the direct query with simplified logic
     const { data, error } = await supabase
       .from("neighborhoods")
       .select("id, name, created_by")
