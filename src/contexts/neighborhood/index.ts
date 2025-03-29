@@ -13,4 +13,5 @@ export { NeighborhoodProvider, useNeighborhood } from './NeighborhoodProvider';
 export type { Neighborhood, NeighborhoodContextType } from './types';
 
 // Export utility functions for direct access if needed
-export * from './neighborhoodUtils';
+export * from './utils';
+

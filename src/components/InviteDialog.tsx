@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -21,7 +20,7 @@ import {
   fetchCreatedNeighborhoods, 
   fetchAllNeighborhoods, 
   checkCoreContributorAccess
-} from "@/contexts/neighborhood/neighborhoodUtils";
+} from "@/contexts/neighborhood/utils";
 
 /**
  * InviteDialog Component

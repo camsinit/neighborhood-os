@@ -1,4 +1,3 @@
-
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
