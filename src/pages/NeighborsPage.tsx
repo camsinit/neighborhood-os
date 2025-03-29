@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
-import { Search, Users, RefreshCw } from "lucide-react"; 
+import { Search, Users, RefreshCw } from "lucide-react";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -19,12 +18,17 @@ import { toast } from "@/components/ui/use-toast";
 const NeighborsPage = () => {
   // State for the search functionality
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // State to handle manual refreshing
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   // Get neighborhood context and navigation
-  const { currentNeighborhood, isLoading, error, refreshNeighborhoodData } = useNeighborhood();
+  const {
+    currentNeighborhood,
+    isLoading,
+    error,
+    refreshNeighborhoodData
+  } = useNeighborhood();
   const navigate = useNavigate();
 
   // Add debugging logs
@@ -47,8 +51,10 @@ const NeighborsPage = () => {
           const neighborCard = document.querySelector(`[data-neighbor-id="${e.detail.id}"]`);
           if (neighborCard) {
             neighborCard.classList.add('rainbow-highlight');
-            neighborCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
+            neighborCard.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
             setTimeout(() => {
               neighborCard.classList.remove('rainbow-highlight');
             }, 2000);
@@ -56,7 +62,6 @@ const NeighborsPage = () => {
         }, 100);
       }
     };
-
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
@@ -67,16 +72,16 @@ const NeighborsPage = () => {
   const handleRefresh = () => {
     // Set refreshing state to show loading indicator
     setIsRefreshing(true);
-    
+
     // Show toast to notify user
     toast({
       title: "Refreshing...",
       description: "Updating your neighborhood information"
     });
-    
+
     // Use our new refresh function from the context
     refreshNeighborhoodData();
-    
+
     // Reset refreshing state after a delay
     setTimeout(() => {
       setIsRefreshing(false);
@@ -85,8 +90,7 @@ const NeighborsPage = () => {
 
   // Show loading state while fetching neighborhood data
   if (isLoading) {
-    return (
-      <div className="min-h-full w-full flex flex-col items-center justify-center p-8">
+    return <div className="min-h-full w-full flex flex-col items-center justify-center p-8">
         <LoadingSpinner />
         <p className="mt-4 text-gray-600 text-center">
           Loading your neighborhood information...
@@ -96,22 +100,16 @@ const NeighborsPage = () => {
         </p>
         
         {/* Add a button to retry after some time */}
-        <Button 
-          variant="outline" 
-          onClick={handleRefresh}
-          className="mt-6"
-        >
+        <Button variant="outline" onClick={handleRefresh} className="mt-6">
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
-      </div>
-    );
+      </div>;
   }
 
   // SIMPLIFIED: More helpful UI when no neighborhood is found
   if (error || !currentNeighborhood) {
-    return (
-      <div className="min-h-full w-full flex items-center justify-center p-4">
+    return <div className="min-h-full w-full flex items-center justify-center p-4">
         <Card className="p-6 max-w-md w-full">
           <CardHeader className="text-center">
             <div className="mx-auto bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-2">
@@ -119,14 +117,10 @@ const NeighborsPage = () => {
             </div>
             <CardTitle className="text-2xl">No Neighborhood Found</CardTitle>
             <CardDescription className="text-gray-600">
-              {error ? (
-                <>
+              {error ? <>
                   There was an error loading your neighborhood data. 
                   {error.message.includes("RLS") ? " This appears to be a permission issue." : ""}
-                </>
-              ) : (
-                "You aren't currently part of any neighborhood community."
-              )}
+                </> : "You aren't currently part of any neighborhood community."}
             </CardDescription>
           </CardHeader>
           
@@ -143,59 +137,31 @@ const NeighborsPage = () => {
                   Go to Home Page
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  onClick={handleRefresh}
-                  className="w-full"
-                  disabled={isRefreshing}
-                >
-                  {isRefreshing ? (
-                    <>
+                <Button variant="outline" onClick={handleRefresh} className="w-full" disabled={isRefreshing}>
+                  {isRefreshing ? <>
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                       Refreshing...
-                    </>
-                  ) : (
-                    <>
+                    </> : <>
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Try Again
-                    </>
-                  )}
+                    </>}
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
 
   // User has a neighborhood, show the neighbors directory with enhanced UI
-  return (
-    <div className="min-h-full w-full bg-gradient-to-b from-[#D3E4FD] to-white">
+  return <div className="min-h-full w-full bg-gradient-to-b from-[#D3E4FD] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
             
             {/* Add refresh button */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-            >
-              {isRefreshing ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Refreshing...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh
-                </>
-              )}
-            </Button>
+            
           </div>
           
           <div className="bg-white rounded-lg p-4 mt-2 mb-6 shadow-md">
@@ -215,13 +181,7 @@ const NeighborsPage = () => {
           <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">
               <div className="relative w-[280px]">
-                <Input
-                  type="text"
-                  placeholder="Search neighbors..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+                <Input type="text" placeholder="Search neighbors..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               </div>
             </div>
@@ -230,8 +190,6 @@ const NeighborsPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default NeighborsPage;
