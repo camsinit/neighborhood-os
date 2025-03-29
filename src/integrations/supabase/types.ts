@@ -1154,6 +1154,20 @@ export type Database = {
           zip: string | null
         }[]
       }
+      get_all_neighborhoods_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string
+          geo_boundary: Json | null
+          id: string
+          name: string
+          state: string | null
+          zip: string | null
+        }[]
+      }
       get_neighborhood_members: {
         Args: {
           neighborhood_uuid: string
@@ -1172,6 +1186,17 @@ export type Database = {
         }
         Returns: string
       }
+      get_user_neighborhood_memberships: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: {
+          neighborhood_id: string
+          user_id: string
+          status: string
+          joined_at: string
+        }[]
+      }
       get_user_neighborhoods: {
         Args: {
           user_uuid: string
@@ -1181,6 +1206,12 @@ export type Database = {
           name: string
           joined_at: string
         }[]
+      }
+      is_super_admin: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: boolean
       }
       is_user_in_neighborhood: {
         Args: {

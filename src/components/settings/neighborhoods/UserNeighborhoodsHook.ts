@@ -64,13 +64,13 @@ export const useUserNeighborhoods = () => {
       }
 
       // Add the user as a member using RPC function
-      // NOTE: We need to use explicit typing because TypeScript doesn't include our custom RPC functions
+      // Using explicit type casting for our custom RPC function
       const {
         error: addError
-      } = (await supabase.rpc('add_neighborhood_member', {
+      } = await supabase.rpc('add_neighborhood_member', {
         user_uuid: userId,
         neighborhood_uuid: neighborhoodId
-      })) as {
+      }) as {
         data: boolean | null;
         error: Error | null;
       };
@@ -127,13 +127,13 @@ export const useUserNeighborhoods = () => {
       }
 
       // Call RPC function that safely checks membership
-      // This avoids the RLS recursion issue
+      // Using explicit type casting for our custom RPC function
       const {
         data: membershipData,
         error: membershipError
-      } = (await supabase.rpc('get_user_neighborhoods', {
+      } = await supabase.rpc('get_user_neighborhoods', {
         user_uuid: user.id
-      })) as {
+      }) as {
         data: Neighborhood[] | null;
         error: Error | null;
       };
@@ -147,9 +147,10 @@ export const useUserNeighborhoods = () => {
       } else {
         setNeighborhoods([]);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("[UserNeighborhoods] Error fetching neighborhoods:", err);
-      setError("Failed to load your neighborhoods");
+      setError(err instanceof Error ? err.message : "Failed to load your neighborhoods");
+      toast.error("Failed to load your neighborhoods");
     } finally {
       setIsLoading(false);
     }

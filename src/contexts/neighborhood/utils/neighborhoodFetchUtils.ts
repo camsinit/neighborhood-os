@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for fetching neighborhood data
  * 
@@ -25,10 +26,11 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
 
     // First try using the get_user_created_neighborhoods function
     try {
+      // Use explicit type casting since TypeScript doesn't know about our custom function
       const { data: neighborhoods, error: rpcError } = await supabase.rpc(
         'get_user_created_neighborhoods',
         { user_uuid: userId }
-      );
+      ) as { data: any, error: any };
       
       if (!rpcError) {
         return { data: neighborhoods as Neighborhood[], error: null };
@@ -71,8 +73,12 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
 
     // First, try to use the get_all_neighborhoods_safe RPC function
     try {
+      // Use explicit type casting for our custom RPC function
       const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
-        await supabase.rpc('get_all_neighborhoods_safe');
+        await supabase.rpc('get_all_neighborhoods_safe') as {
+          data: any,
+          error: any
+        };
       
       if (!allNeighborhoodsError && allNeighborhoodsData) {
         return allNeighborhoodsData as Neighborhood[];
@@ -89,10 +95,14 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
     // Try the core contributor function with the user ID
     if (userId) {
       try {
+        // Use explicit type casting for our custom RPC function
         const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
           await supabase.rpc('get_all_neighborhoods_for_core_contributor', {
             user_uuid: userId // Now passing a string, not a Promise
-          });
+          }) as {
+            data: any,
+            error: any
+          };
         
         if (!allNeighborhoodsError && allNeighborhoodsData) {
           return allNeighborhoodsData as Neighborhood[];
@@ -143,10 +153,14 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
     
     // If no created neighborhoods, try to get neighborhoods via the RPC function
     try {
+      // Use explicit type casting for our custom RPC function
       const { data: userNeighborhoods, error: userNeighborhoodsError } = 
         await supabase.rpc('get_user_neighborhoods', { 
           user_uuid: userId 
-        });
+        }) as {
+          data: any,
+          error: any
+        };
       
       if (!userNeighborhoodsError && userNeighborhoods) {
         return userNeighborhoods as Neighborhood[];
@@ -163,7 +177,10 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
       const { data: memberships, error: membershipError } = await supabase.rpc(
         'get_user_neighborhood_memberships',
         { user_uuid: userId }
-      );
+      ) as {
+        data: any,
+        error: any
+      };
     
       if (membershipError) {
         console.error("[NeighborhoodUtils] Error fetching user memberships via RPC:", membershipError);
@@ -244,10 +261,14 @@ export async function fetchNeighborhoodMembers(neighborhoodId: string): Promise<
     
     // First try using the get_neighborhood_members RPC function
     try {
+      // Use explicit type casting for our custom RPC function
       const { data: memberIds, error: membersError } = 
         await supabase.rpc('get_neighborhood_members_safe', {
           neighborhood_uuid: neighborhoodId
-        });
+        }) as {
+          data: any,
+          error: any
+        };
       
       if (!membersError && memberIds) {
         return Array.isArray(memberIds) ? memberIds : [];

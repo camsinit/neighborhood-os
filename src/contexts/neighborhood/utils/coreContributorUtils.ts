@@ -24,6 +24,7 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
 
     // First try to use the user_is_core_contributor_with_access RPC function if it exists
     try {
+      // Add explicit type casting since TypeScript doesn't know about our custom function
       const { data, error } = await supabase.rpc(
         'user_is_core_contributor_with_access',
         { user_uuid: userId }
@@ -73,10 +74,11 @@ export async function fetchAllNeighborhoodsForCoreContributor(userId: string): P
 
     // Try to use the get_all_neighborhoods_for_core_contributor RPC function
     try {
+      // Add explicit type casting since TypeScript doesn't know about our custom function
       const { data, error } = await supabase.rpc(
         'get_all_neighborhoods_for_core_contributor', 
         { user_uuid: userId }
-      );
+      ) as any;
       
       if (!error && data) {
         return data as any[];
