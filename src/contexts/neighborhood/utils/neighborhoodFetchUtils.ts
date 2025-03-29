@@ -18,7 +18,7 @@ import { Neighborhood } from '../types';
  */
 export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data: Neighborhood[] | null, error: any }> {
   try {
-    // Validate supabase client
+    // Validate supabase client is available
     if (!supabase) {
       console.error("[NeighborhoodUtils] Supabase client is not available");
       return { data: null, error: new Error("Supabase client is not available") };
@@ -26,14 +26,13 @@ export async function fetchCreatedNeighborhoods(userId: string): Promise<{ data:
 
     // First try using the get_user_created_neighborhoods function
     try {
-      // Use a type assertion for the entire response instead of the method name
-      // This avoids the TypeScript error while still allowing the function to be called
-      const response = await supabase.rpc(
-        'get_user_created_neighborhoods',
-        { user_uuid: userId }
-      );
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      // Instead of asserting the function name, we assert the whole response type
+      const response = await (supabase.rpc as any)('get_user_created_neighborhoods', { 
+        user_uuid: userId 
+      });
       
-      // TypeScript doesn't know about the response structure, so we'll cast it
+      // Type-cast the response after the call
       const { data: neighborhoods, error: rpcError } = response as unknown as { 
         data: Neighborhood[] | null; 
         error: any;
@@ -80,9 +79,10 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
 
     // First, try to use the get_all_neighborhoods_safe RPC function
     try {
-      const response = await supabase.rpc('get_all_neighborhoods_safe');
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const response = await (supabase.rpc as any)('get_all_neighborhoods_safe');
       
-      // Use type assertion on the response
+      // Type-cast the response after the call
       const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
         response as unknown as { data: Neighborhood[] | null; error: any };
       
@@ -101,11 +101,11 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
     // Try the core contributor function with the user ID
     if (userId) {
       try {
-        const response = await supabase.rpc('get_all_neighborhoods_for_core_contributor', {
+        const response = await (supabase.rpc as any)('get_all_neighborhoods_for_core_contributor', {
           user_uuid: userId // Now passing a string, not a Promise
         });
         
-        // Use type assertion on the response
+        // Type-cast the response after the call
         const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
           response as unknown as { data: Neighborhood[] | null; error: any };
         
@@ -158,11 +158,12 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
     
     // If no created neighborhoods, try to get neighborhoods via the RPC function
     try {
-      const response = await supabase.rpc('get_user_neighborhoods', { 
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const response = await (supabase.rpc as any)('get_user_neighborhoods', { 
         user_uuid: userId 
       });
       
-      // Use type assertion on the response
+      // Type-cast the response after the call
       const { data: userNeighborhoods, error: userNeighborhoodsError } = 
         response as unknown as { data: Neighborhood[] | null; error: any };
       
@@ -178,12 +179,12 @@ export async function fetchUserNeighborhoods(userId: string): Promise<Neighborho
       console.log("[NeighborhoodUtils] Falling back to direct query for user neighborhoods");
       
       // First try to get memberships
-      const response = await supabase.rpc(
+      const response = await (supabase.rpc as any)(
         'get_user_neighborhood_memberships',
         { user_uuid: userId }
       );
     
-      // Use type assertion on the response
+      // Type-cast the response after the call
       const { data: memberships, error: membershipError } = response as unknown as {
         data: { neighborhood_id: string }[] | null;
         error: any;
@@ -268,11 +269,12 @@ export async function fetchNeighborhoodMembers(neighborhoodId: string): Promise<
     
     // First try using the get_neighborhood_members_safe RPC function
     try {
-      const response = await supabase.rpc('get_neighborhood_members_safe', {
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const response = await (supabase.rpc as any)('get_neighborhood_members_safe', {
         neighborhood_uuid: neighborhoodId
       });
       
-      // Use type assertion on the response
+      // Type-cast the response after the call
       const { data: memberIds, error: membersError } = 
         response as unknown as { data: string[] | null; error: any };
       
