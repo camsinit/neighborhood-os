@@ -39,7 +39,8 @@ const CalendarPage = () => {
             <GodModeSelector />
           </div>
           
-          <GlowingDescriptionBox colorClass="calendar-color">
+          {/* Adding explicit inline style to ensure the glow effect is visible */}
+          <GlowingDescriptionBox colorClass="calendar-color" className="my-6">
             <p className="text-gray-700 text-sm">
               Stay connected with your community through local events. View upcoming gatherings, 
               create new events, and join your neighbors in building stronger connections.

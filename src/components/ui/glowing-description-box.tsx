@@ -23,31 +23,40 @@ const GlowingDescriptionBox = ({
   colorClass,
   className 
 }: GlowingDescriptionBoxProps) => {
+  // Using !important to ensure our styles are applied
+  // Adding console.log to verify the component is rendering with the correct colorClass
+  console.log(`Rendering GlowingDescriptionBox with color: ${colorClass}`);
+  
   return (
-    <div className="relative">
-      {/* Glowing shadow effect behind the box - Enhancing the effect with stronger opacity and blur */}
+    <div className="relative my-4">
+      {/* Debugging: Add a data attribute to identify this element in the DOM */}
       <div 
         className="absolute inset-0 blur-[25px] opacity-50 rounded-lg -z-10"
         style={{ 
-          backgroundColor: `hsl(var(--${colorClass}))`,
+          backgroundColor: `hsl(var(--${colorClass})) !important`,
           transform: 'scale(0.95)' 
         }}
+        data-glow="outer"
       />
       
-      {/* Adding a second glow layer for more intensity */}
+      {/* Second glow layer */}
       <div 
         className="absolute inset-0 blur-[12px] opacity-40 rounded-lg -z-10"
         style={{ 
-          backgroundColor: `hsl(var(--${colorClass}))`,
+          backgroundColor: `hsl(var(--${colorClass})) !important`,
           transform: 'scale(0.98)' 
         }}
+        data-glow="inner"
       />
       
-      {/* Main content box with shadow */}
-      <div className={cn(
-        "bg-white rounded-lg p-4 mt-2 mb-6 shadow-md relative z-10",
-        className
-      )}>
+      {/* Main content box */}
+      <div 
+        className={cn(
+          "bg-white rounded-lg p-4 shadow-md relative z-10",
+          className
+        )}
+        data-description-box="true"
+      >
         {children}
       </div>
     </div>
