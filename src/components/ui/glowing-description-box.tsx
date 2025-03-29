@@ -25,12 +25,21 @@ const GlowingDescriptionBox = ({
 }: GlowingDescriptionBoxProps) => {
   return (
     <div className="relative">
-      {/* Glowing shadow effect behind the box */}
+      {/* Glowing shadow effect behind the box - Enhancing the effect with stronger opacity and blur */}
       <div 
-        className="absolute inset-0 blur-[15px] opacity-30 rounded-lg -z-10"
+        className="absolute inset-0 blur-[25px] opacity-50 rounded-lg -z-10"
         style={{ 
           backgroundColor: `hsl(var(--${colorClass}))`,
           transform: 'scale(0.95)' 
+        }}
+      />
+      
+      {/* Adding a second glow layer for more intensity */}
+      <div 
+        className="absolute inset-0 blur-[12px] opacity-40 rounded-lg -z-10"
+        style={{ 
+          backgroundColor: `hsl(var(--${colorClass}))`,
+          transform: 'scale(0.98)' 
         }}
       />
       
