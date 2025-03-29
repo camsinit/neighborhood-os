@@ -2,15 +2,15 @@
 /**
  * Utility functions for neighborhood membership operations
  * 
- * These functions handle user membership checks and operations
- * using security definer functions to avoid RLS recursion
+ * These functions have been updated to use security definer functions
+ * to avoid the infinite recursion issues in RLS policies.
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses security definer function to avoid RLS recursion
+ * Uses the security definer function to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -21,12 +21,6 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Validate supabase client
-    if (!supabase) {
-      console.error("[NeighborhoodUtils] Supabase client is not available");
-      return false;
-    }
-
     // First try using the "user_is_neighborhood_member" RPC
     try {
       const { data, error } = await supabase
@@ -86,12 +80,6 @@ export async function addNeighborhoodMember(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Validate supabase client
-    if (!supabase) {
-      console.error("[NeighborhoodUtils] Supabase client is not available");
-      return false;
-    }
-
     // Call the RPC function
     const { data, error } = await supabase.rpc(
       'add_neighborhood_member',
@@ -115,6 +103,7 @@ export async function addNeighborhoodMember(
 
 /**
  * Check if a user has created a specific neighborhood
+ * Uses the security definer function to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -125,13 +114,7 @@ export async function checkUserCreatedNeighborhood(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Validate supabase client
-    if (!supabase) {
-      console.error("[NeighborhoodUtils] Supabase client is not available");
-      return false;
-    }
-
-    // Try using the user_created_neighborhood function if available
+    // Try using the user_created_neighborhood function
     try {
       const { data, error } = await supabase.rpc(
         'user_created_neighborhood', 

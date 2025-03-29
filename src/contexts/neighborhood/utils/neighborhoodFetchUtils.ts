@@ -2,8 +2,8 @@
 /**
  * Neighborhood fetching utilities
  * 
- * These utilities have been updated to work with our new Row Level Security (RLS)
- * policies and avoid recursion issues.
+ * These utilities have been updated to work with our security definer functions
+ * and avoid the infinite recursion issues in RLS policies.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -19,7 +19,20 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   error: Error | null;
 }> => {
   try {
-    // Uses the direct query which works with our new RLS policy
+    // Try using the RPC function first if available
+    try {
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc("get_user_created_neighborhoods", { user_uuid: userId });
+        
+      if (!rpcError && rpcData) {
+        console.log(`[fetchCreatedNeighborhoods] Successfully fetched ${rpcData.length || 0} created neighborhoods via RPC`);
+        return { data: rpcData as Neighborhood[], error: null };
+      }
+    } catch (rpcErr) {
+      console.warn("[fetchCreatedNeighborhoods] RPC function not available, falling back to direct query");
+    }
+    
+    // Fall back to the direct query with simplified logic
     const { data, error } = await supabase
       .from("neighborhoods")
       .select("id, name, created_by")
@@ -55,7 +68,7 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
  */
 export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
   try {
-    // Use our new security definer RPC function
+    // Use the security definer RPC function
     const { data, error } = await supabase
       .rpc("get_all_neighborhoods_safe");
     
@@ -76,14 +89,14 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
 /**
  * Fetch members of a specific neighborhood
  * 
- * Uses our new security definer function to avoid RLS recursion
+ * Uses our security definer function to avoid recursion
  * 
  * @param neighborhoodId - The ID of the neighborhood to get members for
  * @returns Array of user IDs who are members of the neighborhood
  */
 export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
   try {
-    // Use our new security definer RPC function
+    // Use our security definer function
     const { data, error } = await supabase
       .rpc("get_neighborhood_members_safe", { neighborhood_uuid: neighborhoodId });
     
@@ -109,7 +122,7 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
  */
 export const checkCoreContributorAccess = async (userId: string): Promise<boolean> => {
   try {
-    // Use the security definer function to check core contributor access
+    // Use a security definer function if available
     const { data, error } = await supabase
       .rpc("user_is_core_contributor_with_access", { user_uuid: userId });
     
@@ -133,7 +146,7 @@ export const checkCoreContributorAccess = async (userId: string): Promise<boolea
  */
 export const fetchAllNeighborhoodsForCoreContributor = async (userId: string): Promise<Neighborhood[]> => {
   try {
-    // Use the security definer function to get all neighborhoods for a core contributor
+    // Use a dedicated RPC function
     const { data, error } = await supabase
       .rpc("get_all_neighborhoods_for_core_contributor", { user_uuid: userId });
     
