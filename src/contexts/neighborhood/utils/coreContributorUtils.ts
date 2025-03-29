@@ -24,11 +24,17 @@ export async function checkCoreContributorAccess(userId: string): Promise<boolea
 
     // First try to use the user_is_core_contributor_with_access RPC function if it exists
     try {
-      // Add explicit type casting since TypeScript doesn't know about our custom function
-      const { data, error } = await supabase.rpc(
+      // Call the RPC function and use type assertion on the response
+      const response = await supabase.rpc(
         'user_is_core_contributor_with_access',
         { user_uuid: userId }
       );
+      
+      // Cast the response to the expected structure
+      const { data, error } = response as unknown as { 
+        data: boolean | null; 
+        error: any;
+      };
       
       if (!error) {
         return !!data;
@@ -74,14 +80,19 @@ export async function fetchAllNeighborhoodsForCoreContributor(userId: string): P
 
     // Try to use the get_all_neighborhoods_for_core_contributor RPC function
     try {
-      // Add explicit type casting since TypeScript doesn't know about our custom function
-      const { data, error } = await supabase.rpc(
+      const response = await supabase.rpc(
         'get_all_neighborhoods_for_core_contributor', 
         { user_uuid: userId }
-      ) as any;
+      );
+      
+      // Cast the response to the expected structure
+      const { data, error } = response as unknown as {
+        data: any[] | null;
+        error: any;
+      };
       
       if (!error && data) {
-        return data as any[];
+        return data;
       }
     } catch (rpcErr) {
       console.warn("[NeighborhoodUtils] RPC get_all_neighborhoods_for_core_contributor failed, falling back to direct query:", rpcErr);

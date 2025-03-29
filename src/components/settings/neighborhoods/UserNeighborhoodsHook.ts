@@ -48,13 +48,16 @@ export const useUserNeighborhoods = () => {
       const neighborhoodId = neighborhoods[0].id;
 
       // Check if user is already a member
-      const {
-        data: isMember,
-        error: membershipCheckError
-      } = await supabase.rpc('user_is_neighborhood_member', {
+      const response = await supabase.rpc('user_is_neighborhood_member', {
         user_uuid: userId,
         neighborhood_uuid: neighborhoodId
       });
+      
+      // Use type assertion for the RPC response
+      const { data: isMember, error: membershipCheckError } = response as unknown as {
+        data: boolean | null;
+        error: Error | null;
+      };
       
       if (membershipCheckError) throw membershipCheckError;
       
@@ -64,13 +67,13 @@ export const useUserNeighborhoods = () => {
       }
 
       // Add the user as a member using RPC function
-      // Using explicit type casting for our custom RPC function
-      const {
-        error: addError
-      } = await supabase.rpc('add_neighborhood_member', {
+      const addMemberResponse = await supabase.rpc('add_neighborhood_member', {
         user_uuid: userId,
         neighborhood_uuid: neighborhoodId
-      }) as {
+      });
+      
+      // Use type assertion for the RPC response
+      const { error: addError } = addMemberResponse as unknown as {
         data: boolean | null;
         error: Error | null;
       };
@@ -127,13 +130,12 @@ export const useUserNeighborhoods = () => {
       }
 
       // Call RPC function that safely checks membership
-      // Using explicit type casting for our custom RPC function
-      const {
-        data: membershipData,
-        error: membershipError
-      } = await supabase.rpc('get_user_neighborhoods', {
+      const response = await supabase.rpc('get_user_neighborhoods', {
         user_uuid: user.id
-      }) as {
+      });
+      
+      // Use type assertion for the RPC response
+      const { data: membershipData, error: membershipError } = response as unknown as {
         data: Neighborhood[] | null;
         error: Error | null;
       };
