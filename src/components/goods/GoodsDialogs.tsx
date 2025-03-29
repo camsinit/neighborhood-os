@@ -5,12 +5,14 @@ import SupportRequestDialog from "@/components/support/SupportRequestDialog";
 
 /**
  * Props interface for the GoodsDialogs component
+ * 
+ * Defines the properties needed to control the dialogs for viewing and adding goods items
  */
 interface GoodsDialogsProps {
   isAddRequestOpen: boolean;
   selectedRequest: GoodsExchangeItem | null;
   onAddRequestOpenChange: (open: boolean) => void;
-  onSelectedRequestChange: (open: boolean) => void;
+  onSelectedRequestChange: (request: GoodsExchangeItem | null) => void;
   initialRequestType: "need" | "offer" | null;
 }
 
@@ -42,7 +44,7 @@ const GoodsDialogs = ({
       <SupportRequestDialog
         request={selectedRequest}
         open={!!selectedRequest}
-        onOpenChange={onSelectedRequestChange}
+        onOpenChange={() => onSelectedRequestChange(null)}
       />
     </>
   );

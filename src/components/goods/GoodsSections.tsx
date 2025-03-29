@@ -1,5 +1,5 @@
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { GoodsItemCategory } from '@/components/support/types/formTypes';
 
@@ -7,7 +7,6 @@ import { GoodsItemCategory } from '@/components/support/types/formTypes';
 import UrgentRequestsSection from "./UrgentRequestsSection";
 import AvailableItemsSection from "./AvailableItemsSection";
 import GoodsRequestsSection from "./GoodsRequestsSection";
-import GoodsSearchBar from "./GoodsSearchBar";
 
 // Import Helpers
 import { getUrgencyClass, getUrgencyLabel } from "./utils/urgencyHelpers";
@@ -16,14 +15,20 @@ import { getUrgencyClass, getUrgencyLabel } from "./utils/urgencyHelpers";
  * Props interface for the GoodsSections component
  */
 interface GoodsSectionsProps {
-  urgentRequests: GoodsExchangeItem[];
-  goodsRequests: GoodsExchangeItem[];
-  goodsItems: GoodsExchangeItem[];
-  onRequestSelect: Dispatch<SetStateAction<GoodsExchangeItem | null>>;
+  // Data and loading state
+  goodsData: GoodsExchangeItem[] | undefined;
+  isLoading: boolean;
+  
+  // Search and filter states
+  searchQuery: string;
+  showUrgent: boolean;
+  showRequests: boolean;
+  showAvailable: boolean;
+  
+  // Event handlers
+  onRequestSelect: (request: GoodsExchangeItem) => void;
   onOfferItem: () => void;
   onRequestItem: () => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
   onRefresh: () => void;
 }
 
@@ -32,83 +37,110 @@ interface GoodsSectionsProps {
  * 
  * This component organizes all the different sections of the Goods page:
  * - Urgent requests at the top
- * - Search bar and action buttons
- * - Regular requests section (moved up above available items)
+ * - Regular requests section
  * - Available items section
  */
 const GoodsSections = ({
-  urgentRequests,
-  goodsRequests,
-  goodsItems,
+  goodsData,
+  isLoading,
+  searchQuery,
+  showUrgent,
+  showRequests,
+  showAvailable,
   onRequestSelect,
   onOfferItem,
   onRequestItem,
-  searchQuery,
-  onSearchChange,
   onRefresh
 }: GoodsSectionsProps) => {
-  // State to store selected category filters
+  // State for category filters
   const [categoryFilters, setCategoryFilters] = useState<GoodsItemCategory[]>([]);
+
+  // If data is loading or no data is available, handle these states
+  if (isLoading) {
+    return <div className="py-10 text-center">Loading goods exchange items...</div>;
+  }
+
+  if (!goodsData || goodsData.length === 0) {
+    return (
+      <div className="py-10 text-center">
+        <p className="text-gray-500">No goods exchange items found.</p>
+        <div className="mt-4 flex justify-center gap-4">
+          <button 
+            onClick={onRequestItem}
+            className="px-4 py-2 bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900 rounded-md"
+          >
+            Request Item
+          </button>
+          <button
+            onClick={onOfferItem} 
+            className="px-4 py-2 bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900 rounded-md"
+          >
+            Offer Item
+          </button>
+        </div>
+      </div>
+    );
+  }
   
-  // Apply category filters to goods items
-  const filteredGoodsItems = categoryFilters.length === 0
-    ? goodsItems // If no filters selected, show all items
-    : goodsItems.filter(item => 
-        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
-      );
+  // Filter data based on search query and display settings
+  const filteredData = goodsData.filter(item => {
+    // Search filter - check if search query matches title or description
+    const matchesSearch = !searchQuery || 
+      item.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Category filter
+    const matchesCategory = categoryFilters.length === 0 || 
+      (item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory));
+      
+    return matchesSearch && matchesCategory;
+  });
+
+  // Separate items into different sections based on type and urgency
+  const urgentRequests = showUrgent ? filteredData.filter(item => 
+    item.request_type === 'need' && item.urgency === 'high'
+  ) : [];
   
-  // Apply category filters to goods requests
-  const filteredGoodsRequests = categoryFilters.length === 0
-    ? goodsRequests // If no filters selected, show all requests
-    : goodsRequests.filter(item => 
-        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
-      );
+  const regularRequests = showRequests ? filteredData.filter(item => 
+    item.request_type === 'need' && item.urgency !== 'high'
+  ) : [];
   
-  // Apply category filters to urgent requests
-  const filteredUrgentRequests = categoryFilters.length === 0
-    ? urgentRequests // If no filters selected, show all urgent requests
-    : urgentRequests.filter(item => 
-        item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory)
-      );
+  const availableItems = showAvailable ? filteredData.filter(item => 
+    item.request_type === 'offer'
+  ) : [];
 
   return (
     <>
-      {/* Urgent requests section - Shows high-priority needs */}
-      <UrgentRequestsSection 
-        urgentRequests={filteredUrgentRequests}
-        onRequestSelect={onRequestSelect}
-        getUrgencyClass={getUrgencyClass}
-        getUrgencyLabel={getUrgencyLabel}
-      />
-
-      {/* Main content section - Contains search, action buttons, and items */}
-      <div className="bg-white rounded-lg p-6 shadow-lg">
-        {/* Search bar and action buttons */}
-        <GoodsSearchBar 
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          onRequestItem={onRequestItem}
-          onOfferItem={onOfferItem}
-          onCategoryFilter={setCategoryFilters}
-        />
-
-        {/* Non-urgent requests section - Shows regular needs (now above available items) */}
-        <GoodsRequestsSection 
-          goodsRequests={filteredGoodsRequests}
+      {/* Only show urgent section if we have urgent requests and showUrgent is true */}
+      {showUrgent && urgentRequests.length > 0 && (
+        <UrgentRequestsSection 
           urgentRequests={urgentRequests}
           onRequestSelect={onRequestSelect}
           getUrgencyClass={getUrgencyClass}
           getUrgencyLabel={getUrgencyLabel}
         />
-        
-        {/* Available items section - Shows offers from neighbors (now below requests) */}
+      )}
+
+      {/* Only show goods requests section if we have requests and showRequests is true */}
+      {showRequests && regularRequests.length > 0 && (
+        <GoodsRequestsSection 
+          goodsRequests={regularRequests}
+          urgentRequests={urgentRequests}
+          onRequestSelect={onRequestSelect}
+          getUrgencyClass={getUrgencyClass}
+          getUrgencyLabel={getUrgencyLabel}
+        />
+      )}
+      
+      {/* Only show available items section if we have items and showAvailable is true */}
+      {showAvailable && (
         <AvailableItemsSection 
-          goodsItems={filteredGoodsItems}
+          goodsItems={availableItems}
           onRequestSelect={onRequestSelect}
           onNewOffer={onOfferItem}
           onRefetch={onRefresh}
         />
-      </div>
+      )}
     </>
   );
 };

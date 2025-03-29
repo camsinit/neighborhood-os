@@ -1,40 +1,55 @@
 
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
-import { GoodsSections } from './GoodsSections';
+// Fix import statement to use default import instead of named import
+import GoodsSections from './GoodsSections';
 import GoodsPageHeader from './GoodsPageHeader';
 import GoodsSearchBar from './GoodsSearchBar';
-import { GoodsDialogs } from './GoodsDialogs';
+// Fix import statement to use default import instead of named import
+import GoodsDialogs from './GoodsDialogs';
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 
+/**
+ * GoodsPageContainer Component
+ * 
+ * This is the main container for the Goods Exchange page that manages the overall state
+ * and coordinates different sections of the goods exchange functionality.
+ */
 const GoodsPageContainer = () => {
+  // State for search and filtering
   const [searchQuery, setSearchQuery] = useState("");
   const [showUrgent, setShowUrgent] = useState(true);
   const [showRequests, setShowRequests] = useState(true);
   const [showAvailable, setShowAvailable] = useState(true);
   
-  // Add some new states for dialogs
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'offer' | 'request'>('offer');
+  // State for handling dialogs and item selection
+  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [initialRequestType, setInitialRequestType] = useState(null);
   
-  // Fetch goods data
-  const { data: goodsData, isLoading } = useGoodsExchange();
+  // Fetch goods data from the backend
+  const { data: goodsData, isLoading, refetch } = useGoodsExchange();
+
+  // Handler for adding new items (offers)
+  const handleAddItem = () => {
+    setInitialRequestType('offer');
+    setIsAddRequestOpen(true);
+  };
+
+  // Handler for adding new requests (needs)
+  const handleAddRequest = () => {
+    setInitialRequestType('need');
+    setIsAddRequestOpen(true);
+  };
 
   return (
     <div className="min-h-full w-full bg-gradient-to-b from-[#FFEFD5] to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8">
-          <GoodsPageHeader 
-            onAddItem={() => {
-              setViewMode('offer');
-              setAddDialogOpen(true);
-            }} 
-            onAddRequest={() => {
-              setViewMode('request');
-              setAddDialogOpen(true);
-            }}
-          />
+          {/* Page header with title and action buttons */}
+          <GoodsPageHeader />
           
+          {/* Description box with glow effect */}
           <GlowingDescriptionBox colorClass="goods-color">
             <p className="text-gray-700 text-sm">
               Share resources with your neighbors through our community exchange. 
@@ -42,32 +57,39 @@ const GoodsPageContainer = () => {
             </p>
           </GlowingDescriptionBox>
 
+          {/* Search bar with filters and main content */}
           <div className="bg-white rounded-lg p-6 shadow-lg">
+            {/* Search bar with filters */}
             <GoodsSearchBar 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
-              showUrgent={showUrgent}
-              onToggleUrgent={() => setShowUrgent(!showUrgent)}
-              showRequests={showRequests}
-              onToggleRequests={() => setShowRequests(!showRequests)}
-              showAvailable={showAvailable}
-              onToggleAvailable={() => setShowAvailable(!showAvailable)}
+              onRequestItem={handleAddRequest}
+              onOfferItem={handleAddItem}
+              // onCategoryFilter prop is optional so we don't need to pass it
             />
             
+            {/* Main content sections */}
             <GoodsSections 
+              searchQuery={searchQuery}
               goodsData={goodsData}
               isLoading={isLoading}
-              searchQuery={searchQuery}
               showUrgent={showUrgent}
               showRequests={showRequests}
               showAvailable={showAvailable}
+              onRequestSelect={setSelectedRequest}
+              onRefresh={refetch}
+              onOfferItem={handleAddItem}
+              onRequestItem={handleAddRequest}
             />
           </div>
           
+          {/* Dialogs for adding/viewing items */}
           <GoodsDialogs 
-            addDialogOpen={addDialogOpen}
-            onAddDialogOpenChange={setAddDialogOpen}
-            viewMode={viewMode}
+            isAddRequestOpen={isAddRequestOpen}
+            selectedRequest={selectedRequest}
+            onAddRequestOpenChange={setIsAddRequestOpen}
+            onSelectedRequestChange={setSelectedRequest}
+            initialRequestType={initialRequestType}
           />
         </div>
       </div>
