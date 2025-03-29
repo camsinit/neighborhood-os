@@ -27,7 +27,7 @@ export async function checkNeighborhoodMembership(
       return false;
     }
 
-    // First try using the existing "user_is_neighborhood_member" RPC
+    // First try using the "user_is_neighborhood_member" RPC
     try {
       const { data, error } = await supabase
         .rpc('user_is_neighborhood_member', {

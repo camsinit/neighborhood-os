@@ -2,7 +2,7 @@
 /**
  * Custom hook to get the current neighborhood ID
  * 
- * This simplified version handles cases where no neighborhood is selected gracefully
+ * This updated version handles cases where no neighborhood is selected gracefully
  */
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 
 /**
  * Custom hook to get the current neighborhood ID
- * SIMPLIFIED VERSION: No longer throws errors when no neighborhood is selected
+ * UPDATED VERSION: No longer throws errors when no neighborhood is selected
  * 
  * @returns The current neighborhood ID or null if none selected
  */
@@ -70,7 +70,7 @@ export const useCurrentNeighborhood = () => {
     userId: user?.id,
   });
   
-  // SIMPLIFIED: Instead of throwing an error, return null if no neighborhood is selected
+  // UPDATED: Instead of throwing an error, return null if no neighborhood is selected
   if (!currentNeighborhood?.id) {
     console.warn("[useCurrentNeighborhood] No neighborhood selected - returning null instead of throwing error");
     return null;

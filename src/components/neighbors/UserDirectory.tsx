@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
@@ -122,14 +123,14 @@ export const UserDirectory = ({
     console.log("[UserDirectory] No users found to display");
     return <EmptyState neighborhoodName={currentNeighborhood.name} onRefresh={handleRefresh} />;
   }
-  return <div className="p-6">
-      {/* Show neighborhood info */}
-      
-      
+  
+  return (
+    <div className="p-6">
       {/* Grid of neighbor cards */}
       <UserGrid users={filteredUsers || []} onUserSelect={setSelectedUser} />
 
       {/* Profile Dialog */}
       <NeighborProfileDialog user={selectedUser} onClose={() => setSelectedUser(null)} />
-    </div>;
+    </div>
+  );
 };

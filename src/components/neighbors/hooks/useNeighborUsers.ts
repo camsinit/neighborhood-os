@@ -8,7 +8,7 @@ import { fetchNeighborhoodMembers } from "@/contexts/neighborhood/utils/neighbor
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * This improved version uses security definer functions to completely avoid 
+ * This updated version uses security definer functions to completely avoid 
  * the RLS recursion issue when fetching neighbor information
  */
 export const useNeighborUsers = () => {

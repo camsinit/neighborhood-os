@@ -2,8 +2,8 @@
 /**
  * Neighborhood fetching utilities
  * 
- * These utilities have been simplified to work without Row Level Security (RLS)
- * and core contributor functionality.
+ * These utilities have been updated to work with our new Row Level Security (RLS)
+ * policies and avoid recursion issues.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -19,7 +19,7 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   error: Error | null;
 }> => {
   try {
-    // Simple direct query to get neighborhoods created by user
+    // Uses the direct query which works with our new RLS policy
     const { data, error } = await supabase
       .from("neighborhoods")
       .select("id, name, created_by")
@@ -46,19 +46,18 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
 };
 
 /**
- * Fetch all neighborhoods (simplified version)
+ * Fetch all neighborhoods (using our security definer function)
  * 
- * This function no longer requires core contributor access
- * and simply returns all neighborhoods in the database.
+ * Uses the get_all_neighborhoods_safe RPC function to bypass RLS
+ * for authorized users.
  * 
  * @returns Array of all neighborhoods
  */
 export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
   try {
-    // Now we can just fetch all neighborhoods directly without checking permissions
+    // Use our new security definer RPC function
     const { data, error } = await supabase
-      .from("neighborhoods")
-      .select("id, name, created_by");
+      .rpc("get_all_neighborhoods_safe");
     
     if (error) {
       console.error("[fetchAllNeighborhoods] Error:", error.message);
@@ -77,29 +76,25 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
 /**
  * Fetch members of a specific neighborhood
  * 
+ * Uses our new security definer function to avoid RLS recursion
+ * 
  * @param neighborhoodId - The ID of the neighborhood to get members for
  * @returns Array of user IDs who are members of the neighborhood
  */
 export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
   try {
-    // Since RLS is disabled, we can simply query the neighborhood_members table directly
+    // Use our new security definer RPC function
     const { data, error } = await supabase
-      .from("neighborhood_members")
-      .select("user_id")
-      .eq("neighborhood_id", neighborhoodId)
-      .eq("status", "active");
+      .rpc("get_neighborhood_members_safe", { neighborhood_uuid: neighborhoodId });
     
     if (error) {
       console.error("[fetchNeighborhoodMembers] Error:", error.message);
       return [];
     }
     
-    // Extract just the user_id values from each row
-    const memberIds = data.map(row => row.user_id);
+    console.log(`[fetchNeighborhoodMembers] Found ${data?.length || 0} members for neighborhood ${neighborhoodId}`);
     
-    console.log(`[fetchNeighborhoodMembers] Found ${memberIds.length} members for neighborhood ${neighborhoodId}`);
-    
-    return memberIds;
+    return data || [];
   } catch (error) {
     console.error("[fetchNeighborhoodMembers] Unexpected error:", error);
     return [];
@@ -107,38 +102,49 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
 };
 
 /**
- * No-op function that always returns false
- * 
- * This is a placeholder for the removed core contributor check functionality
+ * Check if a user is a core contributor with access to all neighborhoods
  * 
  * @param userId - The ID of the user to check
- * @returns Always returns false
+ * @returns True if the user is a core contributor with access, false otherwise
  */
 export const checkCoreContributorAccess = async (userId: string): Promise<boolean> => {
-  // This function now always returns false as core contributor functionality has been removed
-  console.log("[checkCoreContributorAccess] Core contributor functionality disabled");
-  return false;
+  try {
+    // Use the security definer function to check core contributor access
+    const { data, error } = await supabase
+      .rpc("user_is_core_contributor_with_access", { user_uuid: userId });
+    
+    if (error) {
+      console.error("[checkCoreContributorAccess] Error:", error.message);
+      return false;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error("[checkCoreContributorAccess] Error:", error);
+    return false;
+  }
 };
 
 /**
- * No-op function that returns an empty array
+ * Fetch all neighborhoods for a core contributor
  * 
- * This is a placeholder for the removed core contributor neighborhood access
- * 
- * @param userId - The ID of the user
- * @returns Always returns an empty array
+ * @param userId - The ID of the core contributor
+ * @returns Array of all neighborhoods if the user is a core contributor, empty array otherwise
  */
 export const fetchAllNeighborhoodsForCoreContributor = async (userId: string): Promise<Neighborhood[]> => {
-  // This function now always returns an empty array as core contributor functionality has been removed
-  console.log("[fetchAllNeighborhoodsForCoreContributor] Core contributor functionality disabled");
-  return [];
+  try {
+    // Use the security definer function to get all neighborhoods for a core contributor
+    const { data, error } = await supabase
+      .rpc("get_all_neighborhoods_for_core_contributor", { user_uuid: userId });
+    
+    if (error) {
+      console.error("[fetchAllNeighborhoodsForCoreContributor] Error:", error.message);
+      return [];
+    }
+    
+    return data as Neighborhood[] || [];
+  } catch (error) {
+    console.error("[fetchAllNeighborhoodsForCoreContributor] Error:", error);
+    return [];
+  }
 };
-
-/**
- * Legacy function for compatibility - will create RPC functions if needed
- */
-export async function createRequiredRPCFunctions(): Promise<void> {
-  // This would normally be done in a migration, but we'll add it here as a backup
-  console.log("[NeighborhoodUtils] Creating required RPC functions is meant to be done in migrations");
-  // No-op in the simplified version
-}

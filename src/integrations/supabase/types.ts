@@ -1131,6 +1131,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      check_neighborhood_access: {
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      check_neighborhood_limit: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: boolean
+      }
       check_user_role: {
         Args: {
           user_id: string
@@ -1174,6 +1187,12 @@ export type Database = {
         }
         Returns: string[]
       }
+      get_neighborhood_members_direct: {
+        Args: {
+          neighborhood_uuid: string
+        }
+        Returns: string[]
+      }
       get_neighborhood_members_safe: {
         Args: {
           neighborhood_uuid: string
@@ -1185,6 +1204,21 @@ export type Database = {
           neighborhood_uuid: string
         }
         Returns: string[]
+      }
+      get_neighborhood_members_with_profiles: {
+        Args: {
+          neighborhood_uuid: string
+        }
+        Returns: {
+          user_id: string
+          display_name: string
+          email: string
+          avatar_url: string
+          email_visible: boolean
+          phone_visible: boolean
+          address_visible: boolean
+          needs_visible: boolean
+        }[]
       }
       get_user_current_neighborhood: {
         Args: {
@@ -1235,9 +1269,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      remove_neighborhood_member: {
+        Args: {
+          creator_uuid: string
+          member_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
       simple_membership_check: {
         Args: {
           user_uuid: string
+          neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      transfer_neighborhood_ownership: {
+        Args: {
+          current_owner_uuid: string
+          new_owner_uuid: string
           neighborhood_uuid: string
         }
         Returns: boolean

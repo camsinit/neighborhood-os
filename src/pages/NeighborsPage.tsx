@@ -15,7 +15,7 @@ import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
  * NeighborsPage Component
  * 
  * This page displays a directory of neighbors in the user's neighborhood.
- * SIMPLIFIED: Now more resilient to missing neighborhood data
+ * UPDATED: Now more resilient to missing neighborhood data
  */
 const NeighborsPage = () => {
   // State for the search functionality
@@ -109,7 +109,7 @@ const NeighborsPage = () => {
       </div>;
   }
 
-  // SIMPLIFIED: More helpful UI when no neighborhood is found
+  // UPDATED: More helpful UI when no neighborhood is found
   if (error || !currentNeighborhood) {
     return <div className="min-h-full w-full flex items-center justify-center p-4">
         <Card className="p-6 max-w-md w-full">
