@@ -58,9 +58,13 @@ export async function fetchAllNeighborhoods(): Promise<Neighborhood[]> {
 
     // First, try to use the get_all_neighborhoods_for_core_contributor function
     try {
+      // Get the current user ID first to avoid the Promise<string> error
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id || '';
+      
       const { data: allNeighborhoodsData, error: allNeighborhoodsError } = 
         await supabase.rpc('get_all_neighborhoods_for_core_contributor', {
-          user_uuid: supabase.auth.getUser().then(res => res.data.user?.id) || ''
+          user_uuid: userId // Now passing a string, not a Promise
         });
       
       if (!allNeighborhoodsError && allNeighborhoodsData) {
