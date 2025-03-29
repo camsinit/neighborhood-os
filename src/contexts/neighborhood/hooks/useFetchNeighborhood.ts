@@ -7,7 +7,11 @@
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../types';
-import { fetchCreatedNeighborhoods } from '../utils';
+import { 
+  fetchCreatedNeighborhoods,
+  checkCoreContributorAccess,
+  fetchAllNeighborhoodsForCoreContributor
+} from '../utils/neighborhoodFetchUtils';
 import { supabase } from '@/integrations/supabase/client';
 
 /**

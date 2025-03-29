@@ -18,7 +18,7 @@ import { Neighborhood } from "@/contexts/neighborhood/types";
 import { 
   fetchCreatedNeighborhoods, 
   fetchAllNeighborhoods
-} from "@/contexts/neighborhood/utils";
+} from "@/contexts/neighborhood/utils/neighborhoodFetchUtils";
 
 /**
  * InviteDialog Component
