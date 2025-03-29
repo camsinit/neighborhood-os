@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
@@ -43,12 +43,22 @@ const queryClient = new QueryClient({
 function App() {
   // Track the user's authentication session
   const [session, setSession] = useState<Session | null>(null);
+  // Track if the initial auth check is complete
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // Set up auth state change listener when the app loads
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      // Mark auth as initialized after getting the initial session
+      setAuthInitialized(true);
+      
+      console.log("[Supabase Client] Initial auth check:", {
+        hasSession: !!session,
+        userId: session?.user?.id,
+        timestamp: new Date().toISOString()
+      });
     });
 
     // Listen for auth changes
@@ -56,39 +66,56 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      
+      console.log("[Supabase Client] Auth state changed:", {
+        event: _event,
+        hasSession: !!session,
+        userId: session?.user?.id,
+        timestamp: new Date().toISOString()
+      });
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // Show nothing during initial auth check to prevent flashing content
+  if (!authInitialized) {
+    return null;
+  }
+
   // Provide session context and neighborhood context to the app
   return (
-    <SessionContextProvider supabaseClient={supabase}>
-      <NeighborhoodProvider>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/join" element={<JoinPage />} />
+    <QueryClientProvider client={queryClient}>
+      <SessionContextProvider supabaseClient={supabase} initialSession={session}>
+        <NeighborhoodProvider>
+          <Router>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/join" element={<JoinPage />} />
 
-            {/* Protected routes */}
-            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-            <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
-            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
-            <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
-            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-            <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
-            <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+              {/* Wildcard route that redirects to index for proper routing logic */}
+              <Route path="/index" element={<Index />} />
 
-            {/* Default to Index */}
-            <Route path="*" element={<Index />} />
-          </Routes>
-          <Toaster position="top-center" />
-        </Router>
-      </NeighborhoodProvider>
-    </SessionContextProvider>
+              {/* Protected routes */}
+              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+              <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
+              <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+              <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
+              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+              <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+              <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+              <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+
+              {/* Default to Index for all other routes */}
+              <Route path="*" element={<Index />} />
+            </Routes>
+            <Toaster position="top-center" />
+          </Router>
+        </NeighborhoodProvider>
+      </SessionContextProvider>
+    </QueryClientProvider>
   );
 }
 

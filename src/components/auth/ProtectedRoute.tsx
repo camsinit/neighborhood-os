@@ -1,34 +1,52 @@
 
+/**
+ * ProtectedRoute component
+ * 
+ * Ensures routes are only accessible to authenticated users.
+ * Displays a loading spinner while authentication is being checked.
+ */
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import { Navigate, useLocation } from "react-router-dom";
-import { LoadingSpinner } from "@/components/ui/loading";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-/**
- * ProtectedRoute component
- * 
- * Simplified version that handles authentication state with minimal logging.
- * Redirects unauthenticated users to login page.
- */
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isLoading, session } = useSessionContext();
+  // Get authentication state from Supabase Auth Helpers
+  const { isLoading: isLoadingAuth, session } = useSessionContext();
   const user = useUser();
   const location = useLocation();
 
-  // Basic loading state
-  if (isLoading) {
-    return <LoadingSpinner />;
+  // Show loading spinner while checking authentication
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-gray-600">Verifying your account...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Redirect if user is not authenticated
+  // If not authenticated, redirect to login page
   if (!user || !session) {
+    console.log("[ProtectedRoute] User not authenticated, redirecting to login", {
+      path: location.pathname,
+      timestamp: new Date().toISOString()
+    });
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // User is authenticated, render children
+  // User is authenticated, render the protected content
+  console.log("[ProtectedRoute] User authenticated, rendering protected content", {
+    userId: user.id,
+    path: location.pathname,
+    timestamp: new Date().toISOString()
+  });
+  
   return <>{children}</>;
 };
 
