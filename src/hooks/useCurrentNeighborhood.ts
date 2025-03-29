@@ -17,7 +17,7 @@ import { useState, useEffect } from "react";
  */
 export const useCurrentNeighborhood = () => {
   // Get the neighborhood context from the provider
-  const { currentNeighborhood, isCoreContributor } = useNeighborhood();
+  const { currentNeighborhood } = useNeighborhood();
   
   // Get the current authenticated user
   const user = useUser();
@@ -65,7 +65,6 @@ export const useCurrentNeighborhood = () => {
     hasNeighborhood: !!currentNeighborhood?.id,
     neighborhoodId: currentNeighborhood?.id,
     neighborhoodName: currentNeighborhood?.name,
-    isCoreContributor: isCoreContributor,
     timestamp: new Date().toISOString(),
     authStatus: !!user,
     userId: user?.id,
