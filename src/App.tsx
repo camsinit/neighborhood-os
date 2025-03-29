@@ -21,8 +21,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import WaitlistAdmin from './pages/WaitlistAdmin';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import MainLayout from './components/layout/MainLayout';
 
-// Create a client (reduced comments for simplicity)
+/**
+ * Create a client for React Query
+ * - Sets retry attempts to 2 for failed requests
+ * - Sets stale time to 5 minutes to reduce unnecessary refetches
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -38,7 +43,7 @@ const queryClient = new QueryClient({
  * This component:
  * 1. Sets up authentication state tracking
  * 2. Provides the NeighborhoodProvider context
- * 3. Defines all application routes
+ * 3. Defines all application routes with a streamlined hierarchy
  */
 function App() {
   // Track the user's authentication session
@@ -90,28 +95,30 @@ function App() {
         <NeighborhoodProvider>
           <Router>
             <Routes>
-              {/* Public routes - fixed duplicated routes issue */}
+              {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/join" element={<JoinPage />} />
-              
-              {/* Dashboard route - will redirect to /home if authenticated */}
-              <Route path="/dashboard" element={
-                session ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
-              } />
 
-              {/* Index route now properly redirects based on auth state */}
+              {/* Index route - handles routing logic based on auth state */}
               <Route path="/index" element={<Index />} />
-
-              {/* Protected routes */}
-              <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-              <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
-              <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
-              <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-              <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-              <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
-              <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+              
+              {/* Protected routes - all using the main layout with sidebar */}
+              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                {/* Default route redirects to /home */}
+                <Route index element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/neighbors" element={<NeighborsPage />} />
+                <Route path="/skills" element={<SkillsPage />} />
+                <Route path="/goods" element={<GoodsPage />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/safety" element={<SafetyPage />} />
+                <Route path="/care" element={<CarePage />} />
+                <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
+                
+                {/* Redirect old dashboard route to /home */}
+                <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+              </Route>
 
               {/* Catch-all route redirects to landing page for better UX */}
               <Route path="*" element={<Navigate to="/" replace />} />

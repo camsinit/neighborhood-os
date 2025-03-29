@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 /**
  * MainNavigation component
  * 
- * Displays the primary navigation item (Dashboard)
+ * Displays the primary navigation item (Home/Dashboard)
  */
 const MainNavigation = () => {
   // Get current location to determine which nav item is active
@@ -18,7 +18,7 @@ const MainNavigation = () => {
     { 
       icon: Home, 
       label: "Home", 
-      href: "/dashboard" // Updated to use /dashboard path
+      href: "/home" // Updated to use /home path directly
     }
   ];
 

@@ -2,7 +2,7 @@
 /**
  * Index page component
  * 
- * This component serves as the entry point to the application when a user visits the root route.
+ * This component serves as the entry point to the application when a user visits the index route.
  * It redirects users based on authentication status and neighborhood context.
  */
 import { useEffect } from "react";

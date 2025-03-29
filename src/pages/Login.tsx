@@ -1,34 +1,31 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils"; // Import cn utility
+import { cn } from "@/lib/utils";
 
 /**
  * Login page component
  * 
  * This page displays the authentication form and header,
  * allowing users to sign in to access the Neighborhood OS dashboard.
- * It also redirects authenticated users to the dashboard.
- * 
- * Updated with consistent styling to match the landing page hero section.
+ * It also redirects authenticated users to the home page.
  */
 const Login = () => {
   // Get navigation and session context
   const navigate = useNavigate();
   const { session, isLoading } = useSessionContext();
   
-  // Redirect authenticated users to dashboard
+  // Redirect authenticated users to home page
   useEffect(() => {
     // Only redirect if we're not loading AND we have a session
     if (!isLoading && session) {
       console.log("[Login] User is already authenticated, redirecting to home page");
-      // Redirect to home, not dashboard (for consistency)
+      // Redirect directly to home, for consistency with our routing
       navigate("/home", { replace: true });
     }
   }, [session, isLoading, navigate]);

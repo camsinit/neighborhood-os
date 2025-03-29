@@ -13,52 +13,51 @@ const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
   const location = useLocation();
   
-  // Define middle navigation items with their respective theme colors
+  // Define navigation items with their respective theme colors
   // Each item has a specific color that represents its category
-  const middleNavItems = [
+  const featureNavItems = [
     { 
-      icon: Calendar, 
-      label: "Calendar", 
-      href: "/dashboard/events", 
-      color: "#0EA5E9" // Calendar uses a bright blue theme
+      icon: Users,
+      label: "Neighbors",
+      href: "/neighbors",
+      color: "#7E69AB" // Neighbors uses a secondary purple theme
     },
     { 
       icon: Brain, 
       label: "Skills", 
-      href: "/dashboard/skills", 
+      href: "/skills", 
       color: "#9b87f5" // Skills uses a purple theme
     },
     { 
       icon: Gift, 
       label: "Goods", 
-      href: "/dashboard/goods", 
+      href: "/goods", 
       color: "#F97316" // Goods uses an orange theme
     },
     { 
-      icon: Heart, 
-      label: "Care", 
-      href: "/dashboard/care", 
-      color: "#22C55E" // Care uses a green theme
+      icon: Calendar, 
+      label: "Calendar", 
+      href: "/calendar", 
+      color: "#0EA5E9" // Calendar uses a bright blue theme
     },
     { 
       icon: Shield, 
       label: "Safety", 
-      href: "/dashboard/safety", 
+      href: "/safety", 
       color: "#EA384C" // Safety uses a red theme
     },
-    {
-      icon: Users,
-      label: "Neighbors",
-      href: "/dashboard/neighbors",
-      color: "#7E69AB" // Neighbors uses a secondary purple theme
+    { 
+      icon: Heart, 
+      label: "Care", 
+      href: "/care", 
+      color: "#22C55E" // Care uses a green theme
     },
   ];
 
   return (
     <div className="space-y-1">
-      {middleNavItems.map((item) => {
-        // For the middle items, we need to check if we're on that specific page
-        // or any child routes of that page
+      {featureNavItems.map((item) => {
+        // Check if current path matches this nav item
         const isActive = location.pathname === item.href || 
                         location.pathname.startsWith(item.href + '/');
         return (

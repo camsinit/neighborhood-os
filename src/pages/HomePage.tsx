@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -11,17 +10,28 @@ import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 import NotificationItem from "@/components/notifications/NotificationItem";
 
+/**
+ * HomePage component
+ * 
+ * Main dashboard page that displays:
+ * 1. Quick actions for common neighborhood tasks
+ * 2. Notifications for the current user
+ * 3. Recent activity feed from the neighborhood
+ */
 const HomePage = () => {
   const [showArchived, setShowArchived] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch notifications from the database
   const {
     data: notifications,
     refetch
   } = useQuery({
     queryKey: ["notifications", showArchived],
     queryFn: async () => {
-      const [safetyUpdates, events, supportRequests] = await Promise.all([supabase.from("safety_updates").select(`
+      // Fetch data from multiple tables concurrently
+      const [safetyUpdates, events, supportRequests] = await Promise.all([
+        supabase.from("safety_updates").select(`
             id, 
             title, 
             type, 
@@ -99,6 +109,7 @@ const HomePage = () => {
     }
   });
 
+  // Handle clicks on notification items
   const handleItemClick = (type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", id: string) => {
     // Map notification types to their respective routes
     const routeMap = {
@@ -130,9 +141,10 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-full w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8 space-y-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="space-y-8">
+          {/* Quick Actions Section */}
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
             <QuickActions />
@@ -140,7 +152,9 @@ const HomePage = () => {
 
           <Separator className="my-8 bg-gray-200" />
 
+          {/* Two Column Layout for Notifications and Activity */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Notifications Section */}
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
@@ -150,8 +164,8 @@ const HomePage = () => {
                   className="flex items-center" 
                   onClick={() => setShowArchived(!showArchived)}
                 >
-                  <Archive className="h-4 w-4" />
-                  Archive
+                  <Archive className="h-4 w-4 mr-2" />
+                  {showArchived ? "Show Active" : "Show Archived"}
                 </Button>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0 py-[3px]">
@@ -183,6 +197,7 @@ const HomePage = () => {
               </div>
             </section>
 
+            {/* Neighborhood Activity Section */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">Neighborhood Activity</h2>
               <div className="bg-white rounded-lg shadow-sm p-4 py-[3px]">

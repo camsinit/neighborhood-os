@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
-import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { useNeighborhood } from "@/contexts/neighborhood";
 import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
 
 // Import sidebar components
@@ -12,34 +12,23 @@ import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
 
 /**
- * Sidebar component props
- * onOpenSettings is a function that will be called when the settings button is clicked
- */
-interface SidebarProps {
-  onOpenSettings?: () => void; // This is now completely optional and unused
-}
-
-/**
  * Sidebar component
  * 
  * Displays the navigation sidebar with links to different sections of the app
  */
-const Sidebar = ({ onOpenSettings }: SidebarProps) => {
+const Sidebar = () => {
   // State to control the settings dialog visibility
-  // This is the ONLY state that controls whether the dialog is open
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Get current user
   const user = useUser();
   
   // Get neighborhood context for diagnostics data
-  // Removed isCoreContributor since it no longer exists in the context
   const { 
     currentNeighborhood
   } = useNeighborhood();
 
   // Function to handle opening settings dialog
-  // This is the ONLY function that controls opening the dialog
   const handleOpenSettings = () => {
     console.log("[Sidebar] Opening settings dialog - setting state to true");
     // Directly open the dialog by setting state to true
@@ -47,12 +36,12 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   };
 
   return (
-    <div className="w-48 border-r bg-white flex flex-col">
+    <div className="w-64 border-r bg-white flex flex-col h-screen sticky top-0">
       {/* Logo section at the top of sidebar */}
       <Logo />
       
       {/* Navigation menu section */}
-      <nav className="flex-1 px-2">
+      <nav className="flex-1 px-3 overflow-y-auto">
         {/* Home/Dashboard navigation */}
         <MainNavigation />
 
