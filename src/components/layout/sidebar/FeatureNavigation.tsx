@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
  * FeatureNavigation component
  * 
  * Displays the feature navigation items with their respective theme colors
+ * The order has been updated as requested and each item has a unique color
  */
 const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
@@ -15,12 +16,13 @@ const FeatureNavigation = () => {
   
   // Define navigation items with their respective theme colors
   // Each item has a specific color that represents its category
+  // Order has been changed as requested: Calendar, Skills, Goods, Care, Safety, Neighbors
   const featureNavItems = [
     { 
-      icon: Users,
-      label: "Neighbors",
-      href: "/neighbors",
-      color: "#7E69AB" // Neighbors uses a secondary purple theme
+      icon: Calendar, 
+      label: "Calendar", 
+      href: "/calendar", 
+      color: "#0EA5E9" // Calendar uses a bright blue theme
     },
     { 
       icon: Brain, 
@@ -30,15 +32,15 @@ const FeatureNavigation = () => {
     },
     { 
       icon: Gift, 
-      label: "Goods", 
+      label: "Stuff", 
       href: "/goods", 
-      color: "#F97316" // Goods uses an orange theme
+      color: "#F97316" // Stuff (formerly Goods) uses an orange theme
     },
     { 
-      icon: Calendar, 
-      label: "Calendar", 
-      href: "/calendar", 
-      color: "#0EA5E9" // Calendar uses a bright blue theme
+      icon: Heart, 
+      label: "Care", 
+      href: "/care", 
+      color: "#22C55E" // Care uses a green theme
     },
     { 
       icon: Shield, 
@@ -47,10 +49,10 @@ const FeatureNavigation = () => {
       color: "#EA384C" // Safety uses a red theme
     },
     { 
-      icon: Heart, 
-      label: "Care", 
-      href: "/care", 
-      color: "#22C55E" // Care uses a green theme
+      icon: Users,
+      label: "Neighbors",
+      href: "/neighbors",
+      color: "#7E69AB" // Neighbors uses a secondary purple theme
     },
   ];
 
@@ -72,6 +74,10 @@ const FeatureNavigation = () => {
               <item.icon 
                 className="h-5 w-5" 
                 color={item.color} // Apply the theme color to the icon
+                style={{
+                  // Add a subtle transition effect on the icon
+                  transition: 'transform 0.2s ease-in-out'
+                }}
               />
               {item.label}
             </Button>

@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,6 +48,13 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 215 27.9% 16.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    --calendar-color: 198 97% 48%;  /* #0EA5E9 - bright blue */
+    --skills-color: 253 83% 74%;    /* #9B87F5 - purple */
+    --goods-color: 25 95% 53%;      /* #F97316 - orange */
+    --care-color: 142 70% 45%;      /* #22C55E - green */
+    --safety-color: 355 84% 57%;    /* #EA384C - red */
+    --neighbors-color: 270 29% 54%; /* #7E69AB - secondary purple */
   }
 
   .dark {
