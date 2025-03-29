@@ -9,6 +9,7 @@
 export interface Neighborhood {
   id: string;
   name: string;
+  created_by?: string; // Added created_by for compatibility with existing code
 }
 
 // Define the context type

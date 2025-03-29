@@ -33,9 +33,9 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   const user = useUser();
   
   // Get neighborhood context for diagnostics data
+  // Removed isCoreContributor since it no longer exists in the context
   const { 
-    currentNeighborhood, 
-    isCoreContributor
+    currentNeighborhood
   } = useNeighborhood();
 
   // Function to handle opening settings dialog
@@ -74,7 +74,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         <DiagnosticsPanel 
           user={user}
           currentNeighborhood={currentNeighborhood}
-          isCoreContributor={isCoreContributor}
         />
       </nav>
       

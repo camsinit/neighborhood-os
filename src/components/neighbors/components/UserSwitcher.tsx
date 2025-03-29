@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import { useNeighborhoodData } from '@/components/neighbors/hooks/useNeighborhoodData';
 
 interface Neighborhood {
   id: string;
@@ -26,9 +27,12 @@ interface Neighborhood {
  * UserSwitcher component
  * 
  * Allows users to switch between neighborhoods they are members of
+ * Now uses direct neighborhood data hook instead of allNeighborhoods from context
  */
 export function UserSwitcher() {
-  const { currentNeighborhood, allNeighborhoods, setCurrentNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, setCurrentNeighborhood } = useNeighborhood();
+  // Use the dedicated hook to get neighborhood data
+  const { neighborhoods } = useNeighborhoodData();
   const [open, setOpen] = useState(false);
 
   // Default to showing the current neighborhood name
@@ -36,7 +40,7 @@ export function UserSwitcher() {
 
   // Handle neighborhood selection
   const handleSelect = (neighborhoodId: string) => {
-    const selected = allNeighborhoods.find(n => n.id === neighborhoodId);
+    const selected = neighborhoods.find(n => n.id === neighborhoodId);
     if (selected) {
       setCurrentNeighborhood(selected);
     }
@@ -45,13 +49,13 @@ export function UserSwitcher() {
 
   // If there's only one neighborhood, auto-select it
   useEffect(() => {
-    if (allNeighborhoods.length === 1 && !currentNeighborhood) {
-      setCurrentNeighborhood(allNeighborhoods[0]);
+    if (neighborhoods.length === 1 && !currentNeighborhood) {
+      setCurrentNeighborhood(neighborhoods[0]);
     }
-  }, [allNeighborhoods, currentNeighborhood, setCurrentNeighborhood]);
+  }, [neighborhoods, currentNeighborhood, setCurrentNeighborhood]);
 
   // If there are no neighborhoods, don't render the switcher
-  if (allNeighborhoods.length === 0) {
+  if (neighborhoods.length === 0) {
     return null;
   }
 
@@ -73,7 +77,7 @@ export function UserSwitcher() {
           <CommandInput placeholder="Search neighborhood..." />
           <CommandEmpty>No neighborhood found.</CommandEmpty>
           <CommandGroup>
-            {allNeighborhoods.map((neighborhood) => (
+            {neighborhoods.map((neighborhood) => (
               <CommandItem
                 key={neighborhood.id}
                 value={neighborhood.id}
