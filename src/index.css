@@ -84,13 +84,12 @@
   }
 }
 
-/* Fade in animation for elements */
+/* Enhanced animations for a more polished UI */
 @keyframes appear {
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Scale in animation for elements */
 @keyframes appear-zoom {
   0% { opacity: 0; transform: scale(0.95); }
   100% { opacity: 1; transform: scale(1); }
@@ -102,4 +101,48 @@
 
 .animate-appear-zoom {
   animation: appear-zoom 0.5s ease-out forwards;
+}
+
+/* Add card and content container styles for consistency */
+@layer components {
+  .content-card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+  
+  .page-container {
+    @apply max-w-7xl mx-auto space-y-6;
+  }
+  
+  .page-header {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+  
+  .page-description {
+    @apply text-gray-600 text-sm mb-6;
+  }
+}
+
+/* Enhance card hover effects */
+.hover-card {
+  @apply transition-all duration-200;
+}
+
+.hover-card:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+/* Consistent section styling */
+.section-container {
+  @apply bg-white rounded-lg p-6 shadow-md mb-6;
+}
+
+/* Rainbow highlight animation for selected items */
+.rainbow-highlight {
+  animation: highlight-pulse 2s ease-in-out;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.2); }
 }

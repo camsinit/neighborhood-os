@@ -1,8 +1,10 @@
 
+/* Base styles for the application */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  /* Remove the constraining max-width and padding to make content fill the space */
+  width: 100%;
+  margin: 0;
+  padding: 0;
   /* Removing text-align: center that was causing all text to be centered */
 }
 
