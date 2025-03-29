@@ -1,5 +1,8 @@
 
 import { useNeighborhood } from "@/contexts/neighborhood";
+import { useUser } from "@supabase/auth-helpers-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 /**
  * Custom hook to get the current neighborhood ID and throw an error if none is selected
@@ -12,6 +15,51 @@ export const useCurrentNeighborhood = () => {
   // Get the neighborhood context from the provider
   const { currentNeighborhood, isCoreContributor } = useNeighborhood();
   
+  // Get the current authenticated user
+  const user = useUser();
+  
+  // State to store debugging information
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  
+  // Check authentication context on mount - this helps diagnose RLS issues
+  useEffect(() => {
+    const checkAuthContext = async () => {
+      try {
+        // Verify Supabase authentication context
+        const { data: authCheck } = await supabase.rpc('check_auth_context');
+        
+        // Check if the user is associated with the neighborhood
+        const { data: membershipCheck } = await supabase.rpc('user_is_neighborhood_member', {
+          user_uuid: user?.id || '',
+          neighborhood_uuid: currentNeighborhood?.id || ''
+        });
+        
+        // Store debug information
+        setDebugInfo({
+          authContext: authCheck,
+          membership: membershipCheck,
+          userID: user?.id,
+          neighborhoodID: currentNeighborhood?.id,
+          timestamp: new Date().toISOString()
+        });
+        
+        console.log("[useCurrentNeighborhood] Auth Context Check:", {
+          authContextExists: !!authCheck,
+          membershipValid: !!membershipCheck,
+          userID: user?.id,
+          neighborhoodID: currentNeighborhood?.id
+        });
+      } catch (error) {
+        console.error("[useCurrentNeighborhood] Auth context check failed:", error);
+      }
+    };
+    
+    // Only run this check if we have both a user and neighborhood
+    if (user && currentNeighborhood?.id) {
+      checkAuthContext();
+    }
+  }, [user, currentNeighborhood]);
+  
   // Log the current neighborhood status with enhanced details for better debugging
   console.log("[useCurrentNeighborhood] Checking neighborhood context:", { 
     hasNeighborhood: !!currentNeighborhood?.id,
@@ -19,6 +67,8 @@ export const useCurrentNeighborhood = () => {
     neighborhoodName: currentNeighborhood?.name,
     isCoreContributor: isCoreContributor,
     timestamp: new Date().toISOString(),
+    authStatus: !!user,
+    userId: user?.id,
     stack: new Error().stack?.split('\n').slice(1, 3).join('\n') // Get stack trace to see where it's being called from
   });
   
@@ -28,7 +78,10 @@ export const useCurrentNeighborhood = () => {
     console.error("[useCurrentNeighborhood] ⚠️ NO NEIGHBORHOOD SELECTED - RLS WILL FAIL ⚠️", {
       neighborhoodContext: JSON.stringify(currentNeighborhood, null, 2),
       isCoreContributor: isCoreContributor,
-      calledFrom: new Error().stack?.split('\n').slice(1, 5).join('\n'), // More detailed stack trace
+      authStatus: !!user,
+      userId: user?.id,
+      debugInfo: debugInfo, // Include our debug information
+      calledFrom: new Error().stack?.split('\n').slice(1, 5).join('\n'),
       timestamp: new Date().toISOString()
     });
     
@@ -41,7 +94,8 @@ export const useCurrentNeighborhood = () => {
     neighborhoodId: currentNeighborhood.id,
     neighborhoodName: currentNeighborhood.name,
     isCoreContributor: isCoreContributor,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    userId: user?.id
   });
   
   return currentNeighborhood.id;

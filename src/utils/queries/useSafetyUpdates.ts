@@ -2,12 +2,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { useUser } from "@supabase/auth-helpers-react";
 
 /**
  * Hook to fetch safety updates for the current neighborhood
  * With enhanced error logging for debugging RLS issues
  */
 export const useSafetyUpdates = () => {
+  // Get the current user for auth context debugging
+  const user = useUser();
+  
   // Get the current neighborhood ID - this will throw if none is selected
   let neighborhoodId;
   
@@ -21,9 +25,24 @@ export const useSafetyUpdates = () => {
   return useQuery({
     queryKey: ['safety-updates', neighborhoodId],
     queryFn: async () => {
-      console.log("[useSafetyUpdates] Starting query with neighborhood:", neighborhoodId);
+      console.log("[useSafetyUpdates] Starting query with neighborhood:", {
+        neighborhoodId, 
+        userId: user?.id,
+        isAuthenticated: !!user,
+        timestamp: new Date().toISOString()
+      });
       
       try {
+        // First, verify auth context is working
+        const { data: authContext, error: authError } = await supabase.rpc('check_auth_context');
+        
+        if (authError) {
+          console.error("[useSafetyUpdates] Auth context check failed:", authError);
+        } else {
+          console.log("[useSafetyUpdates] Auth context check result:", authContext);
+        }
+        
+        // Now try to fetch the safety updates
         const { data, error } = await supabase
           .from('safety_updates')
           .select(`
@@ -45,6 +64,7 @@ export const useSafetyUpdates = () => {
               code: error.code
             },
             neighborhoodId,
+            userId: user?.id,
             timestamp: new Date().toISOString()
           });
           throw error;
@@ -53,6 +73,7 @@ export const useSafetyUpdates = () => {
         console.log("[useSafetyUpdates] Query successful:", {
           count: data?.length || 0,
           neighborhoodId,
+          userId: user?.id,
           firstItem: data?.[0]?.id,
           timestamp: new Date().toISOString()
         });
@@ -63,6 +84,6 @@ export const useSafetyUpdates = () => {
         throw err;
       }
     },
-    enabled: !!neighborhoodId, // Only run query if we have a neighborhood ID
+    enabled: !!neighborhoodId && !!user, // Only run query if we have BOTH a neighborhood ID AND authenticated user
   });
 };
