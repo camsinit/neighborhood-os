@@ -2,12 +2,20 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Index from './pages/Index';
-import Login from './pages/Login';
-import LandingPage from './pages/LandingPage';
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+
+// Import pages
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import JoinPage from './pages/JoinPage';
+import Index from './pages/Index';
+
+// Import protected pages
 import HomePage from './pages/HomePage';
 import NeighborsPage from './pages/NeighborsPage';
 import SkillsPage from './pages/SkillsPage';
@@ -15,12 +23,10 @@ import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
 import CarePage from './pages/CarePage';
-import JoinPage from './pages/JoinPage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
 import WaitlistAdmin from './pages/WaitlistAdmin';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
+
+// Import components
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 
 /**
@@ -59,7 +65,7 @@ function App() {
       // Mark auth as initialized after getting the initial session
       setAuthInitialized(true);
       
-      console.log("[Supabase Client] Initial auth check:", {
+      console.log("[App] Initial auth check:", {
         hasSession: !!session,
         userId: session?.user?.id,
         timestamp: new Date().toISOString()
@@ -72,7 +78,7 @@ function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       
-      console.log("[Supabase Client] Auth state changed:", {
+      console.log("[App] Auth state changed:", {
         event: _event,
         hasSession: !!session,
         userId: session?.user?.id,

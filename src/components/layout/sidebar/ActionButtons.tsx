@@ -1,99 +1,57 @@
 
-import { Settings, LogOut } from "lucide-react";
+import { Settings, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import InviteNeighborPopover from "@/components/neighbors/InviteNeighborPopover";
+import { useState } from "react";
+import InviteDialog from "@/components/InviteDialog";
 
 /**
- * ActionButtons component props
+ * Props for the ActionButtons component
  */
 interface ActionButtonsProps {
-  onOpenSettings: () => void; // Function to open settings dialog
+  // Function to call when the settings button is clicked
+  onOpenSettings?: () => void;
 }
 
 /**
  * ActionButtons component
  * 
- * Displays the settings and invite action buttons in the sidebar
+ * Displays the settings and invite buttons at the bottom of the sidebar
+ * 
+ * @param onOpenSettings - Function to call when the settings button is clicked
  */
-const ActionButtons = ({ 
-  onOpenSettings, 
-}: ActionButtonsProps) => {
-  // Get the toast notification function
-  const { toast } = useToast();
+const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
+  // State to control the invite dialog visibility
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   
-  // Get navigation for logout redirect
-  const navigate = useNavigate();
-  
-  // Function to handle user logout
-  const handleLogout = async () => {
-    try {
-      // Display a logout notification
-      toast({
-        title: "Logging out",
-        description: "You are being signed out...",
-      });
-      
-      // Sign out the user using Supabase auth
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Redirect to login page
-      navigate("/login");
-      
-      // Show success message
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
-    } catch (error: any) {
-      console.error("Logout error:", error);
-      
-      // Show error toast
-      toast({
-        title: "Logout failed",
-        description: error.message || "There was a problem signing out",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
-    <div className="space-y-1">
-      {/* 
-        Settings button - directly calls the provided callback function
-        This is a direct event handler with no conditions or state checks
-      */}
+    <div className="space-y-2">
+      {/* Settings button */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
+        size="sm"
+        className="w-full justify-start"
         onClick={onOpenSettings}
-        type="button"
-        aria-label="Open settings dialog"
       >
-        <Settings className="h-5 w-5" />
+        <Settings className="mr-2 h-4 w-4" />
         Settings
       </Button>
       
-      {/* Invite Neighbor Popover - replaces the previous dialog approach */}
-      <InviteNeighborPopover />
-      
-      {/* Logout button */}
+      {/* Invite button */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium text-red-500"
-        onClick={handleLogout}
-        type="button"
-        aria-label="Log out of your account"
+        size="sm"
+        className="w-full justify-start"
+        onClick={() => setIsInviteOpen(true)}
       >
-        <LogOut className="h-5 w-5" />
-        Logout
+        <UserPlus className="mr-2 h-4 w-4" />
+        Invite Neighbor
       </Button>
+      
+      {/* Invite dialog */}
+      <InviteDialog
+        open={isInviteOpen}
+        onOpenChange={setIsInviteOpen}
+      />
     </div>
   );
 };

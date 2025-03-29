@@ -1,8 +1,6 @@
 
-import { useState } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
 
 // Import sidebar components
 import Logo from './Logo';
@@ -12,14 +10,21 @@ import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
 
 /**
+ * Props for the Sidebar component
+ */
+interface SidebarProps {
+  // Function to call when the settings button is clicked
+  onOpenSettings?: () => void;
+}
+
+/**
  * Sidebar component
  * 
  * Displays the navigation sidebar with links to different sections of the app
+ * 
+ * @param onOpenSettings - Function to call when the settings button is clicked
  */
-const Sidebar = () => {
-  // State to control the settings dialog visibility
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get current user
   const user = useUser();
   
@@ -27,13 +32,6 @@ const Sidebar = () => {
   const { 
     currentNeighborhood
   } = useNeighborhood();
-
-  // Function to handle opening settings dialog
-  const handleOpenSettings = () => {
-    console.log("[Sidebar] Opening settings dialog - setting state to true");
-    // Directly open the dialog by setting state to true
-    setIsSettingsOpen(true);
-  };
 
   return (
     <div className="w-64 border-r bg-white flex flex-col h-screen sticky top-0">
@@ -56,7 +54,7 @@ const Sidebar = () => {
 
         {/* Settings and Invite buttons */}
         <ActionButtons 
-          onOpenSettings={handleOpenSettings}
+          onOpenSettings={onOpenSettings}
         />
         
         {/* Diagnostics information panel - with reduced content */}
@@ -65,12 +63,6 @@ const Sidebar = () => {
           currentNeighborhood={currentNeighborhood}
         />
       </nav>
-      
-      {/* Settings dialog wrapper component (shown when isSettingsOpen is true) */}
-      <SettingsDialogWrapper
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-      />
     </div>
   );
 };
