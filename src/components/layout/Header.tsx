@@ -1,11 +1,10 @@
 
-import { Settings, UserCircle } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -20,7 +19,8 @@ interface HeaderProps {
 /**
  * Header component
  * 
- * Displays the top navigation bar with user profile dropdown and notifications
+ * Displays the top navigation bar with user profile dropdown
+ * - Simplified to remove dashboard title and notifications
  */
 const Header = ({
   onOpenSettings
@@ -70,15 +70,9 @@ const Header = ({
   };
 
   return (
-    <header className="bg-white border-b px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-      {/* Header title - left side */}
-      <div className="text-lg font-medium">Dashboard</div>
-      
-      {/* User profile and notifications - right side */}
-      <div className="flex items-center space-x-4">
-        {/* Notifications popover */}
-        <NotificationsPopover />
-        
+    <header className="bg-white border-b px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-end">
+      {/* User profile dropdown - now aligned to the right */}
+      <div className="flex items-center">
         {/* User profile dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
