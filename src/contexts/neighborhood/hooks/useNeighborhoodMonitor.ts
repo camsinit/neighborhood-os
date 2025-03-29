@@ -1,53 +1,51 @@
-
 /**
- * Hook for monitoring neighborhood data and safety timeouts
- * 
- * This hook provides logging and timeout safety mechanisms for
- * neighborhood data operations.
+ * Hook for monitoring neighborhood data loading state
+ *
+ * This simplified version removes core contributor functionality.
  */
 import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../types';
 
 /**
- * Hook that monitors neighborhood data changes and provides safety timeouts
+ * Props for the useNeighborhoodMonitor hook
+ */
+interface UseNeighborhoodMonitorProps {
+  currentNeighborhood: Neighborhood | null;
+  isLoading: boolean;
+  error: Error | null;
+  user: User | null;
+  fetchAttempts: number;
+  setIsLoading: (isLoading: boolean) => void;
+  setError: (error: Error | null) => void;
+}
+
+/**
+ * Custom hook that monitors neighborhood data loading state
+ * and prevents infinite loading
  * 
- * @param props - The monitoring properties
+ * @param props - The props for the hook
  */
 export function useNeighborhoodMonitor({
   currentNeighborhood,
-  isLoading, 
-  error, 
-  isCoreContributor, 
-  allNeighborhoods,
+  isLoading,
+  error,
   user,
   fetchAttempts,
   setIsLoading,
   setError
-}: {
-  currentNeighborhood: Neighborhood | null;
-  isLoading: boolean;
-  error: Error | null;
-  isCoreContributor: boolean;
-  allNeighborhoods: Neighborhood[];
-  user: User | null | undefined;
-  fetchAttempts: number;
-  setIsLoading: (isLoading: boolean) => void;
-  setError: (error: Error | null) => void;
-}) {
+}: UseNeighborhoodMonitorProps) {
   // Log state changes for debugging
   useEffect(() => {
     console.log("[useNeighborhoodMonitor] State updated:", {
       currentNeighborhood,
       isLoading,
       error: error?.message || null,
-      isCoreContributor,
-      neighborhoodCount: allNeighborhoods.length,
       userId: user?.id,
       fetchAttempts,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoading, error, isCoreContributor, allNeighborhoods, user, fetchAttempts]);
+  }, [currentNeighborhood, isLoading, error, user, fetchAttempts]);
   
   // Add a safety timeout to ensure loading state is eventually cleared
   useEffect(() => {

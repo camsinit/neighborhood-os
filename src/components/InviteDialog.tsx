@@ -14,12 +14,10 @@ import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
-import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { Neighborhood } from "@/contexts/neighborhood/types";
 import { 
   fetchCreatedNeighborhoods, 
-  fetchAllNeighborhoods, 
-  checkCoreContributorAccess
+  fetchAllNeighborhoods
 } from "@/contexts/neighborhood/utils";
 
 /**
@@ -27,6 +25,7 @@ import {
  * 
  * This component allows existing neighborhood members to invite others.
  * It generates unique invite codes tied to both the neighborhood and the inviter.
+ * Core contributor functionality has been removed.
  */
 const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   // State for the email input and link generation process
@@ -42,7 +41,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     currentNeighborhood, 
     isLoading, 
     error, 
-    isCoreContributor,
     refreshNeighborhoodData // Get the refresh function 
   } = useNeighborhood();
 
@@ -78,7 +76,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         isLoading,
         error,
         isGeneratingLink,
-        isCoreContributor,
         loadingTooLong
       });
       
@@ -86,7 +83,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         console.log("[InviteDialog] Still loading...");
       }
     }
-  }, [open, user, currentNeighborhood, isLoading, error, isGeneratingLink, isCoreContributor, loadingTooLong]);
+  }, [open, user, currentNeighborhood, isLoading, error, isGeneratingLink, loadingTooLong]);
 
   /**
    * Generates a unique invitation link and copies it to clipboard
@@ -216,9 +213,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       // Check if user has created neighborhoods - using security definer functions
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
-      // Check if user is a core contributor
-      const isCoreContrib = await checkCoreContributorAccess(user.id);
-      
       // Get neighborhood details from all neighborhoods 
       const allNeighborhoods = await fetchAllNeighborhoods();
       
@@ -226,7 +220,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       const diagnosticInfo = {
         userId: user.id,
         createdNeighborhoods: createdNeighborhoods || [],
-        isCoreContributor: isCoreContrib,
         availableNeighborhoods: allNeighborhoods || [],
         timestamp: new Date().toISOString()
       };
@@ -382,18 +375,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
                 </Button>
               </div>
             </>
-          )}
-          
-          {/* Only show God Mode if user is a core contributor */}
-          {isCoreContributor && (
-            <div className="mt-4 pt-4 border-t">
-              <div className="flex justify-center">
-                <GodModeSelector />
-              </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                As a core contributor, you can access all neighborhoods in God Mode.
-              </p>
-            </div>
           )}
         </div>
       </DialogContent>

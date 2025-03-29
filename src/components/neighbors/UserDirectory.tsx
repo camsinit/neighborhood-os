@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
@@ -15,8 +14,6 @@ import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
 import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
-// Still import GodModeSelector to avoid breaking imports, but we won't use it
-import GodModeSelector from "./GodModeSelector";
 
 /**
  * UserDirectory Component
@@ -39,8 +36,6 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     currentNeighborhood, 
     isLoading: isLoadingNeighborhood, 
     error: neighborhoodError,
-    // Still include isCoreContributor to avoid breaking changes
-    isCoreContributor
   } = useNeighborhood();
   
   // Use our custom hook to fetch users
@@ -58,10 +53,9 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
       neighborhoodName: currentNeighborhood?.name,
       isLoading: isLoadingNeighborhood,
       error: neighborhoodError ? neighborhoodError.message : null,
-      isCoreContributor,
       timestamp: new Date().toISOString()
     });
-  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError, isCoreContributor]);
+  }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError]);
   
   // Add debugging for tracking the query state
   useEffect(() => {
@@ -145,7 +139,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
           onRefresh={handleRefresh} 
         />
         
-        {/* God Mode selector removed - we're not rendering it even if isCoreContributor is true */}
+        {/* God Mode selector removed */}
       </div>
       
       {/* Grid of neighbor cards */}

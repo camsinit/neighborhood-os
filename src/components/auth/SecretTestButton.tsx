@@ -1,7 +1,12 @@
+
 import { useState } from "react";
 import OnboardingDialog from "@/components/onboarding/OnboardingDialog";
 import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
+/**
+ * A hidden test button component that allows triggering onboarding flow
+ * Simplified for clarity
+ */
 const SecretTestButton = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);

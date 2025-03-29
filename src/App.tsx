@@ -20,18 +20,13 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import WaitlistAdmin from './pages/WaitlistAdmin';
-import { checkAuthState } from './utils/authStateCheck';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
-// Create a client
-// We're actually not using this one now - we're using the one from main.tsx
-// But we'll keep it for now to avoid breaking existing code
+// Create a client (reduced comments for simplicity)
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Retry failed queries up to 2 times
       retry: 2,
-      // Keep cached data for 5 minutes
       staleTime: 5 * 60 * 1000,
     },
   },
@@ -51,50 +46,22 @@ function App() {
 
   // Set up auth state change listener when the app loads
   useEffect(() => {
-    console.info("[App] Setting up auth state change listener");
-    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      console.info("[App] Initial session check:", {
-        hasSession: !!session,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email
-      });
-      
-      // If we have a session, run a diagnostic check
-      if (session) {
-        checkAuthState().then(state => {
-          console.info("[App] Auth diagnostic check:", state);
-        });
-      }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.info("[App] Auth state changed:", {
-        event: _event,
-        sessionExists: !!session,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email
-      });
       setSession(session);
-      
-      // Run diagnostic check on auth changes
-      if (session) {
-        checkAuthState().then(state => {
-          console.info("[App] Auth state change diagnostic:", state);
-        });
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Moved SessionContextProvider here from main.tsx and wrapped it around Router
-  // This ensures we don't have nested Router components
+  // Provide session context and neighborhood context to the app
   return (
     <SessionContextProvider supabaseClient={supabase}>
       <NeighborhoodProvider>

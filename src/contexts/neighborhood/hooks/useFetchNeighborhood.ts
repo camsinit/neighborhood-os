@@ -2,17 +2,12 @@
 /**
  * Hook for fetching neighborhood data
  *
- * This hook handles the actual data fetching logic for neighborhoods
- * and contains the core neighborhood data retrieval functionality.
+ * This simplified version has removed core contributor functionality.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../types';
-import { 
-  fetchCreatedNeighborhoods, 
-  checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor
-} from '../utils';
+import { fetchCreatedNeighborhoods } from '../utils';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -38,10 +33,8 @@ export function useFetchNeighborhood(
     setIsLoading: (isLoading: boolean) => void;
   }
 ) {
-  // State variables for neighborhood data
+  // State variables for neighborhood data - removed core contributor related state
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
-  const [isCoreContributor, setIsCoreContributor] = useState(false);
-  const [allNeighborhoods, setAllNeighborhoods] = useState<Neighborhood[]>([]);
 
   // The main fetch function that retrieves neighborhood data
   const fetchNeighborhood = useCallback(async () => {
@@ -55,32 +48,6 @@ export function useFetchNeighborhood(
     const startTime = startFetch();
     
     try {
-      // First check if the user is a core contributor with access to all neighborhoods
-      console.log(`[useFetchNeighborhood] Checking if user is core contributor (attempt ${fetchAttempts})`);
-      const isContributor = await checkCoreContributorAccess(user.id);
-      setIsCoreContributor(isContributor);
-      
-      // If they are a core contributor, fetch all neighborhoods
-      if (isContributor) {
-        console.log("[useFetchNeighborhood] User is a core contributor with access to all neighborhoods", {
-          fetchAttempt: fetchAttempts
-        });
-        
-        // Fetch all neighborhoods
-        const neighborhoods = await fetchAllNeighborhoodsForCoreContributor(user.id);
-        setAllNeighborhoods(neighborhoods);
-        
-        // If we have neighborhoods and no current one is set, set the first one as current
-        if (neighborhoods.length > 0 && !currentNeighborhood) {
-          console.log(`[useFetchNeighborhood] Setting first neighborhood for core contributor (attempt ${fetchAttempts})`, {
-            neighborhood: neighborhoods[0]
-          });
-          setCurrentNeighborhood(neighborhoods[0]);
-          completeFetch(startTime);
-          return;
-        }
-      }
-
       // If we already have a current neighborhood, we're done
       if (currentNeighborhood) {
         completeFetch(startTime);
@@ -130,7 +97,6 @@ export function useFetchNeighborhood(
         }
       } catch (memErr) {
         console.warn("[useFetchNeighborhood] Exception in membership check:", memErr);
-        // Continue to fallback methods
       }
       
       console.log("[useFetchNeighborhood] No neighborhoods found (attempt " + fetchAttempts + ")");
@@ -156,10 +122,9 @@ export function useFetchNeighborhood(
     setIsLoading
   ]);
 
+  // Return simplified data and functions (removed core contributor related data)
   return {
     currentNeighborhood,
-    isCoreContributor,
-    allNeighborhoods,
     setCurrentNeighborhood,
     fetchNeighborhood
   };

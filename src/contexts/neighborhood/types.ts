@@ -1,37 +1,22 @@
+
 /**
- * Types for the neighborhood context and related functions
+ * Neighborhood context types
+ * 
+ * This file has been simplified to remove core contributor functionality.
  */
 
-// Basic neighborhood data structure
+// Define the Neighborhood type
 export interface Neighborhood {
   id: string;
   name: string;
-  // Other fields that might be present but not required for basic functionality
-  created_by?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
 }
 
-// Type for the neighborhood context
+// Define the context type
 export interface NeighborhoodContextType {
-  // Current selected neighborhood
   currentNeighborhood: Neighborhood | null;
-  
-  // Loading and error states
   isLoading: boolean;
   error: Error | null;
-  
-  // Core contributor status (for "God Mode")
-  isCoreContributor: boolean;
-  
-  // All available neighborhoods for this user
-  allNeighborhoods: Neighborhood[];
-  
-  // Function to change the selected neighborhood
-  setCurrentNeighborhood: (neighborhood: Neighborhood) => void;
-  
-  // Function to manually refresh neighborhood data
+  // Removed isCoreContributor and allNeighborhoods
+  setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void;
   refreshNeighborhoodData: () => void;
 }

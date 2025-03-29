@@ -2,8 +2,7 @@
 /**
  * Main neighborhood data hook
  * 
- * This hook combines smaller, focused hooks to provide neighborhood data
- * functionality throughout the application.
+ * This hook has been simplified to remove core contributor functionality.
  */
 import { User } from '@supabase/supabase-js';
 import { useNeighborhoodStatus } from './hooks/useNeighborhoodStatus';
@@ -15,8 +14,7 @@ import { useEffect } from 'react';
 /**
  * Custom hook that handles fetching and managing neighborhood data
  * 
- * This enhanced version handles the RLS recursion issue by using 
- * security definer functions and adds fallback mechanisms
+ * This simplified version removes core contributor functionality
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -37,7 +35,7 @@ export function useNeighborhoodData(user: User | null) {
   // Wait for auth to stabilize
   const isAuthStable = useAuthStabilizer(user);
   
-  // Initialize neighborhood data fetching
+  // Initialize neighborhood data fetching - simplified version
   const neighborhoodHook = useFetchNeighborhood(
     isAuthStable ? user : null,
     fetchAttempts,
@@ -45,19 +43,15 @@ export function useNeighborhoodData(user: User | null) {
   );
   const {
     currentNeighborhood,
-    isCoreContributor,
-    allNeighborhoods,
     setCurrentNeighborhood,
     fetchNeighborhood
   } = neighborhoodHook;
   
-  // Set up monitoring and safety timeouts
+  // Set up monitoring and safety timeouts - removed core contributor parameters
   useNeighborhoodMonitor({
     currentNeighborhood,
     isLoading,
     error,
-    isCoreContributor,
-    allNeighborhoods,
     user,
     fetchAttempts,
     setIsLoading,
@@ -73,13 +67,11 @@ export function useNeighborhoodData(user: User | null) {
     }
   }, [isAuthStable, user, fetchAttempts, fetchNeighborhood]);
 
-  // Return combined state and functions from all hooks
+  // Return simplified state and functions (removed core contributor data)
   return { 
     currentNeighborhood, 
     isLoading, 
     error,
-    isCoreContributor,
-    allNeighborhoods,
     setCurrentNeighborhood,
     refreshNeighborhoodData
   };
