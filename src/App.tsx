@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -20,6 +21,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import WaitlistAdmin from './pages/WaitlistAdmin';
 import { checkAuthState } from './utils/authStateCheck';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
 // Create a client
 // We're actually not using this one now - we're using the one from main.tsx
@@ -91,32 +93,35 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // We KEEP the BrowserRouter (Router) only in App.tsx, not in main.tsx
+  // Moved SessionContextProvider here from main.tsx and wrapped it around Router
+  // This ensures we don't have nested Router components
   return (
-    <NeighborhoodProvider>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/join" element={<JoinPage />} />
+    <SessionContextProvider supabaseClient={supabase}>
+      <NeighborhoodProvider>
+        <Router>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/join" element={<JoinPage />} />
 
-          {/* Protected routes */}
-          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
-          <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
-          <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-          <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
-          <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
-          <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
+            {/* Protected routes */}
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/neighbors" element={<ProtectedRoute><NeighborsPage /></ProtectedRoute>} />
+            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+            <Route path="/goods" element={<ProtectedRoute><GoodsPage /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><SafetyPage /></ProtectedRoute>} />
+            <Route path="/care" element={<ProtectedRoute><CarePage /></ProtectedRoute>} />
+            <Route path="/admin/waitlist" element={<ProtectedRoute><WaitlistAdmin /></ProtectedRoute>} />
 
-          {/* Default to Index */}
-          <Route path="*" element={<Index />} />
-        </Routes>
-        <Toaster position="top-center" />
-      </Router>
-    </NeighborhoodProvider>
+            {/* Default to Index */}
+            <Route path="*" element={<Index />} />
+          </Routes>
+          <Toaster position="top-center" />
+        </Router>
+      </NeighborhoodProvider>
+    </SessionContextProvider>
   );
 }
 
