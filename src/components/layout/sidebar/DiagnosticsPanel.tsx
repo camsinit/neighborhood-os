@@ -8,18 +8,17 @@ import { Neighborhood } from "@/contexts/neighborhood/types";
 interface DiagnosticsPanelProps {
   user: User | null;
   currentNeighborhood: Neighborhood | null;
-  isCoreContributor: boolean;
+  isCoreContributor: boolean; // We keep this prop to avoid breaking changes
 }
 
 /**
- * DiagnosticsPanel component
+ * DiagnosticsPanel component - SIMPLIFIED VERSION
  * 
  * Displays diagnostic information in the sidebar
- * Now with user ID and other diagnostic elements removed
+ * Core contributor status display has been removed
  */
 const DiagnosticsPanel = ({ 
-  currentNeighborhood,
-  isCoreContributor
+  currentNeighborhood
 }: DiagnosticsPanelProps) => {
   return (
     <div className="space-y-2 mt-4">
@@ -31,13 +30,7 @@ const DiagnosticsPanel = ({
         </div>
       )}
       
-      {/* Display core contributor status */}
-      {isCoreContributor && (
-        <div className="px-2 py-1 bg-amber-50 rounded text-xs text-amber-600">
-          <div className="font-semibold mb-1">Access Level:</div>
-          <div>Core Contributor</div>
-        </div>
-      )}
+      {/* Core contributor status display removed */}
     </div>
   );
 };

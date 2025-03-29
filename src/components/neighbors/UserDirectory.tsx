@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
@@ -15,6 +14,7 @@ import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
 import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
+// Still import GodModeSelector to avoid breaking imports, but we won't use it
 import GodModeSelector from "./GodModeSelector";
 
 /**
@@ -38,6 +38,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     currentNeighborhood, 
     isLoading: isLoadingNeighborhood, 
     error: neighborhoodError,
+    // Still include isCoreContributor to avoid breaking changes
     isCoreContributor
   } = useNeighborhood();
   
@@ -84,7 +85,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
     });
     refetch();
   };
-
+  
   // Filter users based on search query
   const filteredUsers = users?.filter(user => 
     searchQuery === "" || 
@@ -143,12 +144,7 @@ export const UserDirectory = ({ searchQuery = "" }: UserDirectoryProps) => {
           onRefresh={handleRefresh} 
         />
         
-        {/* Show God Mode selector if user is a core contributor */}
-        {isCoreContributor && (
-          <div className="flex justify-end">
-            <GodModeSelector />
-          </div>
-        )}
+        {/* God Mode selector removed - we're not rendering it even if isCoreContributor is true */}
       </div>
       
       {/* Grid of neighbor cards */}

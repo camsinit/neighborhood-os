@@ -1,14 +1,14 @@
+
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 
 /**
- * Custom hook to get the current neighborhood ID and throw an error if none is selected
- * This is a critical hook used throughout the application to ensure proper neighborhood context
+ * Custom hook to get the current neighborhood ID
+ * SIMPLIFIED VERSION: No longer throws errors when no neighborhood is selected
  * 
- * @returns The current neighborhood ID
- * @throws Error if no neighborhood is selected
+ * @returns The current neighborhood ID or null if none selected
  */
 export const useCurrentNeighborhood = () => {
   // Get the neighborhood context from the provider
@@ -30,19 +30,11 @@ export const useCurrentNeighborhood = () => {
           .select('id')
           .limit(1);
         
-        // Check if the user is associated with the neighborhood using direct query
-        const { data: membershipCheck } = await supabase
-          .from('neighborhood_members')
-          .select('user_id') 
-          .eq('user_id', user?.id || '')
-          .eq('neighborhood_id', currentNeighborhood?.id || '')
-          .eq('status', 'active')
-          .maybeSingle();
+        // Simplified: Skip the membership check to avoid potential RLS recursion
         
         // Store debug information
         setDebugInfo({
           authContext: authResult?.[0]?.id === user?.id ? 'Valid' : 'Mismatch',
-          membership: !!membershipCheck,
           userID: user?.id,
           neighborhoodID: currentNeighborhood?.id,
           timestamp: new Date().toISOString()
@@ -52,7 +44,6 @@ export const useCurrentNeighborhood = () => {
           authContextExists: !!authResult,
           authUserId: authResult?.[0]?.id,
           currentUserId: user?.id,
-          membershipValid: !!membershipCheck,
           neighborhoodID: currentNeighborhood?.id
         });
       } catch (error) {
@@ -75,31 +66,17 @@ export const useCurrentNeighborhood = () => {
     timestamp: new Date().toISOString(),
     authStatus: !!user,
     userId: user?.id,
-    stack: new Error().stack?.split('\n').slice(1, 3).join('\n') // Get stack trace to see where it's being called from
   });
   
-  // If no neighborhood is selected, log detailed error information and throw an error
+  // SIMPLIFIED: Instead of throwing an error, return null if no neighborhood is selected
   if (!currentNeighborhood?.id) {
-    // Enhance error logging with more context
-    console.error("[useCurrentNeighborhood] ⚠️ NO NEIGHBORHOOD SELECTED - RLS WILL FAIL ⚠️", {
-      neighborhoodContext: JSON.stringify(currentNeighborhood, null, 2),
-      isCoreContributor: isCoreContributor,
-      authStatus: !!user,
-      userId: user?.id,
-      debugInfo: debugInfo, // Include our debug information
-      calledFrom: new Error().stack?.split('\n').slice(1, 5).join('\n'),
-      timestamp: new Date().toISOString()
-    });
-    
-    // Throw a more descriptive error
-    throw new Error("No neighborhood selected - this will cause RLS policies to block data access");
+    console.warn("[useCurrentNeighborhood] No neighborhood selected - returning null instead of throwing error");
+    return null;
   }
   
-  // If we get here, we have a valid neighborhood ID, so log success and return it
   console.log("[useCurrentNeighborhood] ✅ Valid neighborhood found:", { 
     neighborhoodId: currentNeighborhood.id,
     neighborhoodName: currentNeighborhood.name,
-    isCoreContributor: isCoreContributor,
     timestamp: new Date().toISOString(),
     userId: user?.id
   });
