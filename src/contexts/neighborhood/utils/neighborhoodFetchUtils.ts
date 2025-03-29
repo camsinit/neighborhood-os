@@ -1,3 +1,4 @@
+
 /**
  * Neighborhood fetching utilities
  * 
@@ -69,6 +70,38 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
     return data as Neighborhood[];
   } catch (error) {
     console.error("[fetchAllNeighborhoods] Unexpected error:", error);
+    return [];
+  }
+};
+
+/**
+ * Fetch members of a specific neighborhood
+ * 
+ * @param neighborhoodId - The ID of the neighborhood to get members for
+ * @returns Array of user IDs who are members of the neighborhood
+ */
+export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
+  try {
+    // Since RLS is disabled, we can simply query the neighborhood_members table directly
+    const { data, error } = await supabase
+      .from("neighborhood_members")
+      .select("user_id")
+      .eq("neighborhood_id", neighborhoodId)
+      .eq("status", "active");
+    
+    if (error) {
+      console.error("[fetchNeighborhoodMembers] Error:", error.message);
+      return [];
+    }
+    
+    // Extract just the user_id values from each row
+    const memberIds = data.map(row => row.user_id);
+    
+    console.log(`[fetchNeighborhoodMembers] Found ${memberIds.length} members for neighborhood ${neighborhoodId}`);
+    
+    return memberIds;
+  } catch (error) {
+    console.error("[fetchNeighborhoodMembers] Unexpected error:", error);
     return [];
   }
 };
