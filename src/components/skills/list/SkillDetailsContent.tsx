@@ -22,7 +22,7 @@ interface SkillDetailsContentProps {
     display_name: string | null;
     avatar_url: string | null;
     id: string;
-  }[];
+  } | null;
   created_at?: string;
   request_type?: string;
   availability?: string | null;
@@ -56,15 +56,27 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
   const title = props.skill?.title || props.title || '';
   const description = props.skill?.description || props.description;
   const category = props.skill?.skill_category || props.category || 'other';
-  const profiles = props.skill?.profiles ? [props.skill.profiles] : props.profiles || [];
+  
+  // Handle profiles data - ensure it's properly typed
+  let profileData: { display_name: string | null; avatar_url: string | null; id: string } | null = null;
+  
+  if (props.skill?.profiles) {
+    // If we have a skill object with profiles
+    profileData = props.skill.profiles as { display_name: string | null; avatar_url: string | null; id: string };
+  } else if (props.profiles) {
+    // If we have profiles from individual props
+    profileData = props.profiles;
+  }
+  
   const created_at = props.skill?.created_at || props.created_at || '';
   const request_type = props.skill?.request_type || props.request_type || '';
   const availability = props.skill?.availability || props.availability;
   const time_preferences = props.skill?.time_preferences || props.time_preferences;
   
   // Determine if the current user is the owner
-  const profile = profiles[0] || {};
-  const isOwnSkill = props.isOwner !== undefined ? props.isOwner : (user?.id === profile.id);
+  const isOwnSkill = props.isOwner !== undefined 
+    ? props.isOwner 
+    : (user?.id === profileData?.id);
   const isRequest = request_type === 'need';
 
   // Format the creation date
@@ -91,6 +103,11 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
   const { bg, text } = categoryColors[category as keyof typeof categoryColors] || 
     categoryColors.other;
 
+  // Fallback display name and avatar handling for better UX
+  const displayName = profileData?.display_name || 'Neighbor';
+  const avatarUrl = profileData?.avatar_url || null;
+  const providerId = profileData?.id || '';
+
   return (
     <div className="space-y-6 p-1">
       {/* Header with title and category */}
@@ -109,14 +126,14 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
       {/* User profile information */}
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          {profile.avatar_url ? (
-            <AvatarImage src={profile.avatar_url} alt={profile.display_name || ''} />
+          {avatarUrl ? (
+            <AvatarImage src={avatarUrl} alt={displayName} />
           ) : (
-            <AvatarFallback>{(profile.display_name || 'U')[0]}</AvatarFallback>
+            <AvatarFallback>{displayName[0].toUpperCase()}</AvatarFallback>
           )}
         </Avatar>
         <div>
-          <p className="font-medium text-gray-900">{profile.display_name || 'Neighbor'}</p>
+          <p className="font-medium text-gray-900">{displayName}</p>
           <p className="text-sm text-gray-500">
             {isRequest ? 'Needs help with this' : 'Offering to help'}
           </p>
@@ -182,7 +199,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
         onOpenChange={setShowRequestDialog}
         skillId={id}
         skillTitle={title}
-        providerId={profile.id}
+        providerId={providerId}
       />
     </div>
   );
