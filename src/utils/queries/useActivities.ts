@@ -1,3 +1,4 @@
+
 /**
  * This module provides functionality to fetch and manage neighborhood activities
  * It has been enhanced to ensure activity titles stay synchronized with their source content
@@ -18,6 +19,13 @@ export type ActivityType =
   | 'care_requested' 
   | 'safety_update';
 
+// Define the shape of metadata to ensure type safety
+interface ActivityMetadata {
+  deleted?: boolean;
+  original_title?: string;
+  [key: string]: any;
+}
+
 // Main Activity interface
 export interface Activity {
   id: string;
@@ -27,11 +35,7 @@ export interface Activity {
   content_type: string;
   title: string;
   created_at: string;
-  metadata?: {
-    deleted?: boolean;
-    original_title?: string;
-    [key: string]: any;
-  };
+  metadata?: ActivityMetadata;
   profiles: {
     display_name: string;
     avatar_url: string;
@@ -108,6 +112,18 @@ const fetchContentTitles = async (
 };
 
 /**
+ * Helper function to safely check if metadata has the deleted flag
+ * This handles cases where metadata might be a string or other non-object type
+ */
+const isContentDeleted = (metadata: any): boolean => {
+  // Check if metadata exists and is an object
+  if (!metadata || typeof metadata !== 'object') return false;
+  
+  // Now we can safely check for the deleted property
+  return metadata.deleted === true;
+};
+
+/**
  * Fetches recent activities from the database
  * 
  * This has been optimized to fetch up-to-date titles from related content tables
@@ -145,7 +161,7 @@ const fetchActivities = async (): Promise<Activity[]> => {
   
   activitiesData.forEach(activity => {
     // Skip if activity is already marked as deleted
-    if (activity.metadata?.deleted) return;
+    if (isContentDeleted(activity.metadata)) return;
     
     const contentType = activity.content_type;
     if (!contentIdsByType[contentType]) {
@@ -159,8 +175,10 @@ const fetchActivities = async (): Promise<Activity[]> => {
   
   // Process activities and use updated titles where available
   const activities = activitiesData.map(activity => {
-    // Keep original metadata
-    const metadata = activity.metadata || {};
+    // Ensure metadata is an object we can work with
+    const metadata = typeof activity.metadata === 'object' && activity.metadata !== null 
+      ? activity.metadata 
+      : {};
     
     // If we have an updated title for this content, use it
     if (updatedTitlesMap.has(activity.content_id)) {
@@ -168,7 +186,7 @@ const fetchActivities = async (): Promise<Activity[]> => {
         ...activity,
         title: updatedTitlesMap.get(activity.content_id)!
       };
-    } else if (!metadata.deleted && !updatedTitlesMap.has(activity.content_id)) {
+    } else if (!isContentDeleted(metadata) && !updatedTitlesMap.has(activity.content_id)) {
       // If we didn't get a title AND the content wasn't explicitly marked as deleted,
       // it probably means the content was deleted without proper cleanup
       // Mark it as implicitly deleted
