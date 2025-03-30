@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,7 @@ const HomePage = () => {
     queryKey: ["notifications", showArchived],
     queryFn: async () => {
       // Fetch data from multiple tables concurrently
+      // For events data, we'll get the latest information directly
       const [safetyUpdates, events, supportRequests] = await Promise.all([
         supabase.from("safety_updates").select(`
             id, 
@@ -44,7 +46,10 @@ const HomePage = () => {
             )
           `).eq('is_archived', showArchived).order("created_at", {
         ascending: false
-      }).limit(5), supabase.from("events").select(`
+      }).limit(5),
+        
+        // Query events with a direct join to get up-to-date event information
+        supabase.from("events").select(`
             id, 
             title, 
             created_at, 
@@ -56,7 +61,9 @@ const HomePage = () => {
             )
           `).eq('is_archived', showArchived).order("created_at", {
         ascending: false
-      }).limit(5), supabase.from("support_requests").select(`
+      }).limit(5),
+        
+        supabase.from("support_requests").select(`
             id, 
             title, 
             created_at, 
@@ -69,43 +76,52 @@ const HomePage = () => {
           `).eq('is_archived', showArchived).order("created_at", {
         ascending: false
       }).limit(5)]);
-      return [...(safetyUpdates.data?.map(update => ({
-        id: update.id,
-        title: update.title,
-        type: "safety" as const,
-        created_at: update.created_at,
-        is_read: update.is_read,
-        is_archived: update.is_archived,
-        context: {
-          contextType: "safety_alert" as const,
-          neighborName: update.profiles?.display_name,
-          avatarUrl: update.profiles?.avatar_url
-        }
-      })) || []), ...(events.data?.map(event => ({
-        id: event.id,
-        title: event.title,
-        type: "event" as const,
-        created_at: event.created_at,
-        is_read: event.is_read,
-        is_archived: event.is_archived,
-        context: {
-          contextType: "event_invite" as const,
-          neighborName: event.profiles?.display_name,
-          avatarUrl: event.profiles?.avatar_url
-        }
-      })) || []), ...(supportRequests.data?.map(request => ({
-        id: request.id,
-        title: request.title,
-        type: "support" as const,
-        created_at: request.created_at,
-        is_read: request.is_read,
-        is_archived: request.is_archived,
-        context: {
-          contextType: "help_request" as const,
-          neighborName: request.profiles?.display_name,
-          avatarUrl: request.profiles?.avatar_url
-        }
-      })) || [])].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      // Process the results, transforming them into consistent notification objects
+      // The important part is that we're using the latest event titles from the events table
+      return [
+        ...(safetyUpdates.data?.map(update => ({
+          id: update.id,
+          title: update.title,
+          type: "safety" as const,
+          created_at: update.created_at,
+          is_read: update.is_read,
+          is_archived: update.is_archived,
+          context: {
+            contextType: "safety_alert" as const,
+            neighborName: update.profiles?.display_name,
+            avatarUrl: update.profiles?.avatar_url
+          }
+        })) || []), 
+        
+        ...(events.data?.map(event => ({
+          id: event.id,
+          title: event.title, // This will always have the up-to-date title
+          type: "event" as const,
+          created_at: event.created_at,
+          is_read: event.is_read,
+          is_archived: event.is_archived,
+          context: {
+            contextType: "event_invite" as const,
+            neighborName: event.profiles?.display_name,
+            avatarUrl: event.profiles?.avatar_url
+          }
+        })) || []), 
+        
+        ...(supportRequests.data?.map(request => ({
+          id: request.id,
+          title: request.title,
+          type: "support" as const,
+          created_at: request.created_at,
+          is_read: request.is_read,
+          is_archived: request.is_archived,
+          context: {
+            contextType: "help_request" as const,
+            neighborName: request.profiles?.display_name,
+            avatarUrl: request.profiles?.avatar_url
+          }
+        })) || [])
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
 

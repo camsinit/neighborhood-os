@@ -1,4 +1,3 @@
-
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -44,6 +43,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
+        
         supabase
           .from("events")
           .select(`
@@ -60,6 +60,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
+          
         supabase
           .from("support_requests")
           .select(`
@@ -95,6 +96,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionLabel: "Comment",
           actionType: "comment" as NotificationActionType
         })) || []),
+        
         ...(events.data?.map(event => ({
           itemId: event.id,
           title: event.title,
@@ -110,6 +112,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionLabel: "RSVP",
           actionType: "rsvp" as NotificationActionType
         })) || []),
+        
         ...(supportRequests.data?.map(request => {
           const actionType: NotificationActionType = 
             request.category === 'care' ? "help" :
@@ -139,13 +142,11 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   });
 
   const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
-    // Emit custom event
     const event = new CustomEvent('openItemDialog', {
       detail: { type, id }
     });
     window.dispatchEvent(event);
 
-    // Show toast for event and support notifications
     if (type === 'event' || type === 'support') {
       toast({
         title: "Navigating to item",
@@ -153,7 +154,6 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
         duration: 3000,
       });
 
-      // Add highlight class to relevant section
       setTimeout(() => {
         const section = type === 'event' ? 
           document.querySelector('.calendar-container') : 
@@ -161,13 +161,11 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
         
         if (section) {
           section.classList.add('highlight-section');
-          // Remove highlight after animation
           setTimeout(() => {
             section.classList.remove('highlight-section');
           }, 2000);
         }
 
-        // Scroll section into view
         section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }

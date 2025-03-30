@@ -57,6 +57,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`${usersToNotify.length} users have email notifications enabled`);
 
+    // When an event is updated, also update any related activities to keep them in sync
+    if (action === 'update' && eventId) {
+      // Update any activities related to this event
+      const { error: activityError } = await supabaseClient
+        .from('activities')
+        .update({ title: eventTitle })
+        .eq('content_type', 'events')
+        .eq('content_id', eventId);
+
+      if (activityError) {
+        console.error('Error updating activities:', activityError);
+      } else {
+        console.log(`Successfully updated related activities for event: ${eventTitle}`);
+      }
+    }
+
     if (usersToNotify.length === 0) {
       return new Response(JSON.stringify({ success: true, message: "No users to notify" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

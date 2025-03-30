@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -193,11 +192,28 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
+      // After successful update, also update any activities related to this event
+      // This ensures that the activity feed shows the updated event title
+      const { error: activityError } = await supabase
+        .from('activities')
+        .update({ title: formData.title })
+        .eq('content_type', 'events')
+        .eq('content_id', eventId);
+        
+      if (activityError) {
+        console.error("[useEventSubmit] Error updating related activities:", activityError);
+      } else {
+        console.log("[useEventSubmit] Successfully updated related activities");
+      }
+
       // Success notification
       toast.success("Event updated successfully");
       
-      // Invalidate the events query to refresh the data
+      // Invalidate queries to refresh the data
+      // This will update all components that display event data, including notifications and activity feed
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       // Dispatch a custom event to signal that an event was updated
       // This will trigger a data refresh in components listening for this event
