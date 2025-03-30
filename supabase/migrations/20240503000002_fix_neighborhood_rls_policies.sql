@@ -4,6 +4,8 @@
 -- First, clean up existing policies that might be causing recursion
 DROP POLICY IF EXISTS "Users can access their neighborhoods" ON neighborhoods;
 DROP POLICY IF EXISTS "Core contributors can access all neighborhoods" ON neighborhoods;
+DROP POLICY IF EXISTS "Users can view neighborhoods they created" ON neighborhoods;
+DROP POLICY IF EXISTS "Users can view neighborhoods they're members of" ON neighborhoods;
 
 -- Re-create safer policies for neighborhood table
 -- Allow users to access neighborhoods they created

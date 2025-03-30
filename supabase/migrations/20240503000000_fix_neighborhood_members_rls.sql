@@ -6,6 +6,8 @@
 DROP POLICY IF EXISTS "Users can view their own neighborhood memberships" ON neighborhood_members;
 DROP POLICY IF EXISTS "Users can see members of their neighborhoods" ON neighborhood_members;
 DROP POLICY IF EXISTS "Neighborhood creators can see all members" ON neighborhood_members;
+DROP POLICY IF EXISTS "Users can view their own memberships" ON neighborhood_members;
+DROP POLICY IF EXISTS "Neighborhood creators can manage memberships" ON neighborhood_members;
 
 -- Create carefully designed policies to avoid recursion
 -- 1. Users can always access their own memberships
