@@ -43,6 +43,9 @@ const EventForm = ({
   const [date, setDate] = useState(initialValues.date || "");
   const [time, setTime] = useState(initialValues.time || "");
   const [location, setLocation] = useState(initialValues.location || "");
+  
+  // Track UI-only fields that aren't stored in the database yet
+  // These will be handled in the UI but not sent to the database
   const [isRecurring, setIsRecurring] = useState(initialValues.isRecurring || false);
   const [recurrencePattern, setRecurrencePattern] = useState(initialValues.recurrencePattern || "weekly");
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialValues.recurrenceEndDate || "");
@@ -66,6 +69,8 @@ const EventForm = ({
           date,
           time,
           location,
+          // Include UI-only fields in the callback for completeness
+          // (even though they won't be stored in the DB yet)
           isRecurring,
           recurrencePattern,
           recurrenceEndDate,
@@ -78,13 +83,14 @@ const EventForm = ({
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Collect form data
+    // Collect form data including UI-only fields
     const formData = {
       title,
       description,
       date,
       time,
       location,
+      // Include UI-only fields for future functionality
       isRecurring,
       recurrencePattern,
       recurrenceEndDate,
@@ -168,7 +174,7 @@ const EventForm = ({
         />
       </div>
       
-      {/* Recurring Event Toggle */}
+      {/* Recurring Event Toggle - UI only feature (not stored in DB yet) */}
       <div className="flex items-center space-x-2">
         <Switch
           id="recurring"
@@ -178,7 +184,7 @@ const EventForm = ({
         <Label htmlFor="recurring">Recurring Event</Label>
       </div>
       
-      {/* Recurrence Options (shown only if event is recurring) */}
+      {/* Recurrence Options (shown only if event is recurring) - UI only feature */}
       {isRecurring && (
         <>
           <div className="space-y-2 pl-6 border-l-2 border-gray-100">

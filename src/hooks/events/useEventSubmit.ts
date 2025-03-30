@@ -16,6 +16,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
   const handleSubmit = async (formData: any) => {
     if (!user) {
+      // If user is not logged in, show an error toast
       toast.error("You must be logged in to create an event");
       return;
     }
@@ -30,22 +31,27 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       });
 
       // Transform the date and time fields into a single ISO timestamp
-      // The database expects a 'time' field, not 'date' field
       const combinedTime = formData.date && formData.time 
         ? `${formData.date}T${formData.time}` 
         : null;
 
-      // Remove the separate date field since it's not in the database schema
-      const { date, ...restFormData } = formData;
+      // Remove fields that don't exist in the database schema
+      // IMPORTANT: Only include fields that exist in the database table
+      const eventData = {
+        title: formData.title,
+        description: formData.description,
+        time: combinedTime, // Use the combined timestamp
+        location: formData.location,
+        host_id: user.id,
+        neighborhood_id: neighborhoodId
+      };
+
+      // Log the actual data being sent to the database for debugging
+      console.log("[useEventSubmit] Sending to database:", eventData);
 
       const { error, data } = await supabase
         .from('events')
-        .insert({
-          ...restFormData,
-          time: combinedTime, // Use the combined ISO timestamp
-          host_id: user.id,
-          neighborhood_id: neighborhoodId
-        })
+        .insert(eventData)
         .select();
 
       if (error) {
@@ -86,9 +92,11 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       onSuccess();
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[useEventSubmit] Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
+      
+      // Re-throw the error for the component to handle if needed
       throw error;
     }
   };
@@ -113,20 +121,23 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         ? `${formData.date}T${formData.time}` 
         : null;
 
-      // Remove the separate date field since it's not in the database schema
-      const { date, ...restFormData } = formData;
+      // Only include fields that exist in the database table
+      const eventData = {
+        title: formData.title,
+        description: formData.description,
+        time: combinedTime, // Use the combined timestamp
+        location: formData.location
+      };
+
+      // Log the actual data being sent to the database for debugging
+      console.log("[useEventSubmit] Sending update to database:", {
+        eventId,
+        ...eventData
+      });
 
       const { error, data } = await supabase
         .from('events')
-        .update({
-          title: restFormData.title,
-          description: restFormData.description,
-          time: combinedTime, // Use the combined timestamp
-          location: restFormData.location,
-          is_recurring: restFormData.isRecurring,
-          recurrence_pattern: restFormData.isRecurring ? restFormData.recurrencePattern : null,
-          recurrence_end_date: restFormData.isRecurring ? restFormData.recurrenceEndDate : null,
-        })
+        .update(eventData)
         .eq('id', eventId)
         .eq('host_id', user.id)
         .select();
@@ -168,7 +179,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       onSuccess();
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[useEventSubmit] Error updating event:', error);
       toast.error("Failed to update event. Please try again.");
       throw error;
