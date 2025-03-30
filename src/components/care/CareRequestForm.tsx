@@ -119,7 +119,8 @@ const CareRequestForm = ({
         care_category: data.careCategory,
         valid_until: data.validUntil.toISOString(),
         user_id: user.id,
-        neighborhood_id: neighborhoodData.id, // This is now safe since we checked neighborhoodData exists
+        // Here's the fix: Since neighborhoodData is an object with id property, not a string
+        neighborhood_id: neighborhoodData.id, 
         support_type: 'care', // This is the "care" support type
       };
 
@@ -158,7 +159,8 @@ const CareRequestForm = ({
             careRequestTitle: data.title,
             userId: user.id,
             requestType: data.requestType,
-            neighborhoodId: neighborhoodData.id, // This is now safe since we checked neighborhoodData exists above
+            // Here's the fix: Fixed reference to neighborhoodData.id
+            neighborhoodId: neighborhoodData.id,
             changes: data.description
           }
         });
