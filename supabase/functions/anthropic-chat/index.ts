@@ -29,197 +29,287 @@ const getSupabaseClient = (req: Request) => {
   );
 };
 
-// Fetch and filter neighborhood events (privacy-focused)
-async function getNeighborhoodEvents(supabase: any, neighborhoodId: string) {
-  try {
-    const { data, error } = await supabase
-      .from("events")
-      .select(`
-        id, 
-        title, 
-        description, 
-        time, 
-        location, 
-        is_recurring
-      `)
-      .eq('neighborhood_id', neighborhoodId)
-      .order('time', { ascending: true })
-      .limit(10);
-      
-    if (error) {
-      console.error("Error fetching events:", error);
-      return [];
-    }
-    
-    // Further anonymize data by removing any potential PII from descriptions
-    return data.map((event: any) => ({
-      id: event.id,
-      title: event.title,
-      description: event.description 
-        ? sanitizeText(event.description) 
-        : "No description provided",
-      time: event.time,
-      location: event.location,
-      isRecurring: event.is_recurring
-    }));
-  } catch (err) {
-    console.error("Exception in getNeighborhoodEvents:", err);
-    return [];
+/**
+ * Neighborhood Data Services
+ * Functions for fetching and processing neighborhood data
+ */
+class NeighborhoodDataService {
+  private supabase: any;
+
+  constructor(supabase: any) {
+    this.supabase = supabase;
   }
-}
 
-// Fetch and filter neighborhood skills (privacy-focused)
-async function getNeighborhoodSkills(supabase: any, neighborhoodId: string) {
-  try {
-    const { data, error } = await supabase
-      .from("skills_exchange")
-      .select(`
-        id, 
-        title, 
-        description, 
-        skill_category,
-        request_type
-      `)
-      .eq('neighborhood_id', neighborhoodId)
-      .eq('is_archived', false)
-      .limit(10);
-      
-    if (error) {
-      console.error("Error fetching skills:", error);
-      return [];
-    }
-    
-    // Anonymize skills data
-    return data.map((skill: any) => ({
-      id: skill.id,
-      title: skill.title,
-      category: skill.skill_category,
-      type: skill.request_type, // 'offer' or 'need'
-      description: skill.description 
-        ? sanitizeText(skill.description) 
-        : "No description provided"
-    }));
-  } catch (err) {
-    console.error("Exception in getNeighborhoodSkills:", err);
-    return [];
-  }
-}
-
-// Fetch and filter safety updates (privacy-focused)
-async function getSafetyUpdates(supabase: any, neighborhoodId: string) {
-  try {
-    const { data, error } = await supabase
-      .from("safety_updates")
-      .select(`
-        id, 
-        title, 
-        description, 
-        type, 
-        created_at
-      `)
-      .eq('neighborhood_id', neighborhoodId)
-      .order('created_at', { ascending: false })
-      .limit(5);
-      
-    if (error) {
-      console.error("Error fetching safety updates:", error);
-      return [];
-    }
-    
-    // Anonymize safety data
-    return data.map((update: any) => ({
-      id: update.id,
-      title: update.title,
-      type: update.type,
-      date: update.created_at,
-      description: update.description 
-        ? sanitizeText(update.description) 
-        : "No details provided"
-    }));
-  } catch (err) {
-    console.error("Exception in getSafetyUpdates:", err);
-    return [];
-  }
-}
-
-// Sanitize text by removing potential PII
-function sanitizeText(text: string): string {
-  if (!text) return "";
-  
-  // Replace email patterns
-  let sanitized = text.replace(/\S+@\S+\.\S+/g, "[email removed]");
-  
-  // Replace phone number patterns (various formats)
-  sanitized = sanitized.replace(/(\+\d{1,3}[\s.-])?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g, "[phone number removed]");
-  
-  // Replace address patterns (simplified approach)
-  sanitized = sanitized.replace(/\d+\s+[A-Za-z0-9\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|drive|dr|court|ct|lane|ln|way|parkway|pkwy)\b/gi, "[address removed]");
-  
-  return sanitized;
-}
-
-// Format neighborhood data for the AI prompt
-function prepareNeighborhoodContext(events: any[], skills: any[], safetyUpdates: any[]): string {
-  let context = "Here is some information about the neighborhood:\n\n";
-  
-  // Add events information
-  if (events.length > 0) {
-    context += "UPCOMING EVENTS:\n";
-    events.forEach((event, index) => {
-      const date = new Date(event.time).toLocaleDateString('en-US', {
-        weekday: 'long', 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      context += `${index + 1}. "${event.title}" - ${date} at ${event.location}\n`;
-      if (event.description) {
-        context += `   Description: ${event.description}\n`;
+  /**
+   * Fetch and filter neighborhood events with privacy protections
+   */
+  async getNeighborhoodEvents(neighborhoodId: string) {
+    try {
+      const { data, error } = await this.supabase
+        .from("events")
+        .select(`
+          id, 
+          title, 
+          description, 
+          time, 
+          location, 
+          is_recurring
+        `)
+        .eq('neighborhood_id', neighborhoodId)
+        .order('time', { ascending: true })
+        .limit(10);
+        
+      if (error) {
+        console.error("Error fetching events:", error);
+        return [];
       }
-    });
-    context += "\n";
-  }
-  
-  // Add skills information
-  if (skills.length > 0) {
-    context += "CURRENT SKILLS IN THE NEIGHBORHOOD:\n";
-    const offers = skills.filter(s => s.type === 'offer');
-    const needs = skills.filter(s => s.type === 'need');
-    
-    if (offers.length > 0) {
-      context += "Skills being offered:\n";
-      offers.forEach((skill, index) => {
-        context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
-      });
+      
+      // Further anonymize data by removing any potential PII from descriptions
+      return data.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description 
+          ? this.sanitizeText(event.description) 
+          : "No description provided",
+        time: event.time,
+        location: event.location,
+        isRecurring: event.is_recurring
+      }));
+    } catch (err) {
+      console.error("Exception in getNeighborhoodEvents:", err);
+      return [];
     }
-    
-    if (needs.length > 0) {
-      context += "Skills being requested:\n";
-      needs.forEach((skill, index) => {
-        context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
-      });
-    }
-    context += "\n";
   }
-  
-  // Add safety updates
-  if (safetyUpdates.length > 0) {
-    context += "RECENT SAFETY UPDATES:\n";
-    safetyUpdates.forEach((update, index) => {
-      const date = new Date(update.date).toLocaleDateString();
-      context += `${index + 1}. ${update.title} (${update.type}) - Posted on ${date}\n`;
-      if (update.description) {
-        context += `   Details: ${update.description}\n`;
+
+  /**
+   * Fetch and filter neighborhood skills with privacy protections
+   */
+  async getNeighborhoodSkills(neighborhoodId: string) {
+    try {
+      const { data, error } = await this.supabase
+        .from("skills_exchange")
+        .select(`
+          id, 
+          title, 
+          description, 
+          skill_category,
+          request_type
+        `)
+        .eq('neighborhood_id', neighborhoodId)
+        .eq('is_archived', false)
+        .limit(10);
+        
+      if (error) {
+        console.error("Error fetching skills:", error);
+        return [];
       }
-    });
+      
+      // Anonymize skills data
+      return data.map((skill: any) => ({
+        id: skill.id,
+        title: skill.title,
+        category: skill.skill_category,
+        type: skill.request_type, // 'offer' or 'need'
+        description: skill.description 
+          ? this.sanitizeText(skill.description) 
+          : "No description provided"
+      }));
+    } catch (err) {
+      console.error("Exception in getNeighborhoodSkills:", err);
+      return [];
+    }
   }
-  
-  return context;
+
+  /**
+   * Fetch and filter safety updates with privacy protections
+   */
+  async getSafetyUpdates(neighborhoodId: string) {
+    try {
+      const { data, error } = await this.supabase
+        .from("safety_updates")
+        .select(`
+          id, 
+          title, 
+          description, 
+          type, 
+          created_at
+        `)
+        .eq('neighborhood_id', neighborhoodId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (error) {
+        console.error("Error fetching safety updates:", error);
+        return [];
+      }
+      
+      // Anonymize safety data
+      return data.map((update: any) => ({
+        id: update.id,
+        title: update.title,
+        type: update.type,
+        date: update.created_at,
+        description: update.description 
+          ? this.sanitizeText(update.description) 
+          : "No details provided"
+      }));
+    } catch (err) {
+      console.error("Exception in getSafetyUpdates:", err);
+      return [];
+    }
+  }
+
+  /**
+   * Sanitize text by removing potential PII
+   */
+  private sanitizeText(text: string): string {
+    if (!text) return "";
+    
+    // Replace email patterns
+    let sanitized = text.replace(/\S+@\S+\.\S+/g, "[email removed]");
+    
+    // Replace phone number patterns (various formats)
+    sanitized = sanitized.replace(/(\+\d{1,3}[\s.-])?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g, "[phone number removed]");
+    
+    // Replace address patterns (simplified approach)
+    sanitized = sanitized.replace(/\d+\s+[A-Za-z0-9\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|drive|dr|court|ct|lane|ln|way|parkway|pkwy)\b/gi, "[address removed]");
+    
+    return sanitized;
+  }
 }
 
-// Main function that handles the HTTP request
+/**
+ * AI Prompt Formatter
+ * Formats neighborhood data into a prompt for the AI
+ */
+class AIPromptFormatter {
+  /**
+   * Format neighborhood data for the AI prompt
+   */
+  prepareNeighborhoodContext(events: any[], skills: any[], safetyUpdates: any[]): string {
+    let context = "Here is some information about the neighborhood:\n\n";
+    
+    // Add events information
+    if (events.length > 0) {
+      context += "UPCOMING EVENTS:\n";
+      events.forEach((event, index) => {
+        const date = new Date(event.time).toLocaleDateString('en-US', {
+          weekday: 'long', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        context += `${index + 1}. "${event.title}" - ${date} at ${event.location}\n`;
+        if (event.description) {
+          context += `   Description: ${event.description}\n`;
+        }
+      });
+      context += "\n";
+    }
+    
+    // Add skills information
+    if (skills.length > 0) {
+      context += "CURRENT SKILLS IN THE NEIGHBORHOOD:\n";
+      const offers = skills.filter(s => s.type === 'offer');
+      const needs = skills.filter(s => s.type === 'need');
+      
+      if (offers.length > 0) {
+        context += "Skills being offered:\n";
+        offers.forEach((skill, index) => {
+          context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
+        });
+      }
+      
+      if (needs.length > 0) {
+        context += "Skills being requested:\n";
+        needs.forEach((skill, index) => {
+          context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
+        });
+      }
+      context += "\n";
+    }
+    
+    // Add safety updates
+    if (safetyUpdates.length > 0) {
+      context += "RECENT SAFETY UPDATES:\n";
+      safetyUpdates.forEach((update, index) => {
+        const date = new Date(update.date).toLocaleDateString();
+        context += `${index + 1}. ${update.title} (${update.type}) - Posted on ${date}\n`;
+        if (update.description) {
+          context += `   Details: ${update.description}\n`;
+        }
+      });
+    }
+    
+    return context;
+  }
+}
+
+/**
+ * AI Service
+ * Handles communication with the Anthropic API
+ */
+class AnthropicService {
+  private apiKey: string;
+  
+  constructor() {
+    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!apiKey) {
+      throw new Error('Missing Anthropic API key');
+    }
+    this.apiKey = apiKey;
+  }
+  
+  /**
+   * Call the Anthropic API with the formatted prompt
+   */
+  async generateResponse(userMessage: string, neighborhoodContext: string) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': this.apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-opus-20240229',
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: `As a friendly, helpful neighborhood assistant, please respond to this question from a neighbor: ${userMessage}.
+
+${neighborhoodContext}
+
+Please follow these guidelines when responding:
+1. Use a friendly, welcoming tone like a helpful neighbor would use
+2. Format your responses with clear headings, bullet points, and simple language
+3. When referring to specific events, skills, or updates, format them like this: [ITEM_TYPE:ITEM_ID:ITEM_NAME]
+4. Focus on providing practical information about the neighborhood
+5. Keep your answers accessible for people aged 7-70
+6. Use a dash of subtle humor when appropriate
+7. Be concise but thorough
+
+Remember, your goal is to help neighbors find ways to engage with their community and connect with each other.`
+          }
+        ]
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Anthropic API error:', errorData);
+      throw new Error('Failed to get response from AI');
+    }
+    
+    const data = await response.json();
+    return data.content && data.content[0] ? data.content[0].text : 'Sorry, I couldn\'t generate a response';
+  }
+}
+
+// Main function that handles HTTP requests
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -238,84 +328,35 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get the Anthropic API key from environment variables
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!apiKey) {
-      console.error('Missing Anthropic API key');
-      return new Response(
-        JSON.stringify({ error: 'Internal configuration error' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Log information about this request for debugging
     console.log(`Processing chat request from user ${userId} in neighborhood ${neighborhoodId}`);
     console.log(`Message length: ${message.length} characters`);
     
-    // Create Supabase client and fetch neighborhood data
+    // Create Supabase client
     const supabase = getSupabaseClient(req);
+    
+    // Initialize services
+    const dataService = new NeighborhoodDataService(supabase);
+    const promptFormatter = new AIPromptFormatter();
+    const aiService = new AnthropicService();
     
     // Fetch filtered neighborhood data in parallel
     const [events, skills, safetyUpdates] = await Promise.all([
-      getNeighborhoodEvents(supabase, neighborhoodId),
-      getNeighborhoodSkills(supabase, neighborhoodId),
-      getSafetyUpdates(supabase, neighborhoodId)
+      dataService.getNeighborhoodEvents(neighborhoodId),
+      dataService.getNeighborhoodSkills(neighborhoodId),
+      dataService.getSafetyUpdates(neighborhoodId)
     ]);
     
     // Prepare neighborhood context for the AI
-    const neighborhoodContext = prepareNeighborhoodContext(events, skills, safetyUpdates);
+    const neighborhoodContext = promptFormatter.prepareNeighborhoodContext(events, skills, safetyUpdates);
     console.log("Prepared neighborhood context with:", {
       eventCount: events.length,
       skillCount: skills.length,
       safetyUpdateCount: safetyUpdates.length
     });
 
-    // Call the Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-opus-20240229',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: `As a friendly, helpful neighborhood assistant, please respond to this question from a neighbor: ${message}.
-
-${neighborhoodContext}
-
-Please follow these guidelines when responding:
-1. Use a friendly, welcoming tone like a helpful neighbor would use
-2. Format your responses with clear headings, bullet points, and simple language
-3. When referring to specific events, skills, or updates, format them like this: [ITEM_TYPE:ITEM_ID:ITEM_NAME]
-4. Focus on providing practical information about the neighborhood
-5. Keep your answers accessible for people aged 7-70
-6. Use a dash of subtle humor when appropriate
-7. Be concise but thorough
-
-Remember, your goal is to help neighbors find ways to engage with their community and connect with each other.`
-          }
-        ]
-      }),
-    });
-
-    // Check if the response is OK
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Anthropic API error:', errorData);
-      return new Response(
-        JSON.stringify({ error: 'Failed to get response from AI' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Parse the response and return it
-    const data = await response.json();
-    const aiResponse = data.content && data.content[0] ? data.content[0].text : 'Sorry, I couldn\'t generate a response';
+    // Generate AI response
+    const aiResponse = await aiService.generateResponse(message, neighborhoodContext);
     
     // Process the response to include original item IDs for frontend processing
     const processedResponse = {

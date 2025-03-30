@@ -4,20 +4,19 @@
  * 
  * This is the main container component for the AI chat interface on the homepage.
  * It manages the chat state, handles message submission, and displays the chat history.
- * Enhanced to handle context information from the AI responses.
  */
 import React, { useState, useRef, useEffect } from 'react';
-import { Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useUser } from '@supabase/auth-helpers-react';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
-import AIMessage from './AIMessage';
+import AIChatMessages from './AIChatMessages';
+import AIChatInput from './AIChatInput';
+import AIChatHeader from './AIChatHeader';
 import AIPromptSuggestions from './AIPromptSuggestions';
 
 // Define the message type for type safety
-type Message = {
+export type Message = {
   id: string;
   content: string;
   role: 'user' | 'assistant';
@@ -39,10 +38,12 @@ const loadingMessages = [
   "Processing your request...",
 ];
 
+/**
+ * The main AI Chat component that orchestrates the entire chat experience
+ */
 const AIChat = () => {
-  // State for messages, input, and loading status
+  // State for messages, loading status
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   
@@ -67,9 +68,7 @@ const AIChat = () => {
   };
 
   // Handle message submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (inputValue: string) => {
     // Don't send empty messages
     if (inputValue.trim() === '') return;
     
@@ -89,7 +88,6 @@ const AIChat = () => {
     
     // Add user message to state
     setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInputValue('');
     
     // Set loading state with a random message
     setIsLoading(true);
@@ -133,72 +131,27 @@ const AIChat = () => {
   
   // Handle clicking on a pre-made prompt
   const handlePromptClick = (prompt: string) => {
-    setInputValue(prompt);
-    // Focus the input after setting the value
-    const inputElement = document.getElementById('ai-chat-input');
-    if (inputElement) {
-      inputElement.focus();
-    }
+    handleSubmit(prompt);
   };
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden">
       {/* Chat header */}
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-semibold">Neighborhood Assistant</h2>
-        <p className="text-sm text-gray-500">Ask questions about your neighborhood</p>
-      </div>
+      <AIChatHeader />
       
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center text-gray-500">
-              <p className="mb-2">👋 How can I help you today?</p>
-              <p className="text-sm">Ask me about neighborhood activities, finding resources, or connecting with neighbors</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            {messages.map((message) => (
-              <AIMessage 
-                key={message.id} 
-                message={message} 
-              />
-            ))}
-            {isLoading && (
-              <div className="flex items-center text-gray-500">
-                <div className="animate-pulse mr-2">⟳</div>
-                <p>{loadingMessage}</p>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </>
-        )}
-      </div>
+      <AIChatMessages 
+        messages={messages} 
+        isLoading={isLoading} 
+        loadingMessage={loadingMessage} 
+        messagesEndRef={messagesEndRef} 
+      />
       
       {/* Prompt suggestions */}
       <AIPromptSuggestions onPromptClick={handlePromptClick} />
       
       {/* Input area */}
-      <form onSubmit={handleSubmit} className="border-t p-3 flex items-center">
-        <input
-          id="ai-chat-input"
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 px-4 py-2 rounded-l-md border border-r-0 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={isLoading}
-        />
-        <Button 
-          type="submit" 
-          className="rounded-l-none"
-          disabled={isLoading || inputValue.trim() === ''}
-        >
-          <Send size={18} />
-        </Button>
-      </form>
+      <AIChatInput onSubmit={handleSubmit} isLoading={isLoading} />
     </div>
   );
 };
