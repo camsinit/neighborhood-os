@@ -1,8 +1,10 @@
+
 import { Button } from "@/components/ui/button";
-import { Gift, ChevronLeft, ChevronRight } from "lucide-react";
+import { Gift, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 import { useState } from "react";
+import { useUser } from "@supabase/auth-helpers-react";
 
 /**
  * Component to display available goods items offered by neighbors
@@ -15,6 +17,8 @@ interface AvailableItemsSectionProps {
   onRequestSelect: (request: GoodsExchangeItem) => void;
   onNewOffer: () => void;
   onRefetch: () => void;
+  onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
+  isDeletingItem?: boolean;
 }
 
 /**
@@ -87,7 +91,12 @@ const AvailableItemsSection = ({
   onRequestSelect,
   onNewOffer,
   onRefetch,
+  onDeleteItem,
+  isDeletingItem = false,
 }: AvailableItemsSectionProps) => {
+  // Get the current user for permission checks
+  const currentUser = useUser();
+  
   // When no items are available, show a call-to-action
   if (goodsItems.length === 0) {
     return (
@@ -113,8 +122,26 @@ const AvailableItemsSection = ({
       {goodsItems.map(request => (
         <div 
           key={request.id}
-          className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer relative"
+          className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer relative group"
         >
+          {/* Delete button - only shown for the creator when hovering */}
+          {currentUser && currentUser.id === request.user_id && onDeleteItem && (
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onDeleteItem(request);
+              }}
+              disabled={isDeletingItem}
+              aria-label="Delete item"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+          
           {/* Main content area that opens the item details */}
           <div onClick={() => onRequestSelect(request)}>
             {/* Determine which image display to use based on available images */}
@@ -144,8 +171,8 @@ const AvailableItemsSection = ({
             {/* Removed category tag as requested */}
           </div>
           
-          {/* Archive button - positioned in the top right corner */}
-          <div className="absolute top-2 right-2">
+          {/* Archive button - positioned in the top right corner (adjusted to accommodate delete button) */}
+          <div className="absolute top-2 right-12">
             <ArchiveButton 
               requestId={request.id}
               tableName="goods_exchange"

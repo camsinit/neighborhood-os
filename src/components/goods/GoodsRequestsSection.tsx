@@ -14,10 +14,6 @@ import { Link } from "react-router-dom";
 // Import Trash2 icon for delete functionality and useUser hook to check permissions
 import { Trash2 } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
-// Import supabase client for delete operations
-import { supabase } from "@/integrations/supabase/client";
-// Import toast for notifications
-import { toast } from "sonner";
 
 /**
  * Helper function to create a contact email link for an item
@@ -54,6 +50,8 @@ interface GoodsRequestsSectionProps {
   onRequestSelect: Dispatch<SetStateAction<GoodsExchangeItem | null>>;
   getUrgencyClass: (urgency: string) => string;
   getUrgencyLabel: (urgency: string) => string;
+  onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
+  isDeletingItem?: boolean;
 }
 
 /**
@@ -66,7 +64,9 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   urgentRequests, 
   onRequestSelect,
   getUrgencyClass,
-  getUrgencyLabel
+  getUrgencyLabel,
+  onDeleteItem,
+  isDeletingItem = false
 }) => {
   // State to track which popover is currently open (if any)
   // We store the request ID as a string to track the open popover
@@ -84,45 +84,10 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   if (regularRequests.length === 0) {
     return null;
   }
-  
-  /**
-   * Function to handle deleting a request
-   * Only the creator of the request can delete it
-   */
-  const handleDeleteRequest = async (requestId: string, event: React.MouseEvent) => {
-    // Prevent event bubbling to parent elements
-    event.stopPropagation();
-    event.preventDefault();
-    
-    try {
-      // Delete the request from the database
-      const { error } = await supabase
-        .from('goods_exchange')
-        .delete()
-        .eq('id', requestId);
-        
-      // Handle any errors
-      if (error) {
-        console.error("Error deleting request:", error);
-        toast.error("Failed to delete request");
-        return;
-      }
-      
-      // Show success message
-      toast.success("Request successfully deleted");
-      
-      // Close the popover if it was open
-      setOpenPopoverId(null);
-    } catch (err) {
-      console.error("Error in delete operation:", err);
-      toast.error("An unexpected error occurred");
-    }
-  };
 
   return (
     <div className="mt-10">
-      {/* Section title */}
-      <h3 className="text-2xl font-bold mb-4">Requests from Neighbors</h3>
+      {/* Section title is handled by parent component */}
       
       {/* Container for the horizontally scrollable cards */}
       <div className="p-4 rounded-lg overflow-x-auto">
@@ -146,12 +111,17 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               <PopoverTrigger asChild>
                 <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0 relative group">
                   {/* Delete button - only shown for the creator when hovering */}
-                  {currentUser && currentUser.id === request.user_id && (
+                  {currentUser && currentUser.id === request.user_id && onDeleteItem && (
                     <Button
                       variant="destructive"
                       size="icon"
                       className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-8 w-8"
-                      onClick={(e) => handleDeleteRequest(request.id, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onDeleteItem(request);
+                      }}
+                      disabled={isDeletingItem}
                       aria-label="Delete request"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -189,12 +159,17 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
               <PopoverContent className="w-[300px] p-0" sideOffset={5}>
                 <Card className="border-0 shadow-none relative">
                   {/* Add delete button in the expanded view too */}
-                  {currentUser && currentUser.id === request.user_id && (
+                  {currentUser && currentUser.id === request.user_id && onDeleteItem && (
                     <Button
                       variant="destructive"
                       size="icon"
                       className="absolute top-2 right-2 z-10 h-8 w-8"
-                      onClick={(e) => handleDeleteRequest(request.id, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onDeleteItem(request);
+                      }}
+                      disabled={isDeletingItem}
                       aria-label="Delete request"
                     >
                       <Trash2 className="h-4 w-4" />

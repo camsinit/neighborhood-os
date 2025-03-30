@@ -1,147 +1,336 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { GoodsItemCategory } from '@/components/support/types/formTypes';
-
-// Import Components
-import UrgentRequestsSection from "./UrgentRequestsSection";
-import AvailableItemsSection from "./AvailableItemsSection";
-import GoodsRequestsSection from "./GoodsRequestsSection";
-
-// Import Helpers
-import { getUrgencyClass, getUrgencyLabel } from "./utils/urgencyHelpers";
-
-/**
- * Props interface for the GoodsSections component
- */
-interface GoodsSectionsProps {
-  // Data and loading state
-  goodsData: GoodsExchangeItem[] | undefined;
-  isLoading: boolean;
-  
-  // Search and filter states
-  searchQuery: string;
-  showUrgent: boolean;
-  showRequests: boolean;
-  showAvailable: boolean;
-  
-  // Event handlers
-  onRequestSelect: (request: GoodsExchangeItem) => void;
-  onOfferItem: () => void;
-  onRequestItem: () => void;
-  onRefresh: () => void;
-}
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { createContactEmailLink } from './GoodsRequestsSection';
+import UrgentRequestsSection from './UrgentRequestsSection';
+import GoodsRequestsSection from './GoodsRequestsSection';
+import AvailableItemsSection from './AvailableItemsSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@supabase/auth-helpers-react";
+import { Package2, ListFilter } from "lucide-react";
 
 /**
  * GoodsSections component
  * 
- * This component organizes all the different sections of the Goods page:
- * - Urgent requests at the top
- * - Regular requests section
- * - Available items section
+ * This component organizes and displays the different sections of the goods exchange:
+ * - Urgent Requests: High priority needs that require immediate attention
+ * - Requests: Regular requests from neighbors looking for items
+ * - Available: Items that neighbors are offering to share
  */
-const GoodsSections = ({
-  goodsData,
+interface GoodsSectionsProps {
+  goodsData: GoodsExchangeItem[];
+  isLoading: boolean;
+  searchQuery: string;
+  showUrgent: boolean;
+  showRequests: boolean;
+  showAvailable: boolean;
+  onRequestSelect: (request: GoodsExchangeItem) => void;
+  onRefresh: () => void;
+  onOfferItem: () => void;
+  onRequestItem: () => void;
+}
+
+const GoodsSections: React.FC<GoodsSectionsProps> = ({
+  goodsData = [],
   isLoading,
   searchQuery,
   showUrgent,
   showRequests,
   showAvailable,
   onRequestSelect,
+  onRefresh,
   onOfferItem,
-  onRequestItem,
-  onRefresh
-}: GoodsSectionsProps) => {
-  // State for category filters
-  const [categoryFilters, setCategoryFilters] = useState<GoodsItemCategory[]>([]);
+  onRequestItem
+}) => {
+  // Get the current user for permission checks
+  const currentUser = useUser();
+  const queryClient = useQueryClient();
 
-  // If data is loading or no data is available, handle these states
+  // State to track if we're currently deleting an item
+  const [isDeletingItem, setIsDeletingItem] = useState(false);
+
+  // Helper function to filter goods based on search query
+  const filterBySearch = (goods: GoodsExchangeItem[]) => {
+    if (!searchQuery) return goods;
+    
+    const query = searchQuery.toLowerCase();
+    return goods.filter(item => 
+      (item.title?.toLowerCase().includes(query) || 
+      item.description?.toLowerCase().includes(query) ||
+      item.goods_category?.toLowerCase().includes(query))
+    );
+  };
+  
+  /**
+   * Helper function to categorize goods by urgency and type
+   * Returns objects containing filtered arrays of goods items
+   */
+  const categorizeGoods = () => {
+    // Filter by search first
+    const filteredGoods = filterBySearch(goodsData || []);
+    
+    // Then categorize by type and urgency
+    const urgentRequests = filteredGoods.filter(
+      item => item.request_type === 'need' && item.urgency === 'high'
+    );
+    
+    const requests = filteredGoods.filter(
+      item => item.request_type === 'need' && item.urgency !== 'high'
+    );
+    
+    const available = filteredGoods.filter(
+      item => item.request_type === 'offer'
+    );
+    
+    return { urgentRequests, requests, available };
+  };
+
+  /**
+   * Function to get the appropriate CSS class for urgency labels
+   */
+  const getUrgencyClass = (urgency: string) => {
+    switch(urgency?.toLowerCase()) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  /**
+   * Function to get a human-readable label for urgency levels
+   */
+  const getUrgencyLabel = (urgency: string) => {
+    switch(urgency?.toLowerCase()) {
+      case 'high':
+        return 'Urgent';
+      case 'medium':
+        return 'Medium';
+      case 'low':
+        return 'Low';
+      default:
+        return 'Standard';
+    }
+  };
+
+  /**
+   * Function to delete a goods item
+   * This will remove it from the database and notify the activity feed via our edge function
+   */
+  const handleDeleteGoodsItem = async (item: GoodsExchangeItem) => {
+    try {
+      // Set deleting state to prevent multiple clicks
+      setIsDeletingItem(true);
+
+      // Get the current user and neighborhood for the edge function
+      const user = currentUser?.id;
+      const neighborhoodId = item.neighborhood_id;
+
+      if (!user) {
+        toast.error("You must be logged in to delete items");
+        setIsDeletingItem(false);
+        return;
+      }
+
+      // First, delete from the database
+      const { error } = await supabase
+        .from('goods_exchange')
+        .delete()
+        .eq('id', item.id);
+
+      if (error) {
+        console.error("Error deleting goods item:", error);
+        toast.error("Failed to delete item");
+        setIsDeletingItem(false);
+        return;
+      }
+
+      // Now call our edge function to update activity feed
+      const { error: edgeFunctionError } = await supabase.functions.invoke(
+        'notify-goods-changes', {
+        body: {
+          goodsItemId: item.id,
+          action: 'delete',
+          goodsItemTitle: item.title,
+          userId: user,
+          requestType: item.request_type,
+          neighborhoodId: neighborhoodId
+        }
+      });
+
+      if (edgeFunctionError) {
+        console.error("Error calling edge function:", edgeFunctionError);
+        // Don't show an error to the user since the item was already deleted
+      }
+
+      // Success! Refresh the data
+      toast.success("Item deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["goods-exchange"] });
+      onRefresh();
+    } catch (error) {
+      console.error("Error in delete operation:", error);
+      toast.error("An error occurred while deleting the item");
+    } finally {
+      setIsDeletingItem(false);
+    }
+  };
+  
+  // Get categorized goods
+  const { urgentRequests, requests, available } = categorizeGoods();
+  
+  // If loading, display a loading state
   if (isLoading) {
-    return <div className="py-10 text-center">Loading goods exchange items...</div>;
-  }
-
-  if (!goodsData || goodsData.length === 0) {
     return (
-      <div className="py-10 text-center">
-        <p className="text-gray-500">No goods exchange items found.</p>
-        <div className="mt-4 flex justify-center gap-4">
-          <button 
-            onClick={onRequestItem}
-            className="px-4 py-2 bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900 rounded-md"
-          >
-            Request Item
-          </button>
-          <button
-            onClick={onOfferItem} 
-            className="px-4 py-2 bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900 rounded-md"
-          >
-            Offer Item
-          </button>
+      <div className="text-center py-12">
+        <div className="inline-block animate-pulse bg-gray-200 rounded-md h-8 w-32 mb-4"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg border p-4 h-64">
+              <div className="animate-pulse bg-gray-200 h-32 w-full rounded-md mb-4"></div>
+              <div className="animate-pulse bg-gray-200 h-6 w-3/4 rounded-md mb-3"></div>
+              <div className="animate-pulse bg-gray-200 h-4 w-1/2 rounded-md"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
   
-  // Filter data based on search query and display settings
-  const filteredData = goodsData.filter(item => {
-    // Search filter - check if search query matches title or description
-    const matchesSearch = !searchQuery || 
-      item.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // Category filter
-    const matchesCategory = categoryFilters.length === 0 || 
-      (item.goods_category && categoryFilters.includes(item.goods_category as GoodsItemCategory));
-      
-    return matchesSearch && matchesCategory;
-  });
-
-  // Separate items into different sections based on type and urgency
-  const urgentRequests = showUrgent ? filteredData.filter(item => 
-    item.request_type === 'need' && item.urgency === 'high'
-  ) : [];
-  
-  const regularRequests = showRequests ? filteredData.filter(item => 
-    item.request_type === 'need' && item.urgency !== 'high'
-  ) : [];
-  
-  const availableItems = showAvailable ? filteredData.filter(item => 
-    item.request_type === 'offer'
-  ) : [];
-
+  // Main content with tabs for different sections
   return (
-    <>
-      {/* Only show urgent section if we have urgent requests and showUrgent is true */}
-      {showUrgent && urgentRequests.length > 0 && (
-        <UrgentRequestsSection 
-          urgentRequests={urgentRequests}
-          onRequestSelect={onRequestSelect}
-          getUrgencyClass={getUrgencyClass}
-          getUrgencyLabel={getUrgencyLabel}
-        />
-      )}
-
-      {/* Only show goods requests section if we have requests and showRequests is true */}
-      {showRequests && regularRequests.length > 0 && (
-        <GoodsRequestsSection 
-          goodsRequests={regularRequests}
-          urgentRequests={urgentRequests}
-          onRequestSelect={onRequestSelect}
-          getUrgencyClass={getUrgencyClass}
-          getUrgencyLabel={getUrgencyLabel}
-        />
-      )}
-      
-      {/* Only show available items section if we have items and showAvailable is true */}
-      {showAvailable && (
-        <AvailableItemsSection 
-          goodsItems={availableItems}
-          onRequestSelect={onRequestSelect}
-          onNewOffer={onOfferItem}
-          onRefetch={onRefresh}
-        />
-      )}
-    </>
+    <div className="mt-6">
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Package2 className="h-4 w-4" />
+            <span>All Items</span>
+          </TabsTrigger>
+          <TabsTrigger value="needs" className="flex items-center gap-2">
+            <ListFilter className="h-4 w-4" />
+            <span>Requests</span>
+          </TabsTrigger>
+          <TabsTrigger value="offers" className="flex items-center gap-2">
+            <Package2 className="h-4 w-4" />
+            <span>Available</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        {/* Tab content for all items */}
+        <TabsContent value="all" className="space-y-8">
+          {showUrgent && 
+            <UrgentRequestsSection 
+              urgentRequests={urgentRequests} 
+              onRequestSelect={onRequestSelect}
+              getUrgencyClass={getUrgencyClass}
+              getUrgencyLabel={getUrgencyLabel}
+            />
+          }
+          
+          {showRequests && 
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
+                <Button variant="outline" onClick={onRequestItem}>
+                  Request an Item
+                </Button>
+              </div>
+              
+              <GoodsRequestsSection 
+                goodsRequests={requests}
+                urgentRequests={urgentRequests}
+                onRequestSelect={onRequestSelect}
+                getUrgencyClass={getUrgencyClass}
+                getUrgencyLabel={getUrgencyLabel}
+                onDeleteItem={handleDeleteGoodsItem}
+                isDeletingItem={isDeletingItem}
+              />
+            </div>
+          }
+          
+          {showAvailable && 
+            <div className="mt-10">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Available Items</h2>
+                <Button variant="outline" onClick={onOfferItem}>
+                  Offer an Item
+                </Button>
+              </div>
+              
+              <AvailableItemsSection 
+                goodsItems={available}
+                onRequestSelect={onRequestSelect}
+                onNewOffer={onOfferItem}
+                onRefetch={onRefresh}
+                onDeleteItem={handleDeleteGoodsItem}
+                isDeletingItem={isDeletingItem}
+              />
+            </div>
+          }
+        </TabsContent>
+        
+        {/* Tab content for requests */}
+        <TabsContent value="needs">
+          <div className="space-y-8">
+            {showUrgent && 
+              <UrgentRequestsSection 
+                urgentRequests={urgentRequests}
+                onRequestSelect={onRequestSelect}
+                getUrgencyClass={getUrgencyClass}
+                getUrgencyLabel={getUrgencyLabel}
+              />
+            }
+            
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
+                <Button variant="outline" onClick={onRequestItem}>
+                  Request an Item
+                </Button>
+              </div>
+              
+              <GoodsRequestsSection 
+                goodsRequests={requests}
+                urgentRequests={urgentRequests}
+                onRequestSelect={onRequestSelect}
+                getUrgencyClass={getUrgencyClass}
+                getUrgencyLabel={getUrgencyLabel}
+                onDeleteItem={handleDeleteGoodsItem}
+                isDeletingItem={isDeletingItem}
+              />
+            </div>
+          </div>
+        </TabsContent>
+        
+        {/* Tab content for offers */}
+        <TabsContent value="offers">
+          <div className="mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Available Items</h2>
+              <Button variant="outline" onClick={onOfferItem}>
+                Offer an Item
+              </Button>
+            </div>
+            
+            <AvailableItemsSection 
+              goodsItems={available}
+              onRequestSelect={onRequestSelect}
+              onNewOffer={onOfferItem}
+              onRefetch={onRefresh}
+              onDeleteItem={handleDeleteGoodsItem}
+              isDeletingItem={isDeletingItem}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
