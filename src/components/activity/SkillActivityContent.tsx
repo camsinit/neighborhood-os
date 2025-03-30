@@ -21,7 +21,10 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
   activity,
   onClick
 }) => {
+  // Determine if this is a skill offering or request
   const isOffering = activity.activity_type === 'skill_offered';
+  
+  // Set the color for the skill icon
   const color = '#9b87f5'; // Skills purple color
   
   // Extract category from metadata if available
@@ -48,14 +51,7 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
         )}
       </div>
       
-      {/* Brief description if available */}
-      {activity.metadata?.description && (
-        <p className="text-sm text-gray-600 line-clamp-2">
-          {activity.metadata.description}
-        </p>
-      )}
-      
-      {/* Action button */}
+      {/* Action button - customized based on skill type */}
       <div className="mt-1">
         <Button 
           variant="outline" 
