@@ -155,12 +155,13 @@ const AIChat = () => {
     }
   };
 
+  // Render the chat interface without the extra container div
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="h-full bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
       {/* Chat header */}
       <AIChatHeader />
       
-      {/* Messages area - now with reduced height */}
+      {/* Messages area */}
       <AIChatMessages 
         messages={messages} 
         isLoading={isLoading} 
