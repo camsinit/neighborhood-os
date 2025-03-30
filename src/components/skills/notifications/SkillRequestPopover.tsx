@@ -49,8 +49,7 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
         .insert({
           title: `Skill Session: ${notification.skillTitle}`,
           description: `Skill exchange session between provider and requester.`,
-          start_time: eventDate.toISOString(),
-          end_time: new Date(eventDate.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour duration
+          time: eventDate.toISOString(), // Use 'time' instead of 'start_time'
           location: 'To be determined',
           host_id: notification.providerId, // Primary host is the provider
           is_private: true,
@@ -61,45 +60,38 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
         
       if (eventError) throw eventError;
       
-      // 2. Add the requester as co-host
+      // 2. Update the skill session status
       if (eventData) {
-        await supabase
-          .from('event_cohosts')
-          .insert({
-            event_id: eventData.id,
-            user_id: notification.requesterId
-          });
-          
-        // 3. Update the skill session status
+        // Update the skill session status - make sure we use a valid status from the enum
         await supabase
           .from('skill_sessions')
           .update({
-            status: 'scheduled',
+            status: 'confirmed', // Using 'confirmed' instead of 'scheduled'
             event_id: eventData.id
           })
           .eq('skill_id', notification.skillId)
           .eq('provider_id', notification.providerId)
           .eq('requester_id', notification.requesterId);
+            
+        // 3. Send notification to the requester
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: notification.requesterId,
+            actor_id: notification.providerId,
+            title: `Skill session for "${notification.skillTitle}" has been scheduled`,
+            content_type: 'skill_session',
+            content_id: notification.skillId,
+            notification_type: 'skills',
+            action_type: 'view',
+            action_label: 'View Calendar',
+            metadata: {
+              event_id: eventData?.id,
+              skill_id: notification.skillId
+            }
+          });
       }
       
-      // 4. Send notification to the requester
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: notification.requesterId,
-          actor_id: notification.providerId,
-          title: `Skill session for "${notification.skillTitle}" has been scheduled`,
-          content_type: 'skill_session',
-          content_id: notification.skillId,
-          notification_type: 'skills',
-          action_type: 'view',
-          action_label: 'View Calendar',
-          metadata: {
-            event_id: eventData?.id,
-            skill_id: notification.skillId
-          }
-        });
-        
       // Success message and cleanup
       toast({
         title: "Session scheduled successfully!",

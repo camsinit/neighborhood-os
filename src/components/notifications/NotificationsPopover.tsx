@@ -95,7 +95,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             skill_id,
             requester_id,
             provider_id,
-            requester:requester_id (
+            requester:profiles!skill_sessions_requester_id_fkey (
               display_name,
               avatar_url
             ),
@@ -107,7 +107,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
               time_preferences
             )
           `)
-          .eq('status', 'pending_scheduling')
+          .eq('status', 'pending_provider_times')
           .order("created_at", { ascending: false })
           .limit(5)
       ]);
@@ -177,13 +177,14 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
         // Skill request notifications - new addition
         ...(skillRequests.data?.map(session => {
           // Convert skill session data into a notification format
+          // Make sure we're accessing the correct nested fields with null checks
           const skillRequestData: SkillRequestNotification = {
             skillId: session.skill_id,
             requesterId: session.requester_id,
             providerId: session.provider_id,
             skillTitle: session.skill?.title || "Unnamed skill",
-            requesterName: session.requester?.display_name,
-            requesterAvatar: session.requester?.avatar_url,
+            requesterName: session.requester?.display_name || null,
+            requesterAvatar: session.requester?.avatar_url || null,
             timePreferences: session.skill?.time_preferences || null,
             availability: session.skill?.availability || null
           };
@@ -197,8 +198,8 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             isArchived: false, // Skill sessions don't have is_archived yet
             context: {
               contextType: "skill_request" as const,
-              neighborName: session.requester?.display_name,
-              avatarUrl: session.requester?.avatar_url,
+              neighborName: session.requester?.display_name || null,
+              avatarUrl: session.requester?.avatar_url || null,
               skillRequestData
             },
             actionLabel: "Confirm",

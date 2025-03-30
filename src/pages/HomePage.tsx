@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -88,7 +89,7 @@ const HomePage = () => {
             skill_id,
             requester_id,
             provider_id,
-            requester:requester_id (
+            requester:profiles!skill_sessions_requester_id_fkey (
               display_name,
               avatar_url
             ),
@@ -100,7 +101,7 @@ const HomePage = () => {
               time_preferences
             )
           `)
-          .eq('status', 'pending_scheduling')
+          .eq('status', 'pending_provider_times')
           .order("created_at", { ascending: false })
           .limit(5)
       ]);
@@ -160,8 +161,8 @@ const HomePage = () => {
             requesterId: session.requester_id,
             providerId: session.provider_id,
             skillTitle: session.skill?.title || "Unnamed skill",
-            requesterName: session.requester?.display_name,
-            requesterAvatar: session.requester?.avatar_url,
+            requesterName: session.requester?.display_name || null,
+            requesterAvatar: session.requester?.avatar_url || null,
             timePreferences: session.skill?.time_preferences || null,
             availability: session.skill?.availability || null
           };
@@ -175,8 +176,8 @@ const HomePage = () => {
             is_archived: false, // Skill sessions don't have is_archived yet
             context: {
               contextType: "skill_request" as const,
-              neighborName: session.requester?.display_name,
-              avatarUrl: session.requester?.avatar_url,
+              neighborName: session.requester?.display_name || null,
+              avatarUrl: session.requester?.avatar_url || null,
               skillRequestData
             }
           };

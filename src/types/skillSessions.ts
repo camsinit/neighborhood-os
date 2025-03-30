@@ -1,5 +1,5 @@
 
-export type SkillSessionStatus = 'pending_provider_times' | 'pending_requester_confirmation' | 'confirmed' | 'expired' | 'completed';
+export type SkillSessionStatus = 'pending_provider_times' | 'pending_requester_confirmation' | 'confirmed' | 'expired' | 'completed' | 'scheduled' | 'pending_scheduling' | 'in_progress';
 
 export interface TimeSlot {
   id: string;

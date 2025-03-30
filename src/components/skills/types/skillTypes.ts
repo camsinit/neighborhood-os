@@ -5,7 +5,8 @@ export type SkillCategory = 'technology' | 'creative' | 'trade' | 'education' | 
 // Make sure this matches exactly what's in the database enum
 export type SkillRequestType = 'offer' | 'need';
 
-export type SkillStatus = 'pending' | 'pending_scheduling' | 'scheduled' | 'completed';
+// Updated to match the database enum values
+export type SkillStatus = 'pending' | 'pending_scheduling' | 'pending_provider_times' | 'pending_requester_confirmation' | 'scheduled' | 'confirmed' | 'completed' | 'expired' | 'in_progress';
 
 // Define notification action types for skills
 export type SkillNotificationActionType = 'confirm' | 'view' | 'schedule';
