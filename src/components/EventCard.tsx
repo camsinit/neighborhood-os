@@ -1,7 +1,7 @@
 
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Pencil, Clock } from "lucide-react";
+import { Pencil, Clock, Users } from "lucide-react";
 import { format } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -14,16 +14,19 @@ import { supabase } from "@/integrations/supabase/client";
 const EventCard = ({ event, onDelete }: EventCardProps) => {
   const user = useUser();
   const [isRsvped, setIsRsvped] = useState(false);
+  const [rsvpCount, setRsvpCount] = useState(0);
   const displayTime = format(new Date(event.time), 'h:mm a');
   const isHost = user?.id === event.host_id;
 
-  // Check if the current user has RSVP'd to this event
+  // Check if the current user has RSVP'd to this event and get the count
   useEffect(() => {
-    if (user) {
+    if (user && event.id) {
       checkRsvpStatus();
+      fetchRsvpCount();
     }
   }, [user, event.id]);
 
+  // Check if current user has RSVP'd
   const checkRsvpStatus = async () => {
     if (!user) return;
 
@@ -35,6 +38,21 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
       .maybeSingle();
 
     setIsRsvped(!!data);
+  };
+  
+  // Get total RSVP count for this event
+  const fetchRsvpCount = async () => {
+    const { count, error } = await supabase
+      .from('event_rsvps')
+      .select('id', { count: 'exact', head: true })
+      .eq('event_id', event.id);
+      
+    if (error) {
+      console.error('Error fetching RSVP count:', error);
+      return;
+    }
+    
+    setRsvpCount(count || 0);
   };
 
   const EditButton = () => isHost ? (
@@ -63,6 +81,12 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
       className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full`}
     >
       <div className="font-medium line-clamp-2">{event.title}</div>
+      {rsvpCount > 0 && (
+        <div className="flex items-center gap-1 text-gray-600 mt-1">
+          <Users className="h-3 w-3" />
+          <span>{rsvpCount}</span>
+        </div>
+      )}
     </div>
   );
 
