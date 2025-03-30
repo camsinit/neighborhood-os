@@ -29,10 +29,20 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
+      // Transform the date and time fields into a single ISO timestamp
+      // The database expects a 'time' field, not 'date' field
+      const combinedTime = formData.date && formData.time 
+        ? `${formData.date}T${formData.time}` 
+        : null;
+
+      // Remove the separate date field since it's not in the database schema
+      const { date, ...restFormData } = formData;
+
       const { error, data } = await supabase
         .from('events')
         .insert({
-          ...formData,
+          ...restFormData,
+          time: combinedTime, // Use the combined ISO timestamp
           host_id: user.id,
           neighborhood_id: neighborhoodId
         })
@@ -98,16 +108,24 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
+      // Transform the date and time fields into a single ISO timestamp
+      const combinedTime = formData.date && formData.time 
+        ? `${formData.date}T${formData.time}` 
+        : null;
+
+      // Remove the separate date field since it's not in the database schema
+      const { date, ...restFormData } = formData;
+
       const { error, data } = await supabase
         .from('events')
         .update({
-          title: formData.title,
-          description: formData.description,
-          time: formData.time,
-          location: formData.location,
-          is_recurring: formData.isRecurring,
-          recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
-          recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null,
+          title: restFormData.title,
+          description: restFormData.description,
+          time: combinedTime, // Use the combined timestamp
+          location: restFormData.location,
+          is_recurring: restFormData.isRecurring,
+          recurrence_pattern: restFormData.isRecurring ? restFormData.recurrencePattern : null,
+          recurrence_end_date: restFormData.isRecurring ? restFormData.recurrenceEndDate : null,
         })
         .eq('id', eventId)
         .eq('host_id', user.id)

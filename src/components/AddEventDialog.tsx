@@ -10,6 +10,14 @@ interface AddEventDialogProps {
   initialDate?: Date | null;
 }
 
+/**
+ * A dialog component to add new events to the community calendar
+ * 
+ * @param open - Whether the dialog is currently open
+ * @param onOpenChange - Function to call when the open state changes
+ * @param onAddEvent - Callback function when an event is added successfully
+ * @param initialDate - Optional initial date to pre-fill in the form
+ */
 const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEventDialogProps) => {
   // Format the initial date for the form if provided
   const formattedDate = initialDate ? format(initialDate, 'yyyy-MM-dd') : '';
