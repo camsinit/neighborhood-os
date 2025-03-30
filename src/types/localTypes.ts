@@ -86,6 +86,7 @@ export interface GoodsExchangeItem {
   images?: string[]; // Support for multiple images
   image_url?: string | null; // Single image URL (legacy support)
   profiles?: Profile; // Profile of the provider/requester
+  neighborhood_id: string; // Add neighborhood_id field which is required by the database
 }
 
 /**

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { useQueryClient } from '@tanstack/react-query';
@@ -132,7 +131,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
       // Get the current user and neighborhood for the edge function
       const user = currentUser?.id;
-      const neighborhoodId = item.neighborhood_id;
+      const neighborhoodId = item.neighborhood_id || '';
 
       if (!user) {
         toast.error("You must be logged in to delete items");

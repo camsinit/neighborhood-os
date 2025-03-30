@@ -74,6 +74,7 @@ const CareRequestForm = ({
   existingRequest = null
 }: CareRequestFormProps) => {
   const user = useUser();
+  // Fix TypeScript error by properly destructuring the neighborhood object
   const { neighborhood } = useCurrentNeighborhood();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
