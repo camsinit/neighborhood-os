@@ -1,15 +1,15 @@
-
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowUpRight, Trash2 } from 'lucide-react'; // Import Trash2 icon for delete button
+import { ArrowUpRight, Trash2 } from 'lucide-react';
 import { Skill } from '../types/skillTypes';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useUser } from '@supabase/auth-helpers-react'; // Import useUser hook to get current user
-import { toast } from 'sonner'; // Import toast for notifications
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { useUser } from '@supabase/auth-helpers-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useSkillUpdate } from '@/hooks/skillUpdate';
 
 interface SkillCardProps {
   skill: Skill & { 
@@ -23,62 +23,22 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
-  // Get the current authenticated user
   const currentUser = useUser();
   
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   
-  // Check if the current user is the owner of this skill
+  const { deleteSkill, isLoading: isDeleting } = useSkillUpdate();
+  
   const isOwner = currentUser?.id === skill.user_id;
   
-  // Handle skill deletion
   const handleDeleteSkill = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent dialog from opening
+    e.stopPropagation();
     
-    try {
-      // Delete the skill from the database
-      const { error } = await supabase
-        .from('skills_exchange')
-        .delete()
-        .eq('id', skill.id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Show success message
-      toast.success('Skill deleted successfully');
-      
-      // Track this deletion in the activities (optional)
-      try {
-        // Call the edge function to update activities
-        const { error: functionError } = await supabase.functions.invoke('notify-skills-changes', {
-          body: {
-            skillId: skill.id,
-            action: 'delete',
-            skillTitle: skill.title,
-            changes: 'Skill deleted'
-          }
-        });
-
-        if (functionError) {
-          console.error('Error calling notify-skills-changes function:', functionError);
-        }
-      } catch (functionError) {
-        console.error('Failed to notify about skill deletion:', functionError);
-        // Non-critical error, we don't need to show this to the user
-      }
-      
-      // Dispatch custom event to refresh skills list
-      document.dispatchEvent(new CustomEvent('skill-deleted', {
-        detail: { id: skill.id }
-      }));
-    } catch (error) {
-      console.error('Error deleting skill:', error);
-      toast.error('Failed to delete skill. Please try again.');
-    }
+    await deleteSkill(skill.id, skill.title);
+    
+    setIsDetailsOpen(false);
   };
 
   if (type === 'request') {
@@ -146,19 +106,17 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
           </Avatar>
           <h4 className="font-medium text-gray-900">{skill.title}</h4>
         </div>
-        {/* Show different buttons based on ownership */}
         {isOwner ? (
-          // Show delete button for the owner
           <Button 
             variant="destructive" 
             onClick={handleDeleteSkill}
+            disabled={isDeleting}
             className="ml-4"
           >
             <Trash2 className="mr-1 h-4 w-4" />
-            Delete
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         ) : (
-          // Show request button for other users
           <Button 
             variant="outline" 
             onClick={(e) => {
@@ -219,7 +177,6 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
               </div>
             )}
 
-            {/* Only show the request button in the dialog if user is not the owner */}
             {!isOwner ? (
               <Button 
                 className="w-full"
@@ -235,9 +192,10 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
                 variant="destructive"
                 className="w-full"
                 onClick={handleDeleteSkill}
+                disabled={isDeleting}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete this Skill
+                {isDeleting ? 'Deleting...' : 'Delete this Skill'}
               </Button>
             )}
           </div>
