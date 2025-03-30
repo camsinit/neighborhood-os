@@ -34,6 +34,16 @@ const WaitlistForm = () => {
     // Don't proceed if already processing a submission
     if (isLoading) return;
     
+    // Validate email before submission
+    if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Set loading state to true while processing
     setIsLoading(true);
     
@@ -51,7 +61,9 @@ const WaitlistForm = () => {
         throw new Error("Failed to join waitlist. Please try again.");
       }
       
-      // Check the response from the function
+      console.log("Response from join-waitlist function:", data);
+      
+      // Check if the request was successful based on the response
       if (!data.success) {
         console.error("Function reported error:", data.error);
         throw new Error(data.error || "Failed to join waitlist");
