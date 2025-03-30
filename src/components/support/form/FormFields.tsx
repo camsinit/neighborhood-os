@@ -1,6 +1,6 @@
 
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -9,112 +9,183 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UseFormReturn } from "react-hook-form";
 import { SupportRequestFormData } from "../types/formTypes";
 
+/**
+ * FormFields component
+ * 
+ * This component handles all the input fields for the support request form
+ * in a reusable way similar to the CareRequestFormFields component
+ */
 interface FormFieldsProps {
-  formData: Partial<SupportRequestFormData>;
-  onChange: (field: keyof SupportRequestFormData, value: any) => void;
+  form: UseFormReturn<SupportRequestFormData>;
 }
 
-const FormFields = ({ formData, onChange }: FormFieldsProps) => {
-  const showCategoryField = formData.requestType !== 'offer' || formData.category !== 'skills';
-  const isCareCategory = formData.category === 'care';
+const FormFields = ({ form }: FormFieldsProps) => {
+  // Watch form values to conditionally render fields
+  const category = form.watch('category');
+  const requestType = form.watch('requestType');
+  
+  // Determine whether to show category field
+  const showCategoryField = requestType !== 'offer' || category !== 'skills';
+  const isCareCategory = category === 'care';
 
   return (
     <>
+      {/* Request Type Field */}
+      <FormField
+        control={form.control}
+        name="requestType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Request Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select request type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="need">I need help</SelectItem>
+                <SelectItem value="offer">I can help</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Category Field */}
       {showCategoryField && (
-        <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Select 
-            value={formData.category} 
-            onValueChange={(value) => onChange('category', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="goods">Goods</SelectItem>
-              <SelectItem value="transportation">Transportation</SelectItem>
-              <SelectItem value="skills">Skills</SelectItem>
-              <SelectItem value="care">Care</SelectItem>
-              <SelectItem value="resources">Resources</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="goods">Goods</SelectItem>
+                  <SelectItem value="transportation">Transportation</SelectItem>
+                  <SelectItem value="skills">Skills</SelectItem>
+                  <SelectItem value="care">Care</SelectItem>
+                  <SelectItem value="resources">Resources</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
 
+      {/* Care Category Field (only shown when category is 'care') */}
       {isCareCategory && (
-        <div className="space-y-2">
-          <Label htmlFor="careCategory">Care Type</Label>
-          <Select 
-            value={formData.care_category} 
-            onValueChange={(value) => onChange('care_category', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select care type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="transportation">Transportation</SelectItem>
-              <SelectItem value="household">Household Tasks</SelectItem>
-              <SelectItem value="medical">Medical Assistance</SelectItem>
-              <SelectItem value="childcare">Childcare</SelectItem>
-              <SelectItem value="eldercare">Elder Care</SelectItem>
-              <SelectItem value="petcare">Pet Care</SelectItem>
-              <SelectItem value="mealprep">Meal Preparation</SelectItem>
-              <SelectItem value="general">General Assistance</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FormField
+          control={form.control}
+          name="care_category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Care Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select care type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="transportation">Transportation</SelectItem>
+                  <SelectItem value="household">Household Tasks</SelectItem>
+                  <SelectItem value="medical">Medical Assistance</SelectItem>
+                  <SelectItem value="childcare">Childcare</SelectItem>
+                  <SelectItem value="eldercare">Elder Care</SelectItem>
+                  <SelectItem value="petcare">Pet Care</SelectItem>
+                  <SelectItem value="mealprep">Meal Preparation</SelectItem>
+                  <SelectItem value="general">General Assistance</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       )}
 
-      {showCategoryField && (
-        <div className="space-y-2">
-          <Label htmlFor="supportType">Support Type</Label>
-          <Select 
-            value={formData.supportType} 
-            onValueChange={(value) => onChange('supportType', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select support type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="immediate">Immediate</SelectItem>
-              <SelectItem value="ongoing">Ongoing</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      {/* Support Type Field */}
+      <FormField
+        control={form.control}
+        name="supportType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Support Type</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select support type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="immediate">Immediate</SelectItem>
+                <SelectItem value="ongoing">Ongoing</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={formData.title || ''}
-          onChange={(e) => onChange('title', e.target.value)}
-          required
-        />
-      </div>
+      {/* Title Field */}
+      <FormField
+        control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Title</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="Enter a title for your request" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description || ''}
-          onChange={(e) => onChange('description', e.target.value)}
-          required
-        />
-      </div>
+      {/* Description Field */}
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Textarea 
+                {...field} 
+                placeholder="Describe your request in detail"
+                className="min-h-[100px]"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="validUntil">Valid Until</Label>
-        <Input
-          id="validUntil"
-          type="date"
-          value={formData.validUntil || ''}
-          onChange={(e) => onChange('validUntil', e.target.value)}
-          required
-        />
-      </div>
+      {/* Valid Until Field */}
+      <FormField
+        control={form.control}
+        name="validUntil"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Valid Until</FormLabel>
+            <FormControl>
+              <Input type="date" {...field} min={new Date().toISOString().split('T')[0]} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };

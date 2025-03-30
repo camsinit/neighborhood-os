@@ -36,12 +36,14 @@ const CareRequestForm = ({
 }: CareRequestFormProps) => {
   // Get the current user and neighborhood
   const user = useUser();
+  
+  // Get the current neighborhood - this returns a Neighborhood object or null
   const neighborhoodData = useCurrentNeighborhood();
   
   // Setup the form submission hook
   const { isSubmitting, submitCareRequest } = useCareRequestSubmit(
     user,
-    neighborhoodData,
+    neighborhoodData, // Pass the entire neighborhood object (or null)
     onClose,
     editMode,
     existingRequest

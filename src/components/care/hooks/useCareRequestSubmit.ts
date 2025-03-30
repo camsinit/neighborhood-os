@@ -11,6 +11,12 @@ import { refreshEvents } from '@/utils/refreshEvents';
  * Custom hook for handling care request form submissions
  * 
  * This hook encapsulates the logic for creating and updating care requests
+ * 
+ * @param user - The current authenticated user
+ * @param neighborhoodData - The current neighborhood data (may be null or a Neighborhood object)
+ * @param onClose - Function to call when submission is complete
+ * @param editMode - Whether we're editing an existing request
+ * @param existingRequest - The existing request data if in edit mode
  */
 export const useCareRequestSubmit = (
   user: User | null,
@@ -27,9 +33,14 @@ export const useCareRequestSubmit = (
    */
   const submitCareRequest = async (data: CareRequestFormData) => {
     // Validate prerequisites
-    if (!user || !neighborhoodData) {
-      toast.error("You must be logged in and part of a neighborhood to create a care request");
-      return;
+    if (!user) {
+      toast.error("You must be logged in to create a care request");
+      return false;
+    }
+
+    if (!neighborhoodData || !neighborhoodData.id) {
+      toast.error("You must be part of a neighborhood to create a care request");
+      return false;
     }
 
     setIsSubmitting(true);

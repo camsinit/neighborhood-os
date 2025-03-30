@@ -1,22 +1,27 @@
 
 // This file defines the types for the support request forms
+import { z } from 'zod';
 
-export type SupportRequestFormData = {
-  title: string;
-  description: string;
-  category: string;
-  requestType: "need" | "offer";
-  validUntil: string;
-  supportType: "immediate" | "ongoing";
-  imageUrl?: string | null;
-  skill_category?: string;
-  care_category?: string;
+// Define the schema for support requests
+export const supportRequestSchema = z.object({
+  title: z.string().min(3, { message: 'Title must be at least 3 characters' }).max(100),
+  description: z.string().min(10, { message: 'Description must be at least 10 characters' }),
+  category: z.string(),
+  requestType: z.enum(["need", "offer"]),
+  validUntil: z.string().min(1, { message: 'Valid until date is required' }),
+  supportType: z.enum(["immediate", "ongoing"]),
+  imageUrl: z.string().optional().nullable(),
   // Add support for multiple images
-  images?: string[];
+  images: z.array(z.string()).optional(),
   // Add support for goods-specific fields
-  goods_category?: GoodsItemCategory;
-  urgency?: GoodsRequestUrgency;
-};
+  goods_category: z.string().optional(),
+  urgency: z.string().optional(),
+  care_category: z.string().optional(),
+  skill_category: z.string().optional(),
+});
+
+// Export the form data type
+export type SupportRequestFormData = z.infer<typeof supportRequestSchema>;
 
 export type SupportRequestFormProps = {
   onClose: () => void;
