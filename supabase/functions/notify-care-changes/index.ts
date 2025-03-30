@@ -10,12 +10,18 @@ const corsHeaders = {
 // Define the expected request structure
 interface UpdateRequest {
   careRequestId: string;
-  action: 'update' | 'delete';
+  action: 'update' | 'delete' | 'create' | 'confirm';
   careRequestTitle: string;
+  userId: string;
+  requestType?: 'need' | 'offer';
+  neighborhoodId: string;
   changes?: string;
 }
 
-// Main handler function for the edge function
+/**
+ * Main handler function for the edge function
+ * This processes care request events and updates the activity feed accordingly
+ */
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -30,25 +36,93 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Extract data from the request body
-    const { careRequestId, action, careRequestTitle, changes } = await req.json() as UpdateRequest;
+    const { 
+      careRequestId, 
+      action, 
+      careRequestTitle, 
+      userId,
+      requestType,
+      neighborhoodId,
+      changes 
+    } = await req.json() as UpdateRequest;
 
     console.log(`Processing ${action} notification for care request: ${careRequestTitle}`);
 
-    // When a care request is modified, update any related activities to keep them in sync
-    if (action === 'update' && careRequestId) {
-      // Update any activities related to this care request
-      const { error: activityError } = await supabaseClient
-        .from('activities')
-        .update({ title: careRequestTitle })
-        .eq('content_type', 'care_requests')
-        .eq('content_id', careRequestId);
+    // We only want to show activities for help requests and confirmations
+    // Handle different actions
+    switch (action) {
+      case 'create':
+        // Only create an activity if this is a request for help (not an offer)
+        if (requestType === 'need') {
+          // Create a new activity for this care request
+          const { error: createError } = await supabaseClient
+            .from('activities')
+            .insert({
+              title: careRequestTitle,
+              activity_type: 'care_requested',
+              content_id: careRequestId,
+              content_type: 'care_requests',
+              actor_id: userId,
+              is_public: true,
+              neighborhood_id: neighborhoodId,
+              metadata: { description: changes }
+            });
 
-      if (activityError) {
-        console.error('Error updating activities:', activityError);
-        throw activityError;
-      } else {
-        console.log(`Successfully updated related activities for care request: ${careRequestTitle}`);
-      }
+          if (createError) {
+            console.error('Error creating activity:', createError);
+            throw createError;
+          } else {
+            console.log(`Successfully created activity for care request: ${careRequestTitle}`);
+          }
+        }
+        break;
+
+      case 'confirm':
+        // Create an activity when help has been provided/confirmed
+        const { error: confirmError } = await supabaseClient
+          .from('activities')
+          .insert({
+            title: `Help provided: ${careRequestTitle}`,
+            activity_type: 'care_completed',
+            content_id: careRequestId,
+            content_type: 'care_requests',
+            actor_id: userId,
+            is_public: true,
+            neighborhood_id: neighborhoodId,
+            metadata: { description: "Help has been provided for this request" }
+          });
+
+        if (confirmError) {
+          console.error('Error creating confirmation activity:', confirmError);
+          throw confirmError;
+        } else {
+          console.log(`Successfully created help provided activity for: ${careRequestTitle}`);
+        }
+        break;
+
+      case 'update':
+        // Update any activities related to this care request to keep them in sync
+        if (careRequestId) {
+          const { error: activityError } = await supabaseClient
+            .from('activities')
+            .update({ title: careRequestTitle })
+            .eq('content_type', 'care_requests')
+            .eq('content_id', careRequestId);
+
+          if (activityError) {
+            console.error('Error updating activities:', activityError);
+            throw activityError;
+          } else {
+            console.log(`Successfully updated related activities for care request: ${careRequestTitle}`);
+          }
+        }
+        break;
+      
+      case 'delete':
+        // For future implementation - handle deletions appropriately
+        // Currently we're just keeping the existing behavior
+        console.log(`Care request deleted: ${careRequestTitle}`);
+        break;
     }
 
     // Return a success response

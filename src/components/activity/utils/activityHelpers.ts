@@ -18,6 +18,7 @@ export const getActivityColor = (type: string): string => {
       return '#F97316'; // Goods orange
     case 'care_offered':
     case 'care_requested':
+    case 'care_completed':
       return '#22C55E'; // Care green
     case 'safety_update':
       return '#EA384C'; // Safety red
@@ -43,6 +44,7 @@ export const getActivityIcon = (type: string) => {
       return Package;
     case 'care_offered':
     case 'care_requested':
+    case 'care_completed':
       return Heart;
     case 'safety_update':
       return Shield;
@@ -97,7 +99,9 @@ export const getActivityContext = (type: string): string => {
     case 'care_offered':
       return "New care offering available";
     case 'care_requested':
-      return "New care request posted";
+      return "A neighbor needs help";
+    case 'care_completed':
+      return "Help has been provided";
     case 'safety_update':
       return "New safety update posted";
     default:
