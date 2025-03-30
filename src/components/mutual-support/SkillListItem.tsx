@@ -34,111 +34,23 @@ const SkillListItem = ({
 }: SkillListItemProps) => {
   const user = useUser();
   
-  // Log the full profiles array to see what we're receiving
-  console.log('Profiles data:', profiles);
-  
   // Extract the requester profile and add validation
   const requesterProfile = profiles?.[0];
-  console.log('Requester profile:', requesterProfile);
   
   const isOwner = user?.id === requesterProfile?.id;
 
-  // Add validation to ensure we have the necessary data
-  const validateSessionData = () => {
-    if (!user?.id) {
-      console.error('No user ID available');
-      return false;
-    }
-    if (!requesterProfile?.id) {
-      console.error('No requester profile ID available');
-      return false;
-    }
-    if (!requestId) {
-      console.error('No request ID available');
-      return false;
-    }
-    return true;
-  };
-
-  const handleScheduleHelp = async (e: React.MouseEvent) => {
+  // When "Learn" or "Help" button is clicked, we just use the onClick handler 
+  // from props which will open the appropriate dialog
+  const handleScheduleHelp = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Log all relevant IDs
-    console.log('Session creation attempt:', {
-      requestId,
-      userId: user?.id,
-      requesterProfile: requesterProfile,
-      requesterProfileId: requesterProfile?.id,
-      type
-    });
-
-    // Validate required data before proceeding
-    if (!validateSessionData()) {
-      toast.error("Unable to create session: Missing required data");
+    if (!user?.id) {
+      toast.error("Please log in to continue");
       return;
     }
 
-    try {
-      const defaultAvailability = {
-        weekday: false,
-        weekend: false,
-        morning: false,
-        afternoon: false,
-        evening: false
-      };
-
-      // Get the actual requester ID from the skills_exchange table
-      const { data: skillRequest, error: skillError } = await supabase
-        .from('skills_exchange')
-        .select('user_id')
-        .eq('id', requestId)
-        .single();
-
-      if (skillError) {
-        console.error('Error fetching skill request:', skillError);
-        throw skillError;
-      }
-
-      console.log('Creating skill session with data:', {
-        skill_id: requestId,
-        requester_id: skillRequest.user_id,
-        provider_id: user?.id,
-        defaultAvailability
-      });
-
-      const { data: session, error: sessionError } = await supabase
-        .from('skill_sessions')
-        .insert({
-          skill_id: requestId,
-          requester_id: skillRequest.user_id,
-          provider_id: user?.id,
-          status: 'pending_provider_times',
-          expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-          requester_availability: defaultAvailability
-        })
-        .select()
-        .single();
-
-      if (sessionError) {
-        console.error('Error creating skill session:', sessionError);
-        throw sessionError;
-      }
-
-      console.log('Skill session created successfully:', session);
-
-      toast.success(type === "Needs Help" 
-        ? "Great! You've offered to help. Please propose some available time slots."
-        : "Great! You've requested to learn. Please share your availability."
-      );
-
-      console.log('Dispatching openSkillSessionDialog event with sessionId:', session.id);
-      window.dispatchEvent(new CustomEvent('openSkillSessionDialog', {
-        detail: { sessionId: session.id }
-      }));
-    } catch (error) {
-      console.error('Detailed error creating skill session:', error);
-      toast.error("Failed to initiate skill session. Please try again.");
-    }
+    // We'll let the parent component handle opening the proper dialog
+    onClick();
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -199,7 +111,8 @@ const SkillListItem = ({
                 size="sm"
                 variant="outline"
                 onClick={(e) => {
-                  console.log('Learn/Help button clicked');
+                  // Prevent propagation to parent onClick
+                  e.stopPropagation();
                   handleScheduleHelp(e);
                 }}
                 className="text-xs px-3 py-1 h-7"

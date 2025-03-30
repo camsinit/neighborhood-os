@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useUser } from '@supabase/auth-helpers-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import DialogWrapper from '@/components/dialog/DialogWrapper';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useUser } from "@supabase/auth-helpers-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import DialogWrapper from "@/components/dialog/DialogWrapper";
 import {
   Form,
   FormControl,
@@ -12,11 +12,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { addDays, format } from "date-fns";
+import TimeSlotSelector, { TimeSlot } from "./contribution/TimeSlotSelector";
 
 // Define the form data structure
 interface SkillRequestFormData {
@@ -41,6 +44,9 @@ const SkillSessionRequestDialog = ({
   providerId,
 }: SkillSessionRequestDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Add state for date selection
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
+  
   const user = useUser();
   const queryClient = useQueryClient();
 
@@ -53,16 +59,61 @@ const SkillSessionRequestDialog = ({
     },
   });
 
+  // Settings for the date picker
+  const disabledDays = {
+    before: new Date(),
+    after: addDays(new Date(), 90) // Limit date selection to 90 days in the future
+  };
+
+  // Handler for date selection
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const existingSlotIndex = selectedTimeSlots.findIndex(
+      slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
+    );
+
+    if (existingSlotIndex === -1) {
+      if (selectedTimeSlots.length < 3) {
+        // Add a new date with no time preferences selected yet
+        setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
+      } else {
+        toast.error("Maximum 3 dates can be selected", {
+          description: "Please remove a date before adding another one"
+        });
+      }
+    } else {
+      // Remove the date if clicked again
+      setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
+    }
+  };
+
   const onSubmit = async (data: SkillRequestFormData) => {
     if (!user) {
       toast.error('You must be logged in to request skills');
       return;
     }
 
+    // Make sure at least 3 dates are selected
+    if (selectedTimeSlots.length < 3) {
+      toast.error('Date selection required', {
+        description: 'Please select exactly 3 different dates for your request'
+      });
+      return;
+    }
+
+    // Make sure each date has at least one time preference
+    if (selectedTimeSlots.some(slot => slot.preferences.length === 0)) {
+      toast.error('Time preferences required', {
+        description: 'Please select at least one time preference for each selected date'
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // Create a new skill session
-      const { error } = await supabase
+      // First create the skill session
+      const { data: session, error: sessionError } = await supabase
         .from('skill_sessions')
         .insert({
           skill_id: skillId,
@@ -74,16 +125,39 @@ const SkillSessionRequestDialog = ({
             description: data.description,
           },
           status: 'pending_provider_times',
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (sessionError) throw sessionError;
+
+      // Then create time slots for the selected dates
+      const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
+        slot.preferences.map(preference => ({
+          session_id: session.id,
+          proposed_time: new Date(slot.date.setHours(
+            preference === 'morning' ? 9 :
+            preference === 'afternoon' ? 13 :
+            18
+          )).toISOString(),
+        }))
+      );
+
+      // Insert the time slots
+      const { error: timeSlotError } = await supabase
+        .from('skill_session_time_slots')
+        .insert(timeSlotPromises);
+
+      if (timeSlotError) throw timeSlotError;
 
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting skill request:', error);
-      toast.error('Failed to submit skill request. Please try again.');
+      toast.error('Request submission failed', {
+        description: error.message || 'Failed to submit skill request. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -114,6 +188,46 @@ const SkillSessionRequestDialog = ({
               </FormItem>
             )}
           />
+
+          {/* Date Selection Section */}
+          <div className="space-y-2">
+            <FormLabel>Select 3 dates that work for you</FormLabel>
+            <div className="border rounded-lg p-4">
+              <Calendar
+                mode="single"
+                selected={undefined}
+                onSelect={handleDateSelect}
+                disabled={disabledDays}
+                className="mx-auto"
+              />
+            </div>
+          </div>
+
+          {/* Display selected dates with time preferences */}
+          <div className="space-y-4">
+            {selectedTimeSlots.map((slot, index) => (
+              <TimeSlotSelector
+                key={format(slot.date, 'yyyy-MM-dd')}
+                timeSlot={slot}
+                onRemove={() => setSelectedTimeSlots(slots => 
+                  slots.filter((_, i) => i !== index)
+                )}
+                onPreferenceChange={(timeId) => {
+                  setSelectedTimeSlots(slots =>
+                    slots.map((s, i) => {
+                      if (i === index) {
+                        const preferences = s.preferences.includes(timeId)
+                          ? s.preferences.filter(p => p !== timeId)
+                          : [...s.preferences, timeId];
+                        return { ...s, preferences };
+                      }
+                      return s;
+                    })
+                  );
+                }}
+              />
+            ))}
+          </div>
 
           {/* Availability Field */}
           <FormField
@@ -153,7 +267,7 @@ const SkillSessionRequestDialog = ({
             name="timePreference"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What times of day work best for you?</FormLabel>
+                <FormLabel>What times of day generally work best for you?</FormLabel>
                 <FormControl>
                   <div className="flex flex-wrap gap-4">
                     {['morning', 'afternoon', 'evening'].map((time) => (
