@@ -10,21 +10,23 @@ import { useNavigate } from "react-router-dom";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
 
+// Updated to include new notification context types
 interface NotificationContext {
   neighborName?: string;
   avatarUrl?: string;
-  contextType: "help_request" | "event_invite" | "safety_alert" | "skill_request";
+  contextType: "help_request" | "event_invite" | "safety_alert" | "skill_request" | "goods_offer" | "goods_request" | "neighbor_join";
   skillRequestData?: SkillRequestNotification;
 }
 
+// Updated to include new notification types
 interface NotificationItemProps {
   title: string;
-  type: "safety" | "event" | "support" | "skills";
+  type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors";
   itemId: string;
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
-  onItemClick: (type: "safety" | "event" | "support" | "skills", id: string) => void;
+  onItemClick: (type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", id: string) => void;
   context?: NotificationContext;
 }
 
@@ -56,6 +58,12 @@ const NotificationItem = ({
         return `Important update from ${context.neighborName} about`;
       case "skill_request":
         return `${context.neighborName} is requesting your skill for`;
+      case "goods_offer":
+        return `${context.neighborName} is offering`;
+      case "goods_request":
+        return `${context.neighborName} is requesting`;
+      case "neighbor_join":
+        return `${context.neighborName} has joined the neighborhood`;
       default:
         return null;
     }

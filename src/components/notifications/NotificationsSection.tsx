@@ -29,7 +29,10 @@ const NotificationsSection = () => {
    * 
    * Navigates to the appropriate page and highlights the relevant item
    */
-  const handleItemClick = (type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", id: string) => {
+  const handleItemClick = (
+    type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", 
+    id: string
+  ) => {
     // Map notification types to their respective routes
     const routeMap = {
       safety: "/safety",

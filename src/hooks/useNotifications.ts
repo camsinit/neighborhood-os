@@ -17,7 +17,7 @@ export interface BaseNotification {
   is_read: boolean;
   is_archived: boolean;
   context: {
-    contextType: string;
+    contextType: "help_request" | "event_invite" | "safety_alert" | "skill_request" | "goods_offer" | "goods_request" | "neighbor_join";
     neighborName: string | null;
     avatarUrl: string | null;
     skillRequestData?: SkillRequestNotification;
@@ -35,7 +35,7 @@ export const useNotifications = (showArchived: boolean) => {
     queryKey: ["notifications", showArchived],
     queryFn: async (): Promise<BaseNotification[]> => {
       // Fetch data from multiple tables concurrently for better performance
-      const [safetyUpdates, events, supportRequests, skillRequests] = await Promise.all([
+      const [safetyUpdates, events, supportRequests, skillRequests, goodsItems] = await Promise.all([
         // Safety updates query
         supabase.from("safety_updates").select(`
             id, 
@@ -105,6 +105,25 @@ export const useNotifications = (showArchived: boolean) => {
           `)
           .eq('status', 'pending_provider_times')
           .order("created_at", { ascending: false })
+          .limit(5),
+          
+        // Goods exchange items query
+        supabase
+          .from("goods_exchange")
+          .select(`
+            id,
+            title,
+            request_type,
+            created_at,
+            is_read,
+            is_archived,
+            profiles:user_id (
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('is_archived', showArchived)
+          .order("created_at", { ascending: false })
           .limit(5)
       ]);
 
@@ -168,7 +187,7 @@ export const useNotifications = (showArchived: boolean) => {
           }
         })) || []),
         
-        // Skill request notifications - now using the separate profile lookup
+        // Skill request notifications
         ...(skillRequests.data?.map(session => {
           // Look up requester profile from our map
           const requesterProfile = profilesMap[session.requester_id] || {};
@@ -199,7 +218,22 @@ export const useNotifications = (showArchived: boolean) => {
               skillRequestData
             }
           };
-        }) || [])
+        }) || []),
+        
+        // Goods exchange notifications - new addition
+        ...(goodsItems.data?.map(item => ({
+          id: item.id,
+          title: item.title,
+          type: "goods" as const,
+          created_at: item.created_at,
+          is_read: item.is_read,
+          is_archived: item.is_archived,
+          context: {
+            contextType: item.request_type === "offer" ? "goods_offer" as const : "goods_request" as const,
+            neighborName: item.profiles?.display_name,
+            avatarUrl: item.profiles?.avatar_url
+          }
+        })) || [])
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
