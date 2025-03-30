@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
 import { useSafetyUpdates } from "@/utils/queries/useSafetyUpdates";
 import SafetyUpdatesList from "./safety/SafetyUpdatesList";
@@ -18,23 +17,31 @@ import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew"; // Import the new dialog component
 
+/**
+ * SafetyUpdates component displays a list of safety updates for the neighborhood
+ * and provides functionality to create, view, and edit updates
+ */
 const SafetyUpdates = () => {
+  // State to control dialog visibility
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   
-  // Properly destructure data to ensure it's always an array we can work with
+  // Fetch safety updates data
   const { data: safetyUpdatesResponse, isLoading } = useSafetyUpdates();
   // Extract the data array safely, ensuring it's always an array even if there's an error
   const safetyUpdates = safetyUpdatesResponse?.data || [];
   
+  // Get current user for permission checks
   const user = useUser();
 
   // Set up auto-refresh for safety updates data
   // This will listen for the safety-update-submitted event and refresh the data
   useAutoRefresh(['safety-updates'], ['safety-update-submitted']);
 
+  // Handle custom events for opening safety dialogs
   useEffect(() => {
     const handleOpenSafetyDialog = (event: CustomEvent<{ id: string }>) => {
       // Now we're safely working with the array of updates
@@ -53,6 +60,7 @@ const SafetyUpdates = () => {
   
   return (
     <>
+      {/* Add Update Button - hidden by default, shown via CSS in specific contexts */}
       <Button 
         data-add-update-button
         className="hidden"
@@ -61,6 +69,7 @@ const SafetyUpdates = () => {
         Post Update
       </Button>
       
+      {/* Safety updates list */}
       <div className="bg-transparent">
         {/* Pass the array directly - not the PostgrestResponse object */}
         <SafetyUpdatesList
@@ -70,6 +79,7 @@ const SafetyUpdates = () => {
         />
       </div>
 
+      {/* Archive button */}
       <div className="mt-8 flex justify-center">
         <Button 
           variant="outline"
@@ -80,15 +90,19 @@ const SafetyUpdates = () => {
         </Button>
       </div>
 
-      <AddSafetyUpdateDialog 
+      {/* Using the new dialog component instead of the old one */}
+      <AddSafetyUpdateDialogNew 
         open={isAddUpdateOpen}
         onOpenChange={setIsAddUpdateOpen}
       />
+      
+      {/* Archive dialog */}
       <SafetyArchiveDialog
         open={isArchiveOpen}
         onOpenChange={setIsArchiveOpen}
       />
       
+      {/* Detail view dialog for a selected update */}
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
