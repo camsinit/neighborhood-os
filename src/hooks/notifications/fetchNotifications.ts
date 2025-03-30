@@ -221,8 +221,8 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
       is_archived: update.is_archived,
       context: {
         contextType: "safety_alert" as const,
-        neighborName: update.profiles?.display_name,
-        avatarUrl: update.profiles?.avatar_url
+        neighborName: update.profiles?.display_name || null,
+        avatarUrl: update.profiles?.avatar_url || null
       }
     })),
     
@@ -236,8 +236,8 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
       is_archived: event.is_archived,
       context: {
         contextType: "event_invite" as const,
-        neighborName: event.profiles?.display_name,
-        avatarUrl: event.profiles?.avatar_url
+        neighborName: event.profiles?.display_name || null,
+        avatarUrl: event.profiles?.avatar_url || null
       }
     })),
     
@@ -251,15 +251,15 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
       is_archived: request.is_archived,
       context: {
         contextType: "help_request" as const,
-        neighborName: request.profiles?.display_name,
-        avatarUrl: request.profiles?.avatar_url
+        neighborName: request.profiles?.display_name || null,
+        avatarUrl: request.profiles?.avatar_url || null
       }
     })),
     
     // Skill request notifications
     ...skillRequests.map(session => {
       // Look up requester profile from our map
-      const requesterProfile = profilesMap[session.requester_id] || {};
+      const requesterProfile = profilesMap[session.requester_id] || { display_name: null, avatar_url: null };
       
       // Convert skill session data into a notification format
       const skillRequestData: SkillRequestNotification = {
@@ -292,7 +292,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
     // Goods exchange notifications
     ...goodsItems.map(item => {
       // Look up the user profile from our profilesMap
-      const userProfile = profilesMap[item.user_id] || {};
+      const userProfile = profilesMap[item.user_id] || { display_name: null, avatar_url: null };
       
       return {
         id: item.id,
