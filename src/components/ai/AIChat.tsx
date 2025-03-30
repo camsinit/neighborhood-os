@@ -61,6 +61,7 @@ const NEIGHBORHOOD_ACTIONS = [
 
 /**
  * The main AI Chat component that orchestrates the entire chat experience
+ * The outer wrapper div has been removed to flatten the structure
  */
 const AIChat = () => {
   // State for messages, loading status
@@ -154,34 +155,33 @@ const AIChat = () => {
     }
   };
 
-  // Render the chat interface with the div between header and messages removed
+  // Render the chat interface without the outer wrapping div
   return (
-    <div className="h-full bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+    <>
       {/* Chat header */}
       <AIChatHeader />
       
-      {/* Messages area - removed the container div */}
+      {/* Messages area - with direct styling now that the wrapper is gone */}
       <AIChatMessages 
         messages={messages} 
         isLoading={isLoading} 
         loadingMessage={loadingMessage} 
         messagesEndRef={messagesEndRef}
-        // Reduced bottom padding to make the chat more compact vertically
-        className="flex-1 overflow-y-auto pt-0 px-4 pb-2" 
+        // Added bg-white class since the wrapper div that had it is now gone
+        className="flex-1 overflow-y-auto pt-0 px-4 pb-2 bg-white" 
       />
       
-      {/* Input area with suggestions - reduced the top border to a thinner line */}
-      <div className="border-t border-gray-100">
+      {/* Input area with suggestions */}
+      <div className="border-t border-gray-100 bg-white rounded-b-lg">
         <AIInputWithSuggestions
           actions={NEIGHBORHOOD_ACTIONS}
           placeholder="Ask about your neighborhood..."
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          // Add reduced padding prop to make the input area more compact
           compactMode={true}
         />
       </div>
-    </div>
+    </>
   );
 };
 

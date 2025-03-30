@@ -18,14 +18,15 @@ import AIChat from "@/components/ai/AIChat";
  * Main homepage/dashboard of the neighborhood app
  * Shows AI assistant, quick actions, and notifications
  * Reduced chat interface height for a more compact UI
+ * Added styling directly to the AIChat container since its wrapper was removed
  */
 const HomePage = () => {
   return <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-1">
-          {/* AI Chat Section - With reduced height */}
+          {/* AI Chat Section - With reduced height and direct styling for AIChat */}
           <section>
-            <div className="h-[350px]">
+            <div className="h-[350px] bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
               <AIChat />
             </div>
           </section>
