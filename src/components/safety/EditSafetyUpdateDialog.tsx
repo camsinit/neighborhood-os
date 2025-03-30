@@ -34,7 +34,7 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
   // Only show edit button if user is the author
   if (!user || user.id !== update.author_id) return null;
 
-  // Use existingData prop instead of initialValues to match component API
+  // Pass the correct props to the SafetyUpdateForm component
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -61,6 +61,8 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
             type: update.type,
           }}
           onClose={() => setOpen(false)}
+          mode="edit"
+          updateId={update.id}
         />
       </DialogContent>
     </Dialog>

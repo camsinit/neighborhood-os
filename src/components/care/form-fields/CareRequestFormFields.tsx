@@ -1,4 +1,3 @@
-
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -178,25 +177,47 @@ export const ValidUntilField = ({ form }: { form: UseFormReturn<CareRequestFormD
 );
 
 /**
- * FormButtons component
+ * FormButtons - Renders the form action buttons
  * 
- * Renders the form action buttons (cancel and submit)
+ * @param onClose - Function to close the form
+ * @param isSubmitting - Whether the form is currently submitting
+ * @param editMode - Whether the form is in edit mode
+ * @param onDelete - Optional handler for delete functionality
  */
 export const FormButtons = ({ 
   onClose, 
   isSubmitting, 
-  editMode 
+  editMode = false,
+  onDelete
 }: { 
-  onClose: () => void;
-  isSubmitting: boolean;
-  editMode: boolean;
-}) => (
-  <div className="flex justify-end gap-4 pt-4">
-    <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-      Cancel
-    </Button>
-    <Button type="submit" disabled={isSubmitting}>
-      {isSubmitting ? "Saving..." : editMode ? "Update" : "Create"}
-    </Button>
-  </div>
-);
+  onClose: () => void; 
+  isSubmitting: boolean; 
+  editMode?: boolean;
+  onDelete?: () => void;
+}) => {
+  // Add the delete button for edit mode if onDelete is provided
+  return (
+    <div className="flex justify-between">
+      <div>
+        {editMode && onDelete && (
+          <Button 
+            type="button" 
+            onClick={onDelete} 
+            variant="destructive"
+            disabled={isSubmitting}
+          >
+            Delete
+          </Button>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {editMode ? "Update" : "Submit"}
+        </Button>
+      </div>
+    </div>
+  );
+};

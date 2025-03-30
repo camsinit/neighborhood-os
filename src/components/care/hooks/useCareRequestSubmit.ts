@@ -10,10 +10,10 @@ import { refreshEvents } from '@/utils/refreshEvents';
 /**
  * Custom hook for handling care request form submissions
  * 
- * This hook encapsulates the logic for creating and updating care requests
+ * This hook encapsulates the logic for creating, updating, and deleting care requests
  * 
  * @param user - The current authenticated user
- * @param neighborhoodData - The current neighborhood data (may be null or a Neighborhood object)
+ * @param neighborhoodData - The current neighborhood data
  * @param onClose - Function to call when submission is complete
  * @param editMode - Whether we're editing an existing request
  * @param existingRequest - The existing request data if in edit mode
@@ -29,6 +29,47 @@ export const useCareRequestSubmit = (
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
+   * Call the edge function to update the activity feed
+   */
+  const notifyCareChanges = async (
+    careRequestId: string,
+    action: 'create' | 'update' | 'delete' | 'confirm',
+    careRequestTitle: string, 
+    userId: string,
+    requestType: string | undefined,
+    neighborhoodId: string,
+    changes?: string
+  ) => {
+    try {
+      // Call our edge function to handle activity feed updates
+      const { error: edgeFunctionError } = await supabase.functions.invoke(
+        'notify-care-changes',
+        {
+          body: {
+            careRequestId,
+            action,
+            careRequestTitle,
+            userId,
+            requestType,
+            neighborhoodId,
+            changes
+          }
+        }
+      );
+
+      if (edgeFunctionError) {
+        console.error("[useCareRequestSubmit] Error calling edge function:", edgeFunctionError);
+        // We don't throw the error here to avoid blocking the main operation
+      } else {
+        console.log(`[useCareRequestSubmit] Successfully notified about ${action} action for care request ID: ${careRequestId}`);
+      }
+    } catch (error) {
+      console.error("[useCareRequestSubmit] Exception in edge function call:", error);
+      // Again, we don't throw to avoid blocking the main operation
+    }
+  };
+
+  /**
    * Submit form data to create or update a care request
    */
   const submitCareRequest = async (data: CareRequestFormData) => {
@@ -38,7 +79,7 @@ export const useCareRequestSubmit = (
       return false;
     }
 
-    if (!neighborhoodData || !neighborhoodData.id) {
+    if (!neighborhoodData?.id) {
       toast.error("You must be part of a neighborhood to create a care request");
       return false;
     }
@@ -59,7 +100,7 @@ export const useCareRequestSubmit = (
       };
 
       let response;
-      let action = 'create';
+      let action: 'create' | 'update' = 'create';
 
       // Update existing or create new based on mode
       if (editMode && existingRequest) {
@@ -84,23 +125,15 @@ export const useCareRequestSubmit = (
       // Call the edge function to update activities
       const newRequestId = editMode ? existingRequest.id : response.data?.[0]?.id;
       if (newRequestId) {
-        // Call our edge function to handle activity feed updates
-        const { error: edgeFunctionError } = await supabase.functions.invoke(
-          'notify-care-changes', {
-          body: {
-            careRequestId: newRequestId,
-            action: action,
-            careRequestTitle: data.title,
-            userId: user.id,
-            requestType: data.requestType,
-            neighborhoodId: neighborhoodData.id,
-            changes: data.description
-          }
-        });
-
-        if (edgeFunctionError) {
-          console.error("Error calling edge function:", edgeFunctionError);
-        }
+        await notifyCareChanges(
+          newRequestId,
+          action,
+          data.title,
+          user.id,
+          data.requestType,
+          neighborhoodData.id,
+          data.description
+        );
       }
 
       // Show success message
@@ -118,8 +151,54 @@ export const useCareRequestSubmit = (
       
       return true;
     } catch (error) {
-      console.error("Error submitting care request:", error);
+      console.error("[useCareRequestSubmit] Error submitting care request:", error);
       toast.error("Failed to save care request");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  /**
+   * Delete an existing care request 
+   */
+  const deleteCareRequest = async (requestId: string, title: string) => {
+    if (!user || !neighborhoodData?.id) {
+      toast.error("You must be logged in and part of a neighborhood to delete a care request");
+      return false;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Delete the care request
+      const { error } = await supabase
+        .from('care_requests')
+        .delete()
+        .eq('id', requestId)
+        .eq('user_id', user.id); // Only allow deleting your own requests
+
+      if (error) {
+        throw error;
+      }
+
+      // Notify the edge function about the deletion
+      await notifyCareChanges(
+        requestId,
+        'delete',
+        title,
+        user.id,
+        existingRequest?.request_type,
+        neighborhoodData.id
+      );
+
+      toast.success("Care request deleted successfully");
+      refreshEvents.care();
+      onClose();
+      return true;
+    } catch (error) {
+      console.error("[useCareRequestSubmit] Error deleting care request:", error);
+      toast.error("Failed to delete care request");
       return false;
     } finally {
       setIsSubmitting(false);
@@ -128,6 +207,7 @@ export const useCareRequestSubmit = (
 
   return {
     isSubmitting,
-    submitCareRequest
+    submitCareRequest,
+    deleteCareRequest
   };
 };

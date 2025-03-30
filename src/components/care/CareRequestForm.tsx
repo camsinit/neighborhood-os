@@ -27,6 +27,7 @@ import { useCareRequestSubmit } from './hooks/useCareRequestSubmit';
  * CareRequestForm component
  * 
  * This refactored component uses smaller, focused components and hooks for better maintainability
+ * Now supports create, update, and delete operations with edge function integration
  */
 const CareRequestForm = ({
   onClose,
@@ -37,13 +38,13 @@ const CareRequestForm = ({
   // Get the current user and neighborhood
   const user = useUser();
   
-  // Get the current neighborhood - this returns a Neighborhood object or null
+  // Get the current neighborhood - this returns a Neighborhood object
   const neighborhoodData = useCurrentNeighborhood();
   
-  // Setup the form submission hook
-  const { isSubmitting, submitCareRequest } = useCareRequestSubmit(
+  // Setup the form submission hook - now with delete support
+  const { isSubmitting, submitCareRequest, deleteCareRequest } = useCareRequestSubmit(
     user,
-    neighborhoodData, // Pass the entire neighborhood object (or null)
+    neighborhoodData,
     onClose,
     editMode,
     existingRequest
@@ -75,6 +76,13 @@ const CareRequestForm = ({
     submitCareRequest(data);
   };
 
+  // Handle care request deletion
+  const handleDelete = () => {
+    if (existingRequest && existingRequest.id) {
+      deleteCareRequest(existingRequest.id, existingRequest.title);
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -93,8 +101,13 @@ const CareRequestForm = ({
         {/* Valid Until */}
         <ValidUntilField form={form} />
 
-        {/* Form action buttons */}
-        <FormButtons onClose={onClose} isSubmitting={isSubmitting} editMode={editMode} />
+        {/* Form action buttons - now with delete support */}
+        <FormButtons 
+          onClose={onClose} 
+          isSubmitting={isSubmitting} 
+          editMode={editMode}
+          onDelete={editMode ? handleDelete : undefined}
+        />
       </form>
     </Form>
   );

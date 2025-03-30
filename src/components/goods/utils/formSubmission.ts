@@ -1,7 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from '@/components/support/types/formTypes';
-import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 /**
  * Helper function to format the offer form data for submission
@@ -88,12 +88,65 @@ export const formatRequestSubmission = async (
 };
 
 /**
+ * Notify the goods changes edge function about item creation, updates, or deletion
+ *
+ * @param goodsItemId - ID of the goods item
+ * @param action - The action being performed (create, update, delete)
+ * @param goodsItemTitle - Title of the goods item
+ * @param userId - ID of the current user
+ * @param requestType - Whether this is an offer or need
+ * @param neighborhoodId - ID of the current neighborhood
+ * @param category - Category of the goods item
+ * @param urgency - Urgency of the request (if applicable)
+ */
+export const notifyGoodsChanges = async (
+  goodsItemId: string,
+  action: 'create' | 'update' | 'delete',
+  goodsItemTitle: string,
+  userId: string,
+  requestType: 'offer' | 'need',
+  neighborhoodId: string,
+  category?: string,
+  urgency?: string,
+) => {
+  try {
+    // Call the edge function
+    const { error } = await supabase.functions.invoke(
+      'notify-goods-changes',
+      {
+        body: {
+          goodsItemId,
+          action,
+          goodsItemTitle,
+          userId,
+          requestType,
+          neighborhoodId,
+          category,
+          urgency
+        }
+      }
+    );
+
+    if (error) {
+      console.error("[notifyGoodsChanges] Error calling edge function:", error);
+      // We don't throw here to avoid interrupting the main operation
+    } else {
+      console.log(`[notifyGoodsChanges] Successfully notified about ${action} action for goods item ID: ${goodsItemId}`);
+    }
+  } catch (error) {
+    console.error("[notifyGoodsChanges] Exception in edge function call:", error);
+    // Again, don't throw to avoid interrupting main flow
+  }
+};
+
+/**
  * Main function to submit the goods form data
  * 
  * This function handles the entire submission process, including:
  * - Showing loading and success/error toasts
  * - Formatting the data
  * - Submitting to Supabase
+ * - Notifying the edge function
  * - Triggering a refresh of the goods list
  * 
  * @param isOfferForm - Whether this is an offer (true) or request (false) submission
@@ -101,74 +154,165 @@ export const formatRequestSubmission = async (
  * @param requestFormData - The data from the request form (if applicable)
  * @param userId - The ID of the current user
  * @param neighborhoodId - The ID of the current neighborhood
- * @returns The data returned from the database insertion
+ * @param mode - Optional mode parameter (create, update, delete)
+ * @param goodsItemId - Optional goods item ID for updates/deletes
+ * @returns The data returned from the database operation
  */
 export const submitGoodsForm = async (
   isOfferForm: boolean,
   itemFormData: Partial<GoodsItemFormData>,
   requestFormData: Partial<GoodsRequestFormData>,
   userId: string,
-  neighborhoodId: string
+  neighborhoodId: string,
+  mode: 'create' | 'update' | 'delete' = 'create',
+  goodsItemId?: string
 ) => {
   try {
-    const loadingToast = toast.loading("Submitting your item...");
+    const loadingToast = toast.loading(
+      mode === 'delete' 
+        ? "Removing your item..." 
+        : mode === 'update' 
+          ? "Updating your item..." 
+          : "Submitting your item..."
+    );
     
-    const formattedData = isOfferForm
-      ? {
-          ...await formatOfferSubmission(itemFormData, userId),
-          neighborhood_id: neighborhoodId
-        }
-      : {
-          ...await formatRequestSubmission(requestFormData, userId),
-          neighborhood_id: neighborhoodId
-        };
+    let formattedData, data;
     
-    console.log("Submitting to goods_exchange table:", formattedData);
-    
-    // Submit the data to the goods_exchange table
-    const { data, error } = await supabase
-      .from('goods_exchange')
-      .insert(formattedData)
-      .select();
-    
-    // Handle any errors that occur during submission
-    if (error) {
-      console.error("Error submitting goods form:", error);
-      toast.error("There was a problem submitting your item.");
-      throw error;
+    if (mode === 'delete' && goodsItemId) {
+      // Handle deletion
+      const title = isOfferForm ? itemFormData.title : requestFormData.title;
+      
+      console.log(`Deleting goods item: ${goodsItemId}`);
+      
+      const { error, data: deletedData } = await supabase
+        .from('goods_exchange')
+        .delete()
+        .eq('id', goodsItemId)
+        .eq('user_id', userId) // Ensure only the owner can delete
+        .select();
+      
+      if (error) {
+        console.error("Error deleting goods item:", error);
+        toast.error("There was a problem deleting your item.");
+        throw error;
+      }
+      
+      data = deletedData;
+      
+      // Notify the edge function about the deletion
+      if (title) {
+        await notifyGoodsChanges(
+          goodsItemId,
+          'delete',
+          title,
+          userId,
+          isOfferForm ? 'offer' : 'need',
+          neighborhoodId
+        );
+      }
+    } else if (mode === 'update' && goodsItemId) {
+      // Handle update
+      formattedData = isOfferForm
+        ? await formatOfferSubmission(itemFormData, userId)
+        : await formatRequestSubmission(requestFormData, userId);
+      
+      // Remove the user_id from the update as we don't want to change the owner
+      const { user_id, ...updateData } = formattedData;
+      
+      console.log("Updating goods exchange item:", goodsItemId, updateData);
+      
+      const { error, data: updatedData } = await supabase
+        .from('goods_exchange')
+        .update({ ...updateData, neighborhood_id: neighborhoodId })
+        .eq('id', goodsItemId)
+        .eq('user_id', userId) // Ensure only the owner can update
+        .select();
+      
+      if (error) {
+        console.error("Error updating goods form:", error);
+        toast.error("There was a problem updating your item.");
+        throw error;
+      }
+      
+      data = updatedData;
+      
+      // Notify the edge function about the update
+      await notifyGoodsChanges(
+        goodsItemId,
+        'update',
+        formattedData.title,
+        userId,
+        isOfferForm ? 'offer' : 'need',
+        neighborhoodId,
+        isOfferForm ? formattedData.goods_category : undefined,
+        !isOfferForm ? formattedData.urgency : undefined
+      );
+    } else {
+      // Handle creation (default)
+      formattedData = isOfferForm
+        ? {
+            ...await formatOfferSubmission(itemFormData, userId),
+            neighborhood_id: neighborhoodId
+          }
+        : {
+            ...await formatRequestSubmission(requestFormData, userId),
+            neighborhood_id: neighborhoodId
+          };
+      
+      console.log("Creating goods exchange item:", formattedData);
+      
+      const { error, data: insertedData } = await supabase
+        .from('goods_exchange')
+        .insert(formattedData)
+        .select();
+      
+      if (error) {
+        console.error("Error submitting goods form:", error);
+        toast.error("There was a problem submitting your item.");
+        throw error;
+      }
+      
+      data = insertedData;
+      
+      // Notify the edge function about the creation
+      if (data && data.length > 0) {
+        await notifyGoodsChanges(
+          data[0].id,
+          'create',
+          formattedData.title,
+          userId,
+          isOfferForm ? 'offer' : 'need',
+          neighborhoodId,
+          isOfferForm ? formattedData.goods_category : undefined,
+          !isOfferForm ? formattedData.urgency : undefined
+        );
+      }
     }
     
-    console.log("Successfully saved goods item:", data);
+    console.log("Successfully processed goods item:", data);
     
     // Dismiss the loading toast and show a success message
     toast.dismiss(loadingToast);
-    // Only show one success message with specific wording based on the form type
-    toast.success(isOfferForm ? "Your item was offered successfully!" : "Your request was submitted successfully!");
+    
+    // Show appropriate success message based on the operation
+    if (mode === 'delete') {
+      toast.success("Your item was successfully removed!");
+    } else if (mode === 'update') {
+      toast.success("Your item was updated successfully!");
+    } else {
+      // Only show one success message with specific wording based on the form type
+      toast.success(isOfferForm ? "Your item was offered successfully!" : "Your request was submitted successfully!");
+    }
     
     // Trigger a refresh of the goods data by dispatching a custom event
-    // This will be caught by event listeners in GoodsPage to refresh the data
     console.log("Dispatching goods-form-submitted event");
     const customEvent = new Event('goods-form-submitted');
     document.dispatchEvent(customEvent);
     
-    // Instead of trying to access the React Query client through the window object,
-    // which causes a TypeScript error, we'll rely solely on the custom event
-    // This is more reliable anyway, as it doesn't depend on the React Query devtools
-    // being installed or configured in a specific way
-    
-    // NOTE: The previous code attempted to do this:
-    // const queryClient = window.__REACT_QUERY_DEVTOOLS_GLOBAL_NAMESPACE?.get('queryClient');
-    // if (queryClient) {
-    //   queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
-    // }
-    
-    // But since that's causing a TypeScript error, we'll rely on the custom event
-    // which is picked up by the useAutoRefresh hook in GoodsPage.tsx
-    
     return data;
   } catch (error) {
-    console.error("Error submitting goods form:", error);
-    toast.error("There was a problem submitting your item.");
+    console.error("Error in goods form submission:", error);
+    toast.error("There was a problem with your request. Please try again.");
     throw error;
   }
 };

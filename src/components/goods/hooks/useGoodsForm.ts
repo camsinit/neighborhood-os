@@ -160,7 +160,7 @@ export const useGoodsForm = ({
     }
     
     try {
-      // Fix: Pass neighborhood?.id (string) instead of neighborhood (object)
+      // Make sure we have a valid neighborhood ID (string)
       if (!neighborhood?.id) {
         toast.error("No neighborhood selected");
         return;
