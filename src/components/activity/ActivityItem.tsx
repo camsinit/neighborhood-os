@@ -1,6 +1,6 @@
 
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
-import { User } from "lucide-react";
+import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
@@ -38,7 +38,7 @@ const getCompactTimeAgo = (date: Date): string => {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now with enhanced content display for skill activities
+ * Now with enhanced content display for skill activities and deleted content handling
  */
 const ActivityItem = ({
   activity,
@@ -53,11 +53,20 @@ const ActivityItem = ({
   // Check if this is a skill-related activity
   const isSkillActivity = activity.activity_type === 'skill_offered' || 
                           activity.activity_type === 'skill_requested';
+                          
+  // Check if the content has been deleted
+  const isDeleted = activity.metadata?.deleted === true;
 
   /**
    * Handle click on the activity item
    */
   const handleClick = () => {
+    // If content is deleted, don't navigate
+    if (isDeleted) {
+      onAction(activity);
+      return;
+    }
+    
     // First navigate to calendar page
     navigate('/calendar');
     
@@ -81,9 +90,9 @@ const ActivityItem = ({
       
       <div 
         onClick={handleClick}
-        className="relative flex flex-col py-3 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+        className={`relative flex flex-col py-3 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer ${isDeleted ? 'bg-gray-50' : ''}`}
         style={{
-          borderLeft: `4px solid ${activityColor}`
+          borderLeft: `4px solid ${isDeleted ? '#9CA3AF' : activityColor}`
         }}
       >
         {/* Header with timestamp and avatar */}
@@ -100,13 +109,28 @@ const ActivityItem = ({
           </Avatar>
         </div>
 
-        {/* Content - either specialized skill content or standard content */}
-        {isSkillActivity ? (
+        {/* Content - show different displays based on content type and deleted status */}
+        {isDeleted ? (
+          /* Deleted content display */
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-gray-400" />
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-medium text-gray-500 line-through truncate">
+                {activity.metadata?.original_title || activity.title}
+              </p>
+              <p className="text-sm text-gray-400">
+                This content has been deleted
+              </p>
+            </div>
+          </div>
+        ) : isSkillActivity ? (
+          /* Skill activity display */
           <SkillActivityContent 
             activity={activity}
             onClick={() => onAction(activity)}
           />
         ) : (
+          /* Standard activity display */
           <div className="flex items-center gap-3">
             {IconComponent && (
               <div className="flex-shrink-0">

@@ -1,6 +1,7 @@
 /**
  * This module provides functionality to fetch and manage neighborhood activities
  * It has been enhanced to ensure activity titles stay synchronized with their source content
+ * and properly handle deleted content
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +27,11 @@ export interface Activity {
   content_type: string;
   title: string;
   created_at: string;
-  metadata?: any;
+  metadata?: {
+    deleted?: boolean;
+    original_title?: string;
+    [key: string]: any;
+  };
   profiles: {
     display_name: string;
     avatar_url: string;
@@ -106,7 +111,7 @@ const fetchContentTitles = async (
  * Fetches recent activities from the database
  * 
  * This has been optimized to fetch up-to-date titles from related content tables
- * instead of relying solely on the stored title in the activities table
+ * and properly handle deleted content references
  */
 const fetchActivities = async (): Promise<Activity[]> => {
   // Fetch activities with profile information
@@ -135,9 +140,13 @@ const fetchActivities = async (): Promise<Activity[]> => {
   }
 
   // Group content IDs by their content type for efficient batch fetching
+  // Skip any items that are already marked as deleted in metadata
   const contentIdsByType: Record<string, string[]> = {};
   
   activitiesData.forEach(activity => {
+    // Skip if activity is already marked as deleted
+    if (activity.metadata?.deleted) return;
+    
     const contentType = activity.content_type;
     if (!contentIdsByType[contentType]) {
       contentIdsByType[contentType] = [];
@@ -145,16 +154,31 @@ const fetchActivities = async (): Promise<Activity[]> => {
     contentIdsByType[contentType].push(activity.content_id);
   });
   
-  // Fetch current titles for all content
+  // Fetch current titles for all content that hasn't been deleted
   const updatedTitlesMap = await fetchContentTitles(contentIdsByType);
   
   // Process activities and use updated titles where available
   const activities = activitiesData.map(activity => {
+    // Keep original metadata
+    const metadata = activity.metadata || {};
+    
     // If we have an updated title for this content, use it
     if (updatedTitlesMap.has(activity.content_id)) {
       return {
         ...activity,
         title: updatedTitlesMap.get(activity.content_id)!
+      };
+    } else if (!metadata.deleted && !updatedTitlesMap.has(activity.content_id)) {
+      // If we didn't get a title AND the content wasn't explicitly marked as deleted,
+      // it probably means the content was deleted without proper cleanup
+      // Mark it as implicitly deleted
+      return {
+        ...activity,
+        metadata: {
+          ...metadata,
+          deleted: true,
+          original_title: activity.title
+        }
       };
     }
     
@@ -168,6 +192,7 @@ const fetchActivities = async (): Promise<Activity[]> => {
 /**
  * Custom hook for fetching recent neighborhood activities
  * Returns activities with synchronized titles from their source content
+ * and proper handling for deleted content
  */
 export const useActivities = () => {
   return useQuery({

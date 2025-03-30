@@ -57,19 +57,39 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`${usersToNotify.length} users have email notifications enabled`);
 
-    // When an event is updated, also update any related activities to keep them in sync
-    if (action === 'update' && eventId) {
-      // Update any activities related to this event
-      const { error: activityError } = await supabaseClient
-        .from('activities')
-        .update({ title: eventTitle })
-        .eq('content_type', 'events')
-        .eq('content_id', eventId);
+    // When an event is updated or deleted, also update any related activities to keep them in sync
+    if (eventId) {
+      if (action === 'update') {
+        // Update any activities related to this event
+        const { error: activityError } = await supabaseClient
+          .from('activities')
+          .update({ title: eventTitle })
+          .eq('content_type', 'events')
+          .eq('content_id', eventId);
 
-      if (activityError) {
-        console.error('Error updating activities:', activityError);
-      } else {
-        console.log(`Successfully updated related activities for event: ${eventTitle}`);
+        if (activityError) {
+          console.error('Error updating activities:', activityError);
+        } else {
+          console.log(`Successfully updated related activities for event: ${eventTitle}`);
+        }
+      } else if (action === 'delete') {
+        // For deleted events, update the metadata in activities to indicate the content is deleted
+        const { error: activityError } = await supabaseClient
+          .from('activities')
+          .update({ 
+            metadata: {
+              deleted: true,
+              original_title: eventTitle
+            }
+          })
+          .eq('content_type', 'events')
+          .eq('content_id', eventId);
+
+        if (activityError) {
+          console.error('Error updating activities for deleted event:', activityError);
+        } else {
+          console.log(`Successfully marked activities as deleted for event: ${eventTitle}`);
+        }
       }
     }
 
