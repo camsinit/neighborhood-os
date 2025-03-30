@@ -38,76 +38,96 @@ class DataProcessor {
    * Fetch neighborhood information
    */
   async getNeighborhoodInfo() {
-    const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('name, description')
-      .eq('id', this.neighborhoodId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('neighborhoods')
+        .select('name')
+        .eq('id', this.neighborhoodId)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching neighborhood:', error);
+        return null;
+      }
       
-    if (error) {
-      console.error('Error fetching neighborhood:', error);
+      return data;
+    } catch (err) {
+      console.error('Error in getNeighborhoodInfo:', err);
       return null;
     }
-    
-    return data;
   }
 
   /**
    * Fetch upcoming events in the neighborhood
    */
   async getEvents() {
-    const { data, error } = await supabase
-      .from('events')
-      .select('id, title, description, start_time, end_time, location')
-      .eq('neighborhood_id', this.neighborhoodId)
-      .gte('start_time', new Date().toISOString())
-      .order('start_time', { ascending: true })
-      .limit(10);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title, description, location, time')
+        .eq('neighborhood_id', this.neighborhoodId)
+        .gte('time', new Date().toISOString())
+        .order('time', { ascending: true })
+        .limit(10);
+        
+      if (error) {
+        console.error('Error fetching events:', error);
+        return [];
+      }
       
-    if (error) {
-      console.error('Error fetching events:', error);
+      return data;
+    } catch (err) {
+      console.error('Error in getEvents:', err);
       return [];
     }
-    
-    return data;
   }
   
   /**
    * Fetch available skills in the neighborhood
    */
   async getSkills() {
-    const { data, error } = await supabase
-      .from('skills_exchange')
-      .select('id, title, description, type, created_by')
-      .eq('neighborhood_id', this.neighborhoodId)
-      .eq('status', 'active')
-      .limit(10);
+    try {
+      const { data, error } = await supabase
+        .from('skills_exchange')
+        .select('id, title, description, request_type')
+        .eq('neighborhood_id', this.neighborhoodId)
+        .eq('is_archived', false)
+        .limit(10);
+        
+      if (error) {
+        console.error('Error fetching skills:', error);
+        return [];
+      }
       
-    if (error) {
-      console.error('Error fetching skills:', error);
+      return data;
+    } catch (err) {
+      console.error('Error in getSkills:', err);
       return [];
     }
-    
-    return data;
   }
   
   /**
    * Fetch recent safety updates in the neighborhood
    */
   async getSafetyUpdates() {
-    const { data, error } = await supabase
-      .from('safety_updates')
-      .select('id, title, description, created_at, update_type')
-      .eq('neighborhood_id', this.neighborhoodId)
-      .order('created_at', { ascending: false })
-      .limit(5);
+    try {
+      const { data, error } = await supabase
+        .from('safety_updates')
+        .select('id, title, description, type, created_at')
+        .eq('neighborhood_id', this.neighborhoodId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (error) {
+        console.error('Error fetching safety updates:', error);
+        return [];
+      }
       
-    if (error) {
-      console.error('Error fetching safety updates:', error);
+      return data;
+    } catch (err) {
+      console.error('Error in getSafetyUpdates:', err);
       return [];
     }
-    
-    return data;
   }
   
   /**
@@ -139,7 +159,6 @@ NEIGHBORHOOD CONTEXT
     if (neighborhood) {
       context += `
 Neighborhood: ${neighborhood.name}
-${neighborhood.description ? `Description: ${neighborhood.description}` : ''}
 
 `;
     }
@@ -152,13 +171,12 @@ UPCOMING EVENTS
     
     if (events.length > 0) {
       events.forEach(event => {
-        const startDate = new Date(event.start_time).toLocaleString();
-        const endDate = new Date(event.end_time).toLocaleString();
+        const eventDate = new Date(event.time).toLocaleString();
         
         context += `
 - Event: ${event.title} (ID: ${event.id})
   Description: ${event.description || 'No description provided'}
-  When: ${startDate} to ${endDate}
+  When: ${eventDate}
   Where: ${event.location || 'Location not specified'}
 `;
       });
@@ -178,7 +196,7 @@ AVAILABLE SKILLS AND HELP
       skills.forEach(skill => {
         context += `
 - Skill: ${skill.title} (ID: ${skill.id})
-  Type: ${skill.type === 'offer' ? 'Offering help' : 'Requesting help'}
+  Type: ${skill.request_type === 'offer' ? 'Offering help' : 'Requesting help'}
   Description: ${skill.description || 'No description provided'}
 `;
       });
@@ -200,7 +218,7 @@ RECENT SAFETY UPDATES
         
         context += `
 - Update: ${update.title} (ID: ${update.id})
-  Type: ${update.update_type || 'General'}
+  Type: ${update.type || 'General'}
   Posted: ${updateDate}
   Details: ${update.description || 'No details provided'}
 `;
@@ -210,6 +228,9 @@ RECENT SAFETY UPDATES
 No recent safety updates found.
 `;
     }
+    
+    console.log(`Prepared neighborhood context with: { eventCount: ${events.length}, skillCount: ${skills.length}, safetyUpdateCount: ${safetyUpdates.length} }`);
+    console.log(`Message length: ${context.length} characters`);
     
     return { contextString: context, contextData };
   }
@@ -303,7 +324,14 @@ Focus on matching the user's needs with available skills and help offerings in t
       // Create system prompt
       const systemPrompt = this.formatSystemPrompt(context, actionType);
       
-      // Request completion from Claude
+      // Check if anthropicApiKey is present
+      if (!anthropicApiKey) {
+        throw new Error("ANTHROPIC_API_KEY is not configured");
+      }
+      
+      console.log('Sending request to Anthropic API');
+      
+      // Request completion from Claude using the SDK
       const completion = await anthropic.messages.create({
         model: "claude-3-sonnet-20240229",
         max_tokens: 1000,
@@ -313,6 +341,8 @@ Focus on matching the user's needs with available skills and help offerings in t
         ],
         temperature: 0.7,
       });
+      
+      console.log('Received response from Anthropic API');
       
       // Process the response
       const responseProcessor = new ResponseProcessor();
