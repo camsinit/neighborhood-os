@@ -72,6 +72,11 @@ const fetchActivities = async (): Promise<Activity[]> => {
   const safetyUpdateIds = activitiesData
     .filter(activity => activity.content_type === 'safety_updates')
     .map(activity => activity.content_id);
+    
+  // Get all unique skills exchange IDs from activities
+  const skillsExchangeIds = activitiesData
+    .filter(activity => activity.content_type === 'skills_exchange')
+    .map(activity => activity.content_id);
 
   // Fetch the latest event titles
   if (eventIds.length > 0) {
@@ -98,12 +103,27 @@ const fetchActivities = async (): Promise<Activity[]> => {
       updatedTitlesMap.set(update.id, update.title);
     });
   }
+  
+  // Fetch the latest skills exchange titles
+  if (skillsExchangeIds.length > 0) {
+    const { data: skillTitles } = await supabase
+      .from('skills_exchange')
+      .select('id, title')
+      .in('id', skillsExchangeIds);
+      
+    // Map skills exchange IDs to their current titles
+    skillTitles?.forEach(skill => {
+      updatedTitlesMap.set(skill.id, skill.title);
+    });
+  }
 
   // Process activities and use updated titles where available
   const activities = activitiesData.map(activity => {
     // If we have an updated title for this content, use it
     if (
-      (activity.content_type === 'events' || activity.content_type === 'safety_updates') && 
+      (activity.content_type === 'events' || 
+       activity.content_type === 'safety_updates' ||
+       activity.content_type === 'skills_exchange') && 
       updatedTitlesMap.has(activity.content_id)
     ) {
       return {

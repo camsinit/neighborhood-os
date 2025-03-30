@@ -51,6 +51,26 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
       // Show success message
       toast.success('Skill deleted successfully');
       
+      // Track this deletion in the activities (optional)
+      try {
+        // Call the edge function to update activities
+        const { error: functionError } = await supabase.functions.invoke('notify-skills-changes', {
+          body: {
+            skillId: skill.id,
+            action: 'delete',
+            skillTitle: skill.title,
+            changes: 'Skill deleted'
+          }
+        });
+
+        if (functionError) {
+          console.error('Error calling notify-skills-changes function:', functionError);
+        }
+      } catch (functionError) {
+        console.error('Failed to notify about skill deletion:', functionError);
+        // Non-critical error, we don't need to show this to the user
+      }
+      
       // Dispatch custom event to refresh skills list
       document.dispatchEvent(new CustomEvent('skill-deleted', {
         detail: { id: skill.id }
