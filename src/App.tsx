@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -103,12 +102,14 @@ function App() {
             <Routes>
               {/* Public routes - each route appears only once */}
               <Route path="/" element={<LandingPage />} />
+              
+              {/* Single login route */}
               <Route path="/login" element={<Login />} />
               
               {/* Join routes - unified into a single component with optional parameter */}
-              <Route path="/join" element={<JoinPage />} />
-              <Route path="/join/:inviteCode" element={<JoinPage />} />
-
+              {/* We keep one route with the optional parameter to handle both cases */}
+              <Route path="/join/:inviteCode?" element={<JoinPage />} />
+              
               {/* Index route - handles routing logic based on auth state */}
               <Route path="/index" element={<Index />} />
               

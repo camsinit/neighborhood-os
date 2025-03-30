@@ -8,6 +8,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Interface for the invitation data structure
+ * This defines what we expect from the database for invitations
+ */
 interface Invitation {
   id: string;
   neighborhood_id: string;
@@ -23,10 +27,14 @@ interface Invitation {
  * 
  * This component handles the process of joining a neighborhood through an invitation link.
  * It validates the invite code, shows relevant UI states, and processes the join request.
+ * 
+ * The inviteCode parameter is optional, so this single component handles both
+ * /join and /join/:inviteCode paths.
  */
 const JoinPage = () => {
-  // Get the invite code from URL parameters
-  const { inviteCode } = useParams();
+  // Get the invite code from URL parameters (will be undefined for /join route)
+  const { inviteCode } = useParams<{ inviteCode?: string }>();
+  
   // Track the invitation data
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   // Track loading state
