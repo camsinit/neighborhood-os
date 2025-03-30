@@ -1,4 +1,3 @@
-
 /**
  * HomePage Component
  * 
@@ -19,13 +18,12 @@ import AIChat from "@/components/ai/AIChat";
  * Shows AI assistant, quick actions, and notifications
  */
 const HomePage = () => {
-  return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+  return <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-8">
           {/* AI Chat Section - New component */}
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">AI Assistant</h2>
+            
             <div className="h-[500px]">
               <AIChat />
             </div>
@@ -46,8 +44,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HomePage;
