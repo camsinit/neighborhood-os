@@ -14,6 +14,11 @@ interface AddSafetyUpdateDialogNewProps {
 }
 
 const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogNewProps) => {
+  // Create an onSuccess handler that closes the dialog
+  const handleSuccess = () => {
+    onOpenChange(false);
+  };
+
   return (
     <DialogWrapper
       open={open}
@@ -21,7 +26,8 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
       title="Share Safety Update"
       maxWidth="sm"
     >
-      <SafetyUpdateFormNew onClose={() => onOpenChange(false)} />
+      {/* Pass onSuccess instead of onClose */}
+      <SafetyUpdateFormNew onSuccess={handleSuccess} />
     </DialogWrapper>
   );
 };

@@ -7,8 +7,9 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useState } from "react"; // Added import for useState
 
 // Interface for the hook properties
+// Make onSuccess optional to allow the hook to be used without a callback
 interface SafetyUpdateSubmitProps {
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 // Interface for the form data
@@ -16,11 +17,14 @@ interface SafetyUpdateFormData {
   title: string;
   description: string;
   type: string;
+  id?: string; // Optional id for updates
 }
 
-export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
+// Update the hook to accept an optional parameter
+export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   // Fixed variable naming: renamed the state setter to setIsLoading
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
   const user = useUser();
   const queryClient = useQueryClient();
   const neighborhoodId = useCurrentNeighborhood();
@@ -34,6 +38,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     try {
       // Set loading to true before starting the operation
       setIsLoading(true);
+      setError(null);
       
       // Add detailed logging before insert operation
       console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
@@ -65,6 +70,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
           neighborhoodId,
           timestamp: new Date().toISOString()
         });
+        setError(error);
         throw error;
       }
 
@@ -86,13 +92,17 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       const customEvent = new Event('safety-update-submitted');
       document.dispatchEvent(customEvent);
       
-      onSuccess();
+      // Call onSuccess if provided
+      if (props?.onSuccess) {
+        props.onSuccess();
+      }
       
       return data;
-    } catch (error) {
-      console.error('Error creating safety update:', error);
+    } catch (err) {
+      console.error('Error creating safety update:', err);
       toast.error("Failed to create safety update. Please try again.");
-      throw error;
+      setError(err instanceof Error ? err : new Error(String(err)));
+      throw err;
     } finally {
       // Make sure to set loading to false when done
       setIsLoading(false);
@@ -108,6 +118,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     try {
       // Set loading to true before starting the operation
       setIsLoading(true);
+      setError(null);
       
       // Add detailed logging before update operation
       console.log("[useSafetyUpdateSubmit] Attempting to update safety update:", {
@@ -141,6 +152,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
           userId: user.id,
           timestamp: new Date().toISOString()
         });
+        setError(error);
         throw error;
       }
 
@@ -161,19 +173,33 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       const customEvent = new Event('safety-update-submitted');
       document.dispatchEvent(customEvent);
       
-      onSuccess();
+      // Call onSuccess if provided
+      if (props?.onSuccess) {
+        props.onSuccess();
+      }
       
       return data;
-    } catch (error) {
-      console.error('Error updating safety update:', error);
+    } catch (err) {
+      console.error('Error updating safety update:', err);
       toast.error("Failed to update safety update. Please try again.");
-      throw error;
+      setError(err instanceof Error ? err : new Error(String(err)));
+      throw err;
     } finally {
       // Make sure to set loading to false when done
       setIsLoading(false);
     }
   };
 
+  // Unified safety update submitSafetyUpdate function that works for both create and update
+  const submitSafetyUpdate = (data: SafetyUpdateFormData) => {
+    if (data.id) {
+      return handleUpdate(data.id, data);
+    } else {
+      return handleSubmit(data);
+    }
+  };
+
   // Return isLoading state along with the handleSubmit and handleUpdate functions
-  return { handleSubmit, handleUpdate, isLoading };
+  // Also include the submitSafetyUpdate function and error state for compatibility
+  return { handleSubmit, handleUpdate, submitSafetyUpdate, isLoading, error };
 };

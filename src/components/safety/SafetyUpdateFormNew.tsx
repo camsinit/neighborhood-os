@@ -31,7 +31,8 @@ const formSchema = z.object({
 // Define the interface for form values
 type FormValues = z.infer<typeof formSchema>;
 
-interface SafetyUpdateFormNewProps {
+// Update the props interface to include onSuccess instead of onClose
+export interface SafetyUpdateFormNewProps {
   onSuccess?: () => void;
   existingData?: any;
 }
@@ -51,15 +52,18 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Hooks
-  const toast = useToast();
+  const { toast } = useToast();
   const user = useUser();
-  const { submitSafetyUpdate, isLoading, error } = useSafetyUpdateSubmit();
+  // Pass onSuccess to useSafetyUpdateSubmit now
+  const { submitSafetyUpdate, isLoading, error } = useSafetyUpdateSubmit({ 
+    onSuccess: onSuccess 
+  });
   const queryClient = useQueryClient();
 
   // Function to handle the form submission
   const onSubmit = async (values: FormValues) => {
     if (!user) {
-      toast.toast({
+      toast({
         title: "Error",
         description: "You must be logged in to create a safety update.",
         variant: "destructive",
@@ -107,7 +111,7 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
         queryClient.invalidateQueries({ queryKey: ["safety-updates"] });
         queryClient.invalidateQueries({ queryKey: ["activities"] });
 
-        toast.toast({
+        toast({
           title: "Success!",
           description: existingData?.id
             ? "Safety update has been edited."
@@ -133,7 +137,7 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
       }
     } catch (err) {
       console.error("Error submitting safety update:", err);
-      toast.toast({
+      toast({
         title: "Error",
         description: "There was a problem submitting your safety update.",
         variant: "destructive",
