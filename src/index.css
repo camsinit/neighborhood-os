@@ -3,6 +3,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Inter font for consistent typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styling to match chat aesthetic */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    
+    --radius: 0.75rem;
+    
+    /* Section-specific color variables remain unchanged */
+    --calendar-color: 221.2 83.2% 53.3%;
+    --safety-color: 0 84.2% 60.2%;
+    --skills-color: 142.1 76.2% 36.3%;
+    --goods-color: 24.6 95% 53.1%;
+    --care-color: 262.1 83.3% 57.8%;
+  }
+}
+
+/* Typography styles inspired by the chat component */
+@layer components {
+  .heading-xl {
+    @apply text-2xl font-bold tracking-tight;
+  }
+  
+  .heading-lg {
+    @apply text-xl font-semibold;
+  }
+  
+  .heading-md {
+    @apply text-lg font-medium;
+  }
+  
+  .body-text {
+    @apply text-sm leading-relaxed font-normal;
+  }
+  
+  .caption-text {
+    @apply text-xs text-muted-foreground;
+  }
+  
+  /* Card styling based on chat messages */
+  .chat-card {
+    @apply rounded-lg px-4 py-3 shadow-chat hover:shadow-chat-hover transition-shadow duration-200;
+  }
+}
+
 /* Rainbow highlight animation for element navigation */
 .rainbow-highlight {
   animation: glow-pulse 5s ease-in-out;
@@ -38,18 +111,30 @@
   100% { transform: scale(1); }
 }
 
-/* Dialog styling fix */
+/* Improved styling for dialog components to match chat aesthetic */
 .sm\:max-w-\[600px\] {
   max-width: 600px !important;
-  border-radius: 0.5rem !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Override for transparent backgrounds */
+/* Cleaner background handling */
 [class*="bg-white"] {
   background-color: white !important;
 }
 
-/* Override for dialog content */
+/* Dialog content styling */
 [data-radix-dialog-content] {
-  border-radius: 0.5rem !important;
+  border-radius: var(--radius) !important;
+  padding: 1.25rem !important; 
+}
+
+/* Input field styling to match chat input */
+.input-chat-style {
+  @apply rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
+}
+
+/* Button styling inspired by chat interaction buttons */
+.btn-chat-style {
+  @apply rounded-lg font-medium transition-all duration-200 hover:opacity-90 active:scale-95;
 }

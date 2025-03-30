@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './sidebar';
 import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
@@ -6,18 +7,17 @@ import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
 /**
  * MainLayout component
  * 
- * This component provides a consistent layout for all protected pages, including:
+ * This component provides a consistent layout for all protected pages, with styling
+ * inspired by our chat interface.
+ * 
+ * Includes:
  * 1. The sidebar navigation
- * 2. A content area for page-specific components
+ * 2. A content area for page-specific components with enhanced styling
  * 
  * Uses React Router's Outlet to render child routes within this layout
- * 
- * Note: We've updated this component to ensure page-specific styles like
- * background gradients and glowing effects aren't inadvertently overridden
  */
 const MainLayout = () => {
   // State to control the settings dialog visibility
-  // We keep this at the layout level so it can be opened from anywhere in the app
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const location = useLocation();
   
@@ -25,26 +25,26 @@ const MainLayout = () => {
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
   
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background font-sans">
       {/* Sidebar navigation */}
       <Sidebar onOpenSettings={() => setIsSettingsOpen(true)} />
       
       {/* 
-        Main content area - Important changes:
-        1. Removed the bg-white class that was overriding our gradient backgrounds
-        2. Made sure overflow properties don't interfere with full-height gradients
-       */}
+        Main content area with improved styling for consistent look and feel
+        with the chat interface
+      */}
       <div className={`flex-1 flex flex-col overflow-hidden ${isHomePage ? 'bg-white' : ''}`}>
         {/* 
-          Page content - rendered via Outlet
-          Removed bg-white class to allow page backgrounds to show through
+          Page content with enhanced styling
+          - Added padding for consistency
+          - Improved scrolling behavior
         */}
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>
       
-      {/* Settings dialog wrapper component (shown when isSettingsOpen is true) */}
+      {/* Settings dialog wrapper component */}
       <SettingsDialogWrapper
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}

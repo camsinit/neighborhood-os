@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +18,23 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+			},
+			fontSize: {
+				'xs': ['0.75rem', { lineHeight: '1rem' }],
+				'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+				'base': ['1rem', { lineHeight: '1.5rem' }],
+				'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+				'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+				'2xl': ['1.5rem', { lineHeight: '2rem' }],
+			},
+			borderRadius: {
+				lg: 'var(--radius)',
+				md: 'calc(var(--radius) - 2px)',
+				sm: 'calc(var(--radius) - 4px)',
+				'chat': '0.75rem',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -64,11 +80,6 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },
@@ -78,7 +89,6 @@ export default {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: '0' }
 				},
-				// New animations for the star border and gradient animation
 				'star-movement-bottom': {
 					'0%': { transform: 'translate(0%, 0%)', opacity: '1' },
 					'100%': { transform: 'translate(-100%, 0%)', opacity: '0' },
@@ -101,12 +111,15 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				// New animations for the star border and gradients
 				'star-movement-bottom': 'star-movement-bottom linear infinite alternate',
 				'star-movement-top': 'star-movement-top linear infinite alternate',
 				'gradient-shift': 'gradient-shift 8s ease infinite',
 				'float': 'float 6s ease-in-out infinite',
-			}
+			},
+			boxShadow: {
+				'chat': '0 2px 8px rgba(0, 0, 0, 0.05)',
+				'chat-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

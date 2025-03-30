@@ -12,8 +12,7 @@ import { cn } from "@/lib/utils";
  * Login page component
  * 
  * This page displays the authentication form and header,
- * allowing users to sign in to access the Neighborhood OS dashboard.
- * It also redirects authenticated users to the home page.
+ * now styled to match our chat interface aesthetic.
  */
 const Login = () => {
   // Get navigation and session context
@@ -22,62 +21,58 @@ const Login = () => {
   
   // Redirect authenticated users to home page
   useEffect(() => {
-    // Only redirect if we're not loading AND we have a session
     if (!isLoading && session) {
       console.log("[Login] User is already authenticated, redirecting to home page");
-      // Redirect directly to home, for consistency with our routing
       navigate("/home", { replace: true });
     }
   }, [session, isLoading, navigate]);
 
-  // If still loading or user is not authenticated, show the login page with updated styling
+  // Improved styling to match our chat aesthetic
   return (
-    // Added relative class to position the gradient background
     <div className={cn(
       "min-h-screen relative", 
       "flex flex-col justify-center py-12 sm:px-6 lg:px-8",
-      "bg-background text-foreground" // Match theme with landing page
+      "bg-background text-foreground font-sans" // Added font-sans for consistency
     )}>
       {/* 
-        Adding the diffused rainbow gradient background similar to hero section
-        with increased blur and reduced opacity 
+        Background gradient with more subtle styling to match chat interface
       */}
       <div 
-        className="absolute inset-0 opacity-10 filter blur-[120px]" 
+        className="absolute inset-0 opacity-5 filter blur-[100px]" 
         style={{
-          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+          background: "linear-gradient(135deg, hsl(var(--primary)), #10b981, #8b5cf6)",
           zIndex: 0
         }}
       />
 
-      {/* Back button to return to landing page - now with relative z-index to appear above gradient */}
+      {/* Back button with styling consistent with chat interface */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md mb-4 relative z-10">
-        <Button asChild variant="ghost" size="sm" className="mb-4">
-          <Link to="/" className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm" className="mb-4 rounded-lg">
+          <Link to="/" className="flex items-center gap-2 font-medium">
             <ArrowLeft className="h-4 w-4" />
             Back to Home
           </Link>
         </Button>
       </div>
       
-      {/* Auth form container with updated styling to match landing page */}
+      {/* Auth form container with updated styling to match chat interface */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         {/* AuthHeader component */}
         <AuthHeader />
         
-        {/* AuthForm with shadow and backdrop blur to match landing page aesthetics */}
+        {/* Auth form with enhanced styling */}
         <div className="relative px-8 pb-8">
-          {/* Rainbow gradient effect behind the form - made more diffused */}
-          <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40"
+          {/* Subtle gradient effect behind the form */}
+          <div className="absolute inset-0 rounded-2xl blur-xl opacity-30"
             style={{
-              background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
-              transform: "scale(1.05)", // Slightly larger than the container
+              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/70%))",
+              transform: "scale(1.05)",
               zIndex: 0
             }}
           />
           
-          {/* AuthForm with proper positioning to appear above gradient */}
-          <div className="relative z-10">
+          {/* AuthForm with proper positioning and enhanced styling */}
+          <div className="relative z-10 bg-white rounded-2xl shadow-chat p-6">
             <AuthForm />
           </div>
         </div>
