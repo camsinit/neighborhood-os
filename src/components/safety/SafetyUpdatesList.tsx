@@ -1,9 +1,16 @@
 
-import { Clock, Bell, Wrench, Shield } from "lucide-react";
+import { Clock, Bell, Wrench, Shield, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SafetyUpdateCard from "./SafetyUpdateCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface SafetyUpdatesListProps {
   updates: any[];
@@ -18,17 +25,23 @@ const SafetyUpdatesList = ({
   onUpdateClick,
   onAddUpdate
 }: SafetyUpdatesListProps) => {
-  // Define categories for safety updates filtering (used in category buttons)
+  // Define categories for safety updates filtering
   const categories = [{
     icon: Clock,
-    label: "Updates"
+    label: "All Updates",
+    value: "all"
   }, {
     icon: Bell,
-    label: "Alerts"
+    label: "Alerts",
+    value: "alert"
   }, {
     icon: Wrench,
-    label: "Maintenance"
+    label: "Maintenance",
+    value: "maintenance"
   }];
+  
+  // State to track the selected category
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
   /**
    * Render skeleton loading state
@@ -68,6 +81,34 @@ const SafetyUpdatesList = ({
           placeholder="Search safety updates..." 
           className="max-w-sm bg-white border-gray-200 focus:ring-amber-200 focus:border-amber-300 h-10" 
         />
+        
+        {/* Category filter dropdown menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-gray-600 border-gray-200 bg-white"
+            >
+              <selectedCategory.icon className="w-4 h-4 mr-2" />
+              {selectedCategory.label}
+              <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-white">
+            {categories.map((category) => (
+              <DropdownMenuItem 
+                key={category.value}
+                onClick={() => setSelectedCategory(category)}
+                className="cursor-pointer"
+              >
+                <category.icon className="w-4 h-4 mr-2" />
+                {category.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
         <Button 
           onClick={onAddUpdate}
           className="bg-red-500 hover:bg-red-600 text-white ml-auto"
@@ -75,20 +116,6 @@ const SafetyUpdatesList = ({
           <Shield className="w-4 h-4 mr-2" />
           New Update
         </Button>
-        {/* Fixed: This section was causing the void[] error because map() wasn't returning anything */}
-        <div className="flex gap-4 px-0 mx-[3px]">
-          {categories.map((cat, index) => (
-            <Button 
-              key={index}
-              variant="outline" 
-              size="sm"
-              className="text-gray-600 border-gray-200"
-            >
-              <cat.icon className="w-4 h-4 mr-2" />
-              {cat.label}
-            </Button>
-          ))}
-        </div>
       </div>
       <div className="space-y-6">
         {isLoading ? renderSkeleton() : (
