@@ -1,46 +1,37 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { z } from "zod";
+import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { useSafetyUpdateSubmit } from "@/hooks/safety/useSafetyUpdateSubmit";
 import { useUser } from "@supabase/auth-helpers-react";
 import { Shield } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useSafetyUpdateFormSubmit } from "./hooks/useSafetyUpdateFormSubmit";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { SafetyTypeField } from "./form/SafetyTypeField";
+import { SafetyTextField } from "./form/SafetyTextField";
+import { safetyUpdateSchema, SafetyUpdateFormData } from "./schema/safetyUpdateSchema";
 
-// Define the form schema with zod validation
-const formSchema = z.object({
-  title: z.string().min(3, {
-    message: "Title must be at least 3 characters.",
-  }),
-  description: z.string().min(3, {
-    message: "Description must be at least 3 characters.",
-  }),
-  type: z.enum(["Alerts", "Maintenance", "General"], {
-    required_error: "Please select a type of update.",
-  }),
-});
-
-// Define the interface for form values
-type FormValues = z.infer<typeof formSchema>;
-
-// Update the props interface to include onSuccess instead of onClose
+/**
+ * Props for the SafetyUpdateFormNew component
+ */
 export interface SafetyUpdateFormNewProps {
   onSuccess?: () => void;
   existingData?: any;
 }
 
+/**
+ * SafetyUpdateFormNew component
+ * 
+ * This refactored component uses a more modular approach with separated form fields
+ * and a dedicated submission hook for better maintainability.
+ */
 export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
   // Set up form with validation
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SafetyUpdateFormData>({
+    resolver: zodResolver(safetyUpdateSchema),
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
@@ -48,20 +39,25 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
     },
   });
 
-  // States
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Hooks
   const { toast } = useToast();
   const user = useUser();
-  // Pass onSuccess to useSafetyUpdateSubmit now
-  const { submitSafetyUpdate, isLoading, error } = useSafetyUpdateSubmit({ 
-    onSuccess: onSuccess 
-  });
+  const neighborhood = useCurrentNeighborhood();
   const queryClient = useQueryClient();
+  
+  // Custom hook for form submission
+  const { isSubmitting, submitSafetyUpdate } = useSafetyUpdateFormSubmit(
+    user,
+    neighborhood,
+    () => {
+      if (onSuccess) onSuccess();
+    },
+    existingData?.id ? 'edit' : 'create',
+    existingData?.id
+  );
 
   // Function to handle the form submission
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: SafetyUpdateFormData) => {
     if (!user) {
       toast({
         title: "Error",
@@ -71,61 +67,21 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      let result;
-      if (existingData?.id) {
-        // If we're editing an existing update
-        result = await submitSafetyUpdate({
-          id: existingData.id,
-          title: values.title,
-          description: values.description,
-          type: values.type.toLowerCase(),
-        });
-
-        // Call the edge function to update activities
-        const { error: functionError } = await supabase.functions.invoke('notify-safety-changes', {
-          body: {
-            safetyUpdateId: existingData.id,
-            action: 'update',
-            safetyUpdateTitle: values.title,
-            changes: 'Safety update edited'
-          }
-        });
-
-        if (functionError) {
-          console.error('Error calling notify-safety-changes function:', functionError);
-        }
-      } else {
-        // If we're creating a new update
-        result = await submitSafetyUpdate({
-          title: values.title,
-          description: values.description,
-          type: values.type.toLowerCase(),
-        });
-      }
-
-      if (result) {
+      const success = await submitSafetyUpdate(values);
+      
+      if (success) {
         // Invalidate related queries to refresh data
         queryClient.invalidateQueries({ queryKey: ["safety-updates"] });
         queryClient.invalidateQueries({ queryKey: ["activities"] });
-
+        
         toast({
           title: "Success!",
           description: existingData?.id
             ? "Safety update has been edited."
             : "New safety update has been created.",
         });
-
-        // Dispatch custom event for refresh
-        window.dispatchEvent(new CustomEvent('safety-update-submitted'));
-
-        // Call onSuccess callback if provided
-        if (onSuccess) {
-          onSuccess();
-        }
-
+        
         // Reset the form if not editing
         if (!existingData?.id) {
           form.reset({
@@ -142,90 +98,40 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
         description: "There was a problem submitting your safety update.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
-
-  // Handle form submission error state from the hook
-  if (error) {
-    console.error("Safety update submit error:", error);
-  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Type Selection (Alert, Maintenance, General) */}
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type of Safety Update</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select update type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="Alerts">Alert</SelectItem>
-                    <SelectItem value="Maintenance">Maintenance</SelectItem>
-                    <SelectItem value="General">General Information</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <SafetyTypeField form={form} />
 
         {/* Title Input */}
-        <FormField
-          control={form.control}
+        <SafetyTextField
+          form={form}
           name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter a title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Title"
+          placeholder="Enter a title"
         />
 
         {/* Description Textarea */}
-        <FormField
-          control={form.control}
+        <SafetyTextField
+          form={form}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Provide details about the safety update" 
-                  className="min-h-[120px]" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Description"
+          placeholder="Provide details about the safety update"
+          multiline={true}
         />
 
         {/* Submit Button */}
         <Button 
           type="submit" 
           className="w-full bg-red-500 hover:bg-red-600 text-white"
-          disabled={isSubmitting || isLoading}
+          disabled={isSubmitting}
         >
           <Shield className="w-4 h-4 mr-2" />
-          {isSubmitting || isLoading 
+          {isSubmitting 
             ? "Submitting..." 
             : existingData?.id 
               ? "Update Safety Information" 

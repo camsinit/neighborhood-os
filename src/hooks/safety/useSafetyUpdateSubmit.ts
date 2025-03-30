@@ -4,7 +4,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { useState } from "react"; // Added import for useState
+import { useState } from "react"; 
 
 // Interface for the hook properties
 // Make onSuccess optional to allow the hook to be used without a callback
@@ -27,11 +27,17 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [error, setError] = useState<Error | null>(null);
   const user = useUser();
   const queryClient = useQueryClient();
-  const neighborhoodId = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood(); // Get the neighborhood object
 
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
       toast.error("You must be logged in to create a safety update");
+      return;
+    }
+
+    // Check that we have a valid neighborhood
+    if (!neighborhood || !neighborhood.id) {
+      toast.error("You must be part of a neighborhood to create a safety update");
       return;
     }
 
@@ -43,7 +49,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       // Add detailed logging before insert operation
       console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
         timestamp: new Date().toISOString()
       });
@@ -52,8 +58,8 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         .from('safety_updates')
         .insert({
           ...formData,
-          author_id: user.id,
-          neighborhood_id: neighborhoodId
+          author_id: user.id, // Use author_id to match table schema
+          neighborhood_id: neighborhood.id // Use neighborhood.id instead of neighborhood
         })
         .select();
 
@@ -67,7 +73,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
             code: error.code
           },
           userId: user.id,
-          neighborhoodId,
+          neighborhoodId: neighborhood.id,
           timestamp: new Date().toISOString()
         });
         setError(error);
@@ -78,7 +84,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       console.log("[useSafetyUpdateSubmit] Safety update created successfully:", {
         updateId: data?.[0]?.id,
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         timestamp: new Date().toISOString()
       });
 

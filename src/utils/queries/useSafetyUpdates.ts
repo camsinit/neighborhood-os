@@ -13,14 +13,14 @@ export const useSafetyUpdates = () => {
   // Get the current user for auth context debugging
   const user = useUser();
   
-  // Get the current neighborhood ID - this will return null if none is selected
-  const neighborhoodId = useCurrentNeighborhood();
+  // Get the current neighborhood - this will return null if none is selected
+  const neighborhood = useCurrentNeighborhood();
 
   return useQuery({
-    queryKey: ['safety-updates', neighborhoodId],
+    queryKey: ['safety-updates', neighborhood?.id],
     queryFn: async () => {
       console.log("[useSafetyUpdates] Starting query with neighborhood:", {
-        neighborhoodId, 
+        neighborhoodId: neighborhood?.id, 
         userId: user?.id,
         isAuthenticated: !!user,
         timestamp: new Date().toISOString()
@@ -39,7 +39,7 @@ export const useSafetyUpdates = () => {
                 avatar_url
               )
             `)
-            .eq('neighborhood_id', neighborhoodId) // Explicitly filter by neighborhood
+            .eq('neighborhood_id', neighborhood?.id) // Fixed: Use neighborhood?.id
             .order('created_at', { ascending: false });
         }, 'safety_updates_query');
       } catch (err) {
@@ -48,6 +48,6 @@ export const useSafetyUpdates = () => {
         return { data: [], error: err instanceof Error ? err : new Error(String(err)) };
       }
     },
-    enabled: !!neighborhoodId && !!user, // Only run query if we have BOTH a neighborhood ID AND authenticated user
+    enabled: !!neighborhood?.id && !!user, // Only run query if we have BOTH a neighborhood ID AND authenticated user
   });
 };
