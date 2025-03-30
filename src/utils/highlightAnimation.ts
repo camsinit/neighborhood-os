@@ -29,9 +29,9 @@ export const addRainbowHighlight = (element: HTMLElement | null) => {
  * @param selector The CSS selector to find the element
  * @return True if the element was found and highlighted, false otherwise
  */
-export const highlightElement = (selector: string): boolean => {
+export const highlightElement = (selector: string): void => {
   // Use small delay to ensure DOM is ready
-  return setTimeout(() => {
+  setTimeout(() => {
     // Find the element
     const element = document.querySelector(selector);
     
@@ -44,11 +44,11 @@ export const highlightElement = (selector: string): boolean => {
       
       // Log success for debugging
       console.log(`[highlightElement] Successfully highlighted element: ${selector}`);
-      return true;
+      return;
     } else {
       // Log failure for debugging
       console.log(`[highlightElement] Could not find element: ${selector}`);
-      return false;
+      return;
     }
   }, 100);
 };
