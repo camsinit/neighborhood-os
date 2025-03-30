@@ -1,9 +1,9 @@
-import { Clock, Bell, Wrench } from "lucide-react";
+
+import { Clock, Bell, Wrench, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SafetyUpdateCard from "./SafetyUpdateCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield } from "lucide-react";
 
 interface SafetyUpdatesListProps {
   updates: any[];
@@ -18,6 +18,7 @@ const SafetyUpdatesList = ({
   onUpdateClick,
   onAddUpdate
 }: SafetyUpdatesListProps) => {
+  // Define categories for safety updates filtering (used in category buttons)
   const categories = [{
     icon: Clock,
     label: "Updates"
@@ -29,6 +30,10 @@ const SafetyUpdatesList = ({
     label: "Maintenance"
   }];
 
+  /**
+   * Render skeleton loading state
+   * Creates placeholder cards while data is loading
+   */
   const renderSkeleton = () => <div className="space-y-6">
       {[1, 2, 3].map(i => <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
           <Skeleton className="h-6 w-32 mb-3" />
@@ -37,6 +42,10 @@ const SafetyUpdatesList = ({
         </div>)}
     </div>;
 
+  /**
+   * Render empty state when no updates exist
+   * Shows a message and a button to create the first update
+   */
   const renderEmptyState = () => (
     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
       <Shield className="h-12 w-12 mx-auto mb-4 text-red-500 opacity-50" />
@@ -66,8 +75,19 @@ const SafetyUpdatesList = ({
           <Shield className="w-4 h-4 mr-2" />
           New Update
         </Button>
+        {/* Fixed: This section was causing the void[] error because map() wasn't returning anything */}
         <div className="flex gap-4 px-0 mx-[3px]">
-          {categories.map(cat => {})}
+          {categories.map((cat, index) => (
+            <Button 
+              key={index}
+              variant="outline" 
+              size="sm"
+              className="text-gray-600 border-gray-200"
+            >
+              <cat.icon className="w-4 h-4 mr-2" />
+              {cat.label}
+            </Button>
+          ))}
         </div>
       </div>
       <div className="space-y-6">
