@@ -74,8 +74,8 @@ const CareRequestForm = ({
   existingRequest = null
 }: CareRequestFormProps) => {
   const user = useUser();
-  // Fix TypeScript error by properly destructuring the neighborhood object
-  const { neighborhood } = useCurrentNeighborhood();
+  // Fix TypeScript error by properly handling the neighborhood object
+  const neighborhoodData = useCurrentNeighborhood();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Setup automatic refresh of activities when care requests are updated
@@ -101,7 +101,8 @@ const CareRequestForm = ({
 
   // Handle form submission
   const onSubmit = async (data: FormData) => {
-    if (!user || !neighborhood) {
+    // Check if user is logged in and has a neighborhood
+    if (!user || !neighborhoodData) {
       toast.error("You must be logged in and part of a neighborhood to create a care request");
       return;
     }
@@ -116,7 +117,7 @@ const CareRequestForm = ({
         care_category: data.careCategory,
         valid_until: data.validUntil.toISOString(),
         user_id: user.id,
-        neighborhood_id: neighborhood.id,
+        neighborhood_id: neighborhoodData.id,
         support_type: 'care', // This is the "care" support type
       };
 
@@ -155,7 +156,7 @@ const CareRequestForm = ({
             careRequestTitle: data.title,
             userId: user.id,
             requestType: data.requestType,
-            neighborhoodId: neighborhood.id,
+            neighborhoodId: neighborhoodData.id,
             changes: data.description
           }
         });
