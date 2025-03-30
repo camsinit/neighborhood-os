@@ -9,12 +9,32 @@ interface EventSubmitProps {
   onSuccess: () => void;
 }
 
+/**
+ * Custom hook for handling event submissions and updates
+ * 
+ * This hook provides functions to create and update events in the database
+ * 
+ * @param onSuccess - Callback function to run after successful submission
+ * @returns Object containing handleSubmit and handleUpdate functions
+ */
 export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
+  // Get the current authenticated user
   const user = useUser();
+  
+  // Get the query client for cache invalidation
   const queryClient = useQueryClient();
+  
+  // Get the current neighborhood ID
   const neighborhoodId = useCurrentNeighborhood();
 
+  /**
+   * Handles the submission of a new event
+   * 
+   * @param formData - The form data containing event details
+   * @returns The created event data or undefined if there was an error
+   */
   const handleSubmit = async (formData: any) => {
+    // Check if the user is authenticated
     if (!user) {
       // If user is not logged in, show an error toast
       toast.error("You must be logged in to create an event");
@@ -35,8 +55,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         ? `${formData.date}T${formData.time}` 
         : null;
 
-      // Remove fields that don't exist in the database schema
-      // IMPORTANT: Only include fields that exist in the database table
+      // IMPORTANT: Filter the form data to only include fields that exist in the events table
+      // This ensures we don't try to insert fields like isRecurring that are UI-only
       const eventData = {
         title: formData.title,
         description: formData.description,
@@ -101,6 +121,13 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
     }
   };
 
+  /**
+   * Handles the update of an existing event
+   * 
+   * @param eventId - The ID of the event to update
+   * @param formData - The form data containing updated event details
+   * @returns The updated event data or undefined if there was an error
+   */
   const handleUpdate = async (eventId: string, formData: any) => {
     if (!user) {
       toast.error("You must be logged in to update an event");
@@ -121,12 +148,13 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         ? `${formData.date}T${formData.time}` 
         : null;
 
-      // Only include fields that exist in the database table
+      // IMPORTANT: Filter to only include fields that exist in the database schema
       const eventData = {
         title: formData.title,
         description: formData.description,
         time: combinedTime, // Use the combined timestamp
         location: formData.location
+        // Do NOT include UI-only fields like isRecurring, recurrencePattern, etc.
       };
 
       // Log the actual data being sent to the database for debugging

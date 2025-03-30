@@ -11,6 +11,16 @@ import { useEventSubmit } from "@/hooks/events/useEventSubmit";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
+/**
+ * Interface for the EventForm component props
+ * 
+ * @param onClose - Function to call when the form should close
+ * @param onAddEvent - Optional callback for when an event is added
+ * @param initialValues - Optional initial values for the form fields
+ * @param eventId - Optional ID if editing an existing event
+ * @param mode - Whether we're creating or editing an event
+ * @param deleteButton - Optional delete button component
+ */
 interface EventFormProps {
   onClose: () => void;
   onAddEvent?: (event: any) => void;
@@ -29,6 +39,12 @@ interface EventFormProps {
   deleteButton?: React.ReactNode;
 }
 
+/**
+ * EventForm component for creating and editing events
+ * 
+ * Handles both database fields (title, description, date, time, location)
+ * and UI-only fields for future features (isRecurring, recurrencePattern, recurrenceEndDate)
+ */
 const EventForm = ({ 
   onClose, 
   onAddEvent, 
@@ -38,14 +54,15 @@ const EventForm = ({
   deleteButton
 }: EventFormProps) => {
   // Initialize form state from initial values or defaults
+  // DATABASE FIELDS - these will be saved to the database
   const [title, setTitle] = useState(initialValues.title || "");
   const [description, setDescription] = useState(initialValues.description || "");
   const [date, setDate] = useState(initialValues.date || "");
   const [time, setTime] = useState(initialValues.time || "");
   const [location, setLocation] = useState(initialValues.location || "");
   
-  // Track UI-only fields that aren't stored in the database yet
-  // These will be handled in the UI but not sent to the database
+  // UI-ONLY FIELDS - these are for the UI but not stored in the database yet
+  // They're kept separate from database fields to avoid schema validation errors
   const [isRecurring, setIsRecurring] = useState(initialValues.isRecurring || false);
   const [recurrencePattern, setRecurrencePattern] = useState(initialValues.recurrencePattern || "weekly");
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(initialValues.recurrenceEndDate || "");
@@ -79,18 +96,25 @@ const EventForm = ({
     }
   });
 
-  // Form submission handler
+  /**
+   * Form submission handler
+   * 
+   * Collects form data and calls the appropriate submit/update handler
+   */
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Collect form data including UI-only fields
     const formData = {
+      // DATABASE FIELDS - these will be sent to the database
       title,
       description,
       date,
       time,
       location,
-      // Include UI-only fields for future functionality
+      
+      // UI-ONLY FIELDS - these won't be stored in the database
+      // but are included here for future functionality
       isRecurring,
       recurrencePattern,
       recurrenceEndDate,
