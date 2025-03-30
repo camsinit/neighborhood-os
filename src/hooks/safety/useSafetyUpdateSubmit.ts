@@ -4,11 +4,14 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { useState } from "react"; // Added import for useState
 
+// Interface for the hook properties
 interface SafetyUpdateSubmitProps {
   onSuccess: () => void;
 }
 
+// Interface for the form data
 interface SafetyUpdateFormData {
   title: string;
   description: string;
@@ -16,6 +19,8 @@ interface SafetyUpdateFormData {
 }
 
 export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
+  // Added isLoading state
+  const [isLoading, useState] = useState<boolean>(false);
   const user = useUser();
   const queryClient = useQueryClient();
   const neighborhoodId = useCurrentNeighborhood();
@@ -27,6 +32,9 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     }
 
     try {
+      // Set loading to true before starting the operation
+      useState(true);
+      
       // Add detailed logging before insert operation
       console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
         userId: user.id,
@@ -85,6 +93,9 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       console.error('Error creating safety update:', error);
       toast.error("Failed to create safety update. Please try again.");
       throw error;
+    } finally {
+      // Make sure to set loading to false when done
+      useState(false);
     }
   };
 
@@ -95,6 +106,9 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
     }
 
     try {
+      // Set loading to true before starting the operation
+      useState(true);
+      
       // Add detailed logging before update operation
       console.log("[useSafetyUpdateSubmit] Attempting to update safety update:", {
         updateId,
@@ -154,8 +168,12 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       console.error('Error updating safety update:', error);
       toast.error("Failed to update safety update. Please try again.");
       throw error;
+    } finally {
+      // Make sure to set loading to false when done
+      useState(false);
     }
   };
 
-  return { handleSubmit, handleUpdate };
+  // Return isLoading state along with the handleSubmit and handleUpdate functions
+  return { handleSubmit, handleUpdate, isLoading };
 };
