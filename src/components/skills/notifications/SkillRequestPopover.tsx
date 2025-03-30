@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillRequestNotification } from "../types/skillTypes";
+import { createSkillSessionEvent } from "@/utils/skillSessionCalendar";
 
 /**
  * SkillRequestPopover - Displays details about a skill request and allows the provider
@@ -40,56 +41,22 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
     try {
       setIsConfirming(true);
       
-      // 1. Create a calendar event
+      // 1. Create a calendar event using our new utility function
       const eventDate = new Date();
       eventDate.setDate(eventDate.getDate() + 3); // Default to 3 days from now as example
       
-      const { data: eventData, error: eventError } = await supabase
-        .from('events')
-        .insert({
-          title: `Skill Session: ${notification.skillTitle}`,
-          description: `Skill exchange session between provider and requester.`,
-          time: eventDate.toISOString(), // Use 'time' instead of 'start_time'
-          location: 'To be determined',
-          host_id: notification.providerId, // Primary host is the provider
-          is_private: true,
-          neighborhood_id: null, // This needs to be set correctly
-        })
-        .select()
-        .single();
-        
-      if (eventError) throw eventError;
+      const eventId = await createSkillSessionEvent({
+        sessionId: notification.skillId,
+        skillId: notification.skillId,
+        skillTitle: notification.skillTitle,
+        providerId: notification.providerId,
+        requesterId: notification.requesterId,
+        eventDateTime: eventDate,
+        location: 'To be determined'
+      });
       
-      // 2. Update the skill session status
-      if (eventData) {
-        // Update the skill session status 
-        await supabase
-          .from('skill_sessions')
-          .update({
-            status: 'confirmed', // Using 'confirmed' status
-            event_id: eventData.id
-          })
-          .eq('skill_id', notification.skillId)
-          .eq('provider_id', notification.providerId)
-          .eq('requester_id', notification.requesterId);
-            
-        // 3. Send notification to the requester
-        await supabase
-          .from('notifications')
-          .insert({
-            user_id: notification.requesterId,
-            actor_id: notification.providerId,
-            title: `Skill session for "${notification.skillTitle}" has been scheduled`,
-            content_type: 'skill_session',
-            content_id: notification.skillId,
-            notification_type: 'skills',
-            action_type: 'view',
-            action_label: 'View Calendar',
-            metadata: {
-              event_id: eventData?.id,
-              skill_id: notification.skillId
-            }
-          });
+      if (!eventId) {
+        throw new Error("Failed to create event");
       }
       
       // Success message and cleanup
