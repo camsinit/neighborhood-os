@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses the security definer function to avoid recursion
+ * Uses the simple policy structure to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -21,32 +21,8 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // First try using the "user_is_neighborhood_member" RPC
-    try {
-      const { data, error } = await supabase
-        .rpc('user_is_neighborhood_member', {
-          user_uuid: userId,
-          neighborhood_uuid: neighborhoodId
-        });
-              
-      if (!error) {
-        return !!data;
-      }
-    } catch (rpcErr) {
-      console.warn("[NeighborhoodUtils] RPC user_is_neighborhood_member failed, falling back to direct query:", rpcErr);
-    }
-    
-    // Fall back to checking created neighborhoods
-    try {
-      const isCreator = await checkUserCreatedNeighborhood(userId, neighborhoodId);
-      if (isCreator) {
-        return true;
-      }
-    } catch (creatorErr) {
-      console.warn("[NeighborhoodUtils] Error checking if user created neighborhood:", creatorErr);
-    }
-    
-    // Final fallback to direct query with RLS
+    // With our simplified RLS policies, we can now directly query the table
+    // The policies will ensure users can only see their own memberships
     const { data, error } = await supabase
       .from('neighborhood_members')
       .select('id')
@@ -69,7 +45,6 @@ export async function checkNeighborhoodMembership(
 
 /**
  * Utility function to add a user to a neighborhood
- * Uses the RPC function to safely add a member
  * 
  * @param userId - The ID of the user to add
  * @param neighborhoodId - The ID of the neighborhood to add the user to
@@ -80,14 +55,16 @@ export async function addNeighborhoodMember(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Call the RPC function
-    const { data, error } = await supabase.rpc(
-      'add_neighborhood_member',
-      {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      }
-    );
+    // Direct insert with our simplified RLS policies
+    const { data, error } = await supabase
+      .from('neighborhood_members')
+      .insert({
+        user_id: userId,
+        neighborhood_id: neighborhoodId,
+        status: 'active'
+      })
+      .select('id')
+      .single();
 
     if (error) {
       console.error("[NeighborhoodUtils] Error adding neighborhood member:", error);
@@ -103,7 +80,6 @@ export async function addNeighborhoodMember(
 
 /**
  * Check if a user has created a specific neighborhood
- * Uses the security definer function to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -114,24 +90,7 @@ export async function checkUserCreatedNeighborhood(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Try using the user_created_neighborhood function
-    try {
-      const { data, error } = await supabase.rpc(
-        'user_created_neighborhood', 
-        { 
-          user_uuid: userId,
-          neighborhood_uuid: neighborhoodId 
-        }
-      );
-
-      if (!error) {
-        return !!data;
-      }
-    } catch (rpcErr) {
-      console.warn("[NeighborhoodUtils] RPC user_created_neighborhood failed, falling back to direct query:", rpcErr);
-    }
-
-    // Fall back to direct query
+    // Direct query to neighborhoods table
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id')

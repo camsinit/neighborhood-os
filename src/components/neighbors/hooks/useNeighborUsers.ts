@@ -3,13 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { fetchNeighborhoodMembers } from "@/contexts/neighborhood/utils/neighborhoodFetchUtils";
 
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * This updated version uses security definer functions to completely avoid 
- * the RLS recursion issue when fetching neighbor information
+ * This updated version uses the simplified RLS policies to avoid 
+ * the recursion issue when fetching neighbor information
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -90,13 +89,25 @@ export const useNeighborUsers = () => {
         }
       }
 
-      // For neighborhoods, use security definer function to get members
+      // For neighborhoods, use direct queries with our simplified RLS policies
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // Get member IDs using the security definer function
-        const memberIds = await fetchNeighborhoodMembers(currentNeighborhood.id);
+        // Get member IDs directly - our simplified policies should handle access control
+        const { data: memberData, error: memberError } = await supabase
+          .from('neighborhood_members')
+          .select('user_id')
+          .eq('neighborhood_id', currentNeighborhood.id)
+          .eq('status', 'active');
           
+        if (memberError) {
+          console.error("[useNeighborUsers] Error fetching neighborhood members:", memberError);
+          throw memberError;
+        }
+        
+        // Extract user IDs from member data
+        const memberIds = memberData.map(m => m.user_id);
+        
         // If no members found, return empty array
         if (!memberIds || memberIds.length === 0) {
           console.log("[useNeighborUsers] No members found, returning empty array");
