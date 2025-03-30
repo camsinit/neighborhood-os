@@ -1,4 +1,3 @@
-
 /**
  * AIChat Component
  * 
@@ -21,7 +20,7 @@ export type Message = {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-  // Add context for interactive elements
+  // Context field is kept but not actively used for now
   context?: {
     events?: Array<{ id: string; title: string; }>;
     skills?: Array<{ id: string; title: string; }>;
@@ -135,13 +134,14 @@ const AIChat = () => {
         return;
       }
       
-      // Add AI response to chat with context
+      // Add AI response to chat
       const aiMessage: Message = {
         id: Math.random().toString(36).substring(7),
         content: data.response || "Sorry, I couldn't generate a response",
         role: 'assistant',
         timestamp: new Date(),
-        context: data.context // Include the context for interactive elements
+        // Include empty context to keep TypeScript happy but won't render interactive elements
+        context: {}
       };
       
       setMessages(prevMessages => [...prevMessages, aiMessage]);
@@ -167,7 +167,7 @@ const AIChat = () => {
         messagesEndRef={messagesEndRef} 
       />
       
-      {/* New Input area with suggestions */}
+      {/* Input area with suggestions */}
       <div className="border-t">
         <AIInputWithSuggestions
           actions={NEIGHBORHOOD_ACTIONS}
