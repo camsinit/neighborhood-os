@@ -17,7 +17,7 @@ interface AIChatMessagesProps {
 
 /**
  * Component that displays all messages in the chat
- * Height reduced to make room for other components on the page
+ * Shows a clean, empty state when no messages are present
  */
 const AIChatMessages = ({
   messages,
@@ -25,35 +25,30 @@ const AIChatMessages = ({
   loadingMessage,
   messagesEndRef
 }: AIChatMessagesProps) => {
-  // Render the chat messages area with reduced height
+  // Render the chat messages area with appropriate height
   return (
-    <div className="flex-1 p-4 overflow-y-auto max-h-[200px] min-h-[150px]">
-      {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-gray-500">
-          <p>Ask me anything about your neighborhood!</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <AIMessage key={message.id} message={message} />
-          ))}
-          {isLoading && (
-            <div className="flex items-center space-x-2">
-              <div className="animate-pulse">
-                <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
-              </div>
-              <div className="animate-pulse delay-75">
-                <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
-              </div>
-              <div className="animate-pulse delay-150">
-                <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
-              </div>
-              <span className="text-sm text-gray-500">{loadingMessage}</span>
+    <div className="flex-1 p-4 overflow-y-auto max-h-[400px] min-h-[300px]">
+      {/* We're removing the placeholder message div and just showing the empty space */}
+      <div className="space-y-4">
+        {messages.map((message) => (
+          <AIMessage key={message.id} message={message} />
+        ))}
+        {isLoading && (
+          <div className="flex items-center space-x-2">
+            <div className="animate-pulse">
+              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      )}
+            <div className="animate-pulse delay-75">
+              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
+            </div>
+            <div className="animate-pulse delay-150">
+              <div className="h-2 w-2 bg-blue-400 rounded-full"></div>
+            </div>
+            <span className="text-sm text-gray-500">{loadingMessage}</span>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 };
