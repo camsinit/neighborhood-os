@@ -1,4 +1,3 @@
-
 /**
  * AIChat Component
  * 
@@ -155,21 +154,20 @@ const AIChat = () => {
     }
   };
 
-  // Render the chat interface with a more compact layout
+  // Render the chat interface with the div between header and messages removed
   return (
     <div className="h-full bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-      {/* Chat header with no bottom margin/padding to reduce space */}
+      {/* Chat header */}
       <AIChatHeader />
       
-      {/* Messages area in a scrollable container with reduced top padding */}
-      <div className="flex-1 overflow-y-auto pt-0 px-4 pb-4 space-y-4">
-        <AIChatMessages 
-          messages={messages} 
-          isLoading={isLoading} 
-          loadingMessage={loadingMessage} 
-          messagesEndRef={messagesEndRef} 
-        />
-      </div>
+      {/* Messages area - removed the container div */}
+      <AIChatMessages 
+        messages={messages} 
+        isLoading={isLoading} 
+        loadingMessage={loadingMessage} 
+        messagesEndRef={messagesEndRef}
+        className="flex-1 overflow-y-auto pt-0 px-4 pb-4" 
+      />
       
       {/* Input area with suggestions */}
       <div className="border-t">

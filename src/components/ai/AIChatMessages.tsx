@@ -7,6 +7,7 @@
 import React from 'react';
 import AIMessage from './AIMessage';
 import { Message } from './AIChat';
+import { cn } from '@/lib/utils';
 
 // Define props interface for type safety
 interface AIChatMessagesProps {
@@ -14,6 +15,7 @@ interface AIChatMessagesProps {
   isLoading: boolean;
   loadingMessage: string;
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  className?: string; // Added className prop
 }
 
 /**
@@ -23,17 +25,18 @@ interface AIChatMessagesProps {
  * @param isLoading - Boolean indicating if a message is currently being processed
  * @param loadingMessage - Text to display while loading
  * @param messagesEndRef - Ref object for auto-scrolling to the most recent message
+ * @param className - Optional CSS classes to apply to the component
  */
 const AIChatMessages = ({
   messages,
   isLoading,
   loadingMessage,
-  messagesEndRef
+  messagesEndRef,
+  className
 }: AIChatMessagesProps) => {
-  // We're removing the container div as requested and just returning the elements directly
-  // This allows the parent container in AIChat to control the layout without constraints
+  // Apply the classes directly to the messages component
   return (
-    <>
+    <div className={cn("space-y-4", className)}>
       {/* Map through and render each message */}
       {messages.map((message) => (
         <AIMessage key={message.id} message={message} />
@@ -54,7 +57,7 @@ const AIChatMessages = ({
       
       {/* Invisible div that serves as a reference point for scrolling */}
       <div ref={messagesEndRef} />
-    </>
+    </div>
   );
 };
 
