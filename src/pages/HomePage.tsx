@@ -1,3 +1,4 @@
+
 /**
  * HomePage Component
  * 
@@ -18,21 +19,20 @@ import AIChat from "@/components/ai/AIChat";
  * Shows AI assistant, quick actions, and notifications
  */
 const HomePage = () => {
-  return <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+  return <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
       <div className="max-w-7xl mx-auto">
-        <div className="space-y-8">
+        <div className="space-y-4">
           {/* AI Chat Section - New component */}
           <section>
-            
-            <div className="h-[500px]">
+            <div className="h-[450px]">
               <AIChat />
             </div>
           </section>
 
-          <Separator className="my-8 bg-gray-200" />
+          <Separator className="my-4 bg-gray-200" />
 
           {/* Two Column Layout for Quick Actions and Notifications */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Quick Actions Section - Moved from previous position */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>

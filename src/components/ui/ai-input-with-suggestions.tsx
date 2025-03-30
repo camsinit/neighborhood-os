@@ -60,9 +60,9 @@ export function AIInputWithSuggestions({
     };
 
     return (
-        <div className={cn("w-full py-4", className)}>
-            <div className="relative max-w-xl w-full mx-auto">
-                <div className="relative border border-black/10 dark:border-white/10 focus-within:border-black/20 dark:focus-within:border-white/20 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03]">
+        <div className={cn("w-full py-2", className)}>
+            <div className="w-full mx-auto">
+                <div className="relative w-full border border-black/10 dark:border-white/10 focus-within:border-black/20 dark:focus-within:border-white/20 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03]">
                     <div className="flex flex-col">
                         <div
                             className="overflow-y-auto"
@@ -74,7 +74,7 @@ export function AIInputWithSuggestions({
                                 placeholder={placeholder}
                                 disabled={isLoading}
                                 className={cn(
-                                    "max-w-xl w-full rounded-2xl pr-10 pt-3 pb-3 placeholder:text-black/70 dark:placeholder:text-white/70 border-none focus:ring text-black dark:text-white resize-none text-wrap bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.2]",
+                                    "w-full rounded-2xl pr-10 pt-3 pb-3 placeholder:text-black/70 dark:placeholder:text-white/70 border-none focus:ring text-black dark:text-white resize-none text-wrap bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.2]",
                                     `min-h-[${minHeight}px]`
                                 )}
                                 value={inputValue}
