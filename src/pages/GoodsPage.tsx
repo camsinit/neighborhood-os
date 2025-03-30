@@ -1,5 +1,7 @@
 
 import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
+import { useEffect } from "react";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 /**
  * GoodsPage component
@@ -13,6 +15,21 @@ import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
  * and z-index management to make sure it shows beneath the content.
  */
 const GoodsPage = () => {
+  // Add event listener for highlighting goods items
+  useEffect(() => {
+    // Use our utility to create a consistent highlight listener for goods items
+    // This will handle finding elements by data-goods-id and applying animations
+    const handleHighlightItem = createHighlightListener("goods");
+    
+    // Add event listener when component mounts
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    
+    // Remove event listener when component unmounts
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
+
   return (
     // Wrapper div with relative positioning for the gradient
     <div className="relative min-h-screen">

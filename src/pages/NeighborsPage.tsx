@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
@@ -10,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 /**
  * NeighborsPage Component
  * 
  * This page displays a directory of neighbors in the user's neighborhood.
- * UPDATED: Now more resilient to missing neighborhood data
+ * UPDATED: Now more resilient to missing neighborhood data and uses our
+ * centralized highlighting system
  */
 const NeighborsPage = () => {
   // State for the search functionality
@@ -33,6 +34,21 @@ const NeighborsPage = () => {
   } = useNeighborhood();
   const navigate = useNavigate();
 
+  // Replace the custom highlight implementation with our centralized utility
+  useEffect(() => {
+    // Use our utility to create a consistent highlight listener for neighbors
+    // This will handle finding elements by data-neighbor-id and applying animations
+    const handleHighlightItem = createHighlightListener("neighbors");
+    
+    // Add event listener when component mounts
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    
+    // Remove event listener when component unmounts
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
+
   // Add debugging logs
   useEffect(() => {
     console.log("[NeighborsPage] Neighborhood state:", {
@@ -42,33 +58,6 @@ const NeighborsPage = () => {
       timestamp: new Date().toISOString()
     });
   }, [currentNeighborhood, isLoading, error]);
-
-  // Setup event listener for highlighting neighbors
-  useEffect(() => {
-    // This effect sets up an event listener to highlight neighbors in the directory
-    // when triggered from other parts of the application
-    const handleHighlightItem = (e: CustomEvent) => {
-      if (e.detail.type === 'neighbors') {
-        setTimeout(() => {
-          const neighborCard = document.querySelector(`[data-neighbor-id="${e.detail.id}"]`);
-          if (neighborCard) {
-            neighborCard.classList.add('rainbow-highlight');
-            neighborCard.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            });
-            setTimeout(() => {
-              neighborCard.classList.remove('rainbow-highlight');
-            }, 2000);
-          }
-        }, 100);
-      }
-    };
-    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
-    return () => {
-      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
-    };
-  }, []);
 
   // Handle manual refresh action
   const handleRefresh = () => {
@@ -191,4 +180,5 @@ const NeighborsPage = () => {
       </div>
     </div>;
 };
+
 export default NeighborsPage;

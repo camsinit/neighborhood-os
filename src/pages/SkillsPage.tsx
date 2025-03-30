@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -7,6 +6,7 @@ import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 const categoryIcons = {
   creative: Palette,
@@ -21,22 +21,8 @@ const SkillsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
 
   useEffect(() => {
-    const handleHighlightItem = (e: CustomEvent) => {
-      if (e.detail.type === 'skills') {
-        setTimeout(() => {
-          const skillCard = document.querySelector(`[data-skill-id="${e.detail.id}"]`);
-          if (skillCard) {
-            skillCard.classList.add('rainbow-highlight');
-            skillCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            setTimeout(() => {
-              skillCard.classList.remove('rainbow-highlight');
-            }, 2000);
-          }
-        }, 100);
-      }
-    };
-
+    const handleHighlightItem = createHighlightListener("skills");
+    
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
@@ -54,13 +40,7 @@ const SkillsPage = () => {
   };
 
   return (
-    // Wrapper div with relative positioning for the gradient
     <div className="relative min-h-screen">
-      {/* 
-        Background gradient using the skills-color CSS variable
-        The gradient starts with the section color at reduced opacity at the top
-        and fades to completely transparent toward the bottom
-      */}
       <div 
         className="absolute inset-0 pointer-events-none" 
         style={{ 
@@ -70,7 +50,6 @@ const SkillsPage = () => {
         aria-hidden="true"
       />
       
-      {/* Content div placed above the gradient background */}
       <div className="relative z-10">
         <div className="min-h-full w-full bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

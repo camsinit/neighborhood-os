@@ -27,30 +27,54 @@ export const addRainbowHighlight = (element: HTMLElement | null) => {
  * Helper to find and highlight elements by CSS selector
  * 
  * @param selector The CSS selector to find the element
+ * @param showErrorToast Whether to show an error toast when element not found
  * @return True if the element was found and highlighted, false otherwise
  */
-export const highlightElement = (selector: string): void => {
+export const highlightElement = (selector: string, showErrorToast: boolean = false): boolean => {
   // Use small delay to ensure DOM is ready
   setTimeout(() => {
-    // Find the element
-    const element = document.querySelector(selector);
-    
-    if (element) {
-      // Scroll the element into view (centered)
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    try {
+      // Find the element
+      const element = document.querySelector(selector);
       
-      // Add the rainbow highlight animation
-      addRainbowHighlight(element as HTMLElement);
-      
-      // Log success for debugging
-      console.log(`[highlightElement] Successfully highlighted element: ${selector}`);
-      return;
-    } else {
-      // Log failure for debugging
-      console.log(`[highlightElement] Could not find element: ${selector}`);
-      return;
+      if (element) {
+        // Scroll the element into view (centered)
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Add the rainbow highlight animation
+        addRainbowHighlight(element as HTMLElement);
+        
+        // Log success for debugging
+        console.log(`[highlightElement] Successfully highlighted element: ${selector}`);
+        return true;
+      } else {
+        // Log failure for debugging
+        console.log(`[highlightElement] Could not find element: ${selector}`);
+        
+        // If requested, we could integrate a toast notification here for elements not found
+        // Currently disabled until we decide to implement this feature
+        /*
+        if (showErrorToast) {
+          // Import toast from "@/components/ui/use-toast" once we decide to implement this
+          toast({
+            title: "Element not found",
+            description: `Could not highlight the requested element: ${selector}`,
+            variant: "destructive",
+          });
+        }
+        */
+        
+        return false;
+      }
+    } catch (error) {
+      // Log any errors that occur during highlighting
+      console.error(`[highlightElement] Error highlighting element: ${selector}`, error);
+      return false;
     }
   }, 100);
+  
+  // Return false by default since the actual highlighting happens asynchronously
+  return false;
 };
 
 /**

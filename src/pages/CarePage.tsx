@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
 import SupportRequestDialog from "@/components/support/SupportRequestDialog";
@@ -7,12 +8,28 @@ import { HeartHandshake, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 const CarePage = () => {
   const [hoveredRequestId, setHoveredRequestId] = useState<string | null>(null);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Add event listener for highlighting support items
+  useEffect(() => {
+    // Use our utility to create a consistent highlight listener for support/care items
+    // This will handle finding elements by data-care-id and applying animations
+    const handleHighlightItem = createHighlightListener("support");
+    
+    // Add event listener when component mounts
+    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    
+    // Remove event listener when component unmounts
+    return () => {
+      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+    };
+  }, []);
 
   const {
     data: requests,
