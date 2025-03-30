@@ -1,55 +1,56 @@
 
-/**
- * ActionButtons Component
- * 
- * This component renders the suggestion buttons that appear below the input area.
- * Users can click these buttons to select different AI actions.
- */
+import { AIAction } from "./types";
 import { cn } from "@/lib/utils";
-import { ActionItem } from "./types";
 
+// Props interface for ActionButtons component
 interface ActionButtonsProps {
-    actions: ActionItem[];
-    selectedItem: string | null;
-    toggleItem: (text: string) => void;
-    isLoading?: boolean;
+  actions: AIAction[];
+  selectedItem: string | null;
+  toggleItem: (itemText: string) => void;
+  isLoading: boolean;
 }
 
 /**
- * Renders the action buttons below the text input
- * Shows all actions except the currently selected one
+ * Component that displays selectable action buttons below the input field
+ * Updated to align buttons to the left side
  */
-export function ActionButtons({ 
-    actions, 
-    selectedItem, 
-    toggleItem,
-    isLoading = false
+export function ActionButtons({
+  actions,
+  selectedItem,
+  toggleItem,
+  isLoading,
 }: ActionButtonsProps) {
-    return (
-        <div className="flex flex-wrap gap-1.5 mt-2 max-w-xl mx-auto justify-start px-4">
-            {actions.filter((item) => item.text !== selectedItem).map(
-                ({ text, icon: Icon, colors }) => (
-                    <button
-                        type="button"
-                        key={text}
-                        disabled={isLoading}
-                        className={cn(
-                            "px-3 py-1.5 text-xs font-medium rounded-full",
-                            "border transition-all duration-200",
-                            "border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 hover:bg-black/5 dark:hover:bg-white/5",
-                            "flex-shrink-0"
-                        )}
-                        onClick={() => toggleItem(text)}
-                    >
-                        <div className="flex items-center gap-1.5">
-                            <Icon className={cn("h-4 w-4", colors.icon)} />
-                            <span className="text-black/70 dark:text-white/70 whitespace-nowrap">
-                                {text}
-                            </span>
-                        </div>
-                    </button>
-                )
+  // If no actions are provided, don't render anything
+  if (actions.length === 0) return null;
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2 justify-start">
+      {actions.map((action) => {
+        const isSelected = selectedItem === action.text;
+        
+        return (
+          <button
+            key={action.text}
+            onClick={() => toggleItem(action.text)}
+            disabled={isLoading}
+            className={cn(
+              "inline-flex items-center text-xs font-medium rounded-full px-3 py-1.5 border transition-colors duration-200 ease-in-out",
+              isSelected
+                ? `${action.colors.bg} ${action.colors.border}`
+                : "border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03]",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
-        </div>
-    );
+          >
+            <action.icon
+              className={cn(
+                "mr-1 h-3.5 w-3.5",
+                isSelected ? action.colors.icon : "text-black dark:text-white"
+              )}
+            />
+            <span>{action.text}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }

@@ -28,22 +28,10 @@ const AIChatMessages = ({
   return (
     <div className="flex-1 overflow-y-auto p-4">
       {/* If there are messages, display them */}
-      {messages.length > 0 ? (
+      {messages.length > 0 && (
         messages.map((message) => (
           <AIMessage key={message.id} message={message} />
         ))
-      ) : (
-        // If no messages, display a welcome message
-        <div className="flex h-full items-center justify-center">
-          <div className="text-center max-w-sm">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Welcome to your Neighborhood Assistant
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Ask me about events, skills, or anything happening in your neighborhood!
-            </p>
-          </div>
-        </div>
       )}
       
       {/* Show loading message when waiting for AI response */}
