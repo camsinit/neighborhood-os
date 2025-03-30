@@ -74,7 +74,7 @@ const CareRequestForm = ({
   existingRequest = null
 }: CareRequestFormProps) => {
   const user = useUser();
-  // Fix TypeScript error by properly handling the neighborhood object
+  // Get current neighborhood data - this can be a neighborhood object or null
   const neighborhoodData = useCurrentNeighborhood();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -102,6 +102,7 @@ const CareRequestForm = ({
   // Handle form submission
   const onSubmit = async (data: FormData) => {
     // Check if user is logged in and has a neighborhood
+    // neighborhoodData can be null, so we need to check for its existence
     if (!user || !neighborhoodData) {
       toast.error("You must be logged in and part of a neighborhood to create a care request");
       return;
@@ -110,6 +111,7 @@ const CareRequestForm = ({
     setIsSubmitting(true);
 
     try {
+      // Create the request data object - now safely accessing neighborhoodData
       const requestData = {
         title: data.title,
         description: data.description || '',
@@ -117,7 +119,7 @@ const CareRequestForm = ({
         care_category: data.careCategory,
         valid_until: data.validUntil.toISOString(),
         user_id: user.id,
-        neighborhood_id: neighborhoodData.id,
+        neighborhood_id: neighborhoodData.id, // This is now safe since we checked neighborhoodData exists
         support_type: 'care', // This is the "care" support type
       };
 
@@ -156,7 +158,7 @@ const CareRequestForm = ({
             careRequestTitle: data.title,
             userId: user.id,
             requestType: data.requestType,
-            neighborhoodId: neighborhoodData.id,
+            neighborhoodId: neighborhoodData.id, // This is now safe since we checked neighborhoodData exists above
             changes: data.description
           }
         });
