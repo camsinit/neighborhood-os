@@ -4,6 +4,7 @@
  * 
  * This is the main container component for the AI chat interface on the homepage.
  * It manages the chat state, handles message submission, and displays the chat history.
+ * Enhanced to handle context information from the AI responses.
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from "lucide-react";
@@ -21,6 +22,12 @@ type Message = {
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
+  // Add context for interactive elements
+  context?: {
+    events?: Array<{ id: string; title: string; }>;
+    skills?: Array<{ id: string; title: string; }>;
+    safetyUpdates?: Array<{ id: string; title: string; }>;
+  };
 };
 
 // Define the loading states for clever messages
@@ -105,12 +112,13 @@ const AIChat = () => {
         return;
       }
       
-      // Add AI response to chat
+      // Add AI response to chat with context
       const aiMessage: Message = {
         id: Math.random().toString(36).substring(7),
         content: data.response || "Sorry, I couldn't generate a response",
         role: 'assistant',
         timestamp: new Date(),
+        context: data.context // Include the context for interactive elements
       };
       
       setMessages(prevMessages => [...prevMessages, aiMessage]);

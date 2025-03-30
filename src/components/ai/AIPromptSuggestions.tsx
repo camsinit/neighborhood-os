@@ -4,6 +4,7 @@
  * 
  * This component displays pre-made prompt suggestions that users can click on
  * to quickly start conversations with the AI assistant.
+ * Enhanced with more neighborhood-relevant suggestions.
  */
 import { Button } from "@/components/ui/button";
 
@@ -12,16 +13,19 @@ interface AIPromptSuggestionsProps {
 }
 
 const AIPromptSuggestions = ({ onPromptClick }: AIPromptSuggestionsProps) => {
-  // Define the pre-made prompts
+  // Define the pre-made prompts - more relevant to neighborhood context
   const prompts = [
-    "What's happening in my neighborhood today?",
-    "Anything I can do to be helpful to a neighbor today?",
-    "I need help finding a skill"
+    "What events are happening this week?",
+    "Is anyone offering gardening help?",
+    "Are there any safety updates I should know about?",
+    "What skills are neighbors sharing?",
+    "How can I help my neighbors today?",
+    "Are there any community gatherings soon?"
   ];
   
   return (
     <div className="px-4 py-3 border-t bg-gray-50">
-      <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
+      <p className="text-xs text-gray-500 mb-2">Try asking:</p>
       <div className="flex flex-wrap gap-2">
         {prompts.map((prompt, index) => (
           <Button
