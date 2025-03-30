@@ -24,6 +24,8 @@ interface DescriptionFieldProps {
 
 /**
  * A component for entering the description of what a user needs help with
+ * 
+ * @param form - The react-hook-form form object
  */
 const DescriptionField: React.FC<DescriptionFieldProps> = ({ form }) => {
   return (
@@ -37,6 +39,7 @@ const DescriptionField: React.FC<DescriptionFieldProps> = ({ form }) => {
             <Textarea
               placeholder="Describe what you'd like to learn or get help with..."
               {...field}
+              aria-label="Skill session description"
             />
           </FormControl>
           <FormMessage />

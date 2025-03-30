@@ -8,6 +8,9 @@ import { Book } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Props for SkillActivityContent
+ */
 interface SkillActivityContentProps {
   activity: Activity;
   onClick: () => void;
@@ -16,6 +19,9 @@ interface SkillActivityContentProps {
 /**
  * Component for displaying rich skill activity content in the activity feed
  * Shows additional context like skill category and provides action buttons
+ * 
+ * @param activity - The activity data to display
+ * @param onClick - Function to call when action button is clicked
  */
 const SkillActivityContent: React.FC<SkillActivityContentProps> = ({ 
   activity,
@@ -34,9 +40,10 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
   
   return (
     <div className="flex flex-col gap-1">
+      {/* Title section with optional category badge */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <Book className="h-4 w-4" style={{ color }} />
+          <Book className="h-4 w-4" style={{ color }} aria-hidden="true" />
           <span className="font-medium">{activity.title}</span>
         </div>
         
@@ -58,6 +65,7 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
           size="sm" 
           className="text-xs border-purple-200 hover:bg-purple-50"
           onClick={onClick}
+          aria-label={isOffering ? 'Learn more about this skill' : 'Help with this skill request'}
         >
           {isOffering ? 'Learn More' : 'Help Out'}
         </Button>
