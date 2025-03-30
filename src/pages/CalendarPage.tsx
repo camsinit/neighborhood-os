@@ -4,25 +4,20 @@ import CommunityCalendar from "@/components/CommunityCalendar";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 const CalendarPage = () => {
   // Get neighborhood context - removed isCoreContributor reference
   const { currentNeighborhood } = useNeighborhood();
   
   useEffect(() => {
-    const handleHighlightItem = (e: CustomEvent) => {
-      if (e.detail.type === 'event') {
-        // Dispatch a custom event for the calendar component
-        const event = new CustomEvent('navigateToEvent', {
-          detail: {
-            eventId: e.detail.id
-          }
-        });
-        window.dispatchEvent(event);
-      }
-    };
+    // Create a highlight listener specifically for calendar events
+    const handleHighlightItem = createHighlightListener("event");
 
+    // Add the event listener
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    
+    // Clean up the listener when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
     };

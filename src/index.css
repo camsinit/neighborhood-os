@@ -2,153 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .delay-100 {
-    animation-delay: 100ms;
-  }
-  .delay-300 {
-    animation-delay: 300ms;
-  }
-  .delay-700 {
-    animation-delay: 700ms;
-  }
-  .delay-1000 {
-    animation-delay: 1000ms;
-  }
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-
-    --sidebar-background: 222.2 84% 4.9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217.2 91.2% 59.8%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 215 27.9% 16.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    
-    --calendar-color: 198 100% 50%;  /* Brighter blue */
-    --skills-color: 253 95% 72%;     /* More vibrant purple */
-    --goods-color: 25 100% 55%;      /* Stronger orange */
-    --care-color: 142 85% 45%;       /* Brighter green */
-    --safety-color: 355 95% 60%;     /* More intense red */
-    --neighbors-color: 270 50% 60%;  /* Richer secondary purple */
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 224.3 76.3% 48%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-}
-
-/* Enhanced animations for a more polished UI */
-@keyframes appear {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes appear-zoom {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-.animate-appear {
-  animation: appear 0.5s ease-out forwards;
-}
-
-.animate-appear-zoom {
-  animation: appear-zoom 0.5s ease-out forwards;
-}
-
-/* Add card and content container styles for consistency */
-@layer components {
-  .content-card {
-    @apply bg-white rounded-lg shadow-md p-6;
-  }
-  
-  .page-container {
-    @apply max-w-7xl mx-auto space-y-6;
-  }
-  
-  .page-header {
-    @apply text-2xl font-bold text-gray-900 mb-2;
-  }
-  
-  .page-description {
-    @apply text-gray-600 text-sm mb-6;
-  }
-}
-
-/* Enhance card hover effects */
-.hover-card {
-  @apply transition-all duration-200;
-}
-
-.hover-card:hover {
-  @apply shadow-lg transform -translate-y-1;
-}
-
-/* Consistent section styling */
-.section-container {
-  @apply bg-white rounded-lg p-6 shadow-md mb-6;
-}
-
-/* Rainbow highlight animation for selected items */
+/* Rainbow highlight animation for element navigation */
 .rainbow-highlight {
-  animation: highlight-pulse 2s ease-in-out;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.4);
+  animation: glow-pulse 5s ease-in-out;
+  outline: 3px solid transparent;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+  position: relative;
+  z-index: 10;
 }
 
-@keyframes highlight-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.2); }
+@keyframes glow-pulse {
+  0% { 
+    outline-color: rgba(74, 222, 128, 0.7);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.7); 
+  }
+  50% { 
+    outline-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.7); 
+  }
+  100% { 
+    outline-color: rgba(74, 222, 128, 0);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0); 
+  }
+}
+
+/* Scale animation for interactive elements */
+.scale-animation {
+  animation: quick-scale 300ms ease-in-out;
+}
+
+@keyframes quick-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
