@@ -5,7 +5,7 @@
  * the calendar events system.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "sonner"; // Using sonner for toast notifications
 
 /**
  * Creates a calendar event for a confirmed skill session
@@ -107,8 +107,8 @@ export const createSkillSessionEvent = async (
     return null;
   } catch (error) {
     console.error("Error in createSkillSessionEvent:", error);
-    toast({
-      title: "Failed to create event",
+    // Fix the toast call - use the proper format for the toast library we're using (sonner)
+    toast("Failed to create event", {
       description: "There was an issue creating the calendar event. Please try again.",
       variant: "destructive"
     });
