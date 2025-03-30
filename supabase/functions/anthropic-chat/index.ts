@@ -1,384 +1,395 @@
 
-// This Edge Function securely communicates with Anthropic's API
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.6.2';
 
-// Set up CORS headers to allow our web app to communicate with this function
+// CORS Headers for browser access
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  // Include x-application-name in the allowed headers
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Create a Supabase client for database operations
-const getSupabaseClient = (req: Request) => {
-  const authHeader = req.headers.get('Authorization');
-  const jwt = authHeader?.replace('Bearer ', '') || '';
+// Create a Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Initialize Anthropic client
+const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY') || '';
+const anthropic = new Anthropic({
+  apiKey: anthropicApiKey,
+});
+
+/**
+ * DataProcessor class handles all data preparation and fetching
+ * from Supabase to provide context to Claude
+ */
+class DataProcessor {
+  userId: string;
+  neighborhoodId: string;
+
+  constructor(userId: string, neighborhoodId: string) {
+    this.userId = userId;
+    this.neighborhoodId = neighborhoodId;
+  }
+
+  /**
+   * Fetch neighborhood information
+   */
+  async getNeighborhoodInfo() {
+    const { data, error } = await supabase
+      .from('neighborhoods')
+      .select('name, description')
+      .eq('id', this.neighborhoodId)
+      .single();
+      
+    if (error) {
+      console.error('Error fetching neighborhood:', error);
+      return null;
+    }
+    
+    return data;
+  }
+
+  /**
+   * Fetch upcoming events in the neighborhood
+   */
+  async getEvents() {
+    const { data, error } = await supabase
+      .from('events')
+      .select('id, title, description, start_time, end_time, location')
+      .eq('neighborhood_id', this.neighborhoodId)
+      .gte('start_time', new Date().toISOString())
+      .order('start_time', { ascending: true })
+      .limit(10);
+      
+    if (error) {
+      console.error('Error fetching events:', error);
+      return [];
+    }
+    
+    return data;
+  }
   
-  return createClient(
-    Deno.env.get('SUPABASE_URL') || '',
-    Deno.env.get('SUPABASE_ANON_KEY') || '',
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      },
-    }
-  );
-};
-
-/**
- * Neighborhood Data Services
- * Functions for fetching and processing neighborhood data
- */
-class NeighborhoodDataService {
-  private supabase: any;
-
-  constructor(supabase: any) {
-    this.supabase = supabase;
-  }
-
   /**
-   * Fetch and filter neighborhood events with privacy protections
+   * Fetch available skills in the neighborhood
    */
-  async getNeighborhoodEvents(neighborhoodId: string) {
-    try {
-      const { data, error } = await this.supabase
-        .from("events")
-        .select(`
-          id, 
-          title, 
-          description, 
-          time, 
-          location, 
-          is_recurring
-        `)
-        .eq('neighborhood_id', neighborhoodId)
-        .order('time', { ascending: true })
-        .limit(10);
-        
-      if (error) {
-        console.error("Error fetching events:", error);
-        return [];
-      }
+  async getSkills() {
+    const { data, error } = await supabase
+      .from('skills_exchange')
+      .select('id, title, description, type, created_by')
+      .eq('neighborhood_id', this.neighborhoodId)
+      .eq('status', 'active')
+      .limit(10);
       
-      // Further anonymize data by removing any potential PII from descriptions
-      return data.map((event: any) => ({
-        id: event.id,
-        title: event.title,
-        description: event.description 
-          ? this.sanitizeText(event.description) 
-          : "No description provided",
-        time: event.time,
-        location: event.location,
-        isRecurring: event.is_recurring
-      }));
-    } catch (err) {
-      console.error("Exception in getNeighborhoodEvents:", err);
+    if (error) {
+      console.error('Error fetching skills:', error);
       return [];
     }
+    
+    return data;
   }
-
+  
   /**
-   * Fetch and filter neighborhood skills with privacy protections
+   * Fetch recent safety updates in the neighborhood
    */
-  async getNeighborhoodSkills(neighborhoodId: string) {
-    try {
-      const { data, error } = await this.supabase
-        .from("skills_exchange")
-        .select(`
-          id, 
-          title, 
-          description, 
-          skill_category,
-          request_type
-        `)
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('is_archived', false)
-        .limit(10);
-        
-      if (error) {
-        console.error("Error fetching skills:", error);
-        return [];
-      }
+  async getSafetyUpdates() {
+    const { data, error } = await supabase
+      .from('safety_updates')
+      .select('id, title, description, created_at, update_type')
+      .eq('neighborhood_id', this.neighborhoodId)
+      .order('created_at', { ascending: false })
+      .limit(5);
       
-      // Anonymize skills data
-      return data.map((skill: any) => ({
-        id: skill.id,
-        title: skill.title,
-        category: skill.skill_category,
-        type: skill.request_type, // 'offer' or 'need'
-        description: skill.description 
-          ? this.sanitizeText(skill.description) 
-          : "No description provided"
-      }));
-    } catch (err) {
-      console.error("Exception in getNeighborhoodSkills:", err);
+    if (error) {
+      console.error('Error fetching safety updates:', error);
       return [];
     }
+    
+    return data;
   }
-
+  
   /**
-   * Fetch and filter safety updates with privacy protections
+   * Format the fetched data into a string that provides context to Claude
    */
-  async getSafetyUpdates(neighborhoodId: string) {
-    try {
-      const { data, error } = await this.supabase
-        .from("safety_updates")
-        .select(`
-          id, 
-          title, 
-          description, 
-          type, 
-          created_at
-        `)
-        .eq('neighborhood_id', neighborhoodId)
-        .order('created_at', { ascending: false })
-        .limit(5);
-        
-      if (error) {
-        console.error("Error fetching safety updates:", error);
-        return [];
-      }
-      
-      // Anonymize safety data
-      return data.map((update: any) => ({
-        id: update.id,
-        title: update.title,
-        type: update.type,
-        date: update.created_at,
-        description: update.description 
-          ? this.sanitizeText(update.description) 
-          : "No details provided"
-      }));
-    } catch (err) {
-      console.error("Exception in getSafetyUpdates:", err);
-      return [];
+  async formatDataForContext() {
+    // Gather all the data
+    const [neighborhood, events, skills, safetyUpdates] = await Promise.all([
+      this.getNeighborhoodInfo(),
+      this.getEvents(),
+      this.getSkills(),
+      this.getSafetyUpdates()
+    ]);
+    
+    // Context data for including in the response
+    const contextData = {
+      events: events.map(event => ({ id: event.id, title: event.title })),
+      skills: skills.map(skill => ({ id: skill.id, title: skill.title })),
+      safetyUpdates: safetyUpdates.map(update => ({ id: update.id, title: update.title }))
+    };
+    
+    // Format the context for Claude
+    let context = `
+NEIGHBORHOOD CONTEXT
+--------------------
+`;
+    
+    // Add neighborhood info
+    if (neighborhood) {
+      context += `
+Neighborhood: ${neighborhood.name}
+${neighborhood.description ? `Description: ${neighborhood.description}` : ''}
+
+`;
     }
-  }
-
-  /**
-   * Sanitize text by removing potential PII
-   */
-  private sanitizeText(text: string): string {
-    if (!text) return "";
     
-    // Replace email patterns
-    let sanitized = text.replace(/\S+@\S+\.\S+/g, "[email removed]");
+    // Add events
+    context += `
+UPCOMING EVENTS
+--------------
+`;
     
-    // Replace phone number patterns (various formats)
-    sanitized = sanitized.replace(/(\+\d{1,3}[\s.-])?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g, "[phone number removed]");
-    
-    // Replace address patterns (simplified approach)
-    sanitized = sanitized.replace(/\d+\s+[A-Za-z0-9\s,]+(?:street|st|avenue|ave|road|rd|boulevard|blvd|drive|dr|court|ct|lane|ln|way|parkway|pkwy)\b/gi, "[address removed]");
-    
-    return sanitized;
-  }
-}
-
-/**
- * AI Prompt Formatter
- * Formats neighborhood data into a prompt for the AI
- */
-class AIPromptFormatter {
-  /**
-   * Format neighborhood data for the AI prompt
-   */
-  prepareNeighborhoodContext(events: any[], skills: any[], safetyUpdates: any[]): string {
-    let context = "Here is some information about the neighborhood:\n\n";
-    
-    // Add events information
     if (events.length > 0) {
-      context += "UPCOMING EVENTS:\n";
-      events.forEach((event, index) => {
-        const date = new Date(event.time).toLocaleDateString('en-US', {
-          weekday: 'long', 
-          month: 'short', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+      events.forEach(event => {
+        const startDate = new Date(event.start_time).toLocaleString();
+        const endDate = new Date(event.end_time).toLocaleString();
         
-        context += `${index + 1}. "${event.title}" - ${date} at ${event.location}\n`;
-        if (event.description) {
-          context += `   Description: ${event.description}\n`;
-        }
+        context += `
+- Event: ${event.title} (ID: ${event.id})
+  Description: ${event.description || 'No description provided'}
+  When: ${startDate} to ${endDate}
+  Where: ${event.location || 'Location not specified'}
+`;
       });
-      context += "\n";
+    } else {
+      context += `
+No upcoming events found.
+`;
     }
     
-    // Add skills information
+    // Add skills
+    context += `
+AVAILABLE SKILLS AND HELP
+------------------------
+`;
+    
     if (skills.length > 0) {
-      context += "CURRENT SKILLS IN THE NEIGHBORHOOD:\n";
-      const offers = skills.filter(s => s.type === 'offer');
-      const needs = skills.filter(s => s.type === 'need');
-      
-      if (offers.length > 0) {
-        context += "Skills being offered:\n";
-        offers.forEach((skill, index) => {
-          context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
-        });
-      }
-      
-      if (needs.length > 0) {
-        context += "Skills being requested:\n";
-        needs.forEach((skill, index) => {
-          context += `${index + 1}. "${skill.title}" (${skill.category})\n`;
-        });
-      }
-      context += "\n";
+      skills.forEach(skill => {
+        context += `
+- Skill: ${skill.title} (ID: ${skill.id})
+  Type: ${skill.type === 'offer' ? 'Offering help' : 'Requesting help'}
+  Description: ${skill.description || 'No description provided'}
+`;
+      });
+    } else {
+      context += `
+No skills or help offerings found.
+`;
     }
     
     // Add safety updates
+    context += `
+RECENT SAFETY UPDATES
+-------------------
+`;
+    
     if (safetyUpdates.length > 0) {
-      context += "RECENT SAFETY UPDATES:\n";
-      safetyUpdates.forEach((update, index) => {
-        const date = new Date(update.date).toLocaleDateString();
-        context += `${index + 1}. ${update.title} (${update.type}) - Posted on ${date}\n`;
-        if (update.description) {
-          context += `   Details: ${update.description}\n`;
-        }
+      safetyUpdates.forEach(update => {
+        const updateDate = new Date(update.created_at).toLocaleString();
+        
+        context += `
+- Update: ${update.title} (ID: ${update.id})
+  Type: ${update.update_type || 'General'}
+  Posted: ${updateDate}
+  Details: ${update.description || 'No details provided'}
+`;
       });
+    } else {
+      context += `
+No recent safety updates found.
+`;
     }
     
-    return context;
+    return { contextString: context, contextData };
   }
 }
 
 /**
- * AI Service
- * Handles communication with the Anthropic API
+ * ResponseProcessor class handles response formatting and special item references
  */
-class AnthropicService {
-  private apiKey: string;
-  
-  constructor() {
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!apiKey) {
-      throw new Error('Missing Anthropic API key');
-    }
-    this.apiKey = apiKey;
-  }
-  
+class ResponseProcessor {
   /**
-   * Call the Anthropic API with the formatted prompt
+   * Format special item references in the AI response
    */
-  async generateResponse(userMessage: string, neighborhoodContext: string) {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-opus-20240229',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: `As a friendly, helpful neighborhood assistant, please respond to this question from a neighbor: ${userMessage}.
-
-${neighborhoodContext}
-
-Please follow these guidelines when responding:
-1. Use a friendly, welcoming tone like a helpful neighbor would use
-2. Format your responses with clear headings, bullet points, and simple language
-3. When referring to specific events, skills, or updates, format them like this: [ITEM_TYPE:ITEM_ID:ITEM_NAME]
-4. Focus on providing practical information about the neighborhood
-5. Keep your answers accessible for people aged 7-70
-6. Use a dash of subtle humor when appropriate
-7. Be concise but thorough
-
-Remember, your goal is to help neighbors find ways to engage with their community and connect with each other.`
-          }
-        ]
-      }),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Anthropic API error:', errorData);
-      throw new Error('Failed to get response from AI');
+  processResponseForItemReferences(response: string, contextData: any) {
+    // Process events
+    if (contextData.events) {
+      contextData.events.forEach((event: any) => {
+        const eventRegex = new RegExp(`(^|\\s)"?${event.title}"?(\\s|$|\\.|,|:)`, 'gi');
+        response = response.replace(eventRegex, ` [EVENT:${event.id}:${event.title}] `);
+      });
     }
     
-    const data = await response.json();
-    return data.content && data.content[0] ? data.content[0].text : 'Sorry, I couldn\'t generate a response';
+    // Process skills
+    if (contextData.skills) {
+      contextData.skills.forEach((skill: any) => {
+        const skillRegex = new RegExp(`(^|\\s)"?${skill.title}"?(\\s|$|\\.|,|:)`, 'gi');
+        response = response.replace(skillRegex, ` [SKILL:${skill.id}:${skill.title}] `);
+      });
+    }
+    
+    // Process safety updates
+    if (contextData.safetyUpdates) {
+      contextData.safetyUpdates.forEach((update: any) => {
+        const updateRegex = new RegExp(`(^|\\s)"?${update.title}"?(\\s|$|\\.|,|:)`, 'gi');
+        response = response.replace(updateRegex, ` [SAFETY:${update.id}:${update.title}] `);
+      });
+    }
+    
+    return response;
   }
 }
 
-// Main function that handles HTTP requests
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+/**
+ * AnthropicHandler class manages interactions with the Anthropic API
+ */
+class AnthropicHandler {
+  /**
+   * Format system prompt based on the action type and context
+   */
+  formatSystemPrompt(context: string, actionType?: string) {
+    let basePrompt = `
+You are a friendly and helpful AI assistant for a neighborhood community app.
 
-  try {
-    // Get the request body which contains the user message
-    const { message, userId, neighborhoodId } = await req.json();
-    
-    // Validate the request
-    if (!message || typeof message !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'Message is required and must be a string' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+IMPORTANT FORMATTING INSTRUCTIONS:
+- Provide responses that are clear, concise, and suitable for all age groups (7-70)
+- Use simple language that everyone can understand
+- Use headers, bullet points, and short paragraphs
+- When referring to specific events, skills, or safety updates from the context, use their exact titles
+
+${context}
+
+When referencing specific items from the context, always use their exact titles so they can be properly linked in the UI.
+`;
+
+    // Add specific instructions based on action type
+    if (actionType) {
+      switch (actionType) {
+        case 'Events Question':
+          basePrompt += `
+Focus on providing information about upcoming events in the neighborhood. Highlight event details, times, and locations if available.
+`;
+          break;
+        case 'Skills & Help':
+          basePrompt += `
+Focus on matching the user's needs with available skills and help offerings in the neighborhood. Suggest relevant skills that might address their question.
+`;
+          break;
+        default:
+          // No special instructions needed
+          break;
+      }
     }
 
-    // Log information about this request for debugging
-    console.log(`Processing chat request from user ${userId} in neighborhood ${neighborhoodId}`);
-    console.log(`Message length: ${message.length} characters`);
-    
-    // Create Supabase client
-    const supabase = getSupabaseClient(req);
-    
-    // Initialize services
-    const dataService = new NeighborhoodDataService(supabase);
-    const promptFormatter = new AIPromptFormatter();
-    const aiService = new AnthropicService();
-    
-    // Fetch filtered neighborhood data in parallel
-    const [events, skills, safetyUpdates] = await Promise.all([
-      dataService.getNeighborhoodEvents(neighborhoodId),
-      dataService.getNeighborhoodSkills(neighborhoodId),
-      dataService.getSafetyUpdates(neighborhoodId)
-    ]);
-    
-    // Prepare neighborhood context for the AI
-    const neighborhoodContext = promptFormatter.prepareNeighborhoodContext(events, skills, safetyUpdates);
-    console.log("Prepared neighborhood context with:", {
-      eventCount: events.length,
-      skillCount: skills.length,
-      safetyUpdateCount: safetyUpdates.length
+    return basePrompt;
+  }
+
+  /**
+   * Handle the entire Claude request/response process
+   */
+  async processRequest(message: string, context: string, contextData: any, actionType?: string) {
+    try {
+      // Create system prompt
+      const systemPrompt = this.formatSystemPrompt(context, actionType);
+      
+      // Request completion from Claude
+      const completion = await anthropic.messages.create({
+        model: "claude-3-sonnet-20240229",
+        max_tokens: 1000,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }
+        ],
+        temperature: 0.7,
+      });
+      
+      // Process the response
+      const responseProcessor = new ResponseProcessor();
+      const processedResponse = responseProcessor.processResponseForItemReferences(
+        completion.content[0].text,
+        contextData
+      );
+      
+      return {
+        response: processedResponse,
+        context: contextData
+      };
+    } catch (error) {
+      console.error('Error processing request with Anthropic:', error);
+      throw new Error('Failed to get a response from Claude');
+    }
+  }
+}
+
+// Main handler for the edge function
+serve(async (req) => {
+  // Handle OPTIONS request for CORS
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: corsHeaders,
+      status: 200,
     });
-
-    // Generate AI response
-    const aiResponse = await aiService.generateResponse(message, neighborhoodContext);
+  }
+  
+  try {
+    // Parse request body
+    const requestData = await req.json();
+    const { message, userId, neighborhoodId, actionType } = requestData;
     
-    // Process the response to include original item IDs for frontend processing
-    const processedResponse = {
-      response: aiResponse,
-      context: {
-        events: events.map(e => ({ id: e.id, title: e.title })),
-        skills: skills.map(s => ({ id: s.id, title: s.title })),
-        safetyUpdates: safetyUpdates.map(u => ({ id: u.id, title: u.title }))
+    // Validate required fields
+    if (!message || !userId || !neighborhoodId) {
+      return new Response(
+        JSON.stringify({
+          error: "Missing required fields: message, userId, or neighborhoodId"
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+    
+    console.log(`Processing request for user ${userId} in neighborhood ${neighborhoodId}`);
+    if (actionType) {
+      console.log(`Action type: ${actionType}`);
+    }
+    
+    // Process data to create context
+    const dataProcessor = new DataProcessor(userId, neighborhoodId);
+    const { contextString, contextData } = await dataProcessor.formatDataForContext();
+    
+    // Handle the request with Anthropic
+    const anthropicHandler = new AnthropicHandler();
+    const result = await anthropicHandler.processRequest(message, contextString, contextData, actionType);
+    
+    // Return the result
+    return new Response(
+      JSON.stringify(result),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       }
-    };
-    
-    return new Response(
-      JSON.stringify(processedResponse),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-
   } catch (error) {
-    // Handle any errors
-    console.error('Error in anthropic-chat function:', error.message);
+    console.error("Error:", error);
+    
+    // Return error response
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: error.message || "An unknown error occurred" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
     );
   }
 });

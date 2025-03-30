@@ -11,9 +11,9 @@ import { useNeighborhood } from '@/contexts/neighborhood';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
 import AIChatMessages from './AIChatMessages';
-import AIChatInput from './AIChatInput';
 import AIChatHeader from './AIChatHeader';
-import AIPromptSuggestions from './AIPromptSuggestions';
+import { AIInputWithSuggestions } from '../ui/ai-input-with-suggestions';
+import { Text, CheckCheck, CornerRightDown } from "lucide-react";
 
 // Define the message type for type safety
 export type Message = {
@@ -36,6 +36,28 @@ const loadingMessages = [
   "Finding helpful information...",
   "Consulting the neighborhood wisdom...",
   "Processing your request...",
+];
+
+// Define the neighborhood-specific action items for the input component
+const NEIGHBORHOOD_ACTIONS = [
+  {
+    text: "Events Question",
+    icon: Text,
+    colors: {
+      icon: "text-blue-600",
+      border: "border-blue-500",
+      bg: "bg-blue-100",
+    },
+  },
+  {
+    text: "Skills & Help",
+    icon: CheckCheck,
+    colors: {
+      icon: "text-green-600",
+      border: "border-green-500",
+      bg: "bg-green-100",
+    },
+  },
 ];
 
 /**
@@ -68,7 +90,7 @@ const AIChat = () => {
   };
 
   // Handle message submission
-  const handleSubmit = async (inputValue: string) => {
+  const handleSubmit = async (inputValue: string, actionType?: string) => {
     // Don't send empty messages
     if (inputValue.trim() === '') return;
     
@@ -81,7 +103,9 @@ const AIChat = () => {
     // Create a new user message
     const userMessage: Message = {
       id: Math.random().toString(36).substring(7),
-      content: inputValue,
+      content: actionType 
+        ? `[${actionType}] ${inputValue}`
+        : inputValue,
       role: 'user',
       timestamp: new Date(),
     };
@@ -100,6 +124,7 @@ const AIChat = () => {
           message: inputValue,
           userId: user.id,
           neighborhoodId: currentNeighborhood.id,
+          actionType: actionType, // Pass the action type to the edge function
         },
       });
       
@@ -128,11 +153,6 @@ const AIChat = () => {
       setIsLoading(false);
     }
   };
-  
-  // Handle clicking on a pre-made prompt
-  const handlePromptClick = (prompt: string) => {
-    handleSubmit(prompt);
-  };
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-sm overflow-hidden">
@@ -147,11 +167,15 @@ const AIChat = () => {
         messagesEndRef={messagesEndRef} 
       />
       
-      {/* Prompt suggestions */}
-      <AIPromptSuggestions onPromptClick={handlePromptClick} />
-      
-      {/* Input area */}
-      <AIChatInput onSubmit={handleSubmit} isLoading={isLoading} />
+      {/* New Input area with suggestions */}
+      <div className="border-t">
+        <AIInputWithSuggestions
+          actions={NEIGHBORHOOD_ACTIONS}
+          placeholder="Ask about your neighborhood..."
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 };
