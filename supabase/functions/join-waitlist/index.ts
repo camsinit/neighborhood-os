@@ -14,11 +14,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * table in the database. It includes validation and error handling.
  */
 serve(async (req) => {
-  // Set up CORS headers for the response
+  // Set up CORS headers for the response - updated to include x-application-name
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-application-name",
   };
 
   // Handle preflight OPTIONS request
