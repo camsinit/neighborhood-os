@@ -1,9 +1,9 @@
-
 import { useEffect } from "react";
 import SafetyUpdates from "@/components/SafetyUpdates";
 import { useToast } from "@/components/ui/use-toast";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
-import AddSafetyUpdateDialogNew from "@/components/safety/AddSafetyUpdateDialogNew"; // Import new dialog
+import AddSafetyUpdateDialogNew from "@/components/safety/AddSafetyUpdateDialogNew";
+import { createHighlightListener } from "@/utils/highlightNavigation";
 
 /**
  * SafetyPage - Main page for viewing and creating safety updates
@@ -18,31 +18,10 @@ const SafetyPage = () => {
 
   // Handle highlighting of safety items when navigated to directly
   useEffect(() => {
-    // Create a function to handle the highlightItem event
-    const handleHighlightItem = (e: CustomEvent) => {
-      // Check if this event is for a safety update
-      if (e.detail.type === 'safety') {
-        // Find and highlight the safety update card with a small delay to ensure DOM is ready
-        setTimeout(() => {
-          // Look for the element with the data-safety-id attribute matching the ID
-          const updateCard = document.querySelector(`[data-safety-id="${e.detail.id}"]`);
-          
-          if (updateCard) {
-            // Add the rainbow highlight class to make it glow
-            updateCard.classList.add('rainbow-highlight');
-            
-            // Scroll the card into view so user can see it
-            updateCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Remove highlight after animation completes
-            setTimeout(() => {
-              updateCard.classList.remove('rainbow-highlight');
-            }, 2000);
-          }
-        }, 100);
-      }
-    };
-
+    // Use our utility to create a consistent highlight listener for safety items
+    // This will handle finding elements by data-safety-id and applying animations
+    const handleHighlightItem = createHighlightListener("safety");
+    
     // Add event listener when component mounts
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     
