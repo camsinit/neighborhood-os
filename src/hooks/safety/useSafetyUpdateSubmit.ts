@@ -19,8 +19,8 @@ interface SafetyUpdateFormData {
 }
 
 export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) => {
-  // Added isLoading state
-  const [isLoading, useState] = useState<boolean>(false);
+  // Fixed variable naming: renamed the state setter to setIsLoading
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useUser();
   const queryClient = useQueryClient();
   const neighborhoodId = useCurrentNeighborhood();
@@ -33,7 +33,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
 
     try {
       // Set loading to true before starting the operation
-      useState(true);
+      setIsLoading(true);
       
       // Add detailed logging before insert operation
       console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
@@ -95,7 +95,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       throw error;
     } finally {
       // Make sure to set loading to false when done
-      useState(false);
+      setIsLoading(false);
     }
   };
 
@@ -107,7 +107,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
 
     try {
       // Set loading to true before starting the operation
-      useState(true);
+      setIsLoading(true);
       
       // Add detailed logging before update operation
       console.log("[useSafetyUpdateSubmit] Attempting to update safety update:", {
@@ -170,7 +170,7 @@ export const useSafetyUpdateSubmit = ({ onSuccess }: SafetyUpdateSubmitProps) =>
       throw error;
     } finally {
       // Make sure to set loading to false when done
-      useState(false);
+      setIsLoading(false);
     }
   };
 
