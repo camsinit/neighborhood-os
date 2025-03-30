@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -100,22 +101,21 @@ function App() {
         <NeighborhoodProvider>
           <Router>
             <Routes>
-              {/* Public routes - each route appears only once */}
+              {/* Public routes */}
+              {/* Root route always displays landing page */}
               <Route path="/" element={<LandingPage />} />
               
-              {/* Single login route */}
+              {/* Authentication route */}
               <Route path="/login" element={<Login />} />
               
-              {/* Join routes - unified into a single component with optional parameter */}
-              {/* We keep one route with the optional parameter to handle both cases */}
+              {/* Join routes - using a single route with optional parameter */}
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               
-              {/* Index route - handles routing logic based on auth state */}
+              {/* Route used for determining where to navigate based on auth state */}
               <Route path="/index" element={<Index />} />
               
               {/* Protected routes - all using the main layout with sidebar */}
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                {/* Default route redirects to /home */}
                 <Route index element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/neighbors" element={<NeighborsPage />} />
@@ -130,7 +130,7 @@ function App() {
                 <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               </Route>
 
-              {/* Catch-all route redirects to landing page for better UX */}
+              {/* Redirect any unmatched routes to the landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster position="top-center" />

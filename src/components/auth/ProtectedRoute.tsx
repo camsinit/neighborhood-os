@@ -64,7 +64,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // Handle special case for join pages
+  // Handle special case for join pages to avoid infinite loops
   const isJoinPage = location.pathname === '/join' || location.pathname.startsWith('/join/');
   
   // If user has no neighborhood and trying to access a page that requires one,
@@ -72,18 +72,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (!currentNeighborhood && !isJoinPage) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
     // If there was an error loading neighborhood data, include that in the redirect
-    if (error) {
-      console.log("[ProtectedRoute] Error loading neighborhood data:", error);
-    }
     return <Navigate to="/join" replace />;
   }
 
-  // Handle case where we're having persistent errors loading neighborhood data
-  if (error && !isJoinPage) {
-    console.log("[ProtectedRoute] Persistent error with neighborhood data:", error);
-    // We could consider showing an error page here instead of a redirect
-  }
-  
   // User is authenticated and has necessary data, render the protected content
   return <>{children}</>;
 };

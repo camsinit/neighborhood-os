@@ -45,39 +45,34 @@ const Index = () => {
       timestamp: new Date().toISOString()
     });
     
-    // Add a small delay to prevent routing race conditions
-    const timer = setTimeout(() => {
-      // If user is not authenticated, redirect to landing page
-      if (!user) {
-        console.log("[Index] User not authenticated, redirecting to landing page");
-        navigate("/", { replace: true });
-        return;
-      }
-      
-      // If there was an error loading neighborhood data, still try to proceed to join page
-      if (error) {
-        console.log("[Index] Error loading neighborhood data, redirecting to join page:", error);
-        navigate("/join", { replace: true });
-        return;
-      }
-      
-      // If authenticated but no neighborhood, redirect to join page
-      if (user && !currentNeighborhood) {
-        console.log("[Index] User authenticated but no neighborhood, redirecting to join page");
-        navigate("/join", { replace: true });
-        return;
-      }
-      
-      // If authenticated and has neighborhood, redirect to home page
-      if (user && currentNeighborhood) {
-        console.log("[Index] User authenticated with neighborhood, redirecting to home page");
-        navigate("/home", { replace: true });
-        return;
-      }
-    }, 300); // Short delay to prevent flashing
-
-    // Clean up timer on unmount
-    return () => clearTimeout(timer);
+    // Use immediate routing to prevent duplicate page appearances
+    // If user is not authenticated, redirect to landing page
+    if (!user) {
+      console.log("[Index] User not authenticated, redirecting to landing page");
+      navigate("/", { replace: true });
+      return;
+    }
+    
+    // If there was an error loading neighborhood data, still try to proceed to join page
+    if (error) {
+      console.log("[Index] Error loading neighborhood data, redirecting to join page:", error);
+      navigate("/join", { replace: true });
+      return;
+    }
+    
+    // If authenticated but no neighborhood, redirect to join page
+    if (user && !currentNeighborhood) {
+      console.log("[Index] User authenticated but no neighborhood, redirecting to join page");
+      navigate("/join", { replace: true });
+      return;
+    }
+    
+    // If authenticated and has neighborhood, redirect to home page
+    if (user && currentNeighborhood) {
+      console.log("[Index] User authenticated with neighborhood, redirecting to home page");
+      navigate("/home", { replace: true });
+      return;
+    }
   }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error]);
 
   // Show a visible loading indicator while determining where to route
