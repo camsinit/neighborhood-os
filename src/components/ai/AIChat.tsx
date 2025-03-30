@@ -1,4 +1,3 @@
-
 /**
  * AIChat Component
  * 
@@ -13,7 +12,7 @@ import { toast } from 'sonner';
 import AIChatMessages from './AIChatMessages';
 import AIChatHeader from './AIChatHeader';
 import { AIInputWithSuggestions } from '../ui/ai-input-with-suggestions';
-import { Text, CheckCheck, CornerRightDown } from "lucide-react";
+import { Text, CheckCheck } from "lucide-react";
 
 // Define the message type for type safety
 export type Message = {
