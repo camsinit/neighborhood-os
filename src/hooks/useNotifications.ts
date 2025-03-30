@@ -107,7 +107,7 @@ export const useNotifications = (showArchived: boolean) => {
           .order("created_at", { ascending: false })
           .limit(5),
           
-        // Goods exchange items query
+        // Goods exchange items query - FIX: Fetching user_id only, not trying to join directly
         supabase
           .from("goods_exchange")
           .select(`
@@ -117,10 +117,7 @@ export const useNotifications = (showArchived: boolean) => {
             created_at,
             is_read,
             is_archived,
-            profiles:user_id (
-              display_name,
-              avatar_url
-            )
+            user_id
           `)
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
@@ -129,14 +126,23 @@ export const useNotifications = (showArchived: boolean) => {
 
       // Get requester profiles in a separate query since the relation is not directly accessible
       const requesterIds = skillRequests.data?.map(session => session.requester_id) || [];
-      const { data: requesterProfiles } = await supabase
-        .from("profiles")
-        .select('id, display_name, avatar_url')
-        .in('id', requesterIds);
+      
+      // FIX: Get goods item user profiles in a separate query
+      const goodsUserIds = goodsItems.data?.map(item => item.user_id) || [];
+      
+      // Combine all user IDs we need to fetch profiles for
+      const allUserIds = [...requesterIds, ...goodsUserIds];
+      
+      // Only make the query if we have IDs to fetch
+      const { data: userProfiles } = allUserIds.length > 0 ? 
+        await supabase.from("profiles").select('id, display_name, avatar_url').in('id', allUserIds) : 
+        { data: [] };
 
-      // Create a lookup map for requester profiles
-      const profilesMap = (requesterProfiles || []).reduce((map, profile) => {
-        map[profile.id] = profile;
+      // Create a lookup map for all user profiles
+      const profilesMap = (userProfiles || []).reduce((map, profile) => {
+        if (profile && profile.id) {
+          map[profile.id] = profile;
+        }
         return map;
       }, {} as Record<string, any>);
 
@@ -220,20 +226,25 @@ export const useNotifications = (showArchived: boolean) => {
           };
         }) || []),
         
-        // Goods exchange notifications - new addition
-        ...(goodsItems.data?.map(item => ({
-          id: item.id,
-          title: item.title,
-          type: "goods" as const,
-          created_at: item.created_at,
-          is_read: item.is_read,
-          is_archived: item.is_archived,
-          context: {
-            contextType: item.request_type === "offer" ? "goods_offer" as const : "goods_request" as const,
-            neighborName: item.profiles?.display_name,
-            avatarUrl: item.profiles?.avatar_url
-          }
-        })) || [])
+        // Goods exchange notifications - FIX: Use the profiles from profilesMap
+        ...(goodsItems.data?.map(item => {
+          // Look up the user profile from our profilesMap
+          const userProfile = profilesMap[item.user_id] || {};
+          
+          return {
+            id: item.id,
+            title: item.title,
+            type: "goods" as const,
+            created_at: item.created_at,
+            is_read: item.is_read,
+            is_archived: item.is_archived,
+            context: {
+              contextType: item.request_type === "offer" ? "goods_offer" as const : "goods_request" as const,
+              neighborName: userProfile.display_name || null,
+              avatarUrl: userProfile.avatar_url || null
+            }
+          };
+        }) || [])
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
