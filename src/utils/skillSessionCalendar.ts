@@ -107,9 +107,10 @@ export const createSkillSessionEvent = async (
     return null;
   } catch (error) {
     console.error("Error in createSkillSessionEvent:", error);
-    // Use the correct toast format for Sonner - it doesn't accept a 'variant' property
-    // Instead, Sonner uses different methods like toast.error() for different variants
-    toast.error("Failed to create event", "There was an issue creating the calendar event. Please try again.");
+    // Fix for sonner toast API - the second param should be an options object, not a string
+    toast.error("Failed to create event", {
+      description: "There was an issue creating the calendar event. Please try again."
+    });
     return null;
   }
 };
