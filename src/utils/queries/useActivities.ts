@@ -53,20 +53,79 @@ const fetchContentTitles = async (
   ): Promise<void> => {
     if (ids.length === 0) return;
     
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('id, title')
-      .in('id', ids);
+    // Using a type-safe approach for table names to fix the TS errors
+    // We need to check the table name and handle each case separately
+    if (tableName === 'events') {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title')
+        .in('id', ids);
+        
+      if (error) {
+        console.error(`Error fetching ${tableName} titles:`, error);
+        return;
+      }
       
-    if (error) {
-      console.error(`Error fetching ${tableName} titles:`, error);
-      return;
+      data?.forEach(item => {
+        titleMap.set(item.id, item.title);
+      });
+    } else if (tableName === 'safety_updates') {
+      const { data, error } = await supabase
+        .from('safety_updates')
+        .select('id, title')
+        .in('id', ids);
+        
+      if (error) {
+        console.error(`Error fetching ${tableName} titles:`, error);
+        return;
+      }
+      
+      data?.forEach(item => {
+        titleMap.set(item.id, item.title);
+      });
+    } else if (tableName === 'skills_exchange') {
+      const { data, error } = await supabase
+        .from('skills_exchange')
+        .select('id, title')
+        .in('id', ids);
+        
+      if (error) {
+        console.error(`Error fetching ${tableName} titles:`, error);
+        return;
+      }
+      
+      data?.forEach(item => {
+        titleMap.set(item.id, item.title);
+      });
+    } else if (tableName === 'goods_exchange') {
+      const { data, error } = await supabase
+        .from('goods_exchange')
+        .select('id, title')
+        .in('id', ids);
+        
+      if (error) {
+        console.error(`Error fetching ${tableName} titles:`, error);
+        return;
+      }
+      
+      data?.forEach(item => {
+        titleMap.set(item.id, item.title);
+      });
+    } else if (tableName === 'care_requests') {
+      const { data, error } = await supabase
+        .from('care_requests')
+        .select('id, title')
+        .in('id', ids);
+        
+      if (error) {
+        console.error(`Error fetching ${tableName} titles:`, error);
+        return;
+      }
+      
+      data?.forEach(item => {
+        titleMap.set(item.id, item.title);
+      });
     }
-    
-    // Add titles to our map
-    data?.forEach(item => {
-      titleMap.set(item.id, item.title);
-    });
   };
   
   // Process each content type in parallel for better performance

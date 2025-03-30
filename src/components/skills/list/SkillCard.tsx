@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useSkillUpdate } from '@/hooks/skillUpdate';
+import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 
 interface SkillCardProps {
   skill: Skill & { 
