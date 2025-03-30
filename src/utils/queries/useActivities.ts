@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -67,8 +68,13 @@ const fetchActivities = async (): Promise<Activity[]> => {
     .filter(activity => activity.content_type === 'events')
     .map(activity => activity.content_id);
 
+  // Get all unique safety update IDs from activities
+  const safetyUpdateIds = activitiesData
+    .filter(activity => activity.content_type === 'safety_updates')
+    .map(activity => activity.content_id);
+
+  // Fetch the latest event titles
   if (eventIds.length > 0) {
-    // Fetch the latest event titles
     const { data: eventTitles } = await supabase
       .from('events')
       .select('id, title')
@@ -80,10 +86,26 @@ const fetchActivities = async (): Promise<Activity[]> => {
     });
   }
 
+  // Fetch the latest safety update titles
+  if (safetyUpdateIds.length > 0) {
+    const { data: safetyTitles } = await supabase
+      .from('safety_updates')
+      .select('id, title')
+      .in('id', safetyUpdateIds);
+
+    // Map safety update IDs to their current titles
+    safetyTitles?.forEach(update => {
+      updatedTitlesMap.set(update.id, update.title);
+    });
+  }
+
   // Process activities and use updated titles where available
   const activities = activitiesData.map(activity => {
-    // If this is an event activity and we have an updated title, use it
-    if (activity.content_type === 'events' && updatedTitlesMap.has(activity.content_id)) {
+    // If we have an updated title for this content, use it
+    if (
+      (activity.content_type === 'events' || activity.content_type === 'safety_updates') && 
+      updatedTitlesMap.has(activity.content_id)
+    ) {
       return {
         ...activity,
         title: updatedTitlesMap.get(activity.content_id)!
