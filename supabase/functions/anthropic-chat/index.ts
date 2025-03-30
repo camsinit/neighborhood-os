@@ -82,7 +82,7 @@ class DataProcessor {
     try {
       const { data, error } = await supabase
         .from('skills_exchange')
-        .select('id, title, description, request_type')
+        .select('id, title, description, request_type, user_id, skill_category')
         .eq('neighborhood_id', this.neighborhoodId)
         .eq('is_archived', false)
         .limit(10);
@@ -90,6 +90,23 @@ class DataProcessor {
       if (error) {
         console.error('Error fetching skills:', error);
         return [];
+      }
+      
+      // Get user profiles for skill owners
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(skill => skill.user_id))];
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', userIds);
+          
+        if (!profilesError && profiles) {
+          // Add display names to skills
+          data.forEach(skill => {
+            const owner = profiles.find(p => p.id === skill.user_id);
+            skill.owner_name = owner?.display_name || 'Neighbor';
+          });
+        }
       }
       
       return data;
@@ -138,7 +155,13 @@ class DataProcessor {
     // Context data for including in the response
     const contextData = {
       events: events.map(event => ({ id: event.id, title: event.title })),
-      skills: skills.map(skill => ({ id: skill.id, title: skill.title })),
+      skills: skills.map(skill => ({ 
+        id: skill.id, 
+        title: skill.title,
+        category: skill.skill_category,
+        type: skill.request_type,
+        owner: skill.owner_name || 'Neighbor'
+      })),
       safetyUpdates: safetyUpdates.map(update => ({ id: update.id, title: update.title }))
     };
     
@@ -190,6 +213,8 @@ AVAILABLE SKILLS AND HELP
         context += `
 - Skill: ${skill.title} (ID: ${skill.id})
   Type: ${skill.request_type === 'offer' ? 'Offering help' : 'Requesting help'}
+  Category: ${skill.skill_category || 'General'}
+  Owner: ${skill.owner_name || 'Neighbor'}
   Description: ${skill.description || 'No description provided'}
 `;
       });
@@ -225,7 +250,7 @@ No recent safety updates found.
     console.log(`Prepared neighborhood context with: { eventCount: ${events.length}, skillCount: ${skills.length}, safetyUpdateCount: ${safetyUpdates.length} }`);
     console.log(`Message length: ${context.length} characters`);
     
-    return { contextString: context, contextData };
+    return { contextString: context, contextData, rawData: { neighborhood, events, skills, safetyUpdates } };
   }
 }
 
@@ -261,15 +286,15 @@ serve(async (req) => {
     
     // Process data to create context
     const dataProcessor = new DataProcessor(userId, neighborhoodId);
-    const { contextString, contextData } = await dataProcessor.formatDataForContext();
+    const { contextString, contextData, rawData } = await dataProcessor.formatDataForContext();
     
-    // For now, return a simulated AI response since we're having issues with Anthropic
-    const simulatedResponse = generateFallbackResponse(message, contextString);
+    // Generate an improved fallback response based on the message content and available data
+    const improvedResponse = generateImprovedResponse(message, contextString, rawData);
     
     // Return the result with simplified data
     return new Response(
       JSON.stringify({
-        response: simulatedResponse,
+        response: improvedResponse,
         context: {} // Empty context to disable interactive elements
       }),
       {
@@ -292,21 +317,123 @@ serve(async (req) => {
 });
 
 /**
- * Generate a fallback response when the AI service is unavailable
+ * Generate an improved response when the AI service is unavailable
+ * This function uses basic keyword matching to provide more relevant responses
  */
-function generateFallbackResponse(message: string, context: string): string {
-  // Simple set of keywords to match against for basic responses
-  if (message.toLowerCase().includes('event') || message.toLowerCase().includes('calendar')) {
-    return "I can see there are several events in your neighborhood. You can check the calendar page for detailed information about upcoming events.";
+function generateImprovedResponse(message: string, context: string, rawData: any): string {
+  const lowerMessage = message.toLowerCase();
+  const { neighborhood, events, skills, safetyUpdates } = rawData;
+  
+  // Check for meme-related questions
+  if (lowerMessage.includes('meme') || lowerMessage.includes('memes')) {
+    // Look for skills related to memes, art, or design
+    const relevantSkills = skills.filter(skill => 
+      skill.title.toLowerCase().includes('meme') ||
+      skill.title.toLowerCase().includes('design') ||
+      skill.title.toLowerCase().includes('art') ||
+      skill.title.toLowerCase().includes('photo') ||
+      (skill.description && (
+        skill.description.toLowerCase().includes('meme') ||
+        skill.description.toLowerCase().includes('design') ||
+        skill.description.toLowerCase().includes('art') ||
+        skill.description.toLowerCase().includes('photo')
+      ))
+    );
+    
+    if (relevantSkills.length > 0) {
+      let response = "I found some neighbors who might be able to help with memes:\n\n";
+      relevantSkills.forEach(skill => {
+        response += `- ${skill.owner_name || 'A neighbor'} ${skill.request_type === 'offer' ? 'offers' : 'requested'}: ${skill.title}\n`;
+      });
+      response += "\nYou can check the Skills page for more details and to connect with them!";
+      return response;
+    } else {
+      return "I don't see anyone specifically offering meme creation skills right now. You could post your own request for help with memes in the Skills section, or check back later as neighbors update their skill offerings.";
+    }
   }
   
-  if (message.toLowerCase().includes('skill') || message.toLowerCase().includes('help')) {
-    return "Your neighbors have various skills to share. Check the Skills page to see who can help with what you need.";
+  // Check for event-related questions
+  if (lowerMessage.includes('event') || lowerMessage.includes('happening') || lowerMessage.includes('calendar')) {
+    if (events.length > 0) {
+      let response = `Here are some upcoming events in ${neighborhood?.name || 'your neighborhood'}:\n\n`;
+      events.slice(0, 3).forEach(event => {
+        const eventDate = new Date(event.time).toLocaleString();
+        response += `- ${event.title} on ${eventDate} at ${event.location || 'location TBD'}\n`;
+      });
+      if (events.length > 3) {
+        response += `\nAnd ${events.length - 3} more events. Check the Calendar page for all upcoming events!`;
+      } else {
+        response += "\nCheck the Calendar page for more details!";
+      }
+      return response;
+    } else {
+      return "There are no upcoming events scheduled at the moment. You can add a new event through the Calendar page!";
+    }
   }
   
-  if (message.toLowerCase().includes('safety') || message.toLowerCase().includes('emergency')) {
-    return "Safety is important in your neighborhood. You can view recent safety updates on the Safety page.";
+  // Check for skill or help related questions
+  if (lowerMessage.includes('skill') || lowerMessage.includes('help') || lowerMessage.includes('offer') || lowerMessage.includes('need')) {
+    // See if there's a specific skill category mentioned
+    let categorySearch = '';
+    const categories = ['art', 'cooking', 'music', 'technology', 'gardening', 'babysitting', 'tutoring', 'repairs', 'transportation'];
+    
+    for (const category of categories) {
+      if (lowerMessage.includes(category)) {
+        categorySearch = category;
+        break;
+      }
+    }
+    
+    if (categorySearch) {
+      const matchingSkills = skills.filter(skill => 
+        skill.title.toLowerCase().includes(categorySearch) || 
+        skill.skill_category?.toLowerCase().includes(categorySearch) ||
+        (skill.description && skill.description.toLowerCase().includes(categorySearch))
+      );
+      
+      if (matchingSkills.length > 0) {
+        let response = `I found ${matchingSkills.length} neighbors offering or requesting help with ${categorySearch}:\n\n`;
+        matchingSkills.forEach(skill => {
+          response += `- ${skill.owner_name || 'A neighbor'} ${skill.request_type === 'offer' ? 'offers' : 'requested'}: ${skill.title}\n`;
+        });
+        response += "\nCheck out the Skills page for more details!";
+        return response;
+      } else {
+        return `I don't see any current listings related to ${categorySearch}. You could post your own skill request or offering in the Skills section!`;
+      }
+    }
+    
+    if (skills.length > 0) {
+      let response = "Here are some skills being offered or requested in your neighborhood:\n\n";
+      skills.slice(0, 5).forEach(skill => {
+        response += `- ${skill.owner_name || 'A neighbor'} ${skill.request_type === 'offer' ? 'offers' : 'requested'}: ${skill.title}\n`;
+      });
+      if (skills.length > 5) {
+        response += `\nAnd ${skills.length - 5} more. Visit the Skills page to see all listings!`;
+      } else {
+        response += "\nVisit the Skills page to see more details!";
+      }
+      return response;
+    } else {
+      return "There are no skills currently being offered or requested. You can be the first to add one through the Skills page!";
+    }
   }
   
-  return "I'm your neighborhood assistant. I can help you learn about events, skills offered by your neighbors, and safety updates. Try asking me about these topics!";
+  // Check for safety-related questions
+  if (lowerMessage.includes('safety') || lowerMessage.includes('emergency') || lowerMessage.includes('alert')) {
+    if (safetyUpdates.length > 0) {
+      let response = "Here are the most recent safety updates:\n\n";
+      safetyUpdates.forEach(update => {
+        const updateDate = new Date(update.created_at).toLocaleString();
+        response += `- ${update.title} (posted ${updateDate})\n`;
+      });
+      response += "\nVisit the Safety page for more information and to add your own updates.";
+      return response;
+    } else {
+      return "There are no recent safety updates in your neighborhood. You can add safety information through the Safety page if needed.";
+    }
+  }
+  
+  // Generic response if no specific topic is matched
+  return `I'm your neighborhood assistant for ${neighborhood?.name || 'your community'}. I can help you learn about events (${events.length} upcoming), skills offered by neighbors (${skills.length} available), and safety updates (${safetyUpdates.length} recent). Try asking me specific questions about these topics!`;
 }
