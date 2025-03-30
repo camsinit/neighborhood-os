@@ -161,13 +161,15 @@ const AIChat = () => {
       {/* Chat header */}
       <AIChatHeader />
       
-      {/* Messages area */}
-      <AIChatMessages 
-        messages={messages} 
-        isLoading={isLoading} 
-        loadingMessage={loadingMessage} 
-        messagesEndRef={messagesEndRef} 
-      />
+      {/* Messages area - now without the extra container div */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <AIChatMessages 
+          messages={messages} 
+          isLoading={isLoading} 
+          loadingMessage={loadingMessage} 
+          messagesEndRef={messagesEndRef} 
+        />
+      </div>
       
       {/* Input area with suggestions */}
       <div className="border-t">

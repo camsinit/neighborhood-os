@@ -8,15 +8,20 @@
 import { format } from 'date-fns';
 import { Message } from './AIChat';
 
+// Define props interface with optional isLoading property
 interface AIMessageProps {
   message: Message;
+  isLoading?: boolean; // Added isLoading as optional property to fix TypeScript error
 }
 
 /**
  * Renders a chat message with enhanced styling that will be used as the basis
  * for our site-wide visual language
+ * 
+ * @param message - The message object to display
+ * @param isLoading - Optional flag that indicates if this message is in a loading state
  */
-const AIMessage = ({ message }: AIMessageProps) => {
+const AIMessage = ({ message, isLoading = false }: AIMessageProps) => {
   // Determine if this is a user message or AI message
   const isUserMessage = message.role === 'user';
   

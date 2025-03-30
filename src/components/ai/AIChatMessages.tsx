@@ -30,9 +30,10 @@ const AIChatMessages = ({
   loadingMessage,
   messagesEndRef
 }: AIChatMessagesProps) => {
-  // Render the messages directly without a constraining container
+  // We're removing the container div as requested and just returning the elements directly
+  // This allows the parent container in AIChat to control the layout without constraints
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <>
       {/* Map through and render each message */}
       {messages.map((message) => (
         <AIMessage key={message.id} message={message} />
@@ -53,7 +54,7 @@ const AIChatMessages = ({
       
       {/* Invisible div that serves as a reference point for scrolling */}
       <div ref={messagesEndRef} />
-    </div>
+    </>
   );
 };
 
