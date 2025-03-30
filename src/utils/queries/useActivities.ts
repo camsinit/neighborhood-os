@@ -1,4 +1,3 @@
-
 /**
  * This module provides functionality to fetch and manage neighborhood activities
  * It has been enhanced to ensure activity titles stay synchronized with their source content
@@ -20,7 +19,7 @@ export type ActivityType =
   | 'safety_update';
 
 // Define the shape of metadata to ensure type safety
-interface ActivityMetadata {
+export interface ActivityMetadata {
   deleted?: boolean;
   original_title?: string;
   [key: string]: any;
@@ -177,15 +176,16 @@ const fetchActivities = async (): Promise<Activity[]> => {
   const activities = activitiesData.map(activity => {
     // Ensure metadata is an object we can work with
     const metadata = typeof activity.metadata === 'object' && activity.metadata !== null 
-      ? activity.metadata 
-      : {};
+      ? activity.metadata as ActivityMetadata
+      : {} as ActivityMetadata;
     
     // If we have an updated title for this content, use it
     if (updatedTitlesMap.has(activity.content_id)) {
       return {
         ...activity,
+        metadata: metadata, // Ensure we have the correct metadata type
         title: updatedTitlesMap.get(activity.content_id)!
-      };
+      } as Activity;
     } else if (!isContentDeleted(metadata) && !updatedTitlesMap.has(activity.content_id)) {
       // If we didn't get a title AND the content wasn't explicitly marked as deleted,
       // it probably means the content was deleted without proper cleanup
@@ -197,14 +197,17 @@ const fetchActivities = async (): Promise<Activity[]> => {
           deleted: true,
           original_title: activity.title
         }
-      };
+      } as Activity;
     }
     
     // Otherwise use the title as stored in the activities table
-    return activity;
+    return {
+      ...activity,
+      metadata: metadata
+    } as Activity;
   });
 
-  return activities;
+  return activities as Activity[];
 };
 
 /**
