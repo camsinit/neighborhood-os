@@ -62,11 +62,11 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       
       // 2. Update the skill session status
       if (eventData) {
-        // Update the skill session status - make sure we use a valid status from the enum
+        // Update the skill session status 
         await supabase
           .from('skill_sessions')
           .update({
-            status: 'confirmed', // Using 'confirmed' instead of 'scheduled'
+            status: 'confirmed', // Using 'confirmed' status
             event_id: eventData.id
           })
           .eq('skill_id', notification.skillId)

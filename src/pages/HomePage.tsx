@@ -79,7 +79,7 @@ const HomePage = () => {
           ascending: false
         }).limit(5),
         
-        // Skill requests query - new addition
+        // Skill requests query - Fixed to use proper foreign key relationship
         supabase
           .from("skill_sessions")
           .select(`
@@ -89,9 +89,8 @@ const HomePage = () => {
             skill_id,
             requester_id,
             provider_id,
-            requester:profiles!skill_sessions_requester_id_fkey (
-              display_name,
-              avatar_url
+            requester:requester_id (
+              id
             ),
             skill:skill_id (
               id,
@@ -105,6 +104,19 @@ const HomePage = () => {
           .order("created_at", { ascending: false })
           .limit(5)
       ]);
+
+      // Get requester profiles in a separate query since the relation is not directly accessible
+      const requesterIds = skillRequests.data?.map(session => session.requester_id) || [];
+      const { data: requesterProfiles } = await supabase
+        .from("profiles")
+        .select('id, display_name, avatar_url')
+        .in('id', requesterIds);
+
+      // Create a lookup map for requester profiles
+      const profilesMap = (requesterProfiles || []).reduce((map, profile) => {
+        map[profile.id] = profile;
+        return map;
+      }, {} as Record<string, any>);
 
       // Process the results into notification objects
       return [
@@ -153,16 +165,19 @@ const HomePage = () => {
           }
         })) || []),
         
-        // Skill request notifications - new addition
+        // Skill request notifications - now using the separate profile lookup
         ...(skillRequests.data?.map(session => {
+          // Look up requester profile from our map
+          const requesterProfile = profilesMap[session.requester_id] || {};
+          
           // Convert skill session data into a notification format
           const skillRequestData: SkillRequestNotification = {
             skillId: session.skill_id,
             requesterId: session.requester_id,
             providerId: session.provider_id,
             skillTitle: session.skill?.title || "Unnamed skill",
-            requesterName: session.requester?.display_name || null,
-            requesterAvatar: session.requester?.avatar_url || null,
+            requesterName: requesterProfile.display_name || null,
+            requesterAvatar: requesterProfile.avatar_url || null,
             timePreferences: session.skill?.time_preferences || null,
             availability: session.skill?.availability || null
           };
@@ -176,8 +191,8 @@ const HomePage = () => {
             is_archived: false, // Skill sessions don't have is_archived yet
             context: {
               contextType: "skill_request" as const,
-              neighborName: session.requester?.display_name || null,
-              avatarUrl: session.requester?.avatar_url || null,
+              neighborName: requesterProfile.display_name || null,
+              avatarUrl: requesterProfile.avatar_url || null,
               skillRequestData
             }
           };
