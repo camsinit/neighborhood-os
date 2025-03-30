@@ -95,7 +95,7 @@ const SafetyUpdates = () => {
       
       {/* Detail view dialog for a selected update */}
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] bg-white p-6 rounded-lg shadow-lg">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>{selectedUpdate?.title}</DialogTitle>

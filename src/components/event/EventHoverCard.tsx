@@ -12,6 +12,13 @@ interface EventHoverCardProps extends EventCardProps {
   EditButton: () => JSX.Element | null;
 }
 
+/**
+ * EventHoverCard - A component that shows event details on hover
+ * 
+ * This component wraps its children with a hover card that displays
+ * more detailed information about an event when hovered over, including
+ * time, host, location, attendee count, and actions.
+ */
 const EventHoverCard = ({ event, children, EditButton }: EventHoverCardProps) => {
   const displayTime = format(new Date(event.time), 'h:mm a');
   const [rsvpCount, setRsvpCount] = useState(0);
@@ -43,7 +50,7 @@ const EventHoverCard = ({ event, children, EditButton }: EventHoverCardProps) =>
       <HoverCardTrigger asChild>
         {children}
       </HoverCardTrigger>
-      <HoverCardContent className="w-80 bg-white border border-gray-200 shadow-lg">
+      <HoverCardContent className="w-80">
         <div className="space-y-2">
           <h4 className="font-semibold">{event.title}</h4>
           <div className="flex items-center gap-2 text-sm">

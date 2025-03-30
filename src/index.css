@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,4 +36,20 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
+}
+
+/* Dialog styling fix */
+.sm\:max-w-\[600px\] {
+  max-width: 600px !important;
+  border-radius: 0.5rem !important;
+}
+
+/* Override for transparent backgrounds */
+[class*="bg-white"] {
+  background-color: white !important;
+}
+
+/* Override for dialog content */
+[data-radix-dialog-content] {
+  border-radius: 0.5rem !important;
 }
