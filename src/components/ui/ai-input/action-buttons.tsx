@@ -1,10 +1,24 @@
 
-import { AIAction } from "./types";
+/**
+ * ActionButtons Component
+ * 
+ * Component that displays selectable action buttons below the input field.
+ * These buttons allow users to quickly specify the type of query they're making.
+ */
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 // Props interface for ActionButtons component
 interface ActionButtonsProps {
-  actions: AIAction[];
+  actions: Array<{
+    text: string;
+    icon: LucideIcon;
+    colors: {
+      bg: string;
+      border: string;
+      icon: string;
+    };
+  }>;
   selectedItem: string | null;
   toggleItem: (itemText: string) => void;
   isLoading: boolean;
@@ -12,7 +26,7 @@ interface ActionButtonsProps {
 
 /**
  * Component that displays selectable action buttons below the input field
- * Updated to align buttons to the left side
+ * Aligned to the left side for better visual hierarchy
  */
 export function ActionButtons({
   actions,

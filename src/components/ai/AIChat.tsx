@@ -1,3 +1,4 @@
+
 /**
  * AIChat Component
  * 
@@ -159,7 +160,7 @@ const AIChat = () => {
       {/* Chat header */}
       <AIChatHeader />
       
-      {/* Messages area */}
+      {/* Messages area - now with reduced height */}
       <AIChatMessages 
         messages={messages} 
         isLoading={isLoading} 

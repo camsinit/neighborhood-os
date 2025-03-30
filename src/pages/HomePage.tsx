@@ -17,25 +17,26 @@ import AIChat from "@/components/ai/AIChat";
 /**
  * Main homepage/dashboard of the neighborhood app
  * Shows AI assistant, quick actions, and notifications
+ * Spacing reduced to fit more content on screen
  */
 const HomePage = () => {
-  return <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+  return <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
-        <div className="space-y-4">
-          {/* AI Chat Section - New component */}
+        <div className="space-y-1">
+          {/* AI Chat Section - With reduced height */}
           <section>
-            <div className="h-[450px]">
+            <div className="h-[225px]">
               <AIChat />
             </div>
           </section>
 
-          <Separator className="my-4 bg-gray-200" />
+          <Separator className="my-2 bg-gray-200" />
 
           {/* Two Column Layout for Quick Actions and Notifications */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Quick Actions Section - Moved from previous position */}
             <section>
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
+              <h2 className="text-2xl font-bold mb-2 text-gray-900">Quick Actions</h2>
               <QuickActions />
             </section>
 
