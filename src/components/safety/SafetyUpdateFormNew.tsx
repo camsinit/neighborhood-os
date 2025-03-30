@@ -4,15 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { Shield } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSafetyUpdateFormSubmit } from "./hooks/useSafetyUpdateFormSubmit";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { SafetyTypeField } from "./form/SafetyTypeField";
 import { SafetyTextField } from "./form/SafetyTextField";
 import { safetyUpdateSchema, SafetyUpdateFormData } from "./schema/safetyUpdateSchema";
+import { useSafetyUpdateSubmit } from "@/hooks/safety/useSafetyUpdateSubmit";
+import { toast } from "sonner";
 
 /**
  * Props for the SafetyUpdateFormNew component
@@ -25,8 +25,8 @@ export interface SafetyUpdateFormNewProps {
 /**
  * SafetyUpdateFormNew component
  * 
- * This refactored component uses a more modular approach with separated form fields
- * and a dedicated submission hook for better maintainability.
+ * Refactored component that uses our standardized submission hook pattern
+ * for consistent form behavior across the application.
  */
 export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
   // Set up form with validation
@@ -40,64 +40,54 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
   });
 
   // Hooks
-  const { toast } = useToast();
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
   const queryClient = useQueryClient();
   
-  // Custom hook for form submission
-  const { isSubmitting, submitSafetyUpdate } = useSafetyUpdateFormSubmit(
-    user,
-    neighborhood,
-    () => {
+  // Use our submission hook with the success callback
+  const { submitSafetyUpdate, isLoading } = useSafetyUpdateSubmit({
+    onSuccess: () => {
       if (onSuccess) onSuccess();
-    },
-    existingData?.id ? 'edit' : 'create',
-    existingData?.id
-  );
+    }
+  });
 
   // Function to handle the form submission
   const onSubmit = async (values: SafetyUpdateFormData) => {
+    // Basic validation checks
     if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create a safety update.",
-        variant: "destructive",
-      });
+      toast.error("You must be logged in to create a safety update.");
+      return;
+    }
+
+    if (!neighborhood) {
+      toast.error("You must be part of a neighborhood to create a safety update.");
       return;
     }
 
     try {
-      const success = await submitSafetyUpdate(values);
+      // Add the ID to the form data if we're editing
+      const formData = existingData?.id 
+        ? { ...values, id: existingData.id }
+        : values;
+        
+      // Submit the update using our hook
+      await submitSafetyUpdate(formData);
       
-      if (success) {
-        // Invalidate related queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ["safety-updates"] });
-        queryClient.invalidateQueries({ queryKey: ["activities"] });
-        
-        toast({
-          title: "Success!",
-          description: existingData?.id
-            ? "Safety update has been edited."
-            : "New safety update has been created.",
+      // Invalidate related queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["safety-updates"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      
+      // Reset the form if not editing
+      if (!existingData?.id) {
+        form.reset({
+          title: "",
+          description: "",
+          type: "General",
         });
-        
-        // Reset the form if not editing
-        if (!existingData?.id) {
-          form.reset({
-            title: "",
-            description: "",
-            type: "General",
-          });
-        }
       }
     } catch (err) {
       console.error("Error submitting safety update:", err);
-      toast({
-        title: "Error",
-        description: "There was a problem submitting your safety update.",
-        variant: "destructive",
-      });
+      toast.error("There was a problem submitting your safety update.");
     }
   };
 
@@ -128,10 +118,10 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
         <Button 
           type="submit" 
           className="w-full bg-red-500 hover:bg-red-600 text-white"
-          disabled={isSubmitting}
+          disabled={isLoading}
         >
           <Shield className="w-4 h-4 mr-2" />
-          {isSubmitting 
+          {isLoading 
             ? "Submitting..." 
             : existingData?.id 
               ? "Update Safety Information" 

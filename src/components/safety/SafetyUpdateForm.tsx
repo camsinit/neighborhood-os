@@ -1,164 +1,149 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
-import { 
-  safetyUpdateSchema,
-  SafetyUpdateFormData, 
-  SafetyUpdateFormProps 
-} from "./schema/safetyUpdateSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/components/ui/use-toast";
+import { useUser } from "@supabase/auth-helpers-react";
+import { Shield } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSafetyUpdateFormSubmit } from "./hooks/useSafetyUpdateFormSubmit";
-import { 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { SafetyTypeField } from "./form/SafetyTypeField";
+import { SafetyTextField } from "./form/SafetyTextField";
+import { safetyUpdateSchema, SafetyUpdateFormData } from "./schema/safetyUpdateSchema";
+
+/**
+ * Props for the SafetyUpdateForm component
+ */
+interface SafetyUpdateFormProps {
+  onClose: () => void;
+  existingData?: any;
+}
 
 /**
  * SafetyUpdateForm component
  * 
- * This refactored component uses the same pattern as the care request form,
- * with a form hook and validation for better maintainability
+ * This is the older version of the form that's being maintained for backward compatibility.
+ * Consider using SafetyUpdateFormNew for new implementations.
  */
-const SafetyUpdateForm = ({ 
-  onClose, 
-  initialValues, 
-  mode = 'create', 
-  updateId 
-}: SafetyUpdateFormProps) => {
-  // Get the current user and neighborhood
-  const user = useUser();
-  const neighborhoodData = useCurrentNeighborhood();
+export default function SafetyUpdateForm({ onClose, existingData }: SafetyUpdateFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Setup the form submission hook
-  const { isSubmitting, submitSafetyUpdate } = useSafetyUpdateFormSubmit(
-    user,
-    neighborhoodData,
-    onClose,
-    mode,
-    updateId
-  );
-
-  // Set up default values for the form
-  const defaultValues = {
-    title: initialValues?.title || '',
-    description: initialValues?.description || '',
-    type: initialValues?.type || '',
-  };
-
-  // Initialize the form with react-hook-form
+  // Set up form with validation
   const form = useForm<SafetyUpdateFormData>({
     resolver: zodResolver(safetyUpdateSchema),
-    defaultValues,
+    defaultValues: {
+      title: existingData?.title || "",
+      description: existingData?.description || "",
+      type: existingData?.type || "General",
+    },
   });
 
-  // Handle form submission
-  const onSubmit = (data: SafetyUpdateFormData) => {
-    submitSafetyUpdate(data);
+  // Hooks
+  const { toast } = useToast();
+  const user = useUser();
+  const neighborhood = useCurrentNeighborhood();
+  const queryClient = useQueryClient();
+  
+  // Custom hook for form submission
+  const { submitSafetyUpdate } = useSafetyUpdateFormSubmit(
+    user,
+    neighborhood,
+    onClose,
+    existingData?.id ? 'edit' : 'create',
+    existingData?.id
+  );
+
+  // Function to handle the form submission
+  const onSubmit = async (values: SafetyUpdateFormData) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a safety update.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Use the submission hook to handle the update
+      const success = await submitSafetyUpdate(values);
+      
+      if (success) {
+        // Invalidate related queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ["safety-updates"] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
+        
+        toast({
+          title: "Success!",
+          description: existingData?.id
+            ? "Safety update has been edited."
+            : "New safety update has been created.",
+        });
+        
+        // Reset the form if not editing
+        if (!existingData?.id) {
+          form.reset({
+            title: "",
+            description: "",
+            type: "General",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error submitting safety update:", err);
+      toast({
+        title: "Error",
+        description: "There was a problem submitting your safety update.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Update Type */}
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Update Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="alerts">Alerts</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="updates">Updates</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Type Selection */}
+        <SafetyTypeField form={form} />
 
-        {/* Title */}
-        <FormField
-          control={form.control}
+        {/* Title Input */}
+        <SafetyTextField
+          form={form}
           name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Title of your safety update" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Title"
+          placeholder="Enter a title"
         />
 
-        {/* Description */}
-        <FormField
-          control={form.control}
+        {/* Description Textarea */}
+        <SafetyTextField
+          form={form}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  {...field} 
-                  placeholder="Provide details about the safety update"
-                  className="min-h-[100px]"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Description"
+          placeholder="Provide details about the safety update"
+          multiline={true}
         />
 
-        {/* Form action buttons */}
-        <DialogFooter>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-[#ea384c] hover:bg-[#ea384c]/90"
-            disabled={isSubmitting}
-          >
-            {isSubmitting 
-              ? "Saving..." 
-              : mode === 'edit' 
-                ? "Update" 
-                : "Share Update"
-            }
-          </Button>
-        </DialogFooter>
+        {/* Submit Button */}
+        <Button 
+          type="submit" 
+          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          disabled={isSubmitting}
+        >
+          <Shield className="w-4 h-4 mr-2" />
+          {isSubmitting 
+            ? "Submitting..." 
+            : existingData?.id 
+              ? "Update Safety Information" 
+              : "Post Safety Update"
+          }
+        </Button>
       </form>
     </Form>
   );
-};
-
-export default SafetyUpdateForm;
+}

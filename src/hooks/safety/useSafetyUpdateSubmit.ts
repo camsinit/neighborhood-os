@@ -5,30 +5,30 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useState } from "react"; 
+import { SafetyUpdateFormData } from "@/components/safety/schema/safetyUpdateSchema";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 // Interface for the hook properties
-// Make onSuccess optional to allow the hook to be used without a callback
 interface SafetyUpdateSubmitProps {
   onSuccess?: () => void;
 }
 
-// Interface for the form data
-interface SafetyUpdateFormData {
-  title: string;
-  description: string;
-  type: string;
-  id?: string; // Optional id for updates
-}
-
-// Update the hook to accept an optional parameter
+/**
+ * Custom hook for handling safety update submissions
+ * 
+ * This hook provides methods to create and update safety updates
+ * with consistent error handling and state management
+ */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
-  // Fixed variable naming: renamed the state setter to setIsLoading
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const user = useUser();
   const queryClient = useQueryClient();
-  const neighborhood = useCurrentNeighborhood(); // Get the neighborhood object
+  const neighborhood = useCurrentNeighborhood();
 
+  /**
+   * Create a new safety update
+   */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
       toast.error("You must be logged in to create a safety update");
@@ -42,61 +42,40 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
     }
 
     try {
-      // Set loading to true before starting the operation
       setIsLoading(true);
       setError(null);
       
-      // Add detailed logging before insert operation
-      console.log("[useSafetyUpdateSubmit] Attempting to insert safety update:", {
+      // Log the operation for debugging
+      console.log("[useSafetyUpdateSubmit] Creating safety update:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
-        timestamp: new Date().toISOString()
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
+      // Insert the safety update with author_id (not user_id)
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
-          ...formData,
+          title: formData.title,
+          description: formData.description,
+          type: formData.type,
           author_id: user.id, // Use author_id to match table schema
-          neighborhood_id: neighborhood.id // Use neighborhood.id instead of neighborhood
+          neighborhood_id: neighborhood.id // Use neighborhood.id (not the whole object)
         })
         .select();
 
       if (error) {
-        // Log detailed error information
-        console.error("[useSafetyUpdateSubmit] Error inserting safety update:", {
-          error: {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          },
-          userId: user.id,
-          neighborhoodId: neighborhood.id,
-          timestamp: new Date().toISOString()
-        });
+        console.error("[useSafetyUpdateSubmit] Error:", error);
         setError(error);
         throw error;
       }
 
-      // Log success information
-      console.log("[useSafetyUpdateSubmit] Safety update created successfully:", {
-        updateId: data?.[0]?.id,
-        userId: user.id,
-        neighborhoodId: neighborhood.id,
-        timestamp: new Date().toISOString()
-      });
-
+      // Success handling
       toast.success("Safety update created successfully");
-      
-      // Invalidate the safety-updates query
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
-      // Dispatch a custom event to signal that the update was submitted
-      // This will trigger a data refresh in the SafetyUpdates component
-      const customEvent = new Event('safety-update-submitted');
-      document.dispatchEvent(customEvent);
+      // Use refreshEvents to signal update
+      refreshEvents.safety();
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
@@ -110,11 +89,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
     } finally {
-      // Make sure to set loading to false when done
       setIsLoading(false);
     }
   };
 
+  /**
+   * Update an existing safety update
+   */
   const handleUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
     if (!user) {
       toast.error("You must be logged in to update a safety update");
@@ -122,18 +103,17 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
     }
 
     try {
-      // Set loading to true before starting the operation
       setIsLoading(true);
       setError(null);
       
-      // Add detailed logging before update operation
-      console.log("[useSafetyUpdateSubmit] Attempting to update safety update:", {
+      // Log the operation for debugging
+      console.log("[useSafetyUpdateSubmit] Updating safety update:", {
         updateId,
         userId: user.id,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
-        timestamp: new Date().toISOString()
+        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
+      // Update the safety update
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -146,38 +126,17 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         .select();
 
       if (error) {
-        // Log detailed error information
-        console.error("[useSafetyUpdateSubmit] Error updating safety update:", {
-          error: {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          },
-          updateId,
-          userId: user.id,
-          timestamp: new Date().toISOString()
-        });
+        console.error("[useSafetyUpdateSubmit] Error:", error);
         setError(error);
         throw error;
       }
 
-      // Log success information
-      console.log("[useSafetyUpdateSubmit] Safety update updated successfully:", {
-        updateId,
-        userId: user.id,
-        timestamp: new Date().toISOString()
-      });
-
+      // Success handling
       toast.success("Safety update updated successfully");
-      
-      // Invalidate the safety-updates query
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
-      // Dispatch a custom event to signal that the update was submitted
-      // This will trigger a data refresh in the SafetyUpdates component
-      const customEvent = new Event('safety-update-submitted');
-      document.dispatchEvent(customEvent);
+      // Use refreshEvents to signal update
+      refreshEvents.safety();
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
@@ -191,13 +150,14 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
     } finally {
-      // Make sure to set loading to false when done
       setIsLoading(false);
     }
   };
 
-  // Unified safety update submitSafetyUpdate function that works for both create and update
-  const submitSafetyUpdate = (data: SafetyUpdateFormData) => {
+  /**
+   * Unified method that works for both create and update operations
+   */
+  const submitSafetyUpdate = (data: SafetyUpdateFormData & { id?: string }) => {
     if (data.id) {
       return handleUpdate(data.id, data);
     } else {
@@ -205,7 +165,5 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
     }
   };
 
-  // Return isLoading state along with the handleSubmit and handleUpdate functions
-  // Also include the submitSafetyUpdate function and error state for compatibility
   return { handleSubmit, handleUpdate, submitSafetyUpdate, isLoading, error };
 };

@@ -39,7 +39,7 @@ export const useSafetyUpdates = () => {
                 avatar_url
               )
             `)
-            .eq('neighborhood_id', neighborhood?.id) // Fixed: Use neighborhood?.id
+            .eq('neighborhood_id', neighborhood?.id) // Use neighborhood?.id instead of neighborhood
             .order('created_at', { ascending: false });
         }, 'safety_updates_query');
       } catch (err) {
