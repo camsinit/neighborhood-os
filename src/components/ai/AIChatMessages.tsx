@@ -17,7 +17,6 @@ interface AIChatMessagesProps {
 
 /**
  * Component that displays all messages in the chat
- * Shows a clean, empty state when no messages are present
  */
 const AIChatMessages = ({
   messages,
@@ -25,10 +24,9 @@ const AIChatMessages = ({
   loadingMessage,
   messagesEndRef
 }: AIChatMessagesProps) => {
-  // Render the chat messages area with appropriate height
+  // Render the chat messages area
   return (
     <div className="flex-1 p-4 overflow-y-auto max-h-[400px] min-h-[300px]">
-      {/* We're removing the placeholder message div and just showing the empty space */}
       <div className="space-y-4">
         {messages.map((message) => (
           <AIMessage key={message.id} message={message} />
