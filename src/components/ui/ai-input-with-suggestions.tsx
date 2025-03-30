@@ -27,7 +27,8 @@ export function AIInputWithSuggestions({
     defaultSelected,
     onSubmit,
     className,
-    isLoading = false
+    isLoading = false,
+    compactMode = false // New prop for compact mode
 }: AIInputWithSuggestionsProps) {
     // State management for the input and selected action
     const [inputValue, setInputValue] = useState("");
@@ -60,7 +61,11 @@ export function AIInputWithSuggestions({
     };
 
     return (
-        <div className={cn("w-full py-2", className)}>
+        <div className={cn(
+            // Reduced vertical padding in compact mode
+            compactMode ? "w-full py-1" : "w-full py-2", 
+            className
+        )}>
             <div className="w-full mx-auto">
                 <div className="relative w-full border border-black/10 dark:border-white/10 focus-within:border-black/20 dark:focus-within:border-white/20 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03]">
                     <div className="flex flex-col">
@@ -75,7 +80,8 @@ export function AIInputWithSuggestions({
                                 disabled={isLoading}
                                 className={cn(
                                     "w-full rounded-2xl pr-10 pt-3 pb-3 placeholder:text-black/70 dark:placeholder:text-white/70 border-none focus:ring text-black dark:text-white resize-none text-wrap bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 leading-[1.2]",
-                                    `min-h-[${minHeight}px]`
+                                    // Reduced minimum height in compact mode
+                                    compactMode ? `min-h-[${minHeight - 16}px]` : `min-h-[${minHeight}px]`
                                 )}
                                 value={inputValue}
                                 onChange={(e) => {
@@ -91,7 +97,11 @@ export function AIInputWithSuggestions({
                             />
                         </div>
 
-                        <div className="h-12 bg-transparent">
+                        <div className={cn(
+                            // Reduced height in compact mode
+                            compactMode ? "h-10" : "h-12", 
+                            "bg-transparent"
+                        )}>
                             <SelectedAction
                                 currentItem={currentItem}
                                 selectedItem={selectedItem}
@@ -122,6 +132,8 @@ export function AIInputWithSuggestions({
                 selectedItem={selectedItem}
                 toggleItem={toggleItem}
                 isLoading={isLoading}
+                // Pass compact mode to action buttons
+                compactMode={compactMode}
             />
         </div>
     );

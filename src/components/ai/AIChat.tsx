@@ -166,16 +166,19 @@ const AIChat = () => {
         isLoading={isLoading} 
         loadingMessage={loadingMessage} 
         messagesEndRef={messagesEndRef}
-        className="flex-1 overflow-y-auto pt-0 px-4 pb-4" 
+        // Reduced bottom padding to make the chat more compact vertically
+        className="flex-1 overflow-y-auto pt-0 px-4 pb-2" 
       />
       
-      {/* Input area with suggestions */}
-      <div className="border-t">
+      {/* Input area with suggestions - reduced the top border to a thinner line */}
+      <div className="border-t border-gray-100">
         <AIInputWithSuggestions
           actions={NEIGHBORHOOD_ACTIONS}
           placeholder="Ask about your neighborhood..."
           onSubmit={handleSubmit}
           isLoading={isLoading}
+          // Add reduced padding prop to make the input area more compact
+          compactMode={true}
         />
       </div>
     </div>

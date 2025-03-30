@@ -22,6 +22,7 @@ interface ActionButtonsProps {
   selectedItem: string | null;
   toggleItem: (itemText: string) => void;
   isLoading: boolean;
+  compactMode?: boolean; // Added compact mode prop
 }
 
 /**
@@ -33,12 +34,17 @@ export function ActionButtons({
   selectedItem,
   toggleItem,
   isLoading,
+  compactMode = false,
 }: ActionButtonsProps) {
   // If no actions are provided, don't render anything
   if (actions.length === 0) return null;
 
   return (
-    <div className="mt-2 flex flex-wrap gap-2 justify-start">
+    <div className={cn(
+      "flex flex-wrap gap-2 justify-start",
+      // Reduced top margin in compact mode
+      compactMode ? "mt-1" : "mt-2"
+    )}>
       {actions.map((action) => {
         const isSelected = selectedItem === action.text;
         
@@ -48,7 +54,9 @@ export function ActionButtons({
             onClick={() => toggleItem(action.text)}
             disabled={isLoading}
             className={cn(
-              "inline-flex items-center text-xs font-medium rounded-full px-3 py-1.5 border transition-colors duration-200 ease-in-out",
+              "inline-flex items-center text-xs font-medium rounded-full border transition-colors duration-200 ease-in-out",
+              // Smaller padding in compact mode
+              compactMode ? "px-2 py-1" : "px-3 py-1.5",
               isSelected
                 ? `${action.colors.bg} ${action.colors.border}`
                 : "border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03]",
