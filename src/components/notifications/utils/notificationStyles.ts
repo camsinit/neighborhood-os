@@ -1,15 +1,6 @@
 
 import { Bell, Calendar, Shield, HandHelping, Check, Archive, Package, Users } from "lucide-react";
-
-// Updated to include new notification context types
-export type NotificationContextType = 
-  | "help_request" 
-  | "event_invite" 
-  | "safety_alert" 
-  | "skill_request" 
-  | "goods_offer" 
-  | "goods_request" 
-  | "neighbor_join";
+import { NotificationContextType } from "@/hooks/notifications";
 
 export interface NotificationStyle {
   backgroundColor: string;
@@ -17,9 +8,17 @@ export interface NotificationStyle {
   textColor: string;
   borderColor: string;
   icon: typeof Bell | typeof Calendar | typeof Shield | typeof HandHelping | typeof Package | typeof Users;
+  // New property for badges
+  badgeColor: string;
 }
 
-// Updated to include new notification types
+/**
+ * Gets the appropriate style for a notification based on its type
+ * Enhanced with more distinctive colors and new badge color property
+ * 
+ * @param type The notification type
+ * @returns An object containing style information
+ */
 export const getNotificationStyle = (
   type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors"
 ): NotificationStyle => {
@@ -30,6 +29,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-red-100",
         textColor: "text-red-700",
         borderColor: "border-red-200",
+        badgeColor: "bg-red-500",
         icon: Shield
       };
     case "event":
@@ -38,6 +38,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-violet-100",
         textColor: "text-violet-700",
         borderColor: "border-violet-200",
+        badgeColor: "bg-violet-500",
         icon: Calendar
       };
     case "support":
@@ -46,6 +47,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-orange-100",
         textColor: "text-orange-700",
         borderColor: "border-orange-200",
+        badgeColor: "bg-orange-500",
         icon: HandHelping
       };
     case "skills":
@@ -54,6 +56,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-blue-100",
         textColor: "text-blue-700",
         borderColor: "border-blue-200",
+        badgeColor: "bg-blue-500",
         icon: Bell
       };
     case "goods":
@@ -62,6 +65,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-green-100",
         textColor: "text-green-700",
         borderColor: "border-green-200",
+        badgeColor: "bg-green-500",
         icon: Package
       };
     case "neighbors":
@@ -70,6 +74,7 @@ export const getNotificationStyle = (
         hoverColor: "hover:bg-amber-100",
         textColor: "text-amber-700",
         borderColor: "border-amber-200",
+        badgeColor: "bg-amber-500",
         icon: Users
       };
   }
