@@ -1,16 +1,21 @@
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowUpRight, Trash2 } from 'lucide-react';
-import { Skill } from '../types/skillTypes';
-import { useState } from 'react';
-import { FinalizeDateDialog } from '../FinalizeDateDialog';
-import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useUser } from '@supabase/auth-helpers-react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 
+import { useState } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skill } from '../types/skillTypes';
+import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
+import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
+import SkillRequestCard from './SkillRequestCard';
+import SkillOfferCard from './SkillOfferCard';
+import SkillDetailsContent from './SkillDetailsContent';
+
+/**
+ * SkillCard - Main component that renders different skill card types
+ * 
+ * This component has been refactored to use smaller, focused components
+ * for better maintainability and clarity. It now serves as a container
+ * that determines which card type to show based on props.
+ */
 interface SkillCardProps {
   skill: Skill & { 
     profiles: { 
@@ -23,185 +28,70 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
+  // Get the current user to determine ownership
   const currentUser = useUser();
   
+  // State variables for dialogs
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   
+  // Custom hook for skill operations
   const { deleteSkill, isLoading: isDeleting } = useSkillUpdate();
   
+  // Check if current user is the skill owner
   const isOwner = currentUser?.id === skill.user_id;
   
-  const handleDeleteSkill = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Handle skill deletion
+  const handleDeleteSkill = async (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     
     await deleteSkill(skill.id, skill.title);
-    
     setIsDetailsOpen(false);
   };
 
+  // For skill requests, we render the request card component
   if (type === 'request') {
     return (
-      <div 
-        data-skill-id={skill.id}
-        className="relative flex-shrink-0 w-[250px] h-[120px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
-      >
-        <ArrowUpRight className="absolute top-2 right-2 h-4 w-4 text-gray-400" />
-        <div className="h-full flex flex-col justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-              <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-            </Avatar>
-            <h4 className="font-medium text-gray-900 line-clamp-2">{skill.title}</h4>
-          </div>
-          <div className="space-y-1">
-            <Button 
-              variant="outline" 
-              className="w-full"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onContribute?.();
-              }}
-            >
-              Contribute Skill
-            </Button>
-            {skill.status === 'pending_scheduling' && (
-              <Button
-                variant="secondary"
-                className="w-full"
-                size="sm"
-                onClick={() => setIsScheduleDialogOpen(true)}
-              >
-                View Schedule
-              </Button>
-            )}
-          </div>
-
-          {isScheduleDialogOpen && (
-            <FinalizeDateDialog
-              sessionId={skill.id}
-              open={isScheduleDialogOpen}
-              onOpenChange={setIsScheduleDialogOpen}
-            />
-          )}
-        </div>
-      </div>
+      <SkillRequestCard
+        skill={skill}
+        onContribute={onContribute || (() => {})}
+      />
     );
   }
 
+  // For skill offers, we render the offer card and detail dialog
   return (
     <>
-      <div 
-        data-skill-id={skill.id}
-        className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
+      <SkillOfferCard 
+        skill={skill}
+        isOwner={isOwner}
+        onDelete={handleDeleteSkill}
+        isDeleting={isDeleting}
+        onRequestSkill={() => setIsRequestDialogOpen(true)}
         onClick={() => setIsDetailsOpen(true)}
-      >
-        <div className="flex items-center gap-3 flex-1">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-            <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-          </Avatar>
-          <h4 className="font-medium text-gray-900">{skill.title}</h4>
-        </div>
-        {isOwner ? (
-          <Button 
-            variant="destructive" 
-            onClick={handleDeleteSkill}
-            disabled={isDeleting}
-            className="ml-4"
-          >
-            <Trash2 className="mr-1 h-4 w-4" />
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </Button>
-        ) : (
-          <Button 
-            variant="outline" 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsRequestDialogOpen(true);
-            }}
-            className="ml-4"
-          >
-            Request Skill
-          </Button>
-        )}
-      </div>
+      />
 
+      {/* Details dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{skill.title}</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-                <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-medium text-gray-900">
-                  {skill.profiles?.display_name || 'Anonymous'}
-                </h4>
-                <p className="text-sm text-gray-500">Skill Provider</p>
-              </div>
-            </div>
-
-            {skill.description && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">About this skill</h4>
-                <p className="text-sm text-gray-600">{skill.description}</p>
-              </div>
-            )}
-
-            {skill.availability && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">Availability</h4>
-                <p className="text-sm text-gray-600">{skill.availability}</p>
-              </div>
-            )}
-
-            {skill.time_preferences && skill.time_preferences.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">Preferred Times</h4>
-                <div className="flex flex-wrap gap-2">
-                  {skill.time_preferences.map((time, index) => (
-                    <span key={index} className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                      {time}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!isOwner ? (
-              <Button 
-                className="w-full"
-                onClick={() => {
-                  setIsDetailsOpen(false);
-                  setIsRequestDialogOpen(true);
-                }}
-              >
-                Request this Skill
-              </Button>
-            ) : (
-              <Button 
-                variant="destructive"
-                className="w-full"
-                onClick={handleDeleteSkill}
-                disabled={isDeleting}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                {isDeleting ? 'Deleting...' : 'Delete this Skill'}
-              </Button>
-            )}
-          </div>
+          <SkillDetailsContent 
+            skill={skill}
+            isOwner={isOwner}
+            onDelete={handleDeleteSkill}
+            isDeleting={isDeleting}
+            onRequestSkill={() => {
+              setIsDetailsOpen(false);
+              setIsRequestDialogOpen(true);
+            }}
+          />
         </DialogContent>
       </Dialog>
 
+      {/* Skill request dialog */}
       <SkillSessionRequestDialog
         open={isRequestDialogOpen}
         onOpenChange={setIsRequestDialogOpen}

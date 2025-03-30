@@ -1,4 +1,3 @@
-
 /**
  * This module provides functionality to fetch and manage neighborhood activities
  * It has been enhanced to ensure activity titles stay synchronized with their source content
@@ -34,6 +33,44 @@ export interface Activity {
   };
 }
 
+// Define valid content tables for type safety
+type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange' | 'care_requests';
+
+/**
+ * Helper function to fetch titles for a specific content type with type safety
+ * 
+ * @param tableName Name of the table to query
+ * @param ids Array of content IDs to look up
+ * @param titleMap Map to store the results
+ */
+const fetchTitlesForType = async (
+  tableName: ContentTable, 
+  ids: string[],
+  titleMap: Map<string, string>
+): Promise<void> => {
+  // Skip if no IDs to fetch
+  if (ids.length === 0) return;
+  
+  // All these tables have the same structure for id and title columns
+  // so we can use a generic query with type safety
+  const { data, error } = await supabase
+    .from(tableName)
+    .select('id, title')
+    .in('id', ids);
+    
+  if (error) {
+    console.error(`Error fetching ${tableName} titles:`, error);
+    return;
+  }
+  
+  // Add titles to our map
+  data?.forEach(item => {
+    if (item.id && item.title) {
+      titleMap.set(item.id, item.title);
+    }
+  });
+};
+
 /**
  * Fetches content titles from their respective tables
  * Used to ensure activity feeds show up-to-date titles
@@ -46,110 +83,18 @@ const fetchContentTitles = async (
 ): Promise<Map<string, string>> => {
   const titleMap = new Map<string, string>();
   
-  // Helper function to fetch titles for a specific content type
-  const fetchTitlesForType = async (
-    tableName: string, 
-    ids: string[]
-  ): Promise<void> => {
-    if (ids.length === 0) return;
-    
-    // Using a type-safe approach for table names to fix the TS errors
-    // We need to check the table name and handle each case separately
-    if (tableName === 'events') {
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, title')
-        .in('id', ids);
-        
-      if (error) {
-        console.error(`Error fetching ${tableName} titles:`, error);
-        return;
-      }
-      
-      data?.forEach(item => {
-        titleMap.set(item.id, item.title);
-      });
-    } else if (tableName === 'safety_updates') {
-      const { data, error } = await supabase
-        .from('safety_updates')
-        .select('id, title')
-        .in('id', ids);
-        
-      if (error) {
-        console.error(`Error fetching ${tableName} titles:`, error);
-        return;
-      }
-      
-      data?.forEach(item => {
-        titleMap.set(item.id, item.title);
-      });
-    } else if (tableName === 'skills_exchange') {
-      const { data, error } = await supabase
-        .from('skills_exchange')
-        .select('id, title')
-        .in('id', ids);
-        
-      if (error) {
-        console.error(`Error fetching ${tableName} titles:`, error);
-        return;
-      }
-      
-      data?.forEach(item => {
-        titleMap.set(item.id, item.title);
-      });
-    } else if (tableName === 'goods_exchange') {
-      const { data, error } = await supabase
-        .from('goods_exchange')
-        .select('id, title')
-        .in('id', ids);
-        
-      if (error) {
-        console.error(`Error fetching ${tableName} titles:`, error);
-        return;
-      }
-      
-      data?.forEach(item => {
-        titleMap.set(item.id, item.title);
-      });
-    } else if (tableName === 'care_requests') {
-      const { data, error } = await supabase
-        .from('care_requests')
-        .select('id, title')
-        .in('id', ids);
-        
-      if (error) {
-        console.error(`Error fetching ${tableName} titles:`, error);
-        return;
-      }
-      
-      data?.forEach(item => {
-        titleMap.set(item.id, item.title);
-      });
-    }
-  };
-  
   // Process each content type in parallel for better performance
   const fetchPromises: Promise<void>[] = [];
   
-  if (contentIds.events?.length) {
-    fetchPromises.push(fetchTitlesForType('events', contentIds.events));
-  }
+  // Type-safe mapping of content types to their tables
+  const validTables: ContentTable[] = ['events', 'safety_updates', 'skills_exchange', 'goods_exchange', 'care_requests'];
   
-  if (contentIds.safety_updates?.length) {
-    fetchPromises.push(fetchTitlesForType('safety_updates', contentIds.safety_updates));
-  }
-  
-  if (contentIds.skills_exchange?.length) {
-    fetchPromises.push(fetchTitlesForType('skills_exchange', contentIds.skills_exchange));
-  }
-  
-  if (contentIds.goods_exchange?.length) {
-    fetchPromises.push(fetchTitlesForType('goods_exchange', contentIds.goods_exchange));
-  }
-  
-  if (contentIds.care_requests?.length) {
-    fetchPromises.push(fetchTitlesForType('care_requests', contentIds.care_requests));
-  }
+  // Create a promise for each table that has IDs to fetch
+  validTables.forEach(table => {
+    if (contentIds[table]?.length) {
+      fetchPromises.push(fetchTitlesForType(table, contentIds[table], titleMap));
+    }
+  });
   
   // Wait for all fetch operations to complete
   await Promise.all(fetchPromises);
