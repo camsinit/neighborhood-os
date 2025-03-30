@@ -1,12 +1,15 @@
 
+/**
+ * Component for displaying detailed information about a skill
+ */
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@supabase/auth-helpers-react';
-import { formatDistanceToNow } from 'date-fns';
 import SkillSessionRequestDialog from '@/components/skills/SkillSessionRequestDialog';
 import { SkillWithProfile } from '../types/skillTypes';
+import SkillDetailsHeader from './SkillDetailsHeader';
+import UserProfileSection from './UserProfileSection';
+import ActionButtons from './ActionButtons';
 
 /**
  * Props for SkillDetailsContent
@@ -41,10 +44,6 @@ interface SkillDetailsContentProps {
 
 /**
  * SkillDetailsContent - Displays detailed information about a skill
- * 
- * This component shows all relevant information about a skill offering or request,
- * including the user profile, description, availability, and time preferences.
- * It also provides action buttons appropriate for the current user.
  */
 const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
   // Initialize state for request dialog
@@ -79,66 +78,35 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
     : (user?.id === profileData?.id);
   const isRequest = request_type === 'need';
 
-  // Format the creation date
-  const formattedDate = created_at
-    ? formatDistanceToNow(new Date(created_at), { addSuffix: true })
-    : '';
-
-  // Define category colors for visual distinction
-  const categoryColors: Record<string, { bg: string; text: string }> = {
-    technology: { bg: 'bg-blue-100', text: 'text-blue-800' },
-    creativity: { bg: 'bg-purple-100', text: 'text-purple-800' },
-    education: { bg: 'bg-green-100', text: 'text-green-800' },
-    cooking: { bg: 'bg-orange-100', text: 'text-orange-800' },
-    health: { bg: 'bg-red-100', text: 'text-red-800' },
-    gardening: { bg: 'bg-emerald-100', text: 'text-emerald-800' },
-    repair: { bg: 'bg-amber-100', text: 'text-amber-800' },
-    other: { bg: 'bg-gray-100', text: 'text-gray-800' },
-    creative: { bg: 'bg-purple-100', text: 'text-purple-800' },
-    trade: { bg: 'bg-amber-100', text: 'text-amber-800' },
-    wellness: { bg: 'bg-red-100', text: 'text-red-800' },
-  };
-
-  // Get the appropriate color scheme for the category
-  const { bg, text } = categoryColors[category as keyof typeof categoryColors] || 
-    categoryColors.other;
-
   // Fallback display name and avatar handling for better UX
   const displayName = profileData?.display_name || 'Neighbor';
   const avatarUrl = profileData?.avatar_url || null;
   const providerId = profileData?.id || '';
 
+  // Handle the request skill action
+  const handleRequestSkill = () => {
+    if (props.onRequestSkill) {
+      props.onRequestSkill();
+    } else {
+      setShowRequestDialog(true);
+    }
+  };
+
   return (
     <div className="space-y-6 p-1">
       {/* Header with title and category */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          <div className="flex gap-2 items-center">
-            <Badge variant="outline" className={`${bg} ${text} border-none`}>
-              {category}
-            </Badge>
-            <span className="text-xs text-gray-400">{formattedDate}</span>
-          </div>
-        </div>
-      </div>
+      <SkillDetailsHeader 
+        title={title} 
+        category={category} 
+        created_at={created_at} 
+      />
 
       {/* User profile information */}
-      <div className="flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          {avatarUrl ? (
-            <AvatarImage src={avatarUrl} alt={displayName} />
-          ) : (
-            <AvatarFallback>{displayName[0].toUpperCase()}</AvatarFallback>
-          )}
-        </Avatar>
-        <div>
-          <p className="font-medium text-gray-900">{displayName}</p>
-          <p className="text-sm text-gray-500">
-            {isRequest ? 'Needs help with this' : 'Offering to help'}
-          </p>
-        </div>
-      </div>
+      <UserProfileSection 
+        displayName={displayName} 
+        avatarUrl={avatarUrl} 
+        isRequest={isRequest} 
+      />
 
       {/* Description section */}
       {description && (
@@ -171,27 +139,13 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
       )}
 
       {/* Action buttons */}
-      {isOwnSkill && props.onDelete ? (
-        <div className="pt-4">
-          <Button 
-            onClick={props.onDelete}
-            variant="destructive"
-            disabled={props.isDeleting}
-            className="w-full"
-          >
-            {props.isDeleting ? 'Deleting...' : 'Delete Skill'}
-          </Button>
-        </div>
-      ) : !isOwnSkill && (
-        <div className="pt-4">
-          <Button 
-            onClick={() => props.onRequestSkill ? props.onRequestSkill() : setShowRequestDialog(true)} 
-            className="w-full"
-          >
-            {isRequest ? 'Offer to Help' : 'Request to Learn'}
-          </Button>
-        </div>
-      )}
+      <ActionButtons 
+        isOwner={isOwnSkill}
+        isRequest={isRequest}
+        onDelete={props.onDelete}
+        onRequestSkill={handleRequestSkill}
+        isDeleting={props.isDeleting}
+      />
 
       {/* Request dialog */}
       <SkillSessionRequestDialog

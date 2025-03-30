@@ -1,6 +1,10 @@
+
 import { Calendar, Book, Package, Heart, Shield } from "lucide-react";
 
-// Color mapping for different activity types
+/**
+ * Color mapping for different activity types
+ * Used for visual distinction in the activity feed
+ */
 export const getActivityColor = (type: string): string => {
   switch (type) {
     case 'event_created':
@@ -22,6 +26,10 @@ export const getActivityColor = (type: string): string => {
   }
 };
 
+/**
+ * Icon mapping for different activity types
+ * Provides a visual indicator for each activity type
+ */
 export const getActivityIcon = (type: string) => {
   switch (type) {
     case 'event_created':
@@ -43,6 +51,10 @@ export const getActivityIcon = (type: string) => {
   }
 };
 
+/**
+ * Background color mapping for different activity types
+ * Used for hover effects
+ */
 export const getActivityBackground = (type: string) => {
   switch (type) {
     case 'event_created':
@@ -64,6 +76,10 @@ export const getActivityBackground = (type: string) => {
   }
 };
 
+/**
+ * Enhanced contextual descriptions for activity types
+ * Provides more specific information for each activity
+ */
 export const getActivityContext = (type: string): string => {
   switch (type) {
     case 'event_created':
@@ -71,9 +87,9 @@ export const getActivityContext = (type: string): string => {
     case 'event_rsvp':
       return "New event RSVP received";
     case 'skill_offered':
-      return "New skill offering available";
+      return "A neighbor is offering to share their skills";
     case 'skill_requested':
-      return "New skill request posted";
+      return "A neighbor is looking for help with a skill";
     case 'good_shared':
       return "New item shared with the community";
     case 'good_requested':
@@ -89,6 +105,9 @@ export const getActivityContext = (type: string): string => {
   }
 };
 
+/**
+ * Action button configuration for different activity types
+ */
 export const getActionButton = (activity: any) => {
   switch (activity.activity_type) {
     case 'event_created':
@@ -130,10 +149,29 @@ export const getActionButton = (activity: any) => {
   }
 };
 
+/**
+ * Extract description from activity metadata
+ */
 export const getActivityDescription = (metadata: any) => {
   if (!metadata) return null;
   if (typeof metadata === 'object' && metadata !== null && 'description' in metadata) {
     return metadata.description as string;
   }
   return null;
+};
+
+/**
+ * Get a more descriptive title for skill activities
+ */
+export const getSkillActivityTitle = (activity: any) => {
+  const baseTitle = activity.title || "Skill Exchange";
+  const type = activity.activity_type;
+  
+  if (type === 'skill_offered') {
+    return `Skill Offering: ${baseTitle}`;
+  } else if (type === 'skill_requested') {
+    return `Skill Request: ${baseTitle}`;
+  }
+  
+  return baseTitle;
 };
