@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
-import { Skill } from '../types/skillTypes';
+import { SkillWithProfile } from '../types/skillTypes';
 
 /**
  * SkillOfferCard - The compact card showing an offered skill
@@ -11,12 +11,7 @@ import { Skill } from '../types/skillTypes';
  * appropriate based on whether you're the owner or not.
  */
 interface SkillOfferCardProps {
-  skill: Skill & { 
-    profiles: { 
-      avatar_url: string | null; 
-      display_name: string | null; 
-    } 
-  };
+  skill: SkillWithProfile;
   isOwner: boolean;
   onDelete: () => void;
   isDeleting: boolean;
@@ -32,11 +27,15 @@ const SkillOfferCard = ({
   onRequestSkill,
   onClick 
 }: SkillOfferCardProps) => {
+  // This function handles the delete button click
+  // We stop event propagation to prevent the card onClick from firing
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete();
   };
 
+  // This function handles the request button click
+  // Again, we stop propagation to prevent the card onClick
   const handleRequestClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onRequestSkill();

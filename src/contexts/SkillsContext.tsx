@@ -7,7 +7,7 @@
  */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Skill, SkillCategory } from '@/components/skills/types/skillTypes';
+import { Skill, SkillCategory, SkillWithProfile, isValidRequestType } from '@/components/skills/types/skillTypes';
 import { SkillFormData } from '@/components/skills/types/skillFormTypes';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 // Define the context shape
 interface SkillsContextType {
-  skills: (Skill & { profiles: any })[];
+  skills: SkillWithProfile[];
   isLoading: boolean;
   selectedCategory: SkillCategory | null;
   setSelectedCategory: (category: SkillCategory | null) => void;
@@ -39,10 +39,26 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
 
   // Fetch skills data
-  const { data: skills = [], isLoading } = useQuery({
+  const { data: rawSkills = [], isLoading } = useQuery({
     queryKey: ['skills-exchange', selectedCategory],
     queryFn: () => skillsService.fetchSkills(selectedCategory || undefined),
     enabled: !!neighborhoodId,
+  });
+
+  // Validate and transform the skills to ensure they match our expected types
+  const skills: SkillWithProfile[] = rawSkills.map(skill => {
+    // Ensure request_type is valid, defaulting to 'offer' if invalid
+    const requestType = isValidRequestType(skill.request_type) ? skill.request_type : 'offer';
+    
+    // Create a properly typed skill object
+    return {
+      ...skill,
+      request_type: requestType,
+      // Ensure other critical fields have appropriate defaults
+      time_preferences: skill.time_preferences || null,
+      // Make sure we include the profiles data
+      profiles: skill.profiles || { avatar_url: null, display_name: null }
+    };
   });
 
   // Create a new skill

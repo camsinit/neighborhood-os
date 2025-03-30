@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Skill } from '../types/skillTypes';
+import { Skill, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 import SkillRequestCard from './SkillRequestCard';
@@ -17,12 +17,7 @@ import SkillDetailsContent from './SkillDetailsContent';
  * that determines which card type to show based on props.
  */
 interface SkillCardProps {
-  skill: Skill & { 
-    profiles: { 
-      avatar_url: string | null; 
-      display_name: string | null; 
-    } 
-  };
+  skill: SkillWithProfile;
   onContribute?: () => void;
   type: 'request' | 'offer';
 }

@@ -1,180 +1,145 @@
 
-/**
- * Skills Service
- * 
- * This service provides a centralized place for all skills-related data operations.
- * It abstracts database access and ensures consistent data handling.
- */
-import { supabase } from "@/integrations/supabase/client";
-import { Skill, SkillCategory } from "@/components/skills/types/skillTypes";
-import { SkillFormData } from "@/components/skills/types/skillFormTypes";
-import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { SkillCategory, SkillWithProfile } from '@/components/skills/types/skillTypes';
+import { SkillFormData } from '@/components/skills/types/skillFormTypes';
 
 /**
- * Fetches skills with optional category filtering
+ * Fetch skills from the database
+ * 
+ * @param category Optional category to filter by
  */
 export const fetchSkills = async (category?: SkillCategory) => {
-  try {
-    let query = supabase.from('skills_exchange').select(`
+  // Start the query builder
+  let query = supabase
+    .from('skills_exchange')
+    .select(`
       *,
-      profiles:user_id (
+      profiles (
         avatar_url,
         display_name
       )
-    `).order('created_at', { ascending: false });
-    
-    if (category) {
-      query = query.eq('skill_category', category);
-    }
-
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    return data;
-    
-  } catch (error) {
-    console.error("Error fetching skills:", error);
+    `)
+    .order('created_at', { ascending: false });
+  
+  // Apply category filter if specified
+  if (category) {
+    query = query.eq('skill_category', category);
+  }
+  
+  // Execute the query
+  const { data, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching skills:', error);
     throw error;
   }
+
+  return data as any[]; // Type assertion will be handled by the context
 };
 
 /**
- * Creates a new skill (offer or request)
+ * Create a new skill
  */
 export const createSkill = async (
-  formData: Partial<SkillFormData>, 
+  formData: Partial<SkillFormData>,
   mode: 'offer' | 'request',
   userId: string,
   neighborhoodId: string
 ) => {
-  try {
-    // Validate required fields
-    if (!formData.title || !formData.category) {
-      throw new Error("Missing required fields");
-    }
+  // Validate essential data
+  if (!formData.title || !formData.category) {
+    throw new Error('Title and category are required');
+  }
 
-    const skillData = {
-      title: formData.title,
-      description: formData.description || null,
-      request_type: mode === 'offer' ? 'offer' : 'need',
-      user_id: userId,
-      neighborhood_id: neighborhoodId,
-      skill_category: formData.category,
-      valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      availability: formData.availability || null,
-      time_preferences: formData.timePreference || []
-    };
+  const { error } = await supabase.from('skills_exchange').insert({
+    title: formData.title,
+    description: formData.description || null,
+    request_type: mode,
+    user_id: userId,
+    neighborhood_id: neighborhoodId,
+    skill_category: formData.category,
+    valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+    availability: formData.availability || null,
+    time_preferences: formData.timePreference || null
+  });
 
-    const { data, error } = await supabase
-      .from('skills_exchange')
-      .insert(skillData)
-      .select();
-
-    if (error) throw error;
-    return data?.[0];
-    
-  } catch (error) {
-    console.error("Error creating skill:", error);
+  if (error) {
+    console.error('Error creating skill:', error);
     throw error;
   }
 };
 
 /**
- * Updates an existing skill
+ * Update an existing skill
  */
 export const updateSkill = async (
   skillId: string,
   formData: Partial<SkillFormData>,
   userId: string
 ) => {
-  try {
-    // Validate required fields
-    if (!formData.title) {
-      throw new Error("Title is required");
-    }
-
-    const updateData = {
-      title: formData.title,
-      description: formData.description || null,
-      skill_category: formData.category,
-      availability: formData.availability || null,
-      time_preferences: formData.timePreference || []
-    };
-
-    const { data, error } = await supabase
-      .from('skills_exchange')
-      .update(updateData)
-      .eq('id', skillId)
-      .eq('user_id', userId)  // Security check
-      .select();
-
-    if (error) throw error;
-    return data?.[0];
-    
-  } catch (error) {
-    console.error("Error updating skill:", error);
+  // Prepare update data
+  const updateData: any = {};
+  
+  if (formData.title) updateData.title = formData.title;
+  if (formData.description !== undefined) updateData.description = formData.description || null;
+  if (formData.category) updateData.skill_category = formData.category;
+  if (formData.availability !== undefined) updateData.availability = formData.availability || null;
+  if (formData.timePreference !== undefined) updateData.time_preferences = formData.timePreference || null;
+  
+  // Update the skill
+  const { error } = await supabase
+    .from('skills_exchange')
+    .update(updateData)
+    .eq('id', skillId)
+    .eq('user_id', userId);
+  
+  if (error) {
+    console.error('Error updating skill:', error);
     throw error;
   }
 };
 
 /**
- * Deletes a skill and syncs related activities
+ * Delete a skill
  */
-export const deleteSkill = async (skillId: string, skillTitle: string, userId: string) => {
-  try {
-    // Delete the skill
-    const { error: deleteError } = await supabase
-      .from('skills_exchange')
-      .delete()
-      .eq('id', skillId)
-      .eq('user_id', userId); // Security check - only owner can delete
+export const deleteSkill = async (
+  skillId: string,
+  skillTitle: string,
+  userId: string
+) => {
+  // Delete the skill
+  const { error } = await supabase
+    .from('skills_exchange')
+    .delete()
+    .eq('id', skillId)
+    .eq('user_id', userId);
 
-    if (deleteError) throw deleteError;
-
-    // Notify about the change for activity feed updates
-    try {
-      await supabase.functions.invoke('notify-skills-changes', {
-        body: {
-          skillId,
-          action: 'delete',
-          skillTitle,
-          changes: 'Skill deleted'
-        }
-      });
-    } catch (functionError) {
-      console.error("Error updating activities:", functionError);
-      // Non-critical error, don't fail the operation
-    }
-
-    return true;
-    
-  } catch (error) {
-    console.error("Error deleting skill:", error);
+  if (error) {
+    console.error('Error deleting skill:', error);
     throw error;
   }
 };
 
 /**
- * Checks for similar skills to avoid duplicates
+ * Check for duplicate skills
  */
 export const checkForDuplicates = async (
   title: string,
   category: string,
   mode: 'offer' | 'request'
 ) => {
-  try {
-    const { data, error } = await supabase
-      .from('skills_exchange')
-      .select('id, title')
-      .ilike('title', `%${title}%`)
-      .eq('skill_category', category)
-      .eq('request_type', mode === 'offer' ? 'offer' : 'need');
+  // Query for similar skills
+  const { data, error } = await supabase
+    .from('skills_exchange')
+    .select()
+    .eq('request_type', mode)
+    .eq('skill_category', category)
+    .ilike('title', `%${title}%`);
 
-    if (error) throw error;
-    return data;
-    
-  } catch (error) {
-    console.error("Error checking for duplicates:", error);
-    return [];
+  if (error) {
+    console.error('Error checking for duplicates:', error);
+    throw error;
   }
+
+  return data;
 };

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trash2 } from 'lucide-react';
-import { Skill } from '../types/skillTypes';
+import { SkillWithProfile } from '../types/skillTypes';
 
 /**
  * SkillDetailsContent - Content displayed in the skill detail dialog
@@ -11,12 +11,7 @@ import { Skill } from '../types/skillTypes';
  * when a user clicks to see more information.
  */
 interface SkillDetailsContentProps {
-  skill: Skill & { 
-    profiles: { 
-      avatar_url: string | null; 
-      display_name: string | null; 
-    } 
-  };
+  skill: SkillWithProfile;
   isOwner: boolean;
   onDelete: () => void;
   isDeleting: boolean;

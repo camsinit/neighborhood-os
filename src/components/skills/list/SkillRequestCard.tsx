@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
-import { Skill } from '../types/skillTypes';
+import { SkillWithProfile } from '../types/skillTypes';
 
 /**
  * SkillRequestCard - Displays a request for skills from other users
@@ -13,12 +13,7 @@ import { Skill } from '../types/skillTypes';
  * that allows users to contribute their skills to help others.
  */
 interface SkillRequestCardProps {
-  skill: Skill & { 
-    profiles: { 
-      avatar_url: string | null; 
-      display_name: string | null; 
-    } 
-  };
+  skill: SkillWithProfile;
   onContribute: () => void;
 }
 
