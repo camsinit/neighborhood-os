@@ -92,12 +92,12 @@ export function HeroSection({
 
           {/* Title - Main headline with gradient text effect */}
           <h1 className="relative z-10 inline-block bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-7xl md:leading-tight">
-            {title}
+            neighborhoodOS
           </h1>
 
           {/* Description - Supporting text that explains the value proposition */}
           <p className="text-md relative z-10 max-w-[550px] font-medium text-muted-foreground sm:text-xl">
-            {description}
+            The neighborhood operating system to create a caring neighborhood
           </p>
 
           {/* Actions - Call-to-action buttons */}
