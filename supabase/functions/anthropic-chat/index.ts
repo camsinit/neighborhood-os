@@ -3,10 +3,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.6.2';
 
-// CORS Headers for browser access
+// Updated CORS Headers for browser access
+// Include x-application-name in the allowed headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
 };
 
 // Create a Supabase client
@@ -333,7 +334,7 @@ Focus on matching the user's needs with available skills and help offerings in t
 
 // Main handler for the edge function
 serve(async (req) => {
-  // Handle OPTIONS request for CORS
+  // Handle OPTIONS request for CORS - improved to return proper headers
   if (req.method === "OPTIONS") {
     return new Response(null, {
       headers: corsHeaders,
