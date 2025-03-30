@@ -6,47 +6,73 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@supabase/auth-helpers-react';
 import { formatDistanceToNow } from 'date-fns';
 import SkillSessionRequestDialog from '@/components/skills/SkillSessionRequestDialog';
+import { SkillWithProfile } from '../types/skillTypes';
 
+/**
+ * Props for SkillDetailsContent
+ * This component accepts either individual properties or a complete skill object
+ */
 interface SkillDetailsContentProps {
-  id: string;
-  title: string;
+  // Individual properties approach
+  id?: string;
+  title?: string;
   description?: string | null;
-  category: string;
+  category?: string;
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
     id: string;
   }[];
-  created_at: string;
-  request_type: string;
+  created_at?: string;
+  request_type?: string;
   availability?: string | null;
   time_preferences?: string[] | null;
   onClose?: () => void;
+  
+  // Alternative: pass the complete skill object
+  skill?: SkillWithProfile;
+  
+  // Actions for owner
+  isOwner?: boolean;
+  onDelete?: () => void;
+  isDeleting?: boolean;
+  onRequestSkill?: () => void;
 }
 
-const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
-  id,
-  title,
-  description,
-  category,
-  profiles = [],
-  created_at,
-  request_type,
-  availability,
-  time_preferences,
-  onClose,
-}) => {
+/**
+ * SkillDetailsContent - Displays detailed information about a skill
+ * 
+ * This component shows all relevant information about a skill offering or request,
+ * including the user profile, description, availability, and time preferences.
+ * It also provides action buttons appropriate for the current user.
+ */
+const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
+  // Initialize state for request dialog
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const user = useUser();
 
+  // Extract properties, either from individual props or from skill object
+  const id = props.skill?.id || props.id || '';
+  const title = props.skill?.title || props.title || '';
+  const description = props.skill?.description || props.description;
+  const category = props.skill?.skill_category || props.category || 'other';
+  const profiles = props.skill?.profiles ? [props.skill.profiles] : props.profiles || [];
+  const created_at = props.skill?.created_at || props.created_at || '';
+  const request_type = props.skill?.request_type || props.request_type || '';
+  const availability = props.skill?.availability || props.availability;
+  const time_preferences = props.skill?.time_preferences || props.time_preferences;
+  
+  // Determine if the current user is the owner
   const profile = profiles[0] || {};
-  const isOwnSkill = user?.id === profile.id;
+  const isOwnSkill = props.isOwner !== undefined ? props.isOwner : (user?.id === profile.id);
   const isRequest = request_type === 'need';
 
+  // Format the creation date
   const formattedDate = created_at
     ? formatDistanceToNow(new Date(created_at), { addSuffix: true })
     : '';
 
+  // Define category colors for visual distinction
   const categoryColors: Record<string, { bg: string; text: string }> = {
     technology: { bg: 'bg-blue-100', text: 'text-blue-800' },
     creativity: { bg: 'bg-purple-100', text: 'text-purple-800' },
@@ -56,13 +82,18 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
     gardening: { bg: 'bg-emerald-100', text: 'text-emerald-800' },
     repair: { bg: 'bg-amber-100', text: 'text-amber-800' },
     other: { bg: 'bg-gray-100', text: 'text-gray-800' },
+    creative: { bg: 'bg-purple-100', text: 'text-purple-800' },
+    trade: { bg: 'bg-amber-100', text: 'text-amber-800' },
+    wellness: { bg: 'bg-red-100', text: 'text-red-800' },
   };
 
+  // Get the appropriate color scheme for the category
   const { bg, text } = categoryColors[category as keyof typeof categoryColors] || 
     categoryColors.other;
 
   return (
     <div className="space-y-6 p-1">
+      {/* Header with title and category */}
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
@@ -75,6 +106,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       </div>
 
+      {/* User profile information */}
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
           {profile.avatar_url ? (
@@ -91,6 +123,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       </div>
 
+      {/* Description section */}
       {description && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-900">Description</h3>
@@ -98,6 +131,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       )}
 
+      {/* Availability section */}
       {availability && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-900">Availability</h3>
@@ -105,6 +139,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       )}
 
+      {/* Time preferences section */}
       {time_preferences && time_preferences.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-900">Time Preferences</h3>
@@ -118,10 +153,22 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       )}
 
-      {!isOwnSkill && (
+      {/* Action buttons */}
+      {isOwnSkill && props.onDelete ? (
         <div className="pt-4">
           <Button 
-            onClick={() => setShowRequestDialog(true)} 
+            onClick={props.onDelete}
+            variant="destructive"
+            disabled={props.isDeleting}
+            className="w-full"
+          >
+            {props.isDeleting ? 'Deleting...' : 'Delete Skill'}
+          </Button>
+        </div>
+      ) : !isOwnSkill && (
+        <div className="pt-4">
+          <Button 
+            onClick={() => props.onRequestSkill ? props.onRequestSkill() : setShowRequestDialog(true)} 
             className="w-full"
           >
             {isRequest ? 'Offer to Help' : 'Request to Learn'}
@@ -129,6 +176,7 @@ const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
         </div>
       )}
 
+      {/* Request dialog */}
       <SkillSessionRequestDialog
         open={showRequestDialog}
         onOpenChange={setShowRequestDialog}
