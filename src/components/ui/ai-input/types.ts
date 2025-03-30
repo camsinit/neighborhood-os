@@ -33,5 +33,5 @@ export interface AIInputWithSuggestionsProps {
     defaultSelected?: string;
     onSubmit?: (text: string, action?: string) => void;
     className?: string;
-    isLoading?: boolean;
+    isLoading?: boolean; // Added isLoading prop to handle loading state
 }
