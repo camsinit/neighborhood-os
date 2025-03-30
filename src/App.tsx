@@ -99,38 +99,43 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase} initialSession={session}>
         <NeighborhoodProvider>
+          {/* IMPORTANT: Only ONE Router component in the entire app */}
           <Router>
             <Routes>
               {/* Public routes */}
-              {/* Root route always displays landing page */}
+              {/* Root route displays landing page */}
               <Route path="/" element={<LandingPage />} />
               
-              {/* Authentication route */}
+              {/* Authentication route - single instance */}
               <Route path="/login" element={<Login />} />
               
-              {/* Join routes - using a single route with optional parameter */}
+              {/* Join routes - single instance with optional parameter */}
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               
-              {/* Route used for determining where to navigate based on auth state */}
+              {/* Route for determining navigation based on auth state */}
               <Route path="/index" element={<Index />} />
               
-              {/* Protected routes - all using the main layout with sidebar */}
+              {/* Protected routes - all using main layout with sidebar */}
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-                <Route index element={<Navigate to="/home" replace />} />
+                {/* Home route */}
                 <Route path="/home" element={<HomePage />} />
+                
+                {/* Feature routes */}
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
                 <Route path="/care" element={<CarePage />} />
+                
+                {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
                 
-                {/* Redirect old dashboard route to /home */}
+                {/* Redirects */}
                 <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               </Route>
 
-              {/* Redirect any unmatched routes to the landing page */}
+              {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster position="top-center" />

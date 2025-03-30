@@ -45,7 +45,7 @@ const Index = () => {
       timestamp: new Date().toISOString()
     });
     
-    // Use immediate routing to prevent duplicate page appearances
+    // Use immediate routing with replace to prevent history buildup
     // If user is not authenticated, redirect to landing page
     if (!user) {
       console.log("[Index] User not authenticated, redirecting to landing page");
