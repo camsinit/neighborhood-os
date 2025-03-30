@@ -60,22 +60,13 @@ const SafetyUpdates = () => {
   
   return (
     <>
-      {/* Add Update Button - hidden by default, shown via CSS in specific contexts */}
-      <Button 
-        data-add-update-button
-        className="hidden"
-        onClick={() => setIsAddUpdateOpen(true)}
-      >
-        Post Update
-      </Button>
-      
-      {/* Safety updates list */}
+      {/* Safety updates list with improved empty state and relocated button */}
       <div className="bg-transparent">
-        {/* Pass the array directly - not the PostgrestResponse object */}
         <SafetyUpdatesList
           updates={safetyUpdates}
           isLoading={isLoading}
           onUpdateClick={setSelectedUpdate}
+          onAddUpdate={() => setIsAddUpdateOpen(true)} // Pass the function to open the dialog
         />
       </div>
 
@@ -90,7 +81,7 @@ const SafetyUpdates = () => {
         </Button>
       </div>
 
-      {/* Using the new dialog component instead of the old one */}
+      {/* Safety Update Dialog */}
       <AddSafetyUpdateDialogNew 
         open={isAddUpdateOpen}
         onOpenChange={setIsAddUpdateOpen}
