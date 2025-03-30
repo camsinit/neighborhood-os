@@ -1,3 +1,4 @@
+
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -11,12 +12,13 @@ import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
+import { SkillRequestNotification } from "../skills/types/skillTypes";
 
 interface NotificationsPopoverProps {
   children?: ReactNode;
 }
 
-type NotificationActionType = "view" | "rsvp" | "comment" | "help" | "respond" | "share";
+type NotificationActionType = "view" | "rsvp" | "comment" | "help" | "respond" | "share" | "confirm";
 
 const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { toast } = useToast();
@@ -25,7 +27,9 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { data: notifications, refetch } = useQuery({
     queryKey: ["notifications", showArchived],
     queryFn: async () => {
-      const [safetyUpdates, events, supportRequests] = await Promise.all([
+      // Fetch data from multiple tables concurrently
+      const [safetyUpdates, events, supportRequests, skillRequests] = await Promise.all([
+        // Safety updates query
         supabase
           .from("safety_updates")
           .select(`
@@ -44,6 +48,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           .order("created_at", { ascending: false })
           .limit(5),
         
+        // Events query
         supabase
           .from("events")
           .select(`
@@ -61,6 +66,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           .order("created_at", { ascending: false })
           .limit(5),
           
+        // Support requests query  
         supabase
           .from("support_requests")
           .select(`
@@ -78,9 +84,37 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           .eq('is_archived', showArchived)
           .order("created_at", { ascending: false })
           .limit(5),
+          
+        // Skill requests query - new addition
+        supabase
+          .from("skill_sessions")
+          .select(`
+            id,
+            created_at,
+            status,
+            skill_id,
+            requester_id,
+            provider_id,
+            requester:requester_id (
+              display_name,
+              avatar_url
+            ),
+            skill:skill_id (
+              id,
+              title,
+              description,
+              availability,
+              time_preferences
+            )
+          `)
+          .eq('status', 'pending_scheduling')
+          .order("created_at", { ascending: false })
+          .limit(5)
       ]);
 
+      // Process the results into notification objects
       return [
+        // Safety notifications
         ...(safetyUpdates.data?.map(update => ({
           itemId: update.id,
           title: update.title,
@@ -97,6 +131,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionType: "comment" as NotificationActionType
         })) || []),
         
+        // Event notifications
         ...(events.data?.map(event => ({
           itemId: event.id,
           title: event.title,
@@ -113,6 +148,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           actionType: "rsvp" as NotificationActionType
         })) || []),
         
+        // Support request notifications
         ...(supportRequests.data?.map(request => {
           const actionType: NotificationActionType = 
             request.category === 'care' ? "help" :
@@ -137,11 +173,43 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
             actionType
           };
         }) || []),
+        
+        // Skill request notifications - new addition
+        ...(skillRequests.data?.map(session => {
+          // Convert skill session data into a notification format
+          const skillRequestData: SkillRequestNotification = {
+            skillId: session.skill_id,
+            requesterId: session.requester_id,
+            providerId: session.provider_id,
+            skillTitle: session.skill?.title || "Unnamed skill",
+            requesterName: session.requester?.display_name,
+            requesterAvatar: session.requester?.avatar_url,
+            timePreferences: session.skill?.time_preferences || null,
+            availability: session.skill?.availability || null
+          };
+          
+          return {
+            itemId: session.id,
+            title: session.skill?.title || "New skill request",
+            type: "skills" as const,
+            created_at: session.created_at,
+            isRead: false, // Skill sessions don't have a is_read flag yet
+            isArchived: false, // Skill sessions don't have is_archived yet
+            context: {
+              contextType: "skill_request" as const,
+              neighborName: session.requester?.display_name,
+              avatarUrl: session.requester?.avatar_url,
+              skillRequestData
+            },
+            actionLabel: "Confirm",
+            actionType: "confirm" as NotificationActionType
+          };
+        }) || [])
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
     },
   });
 
-  const handleItemClick = (type: "safety" | "event" | "support", id: string) => {
+  const handleItemClick = (type: "safety" | "event" | "support" | "skills", id: string) => {
     const event = new CustomEvent('openItemDialog', {
       detail: { type, id }
     });

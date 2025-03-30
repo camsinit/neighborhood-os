@@ -7,11 +7,14 @@ import { FinalizeDateDialog } from "@/components/skills/FinalizeDateDialog";
 import { getNotificationStyle } from "./utils/notificationStyles";
 import { archiveNotification, markAsRead } from "./utils/notificationActions";
 import { useNavigate } from "react-router-dom";
+import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
+import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
 
 interface NotificationContext {
   neighborName?: string;
   avatarUrl?: string;
-  contextType: "help_request" | "event_invite" | "safety_alert";
+  contextType: "help_request" | "event_invite" | "safety_alert" | "skill_request";
+  skillRequestData?: SkillRequestNotification;
 }
 
 interface NotificationItemProps {
@@ -38,6 +41,7 @@ const NotificationItem = ({
   const navigate = useNavigate();
   const [isRemoving, setIsRemoving] = useState(false);
   const [height, setHeight] = useState<number | undefined>();
+  const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
   const style = getNotificationStyle(type);
   const Icon = style.icon;
 
@@ -50,6 +54,8 @@ const NotificationItem = ({
         return `${context.neighborName} invites you to`;
       case "safety_alert":
         return `Important update from ${context.neighborName} about`;
+      case "skill_request":
+        return `${context.neighborName} is requesting your skill for`;
       default:
         return null;
     }
@@ -68,7 +74,15 @@ const NotificationItem = ({
     }, 300);
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // If this is a skill request notification, open the popover instead of navigating
+    if (type === 'skills' && context?.contextType === 'skill_request' && context.skillRequestData) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsSkillRequestDialogOpen(true);
+      return;
+    }
+    
     // Get the appropriate route for the notification type
     const routeMap = {
       safety: '/safety',
@@ -143,6 +157,15 @@ const NotificationItem = ({
           )}
         </div>
       </div>
+
+      {/* Skill Request Dialog */}
+      {context?.contextType === 'skill_request' && context.skillRequestData && (
+        <SkillRequestPopover
+          open={isSkillRequestDialogOpen}
+          onOpenChange={setIsSkillRequestDialogOpen}
+          notification={context.skillRequestData}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 import NotificationItem from "@/components/notifications/NotificationItem";
+import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
 
 /**
  * HomePage component
@@ -31,8 +31,8 @@ const HomePage = () => {
     queryKey: ["notifications", showArchived],
     queryFn: async () => {
       // Fetch data from multiple tables concurrently
-      // For events data, we'll get the latest information directly
-      const [safetyUpdates, events, supportRequests] = await Promise.all([
+      const [safetyUpdates, events, supportRequests, skillRequests] = await Promise.all([
+        // Safety updates query
         supabase.from("safety_updates").select(`
             id, 
             title, 
@@ -45,10 +45,10 @@ const HomePage = () => {
               avatar_url
             )
           `).eq('is_archived', showArchived).order("created_at", {
-        ascending: false
-      }).limit(5),
+          ascending: false
+        }).limit(5),
         
-        // Query events with a direct join to get up-to-date event information
+        // Events query  
         supabase.from("events").select(`
             id, 
             title, 
@@ -60,9 +60,10 @@ const HomePage = () => {
               avatar_url
             )
           `).eq('is_archived', showArchived).order("created_at", {
-        ascending: false
-      }).limit(5),
+          ascending: false
+        }).limit(5),
         
+        // Support requests query
         supabase.from("support_requests").select(`
             id, 
             title, 
@@ -74,12 +75,39 @@ const HomePage = () => {
               avatar_url
             )
           `).eq('is_archived', showArchived).order("created_at", {
-        ascending: false
-      }).limit(5)]);
-      
-      // Process the results, transforming them into consistent notification objects
-      // The important part is that we're using the latest event titles from the events table
+          ascending: false
+        }).limit(5),
+        
+        // Skill requests query - new addition
+        supabase
+          .from("skill_sessions")
+          .select(`
+            id,
+            created_at,
+            status,
+            skill_id,
+            requester_id,
+            provider_id,
+            requester:requester_id (
+              display_name,
+              avatar_url
+            ),
+            skill:skill_id (
+              id,
+              title,
+              description,
+              availability,
+              time_preferences
+            )
+          `)
+          .eq('status', 'pending_scheduling')
+          .order("created_at", { ascending: false })
+          .limit(5)
+      ]);
+
+      // Process the results into notification objects
       return [
+        // Safety notifications
         ...(safetyUpdates.data?.map(update => ({
           id: update.id,
           title: update.title,
@@ -92,11 +120,12 @@ const HomePage = () => {
             neighborName: update.profiles?.display_name,
             avatarUrl: update.profiles?.avatar_url
           }
-        })) || []), 
+        })) || []),
         
+        // Event notifications
         ...(events.data?.map(event => ({
           id: event.id,
-          title: event.title, // This will always have the up-to-date title
+          title: event.title,
           type: "event" as const,
           created_at: event.created_at,
           is_read: event.is_read,
@@ -106,8 +135,9 @@ const HomePage = () => {
             neighborName: event.profiles?.display_name,
             avatarUrl: event.profiles?.avatar_url
           }
-        })) || []), 
+        })) || []),
         
+        // Support request notifications
         ...(supportRequests.data?.map(request => ({
           id: request.id,
           title: request.title,
@@ -120,7 +150,37 @@ const HomePage = () => {
             neighborName: request.profiles?.display_name,
             avatarUrl: request.profiles?.avatar_url
           }
-        })) || [])
+        })) || []),
+        
+        // Skill request notifications - new addition
+        ...(skillRequests.data?.map(session => {
+          // Convert skill session data into a notification format
+          const skillRequestData: SkillRequestNotification = {
+            skillId: session.skill_id,
+            requesterId: session.requester_id,
+            providerId: session.provider_id,
+            skillTitle: session.skill?.title || "Unnamed skill",
+            requesterName: session.requester?.display_name,
+            requesterAvatar: session.requester?.avatar_url,
+            timePreferences: session.skill?.time_preferences || null,
+            availability: session.skill?.availability || null
+          };
+          
+          return {
+            id: session.id,
+            title: session.skill?.title || "New skill request",
+            type: "skills" as const,
+            created_at: session.created_at,
+            is_read: false, // Skill sessions don't have a is_read flag yet
+            is_archived: false, // Skill sessions don't have is_archived yet
+            context: {
+              contextType: "skill_request" as const,
+              neighborName: session.requester?.display_name,
+              avatarUrl: session.requester?.avatar_url,
+              skillRequestData
+            }
+          };
+        }) || [])
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });

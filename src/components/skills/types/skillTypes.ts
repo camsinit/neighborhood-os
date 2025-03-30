@@ -7,6 +7,9 @@ export type SkillRequestType = 'offer' | 'need';
 
 export type SkillStatus = 'pending' | 'pending_scheduling' | 'scheduled' | 'completed';
 
+// Define notification action types for skills
+export type SkillNotificationActionType = 'confirm' | 'view' | 'schedule';
+
 export interface Skill {
   id: string;
   title: string;
@@ -36,4 +39,16 @@ export interface SkillWithProfile extends Skill {
 // Helper type guard function to validate request types
 export function isValidRequestType(value: string): value is SkillRequestType {
   return value === 'offer' || value === 'need';
+}
+
+// Interface for skill request notification data
+export interface SkillRequestNotification {
+  skillId: string;
+  requesterId: string;
+  providerId: string;
+  skillTitle: string;
+  requesterName: string | null;
+  requesterAvatar: string | null;
+  timePreferences?: string[] | null;
+  availability?: string | null;
 }
