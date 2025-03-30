@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -23,8 +24,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
   // Get the query client for cache invalidation
   const queryClient = useQueryClient();
   
-  // Get the current neighborhood ID
-  const neighborhoodId = useCurrentNeighborhood();
+  // Get the current neighborhood
+  const neighborhood = useCurrentNeighborhood();
 
   /**
    * Handles the submission of a new event
@@ -40,11 +41,17 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       return;
     }
 
+    // Check if neighborhood exists and has an ID
+    if (!neighborhood?.id) {
+      toast.error("You must be part of a neighborhood to create an event");
+      return;
+    }
+
     try {
       // Add detailed logging before the insert operation
       console.log("[useEventSubmit] Attempting to insert event:", {
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
         timestamp: new Date().toISOString()
       });
@@ -62,7 +69,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         time: combinedTime, // Use the combined timestamp
         location: formData.location,
         host_id: user.id,
-        neighborhood_id: neighborhoodId
+        neighborhood_id: neighborhood.id // Use the neighborhood.id (string) not the whole object
       };
 
       // Log the actual data being sent to the database for debugging
@@ -83,7 +90,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
             code: error.code
           },
           userId: user.id,
-          neighborhoodId,
+          neighborhoodId: neighborhood.id,
           timestamp: new Date().toISOString()
         });
         throw error;
@@ -93,7 +100,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       console.log("[useEventSubmit] Event created successfully:", {
         eventId: data?.[0]?.id,
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         timestamp: new Date().toISOString()
       });
 

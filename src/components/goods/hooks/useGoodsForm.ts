@@ -30,7 +30,7 @@ export const useGoodsForm = ({
   // Get the current user and query client
   const user = useUser();
   const queryClient = useQueryClient();
-  const neighborhoodId = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood();
   
   // Determine whether this is an offer or request form
   const isOfferForm = initialRequestType === "offer";
@@ -160,14 +160,19 @@ export const useGoodsForm = ({
     }
     
     try {
-      // Submit the form with the correct number of arguments
-      // Make sure to pass the neighborhood ID as the 5th argument
+      // Fix: Pass neighborhood?.id (string) instead of neighborhood (object)
+      if (!neighborhood?.id) {
+        toast.error("No neighborhood selected");
+        return;
+      }
+      
+      // Submit the form with the neighborhood ID (string)
       const success = await submitGoodsForm(
         isOfferForm,
         itemFormData,
         requestFormData,
         user.id,
-        neighborhoodId
+        neighborhood.id // Pass the ID (string) instead of the whole object
       );
       
       if (success) {

@@ -17,12 +17,18 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   // Get current user, query client, and neighborhood context
   const user = useUser();
   const queryClient = useQueryClient();
-  const neighborhoodId = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood();
 
   const handleSubmit = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     // Validate required data
     if (!user) {
       toast.error("You must be logged in to create a skill exchange");
+      return;
+    }
+
+    // Check if we have a neighborhood ID
+    if (!neighborhood?.id) {
+      toast.error("You must be part of a neighborhood to create a skill exchange");
       return;
     }
 
@@ -38,7 +44,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         description: formData.description || null,
         request_type: mode === 'offer' ? 'offer' : 'need',
         user_id: user.id,
-        neighborhood_id: neighborhoodId,
+        neighborhood_id: neighborhood.id, // Use neighborhood.id (string) instead of the whole object
         skill_category: formData.category || 'technology', // Required field, provide default
         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
         availability: formData.availability || null,
@@ -48,7 +54,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       // Add detailed logging before insert operation
       console.log("[useSkillsExchange] Attempting to insert skill exchange:", {
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         mode,
         formData: { ...formattedData, description: formattedData.description?.substring(0, 20) + '...' },
         timestamp: new Date().toISOString()
@@ -69,7 +75,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
             code: error.code
           },
           userId: user.id,
-          neighborhoodId,
+          neighborhoodId: neighborhood.id,
           mode,
           timestamp: new Date().toISOString()
         });
@@ -80,7 +86,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       console.log("[useSkillsExchange] Skill exchange created successfully:", {
         skillId: data?.[0]?.id,
         userId: user.id,
-        neighborhoodId,
+        neighborhoodId: neighborhood.id,
         mode,
         timestamp: new Date().toISOString()
       });

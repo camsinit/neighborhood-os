@@ -19,13 +19,13 @@ const NeighborhoodInviteLink = () => {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const user = useUser();
-  const neighborhoodId = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood();
   
   /**
    * Generates a shareable invite link for the current neighborhood
    */
   const generateInviteLink = async () => {
-    if (!user || !neighborhoodId) {
+    if (!user || !neighborhood?.id) {
       toast.error("You must be logged in and part of a neighborhood to generate an invite link");
       return;
     }
@@ -40,7 +40,7 @@ const NeighborhoodInviteLink = () => {
       const { error } = await supabase
         .from('invitations')
         .insert({
-          neighborhood_id: neighborhoodId,
+          neighborhood_id: neighborhood.id, // Use neighborhood.id (string) instead of the whole object
           inviter_id: user.id,
           invite_code: inviteCode,
         });
@@ -78,10 +78,10 @@ const NeighborhoodInviteLink = () => {
   
   // Generate a link on component mount if none exists
   useEffect(() => {
-    if (!inviteLink && user && neighborhoodId) {
+    if (!inviteLink && user && neighborhood?.id) {
       generateInviteLink();
     }
-  }, [user, neighborhoodId]);
+  }, [user, neighborhood]);
   
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">

@@ -35,14 +35,14 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const user = useUser();
-  const neighborhoodId = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood();
   const queryClient = useQueryClient();
 
   // Fetch skills data
   const { data: rawSkills = [], isLoading } = useQuery({
     queryKey: ['skills-exchange', selectedCategory],
     queryFn: () => skillsService.fetchSkills(selectedCategory || undefined),
-    enabled: !!neighborhoodId,
+    enabled: !!neighborhood?.id,
   });
 
   // Validate and transform the skills to ensure they match our expected types
@@ -64,12 +64,13 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   // Create a new skill
   const createSkill = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     try {
-      if (!user || !neighborhoodId) {
+      if (!user || !neighborhood?.id) {
         toast.error("You must be logged in to create a skill");
         return;
       }
 
-      await skillsService.createSkill(formData, mode, user.id, neighborhoodId);
+      // Pass neighborhood.id (string) instead of the whole neighborhood object
+      await skillsService.createSkill(formData, mode, user.id, neighborhood.id);
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
