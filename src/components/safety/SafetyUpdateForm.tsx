@@ -20,6 +20,8 @@ import { safetyUpdateSchema, SafetyUpdateFormData } from "./schema/safetyUpdateS
 interface SafetyUpdateFormProps {
   onClose: () => void;
   existingData?: any;
+  mode?: 'create' | 'edit'; // Add the mode prop
+  updateId?: string; // Add the updateId prop
 }
 
 /**
@@ -28,7 +30,7 @@ interface SafetyUpdateFormProps {
  * This is the older version of the form that's being maintained for backward compatibility.
  * Consider using SafetyUpdateFormNew for new implementations.
  */
-export default function SafetyUpdateForm({ onClose, existingData }: SafetyUpdateFormProps) {
+export default function SafetyUpdateForm({ onClose, existingData, mode = 'create', updateId }: SafetyUpdateFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Set up form with validation
@@ -47,13 +49,13 @@ export default function SafetyUpdateForm({ onClose, existingData }: SafetyUpdate
   const neighborhood = useCurrentNeighborhood();
   const queryClient = useQueryClient();
   
-  // Custom hook for form submission
+  // Custom hook for form submission - use mode and updateId from props
   const { submitSafetyUpdate } = useSafetyUpdateFormSubmit(
     user,
     neighborhood,
     onClose,
-    existingData?.id ? 'edit' : 'create',
-    existingData?.id
+    mode, // Pass the mode prop
+    updateId || existingData?.id // Use updateId or fall back to existingData.id
   );
 
   // Function to handle the form submission
