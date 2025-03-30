@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/ui/loading";
@@ -25,19 +25,47 @@ interface Invitation {
  * It validates the invite code, shows relevant UI states, and processes the join request.
  */
 const JoinPage = () => {
+  // Get the invite code from URL parameters
   const { inviteCode } = useParams();
+  // Track the invitation data
   const [invitation, setInvitation] = useState<Invitation | null>(null);
+  // Track loading state
   const [loading, setLoading] = useState(true);
+  // Track joining process state
   const [joining, setJoining] = useState(false);
+  // Track any errors that occur
   const [error, setError] = useState<string | null>(null);
+  // Get current user
   const user = useUser();
+  // Get toast functionality for notifications
   const { toast } = useToast();
+  // Get navigation functionality
   const navigate = useNavigate();
+  // Get current location to understand what URL we're on
+  const location = useLocation();
 
+  // Debug the current URL and parameters
+  useEffect(() => {
+    console.log("[JoinPage] Render with:", {
+      path: location.pathname,
+      inviteCode,
+      hasUser: !!user
+    });
+  }, [location.pathname, inviteCode, user]);
+
+  // Effect to fetch invitation data when component mounts
   useEffect(() => {
     async function fetchInvitation() {
       try {
+        // If no invite code, show an error
+        if (!inviteCode) {
+          console.log("[JoinPage] No invitation code in URL");
+          throw new Error('No invitation code provided');
+        }
+        
         console.log("[JoinPage] Fetching invitation:", inviteCode);
+        
+        // Query the database for the invitation
         const { data, error } = await supabase
           .from('invitations')
           .select(`
@@ -49,16 +77,30 @@ const JoinPage = () => {
           .eq('invite_code', inviteCode)
           .single();
 
-        if (error) throw error;
+        // If there was a database error, throw it
+        if (error) {
+          console.error("[JoinPage] Database error:", error);
+          throw error;
+        }
+        
+        // If no data was returned, the invitation doesn't exist
         if (!data) {
+          console.log("[JoinPage] No invitation found for code:", inviteCode);
           throw new Error('Invitation not found');
         }
+        
+        // Check if invitation is expired
         if (data.status === 'expired') {
+          console.log("[JoinPage] Invitation expired:", data);
           throw new Error('This invitation has expired');
         }
+        
+        // Check if invitation is already used
         if (data.status === 'accepted') {
+          console.log("[JoinPage] Invitation already used:", data);
           throw new Error('This invitation has already been used');
         }
+        
         console.log("[JoinPage] Invitation found:", data);
         setInvitation(data as Invitation);
       } catch (err) {
@@ -69,14 +111,18 @@ const JoinPage = () => {
       }
     }
 
-    if (inviteCode) {
+    // Only fetch if we're on a page with an invite code
+    if (location.pathname.includes('/join/')) {
       fetchInvitation();
-    } else {
-      setError("No invitation code provided");
+    } else if (location.pathname === '/join') {
+      // If we're just on /join with no code, show appropriate message
+      console.log("[JoinPage] On /join with no code");
+      setError("To join a neighborhood, you need an invitation link from an existing member.");
       setLoading(false);
     }
-  }, [inviteCode]);
+  }, [inviteCode, location.pathname]);
 
+  // Function to handle completion of join process
   const handleJoinComplete = () => {
     toast({
       title: "Welcome!",
@@ -85,16 +131,28 @@ const JoinPage = () => {
     navigate('/neighbors');
   };
 
+  // Function to handle the join button click
   const handleJoin = async () => {
+    // Safety checks
     if (!user || !invitation) return;
+    
     setJoining(true);
     try {
-      const { data: existingMember } = await supabase
+      // Check if already a member of this neighborhood
+      const { data: existingMember, error: memberCheckError } = await supabase
         .from('neighborhood_members')
         .select('id')
         .eq('user_id', user.id)
         .eq('neighborhood_id', invitation.neighborhood_id)
         .single();
+        
+      if (memberCheckError && memberCheckError.code !== 'PGRST116') {
+        // If error is not "no rows returned" then it's a real error
+        console.error("[JoinPage] Error checking membership:", memberCheckError);
+        throw new Error("Could not verify existing membership");
+      }
+      
+      // If already a member, show message and navigate
       if (existingMember) {
         toast({
           title: "Already a member",
@@ -103,6 +161,8 @@ const JoinPage = () => {
         navigate('/neighbors');
         return;
       }
+      
+      // Add the user to neighborhood members
       const { error: memberError } = await supabase
         .from('neighborhood_members')
         .insert({
@@ -110,7 +170,13 @@ const JoinPage = () => {
           neighborhood_id: invitation.neighborhood_id,
           status: 'active'
         });
-      if (memberError) throw memberError;
+        
+      if (memberError) {
+        console.error("[JoinPage] Error adding member:", memberError);
+        throw memberError;
+      }
+      
+      // Update invitation status to accepted
       const { error: inviteError } = await supabase
         .from('invitations')
         .update({
@@ -119,7 +185,13 @@ const JoinPage = () => {
           accepted_at: new Date().toISOString()
         })
         .eq('id', invitation.id);
-      if (inviteError) throw inviteError;
+        
+      if (inviteError) {
+        console.error("[JoinPage] Error updating invitation:", inviteError);
+        throw inviteError;
+      }
+      
+      // Complete the join process
       handleJoinComplete();
     } catch (err) {
       console.error("[JoinPage] Error joining neighborhood:", err);
@@ -133,6 +205,7 @@ const JoinPage = () => {
     }
   };
 
+  // Show loading spinner while loading
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -141,6 +214,7 @@ const JoinPage = () => {
     );
   }
 
+  // Show error message if there is an error
   if (error || !invitation) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -157,6 +231,7 @@ const JoinPage = () => {
     );
   }
 
+  // Show join UI if everything is valid
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="p-6 max-w-md w-full">

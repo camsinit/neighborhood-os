@@ -104,7 +104,10 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
+              
+              {/* Join routes - both with and without invite code */}
               <Route path="/join" element={<JoinPage />} />
+              <Route path="/join/:inviteCode" element={<JoinPage />} />
 
               {/* Index route - handles routing logic based on auth state */}
               <Route path="/index" element={<Index />} />

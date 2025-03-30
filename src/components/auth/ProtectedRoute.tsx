@@ -34,6 +34,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Get neighborhood status
   const { currentNeighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
 
+  // Debug info
+  console.log("[ProtectedRoute] Checking route access:", {
+    path: location.pathname,
+    isLoadingAuth,
+    isLoadingNeighborhood,
+    hasUser: !!user,
+    hasNeighborhood: !!currentNeighborhood
+  });
+
   // Show loading spinner while checking authentication and neighborhood
   if (isLoadingAuth || (isLoadingNeighborhood && user)) {
     return (
@@ -54,9 +63,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
+  // Handle special case for join pages
+  const isJoinPage = location.pathname === '/join' || location.pathname.startsWith('/join/');
+  
   // If user has no neighborhood and trying to access a page that requires one,
   // redirect to join page - except for the join page itself to avoid loops
-  if (!currentNeighborhood && !location.pathname.includes('/join')) {
+  if (!currentNeighborhood && !isJoinPage) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
     return <Navigate to="/join" replace />;
   }
