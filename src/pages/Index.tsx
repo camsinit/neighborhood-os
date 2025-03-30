@@ -25,7 +25,7 @@ const Index = () => {
   const user = useUser();
   
   // Get neighborhood context
-  const { currentNeighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error } = useNeighborhood();
   
   // Effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
@@ -41,6 +41,7 @@ const Index = () => {
       hasNeighborhood: !!currentNeighborhood,
       neighborhoodId: currentNeighborhood?.id,
       userId: user?.id,
+      neighborhoodError: error,
       timestamp: new Date().toISOString()
     });
     
@@ -50,6 +51,13 @@ const Index = () => {
       if (!user) {
         console.log("[Index] User not authenticated, redirecting to landing page");
         navigate("/", { replace: true });
+        return;
+      }
+      
+      // If there was an error loading neighborhood data, still try to proceed to join page
+      if (error) {
+        console.log("[Index] Error loading neighborhood data, redirecting to join page:", error);
+        navigate("/join", { replace: true });
         return;
       }
       
@@ -70,7 +78,7 @@ const Index = () => {
 
     // Clean up timer on unmount
     return () => clearTimeout(timer);
-  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate]);
+  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error]);
 
   // Show a visible loading indicator while determining where to route
   return (
@@ -81,6 +89,12 @@ const Index = () => {
         <p className="text-gray-400 text-sm mt-2">
           {isLoadingNeighborhood ? "Loading your neighborhood..." : "Preparing your experience..."}
         </p>
+        {error && (
+          <p className="text-amber-600 text-sm mt-4">
+            Note: Having trouble connecting to neighborhood data. 
+            Redirecting you to join a neighborhood.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   
   // Get neighborhood status
-  const { currentNeighborhood, isLoading: isLoadingNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error } = useNeighborhood();
 
   // Debug info
   console.log("[ProtectedRoute] Checking route access:", {
@@ -40,7 +40,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     isLoadingAuth,
     isLoadingNeighborhood,
     hasUser: !!user,
-    hasNeighborhood: !!currentNeighborhood
+    hasNeighborhood: !!currentNeighborhood,
+    neighborhoodError: error ? true : false
   });
 
   // Show loading spinner while checking authentication and neighborhood
@@ -70,7 +71,17 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // redirect to join page - except for the join page itself to avoid loops
   if (!currentNeighborhood && !isJoinPage) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
+    // If there was an error loading neighborhood data, include that in the redirect
+    if (error) {
+      console.log("[ProtectedRoute] Error loading neighborhood data:", error);
+    }
     return <Navigate to="/join" replace />;
+  }
+
+  // Handle case where we're having persistent errors loading neighborhood data
+  if (error && !isJoinPage) {
+    console.log("[ProtectedRoute] Persistent error with neighborhood data:", error);
+    // We could consider showing an error page here instead of a redirect
   }
   
   // User is authenticated and has necessary data, render the protected content

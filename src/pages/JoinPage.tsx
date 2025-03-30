@@ -57,16 +57,21 @@ const JoinPage = () => {
   useEffect(() => {
     async function fetchInvitation() {
       try {
-        // If no invite code, show an error
+        // Clear any previous errors
+        setError(null);
+        
+        // If no invite code, show appropriate message for the join landing page
         if (!inviteCode) {
-          console.log("[JoinPage] No invitation code in URL");
-          throw new Error('No invitation code provided');
+          console.log("[JoinPage] No invitation code in URL - this is the join landing page");
+          setInvitation(null);
+          setLoading(false);
+          return;
         }
         
         console.log("[JoinPage] Fetching invitation:", inviteCode);
         
         // Query the database for the invitation
-        const { data, error } = await supabase
+        const { data, error: fetchError } = await supabase
           .from('invitations')
           .select(`
             *,
@@ -78,9 +83,9 @@ const JoinPage = () => {
           .single();
 
         // If there was a database error, throw it
-        if (error) {
-          console.error("[JoinPage] Database error:", error);
-          throw error;
+        if (fetchError) {
+          console.error("[JoinPage] Database error fetching invitation:", fetchError);
+          throw new Error(`Error fetching invitation: ${fetchError.message}`);
         }
         
         // If no data was returned, the invitation doesn't exist
@@ -104,23 +109,22 @@ const JoinPage = () => {
         console.log("[JoinPage] Invitation found:", data);
         setInvitation(data as Invitation);
       } catch (err) {
-        console.error("[JoinPage] Error fetching invitation:", err);
+        console.error("[JoinPage] Error in invitation process:", err);
         setError(err instanceof Error ? err.message : 'Failed to load invitation');
       } finally {
         setLoading(false);
       }
     }
 
-    // Only fetch if we're on a page with an invite code
-    if (location.pathname.includes('/join/')) {
+    // Fetch invitation if we're on a join page with a code
+    if (inviteCode) {
       fetchInvitation();
-    } else if (location.pathname === '/join') {
-      // If we're just on /join with no code, show appropriate message
-      console.log("[JoinPage] On /join with no code");
-      setError("To join a neighborhood, you need an invitation link from an existing member.");
+    } else {
+      // If we're just on /join with no code, show the join landing page
+      console.log("[JoinPage] On /join with no code - showing join landing page");
       setLoading(false);
     }
-  }, [inviteCode, location.pathname]);
+  }, [inviteCode]);
 
   // Function to handle completion of join process
   const handleJoinComplete = () => {
@@ -149,7 +153,7 @@ const JoinPage = () => {
       if (memberCheckError && memberCheckError.code !== 'PGRST116') {
         // If error is not "no rows returned" then it's a real error
         console.error("[JoinPage] Error checking membership:", memberCheckError);
-        throw new Error("Could not verify existing membership");
+        throw new Error(`Could not verify existing membership: ${memberCheckError.message}`);
       }
       
       // If already a member, show message and navigate
@@ -197,7 +201,7 @@ const JoinPage = () => {
       console.error("[JoinPage] Error joining neighborhood:", err);
       toast({
         title: "Error",
-        description: "Failed to join neighborhood. Please try again.",
+        description: err instanceof Error ? err.message : "Failed to join neighborhood. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -214,7 +218,40 @@ const JoinPage = () => {
     );
   }
 
-  // Show error message if there is an error
+  // If we're on the join page without an invite code, show the join landing page
+  if (!inviteCode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6 max-w-md w-full">
+          <h1 className="text-2xl font-bold text-center mb-4">Join a Neighborhood</h1>
+          <p className="text-center text-gray-600 mb-4">
+            To join a neighborhood, you need an invitation link from an existing member.
+          </p>
+          {!user ? (
+            <div className="space-y-4">
+              <Button className="w-full" onClick={() => navigate('/login')}>
+                Sign in first
+              </Button>
+              <p className="text-center text-sm text-gray-500">
+                You'll need to sign in before you can join a neighborhood.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-center text-amber-600">
+                Please use an invitation link to join a neighborhood.
+              </p>
+              <Button className="w-full" onClick={() => navigate('/')}>
+                Go Home
+              </Button>
+            </div>
+          )}
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error message if there is an error with the invitation
   if (error || !invitation) {
     return (
       <div className="min-h-screen flex items-center justify-center">

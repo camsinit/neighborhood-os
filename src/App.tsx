@@ -101,11 +101,11 @@ function App() {
         <NeighborhoodProvider>
           <Router>
             <Routes>
-              {/* Public routes */}
+              {/* Public routes - each route appears only once */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               
-              {/* Join routes - both with and without invite code */}
+              {/* Join routes - unified into a single component with optional parameter */}
               <Route path="/join" element={<JoinPage />} />
               <Route path="/join/:inviteCode" element={<JoinPage />} />
 
