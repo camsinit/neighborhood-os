@@ -40,12 +40,12 @@ export const useSafetyUpdateFormSubmit = (
     setIsSubmitting(true);
 
     try {
-      // Prepare the safety update data object
+      // Prepare the safety update data object - using author_id instead of user_id
       const updateData = {
         title: data.title,
         description: data.description,
         type: data.type,
-        user_id: user.id,
+        author_id: user.id, // Changed from user_id to author_id to match the table schema
         neighborhood_id: neighborhoodData.id,
       };
 

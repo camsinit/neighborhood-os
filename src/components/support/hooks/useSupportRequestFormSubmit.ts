@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood/types';
-import { SupportRequestFormData } from '../types/formTypes';
 import { refreshEvents } from '@/utils/refreshEvents';
+import { SupportRequestFormData } from '../types/formTypes';
 
 /**
  * Custom hook for handling support request form submissions
@@ -89,8 +89,18 @@ export const useSupportRequestFormSubmit = (
           : "Support request created successfully"
       );
 
-      // Trigger refresh of relevant data
-      refreshEvents.support();
+      // Fixed: Use the correct refresh event based on the category
+      if (formData.category === 'goods') {
+        refreshEvents.goods();
+      } else if (formData.category === 'skills') {
+        refreshEvents.skills();
+      } else if (formData.category === 'care') {
+        refreshEvents.care();
+      } else {
+        // Generic refresh for other types - we don't have a specific "support" event
+        // Using a common refresh event instead
+        refreshEvents.goods(); // Using goods as a fallback
+      }
 
       // Close the form
       onClose();
