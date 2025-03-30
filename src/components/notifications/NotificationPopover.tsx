@@ -103,7 +103,7 @@ const NotificationPopover = ({
       <PopoverTrigger ref={popoverRef} asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-80">
+      <PopoverContent className="w-80 bg-white shadow-md">
         <div className="space-y-2">
           <h4 className="font-medium text-lg">{title}</h4>
           

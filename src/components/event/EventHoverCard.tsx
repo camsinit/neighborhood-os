@@ -19,16 +19,19 @@ const EventHoverCard = ({ event, children, EditButton }: EventHoverCardProps) =>
   // Get RSVP count for this event
   useEffect(() => {
     const fetchRsvpCount = async () => {
+      // Query the database to get the count of RSVPs for this event
       const { count, error } = await supabase
         .from('event_rsvps')
         .select('id', { count: 'exact', head: true })
         .eq('event_id', event.id);
         
+      // Handle any errors that occur during the fetch
       if (error) {
         console.error('Error fetching RSVP count:', error);
         return;
       }
       
+      // Update the state with the count (or 0 if null)
       setRsvpCount(count || 0);
     };
     
@@ -40,7 +43,7 @@ const EventHoverCard = ({ event, children, EditButton }: EventHoverCardProps) =>
       <HoverCardTrigger asChild>
         {children}
       </HoverCardTrigger>
-      <HoverCardContent className="w-80">
+      <HoverCardContent className="w-80 bg-white border border-gray-200 shadow-lg">
         <div className="space-y-2">
           <h4 className="font-semibold">{event.title}</h4>
           <div className="flex items-center gap-2 text-sm">
