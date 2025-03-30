@@ -14,20 +14,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Calendar } from "@/components/ui/calendar";
-import { addDays, format } from "date-fns";
-import TimeSlotSelector, { TimeSlot } from "./contribution/TimeSlotSelector";
+import { addDays } from "date-fns";
+import { TimeSlot } from "./contribution/TimeSlotSelector";
+import TimeSlotSelectionSection from "./TimeSlotSelectionSection";
+import GeneralAvailabilitySection from "./GeneralAvailabilitySection";
 
-// Define the form data structure
+/**
+ * Define the form data structure
+ */
 interface SkillRequestFormData {
   description: string;
   availability: 'weekdays' | 'weekends' | 'both';
   timePreference: ('morning' | 'afternoon' | 'evening')[];
 }
 
+/**
+ * Props for the dialog component
+ */
 interface SkillSessionRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,6 +41,14 @@ interface SkillSessionRequestDialogProps {
   providerId: string;
 }
 
+/**
+ * A dialog component for requesting a skill session
+ * 
+ * This component allows users to:
+ * 1. Describe what they need help with
+ * 2. Select specific dates and time preferences
+ * 3. Specify general availability patterns
+ */
 const SkillSessionRequestDialog = ({
   open,
   onOpenChange,
@@ -43,10 +56,11 @@ const SkillSessionRequestDialog = ({
   skillTitle,
   providerId,
 }: SkillSessionRequestDialogProps) => {
+  // State management
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Add state for date selection
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
   
+  // Hooks
   const user = useUser();
   const queryClient = useQueryClient();
 
@@ -65,36 +79,18 @@ const SkillSessionRequestDialog = ({
     after: addDays(new Date(), 90) // Limit date selection to 90 days in the future
   };
 
-  // Handler for date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    if (!date) return;
-    const formattedDate = format(date, 'yyyy-MM-dd');
-    const existingSlotIndex = selectedTimeSlots.findIndex(
-      slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
-    );
-
-    if (existingSlotIndex === -1) {
-      if (selectedTimeSlots.length < 3) {
-        // Add a new date with no time preferences selected yet
-        setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
-      } else {
-        toast.error("Maximum 3 dates can be selected", {
-          description: "Please remove a date before adding another one"
-        });
-      }
-    } else {
-      // Remove the date if clicked again
-      setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
-    }
-  };
-
+  /**
+   * Handles the form submission
+   * Creates a skill session and time slots in the database
+   */
   const onSubmit = async (data: SkillRequestFormData) => {
+    // Check user authentication
     if (!user) {
       toast.error('You must be logged in to request skills');
       return;
     }
 
-    // Make sure at least 3 dates are selected
+    // Validate date selection
     if (selectedTimeSlots.length < 3) {
       toast.error('Date selection required', {
         description: 'Please select exactly 3 different dates for your request'
@@ -102,7 +98,7 @@ const SkillSessionRequestDialog = ({
       return;
     }
 
-    // Make sure each date has at least one time preference
+    // Validate time preferences
     if (selectedTimeSlots.some(slot => slot.preferences.length === 0)) {
       toast.error('Time preferences required', {
         description: 'Please select at least one time preference for each selected date'
@@ -150,6 +146,7 @@ const SkillSessionRequestDialog = ({
 
       if (timeSlotError) throw timeSlotError;
 
+      // Show success message and update UI
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       onOpenChange(false);
@@ -189,113 +186,17 @@ const SkillSessionRequestDialog = ({
             )}
           />
 
-          {/* Date Selection Section */}
-          <div className="space-y-2">
-            <FormLabel>Select 3 dates that work for you</FormLabel>
-            <div className="border rounded-lg p-4">
-              <Calendar
-                mode="single"
-                selected={undefined}
-                onSelect={handleDateSelect}
-                disabled={disabledDays}
-                className="mx-auto"
-              />
-            </div>
-          </div>
-
-          {/* Display selected dates with time preferences */}
-          <div className="space-y-4">
-            {selectedTimeSlots.map((slot, index) => (
-              <TimeSlotSelector
-                key={format(slot.date, 'yyyy-MM-dd')}
-                timeSlot={slot}
-                onRemove={() => setSelectedTimeSlots(slots => 
-                  slots.filter((_, i) => i !== index)
-                )}
-                onPreferenceChange={(timeId) => {
-                  setSelectedTimeSlots(slots =>
-                    slots.map((s, i) => {
-                      if (i === index) {
-                        const preferences = s.preferences.includes(timeId)
-                          ? s.preferences.filter(p => p !== timeId)
-                          : [...s.preferences, timeId];
-                        return { ...s, preferences };
-                      }
-                      return s;
-                    })
-                  );
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Availability Field */}
-          <FormField
-            control={form.control}
-            name="availability"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>When are you generally available?</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex flex-col space-y-1"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weekdays" id="weekdays" />
-                      <label htmlFor="weekdays">Weekdays</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weekends" id="weekends" />
-                      <label htmlFor="weekends">Weekends</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="both" id="both" />
-                      <label htmlFor="both">Both weekdays and weekends</label>
-                    </div>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          {/* Date and Time Selection Section */}
+          <TimeSlotSelectionSection
+            selectedTimeSlots={selectedTimeSlots}
+            setSelectedTimeSlots={setSelectedTimeSlots}
+            disabledDays={disabledDays}
           />
 
-          {/* Time Preference Field */}
-          <FormField
-            control={form.control}
-            name="timePreference"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>What times of day generally work best for you?</FormLabel>
-                <FormControl>
-                  <div className="flex flex-wrap gap-4">
-                    {['morning', 'afternoon', 'evening'].map((time) => (
-                      <div key={time} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={time}
-                          checked={field.value.includes(time as any)}
-                          onChange={(e) => {
-                            const updatedValue = e.target.checked
-                              ? [...field.value, time]
-                              : field.value.filter((t) => t !== time);
-                            field.onChange(updatedValue);
-                          }}
-                          className="mr-2"
-                        />
-                        <label htmlFor={time} className="capitalize">
-                          {time}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* General Availability Section */}
+          <GeneralAvailabilitySection form={form} />
 
+          {/* Form Controls */}
           <div className="flex justify-end space-x-2">
             <Button
               type="button"
