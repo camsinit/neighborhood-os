@@ -105,8 +105,8 @@ const WaitlistForm = () => {
         Invites rolling out May 1
       </Badge>
       
-      {/* Wrap the form with the StarBorder component */}
-      <StarBorder as="div" className="w-full max-w-md">
+      {/* Wrap the form with the StarBorder component - increased max-width by 25% from 400px to 500px */}
+      <StarBorder as="div" className="w-full max-w-[500px]">
         <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
           {/* If submitted, show confirmation message. Otherwise, show email input field */}
           {isSubmitted ? (
