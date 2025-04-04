@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -100,7 +101,8 @@ export function HeroSection({
             </div>}
 
           {/* Waitlist Form - Alternative to action buttons */}
-          {waitlistForm && <div className="relative z-10 flex justify-center w-full max-w-md">
+          {/* Modified to not restrict width and let the component control its own width */}
+          {waitlistForm && <div className="relative z-10 w-full flex justify-center">
               {waitlistForm}
             </div>}
 

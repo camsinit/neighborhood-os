@@ -96,17 +96,21 @@ const WaitlistForm = () => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    // Modified container to control width directly at this level 
+    // and ensure it applies to both the badge and form
+    <div className="w-full max-w-[600px] mx-auto">
       {/* Banner announcing invite rollout */}
-      <Badge 
-        variant="outline" 
-        className="mb-2 py-1 px-3 bg-gradient-to-r from-blue-100 to-purple-100 text-primary animate-pulse border-primary/30"
-      >
-        Invites rolling out May 1
-      </Badge>
+      <div className="w-full text-center mb-2">
+        <Badge 
+          variant="outline" 
+          className="py-1 px-3 bg-gradient-to-r from-blue-100 to-purple-100 text-primary animate-pulse border-primary/30"
+        >
+          Invites rolling out May 1
+        </Badge>
+      </div>
       
-      {/* Wrap the form with the StarBorder component - increased width by another 100px from 500px to 600px */}
-      <StarBorder as="div" className="w-full max-w-[600px]">
+      {/* Changed wrapper to full width to properly apply max-width */}
+      <StarBorder as="div" className="w-full">
         <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
           {/* If submitted, show confirmation message. Otherwise, show email input field */}
           {isSubmitted ? (
