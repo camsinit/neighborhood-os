@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -110,7 +111,7 @@ export function HeroSection({
             The MockupFrame is removed but we keep the Mockup wrapper
             Added rounded corners and drop shadow to make the image pop
            */}
-          <div className="relative pt-8 w-full max-w-5xl mb-16"> {/* Reduced pt from 12 to 8 */}
+          <div className="relative pt-8 w-full max-w-3xl mb-16"> {/* Changed max-w-5xl to max-w-3xl for 75% smaller width */}
             {/* Updated container to allow shadow to extend beyond boundaries */}
             <div className="relative px-8 pb-8">
               {/* Rainbow gradient effect behind the image - made more diffused */}
@@ -125,8 +126,15 @@ export function HeroSection({
               {/* Mockup Component that contains the image */}
               <Mockup type="responsive">
                 {/* Added rounded-2xl for curved corners and drop-shadow-xl for the pop effect */}
-                <img src={image.src} alt={image.alt} width={1248} height={765} className="w-full h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" // Added z-10 to stay above gradient
-              />
+                {/* Added max-w-[75%] and mx-auto to make the image 75% of its container size and center it */}
+                <img 
+                  src={image.src} 
+                  alt={image.alt} 
+                  width={1248} 
+                  height={765} 
+                  className="w-[75%] h-auto mx-auto object-contain rounded-2xl drop-shadow-xl relative z-10" 
+                  // Changed from w-full to w-[75%] and added mx-auto to center the smaller image
+                />
               </Mockup>
             </div>
           </div>
