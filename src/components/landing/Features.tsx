@@ -11,46 +11,56 @@ import { Calendar, Shield, Sparkles, Package, Heart, Users, Home } from "lucide-
  */
 const Features = () => {
   // Array of feature data objects for easy maintenance and updates
+  // Each feature now includes a borderColor that corresponds to the section color in the dashboard
   const features = [
     {
       icon: <Home className="h-6 w-6 text-primary" />,
       title: "Home Dashboard",
-      description: "AI Neighborhood Assistant that learns your community's needs, answers questions, and helps find local resources."
+      description: "AI Neighborhood Assistant that learns your community's needs, answers questions, and helps find local resources.",
+      borderColor: "border-primary/70" // Primary blue for Home
     },
     {
-      icon: <Calendar className="h-6 w-6 text-primary" />,
+      icon: <Calendar className="h-6 w-6 text-[#3b82f6]" />,
       title: "Community Calendar",
-      description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality."
+      description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality.",
+      borderColor: "border-[#3b82f6]/70" // Calendar blue
     },
     {
-      icon: <Shield className="h-6 w-6 text-primary" />,
+      icon: <Shield className="h-6 w-6 text-[#ef4444]" />,
       title: "Safety Updates",
-      description: "Share and receive important safety information with neighbors, from suspicious activity to lost pets."
+      description: "Share and receive important safety information with neighbors, from suspicious activity to lost pets.",
+      borderColor: "border-[#ef4444]/70" // Safety red
     },
     {
-      icon: <Sparkles className="h-6 w-6 text-primary" />,
+      icon: <Sparkles className="h-6 w-6 text-[#10b981]" />,
       title: "Skills Exchange",
-      description: "Offer your talents to neighbors or find help with projects, from gardening advice to language lessons."
+      description: "Offer your talents to neighbors or find help with projects, from gardening advice to language lessons.",
+      borderColor: "border-[#10b981]/70" // Skills green
     },
     {
-      icon: <Package className="h-6 w-6 text-primary" />,
+      icon: <Package className="h-6 w-6 text-[#f59e0b]" />,
       title: "Goods Exchange",
-      description: "Reduce waste by sharing items like ladders or cake pans that aren't used daily. See what's available nearby."
+      description: "Reduce waste by sharing items like ladders or cake pans that aren't used daily. See what's available nearby.",
+      borderColor: "border-[#f59e0b]/70" // Goods amber/orange
     },
     {
-      icon: <Heart className="h-6 w-6 text-primary" />,
+      icon: <Heart className="h-6 w-6 text-[#8b5cf6]" />,
       title: "Care Requests",
-      description: "Request or offer help during challenging times, from meal trains to rides for medical appointments."
+      description: "Request or offer help during challenging times, from meal trains to rides for medical appointments.",
+      borderColor: "border-[#8b5cf6]/70" // Care purple
     },
     {
-      icon: <Users className="h-6 w-6 text-primary" />,
+      icon: <Users className="h-6 w-6 text-[#6b7280]" />,
       title: "Neighbors Directory",
-      description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share."
+      description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share.",
+      borderColor: "border-[#6b7280]/70" // Neighbors gray
     }
   ];
 
   return (
-    <section className="py-16 px-4 bg-white">
+    // Changed bg-white to bg-background to inherit the same style as the section above
+    // Added more padding (px-6 md:px-12 instead of just px-4)
+    <section className="py-16 px-6 md:px-12 lg:px-16 bg-background">
       {/* Section header with title and description */}
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
@@ -61,12 +71,13 @@ const Features = () => {
         </p>
       </div>
 
-      {/* Features grid */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Features grid - added more horizontal padding with mx-auto max-w-7xl px-4 sm:px-6 */}
+      <div className="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {features.map((feature, index) => (
           <div 
             key={index} 
-            className="border border-border/30 rounded-xl p-6 flex flex-col gap-4 transition-all duration-200 hover:shadow-md hover:border-primary/30"
+            // Added the specific border color for each card and increased padding
+            className={`border ${feature.borderColor} rounded-xl p-7 flex flex-col gap-4 transition-all duration-200 hover:shadow-md hover:border-primary/50`}
           >
             {/* Icon with primary color */}
             <div className="mb-2">
