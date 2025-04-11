@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
@@ -71,7 +70,7 @@ export function HeroSection({
     }} />
       
       {/* Added extra padding to ensure there's space for the shadow */}
-      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10"> {/* Kept z-10 to ensure content stays above gradient */}
+      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10 py-0"> {/* Kept z-10 to ensure content stays above gradient */}
         <div className="flex flex-col items-center gap-4 text-center sm:gap-8"> {/* Reduced gap from 6/12 to 4/8 */}
           {/* Badge - Optional promotional badge or tag */}
           {badge && <Badge variant="outline" className="gap-2 animate-pulse">
