@@ -125,24 +125,9 @@ export function HeroSection({
               
               {/* Mockup Component that contains the image */}
               <Mockup type="responsive">
-                {/* Added blur overlay and launch text */}
-                <div className="relative">
-                  {/* The image with blur effect */}
-                  <img 
-                    src={image.src} 
-                    alt={image.alt} 
-                    width={1248} 
-                    height={765} 
-                    className="w-full h-auto object-contain rounded-2xl blur-md relative z-10" 
-                  />
-                  
-                  {/* Overlay with "Launching May 1st" text */}
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <p className="text-[#aaadb0] text-2xl sm:text-3xl md:text-4xl font-light tracking-wider">
-                      Launching May 1st
-                    </p>
-                  </div>
-                </div>
+                {/* Added rounded-2xl for curved corners and drop-shadow-xl for the pop effect */}
+                <img src={image.src} alt={image.alt} width={1248} height={765} className="w-full h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" // Added z-10 to stay above gradient
+              />
               </Mockup>
             </div>
           </div>

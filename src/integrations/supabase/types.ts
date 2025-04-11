@@ -1115,11 +1115,16 @@ export type Database = {
     }
     Functions: {
       add_initial_super_admin: {
-        Args: { admin_email: string }
+        Args: {
+          admin_email: string
+        }
         Returns: undefined
       }
       add_neighborhood_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
       backfill_neighborhood_ids: {
@@ -1127,11 +1132,16 @@ export type Database = {
         Returns: undefined
       }
       check_neighborhood_access: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
       check_neighborhood_limit: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: boolean
       }
       check_user_role: {
@@ -1142,7 +1152,9 @@ export type Database = {
         Returns: boolean
       }
       get_all_neighborhoods_for_core_contributor: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: {
           address: string | null
           city: string | null
@@ -1170,23 +1182,33 @@ export type Database = {
         }[]
       }
       get_neighborhood_members: {
-        Args: { neighborhood_uuid: string }
+        Args: {
+          neighborhood_uuid: string
+        }
         Returns: string[]
       }
       get_neighborhood_members_direct: {
-        Args: { neighborhood_uuid: string }
+        Args: {
+          neighborhood_uuid: string
+        }
         Returns: string[]
       }
       get_neighborhood_members_safe: {
-        Args: { neighborhood_uuid: string }
+        Args: {
+          neighborhood_uuid: string
+        }
         Returns: string[]
       }
       get_neighborhood_members_simple: {
-        Args: { neighborhood_uuid: string }
+        Args: {
+          neighborhood_uuid: string
+        }
         Returns: string[]
       }
       get_neighborhood_members_with_profiles: {
-        Args: { neighborhood_uuid: string }
+        Args: {
+          neighborhood_uuid: string
+        }
         Returns: {
           user_id: string
           display_name: string
@@ -1199,11 +1221,15 @@ export type Database = {
         }[]
       }
       get_user_current_neighborhood: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: string
       }
       get_user_neighborhood_memberships: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: {
           neighborhood_id: string
           user_id: string
@@ -1212,7 +1238,9 @@ export type Database = {
         }[]
       }
       get_user_neighborhoods: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: {
           id: string
           name: string
@@ -1220,18 +1248,25 @@ export type Database = {
         }[]
       }
       get_user_neighborhoods_simple: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: {
           id: string
           name: string
         }[]
       }
       is_super_admin: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: boolean
       }
       is_user_in_neighborhood: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
       remove_neighborhood_member: {
@@ -1243,7 +1278,10 @@ export type Database = {
         Returns: boolean
       }
       simple_membership_check: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
       transfer_neighborhood_ownership: {
@@ -1255,15 +1293,23 @@ export type Database = {
         Returns: boolean
       }
       user_created_neighborhood: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
       user_is_core_contributor_with_access: {
-        Args: { user_uuid: string }
+        Args: {
+          user_uuid: string
+        }
         Returns: boolean
       }
       user_is_neighborhood_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: {
+          user_uuid: string
+          neighborhood_uuid: string
+        }
         Returns: boolean
       }
     }
@@ -1310,29 +1356,27 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1340,22 +1384,20 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1363,22 +1405,20 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1386,23 +1426,21 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof PublicSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -1411,52 +1449,6 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      activity_type: [
-        "event_created",
-        "event_rsvp",
-        "skill_offered",
-        "skill_requested",
-        "good_shared",
-        "good_requested",
-        "care_offered",
-        "care_requested",
-        "safety_update",
-      ],
-      invitation_status: ["pending", "accepted", "expired", "deleted"],
-      notification_action_type: [
-        "rsvp",
-        "comment",
-        "help",
-        "respond",
-        "share",
-        "view",
-        "schedule",
-        "learn",
-      ],
-      notification_type: [
-        "event",
-        "safety",
-        "care",
-        "goods",
-        "skills",
-        "neighbor_welcome",
-      ],
-      skill_session_status: [
-        "pending_provider_times",
-        "pending_requester_confirmation",
-        "confirmed",
-        "expired",
-        "completed",
-        "in_progress",
-      ],
-      user_role: ["super_admin", "admin", "moderator", "user"],
-    },
-  },
-} as const
