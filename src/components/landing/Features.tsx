@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Calendar, Shield, Sparkles, Package, Heart, Users, Home } from "lucide-react";
 
@@ -16,7 +15,7 @@ const Features = () => {
     {
       icon: <Home className="h-6 w-6 text-primary" />,
       title: "Home Dashboard",
-      description: "AI Neighborhood Assistant that learns your community's needs, answers questions, and helps find local resources.",
+      description: "One page for all the activity happening across your neighborhood. Ask questions to our AI assistant to find what you're looking for.",
       borderColor: "border-primary/70" // Primary blue for Home
     },
     {
