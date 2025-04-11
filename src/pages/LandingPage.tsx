@@ -1,16 +1,17 @@
 
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Added Link import
+import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
-import { Button } from "@/components/ui/button"; // Added Button import
+import { Button } from "@/components/ui/button";
+import Features from "@/components/landing/Features"; // Import the new Features component
 
 /**
  * LandingPage component
  * 
- * The public-facing landing page with a waitlist signup form
- * and hero image showcasing the application.
+ * The public-facing landing page with a waitlist signup form,
+ * hero image showcasing the application, and features section.
  */
 const LandingPage = () => {
   // Initialize the navigate function from React Router to handle redirections
@@ -28,6 +29,7 @@ const LandingPage = () => {
       navigate("/dashboard");
     }
   }, [session, navigate]);
+  
   return <div className="min-h-screen bg-white">
       {/* Navigation header with logo and login button */}
       <header className="w-full py-4 px-6 flex justify-between items-center">
@@ -55,7 +57,11 @@ const LandingPage = () => {
           alt: "Skills exchange platform preview"
         }} />
       
-      {/* You could add more sections here for features, testimonials, etc. */}
+      {/* Features section - Added below the hero section */}
+      <Features />
+      
+      {/* You could add more sections here for testimonials, etc. */}
     </div>;
 };
+
 export default LandingPage;
