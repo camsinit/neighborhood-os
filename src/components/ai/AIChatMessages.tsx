@@ -1,4 +1,3 @@
-
 /**
  * AIChatMessages Component
  * 
@@ -35,30 +34,20 @@ const AIChatMessages = ({
   className
 }: AIChatMessagesProps) => {
   // Apply the classes directly to the messages component
-  return (
-    <div className={cn("space-y-4", className)}>
+  return <div className="">
       {/* Map through and render each message */}
-      {messages.map((message) => (
-        <AIMessage key={message.id} message={message} />
-      ))}
+      {messages.map(message => <AIMessage key={message.id} message={message} />)}
       
       {/* Show loading indicator when waiting for AI response */}
-      {isLoading && (
-        <AIMessage 
-          message={{
-            id: 'loading',
-            content: loadingMessage,
-            role: 'assistant',
-            timestamp: new Date(),
-          }} 
-          isLoading={true}
-        />
-      )}
+      {isLoading && <AIMessage message={{
+      id: 'loading',
+      content: loadingMessage,
+      role: 'assistant',
+      timestamp: new Date()
+    }} isLoading={true} />}
       
       {/* Invisible div that serves as a reference point for scrolling */}
       <div ref={messagesEndRef} />
-    </div>
-  );
+    </div>;
 };
-
 export default AIChatMessages;
