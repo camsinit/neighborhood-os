@@ -50,12 +50,8 @@ export function HeroSection({
   waitlistForm,
   image
 }: HeroProps) {
-  return <section className={cn("bg-background text-foreground",
-  "py-4 sm:py-12 md:py-16 px-4",
-  "pb-0", "relative"
-  )}>
-      <div className="absolute inset-0 opacity-10 filter blur-[120px]"
-    style={{
+  return <section className={cn("bg-background text-foreground", "py-4 sm:py-12 md:py-16 px-4", "pb-0", "relative")}>
+      <div className="absolute inset-0 opacity-10 filter blur-[120px]" style={{
       background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
       zIndex: 0
     }} />
@@ -91,21 +87,14 @@ export function HeroSection({
 
           <div className="relative pt-8 w-full max-w-3xl mb-16">
             <div className="relative px-8 pb-8">
-              <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40"
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
-                  transform: "scale(1.05)",
-                  zIndex: 0
-                }} />
+              <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40" style={{
+              background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+              transform: "scale(1.05)",
+              zIndex: 0
+            }} />
               
               <Mockup type="responsive">
-                <img 
-                  src={image.src} 
-                  alt={image.alt} 
-                  width={1248} 
-                  height={765} 
-                  className="w-full h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" 
-                />
+                <img src={image.src} alt={image.alt} width={1248} height={765} className="w-full h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" />
               </Mockup>
             </div>
           </div>
