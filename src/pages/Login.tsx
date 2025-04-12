@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
@@ -60,22 +59,8 @@ const Login = () => {
         {/* AuthHeader component */}
         <AuthHeader />
         
-        {/* Auth form with enhanced styling */}
-        <div className="relative px-8 pb-8">
-          {/* Subtle gradient effect behind the form */}
-          <div className="absolute inset-0 rounded-2xl blur-xl opacity-30"
-            style={{
-              background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/70%))",
-              transform: "scale(1.05)",
-              zIndex: 0
-            }}
-          />
-          
-          {/* AuthForm with proper positioning and enhanced styling */}
-          <div className="relative z-10 bg-white rounded-2xl shadow-chat p-6">
-            <AuthForm />
-          </div>
-        </div>
+        {/* Directly render AuthForm without an extra div */}
+        <AuthForm />
       </div>
     </div>
   );
