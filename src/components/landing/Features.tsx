@@ -19,10 +19,10 @@ const Features = () => {
       borderColor: "border-primary/70" // Primary blue for Home
     },
     {
-      icon: <Calendar className="h-6 w-6 text-[#3b82f6]" />,
+      icon: <Calendar className="h-6 w-6 text-[#0EA5E9]" />,
       title: "Community Calendar",
       description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality.",
-      borderColor: "border-[#3b82f6]/70" // Calendar blue
+      borderColor: "border-[#0EA5E9]/70" // Turquoise border
     },
     {
       icon: <Shield className="h-6 w-6 text-[#ef4444]" />,
@@ -49,10 +49,10 @@ const Features = () => {
       borderColor: "border-[#8b5cf6]/70" // Care purple
     },
     {
-      icon: <Users className="h-6 w-6 text-[#6b7280]" />,
+      icon: <Users className="h-6 w-6 text-[#FDE1D3]" />,
       title: "Neighbors Directory",
       description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share.",
-      borderColor: "border-[#6b7280]/70" // Neighbors gray
+      borderColor: "border-[#FDE1D3]/70" // Brown border
     }
   ];
 
