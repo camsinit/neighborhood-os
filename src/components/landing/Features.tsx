@@ -57,8 +57,8 @@ const Features = () => {
   ];
 
   return (
-    // Reduced top padding further to bring the section even closer to the hero image
-    <section className="py-4 px-8 md:px-16 lg:px-24 bg-background">
+    // Further reduced top padding to bring the section even closer to the hero image
+    <section className="py-0 px-8 md:px-16 lg:px-24 bg-background">
       {/* Section header with title and description */}
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
