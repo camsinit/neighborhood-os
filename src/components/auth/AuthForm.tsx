@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  // Removed isSignUp state since we're directing users to waitlist instead
   
   // Hook for programmatic navigation
   const navigate = useNavigate();
@@ -57,63 +58,43 @@ const AuthForm = () => {
     };
   }, [navigate]); // Only re-run if navigate changes
   
-  // Form submission handler for both login and signup
+  // Form submission handler for login only
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("[AuthForm] Starting authentication process", { isSignUp });
+    console.log("[AuthForm] Starting authentication process");
 
     try {
-      if (isSignUp) {
-        // Signup process
-        console.log("[AuthForm] Attempting signup");
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/login`,
-          },
-        });
+      // Signin process
+      console.log("[AuthForm] Attempting signin");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
-        console.log("[AuthForm] Signup successful");
-
-        toast({
-          title: "Check your email",
-          description: "We've sent you a verification link",
-        });
-      } else {
-        // Signin process
-        console.log("[AuthForm] Attempting signin");
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          console.error("[AuthForm] Signin error:", error);
-          if (error.message.includes('credentials')) {
-            toast({
-              title: "Invalid credentials",
-              description: "Please check your email and password",
-              variant: "destructive",
-            });
-          } else {
-            throw error;
-          }
-          return;
+      if (error) {
+        console.error("[AuthForm] Signin error:", error);
+        if (error.message.includes('credentials')) {
+          toast({
+            title: "Invalid credentials",
+            description: "Please check your email and password",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
         }
-
-        console.log("[AuthForm] Signin successful", { user: data.user?.id });
-        
-        // Show success toast
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in",
-        });
-        
-        // No need to navigate here as the auth state change listener will handle that
+        return;
       }
+
+      console.log("[AuthForm] Signin successful", { user: data.user?.id });
+      
+      // Show success toast
+      toast({
+        title: "Welcome back!",
+        description: "Successfully signed in",
+      });
+      
+      // No need to navigate here as the auth state change listener will handle that
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);
       toast({
@@ -125,6 +106,12 @@ const AuthForm = () => {
       console.log("[AuthForm] Completing authentication process");
       setIsLoading(false);
     }
+  };
+
+  // Function to handle redirecting to homepage/waitlist
+  const handleWaitlistRedirect = () => {
+    // Navigate to the homepage where the waitlist form is located
+    navigate("/", { replace: true });
   };
 
   // Render the authentication form with updated styling
@@ -170,16 +157,16 @@ const AuthForm = () => {
             className="w-full rounded-full" 
             disabled={isLoading}
           >
-            {isLoading ? "Loading..." : isSignUp ? "Sign up" : "Sign in"}
+            {isLoading ? "Loading..." : "Sign in"}
           </Button>
           <Button 
             type="button" 
             variant="ghost" 
             className="w-full"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={handleWaitlistRedirect}
             disabled={isLoading}
           >
-            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+            Need an account? Join the Waitlist!
           </Button>
         </div>
       </form>
