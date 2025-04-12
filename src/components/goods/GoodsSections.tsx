@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,7 +11,7 @@ import AvailableItemsSection from './AvailableItemsSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@supabase/auth-helpers-react";
-import { Package2, ListFilter } from "lucide-react";
+import { Package2, ListFilter, ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * GoodsSections component
@@ -51,6 +52,9 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
   // State to track if we're currently deleting an item
   const [isDeletingItem, setIsDeletingItem] = useState(false);
+  
+  // State to track if the requests section is collapsed
+  const [requestsCollapsed, setRequestsCollapsed] = useState(false);
 
   // Helper function to filter goods based on search query
   const filterBySearch = (goods: GoodsExchangeItem[]) => {
@@ -185,6 +189,10 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   // Get categorized goods
   const { urgentRequests, requests, available } = categorizeGoods();
   
+  // Determine if we should show the requests section
+  // Only show it if there are actual requests from neighbors
+  const hasRequests = requests.length > 0 || urgentRequests.length > 0;
+  
   // If loading, display a loading state
   if (isLoading) {
     return (
@@ -224,37 +232,53 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
         
         {/* Tab content for all items */}
         <TabsContent value="all" className="space-y-8">
-          {showUrgent && 
-            <UrgentRequestsSection 
-              urgentRequests={urgentRequests} 
-              onRequestSelect={onRequestSelect}
-              getUrgencyClass={getUrgencyClass}
-              getUrgencyLabel={getUrgencyLabel}
-            />
-          }
-          
-          {showRequests && 
+          {/* Conditionally render requests section only if there are requests */}
+          {hasRequests && showRequests && (
             <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
+                <h2 className="text-2xl font-bold">
+                  Requests from Neighbors
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setRequestsCollapsed(!requestsCollapsed)}
+                    className="ml-2"
+                  >
+                    {requestsCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                  </Button>
+                </h2>
                 <Button variant="outline" onClick={onRequestItem}>
                   Request an Item
                 </Button>
               </div>
               
-              <GoodsRequestsSection 
-                goodsRequests={requests}
-                urgentRequests={urgentRequests}
-                onRequestSelect={onRequestSelect}
-                getUrgencyClass={getUrgencyClass}
-                getUrgencyLabel={getUrgencyLabel}
-                onDeleteItem={handleDeleteGoodsItem}
-                isDeletingItem={isDeletingItem}
-              />
+              {/* Show urgent and regular requests when not collapsed */}
+              {!requestsCollapsed && (
+                <>
+                  {showUrgent && urgentRequests.length > 0 && (
+                    <UrgentRequestsSection 
+                      urgentRequests={urgentRequests} 
+                      onRequestSelect={onRequestSelect}
+                      getUrgencyClass={getUrgencyClass}
+                      getUrgencyLabel={getUrgencyLabel}
+                    />
+                  )}
+                  
+                  <GoodsRequestsSection 
+                    goodsRequests={requests}
+                    urgentRequests={urgentRequests}
+                    onRequestSelect={onRequestSelect}
+                    getUrgencyClass={getUrgencyClass}
+                    getUrgencyLabel={getUrgencyLabel}
+                    onDeleteItem={handleDeleteGoodsItem}
+                    isDeletingItem={isDeletingItem}
+                  />
+                </>
+              )}
             </div>
-          }
+          )}
           
-          {showAvailable && 
+          {showAvailable && (
             <div className="mt-10">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Available Items</h2>
@@ -272,39 +296,50 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
                 isDeletingItem={isDeletingItem}
               />
             </div>
-          }
+          )}
         </TabsContent>
         
         {/* Tab content for requests */}
         <TabsContent value="needs">
           <div className="space-y-8">
-            {showUrgent && 
-              <UrgentRequestsSection 
-                urgentRequests={urgentRequests}
-                onRequestSelect={onRequestSelect}
-                getUrgencyClass={getUrgencyClass}
-                getUrgencyLabel={getUrgencyLabel}
-              />
-            }
-            
-            <div className="mt-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
-                <Button variant="outline" onClick={onRequestItem}>
-                  Request an Item
+            {hasRequests ? (
+              <>
+                {showUrgent && urgentRequests.length > 0 && (
+                  <UrgentRequestsSection 
+                    urgentRequests={urgentRequests}
+                    onRequestSelect={onRequestSelect}
+                    getUrgencyClass={getUrgencyClass}
+                    getUrgencyLabel={getUrgencyLabel}
+                  />
+                )}
+                
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
+                    <Button variant="outline" onClick={onRequestItem}>
+                      Request an Item
+                    </Button>
+                  </div>
+                  
+                  <GoodsRequestsSection 
+                    goodsRequests={requests}
+                    urgentRequests={urgentRequests}
+                    onRequestSelect={onRequestSelect}
+                    getUrgencyClass={getUrgencyClass}
+                    getUrgencyLabel={getUrgencyLabel}
+                    onDeleteItem={handleDeleteGoodsItem}
+                    isDeletingItem={isDeletingItem}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No requests from neighbors yet</p>
+                <Button onClick={onRequestItem}>
+                  Be the First to Request an Item
                 </Button>
               </div>
-              
-              <GoodsRequestsSection 
-                goodsRequests={requests}
-                urgentRequests={urgentRequests}
-                onRequestSelect={onRequestSelect}
-                getUrgencyClass={getUrgencyClass}
-                getUrgencyLabel={getUrgencyLabel}
-                onDeleteItem={handleDeleteGoodsItem}
-                isDeletingItem={isDeletingItem}
-              />
-            </div>
+            )}
           </div>
         </TabsContent>
         

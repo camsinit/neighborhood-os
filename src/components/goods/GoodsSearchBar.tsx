@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, AlertCircle, Plus, Filter } from "lucide-react";
@@ -63,21 +64,20 @@ const GoodsSearchBar = ({
 
   return (
     <div className="flex items-center justify-between mb-6">
-      {/* Search input with icon */}
-      <div className="relative w-[280px]">
-        <Input
-          type="text"
-          placeholder="Search goods..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10"
-        />
-        <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex gap-2">
-        {/* Filter button with popover */}
+      {/* Search input with icon and filter button */}
+      <div className="flex items-center gap-2">
+        <div className="relative w-[280px]">
+          <Input
+            type="text"
+            placeholder="Search goods..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10"
+          />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+        </div>
+        
+        {/* Filter button with popover - moved next to search bar */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="flex items-center gap-1">
@@ -127,7 +127,10 @@ const GoodsSearchBar = ({
             </div>
           </PopoverContent>
         </Popover>
-        
+      </div>
+      
+      {/* Action buttons */}
+      <div className="flex gap-2">
         {/* Request Item button */}
         <Button 
           onClick={onRequestItem}
