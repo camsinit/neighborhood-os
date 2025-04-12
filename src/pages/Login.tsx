@@ -1,10 +1,9 @@
+
 import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -34,32 +33,22 @@ const Login = () => {
       "bg-background text-foreground font-sans" // Added font-sans for consistency
     )}>
       {/* 
-        Background gradient with more subtle styling to match chat interface
+        Background gradient with blue tones to match the original aesthetic
       */}
       <div 
-        className="absolute inset-0 opacity-5 filter blur-[100px]" 
+        className="absolute inset-0 opacity-10 filter blur-[120px]" 
         style={{
-          background: "linear-gradient(135deg, hsl(var(--primary)), #10b981, #8b5cf6)",
+          background: "linear-gradient(135deg, #0EA5E9, #33C3F0, #1EAEDB)", // Using ocean blue and sky blue tones
           zIndex: 0
         }}
       />
-
-      {/* Back button with styling consistent with chat interface */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-4 relative z-10">
-        <Button asChild variant="ghost" size="sm" className="mb-4 rounded-lg">
-          <Link to="/" className="flex items-center gap-2 font-medium">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </Button>
-      </div>
       
       {/* Auth form container with updated styling to match chat interface */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         {/* AuthHeader component */}
         <AuthHeader />
         
-        {/* Directly render AuthForm without an extra div */}
+        {/* Directly render AuthForm */}
         <AuthForm />
       </div>
     </div>
