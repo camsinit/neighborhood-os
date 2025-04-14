@@ -46,10 +46,10 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
 
   // For skill requests, we render the request card component
   if (type === 'request') {
+    // We no longer pass onContribute to SkillRequestCard since it handles its own dialog
     return (
       <SkillRequestCard
         skill={skill}
-        onContribute={onContribute || (() => {})}
       />
     );
   }

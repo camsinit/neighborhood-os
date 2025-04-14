@@ -5,7 +5,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import { SkillWithProfile } from '../types/skillTypes';
-import { SkillContributionDialog } from '../SkillContributionDialog';
+import SkillContributionDialog from '../SkillContributionDialog'; // Fixed import to use default export
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
