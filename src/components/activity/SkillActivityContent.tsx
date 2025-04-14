@@ -1,6 +1,7 @@
 
 /**
  * Enhanced component for displaying skill activities in the feed
+ * Now simplified for inline display
  */
 import React from "react";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +18,8 @@ interface SkillActivityContentProps {
 }
 
 /**
- * Component for displaying rich skill activity content in the activity feed
- * Shows additional context like skill category and provides action buttons
+ * Component for displaying skill activity content in the activity feed
+ * Now simplified for a single line layout
  * 
  * @param activity - The activity data to display
  * @param onClick - Function to call when action button is clicked
@@ -39,15 +40,15 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
     'Skill';
   
   return (
-    <div className="flex flex-col gap-1">
-      {/* Title section with optional category badge */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Book className="h-4 w-4" style={{ color }} aria-hidden="true" />
-          <span className="font-medium">{activity.title}</span>
-        </div>
-        
-        {/* Display category as a badge if available */}
+    <div className="flex items-center justify-between w-full">
+      {/* Title with icon */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <Book className="h-4 w-4 flex-shrink-0" style={{ color }} aria-hidden="true" />
+        <span className="font-medium text-sm truncate">{activity.title}</span>
+      </div>
+      
+      {/* Compact layout with category badge and action button side by side */}
+      <div className="flex items-center gap-2 flex-shrink-0">
         {category && (
           <Badge 
             variant="outline" 
@@ -56,18 +57,15 @@ const SkillActivityContent: React.FC<SkillActivityContentProps> = ({
             {category}
           </Badge>
         )}
-      </div>
-      
-      {/* Action button - customized based on skill type */}
-      <div className="mt-1">
+        
         <Button 
           variant="outline" 
           size="sm" 
-          className="text-xs border-purple-200 hover:bg-purple-50"
+          className="text-xs h-6 py-0 px-2 border-purple-200 hover:bg-purple-50"
           onClick={onClick}
           aria-label={isOffering ? 'Learn more about this skill' : 'Help with this skill request'}
         >
-          {isOffering ? 'Learn More' : 'Help Out'}
+          {isOffering ? 'Learn' : 'Help'}
         </Button>
       </div>
     </div>

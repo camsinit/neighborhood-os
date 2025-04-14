@@ -1,4 +1,3 @@
-
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -8,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import SkillActivityContent from "./SkillActivityContent";
 import NotificationPopover from "@/components/notifications/NotificationPopover";
 import { highlightItem } from "@/utils/highlightNavigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 /**
  * Props for the ActivityItem component
@@ -40,7 +42,7 @@ const getCompactTimeAgo = (date: Date): string => {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now enhanced with NotificationPopover for better user interaction
+ * Now redesigned to be a compact single-line item
  */
 const ActivityItem = ({
   activity,
@@ -50,7 +52,6 @@ const ActivityItem = ({
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
   const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
-  const contextText = getActivityContext(activity.activity_type);
   
   // Check if this is a skill-related activity
   const isSkillActivity = activity.activity_type === 'skill_offered' || 
@@ -79,7 +80,6 @@ const ActivityItem = ({
 
   /**
    * Handle navigation and highlighting when View is clicked in the popover
-   * The NotificationPopover component will handle this automatically
    */
   const handleView = () => {
     if (isDeleted) {
@@ -93,15 +93,15 @@ const ActivityItem = ({
     highlightItem(itemType, activity.content_id, true);
   };
 
+  // Get the activity type for the badge
+  const activityType = getActivityItemType();
+  const activityLabel = activityType.charAt(0).toUpperCase() + activityType.slice(1);
+
   // Determine if we should show an action button in the popover
   const showAction = !isDeleted && isSkillActivity;
   
   return (
     <div className="mb-2">
-      <p className="text-gray-500 italic mb-0.5 text-sm">
-        {contextText}
-      </p>
-      
       <NotificationPopover
         title={isDeleted ? (activity.metadata?.original_title || activity.title) : activity.title}
         type={getActivityItemType()}
@@ -112,64 +112,67 @@ const ActivityItem = ({
         isArchived={isDeleted}
       >
         <div 
-          className={`relative flex flex-col py-3 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer ${isDeleted ? 'bg-gray-50' : ''}`}
+          className={`relative flex items-center py-2 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer ${isDeleted ? 'bg-gray-50' : ''}`}
           style={{
             borderLeft: `4px solid ${isDeleted ? '#9CA3AF' : activityColor}`
           }}
         >
-          {/* Header with timestamp and avatar */}
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-gray-500">
-              {timeAgo}
-            </span>
-            
-            <Avatar className="h-7 w-7 flex-shrink-0">
-              <AvatarImage src={activity.profiles.avatar_url} />
-              <AvatarFallback>
-                <User className="h-3.5 w-3.5" />
-              </AvatarFallback>
-            </Avatar>
-          </div>
+          {/* Profile avatar with hover tooltip showing name */}
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <div className="flex-shrink-0 mr-3">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={activity.profiles.avatar_url} />
+                  <AvatarFallback>
+                    <User className="h-3 w-3" />
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-auto p-2">
+              <p className="text-sm">{activity.profiles.full_name || "Neighbor"}</p>
+            </HoverCardContent>
+          </HoverCard>
 
-          {/* Content - show different displays based on content type and deleted status */}
+          {/* Time elapsed */}
+          <span className="text-xs text-gray-500 mr-3 min-w-12">
+            {timeAgo}
+          </span>
+
+          {/* Activity title */}
           {isDeleted ? (
-            /* Deleted content display */
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-gray-400" />
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-medium text-gray-500 line-through truncate">
-                  {activity.metadata?.original_title || activity.title}
-                </p>
-                <p className="text-sm text-gray-400">
-                  This content has been deleted
-                </p>
-              </div>
+            <div className="flex items-center flex-1 min-w-0">
+              <AlertCircle className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+              <p className="text-sm font-medium text-gray-500 line-through truncate">
+                {activity.metadata?.original_title || activity.title}
+              </p>
             </div>
-          ) : isSkillActivity ? (
-            /* Skill activity display */
-            <SkillActivityContent 
-              activity={activity}
-              onClick={() => onAction(activity)}
-            />
           ) : (
-            /* Standard activity display */
-            <div className="flex items-center gap-3">
+            <div className="flex items-center flex-1 min-w-0">
               {IconComponent && (
-                <div className="flex-shrink-0">
-                  <IconComponent 
-                    className="h-5 w-5" 
-                    style={{ color: activityColor }} 
-                  />
-                </div>
+                <IconComponent 
+                  className="h-4 w-4 mr-2 flex-shrink-0" 
+                  style={{ color: activityColor }} 
+                />
               )}
-
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-medium text-gray-900 truncate">
-                  {activity.title}
-                </p>
-              </div>
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {activity.title}
+              </p>
             </div>
           )}
+
+          {/* Activity type badge - right aligned */}
+          <Badge 
+            variant="outline" 
+            className="ml-auto flex-shrink-0" 
+            style={{ 
+              backgroundColor: `${activityColor}10`,
+              color: activityColor,
+              borderColor: `${activityColor}30`
+            }}
+          >
+            {activityLabel}
+          </Badge>
         </div>
       </NotificationPopover>
     </div>
