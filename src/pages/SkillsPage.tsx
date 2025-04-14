@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -17,8 +18,12 @@ const categoryIcons = {
 } as const;
 
 const SkillsPage = () => {
+  // State for view control
   const [showCategories, setShowCategories] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const handleHighlightItem = createHighlightListener("skills");
@@ -32,6 +37,17 @@ const SkillsPage = () => {
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);
     setShowCategories(false);
+  };
+
+  const handleViewChange = () => {
+    setShowCategories(!showCategories);
+    if (showCategories) {
+      // When switching to "All" view
+      setSelectedCategory(null);
+    } else {
+      // When switching back to categories, clear search
+      setSearchQuery('');
+    }
   };
 
   const getCategoryIcon = (category: SkillCategory | null) => {
@@ -66,10 +82,9 @@ const SkillsPage = () => {
               <div className="bg-white rounded-lg p-6 shadow-lg">
                 <SkillsHeader 
                   showCategories={showCategories}
-                  onViewChange={() => {
-                    setShowCategories(!showCategories);
-                    setSelectedCategory(null);
-                  }}
+                  onViewChange={handleViewChange}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
                 />
                 
                 <div className="flex items-center gap-2 mb-6">
@@ -77,7 +92,7 @@ const SkillsPage = () => {
                     className: "h-5 w-5 text-gray-700"
                   })}
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'All Skills')}
+                    {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}
                   </h3>
                 </div>
                 
@@ -86,6 +101,7 @@ const SkillsPage = () => {
                 ) : (
                   <SkillsList 
                     selectedCategory={selectedCategory}
+                    searchQuery={searchQuery}
                   />
                 )}
               </div>

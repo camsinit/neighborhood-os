@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, List, Grid, ArrowLeft } from "lucide-react";
@@ -9,15 +9,26 @@ import AddSupportRequestDialog from "../AddSupportRequestDialog";
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
+  searchQuery,
+  setSearchQuery
 }: SkillsHeaderProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
+
+  // Effect to automatically switch to "All" view when search is performed
+  useEffect(() => {
+    // If we have a search query and we're showing categories, switch to All view
+    if (searchQuery && showCategories) {
+      onViewChange();
+    }
+  }, [searchQuery, showCategories, onViewChange]);
 
   const openSkillDialog = (mode: 'offer' | 'need') => {
     setDialogMode(mode);

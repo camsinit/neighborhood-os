@@ -12,10 +12,12 @@ import { useState } from 'react';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
+  searchQuery?: string;
 }
 
 const SkillsList = ({
-  selectedCategory
+  selectedCategory,
+  searchQuery = ''
 }: SkillsListProps) => {
   const user = useUser();
   const [selectedSkill, setSelectedSkill] = useState<{
@@ -28,8 +30,9 @@ const SkillsList = ({
     data: skills,
     isLoading
   } = useQuery({
-    queryKey: ['skills-exchange', selectedCategory],
+    queryKey: ['skills-exchange', selectedCategory, searchQuery],
     queryFn: async () => {
+      // Start with a base query
       let query = supabase.from('skills_exchange').select(`
         *,
         profiles:user_id (
@@ -38,8 +41,15 @@ const SkillsList = ({
         )
       `).order('created_at', { ascending: false });
       
+      // Add category filter if selected
       if (selectedCategory) {
         query = query.eq('skill_category', selectedCategory);
+      }
+      
+      // Add search filter if provided
+      if (searchQuery) {
+        // Search in title and description
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
       }
 
       const { data, error } = await query;
@@ -54,8 +64,25 @@ const SkillsList = ({
     </div>;
   }
 
-  const requests = skills?.filter(skill => skill.request_type === 'need') || [];
-  const offers = skills?.filter(skill => skill.request_type === 'offer') || [];
+  // Filter out deleted activities
+  const filteredSkills = skills || [];
+  
+  // Further separate by request type
+  const requests = filteredSkills.filter(skill => skill.request_type === 'need') || [];
+  const offers = filteredSkills.filter(skill => skill.request_type === 'offer') || [];
+
+  // Show a special empty state for search with no results
+  if (searchQuery && filteredSkills.length === 0) {
+    return (
+      <EmptyState
+        icon={Sparkles}
+        title={`No results found for "${searchQuery}"`}
+        description="Try a different search term or browse by category"
+        actionLabel="Clear Search"
+        onAction={() => window.location.href = '/skills'} // Simple page refresh to clear search
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">
