@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, List, Grid, ArrowLeft } from "lucide-react";
+import { Search, Plus, List, Grid, ArrowLeft } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 
@@ -75,7 +75,6 @@ const SkillsHeader = ({
           onClick={() => openSkillDialog('need')}
           className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
-          <Plus className="h-4 w-4 mr-2" />
           Request Skill
         </Button>
         <Button 
@@ -83,7 +82,6 @@ const SkillsHeader = ({
           onClick={() => openSkillDialog('offer')} 
           className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
         >
-          <Plus className="h-4 w-4 mr-2" />
           Offer Skill
         </Button>
       </div>
