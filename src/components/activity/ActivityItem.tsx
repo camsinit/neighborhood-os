@@ -5,8 +5,6 @@ import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import SkillActivityContent from "./SkillActivityContent";
-import NotificationPopover from "@/components/notifications/NotificationPopover";
 import { highlightItem } from "@/utils/highlightNavigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +41,7 @@ const getCompactTimeAgo = (date: Date): string => {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now redesigned to be a compact single-line item
+ * Now redesigned to be a compact single-line item that navigates directly to content
  */
 const ActivityItem = ({
   activity,
@@ -80,102 +78,100 @@ const ActivityItem = ({
   };
 
   /**
-   * Handle navigation and highlighting when View is clicked in the popover
+   * Handle click on activity item - navigates directly to the content
    */
-  const handleView = () => {
+  const handleItemClick = () => {
     if (isDeleted) {
-      // For deleted content, just show the action dialog
+      // For deleted content, show the action dialog
       onAction(activity);
       return;
     }
     
-    // The popover's view button will handle navigation and highlighting
+    // Get the item type and navigate to the appropriate page
     const itemType = getActivityItemType();
-    highlightItem(itemType, activity.content_id, true);
+    const route = itemType === 'event' ? '/calendar' : `/${itemType}`;
+    
+    // Navigate to the page and highlight the item
+    navigate(route);
+    
+    // After navigation, highlight the specific item
+    setTimeout(() => {
+      highlightItem(itemType, activity.content_id, true);
+    }, 100);
   };
 
   // Get the activity type for the badge
   const activityType = getActivityItemType();
   const activityLabel = activityType.charAt(0).toUpperCase() + activityType.slice(1);
-
-  // Determine if we should show an action button in the popover
-  const showAction = !isDeleted && isSkillActivity;
   
   return (
-    <div className="mb-2">
-      <NotificationPopover
-        title={isDeleted ? (activity.metadata?.original_title || activity.title) : activity.title}
-        type={getActivityItemType()}
-        itemId={activity.content_id}
-        onAction={() => onAction(activity)}
-        actionLabel={showAction ? "View Details" : undefined}
-        description={isDeleted ? "This content has been deleted" : undefined}
-        isArchived={isDeleted}
+    <div className="mb-3">
+      <div 
+        className={`relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-md transition-all cursor-pointer ${isDeleted ? 'bg-gray-50' : 'bg-white'}`}
+        style={{
+          borderLeft: `4px solid ${isDeleted ? '#9CA3AF' : activityColor}`
+        }}
+        onClick={handleItemClick}
       >
-        <div 
-          className={`relative flex items-center py-2 px-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer ${isDeleted ? 'bg-gray-50' : ''}`}
-          style={{
-            borderLeft: `4px solid ${isDeleted ? '#9CA3AF' : activityColor}`
-          }}
-        >
-          {/* Profile avatar with hover tooltip showing name */}
-          <HoverCard>
-            <HoverCardTrigger asChild>
+        {/* Profile avatar with hover tooltip showing name */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
               <div className="flex-shrink-0 mr-3">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={activity.profiles.avatar_url} />
                   <AvatarFallback>
-                    <User className="h-3 w-3" />
+                    <User className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
               </div>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-auto p-2">
-              <p className="text-sm">{activity.profiles.display_name || "Neighbor"}</p>
-            </HoverCardContent>
-          </HoverCard>
+            </TooltipTrigger>
+            <TooltipContent className="bg-gray-800 text-white">
+              <p>{activity.profiles.display_name || "Neighbor"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-          {/* Time elapsed */}
-          <span className="text-xs text-gray-500 mr-3 min-w-12">
-            {timeAgo}
-          </span>
+        {/* Time elapsed */}
+        <span className="text-sm text-gray-500 mr-4 min-w-14 font-medium">
+          {timeAgo}
+        </span>
 
-          {/* Activity title */}
-          {isDeleted ? (
-            <div className="flex items-center flex-1 min-w-0">
-              <AlertCircle className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
-              <p className="text-sm font-medium text-gray-500 line-through truncate">
-                {activity.metadata?.original_title || activity.title}
-              </p>
-            </div>
-          ) : (
-            <div className="flex items-center flex-1 min-w-0">
-              {IconComponent && (
-                <IconComponent 
-                  className="h-4 w-4 mr-2 flex-shrink-0" 
-                  style={{ color: activityColor }} 
-                />
-              )}
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {activity.title}
-              </p>
-            </div>
-          )}
+        {/* Activity title */}
+        {isDeleted ? (
+          <div className="flex items-center flex-1 min-w-0">
+            <AlertCircle className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+            <p className="text-base font-medium text-gray-500 line-through truncate">
+              {activity.metadata?.original_title || activity.title}
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-center flex-1 min-w-0">
+            {IconComponent && (
+              <IconComponent 
+                className="h-5 w-5 mr-2 flex-shrink-0" 
+                style={{ color: activityColor }} 
+              />
+            )}
+            <p className="text-base font-medium text-gray-900 truncate">
+              {activity.title}
+            </p>
+          </div>
+        )}
 
-          {/* Activity type badge - right aligned */}
-          <Badge 
-            variant="outline" 
-            className="ml-auto flex-shrink-0" 
-            style={{ 
-              backgroundColor: `${activityColor}10`,
-              color: activityColor,
-              borderColor: `${activityColor}30`
-            }}
-          >
-            {activityLabel}
-          </Badge>
-        </div>
-      </NotificationPopover>
+        {/* Activity type badge - right aligned */}
+        <Badge 
+          variant="outline" 
+          className="ml-auto flex-shrink-0 text-xs px-3 py-1 font-medium" 
+          style={{ 
+            backgroundColor: `${activityColor}15`,
+            color: activityColor,
+            borderColor: `${activityColor}30`
+          }}
+        >
+          {activityLabel}
+        </Badge>
+      </div>
     </div>
   );
 };
