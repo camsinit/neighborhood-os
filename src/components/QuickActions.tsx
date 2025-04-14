@@ -1,4 +1,3 @@
-
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -102,10 +101,10 @@ const QuickActions = () => {
           <Button 
             key={action.label} 
             variant="outline" 
-            className={`flex flex-col items-center justify-center h-24 py-2 border-2 ${action.className}`} 
+            className={`flex items-center justify-center h-16 py-2 border-2 ${action.className}`} 
             onClick={action.onClick}
           >
-            <action.icon className="h-6 w-6 mb-2" />
+            <action.icon className="h-5 w-5 mr-2" />
             <span className="text-sm text-center">{action.label}</span>
           </Button>
         ))}
