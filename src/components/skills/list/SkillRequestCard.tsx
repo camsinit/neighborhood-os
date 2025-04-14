@@ -5,26 +5,22 @@ import { ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import { SkillWithProfile } from '../types/skillTypes';
+import { SkillContributionDialog } from '../SkillContributionDialog';
 
-/**
- * SkillRequestCard - A compact card for skill requests in the horizontal scrolling section
- * 
- * This is an improved, space-efficient design that maintains functionality
- * while taking up less vertical space.
- */
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
-  onContribute: () => void;
 }
 
-const SkillRequestCard = ({ skill, onContribute }: SkillRequestCardProps) => {
+const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // State to manage the schedule dialog visibility
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
 
   return (
     <div 
       data-skill-id={skill.id}
       className="relative flex-shrink-0 w-[250px] h-[100px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+      onClick={() => setIsContributeDialogOpen(true)}
     >
       {/* Decorative indicator arrow */}
       <ArrowUpRight className="absolute top-2 right-2 h-3 w-3 text-gray-400" />
@@ -39,42 +35,39 @@ const SkillRequestCard = ({ skill, onContribute }: SkillRequestCardProps) => {
           <h4 className="font-medium text-sm text-gray-900 line-clamp-1">{skill.title}</h4>
         </div>
 
-        {/* Action buttons - more compact */}
-        <div className="mt-1">
-          <Button 
-            variant="outline" 
-            className="w-full h-7 text-xs py-0"
+        {/* Only show scheduling button when applicable */}
+        {skill.status === 'pending_scheduling' && (
+          <Button
+            variant="secondary"
+            className="w-full mt-1 h-7 text-xs py-0"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onContribute();
+              setIsScheduleDialogOpen(true);
             }}
           >
-            Contribute Skill
+            View Schedule
           </Button>
-          
-          {/* Only show scheduling button when applicable */}
-          {skill.status === 'pending_scheduling' && (
-            <Button
-              variant="secondary"
-              className="w-full mt-1 h-7 text-xs py-0"
-              size="sm"
-              onClick={() => setIsScheduleDialogOpen(true)}
-            >
-              View Schedule
-            </Button>
-          )}
-        </div>
-
-        {/* Schedule dialog */}
-        {isScheduleDialogOpen && (
-          <FinalizeDateDialog
-            sessionId={skill.id}
-            open={isScheduleDialogOpen}
-            onOpenChange={setIsScheduleDialogOpen}
-          />
         )}
       </div>
+
+      {/* Schedule dialog */}
+      {isScheduleDialogOpen && (
+        <FinalizeDateDialog
+          sessionId={skill.id}
+          open={isScheduleDialogOpen}
+          onOpenChange={setIsScheduleDialogOpen}
+        />
+      )}
+
+      {/* Contribution dialog */}
+      <SkillContributionDialog
+        open={isContributeDialogOpen}
+        onOpenChange={setIsContributeDialogOpen}
+        skillRequestId={skill.id}
+        requestTitle={skill.title}
+        requesterId={skill.user_id}
+      />
     </div>
   );
 };
