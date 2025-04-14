@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
@@ -24,9 +25,9 @@ const CalendarPage = () => {
         className="absolute inset-0 pointer-events-none animate-gradient-shift"
         style={{ 
           background: `linear-gradient(60deg, 
-            hsla(var(--calendar-color), 0.03) 0%,
-            hsla(var(--calendar-color), 0.08) 50%,
-            hsla(var(--calendar-color), 0.03) 100%
+            hsla(var(--calendar-color), 0.01) 0%,
+            hsla(var(--calendar-color), 0.03) 50%,
+            hsla(var(--calendar-color), 0.01) 100%
           )`,
           backgroundSize: '400% 400%',
           zIndex: 0
