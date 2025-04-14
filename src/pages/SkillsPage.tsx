@@ -19,8 +19,8 @@ const categoryIcons = {
 } as const;
 
 const SkillsPage = () => {
-  // State for view control
-  const [showCategories, setShowCategories] = useState(true);
+  // State for view control - default to ALL view (showCategories = false)
+  const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   
   // Search state

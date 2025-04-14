@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, List, Grid, ArrowLeft } from "lucide-react";
+import { Search, Grid, ArrowLeft, BookOpen } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 
@@ -44,10 +45,10 @@ const SkillsHeader = ({
             !showCategories ? 'bg-[#F1F1F1]' : 'bg-white'
           }`}
         >
-          {showCategories ? (
+          {!showCategories ? (
             <>
-              <Grid className="h-4 w-4 mr-2" />
-              All
+              <BookOpen className="h-4 w-4 mr-2" />
+              Types
             </>
           ) : (
             <>
@@ -57,19 +58,6 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        <div className="relative w-[200px] flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <Input 
-            type="search" 
-            placeholder="Search for skills..." 
-            className="pl-10" 
-            value={searchQuery} 
-            onChange={e => setSearchQuery(e.target.value)} 
-          />
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-3 flex-shrink-0">
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
@@ -84,6 +72,17 @@ const SkillsHeader = ({
         >
           Offer Skill
         </Button>
+
+        <div className="relative w-[200px] flex-shrink-0">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input 
+            type="search" 
+            placeholder="Search for skills..." 
+            className="pl-10" 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+          />
+        </div>
       </div>
 
       <AddSupportRequestDialog

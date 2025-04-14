@@ -1,8 +1,8 @@
 
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trash2 } from 'lucide-react';
-import { SkillWithProfile } from '../types/skillTypes';
+import { Badge } from '@/components/ui/badge';
+import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
 
 /**
  * SkillOfferCard - The compact card showing an offered skill
@@ -19,6 +19,15 @@ interface SkillOfferCardProps {
   onClick: () => void;
 }
 
+// This maps categories to their appropriate colors
+const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
+  creative: {bg: 'bg-[#FDE1D3]', text: 'text-[#F97316]'},
+  trade: {bg: 'bg-[#E5DEFF]', text: 'text-[#8B5CF6]'},
+  technology: {bg: 'bg-[#D3E4FD]', text: 'text-[#221F26]'},
+  education: {bg: 'bg-[#F2FCE2]', text: 'text-emerald-600'},
+  wellness: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
+};
+
 const SkillOfferCard = ({ 
   skill, 
   isOwner, 
@@ -27,19 +36,15 @@ const SkillOfferCard = ({
   onRequestSkill,
   onClick 
 }: SkillOfferCardProps) => {
-  // This function handles the delete button click
-  // We stop event propagation to prevent the card onClick from firing
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete();
-  };
-
   // This function handles the request button click
-  // Again, we stop propagation to prevent the card onClick
+  // We stop propagation to prevent the card onClick
   const handleRequestClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onRequestSkill();
   };
+
+  // Get the category colors from our map, fallback to technology if not found
+  const categoryStyle = categoryColors[skill.skill_category] || categoryColors.technology;
 
   return (
     <div 
@@ -48,27 +53,23 @@ const SkillOfferCard = ({
       onClick={onClick}
     >
       {/* User profile and skill title */}
-      <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-center gap-3 flex-grow">
         <Avatar className="h-10 w-10">
           <AvatarImage src={skill.profiles?.avatar_url || undefined} />
           <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
         </Avatar>
-        <h4 className="font-medium text-gray-900">{skill.title}</h4>
+        <div className="flex flex-col">
+          <h4 className="font-medium text-gray-900">{skill.title}</h4>
+          <Badge 
+            className={`${categoryStyle.bg} ${categoryStyle.text} border-0 mt-1 text-xs`}
+          >
+            {skill.skill_category}
+          </Badge>
+        </div>
       </div>
       
       {/* Action button */}
-      {isOwner ? (
-        <Button 
-          variant="destructive" 
-          size="icon"
-          onClick={handleDeleteClick}
-          disabled={isDeleting}
-          className="ml-4 h-9 w-9"
-          aria-label="Delete skill"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      ) : (
+      {!isOwner && (
         <Button 
           variant="outline" 
           onClick={handleRequestClick}
