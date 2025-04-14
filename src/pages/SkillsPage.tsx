@@ -8,6 +8,7 @@ import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
+import SkillRequestsPopover from "@/components/skills/SkillRequestsPopover"; // Import the new component
 
 const categoryIcons = {
   creative: Palette,
@@ -87,14 +88,20 @@ const SkillsPage = () => {
                   setSearchQuery={setSearchQuery}
                 />
                 
-                {/* This is the selected element that's being simplified */}
-                <div className="mb-6 flex items-center">
-                  {React.createElement(getCategoryIcon(selectedCategory), {
-                    className: "h-5 w-5 text-gray-700 mr-2"
-                  })}
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}
-                  </h3>
+                {/* Modified element - added flex justify-between to allow placing popover on right */}
+                <div className="mb-6 flex items-center justify-between">
+                  {/* Left side - Category title with icon */}
+                  <div className="flex items-center">
+                    {React.createElement(getCategoryIcon(selectedCategory), {
+                      className: "h-5 w-5 text-gray-700 mr-2"
+                    })}
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}
+                    </h3>
+                  </div>
+                  
+                  {/* Right side - Skill Requests Popover */}
+                  <SkillRequestsPopover />
                 </div>
                 
                 {showCategories ? (
