@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -14,7 +13,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SkillWithProfile } from './types/skillTypes';
 import SkillContributionDialog from './SkillContributionDialog';
 
-// Import drawer components
 import {
   Drawer,
   DrawerContent,
@@ -24,29 +22,18 @@ import {
   DrawerClose
 } from '@/components/ui/drawer';
 
-/**
- * SkillRequestsPopover Component
- * 
- * This component displays a notification-style popover for skill requests.
- * It shows a button with an icon that, when clicked, displays a list of
- * recent skill requests that users can contribute to.
- */
 const SkillRequestsPopover = () => {
-  // State to track which skill request to show contribution dialog for
   const [selectedSkill, setSelectedSkill] = useState<{
     id: string;
     title: string;
     requesterId: string;
   } | null>(null);
   
-  // State to control the drawer visibility
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
-  // Query to fetch skill requests
   const { data: requests, isLoading } = useQuery({
     queryKey: ['skill-requests'],
     queryFn: async () => {
-      // Fetch skill requests (needs with type = 'need')
       const { data, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -58,18 +45,16 @@ const SkillRequestsPopover = () => {
         `)
         .eq('request_type', 'need')
         .order('created_at', { ascending: false })
-        .limit(5); // Only show the 5 most recent requests in popover
+        .limit(5);
         
       if (error) throw error;
       return data as SkillWithProfile[];
     }
   });
 
-  // Query to fetch all skill requests (for the drawer)
   const { data: allRequests, isLoading: isLoadingAll } = useQuery({
     queryKey: ['all-skill-requests'],
     queryFn: async () => {
-      // Fetch all skill requests
       const { data, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -85,11 +70,9 @@ const SkillRequestsPopover = () => {
       if (error) throw error;
       return data as SkillWithProfile[];
     },
-    // Only fetch when drawer is open
     enabled: isDrawerOpen
   });
 
-  // Handler for when a request is clicked
   const handleRequestClick = (skill: SkillWithProfile) => {
     setSelectedSkill({
       id: skill.id,
@@ -98,7 +81,6 @@ const SkillRequestsPopover = () => {
     });
   };
 
-  // Render request item (shared between popover and drawer)
   const renderRequestItem = (request: SkillWithProfile) => (
     <div 
       key={request.id}
@@ -121,7 +103,6 @@ const SkillRequestsPopover = () => {
 
   return (
     <>
-      {/* Popover */}
       <Popover>
         <PopoverTrigger asChild>
           <Button 
@@ -141,7 +122,6 @@ const SkillRequestsPopover = () => {
           
           <div className="max-h-[300px] overflow-y-auto">
             {isLoading ? (
-              // Loading state
               <div className="p-4 space-y-3">
                 {[1, 2, 3].map(i => (
                   <div key={i} className="flex items-center gap-2">
@@ -154,12 +134,10 @@ const SkillRequestsPopover = () => {
                 ))}
               </div>
             ) : requests && requests.length > 0 ? (
-              // List of skill requests
               <>
                 {requests.map(request => renderRequestItem(request))}
               </>
             ) : (
-              // Empty state
               <div className="py-8 px-4 text-center text-gray-500">
                 <p>No skill requests available</p>
                 <p className="text-xs mt-1">Check back later for new requests</p>
@@ -168,7 +146,6 @@ const SkillRequestsPopover = () => {
           </div>
           
           <div className="p-2 border-t">
-            {/* Drawer trigger instead of simple button */}
             <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
               <DrawerTrigger asChild>
                 <Button 
@@ -179,13 +156,12 @@ const SkillRequestsPopover = () => {
                   View all skill requests
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh]">
+              <DrawerContent className="max-h-[40vh]">
                 <DrawerHeader>
                   <DrawerTitle>All Skill Requests</DrawerTitle>
                 </DrawerHeader>
                 <div className="px-4 py-2 overflow-y-auto max-h-[60vh]">
                   {isLoadingAll ? (
-                    // Loading state for all requests
                     <div className="space-y-3">
                       {[1, 2, 3, 4, 5].map(i => (
                         <div key={i} className="flex items-center gap-2 py-2">
@@ -198,12 +174,10 @@ const SkillRequestsPopover = () => {
                       ))}
                     </div>
                   ) : allRequests && allRequests.length > 0 ? (
-                    // List of all skill requests
                     <div className="divide-y">
                       {allRequests.map(request => renderRequestItem(request))}
                     </div>
                   ) : (
-                    // Empty state
                     <div className="py-8 text-center text-gray-500">
                       <p>No skill requests available</p>
                       <p className="text-xs mt-1">Be the first to request a skill</p>
@@ -221,7 +195,6 @@ const SkillRequestsPopover = () => {
         </PopoverContent>
       </Popover>
       
-      {/* Contribution dialog */}
       {selectedSkill && (
         <SkillContributionDialog
           open={!!selectedSkill}
