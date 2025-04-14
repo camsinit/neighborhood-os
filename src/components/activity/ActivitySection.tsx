@@ -5,7 +5,7 @@ import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 
 /**
  * Component to display the activity feed section on the homepage
- * Updated with a more refined appearance and better visual hierarchy
+ * Displays the activity feed directly without a containing div for a more integrated appearance
  */
 const ActivitySection = () => {
   return (
@@ -14,9 +14,8 @@ const ActivitySection = () => {
         <h2 className="text-2xl font-bold text-gray-900">Neighborhood Activity</h2>
         <NotificationDrawer />
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-full max-h-full">
-        <ActivityFeed />
-      </div>
+      {/* Activity feed is now displayed directly, without the container div */}
+      <ActivityFeed />
     </section>
   );
 };
