@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Grid, ArrowLeft, BookOpen } from "lucide-react";
+import { Search, Grid2x2, ArrowLeft, BookOpen } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 
@@ -47,7 +47,7 @@ const SkillsHeader = ({
         >
           {!showCategories ? (
             <>
-              <BookOpen className="h-4 w-4 mr-2" />
+              <Grid2x2 className="h-4 w-4 mr-2" />
               Types
             </>
           ) : (
