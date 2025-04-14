@@ -24,10 +24,11 @@ const CalendarPage = () => {
       <div 
         className="absolute inset-0 pointer-events-none animate-gradient-shift"
         style={{ 
+          // Increased opacity and adjusted gradient to be more blue
           background: `linear-gradient(60deg, 
-            hsla(var(--calendar-color), 0.01) 0%,
-            hsla(var(--calendar-color), 0.03) 50%,
-            hsla(var(--calendar-color), 0.01) 100%
+            hsla(var(--calendar-color), 0.04) 0%,
+            hsla(var(--calendar-color), 0.1) 50%,
+            hsla(var(--calendar-color), 0.04) 100%
           )`,
           backgroundSize: '400% 400%',
           zIndex: 0
