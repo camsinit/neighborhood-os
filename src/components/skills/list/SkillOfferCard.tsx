@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +48,7 @@ const SkillOfferCard = ({
   return (
     <div 
       data-skill-id={skill.id}
-      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer"
+      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative"
       onClick={onClick}
     >
       {/* User profile and skill title */}
@@ -60,13 +59,15 @@ const SkillOfferCard = ({
         </Avatar>
         <div className="flex flex-col">
           <h4 className="font-medium text-gray-900">{skill.title}</h4>
-          <Badge 
-            className={`${categoryStyle.bg} ${categoryStyle.text} border-0 mt-1 text-xs`}
-          >
-            {skill.skill_category}
-          </Badge>
         </div>
       </div>
+      
+      {/* Category tag on far right */}
+      <Badge 
+        className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs absolute right-2 top-1/2 transform -translate-y-1/2`}
+      >
+        {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
+      </Badge>
       
       {/* Action button */}
       {!isOwner && (
