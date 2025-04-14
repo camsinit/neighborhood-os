@@ -1,3 +1,4 @@
+
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -130,7 +131,7 @@ const ActivityItem = ({
               </div>
             </HoverCardTrigger>
             <HoverCardContent className="w-auto p-2">
-              <p className="text-sm">{activity.profiles.full_name || "Neighbor"}</p>
+              <p className="text-sm">{activity.profiles.display_name || "Neighbor"}</p>
             </HoverCardContent>
           </HoverCard>
 
