@@ -1,19 +1,28 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Popover, 
   PopoverContent, 
   PopoverTrigger 
 } from '@/components/ui/popover';
-import { Bell, MessageSquarePlus } from 'lucide-react';
+import { MessageSquarePlus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkillWithProfile } from './types/skillTypes';
-import { useState } from 'react';
 import SkillContributionDialog from './SkillContributionDialog';
+
+// Import drawer components
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerClose
+} from '@/components/ui/drawer';
 
 /**
  * SkillRequestsPopover Component
@@ -29,6 +38,9 @@ const SkillRequestsPopover = () => {
     title: string;
     requesterId: string;
   } | null>(null);
+  
+  // State to control the drawer visibility
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Query to fetch skill requests
   const { data: requests, isLoading } = useQuery({
@@ -46,11 +58,35 @@ const SkillRequestsPopover = () => {
         `)
         .eq('request_type', 'need')
         .order('created_at', { ascending: false })
-        .limit(5); // Only show the 5 most recent requests
+        .limit(5); // Only show the 5 most recent requests in popover
         
       if (error) throw error;
       return data as SkillWithProfile[];
     }
+  });
+
+  // Query to fetch all skill requests (for the drawer)
+  const { data: allRequests, isLoading: isLoadingAll } = useQuery({
+    queryKey: ['all-skill-requests'],
+    queryFn: async () => {
+      // Fetch all skill requests
+      const { data, error } = await supabase
+        .from('skills_exchange')
+        .select(`
+          *,
+          profiles:user_id (
+            avatar_url,
+            display_name
+          )
+        `)
+        .eq('request_type', 'need')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      return data as SkillWithProfile[];
+    },
+    // Only fetch when drawer is open
+    enabled: isDrawerOpen
   });
 
   // Handler for when a request is clicked
@@ -62,8 +98,30 @@ const SkillRequestsPopover = () => {
     });
   };
 
+  // Render request item (shared between popover and drawer)
+  const renderRequestItem = (request: SkillWithProfile) => (
+    <div 
+      key={request.id}
+      className="p-3 border-b hover:bg-gray-50 cursor-pointer flex items-center gap-3"
+      onClick={() => handleRequestClick(request)}
+    >
+      <Avatar className="h-9 w-9">
+        <AvatarImage src={request.profiles?.avatar_url || undefined} />
+        <AvatarFallback>{request.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+      </Avatar>
+      
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm truncate">{request.title}</p>
+        <p className="text-xs text-gray-500 truncate">
+          From: {request.profiles?.display_name || 'Anonymous'}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <>
+      {/* Popover */}
       <Popover>
         <PopoverTrigger asChild>
           <Button 
@@ -98,25 +156,7 @@ const SkillRequestsPopover = () => {
             ) : requests && requests.length > 0 ? (
               // List of skill requests
               <>
-                {requests.map(request => (
-                  <div 
-                    key={request.id}
-                    className="p-3 border-b hover:bg-gray-50 cursor-pointer flex items-center gap-3"
-                    onClick={() => handleRequestClick(request)}
-                  >
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={request.profiles?.avatar_url || undefined} />
-                      <AvatarFallback>{request.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{request.title}</p>
-                      <p className="text-xs text-gray-500 truncate">
-                        From: {request.profiles?.display_name || 'Anonymous'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                {requests.map(request => renderRequestItem(request))}
               </>
             ) : (
               // Empty state
@@ -128,14 +168,55 @@ const SkillRequestsPopover = () => {
           </div>
           
           <div className="p-2 border-t">
-            <Button 
-              variant="link" 
-              size="sm" 
-              className="w-full text-xs"
-              onClick={() => window.location.href = '/skills'}
-            >
-              View all skill requests
-            </Button>
+            {/* Drawer trigger instead of simple button */}
+            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+              <DrawerTrigger asChild>
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="w-full text-xs"
+                >
+                  View all skill requests
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh]">
+                <DrawerHeader>
+                  <DrawerTitle>All Skill Requests</DrawerTitle>
+                </DrawerHeader>
+                <div className="px-4 py-2 overflow-y-auto max-h-[60vh]">
+                  {isLoadingAll ? (
+                    // Loading state for all requests
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex items-center gap-2 py-2">
+                          <Skeleton className="h-10 w-10 rounded-full" />
+                          <div className="space-y-1 flex-1">
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : allRequests && allRequests.length > 0 ? (
+                    // List of all skill requests
+                    <div className="divide-y">
+                      {allRequests.map(request => renderRequestItem(request))}
+                    </div>
+                  ) : (
+                    // Empty state
+                    <div className="py-8 text-center text-gray-500">
+                      <p>No skill requests available</p>
+                      <p className="text-xs mt-1">Be the first to request a skill</p>
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 border-t text-center">
+                  <DrawerClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DrawerClose>
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         </PopoverContent>
       </Popover>

@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory } from './types/skillTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@supabase/auth-helpers-react';
-import SkillContributionDialog from './SkillContributionDialog';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
@@ -20,11 +19,6 @@ const SkillsList = ({
   searchQuery = ''
 }: SkillsListProps) => {
   const user = useUser();
-  const [selectedSkill, setSelectedSkill] = useState<{
-    id: string;
-    title: string;
-    requesterId: string;
-  } | null>(null);
 
   const {
     data: skills,
@@ -67,8 +61,7 @@ const SkillsList = ({
   // Filter out deleted activities
   const filteredSkills = skills || [];
   
-  // Further separate by request type
-  const requests = filteredSkills.filter(skill => skill.request_type === 'need') || [];
+  // Get only offers (hiding the requests section)
   const offers = filteredSkills.filter(skill => skill.request_type === 'offer') || [];
 
   // Show a special empty state for search with no results
@@ -86,40 +79,8 @@ const SkillsList = ({
 
   return (
     <div className="space-y-8">
-      {requests.length > 0 ? (
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
-          {/* Redesigned more compact horizontal scrolling card layout */}
-          <div className="bg-[#F8F8F8] p-3 rounded-lg overflow-x-auto">
-            <div className="flex gap-3">
-              {requests.map(request => (
-                <SkillCard
-                  key={request.id}
-                  skill={request}
-                  type="request"
-                  onContribute={() => setSelectedSkill({
-                    id: request.id,
-                    title: request.title,
-                    requesterId: request.user_id
-                  })}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
-          <EmptyState
-            icon={Sparkles}
-            title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skill Requests Yet`}
-            description={`Be the first to request ${selectedCategory || 'a'} skill from the community`}
-            actionLabel={`Request ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => setSelectedSkill(null)}
-          />
-        </div>
-      )}
-
+      {/* Skill Requests section removed as requested */}
+      
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-900">Available Skills</h3>
         {offers.length > 0 ? (
@@ -138,20 +99,10 @@ const SkillsList = ({
             title={`No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`}
             description={`Be the first to share your ${selectedCategory || ''} skills with the community`}
             actionLabel={`Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}
-            onAction={() => setSelectedSkill(null)}
+            onAction={() => window.location.href = '/skills?action=create'}
           />
         )}
       </div>
-
-      {selectedSkill && (
-        <SkillContributionDialog
-          open={!!selectedSkill}
-          onOpenChange={(open) => !open && setSelectedSkill(null)}
-          skillRequestId={selectedSkill.id}
-          requestTitle={selectedSkill.title}
-          requesterId={selectedSkill.requesterId}
-        />
-      )}
     </div>
   );
 };

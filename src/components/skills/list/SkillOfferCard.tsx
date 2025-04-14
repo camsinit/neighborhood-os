@@ -60,12 +60,13 @@ const SkillOfferCard = ({
       {isOwner ? (
         <Button 
           variant="destructive" 
+          size="icon"
           onClick={handleDeleteClick}
           disabled={isDeleting}
-          className="ml-4"
+          className="ml-4 h-9 w-9"
+          aria-label="Delete skill"
         >
-          <Trash2 className="mr-1 h-4 w-4" />
-          {isDeleting ? 'Deleting...' : 'Delete'}
+          <Trash2 className="h-4 w-4" />
         </Button>
       ) : (
         <Button 
