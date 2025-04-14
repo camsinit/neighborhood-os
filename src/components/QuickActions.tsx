@@ -35,7 +35,7 @@ const QuickActions = () => {
         setRequestView('goods');
         setIsAddRequestOpen(true);
       },
-      className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
+      className: "text-[#F97316] border-[#F97316]"
     },
     { 
       icon: Package, 
@@ -45,7 +45,7 @@ const QuickActions = () => {
         setRequestView('goods');
         setIsAddRequestOpen(true);
       },
-      className: "bg-[#F97316]/10 hover:bg-[#F97316]/20 text-[#F97316] border-[#F97316]/30"
+      className: "text-[#F97316] border-[#F97316]"
     },
     
     // Skills actions (purple)
@@ -57,7 +57,7 @@ const QuickActions = () => {
         setRequestView('skills');
         setIsAddRequestOpen(true);
       },
-      className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
+      className: "text-[#9b87f5] border-[#9b87f5]"
     },
     { 
       icon: HelpCircle, 
@@ -67,7 +67,7 @@ const QuickActions = () => {
         setRequestView('skills');
         setIsAddRequestOpen(true);
       },
-      className: "bg-[#9b87f5]/10 hover:bg-[#9b87f5]/20 text-[#9b87f5] border-[#9b87f5]/30"
+      className: "text-[#9b87f5] border-[#9b87f5]"
     },
     
     // Other actions (blue and red)
@@ -75,13 +75,13 @@ const QuickActions = () => {
       icon: Calendar, 
       label: "Add Event", 
       onClick: () => setIsAddEventOpen(true),
-      className: "bg-[#0EA5E9]/10 hover:bg-[#0EA5E9]/20 text-[#0EA5E9] border-[#0EA5E9]/30"
+      className: "text-[#0EA5E9] border-[#0EA5E9]"
     },
     { 
       icon: AlertTriangle, 
       label: "Add Safety Update", 
       onClick: () => setIsSafetyUpdateOpen(true),
-      className: "bg-[#EA384C]/10 hover:bg-[#EA384C]/20 text-[#EA384C] border-[#EA384C]/30"
+      className: "text-[#EA384C] border-[#EA384C]"
     }
   ];
 
@@ -101,11 +101,13 @@ const QuickActions = () => {
           <Button 
             key={action.label} 
             variant="outline" 
-            className={`flex items-center justify-center h-16 py-2 border-2 ${action.className}`} 
+            className={`flex items-center justify-center h-16 py-2 border-2 bg-transparent hover:bg-transparent ${action.className}`} 
             onClick={action.onClick}
           >
-            <action.icon className="h-5 w-5 mr-2" />
-            <span className="text-sm text-center">{action.label}</span>
+            <div className="flex items-center">
+              <action.icon className="h-5 w-5 mr-2" />
+              <span className="text-sm">{action.label}</span>
+            </div>
           </Button>
         ))}
       </div>
