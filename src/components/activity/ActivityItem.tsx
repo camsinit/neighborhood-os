@@ -41,7 +41,7 @@ const getCompactTimeAgo = (date: Date): string => {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now redesigned to be a compact single-line item that navigates directly to content
+ * Now redesigned to be a compact single-line item with icon and text on same line
  */
 const ActivityItem = ({
   activity,
@@ -105,11 +105,11 @@ const ActivityItem = ({
   const activityLabel = activityType.charAt(0).toUpperCase() + activityType.slice(1);
   
   return (
-    <div className="mb-3">
+    <div className="mb-2">
       <div 
-        className={`relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-md transition-all cursor-pointer ${isDeleted ? 'bg-gray-50' : 'bg-white'}`}
+        className={`relative flex items-center py-2 px-3 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer ${isDeleted ? 'bg-gray-50' : 'bg-white'}`}
         style={{
-          borderLeft: `4px solid ${isDeleted ? '#9CA3AF' : activityColor}`
+          borderLeft: `3px solid ${isDeleted ? '#9CA3AF' : activityColor}`
         }}
         onClick={handleItemClick}
       >
@@ -117,11 +117,11 @@ const ActivityItem = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex-shrink-0 mr-3">
-                <Avatar className="h-8 w-8">
+              <div className="flex-shrink-0 mr-2">
+                <Avatar className="h-6 w-6">
                   <AvatarImage src={activity.profiles.avatar_url} />
                   <AvatarFallback>
-                    <User className="h-4 w-4" />
+                    <User className="h-3 w-3" />
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -133,15 +133,15 @@ const ActivityItem = ({
         </TooltipProvider>
 
         {/* Time elapsed */}
-        <span className="text-sm text-gray-500 mr-4 min-w-14 font-medium">
+        <span className="text-xs text-gray-500 mr-2 min-w-10 font-medium">
           {timeAgo}
         </span>
 
-        {/* Activity title */}
+        {/* Activity title with icon inline */}
         {isDeleted ? (
           <div className="flex items-center flex-1 min-w-0">
-            <AlertCircle className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
-            <p className="text-base font-medium text-gray-500 line-through truncate">
+            <AlertCircle className="h-3.5 w-3.5 text-gray-400 mr-1.5 flex-shrink-0" />
+            <p className="text-sm font-medium text-gray-500 line-through truncate">
               {activity.metadata?.original_title || activity.title}
             </p>
           </div>
@@ -149,11 +149,11 @@ const ActivityItem = ({
           <div className="flex items-center flex-1 min-w-0">
             {IconComponent && (
               <IconComponent 
-                className="h-5 w-5 mr-2 flex-shrink-0" 
+                className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" 
                 style={{ color: activityColor }} 
               />
             )}
-            <p className="text-base font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-gray-900 truncate">
               {activity.title}
             </p>
           </div>
@@ -162,7 +162,7 @@ const ActivityItem = ({
         {/* Activity type badge - right aligned */}
         <Badge 
           variant="outline" 
-          className="ml-auto flex-shrink-0 text-xs px-3 py-1 font-medium" 
+          className="ml-auto flex-shrink-0 text-xs px-2 py-0.5 font-medium" 
           style={{ 
             backgroundColor: `${activityColor}15`,
             color: activityColor,

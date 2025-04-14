@@ -25,7 +25,7 @@ import { Archive } from "lucide-react";
 
 /**
  * A drawer component for notifications that slides in from the right side
- * Includes a toggle button with notification indicator and a scrollable list
+ * Replaces the previous popover component with a full drawer
  */
 const NotificationDrawer = () => {
   // State to track whether to show archived notifications
@@ -57,25 +57,25 @@ const NotificationDrawer = () => {
 
   return (
     <Drawer>
-      {/* The trigger button with notification indicator - redesigned to be more noticeable */}
+      {/* The trigger button with notification indicator - redesigned to be more compact */}
       <DrawerTrigger asChild>
         <Button
           variant="outline"
           size="sm"
-          className="relative hover:bg-gray-100 flex items-center gap-2 bg-white/80 border-2 border-purple-200 hover:border-purple-300 shadow-sm"
+          className="relative hover:bg-gray-100 flex items-center gap-1.5 bg-white/80 border border-purple-200 hover:border-purple-300 h-9 px-3"
           aria-label="Open notifications"
         >
-          <Bell className="h-5 w-5 text-purple-500" />
-          <span className="font-medium text-purple-700">Notifications</span>
+          <Bell className="h-4 w-4 text-purple-500" />
+          <span className="font-medium text-sm text-purple-700">Notifications</span>
           {/* Show a dot indicator if there are unread notifications */}
           {hasUnreadNotifications && (
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" 
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-red-500" 
                   aria-label="You have unread notifications" />
           )}
         </Button>
       </DrawerTrigger>
       
-      {/* The drawer content */}
+      {/* The drawer content - slides in from the right side */}
       <DrawerContent className="max-w-md mx-auto">
         <DrawerHeader className="border-b pb-4">
           <div className="flex justify-between items-center">

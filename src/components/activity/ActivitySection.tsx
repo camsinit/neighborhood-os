@@ -10,11 +10,11 @@ import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 const ActivitySection = () => {
   return (
     <section className="w-full">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-900">Neighborhood Activity</h2>
         <NotificationDrawer />
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 w-full">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-full max-h-full">
         <ActivityFeed />
       </div>
     </section>
