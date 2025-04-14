@@ -1,20 +1,19 @@
 
-/**
- * ActivitySection Component
- * 
- * This component handles displaying the activity section of the HomePage,
- * showing recent neighborhood activities.
- */
+import React from 'react';
 import ActivityFeed from "./ActivityFeed";
+import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 
 /**
  * Component to display the activity feed section on the homepage
- * Now designed to take up more horizontal space as main content
+ * Now with Notifications button inline with the section heading
  */
 const ActivitySection = () => {
   return (
     <section className="w-full">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900">Neighborhood Activity</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-gray-900">Neighborhood Activity</h2>
+        <NotificationDrawer />
+      </div>
       <div className="bg-white rounded-lg shadow-sm p-4 w-full">
         <ActivityFeed />
       </div>
