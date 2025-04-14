@@ -87,9 +87,10 @@ const SkillsPage = () => {
                   setSearchQuery={setSearchQuery}
                 />
                 
-                <div className="flex items-center gap-2 mb-6">
+                {/* This is the selected element that's being simplified */}
+                <div className="mb-6 flex items-center">
                   {React.createElement(getCategoryIcon(selectedCategory), {
-                    className: "h-5 w-5 text-gray-700"
+                    className: "h-5 w-5 text-gray-700 mr-2"
                   })}
                   <h3 className="text-lg font-semibold text-gray-900">
                     {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}

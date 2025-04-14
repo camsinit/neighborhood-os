@@ -87,10 +87,11 @@ const SkillsList = ({
   return (
     <div className="space-y-8">
       {requests.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           <h3 className="text-lg font-semibold text-gray-900">Skill Requests</h3>
-          <div className="bg-[#F8F8F8] p-4 rounded-lg overflow-x-auto">
-            <div className="flex gap-4 pb-2">
+          {/* Redesigned more compact horizontal scrolling card layout */}
+          <div className="bg-[#F8F8F8] p-3 rounded-lg overflow-x-auto">
+            <div className="flex gap-3">
               {requests.map(request => (
                 <SkillCard
                   key={request.id}

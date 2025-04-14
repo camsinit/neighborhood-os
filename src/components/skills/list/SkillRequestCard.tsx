@@ -7,10 +7,10 @@ import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import { SkillWithProfile } from '../types/skillTypes';
 
 /**
- * SkillRequestCard - Displays a request for skills from other users
+ * SkillRequestCard - A compact card for skill requests in the horizontal scrolling section
  * 
- * This is a more compact card design for the skills request section
- * that allows users to contribute their skills to help others.
+ * This is an improved, space-efficient design that maintains functionality
+ * while taking up less vertical space.
  */
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -24,26 +24,26 @@ const SkillRequestCard = ({ skill, onContribute }: SkillRequestCardProps) => {
   return (
     <div 
       data-skill-id={skill.id}
-      className="relative flex-shrink-0 w-[250px] h-[120px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
+      className="relative flex-shrink-0 w-[250px] h-[100px] border border-dashed border-gray-300 rounded-lg p-3 bg-white cursor-pointer hover:border-gray-400 transition-colors"
     >
       {/* Decorative indicator arrow */}
-      <ArrowUpRight className="absolute top-2 right-2 h-4 w-4 text-gray-400" />
+      <ArrowUpRight className="absolute top-2 right-2 h-3 w-3 text-gray-400" />
       
-      <div className="h-full flex flex-col justify-between gap-2">
-        {/* User profile and skill title section */}
+      <div className="h-full flex flex-col justify-between gap-1">
+        {/* User profile and skill title section - more compact layout */}
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-            <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+            <AvatarFallback className="text-xs">{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
           </Avatar>
-          <h4 className="font-medium text-gray-900 line-clamp-2">{skill.title}</h4>
+          <h4 className="font-medium text-sm text-gray-900 line-clamp-1">{skill.title}</h4>
         </div>
 
-        {/* Action buttons */}
-        <div className="space-y-1">
+        {/* Action buttons - more compact */}
+        <div className="mt-1">
           <Button 
             variant="outline" 
-            className="w-full"
+            className="w-full h-7 text-xs py-0"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
@@ -57,7 +57,7 @@ const SkillRequestCard = ({ skill, onContribute }: SkillRequestCardProps) => {
           {skill.status === 'pending_scheduling' && (
             <Button
               variant="secondary"
-              className="w-full"
+              className="w-full mt-1 h-7 text-xs py-0"
               size="sm"
               onClick={() => setIsScheduleDialogOpen(true)}
             >
