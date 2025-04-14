@@ -57,18 +57,19 @@ const NotificationDrawer = () => {
 
   return (
     <Drawer>
-      {/* The trigger button with notification indicator */}
+      {/* The trigger button with notification indicator - redesigned to be more noticeable */}
       <DrawerTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="relative hover:bg-gray-100"
+          variant="outline"
+          size="sm"
+          className="relative hover:bg-gray-100 flex items-center gap-2 bg-white/80 border-2 border-purple-200 hover:border-purple-300 shadow-sm"
           aria-label="Open notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-purple-500" />
+          <span className="font-medium text-purple-700">Notifications</span>
           {/* Show a dot indicator if there are unread notifications */}
           {hasUnreadNotifications && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" 
+            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" 
                   aria-label="You have unread notifications" />
           )}
         </Button>

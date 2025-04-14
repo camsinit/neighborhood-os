@@ -1,3 +1,4 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -14,7 +15,7 @@ import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
  * - Sharing or requesting skills
  * - Adding safety updates
  * 
- * Now displayed as a full-width grid at the top of the homepage
+ * Now displayed as a 3-column grid at the top of the homepage
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -95,8 +96,8 @@ const QuickActions = () => {
         </p>
       </div>
 
-      {/* Responsive grid for all actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+      {/* Fixed 3-column grid for all actions */}
+      <div className="grid grid-cols-3 gap-4">
         {allActions.map(action => (
           <Button 
             key={action.label} 
