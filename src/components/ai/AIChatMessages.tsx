@@ -1,3 +1,4 @@
+
 /**
  * AIChatMessages Component
  * 
@@ -6,7 +7,6 @@
 import React from 'react';
 import AIMessage from './AIMessage';
 import { Message } from './AIChat';
-import { cn } from '@/lib/utils';
 
 // Define props interface for type safety
 interface AIChatMessagesProps {
@@ -33,21 +33,24 @@ const AIChatMessages = ({
   messagesEndRef,
   className
 }: AIChatMessagesProps) => {
-  // Apply the classes directly to the messages component
-  return <div className="">
+  // Apply the provided className along with default styles
+  return (
+    <div className={className}>
       {/* Map through and render each message */}
       {messages.map(message => <AIMessage key={message.id} message={message} />)}
       
       {/* Show loading indicator when waiting for AI response */}
       {isLoading && <AIMessage message={{
-      id: 'loading',
-      content: loadingMessage,
-      role: 'assistant',
-      timestamp: new Date()
-    }} isLoading={true} />}
+        id: 'loading',
+        content: loadingMessage,
+        role: 'assistant',
+        timestamp: new Date()
+      }} isLoading={true} />}
       
       {/* Invisible div that serves as a reference point for scrolling */}
       <div ref={messagesEndRef} />
-    </div>;
+    </div>
+  );
 };
+
 export default AIChatMessages;

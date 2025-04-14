@@ -14,7 +14,7 @@ const ActivitySection = () => {
   return (
     <section>
       <h2 className="text-2xl font-bold mb-4 text-gray-900">Neighborhood Activity</h2>
-      <div className="bg-white rounded-lg shadow-sm p-4 py-[3px]">
+      <div className="bg-white rounded-lg shadow-sm p-4">
         <ActivityFeed />
       </div>
     </section>

@@ -3,28 +3,29 @@
  * HomePage Component
  * 
  * Main dashboard page that displays:
- * 1. AI Chat interface for interacting with the neighborhood assistant
- * 2. Quick actions for common neighborhood tasks (moved from previous position)
+ * 1. Quick actions for common neighborhood tasks
+ * 2. Activity feed for recent neighborhood events
  * 3. Notifications for the current user
  * 
- * Note: The Activity Feed has been removed as requested
+ * Note: AI Chat is temporarily commented out
  */
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import NotificationsSection from "@/components/notifications/NotificationsSection";
-import AIChat from "@/components/ai/AIChat";
+import ActivitySection from "@/components/activity/ActivitySection";
+// import AIChat from "@/components/ai/AIChat"; // Temporarily commented out
 
 /**
  * Main homepage/dashboard of the neighborhood app
- * Shows AI assistant, quick actions, and notifications
- * Reduced chat interface height for a more compact UI
- * Added styling directly to the AIChat container since its wrapper was removed
+ * Shows activity feed, quick actions, and notifications
+ * AI chat is temporarily disabled
  */
 const HomePage = () => {
-  return <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+  return (
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
-        <div className="space-y-1">
-          {/* AI Chat Section - With reduced height and direct styling for AIChat */}
+        <div className="space-y-6">
+          {/* AI Chat Section - Temporarily commented out 
           <section>
             <div className="h-[350px] bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
               <AIChat />
@@ -32,20 +33,32 @@ const HomePage = () => {
           </section>
 
           <Separator className="my-2 bg-gray-200" />
+          */}
 
-          {/* Two Column Layout for Quick Actions and Notifications */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Quick Actions Section - Moved from previous position */}
-            <section>
-              <h2 className="text-2xl font-bold mb-2 text-gray-900">Quick Actions</h2>
-              <QuickActions />
-            </section>
+          {/* Main content area with Activity Feed, Quick Actions and Notifications */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column - Activity Feed */}
+            <div className="space-y-6">
+              {/* Activity Section */}
+              <ActivitySection />
+            </div>
 
-            {/* Notifications Section - Remains in the same position */}
-            <NotificationsSection />
+            {/* Right Column - Quick Actions and Notifications */}
+            <div className="space-y-6">
+              {/* Quick Actions Section */}
+              <section>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
+                <QuickActions />
+              </section>
+
+              {/* Notifications Section */}
+              <NotificationsSection />
+            </div>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HomePage;
