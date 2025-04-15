@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -36,7 +35,7 @@ const DialogWrapper = ({
   const maxWidthClass = {
     xs: "max-w-xs",
     sm: "max-w-sm",
-    md: "max-w-md", 
+    md: "max-w-xl",
     lg: "max-w-lg",
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
