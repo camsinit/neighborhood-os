@@ -141,7 +141,10 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               // Fix: Use requestType instead of request_type to match the expected interface
               requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               images: itemToEdit.images || [],
-              image_url: itemToEdit.image_url || ""
+              // Fix: Use images array instead of image_url which isn't a valid property
+              // Add the image_url to the images array if it exists and images is empty
+              ...(itemToEdit.image_url && (!itemToEdit.images || itemToEdit.images.length === 0) ? 
+                { images: [itemToEdit.image_url] } : {})
             }}
             requestId={itemToEdit.id}
             initialRequestType={itemToEdit.request_type}

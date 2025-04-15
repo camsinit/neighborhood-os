@@ -11,6 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * AvailableItemsSection component displays available goods items in a grid format
+ * with images displayed at full height on the left side of each card
+ */
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
   onRequestSelect: (request: GoodsExchangeItem) => void;
@@ -20,10 +24,6 @@ interface AvailableItemsSectionProps {
   isDeletingItem?: boolean;
 }
 
-/**
- * AvailableItemsSection component displays available goods items in a grid format
- * with images displayed at full height on the left side of each card
- */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
   onDeleteItem,
@@ -152,7 +152,10 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               // We need requestType, not request_type
               requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               images: itemToEdit.images || [],
-              image_url: itemToEdit.image_url || ""
+              // Fix: Use images array instead of image_url - image_url is not recognized in the form data type
+              // Only add the first image from image_url to the images array if it exists and images is empty
+              ...(itemToEdit.image_url && (!itemToEdit.images || itemToEdit.images.length === 0) ? 
+                { images: [itemToEdit.image_url] } : {})
             }}
             requestId={itemToEdit.id}
             initialRequestType={itemToEdit.request_type}
