@@ -1,4 +1,3 @@
-
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -37,6 +36,47 @@ const getCompactTimeAgo = (date: Date): string => {
     return `${weeks}w`;
   } else {
     return `${months}mo`;
+  }
+};
+
+/**
+ * Get a concise action description for the activity badge
+ * This maps activity types to short, action-focused labels
+ */
+const getActivityBadgeLabel = (activityType: string): string => {
+  switch (activityType) {
+    // Event activities
+    case 'event_created':
+      return 'New Event';
+    case 'event_rsvp':
+      return 'Event RSVP';
+      
+    // Skill activities
+    case 'skill_offered':
+      return 'Skill Offered';
+    case 'skill_requested':
+      return 'Skill Request';
+      
+    // Goods activities  
+    case 'good_shared':
+      return 'Item Shared';
+    case 'good_requested':
+      return 'Item Request';
+      
+    // Care activities
+    case 'care_offered':
+      return 'Care Offered';
+    case 'care_requested':
+      return 'Care Request';
+    case 'care_completed':
+      return 'Care Complete';
+      
+    // Safety activities
+    case 'safety_update':
+      return 'Safety Update';
+      
+    default:
+      return 'Update';
   }
 };
 
@@ -156,7 +196,7 @@ const ActivityItem = ({
           </p>
         </div>
 
-        {/* Activity type badge - right aligned */}
+        {/* Activity action badge - using our new getActivityBadgeLabel function */}
         <Badge 
           variant="outline" 
           className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium" 
@@ -166,7 +206,7 @@ const ActivityItem = ({
             borderColor: `${activityColor}30`
           }}
         >
-          {activityLabel}
+          {getActivityBadgeLabel(activity.activity_type)}
         </Badge>
       </div>
     </div>
