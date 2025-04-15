@@ -120,6 +120,14 @@ export default {
 				'chat': '0 2px 8px rgba(0, 0, 0, 0.05)',
 				'chat-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
 			},
+			maxWidth: {
+				'xs+100': 'calc(20rem + 100px)',     // default xs is 20rem
+				'sm+100': 'calc(24rem + 100px)',     // default sm is 24rem
+				'md+100': 'calc(28rem + 100px)',     // default md is 28rem
+				'lg+100': 'calc(32rem + 100px)',     // default lg is 32rem
+				'xl+100': 'calc(36rem + 100px)',     // default xl is 36rem
+				'2xl+100': 'calc(42rem + 100px)',    // default 2xl is 42rem
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

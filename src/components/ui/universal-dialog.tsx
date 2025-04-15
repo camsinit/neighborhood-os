@@ -12,17 +12,7 @@ import {
 /**
  * UniversalDialog component
  * 
- * This is a standardized dialog component that ensures consistent styling and dimensions
- * for all pop-overs throughout the application. It wraps the shadcn Dialog component
- * with additional constraints and styling.
- * 
- * @param open - Boolean to control dialog visibility
- * @param onOpenChange - Function to handle dialog state changes
- * @param title - Dialog title (optional)
- * @param description - Dialog description (optional)
- * @param children - Dialog content
- * @param footer - Dialog footer content (optional)
- * @param maxWidth - Maximum width for the dialog (default: "md")
+ * Updated to increase default width by 100px
  */
 interface UniversalDialogProps {
   open: boolean;
@@ -43,14 +33,14 @@ const UniversalDialog = ({
   footer,
   maxWidth = "md",
 }: UniversalDialogProps) => {
-  // Map the maxWidth prop to a Tailwind class
+  // Updated width classes to be 100px wider
   const maxWidthClass = {
-    xs: "max-w-xs",
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    "2xl": "max-w-2xl",
+    xs: "max-w-xs+100",
+    sm: "max-w-sm+100",
+    md: "max-w-md+100",
+    lg: "max-w-lg+100",
+    xl: "max-w-xl+100",
+    "2xl": "max-w-2xl+100",
     "full": "max-w-full",
   }[maxWidth];
 
