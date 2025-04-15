@@ -1,4 +1,3 @@
-
 // This component handles category selection for goods form using a button group
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -66,7 +65,9 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
               key={value}
               value={value}
               aria-label={label}
-              className="flex-1 min-w-[140px] items-center gap-2 px-4 py-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              className="flex-1 min-w-[140px] items-center gap-2 px-4 py-3 rounded-full border border-gray-200 
+                bg-blue-50/80 hover:bg-blue-100/80 transition-colors
+                data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
             >
               <IconComponent className="h-4 w-4" />
               <span>{label}</span>
