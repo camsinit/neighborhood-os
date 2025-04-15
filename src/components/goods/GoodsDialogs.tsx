@@ -37,7 +37,7 @@ const GoodsDialogs = ({
         open={isAddRequestOpen}
         onOpenChange={onAddRequestOpenChange}
         initialRequestType={initialRequestType}
-        view="items"
+        view="items" // This is the key parameter that routes to GoodsForm
       />
 
       {/* Dialog for viewing item details */}

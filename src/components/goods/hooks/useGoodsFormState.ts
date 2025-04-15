@@ -8,30 +8,33 @@ export const useGoodsFormState = (initialValues: any, initialRequestType: "offer
   // Check if this is an offer form
   const isOfferForm = normalizedRequestType === "offer";
   
+  // Default category to 'furniture' if none provided - this ensures we always have a category selected
+  const defaultCategory: GoodsItemCategory = "furniture";
+  
   const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
-    // No default category - making sure it's explicitly undefined
-    category: (initialValues as any)?.category || undefined,
+    // Use the initialValues category if available, otherwise use default
+    category: (initialValues?.category as GoodsItemCategory) || defaultCategory,
     // Use the normalized request type that matches the expected type
     requestType: normalizedRequestType || "offer",
-    availableDays: (initialValues as any)?.availableDays || 30,
-    images: (initialValues as any)?.images || []
+    availableDays: initialValues?.availableDays || 30,
+    images: initialValues?.images || []
   });
   
   const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
-    urgency: (initialValues as any)?.urgency || "medium",
-    // No default category - making sure it's explicitly undefined
-    category: (initialValues as any)?.category || undefined
+    urgency: initialValues?.urgency || "medium",
+    // Use the initialValues category if available, otherwise use default
+    category: (initialValues?.category as GoodsItemCategory) || defaultCategory
   });
   
   const [uploading, setUploading] = useState(false);
   
-  // Explicitly set to undefined by default (not a string or any other value)
-  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory | undefined>(
-    (initialValues as any)?.category || undefined
+  // Set the selected category from initialValues or use default
+  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>(
+    (initialValues?.category as GoodsItemCategory) || defaultCategory
   );
   
   return {

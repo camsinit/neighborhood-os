@@ -61,12 +61,15 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
     ? allCategories 
     : allCategories.slice(0, initialCategories);
 
+  // If no category is selected, default to 'furniture'
+  const selectedCategory = category || "furniture";
+
   return (
     <div className="space-y-4">
       <Label htmlFor="category">Item Category</Label>
       <ToggleGroup 
         type="single" 
-        value={category || ""}  
+        value={selectedCategory}  
         onValueChange={(value) => value && onChange(value as GoodsItemCategory)}
         className="flex flex-wrap gap-4 max-w-[800px]"
       >

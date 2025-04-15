@@ -1,3 +1,4 @@
+
 import UniversalDialog from "./ui/universal-dialog";
 import SupportRequestForm from "./support/SupportRequestForm";
 import SkillForm from "./skills/SkillForm";
@@ -28,7 +29,7 @@ const AddSupportRequestDialog = ({
 }: AddSupportRequestDialogProps) => {
   // Determine which specific form to show based on the view prop
   const isSkillsView = view === 'skills';
-  const isGoodsView = view === 'goods';
+  const isGoodsView = view === 'items' || view === 'goods'; // Fix: Check for both 'items' and 'goods'
   
   // Set the dialog title based on the view and request type
   const getDialogTitle = () => {
