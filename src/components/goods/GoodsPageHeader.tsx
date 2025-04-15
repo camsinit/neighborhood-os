@@ -1,3 +1,4 @@
+
 /**
  * Component for the intro section of the Goods page
  * 
@@ -6,8 +7,8 @@
  */
 const GoodsPageHeader = () => {
   return <>
-      {/* Just the page title - description is now in GoodsPageContainer */}
-      <h2 className="text-2xl font-bold text-gray-900">Stuff</h2>
+      {/* Updated page title from "Stuff" to "Items" */}
+      <h2 className="text-2xl font-bold text-gray-900">Items</h2>
     </>;
 };
 export default GoodsPageHeader;
