@@ -2,6 +2,7 @@
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch } from './utils/sectionHelpers';
+import { getUrgencyClass, getUrgencyLabel } from './utils/urgencyHelpers';
 import { useGoodsItemDeletion } from './hooks/useGoodsItemDeletion';
 import { GoodsSectionsLoadingState } from './states/EmptyAndLoadingStates';
 import { TabsContent } from "@/components/ui/tabs";
@@ -23,6 +24,17 @@ interface GoodsSectionsProps {
   activeTab: string;
 }
 
+/**
+ * GoodsSections component
+ * 
+ * This component manages the display of different sections of goods items:
+ * - Urgent requests (high priority needs)
+ * - Regular requests (normal priority needs)
+ * - Available items (things neighbors are offering)
+ * 
+ * It also handles filtering, loading states, and passes appropriate props
+ * to each section component.
+ */
 const GoodsSections: React.FC<GoodsSectionsProps> = ({
   goodsData = [],
   isLoading,
@@ -36,6 +48,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   onRequestItem,
   activeTab
 }) => {
+  // Hook to handle deletion of goods items
   const {
     handleDeleteGoodsItem,
     isDeletingItem
@@ -47,6 +60,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   const requests = filteredGoods.filter(item => item.request_type === 'need' && item.urgency !== 'high');
   const available = filteredGoods.filter(item => item.request_type === 'offer');
 
+  // Show loading state when data is being fetched
   if (isLoading) {
     return <GoodsSectionsLoadingState />;
   }
