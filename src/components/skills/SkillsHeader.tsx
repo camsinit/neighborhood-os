@@ -5,21 +5,24 @@ import { Input } from "@/components/ui/input";
 import { Search, Grid2x2, ArrowLeft, BookOpen } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
-import SkillRequestsPopover from "./SkillRequestsPopover"; // Add this import
+import SkillRequestsButton from "./SkillRequestsPopover"; // Updated import name
 
-// Re-adding the interface that was accidentally removed
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  showRequests: boolean;
+  setShowRequests: (show: boolean) => void;
 }
 
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
   searchQuery,
-  setSearchQuery
+  setSearchQuery,
+  showRequests,
+  setShowRequests
 }: SkillsHeaderProps) => {
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
@@ -58,6 +61,11 @@ const SkillsHeader = ({
           )}
         </Button>
 
+        <SkillRequestsButton
+          isActive={showRequests}
+          onClick={() => setShowRequests(!showRequests)}
+        />
+
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input 
@@ -71,8 +79,6 @@ const SkillsHeader = ({
       </div>
 
       <div className="flex items-center gap-4">
-        <SkillRequestsPopover />
-        
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
