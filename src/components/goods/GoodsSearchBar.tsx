@@ -1,6 +1,7 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, AlertCircle, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GoodsSearchBarProps {
@@ -38,7 +39,7 @@ const GoodsSearchBar = ({
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             <Input 
               type="text" 
-              placeholder="Search stuff..." 
+              placeholder="Search..." 
               value={searchQuery} 
               onChange={e => onSearchChange(e.target.value)} 
               className="pl-10" 
@@ -60,14 +61,12 @@ const GoodsSearchBar = ({
           onClick={onRequestItem} 
           className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
         >
-          <AlertCircle className="h-4 w-4 mr-2" />
           Request
         </Button>
         <Button 
           onClick={onOfferItem} 
           className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
         >
-          <Plus className="h-4 w-4 mr-2" />
           Offer
         </Button>
       </div>
@@ -76,3 +75,4 @@ const GoodsSearchBar = ({
 };
 
 export default GoodsSearchBar;
+
