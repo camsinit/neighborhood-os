@@ -1,8 +1,11 @@
 
 // This component handles category selection for goods form using a button group
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { ChevronDown, ChevronUp } from "lucide-react"; 
 
 // Import category names and icons from Lucide
 import { CATEGORY_NAMES } from "../utils/goodsConstants";
@@ -43,13 +46,21 @@ interface CategorySelectionProps {
   onChange: (category: GoodsItemCategory) => void;
 }
 
-/**
- * CategorySelection component
- * 
- * This component renders a button group for selecting the goods category.
- * Each button includes an icon and label for better visual recognition.
- */
 const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
+  // State to track whether all categories are visible
+  const [showAllCategories, setShowAllCategories] = useState(false);
+
+  // Get all category entries
+  const allCategories = Object.entries(CATEGORY_NAMES);
+  
+  // Calculate how many categories to show initially (half rounded down)
+  const initialCategories = Math.floor(allCategories.length / 2);
+  
+  // Get the categories to display based on showAllCategories state
+  const displayedCategories = showAllCategories 
+    ? allCategories 
+    : allCategories.slice(0, initialCategories);
+
   return (
     <div className="space-y-4">
       <Label htmlFor="category">Item Category</Label>
@@ -59,7 +70,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
         onValueChange={(value) => value && onChange(value as GoodsItemCategory)}
         className="flex flex-wrap gap-4 max-w-[800px]"
       >
-        {Object.entries(CATEGORY_NAMES).map(([value, label]) => {
+        {displayedCategories.map(([value, label]) => {
           const IconComponent = categoryIcons[value as keyof typeof categoryIcons];
           return (
             <ToggleGroupItem
@@ -76,6 +87,24 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
           );
         })}
       </ToggleGroup>
+      
+      {/* View all categories button */}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setShowAllCategories(!showAllCategories)}
+        className="w-full mt-2"
+      >
+        {showAllCategories ? (
+          <>
+            Show Less Categories <ChevronUp className="ml-2 h-4 w-4" />
+          </>
+        ) : (
+          <>
+            View All Categories <ChevronDown className="ml-2 h-4 w-4" />
+          </>
+        )}
+      </Button>
     </div>
   );
 };
