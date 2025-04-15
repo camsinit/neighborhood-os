@@ -23,7 +23,8 @@ interface SkillRequestsDrawerProps {
   onOpenChange: (open: boolean) => void;
   requests: SkillWithProfile[] | undefined;
   isLoading: boolean;
-  onRequestClick: (skill: SkillWithProfile) => void;
+  // Make onRequestClick optional by adding ? to the property name
+  onRequestClick?: (skill: SkillWithProfile) => void;
 }
 
 const SkillRequestsDrawer: React.FC<SkillRequestsDrawerProps> = ({
@@ -31,7 +32,8 @@ const SkillRequestsDrawer: React.FC<SkillRequestsDrawerProps> = ({
   onOpenChange,
   requests,
   isLoading,
-  onRequestClick
+  // Provide a default empty function for onRequestClick if not provided
+  onRequestClick = () => {}
 }) => {
   // Helper to render loading skeletons
   const renderLoadingState = () => (

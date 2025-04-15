@@ -10,18 +10,21 @@ import { SkillWithProfile } from '../types/skillTypes';
  */
 interface SkillRequestNotificationItemProps {
   request: SkillWithProfile;
-  onClick: () => void;
+  onClick?: () => void; // Make onClick optional
 }
 
 const SkillRequestNotificationItem: React.FC<SkillRequestNotificationItemProps> = ({ 
   request, 
   onClick 
 }) => {
+  // Only add onClick handler if it's provided
+  const handleClick = onClick ? onClick : undefined;
+  
   // Render a single request item with consistent styling
   return (
     <div 
-      className="p-3 border-b hover:bg-gray-50 cursor-pointer flex items-center gap-3"
-      onClick={onClick}
+      className={`p-3 border-b hover:bg-gray-50 ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={handleClick}
     >
       {/* Avatar section shows the requester's profile image */}
       <Avatar className="h-9 w-9">
