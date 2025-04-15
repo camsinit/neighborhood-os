@@ -38,8 +38,8 @@ const GoodsSearchBar = ({
         </div>
 
         <TabsList>
-          <TabsTrigger value="needs" onClick={() => onTabChange("needs")}>Requests</TabsTrigger>
           <TabsTrigger value="offers" onClick={() => onTabChange("offers")}>Available</TabsTrigger>
+          <TabsTrigger value="needs" onClick={() => onTabChange("needs")}>Requests</TabsTrigger>
         </TabsList>
       </div>
       

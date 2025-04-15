@@ -21,7 +21,7 @@ const GoodsPageContainer = () => {
   const [showUrgent, setShowUrgent] = useState(true);
   const [showRequests, setShowRequests] = useState(true);
   const [showAvailable, setShowAvailable] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState("offers");
   
   // State for handling dialogs and item selection
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
