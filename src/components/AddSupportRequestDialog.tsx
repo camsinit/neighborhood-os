@@ -64,7 +64,9 @@ const AddSupportRequestDialog = ({
       ) : isGoodsView ? (
         <GoodsForm 
           onClose={() => onOpenChange(false)}
-          initialRequestType={initialRequestType === 'need' ? 'request' : 'offer'}
+          // Pass the initialRequestType directly without conversion
+          // Our updated hook will handle the type conversion internally
+          initialRequestType={initialRequestType}
         />
       ) : (
         <SupportRequestForm 

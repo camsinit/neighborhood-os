@@ -15,9 +15,8 @@ export const useGoodsForm = ({
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
   
-  // Convert "need" to "request" for the form state
-  const formRequestType = initialRequestType === "need" ? "request" : initialRequestType;
-  
+  // We'll pass the initialRequestType directly to useGoodsFormState
+  // since we've updated it to handle both "need" and "request"
   const {
     itemFormData,
     setItemFormData,
@@ -28,7 +27,7 @@ export const useGoodsForm = ({
     selectedCategory,
     setSelectedCategory,
     isOfferForm
-  } = useGoodsFormState(initialValues, formRequestType);
+  } = useGoodsFormState(initialValues, initialRequestType);
   
   const {
     handleAddImage,

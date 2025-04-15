@@ -1,4 +1,3 @@
-
 // This file defines the types for the support request forms
 import { z } from 'zod';
 
@@ -74,5 +73,5 @@ export type GoodsFormProps = {
   initialValues?: Partial<GoodsItemFormData | GoodsRequestFormData>;
   mode?: 'create' | 'edit';
   requestId?: string;
-  initialRequestType: "need" | "offer";
+  initialRequestType?: "need" | "offer" | "request";
 };
