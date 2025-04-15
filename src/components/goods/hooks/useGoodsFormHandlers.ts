@@ -2,7 +2,7 @@
 // This hook manages the form handlers
 import { toast } from "sonner";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
-import { processFileUpload } from "../utils/imageHandling";
+import { processFileUpload, processMultipleFileUploads } from "../utils/imageHandling";
 
 export const useGoodsFormHandlers = (
   isOfferForm: boolean,
@@ -13,8 +13,6 @@ export const useGoodsFormHandlers = (
   setSelectedCategory: (category: GoodsItemCategory) => void
 ) => {
   const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isOfferForm) return;
-    
     if (!userId) {
       toast.error("You must be logged in to upload images");
       return;
@@ -22,12 +20,32 @@ export const useGoodsFormHandlers = (
     
     setUploading(true);
     try {
-      const imageUrl = await processFileUpload(e, userId);
-      if (imageUrl) {
-        setItemFormData(prev => ({
-          ...prev,
-          images: [...(prev.images || []), imageUrl]
-        }));
+      // Use the multiple file upload handler for offer forms (which allow multiple images)
+      if (isOfferForm && e.target.files && e.target.files.length > 0) {
+        // If multiple files are selected, use processMultipleFileUploads
+        const imageUrls = await processMultipleFileUploads(e, userId);
+        if (imageUrls.length > 0) {
+          setItemFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), ...imageUrls]
+          }));
+        }
+      } else {
+        // For single file uploads (or request forms)
+        const imageUrl = await processFileUpload(e, userId);
+        if (imageUrl) {
+          if (isOfferForm) {
+            setItemFormData(prev => ({
+              ...prev,
+              images: [...(prev.images || []), imageUrl]
+            }));
+          } else {
+            setRequestFormData(prev => ({
+              ...prev,
+              image: imageUrl
+            }));
+          }
+        }
       }
     } finally {
       setUploading(false);

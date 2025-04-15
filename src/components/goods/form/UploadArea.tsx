@@ -1,5 +1,7 @@
+
 // This component provides the interface for uploading images
 import { Loader2, Upload } from "lucide-react";
+import { useRef } from "react";
 
 // Props for the UploadArea component
 interface UploadAreaProps {
@@ -25,6 +27,9 @@ const UploadArea = ({
   uploading,
   multiple = false
 }: UploadAreaProps) => {
+  // Create a reference to the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Determine the appropriate message based on the current state
   const getMessage = () => {
     // If we're currently uploading an image, show a loading message
@@ -45,8 +50,23 @@ const UploadArea = ({
     }
   };
 
+  // Handle clicks on the upload area - trigger the hidden file input
+  const handleAreaClick = () => {
+    // Don't allow clicks while uploading
+    if (uploading) return;
+    
+    // Trigger the file input click programmatically
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center py-6">
+    // Make the entire area clickable to open file browser
+    <div 
+      className="flex flex-col items-center justify-center py-6 cursor-pointer"
+      onClick={handleAreaClick}
+    >
       <div className="flex flex-col items-center gap-2">
         {/* Upload icon or loading spinner */}
         <div className={`bg-gray-200 rounded-full p-3 ${isDragging ? 'bg-blue-200' : ''} ${uploading ? 'bg-blue-100' : ''}`}>
@@ -70,8 +90,9 @@ const UploadArea = ({
         </span>
       </div>
       
-      {/* Hidden file input - still needed for functionality but no button UI */}
+      {/* Hidden file input - connected to our ref for programmatic clicking */}
       <input
+        ref={fileInputRef}
         type="file"
         className="hidden"
         accept="image/*"
