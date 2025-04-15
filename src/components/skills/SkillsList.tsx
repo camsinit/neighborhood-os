@@ -1,18 +1,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Skill, SkillCategory } from './types/skillTypes';
+import { Skill, SkillCategory, SkillWithProfile } from './types/skillTypes';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
-import { useState } from 'react';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
   searchQuery?: string;
-  showRequests?: boolean; // New prop to toggle between offers and requests view
+  showRequests?: boolean; // Prop to toggle between offers and requests view
 }
 
 const SkillsList = ({
@@ -54,7 +53,17 @@ const SkillsList = ({
       
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      
+      // Ensure data conforms to SkillWithProfile type
+      return (data || []).map(item => ({
+        ...item,
+        // Ensure request_type is typed correctly as SkillRequestType
+        request_type: item.request_type as 'offer' | 'need',
+        profiles: {
+          avatar_url: item.profiles?.avatar_url || null,
+          display_name: item.profiles?.display_name || null
+        }
+      })) as SkillWithProfile[];
     }
   });
 
