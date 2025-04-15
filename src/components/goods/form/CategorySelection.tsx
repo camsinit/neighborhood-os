@@ -1,17 +1,41 @@
 
-// This component handles category selection for goods form
+// This component handles category selection for goods form using a button group
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
 
-// Import category names from constants
+// Import category names and icons from Lucide
 import { CATEGORY_NAMES } from "../utils/goodsConstants";
+import { 
+  Sofa, 
+  Wrench, 
+  Laptop, 
+  Utensils, 
+  Shirt, 
+  BookOpen, 
+  Gamepad, 
+  Bike, 
+  Flower2, 
+  Apple, 
+  Home, 
+  Package 
+} from "lucide-react";
+
+// Map categories to their respective icons
+const categoryIcons = {
+  furniture: Sofa,
+  tools: Wrench,
+  electronics: Laptop,
+  kitchen: Utensils,
+  clothing: Shirt,
+  books: BookOpen,
+  toys: Gamepad,
+  sports: Bike,
+  garden: Flower2,
+  produce: Apple,
+  household: Home,
+  other: Package
+};
 
 // Component props definition
 interface CategorySelectionProps {
@@ -22,27 +46,34 @@ interface CategorySelectionProps {
 /**
  * CategorySelection component
  * 
- * This component renders a dropdown for selecting the goods category.
- * It uses the predefined category names from constants.
+ * This component renders a button group for selecting the goods category.
+ * Each button includes an icon and label for better visual recognition.
  */
 const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <Label htmlFor="category">Item Category</Label>
-      <Select 
-        value={category} 
+      <ToggleGroup 
+        type="single" 
+        value={category}
         onValueChange={(value) => onChange(value as GoodsItemCategory)}
+        className="flex flex-wrap gap-2"
       >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent>
-          {/* Map through all available categories to create dropdown options */}
-          {Object.entries(CATEGORY_NAMES).map(([value, label]) => (
-            <SelectItem key={value} value={value}>{label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {Object.entries(CATEGORY_NAMES).map(([value, label]) => {
+          const IconComponent = categoryIcons[value as keyof typeof categoryIcons];
+          return (
+            <ToggleGroupItem
+              key={value}
+              value={value}
+              aria-label={label}
+              className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              <IconComponent className="h-4 w-4" />
+              <span>{label}</span>
+            </ToggleGroupItem>
+          );
+        })}
+      </ToggleGroup>
     </div>
   );
 };
