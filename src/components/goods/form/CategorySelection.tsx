@@ -54,7 +54,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
       <Label htmlFor="category">Item Category</Label>
       <ToggleGroup 
         type="single" 
-        value={category || ""}  // Set to empty string if no category selected
+        value={category || ""}  
         onValueChange={(value) => onChange(value as GoodsItemCategory)}
         className="flex flex-wrap gap-4 max-w-[800px]"
       >

@@ -1,3 +1,4 @@
+
 // Constants used throughout the goods exchange feature
 
 import { 
@@ -12,6 +13,7 @@ import {
  * quickly fill in common items in each category.
  */
 export const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
+  produce: ["Fruits", "Vegetables", "Herbs", "Homegrown Produce"],
   furniture: ["Couch", "Chair", "Table", "Desk", "Bookshelf"],
   tools: ["Hammer", "Drill", "Saw", "Ladder", "Lawnmower"],
   electronics: ["TV", "Laptop", "Phone", "Camera", "Speakers"],
@@ -21,7 +23,6 @@ export const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
   toys: ["Board Games", "Puzzles", "Children's Toys", "Outdoor Play Equipment"],
   sports: ["Bicycle", "Tennis Racket", "Basketball", "Camping Gear"],
   garden: ["Plants", "Seeds", "Garden Tools", "Flower Pots"],
-  produce: ["Fruits", "Vegetables", "Herbs", "Homegrown Produce"],
   household: ["Cleaning Supplies", "Home Decor", "Bedding", "Storage Containers"],
   other: ["Art Supplies", "Craft Materials", "Musical Instruments"]
 };
@@ -33,6 +34,7 @@ export const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
  * category names.
  */
 export const CATEGORY_NAMES: Record<GoodsItemCategory, string> = {
+  produce: "Fresh Produce",
   furniture: "Furniture",
   tools: "Tools & Equipment",
   electronics: "Electronics",
@@ -42,7 +44,6 @@ export const CATEGORY_NAMES: Record<GoodsItemCategory, string> = {
   toys: "Toys & Games",
   sports: "Sports & Recreation",
   garden: "Garden & Plants",
-  produce: "Fresh Produce",
   household: "Household Items",
   other: "Other Items"
 };
