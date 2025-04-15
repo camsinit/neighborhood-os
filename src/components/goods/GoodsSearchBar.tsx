@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, Plus, AlertCircle } from "lucide-react";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { CATEGORY_NAMES } from "./utils/goodsConstants";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GoodsSearchBarProps {
   searchQuery: string;
@@ -15,14 +16,28 @@ interface GoodsSearchBarProps {
   onRequestItem: () => void;
   onOfferItem: () => void;
   onCategoryFilter?: (categories: GoodsItemCategory[]) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
+/**
+ * GoodsSearchBar component
+ * 
+ * This component provides search, filtering, and action functionality for the Goods Exchange page.
+ * It contains:
+ * - Search bar for filtering items by text
+ * - Category filter popover for filtering by item category
+ * - Tabs for switching between different views (All/Requests/Available)
+ * - Action buttons for requesting or offering items
+ */
 const GoodsSearchBar = ({
   searchQuery,
   onSearchChange,
   onRequestItem,
   onOfferItem,
-  onCategoryFilter
+  onCategoryFilter,
+  activeTab,
+  onTabChange
 }: GoodsSearchBarProps) => {
   // State to track which categories are selected in the filter
   const [selectedCategories, setSelectedCategories] = useState<GoodsItemCategory[]>([]);
@@ -53,7 +68,7 @@ const GoodsSearchBar = ({
       <div className="flex items-center gap-4">
         {/* Search and filter */}
         <div className="flex items-center gap-2">
-          <div className="relative w-[200px]">
+          <div className="relative w-[180px]">
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             <Input 
               type="text" 
@@ -104,13 +119,26 @@ const GoodsSearchBar = ({
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="all" className="flex-1">
-          <TabsList>
-            <TabsTrigger value="all">All Items</TabsTrigger>
-            <TabsTrigger value="needs">Requests</TabsTrigger>
-            <TabsTrigger value="offers">Available</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <TabsList>
+          <TabsTrigger 
+            value="all" 
+            onClick={() => onTabChange("all")}
+          >
+            All Items
+          </TabsTrigger>
+          <TabsTrigger 
+            value="needs" 
+            onClick={() => onTabChange("needs")}
+          >
+            Requests
+          </TabsTrigger>
+          <TabsTrigger 
+            value="offers" 
+            onClick={() => onTabChange("offers")}
+          >
+            Available
+          </TabsTrigger>
+        </TabsList>
       </div>
       
       {/* Action buttons */}

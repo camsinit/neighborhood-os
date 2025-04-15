@@ -8,6 +8,7 @@ import GoodsSearchBar from './GoodsSearchBar';
 // Fixed import statement to use default import
 import GoodsDialogs from './GoodsDialogs';
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
+import { Tabs } from "@/components/ui/tabs";
 
 /**
  * GoodsPageContainer Component
@@ -21,6 +22,7 @@ const GoodsPageContainer = () => {
   const [showUrgent, setShowUrgent] = useState(true);
   const [showRequests, setShowRequests] = useState(true);
   const [showAvailable, setShowAvailable] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
   
   // State for handling dialogs and item selection
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -42,6 +44,11 @@ const GoodsPageContainer = () => {
     setIsAddRequestOpen(true);
   };
 
+  // Handler for tab changes
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
   return (
     <div className="min-h-full w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,28 +66,34 @@ const GoodsPageContainer = () => {
 
           {/* Search bar with filters and main content */}
           <div className="bg-white rounded-lg p-6 shadow-lg">
-            {/* Search bar with filters */}
-            <GoodsSearchBar 
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onRequestItem={handleAddRequest}
-              onOfferItem={handleAddItem}
-              // onCategoryFilter prop is optional so we don't need to pass it
-            />
-            
-            {/* Main content sections */}
-            <GoodsSections 
-              searchQuery={searchQuery}
-              goodsData={goodsData}
-              isLoading={isLoading}
-              showUrgent={showUrgent}
-              showRequests={showRequests}
-              showAvailable={showAvailable}
-              onRequestSelect={setSelectedRequest}
-              onRefresh={refetch}
-              onOfferItem={handleAddItem}
-              onRequestItem={handleAddRequest}
-            />
+            {/* Wrap everything in a Tabs component */}
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
+              {/* Search bar with filters */}
+              <GoodsSearchBar 
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onRequestItem={handleAddRequest}
+                onOfferItem={handleAddItem}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                // onCategoryFilter prop is optional so we don't need to pass it
+              />
+              
+              {/* Main content sections */}
+              <GoodsSections 
+                searchQuery={searchQuery}
+                goodsData={goodsData}
+                isLoading={isLoading}
+                showUrgent={showUrgent}
+                showRequests={showRequests}
+                showAvailable={showAvailable}
+                onRequestSelect={setSelectedRequest}
+                onRefresh={refetch}
+                onOfferItem={handleAddItem}
+                onRequestItem={handleAddRequest}
+                activeTab={activeTab}
+              />
+            </Tabs>
           </div>
           
           {/* Dialogs for adding/viewing items */}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch, getUrgencyClass, getUrgencyLabel } from './utils/sectionHelpers';
@@ -6,7 +7,7 @@ import UrgentRequestsSection from './UrgentRequestsSection';
 import GoodsRequestsSection from './GoodsRequestsSection';
 import AvailableItemsSection from './AvailableItemsSection';
 import { GoodsSectionsLoadingState, EmptyRequestsState } from './states/EmptyAndLoadingStates';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Package2, ListFilter, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -29,6 +30,7 @@ interface GoodsSectionsProps {
   onRefresh: () => void;
   onOfferItem: () => void;
   onRequestItem: () => void;
+  activeTab: string;
 }
 
 /**
@@ -49,6 +51,7 @@ const categorizeGoods = (goodsData: GoodsExchangeItem[], searchQuery: string) =>
     available
   };
 };
+
 const GoodsSections: React.FC<GoodsSectionsProps> = ({
   goodsData = [],
   isLoading,
@@ -59,7 +62,8 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   onRequestSelect,
   onRefresh,
   onOfferItem,
-  onRequestItem
+  onRequestItem,
+  activeTab
 }) => {
   // State to track if the requests section is collapsed
   const [requestsCollapsed, setRequestsCollapsed] = useState(false);
@@ -88,55 +92,47 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
   return (
     <div>
+      {/* Tab content for "All Items" view */}
       <TabsContent value="all" className="space-y-8">
-        {hasRequests && showRequests && <div className="mt-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">
-                  Requests from Neighbors
-                  <Button variant="ghost" size="sm" onClick={() => setRequestsCollapsed(!requestsCollapsed)} className="ml-2">
-                    {requestsCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-                  </Button>
-                </h2>
-                <Button variant="outline" onClick={onRequestItem}>
-                  Request an Item
+        {hasRequests && showRequests && 
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">
+                Requests from Neighbors
+                <Button variant="ghost" size="sm" onClick={() => setRequestsCollapsed(!requestsCollapsed)} className="ml-2">
+                  {requestsCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                 </Button>
-              </div>
+              </h2>
+              <Button variant="outline" onClick={onRequestItem}>
+                Request an Item
+              </Button>
+            </div>
+            
+            {!requestsCollapsed && <>
+              {showUrgent && urgentRequests.length > 0 && 
+                <UrgentRequestsSection 
+                  urgentRequests={urgentRequests} 
+                  onRequestSelect={onRequestSelect} 
+                  getUrgencyClass={getUrgencyClass} 
+                  getUrgencyLabel={getUrgencyLabel} 
+                />
+              }
               
-              {!requestsCollapsed && <>
-                  {showUrgent && urgentRequests.length > 0 && <UrgentRequestsSection urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} />}
-                  
-                  <GoodsRequestsSection goodsRequests={requests} urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
-                </>}
-            </div>}
-          
-          {showAvailable && <div className="mt-10">
-              
-              
-              <AvailableItemsSection goodsItems={available} onRequestSelect={onRequestSelect} onNewOffer={onOfferItem} onRefetch={onRefresh} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
-            </div>}
-      </TabsContent>
-      
-      <TabsContent value="needs">
-        <div className="space-y-8">
-            {hasRequests ? <>
-                {showUrgent && urgentRequests.length > 0 && <UrgentRequestsSection urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} />}
-                
-                <div className="mt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
-                    <Button variant="outline" onClick={onRequestItem}>
-                      Request an Item
-                    </Button>
-                  </div>
-                  
-                  <GoodsRequestsSection goodsRequests={requests} urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
-                </div>
-              </> : <EmptyRequestsState onRequestItem={onRequestItem} />}
+              <GoodsRequestsSection 
+                goodsRequests={requests} 
+                urgentRequests={urgentRequests} 
+                onRequestSelect={onRequestSelect} 
+                getUrgencyClass={getUrgencyClass} 
+                getUrgencyLabel={getUrgencyLabel} 
+                onDeleteItem={handleDeleteGoodsItem} 
+                isDeletingItem={isDeletingItem} 
+              />
+            </>}
           </div>
-      </TabsContent>
-      
-      <TabsContent value="offers">
-        <div className="mt-4">
+        }
+          
+        {showAvailable && 
+          <div className="mt-10">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Available Items</h2>
               <Button variant="outline" onClick={onOfferItem}>
@@ -144,8 +140,75 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
               </Button>
             </div>
             
-            <AvailableItemsSection goodsItems={available} onRequestSelect={onRequestSelect} onNewOffer={onOfferItem} onRefetch={onRefresh} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
+            <AvailableItemsSection 
+              goodsItems={available} 
+              onRequestSelect={onRequestSelect} 
+              onNewOffer={onOfferItem} 
+              onRefetch={onRefresh} 
+              onDeleteItem={handleDeleteGoodsItem} 
+              isDeletingItem={isDeletingItem} 
+            />
           </div>
+        }
+      </TabsContent>
+      
+      {/* Tab content for "Requests" view */}
+      <TabsContent value="needs">
+        <div className="space-y-8">
+          {hasRequests ? 
+            <>
+              {showUrgent && urgentRequests.length > 0 && 
+                <UrgentRequestsSection 
+                  urgentRequests={urgentRequests} 
+                  onRequestSelect={onRequestSelect} 
+                  getUrgencyClass={getUrgencyClass} 
+                  getUrgencyLabel={getUrgencyLabel} 
+                />
+              }
+              
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">Requests from Neighbors</h2>
+                  <Button variant="outline" onClick={onRequestItem}>
+                    Request an Item
+                  </Button>
+                </div>
+                
+                <GoodsRequestsSection 
+                  goodsRequests={requests} 
+                  urgentRequests={urgentRequests} 
+                  onRequestSelect={onRequestSelect} 
+                  getUrgencyClass={getUrgencyClass} 
+                  getUrgencyLabel={getUrgencyLabel} 
+                  onDeleteItem={handleDeleteGoodsItem} 
+                  isDeletingItem={isDeletingItem} 
+                />
+              </div>
+            </> 
+            : <EmptyRequestsState onRequestItem={onRequestItem} />
+          }
+        </div>
+      </TabsContent>
+      
+      {/* Tab content for "Available" view */}
+      <TabsContent value="offers">
+        <div className="mt-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Available Items</h2>
+            <Button variant="outline" onClick={onOfferItem}>
+              Offer an Item
+            </Button>
+          </div>
+          
+          <AvailableItemsSection 
+            goodsItems={available} 
+            onRequestSelect={onRequestSelect} 
+            onNewOffer={onOfferItem} 
+            onRefetch={onRefresh} 
+            onDeleteItem={handleDeleteGoodsItem} 
+            isDeletingItem={isDeletingItem} 
+          />
+        </div>
       </TabsContent>
     </div>
   );
