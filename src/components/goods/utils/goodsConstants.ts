@@ -1,6 +1,3 @@
-
-// Constants used throughout the goods exchange feature
-
 import { 
   GoodsItemCategory,
   GoodsRequestUrgency
@@ -34,7 +31,7 @@ export const GOODS_SUGGESTIONS: Record<GoodsItemCategory, string[]> = {
  * category names.
  */
 export const CATEGORY_NAMES: Record<GoodsItemCategory, string> = {
-  produce: "Fresh Produce",
+  produce: "Homegrown Produce",
   furniture: "Furniture",
   tools: "Tools & Equipment",
   electronics: "Electronics",
