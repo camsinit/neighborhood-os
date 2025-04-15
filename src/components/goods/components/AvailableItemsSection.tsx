@@ -11,6 +11,10 @@ import GoodsForm from '../GoodsForm';
 import { useToast } from "@/hooks/use-toast";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
 
+/**
+ * This component displays a section of available items with edit/delete functionality
+ * for authorized users (item owners)
+ */
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
   onRequestSelect: (request: GoodsExchangeItem) => void;
@@ -136,18 +140,21 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
-              // Fix: Cast to GoodsItemCategory and use correct property name
+              // Cast to GoodsItemCategory and use the correct property
               category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
-              // Fix: Use requestType instead of request_type to match the expected interface
+              // Use requestType (not request_type) to match the expected interface
               requestType: itemToEdit.request_type === "need" ? "need" : "offer",
+              // Include all images if available
               images: itemToEdit.images || [],
-              // Fix: Use images array instead of image_url which isn't a valid property
-              // Add the image_url to the images array if it exists and images is empty
-              ...(itemToEdit.image_url && (!itemToEdit.images || itemToEdit.images.length === 0) ? 
-                { images: [itemToEdit.image_url] } : {})
+              // Include availableDays for offers (default to 30 if not available)
+              availableDays: 30,
+              // Include urgency for requests
+              urgency: itemToEdit.urgency || "medium"
+              // Don't add image_url directly - it's not in the form data type
             }}
             requestId={itemToEdit.id}
-            initialRequestType={itemToEdit.request_type}
+            // Pass the initialRequestType to ensure the correct form type is shown
+            initialRequestType={itemToEdit.request_type as "need" | "offer"}
           />
         )}
       </UniversalDialog>

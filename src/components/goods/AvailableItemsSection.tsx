@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -48,6 +49,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   const handleCloseEdit = () => {
     setItemToEdit(null);
   };
+  
   return <div className="w-full">
       <div className="space-y-2">
         {goodsItems.map(item => <Popover key={item.id} open={openPopoverId === item.id} onOpenChange={open => setOpenPopoverId(open ? item.id : null)}>
@@ -77,8 +79,30 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                   
                   {/* Edit and Delete buttons for owner */}
                   <div className="flex gap-2 ml-4">
-                    
-                    {onDeleteItem}
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(item);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    {onDeleteItem && (
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteItem(item);
+                        }}
+                        disabled={isDeletingItem}
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -86,27 +110,42 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             
             {/* Popover content */}
             <PopoverContent className="w-[300px] p-0" sideOffset={5}>
-              <RequestDetailCard request={item} getUrgencyClass={() => ''} getUrgencyLabel={() => ''} onDeleteItem={onDeleteItem} isDeletingItem={isDeletingItem} onEdit={() => handleEdit(item)} />
+              <RequestDetailCard 
+                request={item} 
+                getUrgencyClass={() => ''} 
+                getUrgencyLabel={() => ''} 
+                onDeleteItem={onDeleteItem} 
+                isDeletingItem={isDeletingItem} 
+                onEdit={() => handleEdit(item)} 
+              />
             </PopoverContent>
           </Popover>)}
       </div>
 
       {/* Edit Dialog */}
       <UniversalDialog open={!!itemToEdit} onOpenChange={handleCloseEdit} title="Edit Item">
-        {itemToEdit && <GoodsForm onClose={handleCloseEdit} mode="edit" initialValues={{
-        title: itemToEdit.title,
-        description: itemToEdit.description || "",
-        // Here's the fix: we need to cast goods_category to GoodsItemCategory
-        category: itemToEdit.goods_category as GoodsItemCategory || "furniture",
-        // We need requestType, not request_type
-        requestType: itemToEdit.request_type === "need" ? "need" : "offer",
-        images: itemToEdit.images || [],
-        // Fix: Use images array instead of image_url - image_url is not recognized in the form data type
-        // Only add the first image from image_url to the images array if it exists and images is empty
-        ...(itemToEdit.image_url && (!itemToEdit.images || itemToEdit.images.length === 0) ? {
-          images: [itemToEdit.image_url]
-        } : {})
-      }} requestId={itemToEdit.id} initialRequestType={itemToEdit.request_type} />}
+        {itemToEdit && <GoodsForm 
+          onClose={handleCloseEdit} 
+          mode="edit"
+          initialValues={{
+            title: itemToEdit.title,
+            description: itemToEdit.description || "",
+            // Cast to GoodsItemCategory and use the correct property
+            category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
+            // Use requestType (not request_type) to match the expected interface
+            requestType: itemToEdit.request_type === "need" ? "need" : "offer",
+            // Include all images if available
+            images: itemToEdit.images || [],
+            // Include availableDays for offers (default to 30 if not available)
+            availableDays: 30,
+            // Include urgency for requests
+            urgency: itemToEdit.urgency || "medium"
+            // Don't add image_url directly - it's not in the form data type
+          }} 
+          requestId={itemToEdit.id}
+          // Pass the initialRequestType to ensure the correct form type is shown
+          initialRequestType={itemToEdit.request_type as "need" | "offer"}
+        />}
       </UniversalDialog>
     </div>;
 };
