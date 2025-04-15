@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -9,6 +8,7 @@ import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-re
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import SkillRequestsPopover from "@/components/skills/SkillRequestsPopover"; // Import the new component
+import { Button } from "@/components/ui/button";
 
 const categoryIcons = {
   creative: Palette,
@@ -56,6 +56,14 @@ const SkillsPage = () => {
     return categoryIcons[category] || BookOpen;
   };
 
+  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
+
+  const openSkillDialog = (mode: 'offer' | 'need') => {
+    setDialogMode(mode);
+    setIsAddSkillOpen(true);
+  };
+
   return (
     <div className="relative min-h-screen">
       <div 
@@ -81,16 +89,8 @@ const SkillsPage = () => {
               </GlowingDescriptionBox>
 
               <div className="bg-white rounded-lg p-6 shadow-lg">
-                <SkillsHeader 
-                  showCategories={showCategories}
-                  onViewChange={handleViewChange}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                />
-                
-                {/* Modified element - added flex justify-between to allow placing popover on right */}
+                {/* Title and Category section moved above SkillsHeader */}
                 <div className="mb-6 flex items-center justify-between">
-                  {/* Left side - Category title with icon */}
                   <div className="flex items-center">
                     {React.createElement(getCategoryIcon(selectedCategory), {
                       className: "h-5 w-5 text-gray-700 mr-2"
@@ -100,9 +100,32 @@ const SkillsPage = () => {
                     </h3>
                   </div>
                   
-                  {/* Right side - Skill Requests Popover */}
-                  <SkillRequestsPopover />
+                  {/* Buttons container */}
+                  <div className="flex items-center gap-2">
+                    <SkillRequestsPopover />
+                    <Button 
+                      variant="outline"
+                      onClick={() => openSkillDialog('need')}
+                      className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
+                    >
+                      Request Skill
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => openSkillDialog('offer')}
+                      className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
+                    >
+                      Offer Skill
+                    </Button>
+                  </div>
                 </div>
+
+                <SkillsHeader 
+                  showCategories={showCategories}
+                  onViewChange={handleViewChange}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                />
                 
                 {showCategories ? (
                   <CategoryView onCategoryClick={handleCategoryClick} />
