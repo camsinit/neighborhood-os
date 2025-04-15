@@ -14,7 +14,7 @@ import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
  * - Sharing or requesting skills
  * - Adding safety updates
  * 
- * Now displayed as a 2-column grid at the top of the homepage
+ * Now displayed as a 3-column grid at the top of the homepage
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -95,8 +95,8 @@ const QuickActions = () => {
         </p>
       </div>
 
-      {/* 2-column grid for all actions with smaller buttons */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Fixed 3-column grid for all actions with smaller buttons */}
+      <div className="grid grid-cols-3 gap-4">
         {allActions.map(action => (
           <Button 
             key={action.label} 
