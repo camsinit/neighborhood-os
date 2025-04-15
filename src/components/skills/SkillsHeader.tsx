@@ -48,6 +48,18 @@ const SkillsHeader = ({
   return (
     <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
       <div className="flex items-center gap-4">
+        {/* Search input field - now between Types and Skill Requests */}
+        <div className="relative w-[200px] flex-shrink-0">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input 
+            type="search" 
+            placeholder="Search for skills..." 
+            className="pl-10" 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+          />
+        </div>
+
         {/* Toggle button to switch between categories and list view */}
         <Button
           variant="outline"
@@ -68,18 +80,6 @@ const SkillsHeader = ({
             </>
           )}
         </Button>
-
-        {/* Search input field - now between Types and Skill Requests */}
-        <div className="relative w-[200px] flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <Input 
-            type="search" 
-            placeholder="Search for skills..." 
-            className="pl-10" 
-            value={searchQuery} 
-            onChange={e => setSearchQuery(e.target.value)} 
-          />
-        </div>
 
         {/* Toggle button for switching between offers and requests */}
         <Button 
