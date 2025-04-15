@@ -6,7 +6,6 @@ import { GoodsFormProps } from "@/components/support/types/formTypes";
 
 // Import our refactored components
 import CategorySelection from "./form/CategorySelection";
-import ItemSuggestions from "./form/ItemSuggestions";
 import TitleField from "./form/TitleField";
 import DescriptionField from "./form/DescriptionField";
 import AvailabilityField from "./form/AvailabilityField";
@@ -45,7 +44,6 @@ const GoodsForm = ({
     handleAddImage,
     handleRemoveImage,
     handleCategoryChange,
-    handleSelectSuggestion,
     handleTitleChange,
     handleDescriptionChange,
     handleSubmit,
@@ -60,14 +58,6 @@ const GoodsForm = ({
         <CategorySelection 
           category={itemFormData.category!}
           onChange={handleCategoryChange}
-        />
-      )}
-      
-      {/* Quick Suggestions (for offers only) */}
-      {isOfferForm && (
-        <ItemSuggestions 
-          category={selectedCategory}
-          onSelectSuggestion={handleSelectSuggestion}
         />
       )}
       

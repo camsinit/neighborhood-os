@@ -57,7 +57,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
         type="single" 
         value={category}
         onValueChange={(value) => onChange(value as GoodsItemCategory)}
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-4 max-w-[800px]"
       >
         {Object.entries(CATEGORY_NAMES).map(([value, label]) => {
           const IconComponent = categoryIcons[value as keyof typeof categoryIcons];
@@ -66,7 +66,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
               key={value}
               value={value}
               aria-label={label}
-              className="flex items-center gap-2 px-3 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              className="flex-1 min-w-[140px] items-center gap-2 px-4 py-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               <IconComponent className="h-4 w-4" />
               <span>{label}</span>
