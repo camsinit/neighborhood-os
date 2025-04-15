@@ -53,8 +53,8 @@ const SkillsHeader = ({
         <Button
           variant="outline"
           onClick={onViewChange}
-          className={`whitespace-nowrap hover:bg-[#F1F1F1] ${
-            !showCategories ? 'bg-[#F1F1F1]' : 'bg-white'
+          className={`whitespace-nowrap hover:bg-gray-200 ${
+            !showCategories ? 'bg-gray-100' : 'bg-white'
           }`}
         >
           {!showCategories ? (
@@ -86,7 +86,7 @@ const SkillsHeader = ({
         <Button 
           variant="outline" 
           size="default"
-          className={`gap-2 ${showRequests ? 'bg-[#F1F1F1]' : 'bg-white'}`}
+          className={`gap-2 hover:bg-gray-200 ${showRequests ? 'bg-gray-100' : 'bg-white'}`}
           onClick={() => setShowRequests(!showRequests)}
         >
           <MessageSquarePlus className="h-4 w-4" />
@@ -124,4 +124,3 @@ const SkillsHeader = ({
 };
 
 export default SkillsHeader;
-
