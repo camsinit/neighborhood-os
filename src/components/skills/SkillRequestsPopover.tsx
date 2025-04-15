@@ -12,52 +12,46 @@ import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkillWithProfile } from './types/skillTypes';
 import SkillContributionDialog from './SkillContributionDialog';
-import SkillRequestNotificationItem from './notifications/SkillRequestNotificationItem';
+import SkillCard from './list/SkillCard';
 import EmptySkillRequestState from './notifications/EmptySkillRequestState';
 import SkillRequestsDrawer from './notifications/SkillRequestsDrawer';
 
-// Extracted notification loading state component
+// Loading state component shows card-like skeletons
 const NotificationLoadingState = () => (
-  <div className="p-4 space-y-3">
+  <div className="space-y-4 p-4">
     {[1, 2, 3].map(i => (
-      <div key={i} className="flex items-center gap-2">
-        <Skeleton className="h-8 w-8 rounded-full" />
-        <div className="space-y-1 flex-1">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-3 w-3/4" />
+      <div key={i} className="border border-gray-200 rounded-lg p-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
         </div>
       </div>
     ))}
   </div>
 );
 
-// Extracted notifications list component
+// List component using SkillCard
 const NotificationsList = ({ 
-  requests, 
-  handleRequestClick 
+  requests 
 }: { 
-  requests: SkillWithProfile[], 
-  handleRequestClick: (request: SkillWithProfile) => void 
+  requests: SkillWithProfile[]
 }) => (
-  <>
+  <div className="space-y-4 p-4">
     {requests.map(request => (
-      <SkillRequestNotificationItem
+      <SkillCard
         key={request.id}
-        request={request}
-        onClick={() => handleRequestClick(request)}
+        skill={request}
+        type="request"
       />
     ))}
-  </>
+  </div>
 );
 
 const SkillRequestsPopover = () => {
   // State for selected skill and drawer visibility
-  const [selectedSkill, setSelectedSkill] = useState<{
-    id: string;
-    title: string;
-    requesterId: string;
-  } | null>(null);
-  
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Query for recent skill requests (limited to 5)
@@ -101,17 +95,8 @@ const SkillRequestsPopover = () => {
       if (error) throw error;
       return data as SkillWithProfile[];
     },
-    enabled: isDrawerOpen // Only fetch when drawer is opened
+    enabled: isDrawerOpen
   });
-
-  // Handler when a user clicks on a request item
-  const handleRequestClick = (skill: SkillWithProfile) => {
-    setSelectedSkill({
-      id: skill.id,
-      title: skill.title,
-      requesterId: skill.user_id
-    });
-  };
 
   return (
     <>
@@ -119,27 +104,24 @@ const SkillRequestsPopover = () => {
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
-            size="default"  // Changed from sm to default to match other buttons
-            className="gap-2"  // Removed h-8 to use default button height
+            size="default"
+            className="gap-2"
           >
             <MessageSquarePlus className="h-4 w-4" />
             <span>Skill Requests</span>
           </Button>
         </PopoverTrigger>
         
-        <PopoverContent className="w-80 p-0" align="end">
+        <PopoverContent className="w-[350px] p-0" align="end">
           <div className="p-2 font-medium text-sm border-b">
             Recent Skill Requests
           </div>
           
-          <div className="max-h-[300px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto">
             {isLoading ? (
               <NotificationLoadingState />
             ) : requests && requests.length > 0 ? (
-              <NotificationsList 
-                requests={requests} 
-                handleRequestClick={handleRequestClick} 
-              />
+              <NotificationsList requests={requests} />
             ) : (
               <EmptySkillRequestState />
             )}
@@ -164,19 +146,7 @@ const SkillRequestsPopover = () => {
         onOpenChange={setIsDrawerOpen}
         requests={allRequests}
         isLoading={isLoadingAll}
-        onRequestClick={handleRequestClick}
       />
-      
-      {/* Dialog for responding to a request */}
-      {selectedSkill && (
-        <SkillContributionDialog
-          open={!!selectedSkill}
-          onOpenChange={(open) => !open && setSelectedSkill(null)}
-          skillRequestId={selectedSkill.id}
-          requestTitle={selectedSkill.title}
-          requesterId={selectedSkill.requesterId}
-        />
-      )}
     </>
   );
 };
