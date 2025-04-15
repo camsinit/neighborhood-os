@@ -1,4 +1,3 @@
-
 /**
  * Component for the intro section of the Goods page
  * 
@@ -6,12 +5,9 @@
  * the GlowingDescriptionBox in the GoodsPageContainer component.
  */
 const GoodsPageHeader = () => {
-  return (
-    <>
+  return <>
       {/* Just the page title - description is now in GoodsPageContainer */}
-      <h2 className="text-2xl font-bold text-gray-900">Goods</h2>
-    </>
-  );
+      <h2 className="text-2xl font-bold text-gray-900">Stuff</h2>
+    </>;
 };
-
 export default GoodsPageHeader;
