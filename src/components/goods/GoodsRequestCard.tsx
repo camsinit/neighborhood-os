@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,10 +16,6 @@ interface GoodsRequestCardProps {
   isDeletingItem?: boolean;
 }
 
-/**
- * GoodsRequestCard component
- * Displays a single goods request card with a popover for details
- */
 const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   request,
   isOpen,
@@ -33,7 +28,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <div className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group">
+        <div className="w-full flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group mb-3">
           {/* Profile and title section */}
           <div className="flex items-center gap-3 flex-grow">
             <Avatar className="h-10 w-10">

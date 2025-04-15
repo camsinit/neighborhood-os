@@ -1,4 +1,3 @@
-
 // Import React dependencies and types
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
@@ -58,42 +57,33 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   onDeleteItem,
   isDeletingItem = false
 }) => {
-  // State to track which popover is currently open (if any)
-  // We store the request ID as a string to track the open popover
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   
-  // Filter out any requests that are already shown in the urgent section
   const regularRequests = goodsRequests.filter(
     req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
   );
   
-  // If there are no regular requests, don't render this section
   if (regularRequests.length === 0) {
     return null;
   }
 
   return (
-    <div className="mt-10">
-      {/* Section title is handled by parent component */}
-      
-      {/* Container for the horizontally scrollable cards */}
-      <div className="p-4 rounded-lg overflow-x-auto">
-        <div className="flex gap-4 pb-2 relative">
-          {regularRequests.map((request) => (
-            <GoodsRequestCard
-              key={request.id}
-              request={request}
-              isOpen={openPopoverId === request.id}
-              onOpenChange={(open) => {
-                setOpenPopoverId(open ? request.id : null);
-              }}
-              getUrgencyClass={getUrgencyClass}
-              getUrgencyLabel={getUrgencyLabel}
-              onDeleteItem={onDeleteItem}
-              isDeletingItem={isDeletingItem}
-            />
-          ))}
-        </div>
+    <div className="w-full">
+      <div className="space-y-2">
+        {regularRequests.map((request) => (
+          <GoodsRequestCard
+            key={request.id}
+            request={request}
+            isOpen={openPopoverId === request.id}
+            onOpenChange={(open) => {
+              setOpenPopoverId(open ? request.id : null);
+            }}
+            getUrgencyClass={getUrgencyClass}
+            getUrgencyLabel={getUrgencyLabel}
+            onDeleteItem={onDeleteItem}
+            isDeletingItem={isDeletingItem}
+          />
+        ))}
       </div>
     </div>
   );
