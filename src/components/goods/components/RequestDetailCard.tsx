@@ -15,6 +15,10 @@ interface RequestDetailCardProps {
   onEdit?: () => void;
 }
 
+/**
+ * RequestDetailCard - Shows detailed information about a goods item in a card
+ * including title, description, owner, and action buttons based on user permissions
+ */
 const RequestDetailCard = ({
   request,
   getUrgencyClass,
@@ -23,6 +27,7 @@ const RequestDetailCard = ({
   isDeletingItem,
   onEdit
 }: RequestDetailCardProps) => {
+  // Get current user to check item ownership
   const currentUser = useUser();
   const isOwner = currentUser && currentUser.id === request.user_id;
   

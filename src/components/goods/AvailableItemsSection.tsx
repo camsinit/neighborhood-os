@@ -1,11 +1,13 @@
-
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import RequestDetailCard from './components/RequestDetailCard';
-import RequestActionsButton from './components/RequestActionsButton';
-import ItemRequestDialog from '@/components/items/dialogs/ItemRequestDialog';
+import { useToast } from "@/hooks/use-toast";
+import UniversalDialog from "@/components/ui/universal-dialog";
+import GoodsForm from './GoodsForm';
+import { supabase } from "@/integrations/supabase/client";
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -16,9 +18,12 @@ interface AvailableItemsSectionProps {
   isDeletingItem?: boolean;
 }
 
+/**
+ * AvailableItemsSection component displays available goods items in a grid format
+ * with images displayed at full height on the left side of each card
+ */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
-  onRequestSelect,
   onDeleteItem,
   isDeletingItem = false,
   onRefetch
@@ -26,27 +31,16 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   // Keep track of which popover is currently open
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
+  const { toast } = useToast();
 
-  // Handle item update
-  const handleUpdate = async (updatedRequest: GoodsExchangeItem) => {
-    try {
-      const { data } = await supabase
-        .from('goods_exchange')
-        .update({
-          title: updatedRequest.title,
-          description: updatedRequest.description
-        })
-        .eq('id', updatedRequest.id)
-        .select();
-      
-      if (data) {
-        onRefetch();
-        toast.success('Item updated successfully');
-      }
-    } catch (error) {
-      console.error('Error updating item:', error);
-      toast.error('Failed to update item');
-    }
+  // Handle item edit
+  const handleEdit = (item: GoodsExchangeItem) => {
+    setItemToEdit(item);
+  };
+
+  // Handle closing the edit dialog
+  const handleCloseEdit = () => {
+    setItemToEdit(null);
   };
 
   return (
@@ -62,7 +56,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               <div className="w-full flex items-stretch rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group">
                 {/* Image preview on the left */}
                 {(item.image_url || (item.images && item.images.length > 0)) && (
-                  <div className="w-32 flex-shrink-0">
+                  <div className="w-32 h-full flex-shrink-0">
                     <img 
                       src={item.image_url || item.images?.[0]} 
                       alt={item.title}
@@ -88,13 +82,33 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                     </div>
                   </div>
                   
-                  {/* Action buttons */}
-                  <RequestActionsButton 
-                    request={item}
-                    onDeleteItem={onDeleteItem}
-                    isDeletingItem={isDeletingItem}
-                    onEdit={() => setItemToEdit(item)}
-                  />
+                  {/* Edit and Delete buttons for owner */}
+                  <div className="flex gap-2 ml-4">
+                    <Button 
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(item);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    {onDeleteItem && (
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteItem(item);
+                        }}
+                        disabled={isDeletingItem}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </PopoverTrigger>
@@ -107,7 +121,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                 getUrgencyLabel={() => ''}
                 onDeleteItem={onDeleteItem}
                 isDeletingItem={isDeletingItem}
-                onEdit={() => setItemToEdit(item)}
+                onEdit={() => handleEdit(item)}
               />
             </PopoverContent>
           </Popover>
@@ -115,12 +129,28 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
       </div>
 
       {/* Edit Dialog */}
-      <ItemRequestDialog
-        request={itemToEdit}
+      <UniversalDialog
         open={!!itemToEdit}
-        onOpenChange={(open) => !open && setItemToEdit(null)}
-        onUpdate={handleUpdate}
-      />
+        onOpenChange={handleCloseEdit}
+        title="Edit Item"
+      >
+        {itemToEdit && (
+          <GoodsForm
+            onClose={handleCloseEdit}
+            mode="edit"
+            initialValues={{
+              title: itemToEdit.title,
+              description: itemToEdit.description || "",
+              category: itemToEdit.goods_category || "furniture",
+              request_type: itemToEdit.request_type,
+              images: itemToEdit.images || [],
+              image_url: itemToEdit.image_url || ""
+            }}
+            requestId={itemToEdit.id}
+            initialRequestType={itemToEdit.request_type}
+          />
+        )}
+      </UniversalDialog>
     </div>
   );
 };
