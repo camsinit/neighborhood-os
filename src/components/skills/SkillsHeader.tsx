@@ -70,7 +70,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Search input field - moved between Types and Skill Requests */}
+        {/* Search input field - now between Types and Skill Requests */}
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input 
@@ -124,3 +124,4 @@ const SkillsHeader = ({
 };
 
 export default SkillsHeader;
+
