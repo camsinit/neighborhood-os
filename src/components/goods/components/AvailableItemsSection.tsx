@@ -147,14 +147,15 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               // Include all images if available
               images: itemToEdit.images || [],
               // Include availableDays for offers (default to 30 if not available)
-              availableDays: 30,
+              availableDays: itemToEdit.request_type === "offer" ? 30 : undefined,
               // Include urgency for requests
               urgency: itemToEdit.urgency || "medium"
-              // Don't add image_url directly - it's not in the form data type
             }}
             requestId={itemToEdit.id}
             // Pass the initialRequestType to ensure the correct form type is shown
             initialRequestType={itemToEdit.request_type as "need" | "offer"}
+            // Force the display layout to always match new offer/request
+            forceDefaultDisplay={true}
           />
         )}
       </UniversalDialog>

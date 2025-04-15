@@ -32,8 +32,9 @@ const GoodsForm = ({
   initialValues,
   mode = 'create',
   requestId,
-  initialRequestType
-}: GoodsFormProps) => {
+  initialRequestType,
+  forceDefaultDisplay = false // Added this prop to force consistent display
+}: GoodsFormProps & { forceDefaultDisplay?: boolean }) => {
   // Use our custom hook to manage the form state and handlers
   const {
     itemFormData,
@@ -51,10 +52,17 @@ const GoodsForm = ({
     setRequestFormData
   } = useGoodsForm({ onClose, initialValues, initialRequestType });
   
+  // Set title based on form mode (create or edit) and request type (offer or need)
+  const formTitle = mode === 'edit' 
+    ? "Edit Item" 
+    : isOfferForm 
+      ? "Offer an Item" 
+      : "Request an Item";
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Category Selection (for offers only) */}
-      {isOfferForm && (
+      {/* Category Selection - always show for offers or when forcing default display */}
+      {(isOfferForm || forceDefaultDisplay) && (
         <CategorySelection 
           category={selectedCategory}
           onChange={handleCategoryChange}
@@ -86,7 +94,7 @@ const GoodsForm = ({
       )}
       
       {/* Urgency (requests only) */}
-      {!isOfferForm && (
+      {!isOfferForm && !forceDefaultDisplay && (
         <UrgencyField 
           urgency={requestFormData.urgency!}
           onChange={(urgency) => {
@@ -95,8 +103,8 @@ const GoodsForm = ({
         />
       )}
       
-      {/* Image Upload Area (for offers only) */}
-      {isOfferForm && (
+      {/* Image Upload Area - always show for offers or when forcing default display */}
+      {(isOfferForm || forceDefaultDisplay) && (
         <ImageDropzone 
           isOfferForm={isOfferForm}
           images={itemFormData.images}

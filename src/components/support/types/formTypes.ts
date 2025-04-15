@@ -1,36 +1,18 @@
-// This file defines the types for the support request forms
-import { z } from 'zod';
 
-// Define the schema for support requests
-export const supportRequestSchema = z.object({
-  title: z.string().min(3, { message: 'Title must be at least 3 characters' }).max(100),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters' }),
-  category: z.string(),
-  requestType: z.enum(["need", "offer"]),
-  validUntil: z.string().min(1, { message: 'Valid until date is required' }),
-  supportType: z.enum(["immediate", "ongoing"]),
-  imageUrl: z.string().optional().nullable(),
-  // Add support for multiple images
-  images: z.array(z.string()).optional(),
-  // Add support for goods-specific fields
-  goods_category: z.string().optional(),
-  urgency: z.string().optional(),
-  care_category: z.string().optional(),
-  skill_category: z.string().optional(),
-});
+// This file defines types used throughout the application
 
-// Export the form data type
-export type SupportRequestFormData = z.infer<typeof supportRequestSchema>;
+/**
+ * User profile information
+ */
+export interface Profile {
+  id?: string;  // Make id optional to match what comes from the database
+  display_name: string;
+  avatar_url: string;
+  created_at?: string;
+  email?: string;  // Add email field to the Profile interface
+}
 
-export type SupportRequestFormProps = {
-  onClose: () => void;
-  initialValues?: Partial<SupportRequestFormData>;
-  mode?: 'create' | 'edit';
-  requestId?: string;
-  initialRequestType?: "need" | "offer" | null;
-};
-
-// New types for goods-specific forms
+// Categories of goods items that can be exchanged
 export type GoodsItemCategory = 
   | "furniture" 
   | "tools" 
@@ -41,37 +23,57 @@ export type GoodsItemCategory =
   | "toys" 
   | "sports" 
   | "garden" 
-  | "produce"
-  | "household"
+  | "produce" 
+  | "household" 
   | "other";
 
-export type GoodsRequestUrgency = 
-  | "low" 
-  | "medium" 
-  | "high" 
-  | "critical";
+// Types of requests/offers that can be made
+export type RequestType = "need" | "offer";
 
-export type GoodsItemFormData = {
+// Goods exchange form data for offers
+export interface GoodsItemFormData {
   title: string;
   description: string;
   category: GoodsItemCategory;
-  requestType: "need" | "offer";
+  requestType: "offer";
   availableDays: number;
   images: string[];
-};
+}
 
-export type GoodsRequestFormData = {
+// Goods exchange form data for requests
+export interface GoodsRequestFormData {
   title: string;
   description: string;
-  urgency: GoodsRequestUrgency;
-  category?: GoodsItemCategory;
+  category: GoodsItemCategory;
+  requestType: "need";
+  urgency: "low" | "medium" | "high" | "critical";
   image?: string | null;
-};
+}
 
-export type GoodsFormProps = {
+export type FormMode = "create" | "edit";
+
+// Props for the goods form component
+export interface GoodsFormProps {
   onClose: () => void;
   initialValues?: Partial<GoodsItemFormData | GoodsRequestFormData>;
-  mode?: 'create' | 'edit';
+  mode?: FormMode;
   requestId?: string;
-  initialRequestType?: "need" | "offer" | "request";
-};
+  initialRequestType?: "need" | "offer" | null;
+  forceDefaultDisplay?: boolean; // Added this prop to force consistent display
+}
+
+// Legacy support request form data
+export interface SupportRequestFormData {
+  title: string;
+  description: string;
+  category: string;
+  requestType: "need" | "offer" | null;
+  image?: string | null;
+}
+
+// Props for the legacy support request form component
+export interface SupportRequestFormProps {
+  onClose: () => void;
+  initialValues?: Partial<SupportRequestFormData>;
+  requestId?: string;
+}

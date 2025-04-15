@@ -53,8 +53,8 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
   // Get all category entries
   const allCategories = Object.entries(CATEGORY_NAMES);
   
-  // Calculate how many categories to show initially (half rounded down)
-  const initialCategories = Math.floor(allCategories.length / 2);
+  // Calculate how many categories to show initially (6 categories in 2 rows of 3)
+  const initialCategories = 6;
   
   // Get the categories to display based on showAllCategories state
   const displayedCategories = showAllCategories 
