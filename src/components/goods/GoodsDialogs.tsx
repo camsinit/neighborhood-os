@@ -1,7 +1,6 @@
-
 import { GoodsExchangeItem } from '@/types/localTypes';
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
-import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import GoodsRequestDialog from "@/components/support/SupportRequestDialog";
 
 /**
  * Props interface for the GoodsDialogs component
@@ -41,7 +40,7 @@ const GoodsDialogs = ({
       />
 
       {/* Dialog for viewing goods details */}
-      <SupportRequestDialog
+      <GoodsRequestDialog
         request={selectedRequest}
         open={!!selectedRequest}
         onOpenChange={() => onSelectedRequestChange(null)}
