@@ -2,7 +2,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Trash2 } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { GoodsExchangeItem } from "@/types/localTypes";
 import { createContactEmailLink } from '../GoodsRequestsSection';
@@ -13,39 +12,22 @@ interface RequestDetailCardProps {
   getUrgencyLabel: (urgency: string) => string;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
+  onEdit?: () => void;
 }
 
-/**
- * Shows the full details of a request in the popover
- */
 const RequestDetailCard = ({
   request,
   getUrgencyClass,
   getUrgencyLabel,
   onDeleteItem,
-  isDeletingItem
+  isDeletingItem,
+  onEdit
 }: RequestDetailCardProps) => {
   const currentUser = useUser();
+  const isOwner = currentUser && currentUser.id === request.user_id;
   
   return (
     <Card className="border-0 shadow-none relative">
-      {currentUser && currentUser.id === request.user_id && onDeleteItem && (
-        <Button
-          variant="destructive"
-          size="icon"
-          className="absolute top-2 right-2 z-10 h-8 w-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onDeleteItem(request);
-          }}
-          disabled={isDeletingItem}
-          aria-label="Delete request"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-      
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{request.title}</CardTitle>
@@ -75,17 +57,48 @@ const RequestDetailCard = ({
           )}
         </div>
         
-        <Button 
-          variant="default" 
-          size="sm"
-          className="w-full mt-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            window.open(createContactEmailLink(request), '_blank');
-          }}
-        >
-          I have this!
-        </Button>
+        <div className="flex gap-2 mt-4">
+          {isOwner ? (
+            <>
+              {onEdit && (
+                <Button 
+                  variant="secondary" 
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+              {onDeleteItem && (
+                <Button 
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteItem(request);
+                  }}
+                  disabled={isDeletingItem}
+                >
+                  Delete
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button 
+              variant="default" 
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(createContactEmailLink(request), '_blank');
+              }}
+            >
+              Contact
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

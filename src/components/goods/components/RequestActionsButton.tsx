@@ -1,60 +1,70 @@
 
+import { MoreVertical, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { GoodsExchangeItem } from "@/types/localTypes";
 import { useUser } from "@supabase/auth-helpers-react";
-import { createContactEmailLink } from '../GoodsRequestsSection';
 
-/**
- * Component for rendering action buttons (delete/contact) on a goods request card
- */
 interface RequestActionsButtonProps {
   request: GoodsExchangeItem;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
+  onEdit?: () => void;
 }
 
-const RequestActionsButton = ({ 
-  request, 
-  onDeleteItem, 
-  isDeletingItem = false 
+const RequestActionsButton = ({
+  request,
+  onDeleteItem,
+  isDeletingItem = false,
+  onEdit
 }: RequestActionsButtonProps) => {
-  const currentUser = useUser();
+  const user = useUser();
+  const isOwner = user?.id === request.user_id;
 
-  if (!currentUser) return null;
+  if (!isOwner) return null;
 
-  // Show delete button for owner
-  if (currentUser.id === request.user_id && onDeleteItem) {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          onDeleteItem(request);
-        }}
-        disabled={isDeletingItem}
-        aria-label="Delete request"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    );
-  }
-
-  // Show contact button for other users
   return (
-    <Button 
-      variant="outline" 
-      className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
-      onClick={(e) => {
-        e.stopPropagation();
-        window.open(createContactEmailLink(request), '_blank');
-      }}
-    >
-      I have this!
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-8 w-8 absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {onEdit && (
+          <DropdownMenuItem onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}>
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </DropdownMenuItem>
+        )}
+        {onDeleteItem && (
+          <DropdownMenuItem
+            className="text-red-600"
+            disabled={isDeletingItem}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteItem(request);
+            }}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
