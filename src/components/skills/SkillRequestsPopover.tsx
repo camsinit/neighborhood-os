@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -8,12 +7,11 @@ import {
 } from '@/components/ui/popover';
 import { MessageSquarePlus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkillWithProfile } from './types/skillTypes';
 import SkillContributionDialog from './SkillContributionDialog';
-import { formatDistanceToNow } from 'date-fns';
 
 import {
   Drawer,
@@ -96,15 +94,9 @@ const SkillRequestsPopover = () => {
       
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm truncate">{request.title}</p>
-        <div className="flex items-center gap-2">
-          <p className="text-xs text-gray-500 truncate">
-            {request.profiles?.display_name || 'Anonymous'}
-          </p>
-          <span className="text-xs text-gray-400">•</span>
-          <p className="text-xs text-gray-400">
-            {formatDistanceToNow(new Date(request.created_at), { addSuffix: true })}
-          </p>
-        </div>
+        <p className="text-xs text-gray-500 truncate">
+          From: {request.profiles?.display_name || 'Anonymous'}
+        </p>
       </div>
     </div>
   );

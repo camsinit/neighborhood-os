@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +9,13 @@ import SkillRequestCard from './SkillRequestCard';
 import SkillOfferCard from './SkillOfferCard';
 import SkillDetailsContent from './SkillDetailsContent';
 
+/**
+ * SkillCard - Main component that renders different skill card types
+ * 
+ * This component has been refactored to use smaller, focused components
+ * for better maintainability and clarity. It now serves as a container
+ * that determines which card type to show based on props.
+ */
 interface SkillCardProps {
   skill: SkillWithProfile;
   onContribute?: () => void;
@@ -15,15 +23,20 @@ interface SkillCardProps {
 }
 
 const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
+  // Get the current user to determine ownership
   const currentUser = useUser();
   
+  // State variables for dialogs
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   
+  // Custom hook for skill operations
   const { deleteSkill, isLoading: isDeleting } = useSkillUpdate();
   
+  // Check if current user is the skill owner
   const isOwner = currentUser?.id === skill.user_id;
   
+  // Handle skill deletion
   const handleDeleteSkill = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     
@@ -31,41 +44,29 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
     setIsDetailsOpen(false);
   };
 
+  // For skill requests, we render the request card component
   if (type === 'request') {
+    // We no longer pass onContribute to SkillRequestCard since it handles its own dialog
     return (
-      <div className="mb-3">
-        <div 
-          className="relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
-          style={{
-            borderLeft: '4px solid #9b87f5'
-          }}
-        >
-          <SkillRequestCard skill={skill} />
-        </div>
-      </div>
+      <SkillRequestCard
+        skill={skill}
+      />
     );
   }
 
+  // For skill offers, we render the offer card and detail dialog
   return (
     <>
-      <div className="mb-3">
-        <div 
-          className="relative flex items-center py-3 px-4 rounded-lg border border-gray-100 hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer bg-white"
-          style={{
-            borderLeft: '4px solid #9b87f5'
-          }}
-        >
-          <SkillOfferCard 
-            skill={skill}
-            isOwner={isOwner}
-            onDelete={handleDeleteSkill}
-            isDeleting={isDeleting}
-            onRequestSkill={() => setIsRequestDialogOpen(true)}
-            onClick={() => setIsDetailsOpen(true)}
-          />
-        </div>
-      </div>
+      <SkillOfferCard 
+        skill={skill}
+        isOwner={isOwner}
+        onDelete={handleDeleteSkill}
+        isDeleting={isDeleting}
+        onRequestSkill={() => setIsRequestDialogOpen(true)}
+        onClick={() => setIsDetailsOpen(true)}
+      />
 
+      {/* Details dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -85,6 +86,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* Skill request dialog */}
       <SkillSessionRequestDialog
         open={isRequestDialogOpen}
         onOpenChange={setIsRequestDialogOpen}
