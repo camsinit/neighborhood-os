@@ -1,13 +1,7 @@
 
-import DialogWrapper from "./dialog/DialogWrapper";
+import UniversalDialog from "./ui/universal-dialog";
 import SafetyUpdateForm from "./safety/SafetyUpdateForm";
 
-/**
- * AddSafetyUpdateDialog component
- * 
- * Dialog for sharing safety updates in the community.
- * Uses the universal DialogWrapper component for consistent styling.
- */
 interface AddSafetyUpdateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -15,14 +9,14 @@ interface AddSafetyUpdateDialogProps {
 
 const AddSafetyUpdateDialog = ({ open, onOpenChange }: AddSafetyUpdateDialogProps) => {
   return (
-    <DialogWrapper
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Share Safety Update"
       maxWidth="sm"
     >
       <SafetyUpdateForm onClose={() => onOpenChange(false)} />
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 

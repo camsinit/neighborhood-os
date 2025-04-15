@@ -1,5 +1,4 @@
-
-import DialogWrapper from "./dialog/DialogWrapper";
+import UniversalDialog from "./ui/universal-dialog";
 import SupportRequestForm from "./support/SupportRequestForm";
 import SkillForm from "./skills/SkillForm";
 import GoodsForm from "./goods/GoodsForm";
@@ -48,11 +47,10 @@ const AddSupportRequestDialog = ({
   };
   
   return (
-    <DialogWrapper
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title={getDialogTitle()}
-      // Use a smaller width for forms to maintain readability
       maxWidth="sm"
     >
       {/* Render the appropriate form based on the view prop */}
@@ -77,7 +75,7 @@ const AddSupportRequestDialog = ({
           }}
         />
       )}
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 
