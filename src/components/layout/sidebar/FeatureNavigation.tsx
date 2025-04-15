@@ -32,9 +32,9 @@ const FeatureNavigation = () => {
     },
     { 
       icon: Gift, 
-      label: "Stuff", 
+      label: "Items", // Updated from "Stuff" to "Items"
       href: "/goods", 
-      color: "#F97316" // Stuff (formerly Goods) uses an orange theme
+      color: "#F97316" // Items (formerly Goods) uses an orange theme
     },
     { 
       icon: Heart, 
