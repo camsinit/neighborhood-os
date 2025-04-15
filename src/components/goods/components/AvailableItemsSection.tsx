@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from '../GoodsForm';
 import { useToast } from "@/hooks/use-toast";
+import { GoodsItemCategory } from "@/components/support/types/formTypes";
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -128,13 +129,22 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
         onOpenChange={handleCloseEdit}
         title="Edit Item"
       >
-        <GoodsForm
-          onClose={handleCloseEdit}
-          mode="edit"
-          initialValues={itemToEdit || undefined}
-          requestId={itemToEdit?.id}
-          initialRequestType="offer"
-        />
+        {itemToEdit && (
+          <GoodsForm
+            onClose={handleCloseEdit}
+            mode="edit"
+            initialValues={{
+              title: itemToEdit.title,
+              description: itemToEdit.description || "",
+              category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
+              request_type: itemToEdit.request_type,
+              images: itemToEdit.images || [],
+              image_url: itemToEdit.image_url || ""
+            }}
+            requestId={itemToEdit.id}
+            initialRequestType={itemToEdit.request_type}
+          />
+        )}
       </UniversalDialog>
     </div>
   );

@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import RequestDetailCard from './components/RequestDetailCard';
-import RequestActionsButton from './components/RequestActionsButton';
+import { Button } from "@/components/ui/button"; // Import Button directly
 
 interface GoodsRequestCardProps {
   request: GoodsExchangeItem;
@@ -46,11 +47,32 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
           </div>
           
           {/* Action buttons */}
-          <RequestActionsButton 
-            request={request}
-            onDeleteItem={onDeleteItem}
-            isDeletingItem={isDeletingItem}
-          />
+          <div className="flex gap-2 ml-4">
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle edit action
+              }}
+            >
+              Edit
+            </Button>
+            {onDeleteItem && (
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteItem(request);
+                }}
+                disabled={isDeletingItem}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
           
           {/* Urgency badge */}
           {request.urgency && (

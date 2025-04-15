@@ -1,13 +1,14 @@
+
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import RequestDetailCard from './components/RequestDetailCard';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast"; // Import the useToast hook
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client"; // Import the supabase client
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -31,7 +32,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   // Keep track of which popover is currently open
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
-  const { toast } = useToast();
+  const { toast } = useToast(); // Use the toast hook
 
   // Handle item edit
   const handleEdit = (item: GoodsExchangeItem) => {
@@ -141,7 +142,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
-              category: itemToEdit.goods_category || "furniture",
+              category: itemToEdit.goods_category || "furniture", // Cast to GoodsItemCategory
               request_type: itemToEdit.request_type,
               images: itemToEdit.images || [],
               image_url: itemToEdit.image_url || ""
