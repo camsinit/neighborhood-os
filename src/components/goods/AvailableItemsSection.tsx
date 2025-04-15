@@ -5,10 +5,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import RequestDetailCard from './components/RequestDetailCard';
-import { useToast } from "@/hooks/use-toast"; // Import the useToast hook
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
-import { supabase } from "@/integrations/supabase/client"; // Import the supabase client
+import { useToast } from "@/hooks/use-toast"; 
+import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -29,12 +30,16 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   isDeletingItem = false,
   onRefetch
 }) => {
-  // Keep track of which popover is currently open
+  // State to track which popover is currently open
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  
+  // State to track the item being edited
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
-  const { toast } = useToast(); // Use the toast hook
+  
+  // Use the toast hook for notifications
+  const { toast } = useToast();
 
-  // Handle item edit
+  // Handle item edit - opens the edit dialog
   const handleEdit = (item: GoodsExchangeItem) => {
     setItemToEdit(item);
   };
@@ -142,8 +147,10 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
-              category: itemToEdit.goods_category || "furniture", // Cast to GoodsItemCategory
-              request_type: itemToEdit.request_type,
+              // Here's the fix: we need to cast goods_category to GoodsItemCategory
+              category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
+              // We need requestType, not request_type
+              requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               images: itemToEdit.images || [],
               image_url: itemToEdit.image_url || ""
             }}

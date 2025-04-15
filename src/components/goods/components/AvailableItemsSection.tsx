@@ -136,8 +136,10 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
+              // Fix: Cast to GoodsItemCategory and use correct property name
               category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
-              request_type: itemToEdit.request_type,
+              // Fix: Use requestType instead of request_type to match the expected interface
+              requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               images: itemToEdit.images || [],
               image_url: itemToEdit.image_url || ""
             }}
