@@ -16,12 +16,40 @@ import SkillRequestNotificationItem from './notifications/SkillRequestNotificati
 import EmptySkillRequestState from './notifications/EmptySkillRequestState';
 import SkillRequestsDrawer from './notifications/SkillRequestsDrawer';
 
-/**
- * SkillRequestsPopover - Main component that shows recent skill requests
- * and provides ability to view all requests
- * 
- * This component has been refactored into smaller subcomponents for better maintainability
- */
+// Extracted notification loading state component
+const NotificationLoadingState = () => (
+  <div className="p-4 space-y-3">
+    {[1, 2, 3].map(i => (
+      <div key={i} className="flex items-center gap-2">
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="space-y-1 flex-1">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// Extracted notifications list component
+const NotificationsList = ({ 
+  requests, 
+  handleRequestClick 
+}: { 
+  requests: SkillWithProfile[], 
+  handleRequestClick: (request: SkillWithProfile) => void 
+}) => (
+  <>
+    {requests.map(request => (
+      <SkillRequestNotificationItem
+        key={request.id}
+        request={request}
+        onClick={() => handleRequestClick(request)}
+      />
+    ))}
+  </>
+);
+
 const SkillRequestsPopover = () => {
   // State for selected skill and drawer visibility
   const [selectedSkill, setSelectedSkill] = useState<{
@@ -85,29 +113,14 @@ const SkillRequestsPopover = () => {
     });
   };
 
-  // Helper to render loading state in popover
-  const renderLoadingState = () => (
-    <div className="p-4 space-y-3">
-      {[1, 2, 3].map(i => (
-        <div key={i} className="flex items-center gap-2">
-          <Skeleton className="h-8 w-8 rounded-full" />
-          <div className="space-y-1 flex-1">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-3 w-3/4" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <>
       <Popover>
         <PopoverTrigger asChild>
           <Button 
             variant="outline" 
-            size="sm" 
-            className="gap-2 h-8"
+            size="default"  // Changed from sm to default to match other buttons
+            className="gap-2"  // Removed h-8 to use default button height
           >
             <MessageSquarePlus className="h-4 w-4" />
             <span>Skill Requests</span>
@@ -121,17 +134,12 @@ const SkillRequestsPopover = () => {
           
           <div className="max-h-[300px] overflow-y-auto">
             {isLoading ? (
-              renderLoadingState()
+              <NotificationLoadingState />
             ) : requests && requests.length > 0 ? (
-              <>
-                {requests.map(request => (
-                  <SkillRequestNotificationItem
-                    key={request.id}
-                    request={request}
-                    onClick={() => handleRequestClick(request)}
-                  />
-                ))}
-              </>
+              <NotificationsList 
+                requests={requests} 
+                handleRequestClick={handleRequestClick} 
+              />
             ) : (
               <EmptySkillRequestState />
             )}
