@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import DialogWrapper from "@/components/dialog/DialogWrapper";
+// Replace DialogWrapper with UniversalDialog
+import UniversalDialog from "@/components/ui/universal-dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,7 +50,8 @@ const RequestScheduleDialog = ({
   };
 
   return (
-    <DialogWrapper
+    // Replace DialogWrapper with UniversalDialog
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Schedule Your Request"
@@ -122,7 +124,7 @@ const RequestScheduleDialog = ({
           </Button>
         </div>
       </div>
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 

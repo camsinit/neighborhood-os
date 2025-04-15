@@ -1,5 +1,6 @@
 
-import DialogWrapper from "@/components/dialog/DialogWrapper";
+// Replace DialogWrapper with UniversalDialog
+import UniversalDialog from "@/components/ui/universal-dialog";
 import SafetyUpdateFormNew from "./SafetyUpdateFormNew";
 
 /**
@@ -20,7 +21,8 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
   };
 
   return (
-    <DialogWrapper
+    // Replace DialogWrapper with UniversalDialog
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Share Safety Update"
@@ -28,7 +30,7 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
     >
       {/* Pass onSuccess instead of onClose */}
       <SafetyUpdateFormNew onSuccess={handleSuccess} />
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 

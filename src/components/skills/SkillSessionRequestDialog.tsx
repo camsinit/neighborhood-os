@@ -7,7 +7,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import DialogWrapper from "@/components/dialog/DialogWrapper";
+// Replace DialogWrapper with UniversalDialog
+import UniversalDialog from "@/components/ui/universal-dialog";
 import { Form } from "@/components/ui/form";
 import { addDays } from "date-fns";
 import { TimeSlot } from "./contribution/TimeSlotSelector";
@@ -73,7 +74,7 @@ const SkillSessionRequestDialog = ({
   };
 
   return (
-    <DialogWrapper
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title={`Request Help with: ${skillTitle}`}
@@ -108,7 +109,7 @@ const SkillSessionRequestDialog = ({
           </div>
         </form>
       </Form>
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 

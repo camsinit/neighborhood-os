@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import DialogWrapper from '../dialog/DialogWrapper';
+// Replace DialogWrapper with UniversalDialog
+import UniversalDialog from '@/components/ui/universal-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { addDays, format } from 'date-fns';
@@ -158,7 +159,8 @@ const SkillContributionDialog = ({
 
   return (
     <TooltipProvider>
-      <DialogWrapper
+      {/* Replace DialogWrapper with UniversalDialog */}
+      <UniversalDialog
         open={open}
         onOpenChange={onOpenChange}
         title="Contribute Your Skill"
@@ -254,7 +256,7 @@ const SkillContributionDialog = ({
             </Button>
           </DialogFooter>
         </div>
-      </DialogWrapper>
+      </UniversalDialog>
     </TooltipProvider>
   );
 };
