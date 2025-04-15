@@ -3,7 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivitySection from "@/components/activity/ActivitySection";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
-// import AIChat from "@/components/ai/AIChat"; // Temporarily commented out
+import ActivityFeed from "@/components/activity/ActivityFeed"; // Added import for ActivityFeed
 
 /**
  * Main homepage/dashboard of the neighborhood app
