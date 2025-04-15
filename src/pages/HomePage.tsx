@@ -2,6 +2,7 @@
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivitySection from "@/components/activity/ActivitySection";
+import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 // import AIChat from "@/components/ai/AIChat"; // Temporarily commented out
 
 /**
@@ -14,9 +15,12 @@ const HomePage = () => {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          {/* Quick Actions Section - Full width at top */}
+          {/* Quick Actions Section with Notifications */}
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Actions</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+              <NotificationsPopover />
+            </div>
             <QuickActions />
           </section>
 
