@@ -1,10 +1,7 @@
 
-import DialogWrapper from "@/components/dialog/DialogWrapper";
+import UniversalDialog from "@/components/ui/universal-dialog";
 import CareRequestForm from "./CareRequestForm";
 
-/**
- * AddCareRequestDialog component for creating new care requests
- */
 interface AddCareRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,7 +19,7 @@ const AddCareRequestDialog = ({
   };
   
   return (
-    <DialogWrapper
+    <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
       title={getDialogTitle()}
@@ -32,8 +29,9 @@ const AddCareRequestDialog = ({
         onClose={() => onOpenChange(false)}
         initialValues={{ requestType: initialRequestType }}
       />
-    </DialogWrapper>
+    </UniversalDialog>
   );
 };
 
 export default AddCareRequestDialog;
+
