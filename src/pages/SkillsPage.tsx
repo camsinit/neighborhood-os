@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -81,28 +80,22 @@ const SkillsPage = () => {
               </GlowingDescriptionBox>
 
               <div className="bg-white rounded-lg p-6 shadow-lg">
+                {/* Title section moved above the header */}
+                <div className="mb-6 flex items-center">
+                  {React.createElement(getCategoryIcon(selectedCategory), {
+                    className: "h-5 w-5 text-gray-700 mr-2"
+                  })}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}
+                  </h3>
+                </div>
+
                 <SkillsHeader 
                   showCategories={showCategories}
                   onViewChange={handleViewChange}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                 />
-                
-                {/* Modified element - added flex justify-between to allow placing popover on right */}
-                <div className="mb-6 flex items-center justify-between">
-                  {/* Left side - Category title with icon */}
-                  <div className="flex items-center">
-                    {React.createElement(getCategoryIcon(selectedCategory), {
-                      className: "h-5 w-5 text-gray-700 mr-2"
-                    })}
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {showCategories ? 'Categories' : (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : searchQuery ? `Search: "${searchQuery}"` : 'All Skills')}
-                    </h3>
-                  </div>
-                  
-                  {/* Right side - Skill Requests Popover */}
-                  <SkillRequestsPopover />
-                </div>
                 
                 {showCategories ? (
                   <CategoryView onCategoryClick={handleCategoryClick} />
