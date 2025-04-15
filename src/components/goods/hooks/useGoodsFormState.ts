@@ -11,8 +11,8 @@ export const useGoodsFormState = (initialValues: any, initialRequestType: "offer
   const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
-    // Remove default category, leave it as undefined
-    category: (initialValues as any)?.category,
+    // No default category - making sure it's explicitly undefined
+    category: (initialValues as any)?.category || undefined,
     // Use the normalized request type that matches the expected type
     requestType: normalizedRequestType || "offer",
     availableDays: (initialValues as any)?.availableDays || 30,
@@ -23,14 +23,15 @@ export const useGoodsFormState = (initialValues: any, initialRequestType: "offer
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     urgency: (initialValues as any)?.urgency || "medium",
-    // Remove default category, leave it as undefined
-    category: (initialValues as any)?.category
+    // No default category - making sure it's explicitly undefined
+    category: (initialValues as any)?.category || undefined
   });
   
   const [uploading, setUploading] = useState(false);
+  
+  // Explicitly set to undefined by default (not a string or any other value)
   const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory | undefined>(
-    // Remove default category, leave it as undefined
-    (initialValues as any)?.category
+    (initialValues as any)?.category || undefined
   );
   
   return {

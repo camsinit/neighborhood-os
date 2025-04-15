@@ -56,7 +56,7 @@ const GoodsForm = ({
       {/* Category Selection (for offers only) */}
       {isOfferForm && (
         <CategorySelection 
-          category={itemFormData.category!}
+          category={selectedCategory}
           onChange={handleCategoryChange}
         />
       )}

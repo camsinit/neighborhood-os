@@ -1,3 +1,4 @@
+
 // This component handles category selection for goods form using a button group
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -38,7 +39,7 @@ const categoryIcons = {
 
 // Component props definition
 interface CategorySelectionProps {
-  category: GoodsItemCategory;
+  category?: GoodsItemCategory;
   onChange: (category: GoodsItemCategory) => void;
 }
 
@@ -55,7 +56,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
       <ToggleGroup 
         type="single" 
         value={category || ""}  
-        onValueChange={(value) => onChange(value as GoodsItemCategory)}
+        onValueChange={(value) => value && onChange(value as GoodsItemCategory)}
         className="flex flex-wrap gap-4 max-w-[800px]"
       >
         {Object.entries(CATEGORY_NAMES).map(([value, label]) => {
