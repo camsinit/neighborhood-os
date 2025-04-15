@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
-// Update the interface to be more specific about Goods Exchange
-interface GoodsRequestDialogProps {
+// Update the interface to be more specific about Item Exchange
+interface ItemRequestDialogProps {
   request: GoodsExchangeItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,13 +46,13 @@ const createContactEmailLink = (request: any) => {
 };
 
 /**
- * GoodsRequestDialog component
+ * ItemRequestDialog component
  * 
- * Displays and allows editing of goods exchange items in the Goods page.
+ * Displays and allows editing of item exchange items on the Items page.
  * This replaces the legacy support request dialog with a specialized 
- * component for the Goods Exchange functionality.
+ * component for the Item Exchange functionality.
  */
-const GoodsRequestDialog: React.FC<GoodsRequestDialogProps> = ({ 
+const ItemRequestDialog: React.FC<ItemRequestDialogProps> = ({ 
   request, 
   open, 
   onOpenChange,
@@ -204,4 +203,4 @@ const GoodsRequestDialog: React.FC<GoodsRequestDialogProps> = ({
 };
 
 export { createContactEmailLink };
-export default GoodsRequestDialog;
+export default ItemRequestDialog;
