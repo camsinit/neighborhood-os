@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch, getUrgencyClass, getUrgencyLabel } from './utils/sectionHelpers';
@@ -133,13 +132,6 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
           
         {showAvailable && 
           <div className="mt-10">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Available Items</h2>
-              <Button variant="outline" onClick={onOfferItem}>
-                Offer an Item
-              </Button>
-            </div>
-            
             <AvailableItemsSection 
               goodsItems={available} 
               onRequestSelect={onRequestSelect} 

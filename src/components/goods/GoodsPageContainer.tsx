@@ -1,11 +1,8 @@
-
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
-// Fixed import statement to use default import
 import GoodsSections from './GoodsSections';
 import GoodsPageHeader from './GoodsPageHeader';
 import GoodsSearchBar from './GoodsSearchBar';
-// Fixed import statement to use default import
 import GoodsDialogs from './GoodsDialogs';
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { Tabs } from "@/components/ui/tabs";
@@ -66,6 +63,9 @@ const GoodsPageContainer = () => {
 
           {/* Search bar with filters and main content */}
           <div className="bg-white rounded-lg p-6 shadow-lg">
+            {/* Add the title here, above the Tabs component */}
+            <h2 className="text-2xl font-bold mb-6">Available Items</h2>
+            
             {/* Wrap everything in a Tabs component */}
             <Tabs value={activeTab} onValueChange={handleTabChange}>
               {/* Search bar with filters */}
@@ -76,7 +76,6 @@ const GoodsPageContainer = () => {
                 onOfferItem={handleAddItem}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
-                // onCategoryFilter prop is optional so we don't need to pass it
               />
               
               {/* Main content sections */}
