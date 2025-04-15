@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +94,7 @@ const SkillsHeader = ({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Buttons to create new request or offer */}
+        {/* Request and Offer buttons with consistent hover styling */}
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
