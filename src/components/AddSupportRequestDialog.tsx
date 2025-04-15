@@ -64,7 +64,7 @@ const AddSupportRequestDialog = ({
       ) : isGoodsView ? (
         <GoodsForm 
           onClose={() => onOpenChange(false)}
-          initialRequestType={initialRequestType || 'offer'}
+          initialRequestType={initialRequestType === 'need' ? 'request' : 'offer'}
         />
       ) : (
         <SupportRequestForm 

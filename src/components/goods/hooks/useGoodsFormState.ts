@@ -4,6 +4,7 @@ import { useState } from "react";
 import { GoodsItemFormData, GoodsRequestFormData, GoodsItemCategory } from "@/components/support/types/formTypes";
 
 export const useGoodsFormState = (initialValues: any, initialRequestType: "offer" | "request" | null) => {
+  // Use "request" instead of "need" to match the expected types
   const isOfferForm = initialRequestType === "offer";
   
   const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({

@@ -31,7 +31,7 @@ interface UniversalDialogProps {
   description?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 const UniversalDialog = ({
@@ -43,21 +43,21 @@ const UniversalDialog = ({
   footer,
   maxWidth = "md",
 }: UniversalDialogProps) => {
-  // Map maxWidth prop to Tailwind classes
-  const maxWidthClasses = {
+  // Map the maxWidth prop to a Tailwind class
+  const maxWidthClass = {
     xs: "max-w-xs",
     sm: "max-w-sm",
     md: "max-w-md",
     lg: "max-w-lg",
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
-  };
+    "full": "max-w-full",
+  }[maxWidth];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className={`${maxWidthClasses[maxWidth]} max-h-[85vh] overflow-y-auto bg-white p-6 rounded-lg shadow-lg`}
-      >
+      {/* Add additional wrapper to ensure max width is respected */}
+      <DialogContent className={`${maxWidthClass} max-h-[90vh] overflow-y-auto`}>
         {title && (
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
