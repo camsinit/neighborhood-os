@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +49,7 @@ const SkillOfferCard = ({
   return (
     <div 
       data-skill-id={skill.id}
-      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative"
+      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
       onClick={onClick}
     >
       {/* User profile and skill title */}
@@ -62,19 +63,19 @@ const SkillOfferCard = ({
         </div>
       </div>
       
-      {/* Category tag on far right */}
+      {/* Category tag that hides on hover */}
       <Badge 
-        className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs absolute right-2 top-1/2 transform -translate-y-1/2`}
+        className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs absolute right-2 top-1/2 transform -translate-y-1/2 group-hover:opacity-0 transition-opacity`}
       >
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Action button */}
+      {/* Request button that shows on hover */}
       {!isOwner && (
         <Button 
           variant="outline" 
           onClick={handleRequestClick}
-          className="ml-4"
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
         >
           Request Skill
         </Button>

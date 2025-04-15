@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +21,7 @@ const SkillsHeader = ({
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
 
-  // Effect to automatically switch to "All" view when search is performed
   useEffect(() => {
-    // If we have a search query and we're showing categories, switch to All view
     if (searchQuery && showCategories) {
       onViewChange();
     }
@@ -74,14 +71,14 @@ const SkillsHeader = ({
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
-          className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
+          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
         >
           Request Skill
         </Button>
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('offer')} 
-          className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white whitespace-nowrap border-0"
+          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
         >
           Offer Skill
         </Button>
@@ -98,4 +95,3 @@ const SkillsHeader = ({
 };
 
 export default SkillsHeader;
-
