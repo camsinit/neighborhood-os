@@ -87,9 +87,11 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   }
 
   // Main content with tabs for different sections
-  return <div className="mt-6">
+  return (
+    <div className="flex items-center gap-4">
+      {/* Move this div up to be next to search bar */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-6">
+        <TabsList>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Package2 className="h-4 w-4" />
             <span>All Items</span>
@@ -104,7 +106,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
           </TabsTrigger>
         </TabsList>
         
-        {/* Tab content for all items */}
+        {/* Tab content sections */}
         <TabsContent value="all" className="space-y-8">
           {/* Conditionally render requests section only if there are requests */}
           {hasRequests && showRequests && <div className="mt-8">
@@ -169,6 +171,8 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
+
 export default GoodsSections;
