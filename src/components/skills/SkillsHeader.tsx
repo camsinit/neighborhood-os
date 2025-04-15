@@ -70,18 +70,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Toggle button for switching between offers and requests */}
-        <Button 
-          variant="outline" 
-          size="default"
-          className={`gap-2 ${showRequests ? 'bg-[#F1F1F1]' : 'bg-white'}`}
-          onClick={() => setShowRequests(!showRequests)}
-        >
-          <MessageSquarePlus className="h-4 w-4" />
-          <span>Skill Requests</span>
-        </Button>
-
-        {/* Search input field */}
+        {/* Search input field - moved between Types and Skill Requests */}
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input 
@@ -92,6 +81,17 @@ const SkillsHeader = ({
             onChange={e => setSearchQuery(e.target.value)} 
           />
         </div>
+
+        {/* Toggle button for switching between offers and requests */}
+        <Button 
+          variant="outline" 
+          size="default"
+          className={`gap-2 ${showRequests ? 'bg-[#F1F1F1]' : 'bg-white'}`}
+          onClick={() => setShowRequests(!showRequests)}
+        >
+          <MessageSquarePlus className="h-4 w-4" />
+          <span>Skill Requests</span>
+        </Button>
       </div>
 
       <div className="flex items-center gap-4">

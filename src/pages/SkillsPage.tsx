@@ -7,7 +7,7 @@ import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
-import SkillRequestsPopover from "@/components/skills/SkillRequestsPopover";
+import SkillRequestsButton from "@/components/skills/SkillRequestsButton";
 
 const categoryIcons = {
   creative: Palette,
