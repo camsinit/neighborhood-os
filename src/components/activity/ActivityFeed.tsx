@@ -3,21 +3,19 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 
-/**
- * Component to display the feed of neighborhood activities
- * Now with infinite scrolling and proper handling of deleted items
- */
+const ITEMS_PER_PAGE = 5;
+
 const ActivityFeed = () => {
-  // We'll start by showing 20 activities and load more as the user scrolls
-  const [displayCount, setDisplayCount] = useState(20);
+  // Initial display count for pagination
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
   const { data: activities, isLoading } = useActivities();
   const { toast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const observerTarget = useRef(null);
 
   // Handler for when activities that need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
@@ -30,27 +28,10 @@ const ActivityFeed = () => {
     !activity.metadata?.deleted
   ) || [];
 
-  // Callback for intersection observer - load more items when user scrolls to bottom
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries;
-    if (entry.isIntersecting && filteredActivities && displayCount < filteredActivities.length) {
-      // When user scrolls to the bottom, load 20 more items
-      setDisplayCount(prev => Math.min(prev + 20, filteredActivities?.length || 0));
-    }
-  }, [filteredActivities, displayCount]);
-
-  // Set up intersection observer for infinite scrolling
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, {
-      rootMargin: '100px', // Load more items when user is 100px away from bottom
-    });
-    
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-    
-    return () => observer.disconnect();
-  }, [handleObserver]);
+  // Load more items handler
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredActivities.length));
+  };
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
@@ -77,10 +58,10 @@ const ActivityFeed = () => {
     );
   }
 
-  // Display the activities with infinite scrolling
+  // Display the activities with load more button
   return (
     <>
-      <div className="py-2">
+      <div className="py-2 space-y-3">
         {/* Only render the number of items we want to display */}
         {filteredActivities.slice(0, displayCount).map((activity) => (
           <ActivityItem 
@@ -90,10 +71,16 @@ const ActivityFeed = () => {
           />
         ))}
         
-        {/* This empty div is used as an observer target for infinite scrolling */}
+        {/* Load more button */}
         {displayCount < filteredActivities.length && (
-          <div ref={observerTarget} className="h-10 flex items-center justify-center">
-            <div className="animate-pulse text-sm text-gray-400">Loading more...</div>
+          <div className="flex justify-center pt-4">
+            <Button 
+              variant="outline" 
+              onClick={handleLoadMore}
+              className="w-full max-w-xs"
+            >
+              Load More Activities
+            </Button>
           </div>
         )}
       </div>
