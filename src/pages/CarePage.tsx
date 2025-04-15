@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
-import SupportRequestDialog from "@/components/support/SupportRequestDialog";
+import ItemRequestDialog from "@/components/support/ItemRequestDialog";
 import { Button } from "@/components/ui/button";
 import { HeartHandshake, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -16,16 +15,9 @@ const CarePage = () => {
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Add event listener for highlighting support items
   useEffect(() => {
-    // Use our utility to create a consistent highlight listener for support/care items
-    // This will handle finding elements by data-care-id and applying animations
     const handleHighlightItem = createHighlightListener("support");
-    
-    // Add event listener when component mounts
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
-    
-    // Remove event listener when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
     };
@@ -159,7 +151,7 @@ const CarePage = () => {
         view="care"
       />
 
-      <SupportRequestDialog
+      <ItemRequestDialog
         request={selectedRequest}
         open={!!selectedRequest}
         onOpenChange={open => !open && setSelectedRequest(null)}

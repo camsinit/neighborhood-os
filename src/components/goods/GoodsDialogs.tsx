@@ -1,12 +1,12 @@
 
 import { GoodsExchangeItem } from '@/types/localTypes';
 import AddItemRequestDialog from "@/components/AddSupportRequestDialog";
-import ItemRequestDialog from "@/components/support/ItemRequestDialog";
+import ItemRequestDialog from "@/components/items/dialogs/ItemRequestDialog";
 
 /**
  * Props interface for the GoodsDialogs component
  * 
- * Defines the properties needed to control the dialogs for viewing and adding goods items
+ * Defines the properties needed to control the dialogs for viewing and adding items
  */
 interface GoodsDialogsProps {
   isAddRequestOpen: boolean;
@@ -19,8 +19,8 @@ interface GoodsDialogsProps {
 /**
  * GoodsDialogs component
  * 
- * This component manages all the dialogs used on the Goods page:
- * - Dialog for adding new goods items (offers or requests)
+ * This component manages all the dialogs used on the Items page:
+ * - Dialog for adding new items (offers or requests)
  * - Dialog for viewing the details of an existing item
  */
 const GoodsDialogs = ({
