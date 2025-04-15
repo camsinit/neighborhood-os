@@ -7,6 +7,14 @@ import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
 import SkillRequestsPopover from "./SkillRequestsPopover"; // Add this import
 
+// Re-adding the interface that was accidentally removed
+interface SkillsHeaderProps {
+  showCategories: boolean;
+  onViewChange: () => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+}
+
 const SkillsHeader = ({ 
   showCategories, 
   onViewChange,
@@ -70,14 +78,14 @@ const SkillsHeader = ({
           onClick={() => openSkillDialog('need')}
           className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
         >
-          Request Skill
+          Request
         </Button>
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('offer')} 
           className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
         >
-          Offer Skill
+          Offer
         </Button>
       </div>
 
@@ -92,4 +100,3 @@ const SkillsHeader = ({
 };
 
 export default SkillsHeader;
-
