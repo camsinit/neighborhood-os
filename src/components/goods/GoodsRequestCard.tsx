@@ -1,9 +1,8 @@
-
 /**
  * GoodsRequestCard Component
  * 
  * This component renders an individual goods request card with a popover for details
- * Extracted from GoodsRequestsSection for better maintainability
+ * Now styled to match the Skills cards for consistency across the platform
  */
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
@@ -14,6 +13,8 @@ import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { createContactEmailLink } from './GoodsRequestsSection';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 // Define the component's props interface
 interface GoodsRequestCardProps {
@@ -50,15 +51,32 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
     >
       {/* Use the Card as the trigger for the Popover */}
       <PopoverTrigger asChild>
-        <Card className="cursor-pointer hover:shadow-md transition-all duration-300 w-[250px] flex-shrink-0 relative group">
-          {/* Delete button - only shown for the creator when hovering */}
+        <div 
+          className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
+        >
+          {/* Profile and title section */}
+          <div className="flex items-center gap-3 flex-grow">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={request.profiles?.avatar_url || undefined} />
+              <AvatarFallback>
+                {request.profiles?.display_name?.[0] || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <h4 className="font-medium text-gray-900">{request.title}</h4>
+              <p className="text-sm text-gray-500 line-clamp-1">
+                {request.description}
+              </p>
+            </div>
+          </div>
+          
+          {/* Delete button for owners */}
           {currentUser && currentUser.id === request.user_id && onDeleteItem && (
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 h-8 w-8"
+              className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
               onClick={(e) => {
-                // Stop event propagation to prevent popover from opening
                 e.stopPropagation();
                 e.preventDefault();
                 onDeleteItem(request);
@@ -69,29 +87,30 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
+
+          {/* Urgency badge */}
+          {request.urgency && (
+            <Badge 
+              className={`${getUrgencyClass(request.urgency)} absolute right-2 top-1/2 transform -translate-y-1/2 group-hover:opacity-0 transition-opacity`}
+            >
+              {getUrgencyLabel(request.urgency)}
+            </Badge>
+          )}
           
-          <CardHeader className="pb-2">
-            <div className="flex flex-col">
-              {/* Title and urgency tag in a row */}
-              <div className="flex items-center justify-between">
-                {/* Title on the left */}
-                <CardTitle className="text-lg">{request.title}</CardTitle>
-                
-                {/* Urgency tag on the right of the title */}
-                {request.urgency && (
-                  <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-                    {getUrgencyLabel(request.urgency)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-          
-          <CardContent>
-            {/* Description is visible in the normal card view, but gets truncated */}
-            <p className="line-clamp-2">{request.description}</p>
-          </CardContent>
-        </Card>
+          {/* Action button that shows on hover */}
+          {!currentUser?.id !== request.user_id && (
+            <Button 
+              variant="outline" 
+              className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(createContactEmailLink(request), '_blank');
+              }}
+            >
+              I have this!
+            </Button>
+          )}
+        </div>
       </PopoverTrigger>
       
       {/* Popover content shows the expanded details */}
