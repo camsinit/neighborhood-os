@@ -26,8 +26,11 @@ const HomePage = () => {
 
           <Separator className="my-2 bg-gray-200" />
 
-          {/* Activity Section */}
-          <ActivitySection />
+          {/* Activity Section without duplicate notifications */}
+          <section className="w-full">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
+            <ActivityFeed />
+          </section>
         </div>
       </div>
     </div>

@@ -1,22 +1,12 @@
-/**
- * GoodsRequestCard Component
- * 
- * This component renders an individual goods request card with a popover for details
- * Now styled to match the Skills cards for consistency across the platform
- */
+
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Trash2 } from "lucide-react";
-import { useUser } from "@supabase/auth-helpers-react";
-import { createContactEmailLink } from './GoodsRequestsSection';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import RequestDetailCard from './components/RequestDetailCard';
+import RequestActionsButton from './components/RequestActionsButton';
 
-// Define the component's props interface
 interface GoodsRequestCardProps {
   request: GoodsExchangeItem;
   isOpen: boolean;
@@ -29,7 +19,6 @@ interface GoodsRequestCardProps {
 
 /**
  * GoodsRequestCard component
- * 
  * Displays a single goods request card with a popover for details
  */
 const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
@@ -41,19 +30,10 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   onDeleteItem,
   isDeletingItem = false
 }) => {
-  // Get the current user to check if they're the creator of a request
-  const currentUser = useUser();
-  
   return (
-    <Popover 
-      open={isOpen}
-      onOpenChange={onOpenChange}
-    >
-      {/* Use the Card as the trigger for the Popover */}
+    <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <div 
-          className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
-        >
+        <div className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group">
           {/* Profile and title section */}
           <div className="flex items-center gap-3 flex-grow">
             <Avatar className="h-10 w-10">
@@ -70,24 +50,13 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
             </div>
           </div>
           
-          {/* Delete button for owners */}
-          {currentUser && currentUser.id === request.user_id && onDeleteItem && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                onDeleteItem(request);
-              }}
-              disabled={isDeletingItem}
-              aria-label="Delete request"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-
+          {/* Action buttons */}
+          <RequestActionsButton 
+            request={request}
+            onDeleteItem={onDeleteItem}
+            isDeletingItem={isDeletingItem}
+          />
+          
           {/* Urgency badge */}
           {request.urgency && (
             <Badge 
@@ -96,24 +65,10 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
               {getUrgencyLabel(request.urgency)}
             </Badge>
           )}
-          
-          {/* Action button that shows on hover */}
-          {currentUser && currentUser.id !== request.user_id && (
-            <Button 
-              variant="outline" 
-              className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(createContactEmailLink(request), '_blank');
-              }}
-            >
-              I have this!
-            </Button>
-          )}
         </div>
       </PopoverTrigger>
       
-      {/* Popover content shows the expanded details */}
+      {/* Popover content */}
       <PopoverContent className="w-[300px] p-0" sideOffset={5}>
         <RequestDetailCard
           request={request}
@@ -124,103 +79,6 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
         />
       </PopoverContent>
     </Popover>
-  );
-};
-
-/**
- * RequestDetailCard component
- * 
- * Shows the full details of a request in the popover
- */
-interface RequestDetailCardProps {
-  request: GoodsExchangeItem;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
-  onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
-  isDeletingItem?: boolean;
-}
-
-const RequestDetailCard: React.FC<RequestDetailCardProps> = ({
-  request,
-  getUrgencyClass,
-  getUrgencyLabel,
-  onDeleteItem,
-  isDeletingItem
-}) => {
-  // Get the current user for permission checks
-  const currentUser = useUser();
-  
-  return (
-    <Card className="border-0 shadow-none relative">
-      {/* Add delete button in the expanded view too */}
-      {currentUser && currentUser.id === request.user_id && onDeleteItem && (
-        <Button
-          variant="destructive"
-          size="icon"
-          className="absolute top-2 right-2 z-10 h-8 w-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onDeleteItem(request);
-          }}
-          disabled={isDeletingItem}
-          aria-label="Delete request"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-      
-      <CardHeader className="pb-2">
-        {/* Title and urgency in a row with space-between */}
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{request.title}</CardTitle>
-          {request.urgency && (
-            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-              {getUrgencyLabel(request.urgency)}
-            </span>
-          )}
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        {/* Full description with no truncation in the popover view */}
-        <p>{request.description}</p>
-        
-        {/* Posted by section with clickable username */}
-        <div className="mt-4">
-          <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
-          {/* Make the username clickable if we have a user ID */}
-          {request.user_id ? (
-            <Link 
-              to={`/neighbors?user=${request.user_id}`}
-              className="text-sm text-primary hover:underline"
-              onClick={(e) => {
-                // Prevent the click from closing the popover
-                e.stopPropagation();
-              }}
-            >
-              {request.profiles?.display_name || "Anonymous"}
-            </Link>
-          ) : (
-            <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
-          )}
-        </div>
-        
-        {/* "I have this" button */}
-        <Button 
-          variant="default" 
-          size="sm"
-          className="w-full mt-4"
-          onClick={(e) => {
-            // Prevent the click from closing the popover
-            e.stopPropagation();
-            window.open(createContactEmailLink(request), '_blank');
-          }}
-        >
-          I have this!
-        </Button>
-      </CardContent>
-    </Card>
   );
 };
 
