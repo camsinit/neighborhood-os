@@ -86,30 +86,10 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
     return <GoodsSectionsLoadingState />;
   }
 
-  // Main content with tabs for different sections
   return (
-    <div className="flex items-center gap-4">
-      {/* Move this div up to be next to search bar */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          <TabsTrigger value="all" className="flex items-center gap-2">
-            <Package2 className="h-4 w-4" />
-            <span>All Items</span>
-          </TabsTrigger>
-          <TabsTrigger value="needs" className="flex items-center gap-2">
-            <ListFilter className="h-4 w-4" />
-            <span>Requests</span>
-          </TabsTrigger>
-          <TabsTrigger value="offers" className="flex items-center gap-2">
-            <Package2 className="h-4 w-4" />
-            <span>Available</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        {/* Tab content sections */}
-        <TabsContent value="all" className="space-y-8">
-          {/* Conditionally render requests section only if there are requests */}
-          {hasRequests && showRequests && <div className="mt-8">
+    <div>
+      <TabsContent value="all" className="space-y-8">
+        {hasRequests && showRequests && <div className="mt-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">
                   Requests from Neighbors
@@ -122,7 +102,6 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
                 </Button>
               </div>
               
-              {/* Show urgent and regular requests when not collapsed */}
               {!requestsCollapsed && <>
                   {showUrgent && urgentRequests.length > 0 && <UrgentRequestsSection urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} />}
                   
@@ -135,11 +114,10 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
               
               <AvailableItemsSection goodsItems={available} onRequestSelect={onRequestSelect} onNewOffer={onOfferItem} onRefetch={onRefresh} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
             </div>}
-        </TabsContent>
-        
-        {/* Tab content for requests */}
-        <TabsContent value="needs">
-          <div className="space-y-8">
+      </TabsContent>
+      
+      <TabsContent value="needs">
+        <div className="space-y-8">
             {hasRequests ? <>
                 {showUrgent && urgentRequests.length > 0 && <UrgentRequestsSection urgentRequests={urgentRequests} onRequestSelect={onRequestSelect} getUrgencyClass={getUrgencyClass} getUrgencyLabel={getUrgencyLabel} />}
                 
@@ -155,11 +133,10 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
                 </div>
               </> : <EmptyRequestsState onRequestItem={onRequestItem} />}
           </div>
-        </TabsContent>
-        
-        {/* Tab content for offers */}
-        <TabsContent value="offers">
-          <div className="mt-4">
+      </TabsContent>
+      
+      <TabsContent value="offers">
+        <div className="mt-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Available Items</h2>
               <Button variant="outline" onClick={onOfferItem}>
@@ -169,8 +146,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
             
             <AvailableItemsSection goodsItems={available} onRequestSelect={onRequestSelect} onNewOffer={onOfferItem} onRefetch={onRefresh} onDeleteItem={handleDeleteGoodsItem} isDeletingItem={isDeletingItem} />
           </div>
-        </TabsContent>
-      </Tabs>
+      </TabsContent>
     </div>
   );
 };

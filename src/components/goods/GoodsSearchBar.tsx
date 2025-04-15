@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, Plus, AlertCircle } from "lucide-react";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { CATEGORY_NAMES } from "./utils/goodsConstants";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GoodsSearchBarProps {
   searchQuery: string;
@@ -50,59 +50,70 @@ const GoodsSearchBar = ({
 
   return (
     <div className="flex items-center justify-between mb-6 gap-4">
-      {/* Left side: Search and filter */}
-      <div className="flex items-center gap-2">
-        <div className="relative w-[200px]">
-          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          <Input 
-            type="text" 
-            placeholder="Search stuff..." 
-            value={searchQuery} 
-            onChange={e => onSearchChange(e.target.value)} 
-            className="pl-10" 
-          />
-        </div>
-        
-        {/* Filter button with popover */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-4">
-            <div className="space-y-4">
-              <h4 className="font-medium">Filter by Category</h4>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {Object.entries(CATEGORY_NAMES).map(([value, label]) => (
-                  <div key={value} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`cat-${value}`} 
-                      checked={selectedCategories.includes(value as GoodsItemCategory)} 
-                      onCheckedChange={() => toggleCategory(value as GoodsItemCategory)} 
-                    />
-                    <Label htmlFor={`cat-${value}`} className="text-sm cursor-pointer">
-                      {label}
-                    </Label>
-                  </div>
-                ))}
+      <div className="flex items-center gap-4">
+        {/* Search and filter */}
+        <div className="flex items-center gap-2">
+          <div className="relative w-[200px]">
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Search stuff..." 
+              value={searchQuery} 
+              onChange={e => onSearchChange(e.target.value)} 
+              className="pl-10" 
+            />
+          </div>
+          
+          {/* Filter button with popover */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Filter by Category</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {Object.entries(CATEGORY_NAMES).map(([value, label]) => (
+                    <div key={value} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`cat-${value}`} 
+                        checked={selectedCategories.includes(value as GoodsItemCategory)} 
+                        onCheckedChange={() => toggleCategory(value as GoodsItemCategory)} 
+                      />
+                      <Label htmlFor={`cat-${value}`} className="text-sm cursor-pointer">
+                        {label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {selectedCategories.length > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs w-full" 
+                    onClick={clearFilters}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
               </div>
-              {selectedCategories.length > 0 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-xs w-full" 
-                  onClick={clearFilters}
-                >
-                  Clear Filters
-                </Button>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="all" className="flex-1">
+          <TabsList>
+            <TabsTrigger value="all">All Items</TabsTrigger>
+            <TabsTrigger value="needs">Requests</TabsTrigger>
+            <TabsTrigger value="offers">Available</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
-      {/* Right side: Action buttons */}
+      {/* Action buttons */}
       <div className="flex gap-2">
         <Button 
           onClick={onRequestItem} 
