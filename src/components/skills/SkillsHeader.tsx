@@ -98,14 +98,14 @@ const SkillsHeader = ({
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
-          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
+          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Request
         </Button>
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('offer')} 
-          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0"
+          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Offer
         </Button>
