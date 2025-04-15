@@ -6,6 +6,8 @@ import GoodsSearchBar from './GoodsSearchBar';
 import GoodsDialogs from './GoodsDialogs';
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { Tabs } from "@/components/ui/tabs";
+import EmptyState from "@/components/ui/empty-state";
+import { PackageSearch, Gift } from "lucide-react";
 
 /**
  * GoodsPageContainer Component
@@ -46,63 +48,69 @@ const GoodsPageContainer = () => {
     setActiveTab(tab);
   };
 
-  return (
-    <div className="min-h-full w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="py-8">
-          {/* Page header with title and action buttons */}
-          <GoodsPageHeader />
-          
-          {/* Description box with glow effect */}
-          <GlowingDescriptionBox colorClass="goods-color">
-            <p className="text-gray-700 text-sm">
-              Share resources with your neighbors through our community exchange. 
-              Offer items you no longer need, or find things you're looking for.
-            </p>
-          </GlowingDescriptionBox>
+  // Get the title based on active tab
+  const getTitle = () => {
+    switch (activeTab) {
+      case "needs":
+        return "Requested Items";
+      case "offers":
+        return "Available Items";
+      default:
+        return "Community Exchange";
+    }
+  };
 
-          {/* Search bar with filters and main content */}
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            {/* Add the title here, above the Tabs component */}
-            <h2 className="text-2xl font-bold mb-6">Available Items</h2>
+  return (
+    <div className="relative min-h-screen">
+      <div className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-8">
+            <GoodsPageHeader />
             
-            {/* Wrap everything in a Tabs component */}
-            <Tabs value={activeTab} onValueChange={handleTabChange}>
-              {/* Search bar with filters */}
-              <GoodsSearchBar 
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onRequestItem={handleAddRequest}
-                onOfferItem={handleAddItem}
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-              />
+            <GlowingDescriptionBox colorClass="goods-color">
+              <p className="text-gray-700 text-sm">
+                Share resources with your neighbors through our community exchange. 
+                Offer items you no longer need, or find things you're looking for.
+              </p>
+            </GlowingDescriptionBox>
+
+            <div className="bg-white rounded-lg p-6 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6">{getTitle()}</h2>
               
-              {/* Main content sections */}
-              <GoodsSections 
-                searchQuery={searchQuery}
-                goodsData={goodsData}
-                isLoading={isLoading}
-                showUrgent={showUrgent}
-                showRequests={showRequests}
-                showAvailable={showAvailable}
-                onRequestSelect={setSelectedRequest}
-                onRefresh={refetch}
-                onOfferItem={handleAddItem}
-                onRequestItem={handleAddRequest}
-                activeTab={activeTab}
-              />
-            </Tabs>
+              <Tabs value={activeTab} onValueChange={handleTabChange}>
+                <GoodsSearchBar 
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onRequestItem={handleAddRequest}
+                  onOfferItem={handleAddItem}
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                />
+                
+                <GoodsSections 
+                  searchQuery={searchQuery}
+                  goodsData={goodsData}
+                  isLoading={isLoading}
+                  showUrgent={showUrgent}
+                  showRequests={showRequests}
+                  showAvailable={showAvailable}
+                  onRequestSelect={setSelectedRequest}
+                  onRefresh={refetch}
+                  onOfferItem={handleAddItem}
+                  onRequestItem={handleAddRequest}
+                  activeTab={activeTab}
+                />
+              </Tabs>
+            </div>
+            
+            <GoodsDialogs 
+              isAddRequestOpen={isAddRequestOpen}
+              selectedRequest={selectedRequest}
+              onAddRequestOpenChange={setIsAddRequestOpen}
+              onSelectedRequestChange={setSelectedRequest}
+              initialRequestType={initialRequestType}
+            />
           </div>
-          
-          {/* Dialogs for adding/viewing items */}
-          <GoodsDialogs 
-            isAddRequestOpen={isAddRequestOpen}
-            selectedRequest={selectedRequest}
-            onAddRequestOpenChange={setIsAddRequestOpen}
-            onSelectedRequestChange={setSelectedRequest}
-            initialRequestType={initialRequestType}
-          />
         </div>
       </div>
     </div>
