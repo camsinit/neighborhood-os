@@ -2,7 +2,7 @@
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivitySection from "@/components/activity/ActivitySection";
-import NotificationsPopover from "@/components/notifications/NotificationsPopover";
+import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 // import AIChat from "@/components/ai/AIChat"; // Temporarily commented out
 
 /**
@@ -19,7 +19,7 @@ const HomePage = () => {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
-              <NotificationsPopover />
+              <NotificationDrawer />
             </div>
             <QuickActions />
           </section>

@@ -98,7 +98,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
           )}
           
           {/* Action button that shows on hover */}
-          {!currentUser?.id !== request.user_id && (
+          {currentUser && currentUser.id !== request.user_id && (
             <Button 
               variant="outline" 
               className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
