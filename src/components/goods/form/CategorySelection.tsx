@@ -54,7 +54,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
       <Label htmlFor="category">Item Category</Label>
       <ToggleGroup 
         type="single" 
-        value={category}
+        value={category || ""}  // Set to empty string if no category selected
         onValueChange={(value) => onChange(value as GoodsItemCategory)}
         className="flex flex-wrap gap-4 max-w-[800px]"
       >
@@ -66,7 +66,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
               value={value}
               aria-label={label}
               className="flex-1 min-w-[140px] items-center gap-2 px-4 py-3 rounded-full border border-gray-200 
-                bg-blue-50/80 hover:bg-blue-100/80 transition-colors
+                bg-blue-50/80 text-gray-700 hover:bg-blue-100/80 transition-colors
                 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
             >
               <IconComponent className="h-4 w-4" />

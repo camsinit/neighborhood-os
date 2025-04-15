@@ -1,4 +1,3 @@
-
 // Constants used throughout the goods exchange feature
 
 import { 
@@ -38,7 +37,7 @@ export const CATEGORY_NAMES: Record<GoodsItemCategory, string> = {
   tools: "Tools & Equipment",
   electronics: "Electronics",
   kitchen: "Kitchen Items",
-  clothing: "Clothing & Accessories",
+  clothing: "Clothing",
   books: "Books & Media",
   toys: "Toys & Games",
   sports: "Sports & Recreation",
