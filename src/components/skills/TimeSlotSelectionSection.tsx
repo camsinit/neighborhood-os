@@ -1,4 +1,3 @@
-
 import React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -39,38 +38,64 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
     );
 
-    if (existingSlotIndex === -1) {
-      if (selectedTimeSlots.length < 3) {
-        // Add a new date with no time preferences selected yet
-        setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
-      } else {
-        toast.error("Maximum 3 dates can be selected", {
-          description: "Please remove a date before adding another one"
-        });
-      }
-    } else {
-      // Remove the date if clicked again
+    // If date is already selected, remove it
+    if (existingSlotIndex !== -1) {
       setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
+      return;
+    }
+
+    // Add new date if under the limit
+    if (selectedTimeSlots.length < 3) {
+      setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
+    } else {
+      toast.error("Maximum 3 dates can be selected", {
+        description: "Please remove a date before adding another one"
+      });
     }
   };
 
+  // Get array of selected dates for calendar highlighting
+  const selectedDates = selectedTimeSlots.map(slot => slot.date);
+
   return (
     <>
-      {/* Date Selection Section */}
+      {/* Calendar Section - Now full width */}
       <div className="space-y-2">
-        <FormLabel>Select 3 dates that work for you</FormLabel>
-        <div className="border rounded-lg p-4">
+        <FormLabel>Select up to 3 dates that work for you</FormLabel>
+        <div className="w-full border rounded-lg p-4">
           <Calendar
-            mode="single"
-            selected={undefined}
-            onSelect={handleDateSelect}
+            mode="multiple"
+            selected={selectedDates}
+            onSelect={(value) => {
+              // When in multiple mode, value is an array of dates
+              // We need to find which date was clicked by comparing with previous selections
+              if (Array.isArray(value) && value.length !== selectedDates.length) {
+                // Find the date that was added or removed
+                if (value.length > selectedDates.length) {
+                  // A date was added - find which one
+                  const newDate = value.find(date => 
+                    !selectedDates.some(d => format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
+                  );
+                  if (newDate) handleDateSelect(newDate);
+                } else {
+                  // A date was removed - find which one
+                  const removedDate = selectedDates.find(date => 
+                    !value.some(d => format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
+                  );
+                  if (removedDate) handleDateSelect(removedDate);
+                }
+              }
+            }}
             disabled={disabledDays}
-            className="mx-auto"
+            className="w-full mx-auto pointer-events-auto"
+            modifiersClassNames={{
+              selected: "bg-gray-200 text-gray-700",
+            }}
           />
         </div>
       </div>
 
-      {/* Display selected dates with time preferences */}
+      {/* Time preference selectors for selected dates */}
       <div className="space-y-4">
         {selectedTimeSlots.map((slot, index) => (
           <TimeSlotSelector

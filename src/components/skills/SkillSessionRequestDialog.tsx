@@ -1,4 +1,3 @@
-
 /**
  * Dialog component for requesting a skill session
  * 
@@ -13,12 +12,12 @@ import { Form } from "@/components/ui/form";
 import { addDays } from "date-fns";
 import { TimeSlot } from "./contribution/TimeSlotSelector";
 import TimeSlotSelectionSection from "./TimeSlotSelectionSection";
-import GeneralAvailabilitySection from "./GeneralAvailabilitySection";
 import DescriptionField from "./request-dialog/DescriptionField";
 import { 
   useSkillRequestSubmit,
   SkillRequestFormData 
 } from "./request-dialog/useSkillRequestSubmit";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 /**
  * Props for the dialog component
@@ -74,25 +73,30 @@ const SkillSessionRequestDialog = ({
   };
 
   return (
-    <UniversalDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={`Request Help with: ${skillTitle}`}
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <TooltipProvider>
+      <UniversalDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title={`Request Help with: ${skillTitle}`}
+      >
+        <div className="space-y-6 py-4">
+          {/* Request title display */}
+          <div className="text-center mb-6">
+            <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
+            <p className="text-lg font-semibold text-gray-900">{skillTitle}</p>
+          </div>
+
           {/* Description Field */}
           <DescriptionField form={form} />
 
-          {/* Date and Time Selection Section */}
-          <TimeSlotSelectionSection
-            selectedTimeSlots={selectedTimeSlots}
-            setSelectedTimeSlots={setSelectedTimeSlots}
-            disabledDays={disabledDays}
-          />
-
-          {/* General Availability Section */}
-          <GeneralAvailabilitySection form={form} />
+          {/* Date and Time Selection Section - now with full width */}
+          <div className="space-y-2 w-full">
+            <TimeSlotSelectionSection
+              selectedTimeSlots={selectedTimeSlots}
+              setSelectedTimeSlots={setSelectedTimeSlots}
+              disabledDays={disabledDays}
+            />
+          </div>
 
           {/* Form Controls */}
           <div className="flex justify-end space-x-2">
@@ -107,9 +111,10 @@ const SkillSessionRequestDialog = ({
               {isSubmitting ? 'Submitting...' : 'Submit Request'}
             </Button>
           </div>
-        </form>
+        </div>
       </Form>
     </UniversalDialog>
+  </TooltipProvider>
   );
 };
 
