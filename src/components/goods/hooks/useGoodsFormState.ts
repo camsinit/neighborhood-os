@@ -20,8 +20,12 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
   const requestTypeFromValues = initialValues?.requestType || initialRequestType || "offer";
   
   // Convert "request" to "need" to match the expected types in GoodsItemFormData
-  // Note: We need to check against string literal "request" rather than RequestType
-  const normalizedRequestType: RequestType = requestTypeFromValues === "request" ? "need" : requestTypeFromValues as RequestType;
+  // Note: We need to check against string literal "request" using a type assertion
+  // This allows us to safely compare with a string that isn't in the RequestType union
+  const normalizedRequestType: RequestType = (requestTypeFromValues as string) === "request" 
+    ? "need" 
+    : requestTypeFromValues as RequestType;
+    
   // Check if this is an offer form
   const isOfferForm = normalizedRequestType === "offer";
   
