@@ -1,4 +1,3 @@
-
 /**
  * Dialog component for requesting a skill session
  * 
@@ -14,10 +13,7 @@ import { addDays } from "date-fns";
 import { TimeSlot } from "./contribution/TimeSlotSelector";
 import TimeSlotSelectionSection from "./TimeSlotSelectionSection";
 import DescriptionField from "./request-dialog/DescriptionField";
-import { 
-  useSkillRequestSubmit,
-  SkillRequestFormData 
-} from "./request-dialog/useSkillRequestSubmit";
+import { useSkillRequestSubmit, SkillRequestFormData } from "./request-dialog/useSkillRequestSubmit";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 /**
@@ -39,26 +35,25 @@ const SkillSessionRequestDialog = ({
   onOpenChange,
   skillId,
   skillTitle,
-  providerId,
+  providerId
 }: SkillSessionRequestDialogProps) => {
   // State management
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
-  
+
   // Initialize form
   const form = useForm<SkillRequestFormData>({
     defaultValues: {
       description: '',
       availability: 'both',
-      timePreference: ['morning', 'afternoon', 'evening'],
-    },
+      timePreference: ['morning', 'afternoon', 'evening']
+    }
   });
 
   // Custom hook for form submission logic
-  const { isSubmitting, submitSkillRequest } = useSkillRequestSubmit(
-    skillId, 
-    providerId, 
-    () => onOpenChange(false)
-  );
+  const {
+    isSubmitting,
+    submitSkillRequest
+  } = useSkillRequestSubmit(skillId, providerId, () => onOpenChange(false));
 
   // Settings for the date picker
   const disabledDays = {
@@ -72,21 +67,15 @@ const SkillSessionRequestDialog = ({
   const onSubmit = async (data: SkillRequestFormData) => {
     await submitSkillRequest(data, selectedTimeSlots);
   };
-
-  return (
-    <TooltipProvider>
-      <UniversalDialog
-        open={open}
-        onOpenChange={onOpenChange}
-        title={`Request Help with: ${skillTitle}`}
-      >
+  return <TooltipProvider>
+      <UniversalDialog open={open} onOpenChange={onOpenChange} title={`Request Help with: ${skillTitle}`}>
         {/* Wrap everything in a Form component with the onSubmit handler */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-0">
             {/* Request title display */}
             <div className="text-center mb-6">
-              <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
-              <p className="text-lg font-semibold text-gray-900">{skillTitle}</p>
+              
+              
             </div>
 
             {/* Description Field */}
@@ -94,20 +83,12 @@ const SkillSessionRequestDialog = ({
 
             {/* Date and Time Selection Section - now with full width */}
             <div className="space-y-2 w-full">
-              <TimeSlotSelectionSection
-                selectedTimeSlots={selectedTimeSlots}
-                setSelectedTimeSlots={setSelectedTimeSlots}
-                disabledDays={disabledDays}
-              />
+              <TimeSlotSelectionSection selectedTimeSlots={selectedTimeSlots} setSelectedTimeSlots={setSelectedTimeSlots} disabledDays={disabledDays} />
             </div>
 
             {/* Form Controls */}
             <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
@@ -117,8 +98,6 @@ const SkillSessionRequestDialog = ({
           </form>
         </Form>
       </UniversalDialog>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
-
 export default SkillSessionRequestDialog;
