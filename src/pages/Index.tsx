@@ -5,11 +5,13 @@
  * This component serves as the entry point to the application when a user visits the index route.
  * It redirects users based on authentication status and neighborhood context.
  */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 /**
  * Index component that handles routing logic
@@ -24,8 +26,22 @@ const Index = () => {
   // Get the current authenticated user
   const user = useUser();
   
+  // State to track if we need to wait longer than expected
+  const [isDelayed, setIsDelayed] = useState(false);
+  
   // Get neighborhood context
-  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error } = useNeighborhood();
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error, refreshNeighborhoodData } = useNeighborhood();
+  
+  // Set a timer to detect if loading is taking too long
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoadingNeighborhood) {
+        setIsDelayed(true);
+      }
+    }, 5000); // Show delayed message after 5 seconds
+    
+    return () => clearTimeout(timer);
+  }, [isLoadingNeighborhood]);
   
   // Effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
@@ -53,44 +69,73 @@ const Index = () => {
       return;
     }
     
-    // If there was an error loading neighborhood data, still try to proceed to join page
-    if (error) {
-      console.log("[Index] Error loading neighborhood data, redirecting to join page:", error);
-      navigate("/join", { replace: true });
-      return;
-    }
-    
-    // If authenticated but no neighborhood, redirect to join page
-    if (user && !currentNeighborhood) {
-      console.log("[Index] User authenticated but no neighborhood, redirecting to join page");
-      navigate("/join", { replace: true });
-      return;
-    }
-    
     // If authenticated and has neighborhood, redirect to home page
     if (user && currentNeighborhood) {
       console.log("[Index] User authenticated with neighborhood, redirecting to home page");
       navigate("/home", { replace: true });
       return;
     }
+    
+    // If there was an error loading neighborhood data or no neighborhood, redirect to join page
+    if (user && (!currentNeighborhood || error)) {
+      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join page:", error);
+      navigate("/join", { replace: true });
+      return;
+    }
   }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error]);
+
+  // Handle manual retry when there's an issue
+  const handleRetry = async () => {
+    await refreshNeighborhoodData();
+    // If we have a user and neighborhood after refresh, go to home
+    if (user && currentNeighborhood) {
+      navigate("/home", { replace: true });
+    }
+  };
 
   // Show a visible loading indicator while determining where to route
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-        <p className="text-gray-600">Setting up your dashboard...</p>
-        <p className="text-gray-400 text-sm mt-2">
-          {isLoadingNeighborhood ? "Loading your neighborhood..." : "Preparing your experience..."}
-        </p>
-        {error && (
-          <p className="text-amber-600 text-sm mt-4">
-            Note: Having trouble connecting to neighborhood data. 
-            Redirecting you to join a neighborhood.
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      {isDelayed ? (
+        <Card className="p-6 max-w-md w-full">
+          <h2 className="text-xl font-bold text-center mb-4">Taking longer than expected...</h2>
+          <p className="text-gray-600 mb-6 text-center">
+            We're having trouble connecting to your neighborhood data. 
+            You can wait a bit longer or try these options:
           </p>
-        )}
-      </div>
+          <div className="flex flex-col gap-3">
+            <Button onClick={handleRetry} className="w-full">
+              Retry Connection
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/home")} 
+              className="w-full"
+            >
+              Go to Home Anyway
+            </Button>
+          </div>
+          {error && (
+            <p className="text-amber-600 text-sm mt-4 text-center">
+              Error details: {error.message || "Unknown connection issue"}
+            </p>
+          )}
+        </Card>
+      ) : (
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-gray-600">Setting up your dashboard...</p>
+          <p className="text-gray-400 text-sm mt-2">
+            {isLoadingNeighborhood ? "Loading your neighborhood..." : "Preparing your experience..."}
+          </p>
+          {error && (
+            <p className="text-amber-600 text-sm mt-4">
+              Note: Having trouble connecting to neighborhood data. 
+              Redirecting you to join a neighborhood.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

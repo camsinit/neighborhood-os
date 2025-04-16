@@ -6,15 +6,26 @@ import { UserError } from "./UserError";
 import { LoadingState } from "./LoadingState";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useNeighborhood } from "@/contexts/neighborhood";
+import { toast } from "sonner";
 
 /**
  * NoNeighborhoodState Component
  * 
  * This component informs users they need an invitation to join a neighborhood.
- * It redirects them to the home page or shows available profiles as a fallback.
+ * It provides options to join an existing neighborhood or create a test neighborhood.
  */
 export const NoNeighborhoodState = () => {
+  // Get user and navigation functionality
   const navigate = useNavigate();
+  const user = useUser();
+  const { refreshNeighborhoodData } = useNeighborhood();
+  
+  // State for tracking join operation
+  const [isJoining, setIsJoining] = useState(false);
   
   // Fetch all available profiles as a fallback
   const { 
@@ -23,6 +34,53 @@ export const NoNeighborhoodState = () => {
     error,
     refetch 
   } = useNeighborUsers();
+  
+  // Function to add the current user to Terrific Terrace neighborhood
+  const joinTerrificTerrace = async () => {
+    if (!user) return;
+    
+    try {
+      setIsJoining(true);
+      
+      // First, find the Terrific Terrace neighborhood ID
+      const { data: neighborhoods, error: findError } = await supabase
+        .from('neighborhoods')
+        .select('id')
+        .eq('name', 'Terrific Terrace')
+        .limit(1);
+      
+      if (findError) throw findError;
+      
+      if (!neighborhoods || neighborhoods.length === 0) {
+        toast.error("Test neighborhood not found. Please contact support.");
+        return;
+      }
+      
+      const neighborhoodId = neighborhoods[0].id;
+      
+      // Now add the user as a member
+      const { error: joinError } = await supabase
+        .from('neighborhood_members')
+        .insert({
+          user_id: user.id,
+          neighborhood_id: neighborhoodId,
+          status: 'active'
+        });
+      
+      if (joinError) throw joinError;
+      
+      // Success! Refresh neighborhood data and navigate home
+      toast.success("Successfully joined Terrific Terrace!");
+      await refreshNeighborhoodData();
+      navigate("/home");
+      
+    } catch (err) {
+      console.error("Error joining test neighborhood:", err);
+      toast.error("Failed to join test neighborhood. Please try again.");
+    } finally {
+      setIsJoining(false);
+    }
+  };
   
   if (isLoading) {
     return <LoadingState />;
@@ -41,13 +99,23 @@ export const NoNeighborhoodState = () => {
           To join a neighborhood, you need an invitation from an existing member. 
           Please contact someone you know who is already in a neighborhood and ask them for an invitation link.
         </p>
-        <div className="flex justify-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button 
             variant="default" 
-            className="mt-2"
+            className=""
             onClick={() => navigate("/")}
           >
             Return to Home
+          </Button>
+          
+          {/* Add button to join test neighborhood */}
+          <Button
+            variant="outline"
+            className=""
+            onClick={joinTerrificTerrace}
+            disabled={isJoining}
+          >
+            {isJoining ? "Joining..." : "Join Test Neighborhood"}
           </Button>
         </div>
       </Card>
