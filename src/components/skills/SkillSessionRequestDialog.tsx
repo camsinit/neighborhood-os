@@ -7,7 +7,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-// Replace DialogWrapper with UniversalDialog
 import UniversalDialog from "@/components/ui/universal-dialog";
 import { Form } from "@/components/ui/form";
 import { addDays } from "date-fns";
@@ -71,7 +70,7 @@ const SkillSessionRequestDialog = ({
    * Form submission handler that validates the form data before submitting
    */
   const onSubmit = async (data: SkillRequestFormData) => {
-    // Validate that exactly 3 dates are selected
+    // Client-side validation to ensure exactly 3 dates are selected
     if (selectedTimeSlots.length !== 3) {
       toast.error("Date selection required", {
         description: "Please select exactly 3 different dates for your request"
@@ -87,6 +86,8 @@ const SkillSessionRequestDialog = ({
       return;
     }
 
+    console.log("Submitting request with time slots:", selectedTimeSlots);
+    
     // If validation passes, submit the request
     await submitSkillRequest(data, selectedTimeSlots);
   };

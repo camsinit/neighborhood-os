@@ -46,12 +46,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     // If date is already selected, remove it
     if (existingSlotIndex !== -1) {
       setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
+      console.log(`Removed date: ${formattedDate}, remaining: ${selectedTimeSlots.length - 1}`);
       return;
     }
 
     // Add new date if under the limit
     if (selectedTimeSlots.length < 3) {
-      setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
+      // Create a new date object with time set to noon to avoid timezone issues
+      const normalizedDate = new Date(date);
+      normalizedDate.setHours(12, 0, 0, 0);
+      
+      setSelectedTimeSlots([...selectedTimeSlots, { date: normalizedDate, preferences: [] }]);
+      console.log(`Added date: ${formattedDate}, total: ${selectedTimeSlots.length + 1}`);
     } else {
       toast.error("Maximum 3 dates can be selected", {
         description: "Please remove a date before adding another one"
@@ -66,7 +72,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     <>
       {/* Calendar Section - Now full width */}
       <div className="space-y-2">
-        <FormLabel>Select up to 3 dates that work for you</FormLabel>
+        <FormLabel>Select exactly 3 dates that work for you</FormLabel>
         <div className="w-full border rounded-lg p-4">
           <Calendar
             mode="multiple"
@@ -93,7 +99,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
             disabled={disabledDays}
             className="w-full mx-auto pointer-events-auto"
             modifiersClassNames={{
-              selected: "bg-gray-200 text-gray-700",
+              selected: "bg-primary text-primary-foreground",
             }}
           />
         </div>
@@ -110,9 +116,12 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
           <TimeSlotSelector
             key={format(slot.date, 'yyyy-MM-dd')}
             timeSlot={slot}
-            onRemove={() => setSelectedTimeSlots(slots => 
-              slots.filter((_, i) => i !== index)
-            )}
+            onRemove={() => {
+              setSelectedTimeSlots(slots => 
+                slots.filter((_, i) => i !== index)
+              );
+              console.log(`Removed time slot at index ${index}`);
+            }}
             onPreferenceChange={(timeId) => {
               setSelectedTimeSlots(slots =>
                 slots.map((s, i) => {

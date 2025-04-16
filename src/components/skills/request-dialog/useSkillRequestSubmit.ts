@@ -61,6 +61,9 @@ export const useSkillRequestSubmit = (
       return;
     }
 
+    // Log the selected time slots for debugging
+    console.log("Time slots being submitted:", JSON.stringify(selectedTimeSlots));
+
     // Start submission process
     setIsSubmitting(true);
     try {
@@ -83,17 +86,35 @@ export const useSkillRequestSubmit = (
 
       if (sessionError) throw sessionError;
 
-      // Then create time slots for the selected dates
-      const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
-        slot.preferences.map(preference => ({
-          session_id: session.id,
-          proposed_time: new Date(slot.date.setHours(
+      // Normalize the time slots for insertion
+      // Each date can have multiple preferences, so we need to create a time slot for each
+      const timeSlotPromises = selectedTimeSlots.flatMap(slot => {
+        // Ensure each date has at least one preference
+        if (slot.preferences.length === 0) {
+          console.warn(`Date ${slot.date.toISOString()} has no preferences, adding 'morning' as default`);
+          slot.preferences = ['morning'];
+        }
+        
+        // Map each preference to a time slot entry
+        return slot.preferences.map(preference => {
+          // Create a new date object to avoid modifying the original
+          const timeDate = new Date(slot.date);
+          
+          // Set hours based on preference (using standard hours)
+          timeDate.setHours(
             preference === 'morning' ? 9 :
             preference === 'afternoon' ? 13 :
             18
-          )).toISOString(),
-        }))
-      );
+          );
+          
+          return {
+            session_id: session.id,
+            proposed_time: timeDate.toISOString(),
+          };
+        });
+      });
+
+      console.log("Creating time slots:", timeSlotPromises);
 
       // Insert the time slots
       const { error: timeSlotError } = await supabase

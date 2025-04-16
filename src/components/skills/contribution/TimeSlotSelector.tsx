@@ -42,7 +42,7 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
   const formattedDate = format(timeSlot.date, "EEEE, MMMM do");
 
   return (
-    <div className="p-4 border rounded-lg bg-gray-50">
+    <div className="p-4 border rounded-lg bg-gray-50 relative">
       <div className="flex justify-between items-center mb-2">
         <div className="font-medium">{formattedDate}</div>
         <Button
@@ -51,9 +51,9 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
           size="sm"
           onClick={onRemove}
           className="h-8 w-8 p-0 rounded-full"
+          aria-label="Remove date"
         >
           <X className="h-4 w-4" />
-          <span className="sr-only">Remove date</span>
         </Button>
       </div>
       
