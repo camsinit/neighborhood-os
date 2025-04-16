@@ -36,6 +36,24 @@ export const useContributionSubmit = (
     // Set the hours while preserving the date
     dateWithoutTime.setHours(hours, 0, 0, 0);
     
+    // Log detailed information about each date formatting step
+    console.log('Contribution date formatting:', {
+      originalDateStr: dateStr,
+      parsedDate: timeDate.toISOString(),
+      dateWithoutTime: dateWithoutTime.toISOString(),
+      preference,
+      hoursAssigned: hours,
+      finalFormattedDate: dateWithoutTime.toISOString(),
+      dateComponents: {
+        year: dateWithoutTime.getFullYear(),
+        month: dateWithoutTime.getMonth(),
+        day: dateWithoutTime.getDate(),
+        hours: dateWithoutTime.getHours(),
+        minutes: dateWithoutTime.getMinutes(),
+        seconds: dateWithoutTime.getSeconds()
+      }
+    });
+    
     // Return properly formatted ISO string
     return dateWithoutTime.toISOString();
   };
@@ -69,10 +87,48 @@ export const useContributionSubmit = (
       return;
     }
 
+    // Additional diagnostic: Check for unique dates
+    const uniqueDateStrings = new Set(
+      selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
+    );
+    
+    // Log detailed information about each date being processed
+    console.log("CONTRIBUTION DATE DIAGNOSTICS:", {
+      totalSlots: selectedTimeSlots.length,
+      uniqueDatesCount: uniqueDateStrings.size,
+      uniqueDatesArray: Array.from(uniqueDateStrings),
+      allDatesRaw: selectedTimeSlots.map(slot => slot.date),
+      allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toDateString()),
+    });
+    
+    if (uniqueDateStrings.size !== selectedTimeSlots.length) {
+      toast({
+        title: "Duplicate dates detected",
+        description: "Please select different dates for your contribution",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
-      // Create the skill session record
+      // Log the user ID for context
+      const currentUser = await supabase.auth.getUser();
+      console.log("Current user details:", {
+        userId: currentUser.data.user?.id,
+        providerId: currentUser.data.user?.id === requesterId ? "WARNING: Provider is the same as requester!" : "Provider differs from requester",
+      });
+      
+      // Create the skill session record with detailed logging
+      console.log("Creating contribution session with:", {
+        skill_id: skillRequestId,
+        provider_id: currentUser.data.user?.id,
+        requester_id: requesterId,
+        location_preference: location,
+        location_details: location === 'other' ? locationDetails : null,
+      });
+      
       const { data: session, error: sessionError } = await supabase
         .from('skill_sessions')
         .insert({
@@ -87,7 +143,16 @@ export const useContributionSubmit = (
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('Session creation error details:', {
+          error: sessionError,
+          errorMessage: sessionError.message,
+          errorDetails: sessionError.details,
+          errorHint: sessionError.hint,
+          errorCode: sessionError.code
+        });
+        throw sessionError;
+      }
 
       // Create time slot entries for each selected date and time preference
       const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
@@ -96,7 +161,7 @@ export const useContributionSubmit = (
           const formattedTime = formatDateForSubmission(slot.date, preference);
           
           // Log each generated time slot for debugging
-          console.log(`Creating time slot: ${formattedTime} (${preference})`);
+          console.log(`Creating contribution time slot: ${formattedTime} (${preference}) from original date ${slot.date}`);
           
           return {
             session_id: session.id,
@@ -105,14 +170,38 @@ export const useContributionSubmit = (
         })
       );
 
-      // Log all time slots for debugging
-      console.log("Creating time slots:", JSON.stringify(timeSlotPromises));
+      // Log detailed info about time slots for debugging
+      console.log("Creating contribution time slots (detailed):", 
+        timeSlotPromises.map((slot, index) => ({
+          index,
+          sessionId: slot.session_id,
+          proposedTime: slot.proposed_time,
+          proposedTimeObj: new Date(slot.proposed_time).toISOString(),
+          proposedTimeComponents: {
+            year: new Date(slot.proposed_time).getFullYear(),
+            month: new Date(slot.proposed_time).getMonth(),
+            day: new Date(slot.proposed_time).getDate(),
+            hours: new Date(slot.proposed_time).getHours(),
+            minutes: new Date(slot.proposed_time).getMinutes(),
+          }
+        }))
+      );
 
+      // Insert the time slots with enhanced error handling
       const { error: timeSlotError } = await supabase
         .from('skill_session_time_slots')
         .insert(timeSlotPromises);
 
-      if (timeSlotError) throw timeSlotError;
+      if (timeSlotError) {
+        console.error('Time slot error details:', {
+          error: timeSlotError,
+          errorMessage: timeSlotError.message,
+          errorDetails: timeSlotError.details,
+          errorHint: timeSlotError.hint,
+          errorCode: timeSlotError.code
+        });
+        throw timeSlotError;
+      }
 
       // Optionally add skill to user profile
       if (addToProfile) {
@@ -128,8 +217,23 @@ export const useContributionSubmit = (
       
       // Close the dialog
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating skill session:', error);
+      console.error('Error stack trace:', error.stack);
+      
+      // Enhanced error logging
+      console.error('Contribution error context:', {
+        skillRequestId,
+        requesterId,
+        selectedDates: selectedTimeSlots.map(slot => slot.date),
+        location,
+        errorObj: error,
+        errorMessage: error.message,
+        errorCode: error.code,
+        errorDetails: error.details,
+        errorHint: error.hint
+      });
+      
       toast({
         title: "Error",
         description: "Failed to submit skill contribution. Please try again.",

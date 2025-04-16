@@ -39,6 +39,20 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     // Format date to consistent string for comparison (removing time portion)
     const formattedDate = format(date, 'yyyy-MM-dd');
     
+    // Log detailed information about the selected date
+    console.log("Date selection:", {
+      selectedDate: date.toISOString(),
+      formattedDateForComparison: formattedDate,
+      dateComponents: {
+        year: date.getFullYear(),
+        month: date.getMonth(),
+        day: date.getDate(),
+        hours: date.getHours(),
+        minutes: date.getMinutes(),
+        timezone: date.getTimezoneOffset()
+      }
+    });
+    
     // Check if this date is already selected by comparing just the date portion
     const existingSlotIndex = selectedTimeSlots.findIndex(
       slot => format(new Date(slot.date), 'yyyy-MM-dd') === formattedDate
@@ -56,6 +70,20 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     // Then set it to noon (12:00)
     normalizedDate.setHours(12, 0, 0, 0);
+    
+    // Log detailed information about the normalized date
+    console.log("Normalized date for storage:", {
+      originalDate: date.toISOString(),
+      normalizedDate: normalizedDate.toISOString(),
+      dateComponents: {
+        year: normalizedDate.getFullYear(),
+        month: normalizedDate.getMonth(),
+        day: normalizedDate.getDate(),
+        hours: normalizedDate.getHours(),
+        minutes: normalizedDate.getMinutes(),
+        timezone: normalizedDate.getTimezoneOffset()
+      }
+    });
     
     setSelectedTimeSlots([
       ...selectedTimeSlots, 
@@ -139,6 +167,16 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
                     const preferences = s.preferences.includes(timeId)
                       ? s.preferences.filter(p => p !== timeId)
                       : [...s.preferences, timeId];
+                      
+                    // Log preference changes for debugging
+                    console.log(`Time preference for date ${format(new Date(s.date), 'yyyy-MM-dd')} updated:`, {
+                      action: s.preferences.includes(timeId) ? 'Removed' : 'Added',
+                      preference: timeId,
+                      allPreferences: s.preferences.includes(timeId) 
+                        ? s.preferences.filter(p => p !== timeId)
+                        : [...s.preferences, timeId]
+                    });
+                    
                     return { ...s, preferences };
                   }
                   return s;

@@ -53,6 +53,24 @@ export const useSkillRequestSubmit = (
     // Set the hours while preserving the date
     dateWithoutTime.setHours(hours, 0, 0, 0);
     
+    // Log detailed information about each date formatting step
+    console.log('Date formatting:', {
+      originalDateStr: dateStr,
+      parsedDate: timeDate.toISOString(),
+      dateWithoutTime: dateWithoutTime.toISOString(),
+      preference,
+      hoursAssigned: hours,
+      finalFormattedDate: dateWithoutTime.toISOString(),
+      dateComponents: {
+        year: dateWithoutTime.getFullYear(),
+        month: dateWithoutTime.getMonth(),
+        day: dateWithoutTime.getDate(),
+        hours: dateWithoutTime.getHours(),
+        minutes: dateWithoutTime.getMinutes(),
+        seconds: dateWithoutTime.getSeconds()
+      }
+    });
+    
     // Return properly formatted ISO string
     return dateWithoutTime.toISOString();
   };
@@ -91,6 +109,15 @@ export const useSkillRequestSubmit = (
       selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
     );
     
+    // Log detailed information about each date being processed
+    console.log("DATE DIAGNOSTICS - BEFORE SUBMISSION:", {
+      totalSlots: selectedTimeSlots.length,
+      uniqueDatesCount: uniqueDateStrings.size,
+      uniqueDatesArray: Array.from(uniqueDateStrings),
+      allDatesRaw: selectedTimeSlots.map(slot => slot.date),
+      allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toDateString()),
+    });
+    
     if (uniqueDateStrings.size !== selectedTimeSlots.length) {
       toast.error('Duplicate dates detected', {
         description: 'Please select different dates for your request'
@@ -104,7 +131,19 @@ export const useSkillRequestSubmit = (
     // Start submission process
     setIsSubmitting(true);
     try {
-      // First create the skill session
+      // First create the skill session with detailed error handling
+      console.log("Creating session with:", {
+        skill_id: skillId,
+        provider_id: providerId,
+        requester_id: user.id,
+        requester_availability: {
+          availability: data.availability,
+          timePreference: data.timePreference,
+          description: data.description,
+        },
+        status: 'pending_provider_times',
+      });
+      
       const { data: session, error: sessionError } = await supabase
         .from('skill_sessions')
         .insert({
@@ -121,7 +160,16 @@ export const useSkillRequestSubmit = (
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('Session creation error details:', {
+          error: sessionError,
+          errorMessage: sessionError.message,
+          errorDetails: sessionError.details,
+          errorHint: sessionError.hint,
+          errorCode: sessionError.code
+        });
+        throw sessionError;
+      }
 
       // Normalize the time slots for insertion
       // Each date can have multiple preferences, so we need to create a time slot for each
@@ -138,7 +186,7 @@ export const useSkillRequestSubmit = (
           const formattedTime = formatDateForSubmission(slot.date, preference);
           
           // Log each generated time slot for debugging
-          console.log(`Creating time slot: ${formattedTime} (${preference})`);
+          console.log(`Creating time slot: ${formattedTime} (${preference}) from original date ${slot.date}`);
           
           return {
             session_id: session.id,
@@ -147,14 +195,37 @@ export const useSkillRequestSubmit = (
         });
       });
 
-      console.log("Creating time slots:", timeSlotPromises);
+      console.log("Creating time slots (detailed):", 
+        timeSlotPromises.map((slot, index) => ({
+          index,
+          sessionId: slot.session_id,
+          proposedTime: slot.proposed_time,
+          proposedTimeObj: new Date(slot.proposed_time).toISOString(),
+          proposedTimeComponents: {
+            year: new Date(slot.proposed_time).getFullYear(),
+            month: new Date(slot.proposed_time).getMonth(),
+            day: new Date(slot.proposed_time).getDate(),
+            hours: new Date(slot.proposed_time).getHours(),
+            minutes: new Date(slot.proposed_time).getMinutes(),
+          }
+        }))
+      );
 
-      // Insert the time slots
+      // Insert the time slots with enhanced error handling
       const { error: timeSlotError } = await supabase
         .from('skill_session_time_slots')
         .insert(timeSlotPromises);
 
-      if (timeSlotError) throw timeSlotError;
+      if (timeSlotError) {
+        console.error('Time slot error details:', {
+          error: timeSlotError,
+          errorMessage: timeSlotError.message,
+          errorDetails: timeSlotError.details,
+          errorHint: timeSlotError.hint,
+          errorCode: timeSlotError.code
+        });
+        throw timeSlotError;
+      }
 
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
@@ -162,6 +233,22 @@ export const useSkillRequestSubmit = (
       onClose();
     } catch (error: any) {
       console.error('Error submitting skill request:', error);
+      console.error('Error stack trace:', error.stack);
+      
+      // Enhanced error logging
+      console.error('Error context:', {
+        skillId,
+        providerId,
+        requesterId: user?.id,
+        selectedDates: selectedTimeSlots.map(slot => slot.date),
+        uniqueDatesCount: uniqueDateStrings.size,
+        errorObj: error,
+        errorMessage: error.message,
+        errorCode: error.code,
+        errorDetails: error.details,
+        errorHint: error.hint
+      });
+      
       toast.error('Request submission failed', {
         description: error.message || 'Failed to submit skill request. Please try again.'
       });
