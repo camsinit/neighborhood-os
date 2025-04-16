@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
  * Interface for time slots that includes date and preferences
  */
 export interface TimeSlot {
-  date: Date;
+  date: string; // ISO string format for consistent serialization
   preferences: string[];
 }
 
@@ -39,7 +39,8 @@ const TimeSlotSelector: React.FC<TimeSlotSelectorProps> = ({
   ];
 
   // Format the date in a readable way
-  const formattedDate = format(timeSlot.date, "EEEE, MMMM do");
+  // Convert ISO string to Date object for formatting
+  const formattedDate = format(new Date(timeSlot.date), "EEEE, MMMM do");
 
   return (
     <div className="p-4 border rounded-lg bg-gray-50 relative">

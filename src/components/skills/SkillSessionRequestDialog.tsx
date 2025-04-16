@@ -67,15 +67,16 @@ const SkillSessionRequestDialog = ({
   };
 
   /**
-   * Form submission handler that validates the form data before submitting
+   * Validates the time slots before submission
+   * Returns true if valid, false otherwise
    */
-  const onSubmit = async (data: SkillRequestFormData) => {
-    // Client-side validation to ensure exactly 3 dates are selected
+  const validateTimeSlots = () => {
+    // Check if exactly 3 dates are selected
     if (selectedTimeSlots.length !== 3) {
       toast.error("Date selection required", {
         description: "Please select exactly 3 different dates for your request"
       });
-      return;
+      return false;
     }
 
     // Validate that each date has at least one time preference selected
@@ -83,10 +84,34 @@ const SkillSessionRequestDialog = ({
       toast.error("Time preferences required", {
         description: "Please select at least one time preference for each selected date"
       });
-      return;
+      return false;
     }
 
-    console.log("Submitting request with time slots:", selectedTimeSlots);
+    // Validate that dates are unique
+    const uniqueDates = new Set(
+      selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
+    );
+    
+    if (uniqueDates.size !== selectedTimeSlots.length) {
+      toast.error("Duplicate dates detected", {
+        description: "Please select 3 different dates for your request"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Form submission handler that validates the form data before submitting
+   */
+  const onSubmit = async (data: SkillRequestFormData) => {
+    console.log("Form submitted with time slots:", selectedTimeSlots);
+    
+    // Validate time slots
+    if (!validateTimeSlots()) {
+      return;
+    }
     
     // If validation passes, submit the request
     await submitSkillRequest(data, selectedTimeSlots);

@@ -40,7 +40,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     
     // Check if this date is already selected
     const existingSlotIndex = selectedTimeSlots.findIndex(
-      slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
+      slot => format(new Date(slot.date), 'yyyy-MM-dd') === formattedDate
     );
 
     // If date is already selected, remove it
@@ -56,7 +56,13 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       const normalizedDate = new Date(date);
       normalizedDate.setHours(12, 0, 0, 0);
       
-      setSelectedTimeSlots([...selectedTimeSlots, { date: normalizedDate, preferences: [] }]);
+      setSelectedTimeSlots([
+        ...selectedTimeSlots, 
+        { 
+          date: normalizedDate.toISOString(), // Store as ISO string for consistent serialization
+          preferences: [] 
+        }
+      ]);
       console.log(`Added date: ${formattedDate}, total: ${selectedTimeSlots.length + 1}`);
     } else {
       toast.error("Maximum 3 dates can be selected", {
@@ -66,7 +72,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
   };
 
   // Get array of selected dates for calendar highlighting
-  const selectedDates = selectedTimeSlots.map(slot => slot.date);
+  const selectedDates = selectedTimeSlots.map(slot => new Date(slot.date));
 
   return (
     <>
@@ -114,7 +120,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       <div className="space-y-4">
         {selectedTimeSlots.map((slot, index) => (
           <TimeSlotSelector
-            key={format(slot.date, 'yyyy-MM-dd')}
+            key={`${slot.date}-${index}`}
             timeSlot={slot}
             onRemove={() => {
               setSelectedTimeSlots(slots => 

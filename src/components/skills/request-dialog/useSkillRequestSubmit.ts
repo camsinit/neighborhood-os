@@ -54,9 +54,22 @@ export const useSkillRequestSubmit = (
       return;
     }
 
+    // Ensure each date has at least one time preference
     if (selectedTimeSlots.some(slot => slot.preferences.length === 0)) {
       toast.error('Time preferences required', {
         description: 'Please select at least one time preference for each selected date'
+      });
+      return;
+    }
+
+    // Ensure unique dates
+    const uniqueDateStrings = new Set(
+      selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
+    );
+    
+    if (uniqueDateStrings.size !== selectedTimeSlots.length) {
+      toast.error('Duplicate dates detected', {
+        description: 'Please select 3 different dates for your request'
       });
       return;
     }
@@ -91,13 +104,13 @@ export const useSkillRequestSubmit = (
       const timeSlotPromises = selectedTimeSlots.flatMap(slot => {
         // Ensure each date has at least one preference
         if (slot.preferences.length === 0) {
-          console.warn(`Date ${slot.date.toISOString()} has no preferences, adding 'morning' as default`);
+          console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
           slot.preferences = ['morning'];
         }
         
         // Map each preference to a time slot entry
         return slot.preferences.map(preference => {
-          // Create a new date object to avoid modifying the original
+          // Create a new date object from ISO string
           const timeDate = new Date(slot.date);
           
           // Set hours based on preference (using standard hours)
