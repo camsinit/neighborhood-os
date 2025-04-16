@@ -20,35 +20,44 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
   const requestTypeFromValues = initialValues?.requestType || initialRequestType || "offer";
   
   // Convert "request" to "need" to match the expected types in GoodsItemFormData
-  const normalizedRequestType = requestTypeFromValues === "request" ? "need" : requestTypeFromValues;
+  // Note: We need to check against string literal "request" rather than RequestType
+  const normalizedRequestType: RequestType = requestTypeFromValues === "request" ? "need" : requestTypeFromValues as RequestType;
   // Check if this is an offer form
   const isOfferForm = normalizedRequestType === "offer";
   
   // Default category to 'furniture' if none provided - this ensures we always have a category selected
   const defaultCategory: GoodsItemCategory = "furniture";
   
+  // For offer forms, we use the GoodsItemFormData structure
   const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     // Use the initialValues category if available, otherwise use default
     category: (initialValues?.category as GoodsItemCategory) || defaultCategory,
-    // Use the normalized request type that matches the expected type
-    requestType: normalizedRequestType || "offer",
-    // Only set availableDays if this is an offer form or if it exists in initialValues
-    availableDays: isOfferForm ? (initialValues?.availableDays as number) || 30 : undefined,
-    // Only set images if this is an offer form or if it exists in initialValues
-    images: isOfferForm ? (initialValues?.images as string[]) || [] : []
+    // Set the requestType properly
+    requestType: "offer",
+    // Handle availableDays - only relevant for offer forms
+    availableDays: isOfferForm && 'availableDays' in initialValues 
+      ? (initialValues as Partial<GoodsItemFormData>).availableDays || 30 
+      : 30,
+    // Handle images - only relevant for offer forms
+    images: isOfferForm && 'images' in initialValues
+      ? (initialValues as Partial<GoodsItemFormData>).images || []
+      : []
   });
   
+  // For request forms, we use the GoodsRequestFormData structure
   const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
-    // Only set urgency if this is a request form or if it exists in initialValues
-    urgency: !isOfferForm ? (initialValues?.urgency as any) || "medium" : undefined,
+    // Handle urgency - only relevant for request forms
+    urgency: !isOfferForm && 'urgency' in initialValues
+      ? (initialValues as Partial<GoodsRequestFormData>).urgency || "medium"
+      : "medium",
     // Use the initialValues category if available, otherwise use default
     category: (initialValues?.category as GoodsItemCategory) || defaultCategory,
-    // Set the requestType for consistency
-    requestType: normalizedRequestType as "need"
+    // Set the requestType properly
+    requestType: "need"
   });
   
   const [uploading, setUploading] = useState(false);
