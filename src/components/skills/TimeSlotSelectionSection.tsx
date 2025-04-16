@@ -39,7 +39,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     // Format date to consistent string for comparison (removing time portion)
     const formattedDate = format(date, 'yyyy-MM-dd');
     
-    // Check if this date is already selected
+    // Check if this date is already selected by comparing just the date portion
     const existingSlotIndex = selectedTimeSlots.findIndex(
       slot => format(new Date(slot.date), 'yyyy-MM-dd') === formattedDate
     );
@@ -51,9 +51,10 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       return;
     }
 
-    // Create a new date object with time set to noon to avoid timezone issues
-    // Important: We set the time to noon (12:00) to ensure consistent date handling
-    const normalizedDate = new Date(date);
+    // For new dates, standardize to noon to avoid timezone issues
+    // Create date object with just the date portion (year, month, day)
+    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    // Then set it to noon (12:00)
     normalizedDate.setHours(12, 0, 0, 0);
     
     setSelectedTimeSlots([
@@ -114,6 +115,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         <div className="text-sm text-gray-500 mt-1">
           {selectedTimeSlots.length} date{selectedTimeSlots.length !== 1 ? 's' : ''} selected 
           {selectedTimeSlots.length === 0 && " (please select at least one date)"}
+          {selectedTimeSlots.length > 0 && selectedTimeSlots.length < 3 && " (please select at least 3 dates)"}
         </div>
       </div>
 

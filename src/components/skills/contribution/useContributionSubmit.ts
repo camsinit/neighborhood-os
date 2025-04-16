@@ -24,17 +24,20 @@ export const useContributionSubmit = (
     // Create a new date object from ISO string
     const timeDate = new Date(dateStr);
     
-    // Set hours based on preference (using standard hours)
-    // This ensures the time component is different but preserves the date part
+    // Start by stripping time component completely to get just the date portion
+    // This creates a new date set to midnight
+    const dateWithoutTime = new Date(timeDate.getFullYear(), timeDate.getMonth(), timeDate.getDate());
+    
+    // Add hours based on preference (using standard hours)
+    // Morning: 9am, Afternoon: 1pm, Evening: 6pm
     const hours = preference === 'morning' ? 9 : 
                  preference === 'afternoon' ? 13 : 18;
     
-    // Important: Create a new Date to avoid side effects  
-    const dateObj = new Date(timeDate);
-    dateObj.setHours(hours, 0, 0, 0);
+    // Set the hours while preserving the date
+    dateWithoutTime.setHours(hours, 0, 0, 0);
     
     // Return properly formatted ISO string
-    return dateObj.toISOString();
+    return dateWithoutTime.toISOString();
   };
 
   /**
