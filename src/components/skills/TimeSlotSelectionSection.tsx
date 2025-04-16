@@ -58,6 +58,8 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         localeTimeString: date.toLocaleTimeString(),
         dateString: date.toDateString(),
         timeString: date.toTimeString(),
+        utcString: date.toUTCString(),
+        simpleDatePart: date.toISOString().split('T')[0]
       }
     });
     
@@ -67,6 +69,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       date: slot.date,
       dateObj: new Date(slot.date),
       formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+      simpleDatePart: new Date(slot.date).toISOString().split('T')[0],
       preferences: slot.preferences
     })));
     
@@ -87,17 +90,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         date: slot.date,
         dateObj: new Date(slot.date),
         formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+        simpleDatePart: new Date(slot.date).toISOString().split('T')[0],
         preferences: slot.preferences
       })));
       
       return;
     }
 
-    // For new dates, standardize to noon to avoid timezone issues
-    // Create date object with just the date portion (year, month, day)
-    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    // Then set it to noon (12:00)
-    normalizedDate.setHours(12, 0, 0, 0);
+    // For new dates, standardize to noon UTC to avoid timezone issues
+    // Create a UTC date with just the date portion (year, month, day)
+    const normalizedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Then set it to noon UTC (12:00)
+    normalizedDate.setUTCHours(12, 0, 0, 0);
     
     // ENHANCED LOGGING - Log detailed information about the normalized date
     console.log("Normalized date for storage (ENHANCED DEBUG):", {
@@ -118,6 +122,8 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         localeTimeString: normalizedDate.toLocaleTimeString(),
         dateString: normalizedDate.toDateString(),
         timeString: normalizedDate.toTimeString(),
+        utcString: normalizedDate.toUTCString(),
+        simpleDatePart: normalizedDate.toISOString().split('T')[0]
       }
     });
     
@@ -138,12 +144,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       date: slot.date,
       dateObj: new Date(slot.date),
       formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+      simpleDatePart: new Date(slot.date).toISOString().split('T')[0],
       preferences: slot.preferences
     })));
   };
 
   // Get array of selected dates for calendar highlighting
   const selectedDates = selectedTimeSlots.map(slot => new Date(slot.date));
+
+  // NEW: Check for unique dates with improved date extraction
+  const uniqueDates = new Set(selectedTimeSlots.map(slot => 
+    new Date(slot.date).toISOString().split('T')[0]
+  ));
 
   return (
     <>
@@ -189,8 +201,9 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         {/* Helper text showing count of selected dates with recommendation */}
         <div className="text-sm text-gray-500 mt-1">
           {selectedTimeSlots.length} date{selectedTimeSlots.length !== 1 ? 's' : ''} selected 
+          ({uniqueDates.size} unique)
           {selectedTimeSlots.length === 0 && " (please select at least one date)"}
-          {selectedTimeSlots.length > 0 && selectedTimeSlots.length < 3 && " (please select at least 3 dates)"}
+          {uniqueDates.size < 3 && uniqueDates.size > 0 && " (please select at least 3 different dates)"}
         </div>
       </div>
 
@@ -211,6 +224,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
                 date: s.date,
                 dateObj: new Date(s.date),
                 formattedDate: format(new Date(s.date), 'yyyy-MM-dd'),
+                simpleDatePart: new Date(s.date).toISOString().split('T')[0],
                 preferences: s.preferences
               })));
             }}
@@ -234,7 +248,8 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
                         : [...s.preferences, timeId],
                       date: s.date,
                       dateObj: new Date(s.date),
-                      formattedDate: format(new Date(s.date), 'yyyy-MM-dd')
+                      formattedDate: format(new Date(s.date), 'yyyy-MM-dd'),
+                      simpleDatePart: new Date(s.date).toISOString().split('T')[0]
                     });
                     
                     return { ...s, preferences };

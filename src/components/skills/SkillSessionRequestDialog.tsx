@@ -87,14 +87,23 @@ const SkillSessionRequestDialog = ({
       return false;
     }
 
-    // Validate that dates are unique
+    // Validate that at least 3 unique dates are selected
+    // NEW: Extract just the date part (YYYY-MM-DD) from each ISO string
     const uniqueDates = new Set(
-      selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
+      selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
     );
     
-    if (uniqueDates.size !== selectedTimeSlots.length) {
-      toast.error("Duplicate dates detected", {
-        description: "Please select different dates for your request"
+    // Log detailed info about unique dates
+    console.log("VALIDATION - Unique dates check:", {
+      selectedSlotsCount: selectedTimeSlots.length,
+      uniqueDatesCount: uniqueDates.size,
+      uniqueDates: Array.from(uniqueDates),
+      allDateStrings: selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
+    });
+    
+    if (uniqueDates.size < 3) {
+      toast.error(`At least 3 different dates required`, {
+        description: `You have selected ${uniqueDates.size} unique dates. Please select at least 3 different dates.`
       });
       return false;
     }

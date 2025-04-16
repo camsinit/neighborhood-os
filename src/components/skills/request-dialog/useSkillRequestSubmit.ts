@@ -43,15 +43,17 @@ export const useSkillRequestSubmit = (
     
     // Start by stripping time component completely to get just the date portion
     // This creates a new date set to midnight
-    const dateWithoutTime = new Date(timeDate.getFullYear(), timeDate.getMonth(), timeDate.getDate());
+    const dateWithoutTime = new Date(
+      Date.UTC(timeDate.getUTCFullYear(), timeDate.getUTCMonth(), timeDate.getUTCDate())
+    );
     
     // Add hours based on preference (using standard hours)
     // Morning: 9am, Afternoon: 1pm, Evening: 6pm
     const hours = preference === 'morning' ? 9 : 
                  preference === 'afternoon' ? 13 : 18;
     
-    // Set the hours while preserving the date
-    dateWithoutTime.setHours(hours, 0, 0, 0);
+    // Set the hours while preserving the date (in UTC to avoid timezone issues)
+    dateWithoutTime.setUTCHours(hours, 0, 0, 0);
     
     // ENHANCED LOGGING - Log detailed information about each date formatting step
     console.log('Date formatting (EXTENDED DEBUG):', {
@@ -66,7 +68,8 @@ export const useSkillRequestSubmit = (
         seconds: timeDate.getSeconds(),
         milliseconds: timeDate.getMilliseconds(),
         timestamp: timeDate.getTime(),
-        timezoneOffset: timeDate.getTimezoneOffset()
+        timezoneOffset: timeDate.getTimezoneOffset(),
+        utcISOString: timeDate.toISOString()
       },
       strippedDateObj: dateWithoutTime,
       preference,
@@ -81,7 +84,8 @@ export const useSkillRequestSubmit = (
         seconds: dateWithoutTime.getSeconds(),
         milliseconds: dateWithoutTime.getMilliseconds(),
         timestamp: dateWithoutTime.getTime(),
-        timezoneOffset: dateWithoutTime.getTimezoneOffset()
+        timezoneOffset: dateWithoutTime.getTimezoneOffset(),
+        utcISOString: dateWithoutTime.toISOString()
       }
     });
     
@@ -121,9 +125,9 @@ export const useSkillRequestSubmit = (
       return;
     }
 
-    // Ensure unique dates - THIS IS CRITICAL
+    // NEW: Extract just the date part (YYYY-MM-DD) from each ISO string for better uniqueness checking
     const uniqueDateStrings = new Set(
-      selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
+      selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
     );
     
     // ENHANCED LOGGING - Log detailed information about uniqueness check
@@ -132,7 +136,7 @@ export const useSkillRequestSubmit = (
       uniqueDatesCount: uniqueDateStrings.size,
       uniqueDatesArray: Array.from(uniqueDateStrings),
       allDatesRaw: selectedTimeSlots.map(slot => slot.date),
-      allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toDateString()),
+      allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0]),
       allDatesComponents: selectedTimeSlots.map(slot => {
         const d = new Date(slot.date);
         return {
@@ -144,14 +148,17 @@ export const useSkillRequestSubmit = (
           minutes: d.getMinutes(),
           timezone: d.getTimezoneOffset(),
           dateString: d.toDateString(),
-          isoString: d.toISOString()
+          isoString: d.toISOString(),
+          utcDateString: d.toUTCString(),
+          simpleDatePart: d.toISOString().split('T')[0]
         };
       })
     });
     
-    if (uniqueDateStrings.size !== selectedTimeSlots.length) {
-      toast.error('Duplicate dates detected', {
-        description: 'Please select different dates for your request'
+    // Client-side check for unique dates (at least 3)
+    if (uniqueDateStrings.size < 3) {
+      toast.error('At least 3 different dates required', {
+        description: `You selected ${uniqueDateStrings.size} unique dates, but 3 are required.`
       });
       return;
     }
@@ -171,7 +178,9 @@ export const useSkillRequestSubmit = (
           seconds: new Date(slot.date).getSeconds(),
           milliseconds: new Date(slot.date).getMilliseconds(),
           timestamp: new Date(slot.date).getTime(),
-          timezoneOffset: new Date(slot.date).getTimezoneOffset()
+          timezoneOffset: new Date(slot.date).getTimezoneOffset(),
+          utcDateString: new Date(slot.date).toUTCString(),
+          simpleDatePart: new Date(slot.date).toISOString().split('T')[0]
         },
         preferences: slot.preferences,
         preferencesCount: slot.preferences.length,
@@ -234,7 +243,7 @@ export const useSkillRequestSubmit = (
         throw sessionError;
       }
 
-      // Normalize the time slots for insertion
+      // Normalize the time slots for insertion, ensuring the dates are properly preserved
       // Each date can have multiple preferences, so we need to create a time slot for each
       const timeSlotPromises = selectedTimeSlots.flatMap(slot => {
         // Ensure each date has at least one preference
@@ -279,7 +288,8 @@ export const useSkillRequestSubmit = (
         }))
       );
       
-      // Log DISTINCT dates for database comparison
+      // NEW: Force verification of dates before attempting to insert
+      // Extract just the date part (YYYY-MM-DD) from each time slot
       const distinctDates = new Set(
         timeSlotPromises.map(slot => 
           new Date(slot.proposed_time).toISOString().split('T')[0]
@@ -293,6 +303,13 @@ export const useSkillRequestSubmit = (
           new Date(slot.proposed_time).toISOString().split('T')[0]
         )
       });
+
+      // Verify we have at least 3 distinct dates before proceeding
+      if (distinctDates.size < 3) {
+        const error = new Error(`At least 3 different dates must be provided (found ${distinctDates.size})`);
+        error.name = "ValidationError";
+        throw error;
+      }
 
       // Insert the time slots with enhanced error handling
       const { error: timeSlotError } = await supabase
@@ -321,7 +338,6 @@ export const useSkillRequestSubmit = (
       onClose();
     } catch (error: any) {
       console.error('ENHANCED DEBUG - Error submitting skill request:', error);
-      console.error('ENHANCED DEBUG - Error stack trace:', error.stack);
       
       // Enhanced error logging
       console.error('ENHANCED DEBUG - Error context:', {
@@ -338,9 +354,16 @@ export const useSkillRequestSubmit = (
         fullErrorString: JSON.stringify(error)
       });
       
-      toast.error('Request submission failed', {
-        description: error.message || 'Failed to submit skill request. Please try again.'
-      });
+      if (error.name === "ValidationError") {
+        // Special handling for our validation errors
+        toast.error('Request submission failed', {
+          description: error.message
+        });
+      } else {
+        toast.error('Request submission failed', {
+          description: error.message || 'Failed to submit skill request. Please try again.'
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
