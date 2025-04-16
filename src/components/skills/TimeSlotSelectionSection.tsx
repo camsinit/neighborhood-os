@@ -39,8 +39,8 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     // Format date to consistent string for comparison (removing time portion)
     const formattedDate = format(date, 'yyyy-MM-dd');
     
-    // Log detailed information about the selected date
-    console.log("Date selection:", {
+    // ENHANCED LOGGING - Log detailed information about the selected date
+    console.log("Date selection (ENHANCED DEBUG):", {
       selectedDate: date.toISOString(),
       formattedDateForComparison: formattedDate,
       dateComponents: {
@@ -49,9 +49,26 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         day: date.getDate(),
         hours: date.getHours(),
         minutes: date.getMinutes(),
-        timezone: date.getTimezoneOffset()
+        seconds: date.getSeconds(),
+        milliseconds: date.getMilliseconds(),
+        timestamp: date.getTime(),
+        timezoneOffset: date.getTimezoneOffset(),
+        dayOfWeek: date.getDay(),
+        localeDateString: date.toLocaleDateString(),
+        localeTimeString: date.toLocaleTimeString(),
+        dateString: date.toDateString(),
+        timeString: date.toTimeString(),
       }
     });
+    
+    // ENHANCED LOGGING - Log all current time slots before modification
+    console.log("Current time slots (ENHANCED DEBUG):", selectedTimeSlots.map((slot, idx) => ({
+      index: idx,
+      date: slot.date,
+      dateObj: new Date(slot.date),
+      formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+      preferences: slot.preferences
+    })));
     
     // Check if this date is already selected by comparing just the date portion
     const existingSlotIndex = selectedTimeSlots.findIndex(
@@ -60,8 +77,19 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
 
     // If date is already selected, remove it
     if (existingSlotIndex !== -1) {
-      setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
-      console.log(`Removed date: ${formattedDate}, remaining: ${selectedTimeSlots.length - 1}`);
+      const updatedSlots = selectedTimeSlots.filter((_, index) => index !== existingSlotIndex);
+      setSelectedTimeSlots(updatedSlots);
+      console.log(`Removed date: ${formattedDate}, remaining: ${updatedSlots.length}`);
+      
+      // ENHANCED LOGGING - Log all time slots after removal
+      console.log("Time slots after removal (ENHANCED DEBUG):", updatedSlots.map((slot, idx) => ({
+        index: idx,
+        date: slot.date,
+        dateObj: new Date(slot.date),
+        formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+        preferences: slot.preferences
+      })));
+      
       return;
     }
 
@@ -71,8 +99,8 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     // Then set it to noon (12:00)
     normalizedDate.setHours(12, 0, 0, 0);
     
-    // Log detailed information about the normalized date
-    console.log("Normalized date for storage:", {
+    // ENHANCED LOGGING - Log detailed information about the normalized date
+    console.log("Normalized date for storage (ENHANCED DEBUG):", {
       originalDate: date.toISOString(),
       normalizedDate: normalizedDate.toISOString(),
       dateComponents: {
@@ -81,18 +109,37 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         day: normalizedDate.getDate(),
         hours: normalizedDate.getHours(),
         minutes: normalizedDate.getMinutes(),
-        timezone: normalizedDate.getTimezoneOffset()
+        seconds: normalizedDate.getSeconds(),
+        milliseconds: normalizedDate.getMilliseconds(),
+        timestamp: normalizedDate.getTime(),
+        timezoneOffset: normalizedDate.getTimezoneOffset(),
+        dayOfWeek: normalizedDate.getDay(),
+        localeDateString: normalizedDate.toLocaleDateString(),
+        localeTimeString: normalizedDate.toLocaleTimeString(),
+        dateString: normalizedDate.toDateString(),
+        timeString: normalizedDate.toTimeString(),
       }
     });
     
-    setSelectedTimeSlots([
+    const updatedSlots = [
       ...selectedTimeSlots, 
       { 
         date: normalizedDate.toISOString(), // Store as ISO string for consistent serialization
         preferences: [] 
       }
-    ]);
-    console.log(`Added date: ${formattedDate}, total: ${selectedTimeSlots.length + 1}`);
+    ];
+    
+    setSelectedTimeSlots(updatedSlots);
+    console.log(`Added date: ${formattedDate}, total: ${updatedSlots.length}`);
+    
+    // ENHANCED LOGGING - Log all time slots after addition
+    console.log("Time slots after addition (ENHANCED DEBUG):", updatedSlots.map((slot, idx) => ({
+      index: idx,
+      date: slot.date,
+      dateObj: new Date(slot.date),
+      formattedDate: format(new Date(slot.date), 'yyyy-MM-dd'),
+      preferences: slot.preferences
+    })));
   };
 
   // Get array of selected dates for calendar highlighting
@@ -154,10 +201,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
             key={`${slot.date}-${index}`}
             timeSlot={slot}
             onRemove={() => {
-              setSelectedTimeSlots(slots => 
-                slots.filter((_, i) => i !== index)
-              );
-              console.log(`Removed time slot at index ${index}`);
+              const updatedSlots = selectedTimeSlots.filter((_, i) => i !== index);
+              setSelectedTimeSlots(updatedSlots);
+              console.log(`Removed time slot at index ${index}, remaining: ${updatedSlots.length}`);
+              
+              // ENHANCED LOGGING - Log all time slots after removal
+              console.log("Time slots after preference removal (ENHANCED DEBUG):", updatedSlots.map((s, idx) => ({
+                index: idx,
+                date: s.date,
+                dateObj: new Date(s.date),
+                formattedDate: format(new Date(s.date), 'yyyy-MM-dd'),
+                preferences: s.preferences
+              })));
             }}
             onPreferenceChange={(timeId) => {
               setSelectedTimeSlots(slots =>
@@ -168,13 +223,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
                       ? s.preferences.filter(p => p !== timeId)
                       : [...s.preferences, timeId];
                       
-                    // Log preference changes for debugging
-                    console.log(`Time preference for date ${format(new Date(s.date), 'yyyy-MM-dd')} updated:`, {
+                    // ENHANCED LOGGING - Log preference changes
+                    console.log(`Time preference for date ${format(new Date(s.date), 'yyyy-MM-dd')} updated (ENHANCED DEBUG):`, {
                       action: s.preferences.includes(timeId) ? 'Removed' : 'Added',
                       preference: timeId,
-                      allPreferences: s.preferences.includes(timeId) 
+                      slotIndex: index,
+                      beforePreferences: s.preferences,
+                      afterPreferences: s.preferences.includes(timeId) 
                         ? s.preferences.filter(p => p !== timeId)
-                        : [...s.preferences, timeId]
+                        : [...s.preferences, timeId],
+                      date: s.date,
+                      dateObj: new Date(s.date),
+                      formattedDate: format(new Date(s.date), 'yyyy-MM-dd')
                     });
                     
                     return { ...s, preferences };

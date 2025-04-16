@@ -36,21 +36,35 @@ export const useContributionSubmit = (
     // Set the hours while preserving the date
     dateWithoutTime.setHours(hours, 0, 0, 0);
     
-    // Log detailed information about each date formatting step
-    console.log('Contribution date formatting:', {
+    // ENHANCED LOGGING - Log detailed information about each date formatting step
+    console.log('Contribution date formatting (EXTENDED DEBUG):', {
       originalDateStr: dateStr,
-      parsedDate: timeDate.toISOString(),
-      dateWithoutTime: dateWithoutTime.toISOString(),
+      originalDateObj: timeDate,
+      originalDateComponents: {
+        year: timeDate.getFullYear(),
+        month: timeDate.getMonth(), 
+        day: timeDate.getDate(),
+        hours: timeDate.getHours(),
+        minutes: timeDate.getMinutes(),
+        seconds: timeDate.getSeconds(),
+        milliseconds: timeDate.getMilliseconds(),
+        timestamp: timeDate.getTime(),
+        timezoneOffset: timeDate.getTimezoneOffset()
+      },
+      strippedDateObj: dateWithoutTime,
       preference,
       hoursAssigned: hours,
       finalFormattedDate: dateWithoutTime.toISOString(),
-      dateComponents: {
+      finalDateComponents: {
         year: dateWithoutTime.getFullYear(),
         month: dateWithoutTime.getMonth(),
         day: dateWithoutTime.getDate(),
         hours: dateWithoutTime.getHours(),
         minutes: dateWithoutTime.getMinutes(),
-        seconds: dateWithoutTime.getSeconds()
+        seconds: dateWithoutTime.getSeconds(),
+        milliseconds: dateWithoutTime.getMilliseconds(),
+        timestamp: dateWithoutTime.getTime(),
+        timezoneOffset: dateWithoutTime.getTimezoneOffset()
       }
     });
     
@@ -67,6 +81,9 @@ export const useContributionSubmit = (
     locationDetails: string,
     addToProfile: boolean
   ) => {
+    // ENHANCED LOGGING - Log the submission input with more details
+    console.log("CONTRIBUTION SUBMIT - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
+    
     // Basic validation
     if (selectedTimeSlots.length < 1) {
       toast({
@@ -92,13 +109,27 @@ export const useContributionSubmit = (
       selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
     );
     
-    // Log detailed information about each date being processed
-    console.log("CONTRIBUTION DATE DIAGNOSTICS:", {
+    // ENHANCED LOGGING - Log detailed date diagnostics
+    console.log("CONTRIBUTION DATE DIAGNOSTICS (ENHANCED):", {
       totalSlots: selectedTimeSlots.length,
       uniqueDatesCount: uniqueDateStrings.size,
       uniqueDatesArray: Array.from(uniqueDateStrings),
       allDatesRaw: selectedTimeSlots.map(slot => slot.date),
       allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toDateString()),
+      allDatesComponents: selectedTimeSlots.map(slot => {
+        const d = new Date(slot.date);
+        return {
+          original: slot.date,
+          year: d.getFullYear(),
+          month: d.getMonth(),
+          day: d.getDate(),
+          hours: d.getHours(),
+          minutes: d.getMinutes(),
+          timezone: d.getTimezoneOffset(),
+          dateString: d.toDateString(),
+          isoString: d.toISOString()
+        };
+      })
     });
     
     if (uniqueDateStrings.size !== selectedTimeSlots.length) {
@@ -115,13 +146,13 @@ export const useContributionSubmit = (
       
       // Log the user ID for context
       const currentUser = await supabase.auth.getUser();
-      console.log("Current user details:", {
+      console.log("ENHANCED DEBUG - Current user details:", {
         userId: currentUser.data.user?.id,
         providerId: currentUser.data.user?.id === requesterId ? "WARNING: Provider is the same as requester!" : "Provider differs from requester",
       });
       
       // Create the skill session record with detailed logging
-      console.log("Creating contribution session with:", {
+      console.log("ENHANCED DEBUG - Creating contribution session with:", {
         skill_id: skillRequestId,
         provider_id: currentUser.data.user?.id,
         requester_id: requesterId,
@@ -144,12 +175,20 @@ export const useContributionSubmit = (
         .single();
 
       if (sessionError) {
-        console.error('Session creation error details:', {
+        console.error('ENHANCED DEBUG - Session creation error details:', {
           error: sessionError,
           errorMessage: sessionError.message,
           errorDetails: sessionError.details,
           errorHint: sessionError.hint,
-          errorCode: sessionError.code
+          errorCode: sessionError.code,
+          fullError: JSON.stringify(sessionError),
+          requestPayload: {
+            skill_id: skillRequestId,
+            provider_id: currentUser.data.user?.id,
+            requester_id: requesterId,
+            location_preference: location,
+            location_details: location === 'other' ? locationDetails : null,
+          }
         });
         throw sessionError;
       }
@@ -170,8 +209,8 @@ export const useContributionSubmit = (
         })
       );
 
-      // Log detailed info about time slots for debugging
-      console.log("Creating contribution time slots (detailed):", 
+      // ENHANCED LOGGING - Log each time slot in detail
+      console.log("ENHANCED DEBUG - Time slots prepared for insertion:", 
         timeSlotPromises.map((slot, index) => ({
           index,
           sessionId: slot.session_id,
@@ -183,9 +222,28 @@ export const useContributionSubmit = (
             day: new Date(slot.proposed_time).getDate(),
             hours: new Date(slot.proposed_time).getHours(),
             minutes: new Date(slot.proposed_time).getMinutes(),
+            seconds: new Date(slot.proposed_time).getSeconds(),
+            milliseconds: new Date(slot.proposed_time).getMilliseconds(),
+            timestamp: new Date(slot.proposed_time).getTime(),
+            timezoneOffset: new Date(slot.proposed_time).getTimezoneOffset()
           }
         }))
       );
+      
+      // Log DISTINCT dates for database comparison
+      const distinctDates = new Set(
+        timeSlotPromises.map(slot => 
+          new Date(slot.proposed_time).toISOString().split('T')[0]
+        )
+      );
+      
+      console.log("ENHANCED DEBUG - DISTINCT DATES CHECK (CONTRIBUTION):", {
+        distinctDateCount: distinctDates.size,
+        distinctDates: Array.from(distinctDates),
+        allDateStrings: timeSlotPromises.map(slot => 
+          new Date(slot.proposed_time).toISOString().split('T')[0]
+        )
+      });
 
       // Insert the time slots with enhanced error handling
       const { error: timeSlotError } = await supabase
@@ -193,12 +251,17 @@ export const useContributionSubmit = (
         .insert(timeSlotPromises);
 
       if (timeSlotError) {
-        console.error('Time slot error details:', {
+        console.error('ENHANCED DEBUG - Time slot error details:', {
           error: timeSlotError,
           errorMessage: timeSlotError.message,
           errorDetails: timeSlotError.details,
           errorHint: timeSlotError.hint,
-          errorCode: timeSlotError.code
+          errorCode: timeSlotError.code,
+          fullError: JSON.stringify(timeSlotError),
+          timeSlotDataSample: timeSlotPromises.length > 0 ? timeSlotPromises[0] : 'No slots',
+          totalSlots: timeSlotPromises.length,
+          sessionId: session?.id,
+          distinctDateCount: distinctDates.size
         });
         throw timeSlotError;
       }
@@ -218,20 +281,22 @@ export const useContributionSubmit = (
       // Close the dialog
       onSuccess();
     } catch (error: any) {
-      console.error('Error creating skill session:', error);
-      console.error('Error stack trace:', error.stack);
+      console.error('ENHANCED DEBUG - Error creating skill session:', error);
+      console.error('ENHANCED DEBUG - Error stack trace:', error.stack);
       
       // Enhanced error logging
-      console.error('Contribution error context:', {
+      console.error('ENHANCED DEBUG - Contribution error context:', {
         skillRequestId,
         requesterId,
-        selectedDates: selectedTimeSlots.map(slot => slot.date),
+        selectedDatesCount: selectedTimeSlots.length,
+        uniqueDatesCount: uniqueDateStrings.size,
         location,
         errorObj: error,
         errorMessage: error.message,
         errorCode: error.code,
         errorDetails: error.details,
-        errorHint: error.hint
+        errorHint: error.hint,
+        fullErrorString: JSON.stringify(error)
       });
       
       toast({

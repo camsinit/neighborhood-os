@@ -53,21 +53,35 @@ export const useSkillRequestSubmit = (
     // Set the hours while preserving the date
     dateWithoutTime.setHours(hours, 0, 0, 0);
     
-    // Log detailed information about each date formatting step
-    console.log('Date formatting:', {
+    // ENHANCED LOGGING - Log detailed information about each date formatting step
+    console.log('Date formatting (EXTENDED DEBUG):', {
       originalDateStr: dateStr,
-      parsedDate: timeDate.toISOString(),
-      dateWithoutTime: dateWithoutTime.toISOString(),
+      originalDateObj: timeDate,
+      originalDateParts: {
+        year: timeDate.getFullYear(),
+        month: timeDate.getMonth(), 
+        day: timeDate.getDate(),
+        hours: timeDate.getHours(),
+        minutes: timeDate.getMinutes(),
+        seconds: timeDate.getSeconds(),
+        milliseconds: timeDate.getMilliseconds(),
+        timestamp: timeDate.getTime(),
+        timezoneOffset: timeDate.getTimezoneOffset()
+      },
+      strippedDateObj: dateWithoutTime,
       preference,
       hoursAssigned: hours,
       finalFormattedDate: dateWithoutTime.toISOString(),
-      dateComponents: {
+      finalDateParts: {
         year: dateWithoutTime.getFullYear(),
         month: dateWithoutTime.getMonth(),
         day: dateWithoutTime.getDate(),
         hours: dateWithoutTime.getHours(),
         minutes: dateWithoutTime.getMinutes(),
-        seconds: dateWithoutTime.getSeconds()
+        seconds: dateWithoutTime.getSeconds(),
+        milliseconds: dateWithoutTime.getMilliseconds(),
+        timestamp: dateWithoutTime.getTime(),
+        timezoneOffset: dateWithoutTime.getTimezoneOffset()
       }
     });
     
@@ -88,6 +102,9 @@ export const useSkillRequestSubmit = (
       return;
     }
 
+    // ENHANCED LOGGING - Log input time slots array with detailed structure
+    console.log("SUBMIT REQUEST - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
+    
     // Client-side validation - ensure at least 3 dates are selected
     if (selectedTimeSlots.length < 3) {
       toast.error('Date selection required', {
@@ -109,13 +126,27 @@ export const useSkillRequestSubmit = (
       selectedTimeSlots.map(slot => new Date(slot.date).toDateString())
     );
     
-    // Log detailed information about each date being processed
-    console.log("DATE DIAGNOSTICS - BEFORE SUBMISSION:", {
+    // ENHANCED LOGGING - Log detailed information about uniqueness check
+    console.log("DATE DIAGNOSTICS - ENHANCED DEBUG:", {
       totalSlots: selectedTimeSlots.length,
       uniqueDatesCount: uniqueDateStrings.size,
       uniqueDatesArray: Array.from(uniqueDateStrings),
       allDatesRaw: selectedTimeSlots.map(slot => slot.date),
       allDatesFormatted: selectedTimeSlots.map(slot => new Date(slot.date).toDateString()),
+      allDatesComponents: selectedTimeSlots.map(slot => {
+        const d = new Date(slot.date);
+        return {
+          original: slot.date,
+          year: d.getFullYear(),
+          month: d.getMonth(),
+          day: d.getDate(),
+          hours: d.getHours(),
+          minutes: d.getMinutes(),
+          timezone: d.getTimezoneOffset(),
+          dateString: d.toDateString(),
+          isoString: d.toISOString()
+        };
+      })
     });
     
     if (uniqueDateStrings.size !== selectedTimeSlots.length) {
@@ -125,8 +156,28 @@ export const useSkillRequestSubmit = (
       return;
     }
 
-    // Log the selected time slots for debugging
-    console.log("Time slots being submitted:", JSON.stringify(selectedTimeSlots));
+    // ENHANCED LOGGING - More detailed logging of time slots
+    console.log("ENHANCED DEBUG - Time slots pre-processing:", 
+      selectedTimeSlots.map((slot, idx) => ({
+        index: idx,
+        date: slot.date,
+        dateObj: new Date(slot.date),
+        dateComponents: {
+          year: new Date(slot.date).getFullYear(),
+          month: new Date(slot.date).getMonth(),
+          day: new Date(slot.date).getDate(),
+          hours: new Date(slot.date).getHours(),
+          minutes: new Date(slot.date).getMinutes(),
+          seconds: new Date(slot.date).getSeconds(),
+          milliseconds: new Date(slot.date).getMilliseconds(),
+          timestamp: new Date(slot.date).getTime(),
+          timezoneOffset: new Date(slot.date).getTimezoneOffset()
+        },
+        preferences: slot.preferences,
+        preferencesCount: slot.preferences.length,
+        preferencesString: slot.preferences.join(',')
+      }))
+    );
 
     // Start submission process
     setIsSubmitting(true);
@@ -161,12 +212,24 @@ export const useSkillRequestSubmit = (
         .single();
 
       if (sessionError) {
-        console.error('Session creation error details:', {
+        console.error('ENHANCED DEBUG - Session creation error details:', {
           error: sessionError,
           errorMessage: sessionError.message,
           errorDetails: sessionError.details,
           errorHint: sessionError.hint,
-          errorCode: sessionError.code
+          errorCode: sessionError.code,
+          fullError: JSON.stringify(sessionError),
+          requestPayload: {
+            skill_id: skillId,
+            provider_id: providerId,
+            requester_id: user.id,
+            requester_availability: {
+              availability: data.availability,
+              timePreference: data.timePreference,
+              description: data.description,
+            },
+            status: 'pending_provider_times',
+          }
         });
         throw sessionError;
       }
@@ -195,7 +258,8 @@ export const useSkillRequestSubmit = (
         });
       });
 
-      console.log("Creating time slots (detailed):", 
+      // ENHANCED LOGGING - Log the actual time slots being submitted
+      console.log("ENHANCED DEBUG - Time slots prepared for insertion:", 
         timeSlotPromises.map((slot, index) => ({
           index,
           sessionId: slot.session_id,
@@ -207,9 +271,28 @@ export const useSkillRequestSubmit = (
             day: new Date(slot.proposed_time).getDate(),
             hours: new Date(slot.proposed_time).getHours(),
             minutes: new Date(slot.proposed_time).getMinutes(),
+            seconds: new Date(slot.proposed_time).getSeconds(),
+            milliseconds: new Date(slot.proposed_time).getMilliseconds(),
+            timestamp: new Date(slot.proposed_time).getTime(),
+            timezoneOffset: new Date(slot.proposed_time).getTimezoneOffset()
           }
         }))
       );
+      
+      // Log DISTINCT dates for database comparison
+      const distinctDates = new Set(
+        timeSlotPromises.map(slot => 
+          new Date(slot.proposed_time).toISOString().split('T')[0]
+        )
+      );
+      
+      console.log("ENHANCED DEBUG - DISTINCT DATES CHECK:", {
+        distinctDateCount: distinctDates.size,
+        distinctDates: Array.from(distinctDates),
+        allDateStrings: timeSlotPromises.map(slot => 
+          new Date(slot.proposed_time).toISOString().split('T')[0]
+        )
+      });
 
       // Insert the time slots with enhanced error handling
       const { error: timeSlotError } = await supabase
@@ -217,12 +300,17 @@ export const useSkillRequestSubmit = (
         .insert(timeSlotPromises);
 
       if (timeSlotError) {
-        console.error('Time slot error details:', {
+        console.error('ENHANCED DEBUG - Time slot error details:', {
           error: timeSlotError,
           errorMessage: timeSlotError.message,
           errorDetails: timeSlotError.details,
           errorHint: timeSlotError.hint,
-          errorCode: timeSlotError.code
+          errorCode: timeSlotError.code,
+          fullError: JSON.stringify(timeSlotError),
+          timeSlotDataSample: timeSlotPromises.length > 0 ? timeSlotPromises[0] : 'No slots',
+          totalSlots: timeSlotPromises.length,
+          sessionId: session?.id,
+          distinctDateCount: distinctDates.size
         });
         throw timeSlotError;
       }
@@ -232,21 +320,22 @@ export const useSkillRequestSubmit = (
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       onClose();
     } catch (error: any) {
-      console.error('Error submitting skill request:', error);
-      console.error('Error stack trace:', error.stack);
+      console.error('ENHANCED DEBUG - Error submitting skill request:', error);
+      console.error('ENHANCED DEBUG - Error stack trace:', error.stack);
       
       // Enhanced error logging
-      console.error('Error context:', {
+      console.error('ENHANCED DEBUG - Error context:', {
         skillId,
         providerId,
         requesterId: user?.id,
-        selectedDates: selectedTimeSlots.map(slot => slot.date),
-        uniqueDatesCount: uniqueDateStrings.size,
+        selectedDatesCount: selectedTimeSlots.length,
+        distinctDatesCount: uniqueDateStrings.size,
         errorObj: error,
         errorMessage: error.message,
         errorCode: error.code,
         errorDetails: error.details,
-        errorHint: error.hint
+        errorHint: error.hint,
+        fullErrorString: JSON.stringify(error)
       });
       
       toast.error('Request submission failed', {
