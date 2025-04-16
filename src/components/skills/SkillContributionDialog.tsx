@@ -30,6 +30,7 @@ const SkillContributionDialog = ({
   requesterId
 }: SkillContributionDialogProps) => {
   // State for selected time slots with dates and preferences
+  // Update to match TimeSlot interface where date is a string (ISO format)
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
   
   // State for location preferences
@@ -55,16 +56,20 @@ const SkillContributionDialog = ({
     // Format the date to compare with existing selections
     const formattedDate = format(date, 'yyyy-MM-dd');
     
-    // Check if the date is already selected
+    // Check if the date is already selected by comparing formatted date strings
     const existingSlotIndex = selectedTimeSlots.findIndex(
-      slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
+      slot => format(new Date(slot.date), 'yyyy-MM-dd') === formattedDate
     );
 
     // Toggle date selection (remove if already selected, add if not)
     if (existingSlotIndex === -1) {
       // Only allow up to 3 dates
       if (selectedTimeSlots.length < 3) {
-        setSelectedTimeSlots([...selectedTimeSlots, { date, preferences: [] }]);
+        // Convert Date to ISO string to match the TimeSlot interface
+        setSelectedTimeSlots([...selectedTimeSlots, { 
+          date: date.toISOString(), 
+          preferences: [] 
+        }]);
       } else {
         toast({
           title: "Maximum dates selected",
@@ -120,14 +125,21 @@ const SkillContributionDialog = ({
 
       // Create time slot entries for each selected date and time preference
       const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
-        slot.preferences.map(preference => ({
-          session_id: session.id,
-          proposed_time: new Date(slot.date.setHours(
-            preference === 'morning' ? 9 :
-            preference === 'afternoon' ? 13 :
-            18
-          )).toISOString(),
-        }))
+        slot.preferences.map(preference => {
+          // Create a new Date object from ISO string
+          const timeDate = new Date(slot.date);
+          
+          // Set hours based on preference
+          return {
+            session_id: session.id,
+            proposed_time: new Date(timeDate.getTime()).toISOString().replace(
+              /T\d{2}:\d{2}:\d{2}\.\d{3}Z/,
+              preference === 'morning' ? 'T09:00:00.000Z' :
+              preference === 'afternoon' ? 'T13:00:00.000Z' :
+              'T18:00:00.000Z'
+            ),
+          };
+        })
       );
 
       const { error: timeSlotError } = await supabase
@@ -154,8 +166,8 @@ const SkillContributionDialog = ({
     }
   };
 
-  // Get array of selected dates for calendar highlighting
-  const selectedDates = selectedTimeSlots.map(slot => slot.date);
+  // Convert selectedTimeSlots to Date objects for calendar display
+  const selectedDates = selectedTimeSlots.map(slot => new Date(slot.date));
 
   return (
     <TooltipProvider>
@@ -209,7 +221,7 @@ const SkillContributionDialog = ({
           <div className="space-y-4">
             {selectedTimeSlots.map((slot, index) => (
               <TimeSlotSelector
-                key={format(slot.date, 'yyyy-MM-dd')}
+                key={`slot-${index}-${slot.date}`}
                 timeSlot={slot}
                 onRemove={() => setSelectedTimeSlots(slots => 
                   slots.filter((_, i) => i !== index)
