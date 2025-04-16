@@ -1,12 +1,7 @@
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import UniversalDialog from '@/components/ui/universal-dialog';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { format } from 'date-fns';
+import UniversalDialog from '@/components/ui/universal-dialog';
 
 // Import refactored components
 import TimeSlotSelector, { TimeSlot } from './contribution/TimeSlotSelector';
@@ -37,14 +32,9 @@ const SkillContributionDialog = ({
   requestTitle,
   requesterId
 }: SkillContributionDialogProps) => {
-  // State for selected time slots with dates and preferences
+  // State management
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
-  
-  // State for location preferences
   const [location, setLocation] = useState<LocationPreference>('contributor_home');
-  const [locationDetails, setLocationDetails] = useState('');
-  
-  // Optional setting to add skill to user profile
   const [addToProfile, setAddToProfile] = useState(false);
   
   // Custom hook for form submission
@@ -53,43 +43,6 @@ const SkillContributionDialog = ({
     requesterId,
     () => onOpenChange(false)
   );
-
-  /**
-   * Handle date selection from the calendar
-   */
-  const handleDateSelect = (date: Date) => {
-    // Format the date to compare with existing selections
-    const formattedDate = format(date, 'yyyy-MM-dd');
-    
-    // Check if the date is already selected by comparing formatted date strings
-    const existingSlotIndex = selectedTimeSlots.findIndex(
-      slot => format(new Date(slot.date), 'yyyy-MM-dd') === formattedDate
-    );
-
-    // Toggle date selection (remove if already selected, add if not)
-    if (existingSlotIndex === -1) {
-      // Convert Date to ISO string to match the TimeSlot interface
-      setSelectedTimeSlots([...selectedTimeSlots, { 
-        date: date.toISOString(), 
-        preferences: [] 
-      }]);
-    } else {
-      // Remove the date if already selected
-      setSelectedTimeSlots(selectedTimeSlots.filter((_, index) => index !== existingSlotIndex));
-    }
-  };
-
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = () => {
-    submitContribution(
-      selectedTimeSlots,
-      location,
-      locationDetails,
-      addToProfile
-    );
-  };
 
   return (
     <TooltipProvider>
@@ -105,21 +58,33 @@ const SkillContributionDialog = ({
             <p className="text-lg font-semibold text-gray-900">{requestTitle}</p>
           </div>
 
-          {/* Calendar for date selection */}
+          {/* Date selection calendar */}
           <DateSelectionSection 
             selectedTimeSlots={selectedTimeSlots}
-            onDateSelect={handleDateSelect}
+            onDateSelect={(date) => {
+              const normalizedDate = new Date(date);
+              normalizedDate.setHours(12, 0, 0, 0);
+              setSelectedTimeSlots([
+                ...selectedTimeSlots, 
+                { 
+                  date: normalizedDate.toISOString(),
+                  preferences: [] 
+                }
+              ]);
+            }}
           />
 
-          {/* Time preference selectors for each selected date */}
+          {/* Time preferences for selected dates */}
           <div className="space-y-4">
             {selectedTimeSlots.map((slot, index) => (
               <TimeSlotSelector
-                key={`slot-${index}-${slot.date}`}
+                key={`${slot.date}-${index}`}
                 timeSlot={slot}
-                onRemove={() => setSelectedTimeSlots(slots => 
-                  slots.filter((_, i) => i !== index)
-                )}
+                onRemove={() => {
+                  setSelectedTimeSlots(slots => 
+                    slots.filter((_, i) => i !== index)
+                  );
+                }}
                 onPreferenceChange={(timeId) => {
                   setSelectedTimeSlots(slots =>
                     slots.map((s, i) => {
@@ -148,7 +113,12 @@ const SkillContributionDialog = ({
             isSubmitting={isSubmitting}
             addToProfile={addToProfile}
             onAddToProfileChange={(checked) => setAddToProfile(checked)}
-            onSubmit={handleSubmit}
+            onSubmit={() => submitContribution(
+              selectedTimeSlots,
+              location,
+              "",
+              addToProfile
+            )}
           />
         </div>
       </UniversalDialog>
