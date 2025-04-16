@@ -41,10 +41,10 @@ const ImageUpload = ({ form, multiple = false }: ImageUploadProps) => {
           newImages.push(`https://placekitten.com/400/${300 + i}`);
         }
         
-        form.setValue('images', newImages);
+        form.setValue('images', newImages, { shouldValidate: true });
       } else {
         // For single image
-        form.setValue('imageUrl', 'https://placekitten.com/400/300');
+        form.setValue('imageUrl', 'https://placekitten.com/400/300', { shouldValidate: true });
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -58,12 +58,12 @@ const ImageUpload = ({ form, multiple = false }: ImageUploadProps) => {
     const currentImages = form.getValues('images') || [];
     const newImages = [...currentImages];
     newImages.splice(index, 1);
-    form.setValue('images', newImages);
+    form.setValue('images', newImages, { shouldValidate: true });
   };
 
   // Clear the single image
   const clearImage = () => {
-    form.setValue('imageUrl', '');
+    form.setValue('imageUrl', '', { shouldValidate: true });
   };
 
   return (
@@ -79,7 +79,7 @@ const ImageUpload = ({ form, multiple = false }: ImageUploadProps) => {
               <FormControl>
                 <div className="space-y-4">
                   {/* Image previews */}
-                  {field.value && field.value.length > 0 && (
+                  {field.value && Array.isArray(field.value) && field.value.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                       {field.value.map((url, index) => (
                         <div key={index} className="relative">

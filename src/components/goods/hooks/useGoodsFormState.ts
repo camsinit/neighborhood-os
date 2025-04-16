@@ -1,10 +1,12 @@
-
 import { useState } from "react";
 import { GoodsItemFormData, GoodsRequestFormData, GoodsItemCategory } from "@/components/support/types/formTypes";
 
-export const useGoodsFormState = (initialValues: any, initialRequestType: "offer" | "request" | "need" | null) => {
+export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | GoodsRequestFormData>, initialRequestType?: RequestType | null) => {
+  // Set initial request type from initialRequestType prop, initialValues, or default to "offer"
+  const requestTypeFromValues = initialValues?.requestType || initialRequestType || "offer";
+  
   // Convert "request" to "need" to match the expected types in GoodsItemFormData
-  const normalizedRequestType = initialRequestType === "request" ? "need" : initialRequestType;
+  const normalizedRequestType = requestTypeFromValues === "request" ? "need" : requestTypeFromValues;
   // Check if this is an offer form
   const isOfferForm = normalizedRequestType === "offer";
   

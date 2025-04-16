@@ -92,7 +92,7 @@ const FormFields = ({ form }: FormFieldsProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Care Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select care type" />
@@ -122,7 +122,7 @@ const FormFields = ({ form }: FormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Support Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value || "immediate"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select support type" />

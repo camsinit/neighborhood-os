@@ -47,7 +47,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           request_type: formData.requestType,
           support_type: formData.supportType,
           user_id: user.id,
-          valid_until: new Date(formData.validUntil!).toISOString(),
+          valid_until: formData.validUntil ? new Date(formData.validUntil).toISOString() : undefined,
           image_url: formData.imageUrl,
           skill_category: formData.skill_category,
         });
@@ -87,7 +87,7 @@ export const useSupportRequestSubmit = ({ onSuccess }: SupportRequestSubmitProps
           category: formData.category,
           request_type: formData.requestType,
           support_type: formData.supportType,
-          valid_until: new Date(formData.validUntil!).toISOString(),
+          valid_until: formData.validUntil ? new Date(formData.validUntil).toISOString() : undefined,
           image_url: formData.imageUrl,
           skill_category: formData.skill_category,
         })
