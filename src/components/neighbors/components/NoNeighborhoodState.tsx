@@ -96,8 +96,8 @@ export const NoNeighborhoodState = () => {
       <Card className="p-6 mb-6">
         <h3 className="font-semibold text-lg text-center mb-2">Invitation Required</h3>
         <p className="text-gray-700 mb-4 text-center">
-          To join a neighborhood, you need an invitation from an existing member. 
-          Please contact someone you know who is already in a neighborhood and ask them for an invitation link.
+          To connect with your neighbors, you need to join a neighborhood community. 
+          Please check your email for an invitation or ask a neighbor for an invite link.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button 
