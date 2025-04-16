@@ -52,6 +52,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     }
 
     // Create a new date object with time set to noon to avoid timezone issues
+    // Important: We set the time to noon (12:00) to ensure consistent date handling
     const normalizedDate = new Date(date);
     normalizedDate.setHours(12, 0, 0, 0);
     
@@ -132,6 +133,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
               setSelectedTimeSlots(slots =>
                 slots.map((s, i) => {
                   if (i === index) {
+                    // When adding or removing a preference, ensure we don't mutate the original array
                     const preferences = s.preferences.includes(timeId)
                       ? s.preferences.filter(p => p !== timeId)
                       : [...s.preferences, timeId];

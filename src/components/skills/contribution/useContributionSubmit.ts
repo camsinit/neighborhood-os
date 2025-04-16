@@ -17,6 +17,27 @@ export const useContributionSubmit = (
   const { toast } = useToast();
 
   /**
+   * Helper function to format a date for submission
+   * This ensures each date has a distinct day value in the database
+   */
+  const formatDateForSubmission = (dateStr: string, preference: string) => {
+    // Create a new date object from ISO string
+    const timeDate = new Date(dateStr);
+    
+    // Set hours based on preference (using standard hours)
+    // This ensures the time component is different but preserves the date part
+    const hours = preference === 'morning' ? 9 : 
+                 preference === 'afternoon' ? 13 : 18;
+    
+    // Important: Create a new Date to avoid side effects  
+    const dateObj = new Date(timeDate);
+    dateObj.setHours(hours, 0, 0, 0);
+    
+    // Return properly formatted ISO string
+    return dateObj.toISOString();
+  };
+
+  /**
    * Submit a skill contribution offer
    */
   const submitContribution = async (
@@ -68,21 +89,21 @@ export const useContributionSubmit = (
       // Create time slot entries for each selected date and time preference
       const timeSlotPromises = selectedTimeSlots.flatMap(slot =>
         slot.preferences.map(preference => {
-          // Create a new Date object from ISO string
-          const timeDate = new Date(slot.date);
+          // Format the date correctly using our helper function
+          const formattedTime = formatDateForSubmission(slot.date, preference);
           
-          // Set hours based on preference
+          // Log each generated time slot for debugging
+          console.log(`Creating time slot: ${formattedTime} (${preference})`);
+          
           return {
             session_id: session.id,
-            proposed_time: new Date(timeDate.getTime()).toISOString().replace(
-              /T\d{2}:\d{2}:\d{2}\.\d{3}Z/,
-              preference === 'morning' ? 'T09:00:00.000Z' :
-              preference === 'afternoon' ? 'T13:00:00.000Z' :
-              'T18:00:00.000Z'
-            ),
+            proposed_time: formattedTime,
           };
         })
       );
+
+      // Log all time slots for debugging
+      console.log("Creating time slots:", JSON.stringify(timeSlotPromises));
 
       const { error: timeSlotError } = await supabase
         .from('skill_session_time_slots')

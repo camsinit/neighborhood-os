@@ -34,6 +34,27 @@ export const useSkillRequestSubmit = (
   const queryClient = useQueryClient();
 
   /**
+   * Helper function to format a date for submission
+   * This ensures each date has a distinct day value in the database
+   */
+  const formatDateForSubmission = (dateStr: string, preference: string) => {
+    // Create a new date object from ISO string
+    const timeDate = new Date(dateStr);
+    
+    // Set hours based on preference (using standard hours)
+    // This ensures the time component is different but preserves the date part
+    const hours = preference === 'morning' ? 9 : 
+                 preference === 'afternoon' ? 13 : 18;
+    
+    // Important: Create a new Date to avoid side effects
+    const dateObj = new Date(timeDate);
+    dateObj.setHours(hours, 0, 0, 0);
+    
+    // Return properly formatted ISO string
+    return dateObj.toISOString();
+  };
+
+  /**
    * Submit a skill request with selected time slots
    */
   const submitSkillRequest = async (
@@ -110,19 +131,15 @@ export const useSkillRequestSubmit = (
         
         // Map each preference to a time slot entry
         return slot.preferences.map(preference => {
-          // Create a new date object from ISO string
-          const timeDate = new Date(slot.date);
+          // Format the date correctly using our helper function
+          const formattedTime = formatDateForSubmission(slot.date, preference);
           
-          // Set hours based on preference (using standard hours)
-          timeDate.setHours(
-            preference === 'morning' ? 9 :
-            preference === 'afternoon' ? 13 :
-            18
-          );
+          // Log each generated time slot for debugging
+          console.log(`Creating time slot: ${formattedTime} (${preference})`);
           
           return {
             session_id: session.id,
-            proposed_time: timeDate.toISOString(),
+            proposed_time: formattedTime,
           };
         });
       });
