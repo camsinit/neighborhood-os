@@ -46,7 +46,8 @@ export const useSkillRequestSubmit = (
       return;
     }
 
-    if (selectedTimeSlots.length < 3) {
+    // Client-side validation - ensure exactly 3 dates are selected
+    if (selectedTimeSlots.length !== 3) {
       toast.error('Date selection required', {
         description: 'Please select exactly 3 different dates for your request'
       });

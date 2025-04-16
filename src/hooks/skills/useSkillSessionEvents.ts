@@ -7,7 +7,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { SkillSessionEventData, createSkillSessionEvent } from "@/utils/skillSessionCalendar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 /**
  * Custom hook for managing skill session events
@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 export const useSkillSessionEvents = () => {
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   // Schedule a skill session by creating a calendar event
   const scheduleSkillSession = async (eventData: SkillSessionEventData) => {
@@ -29,8 +28,7 @@ export const useSkillSessionEvents = () => {
       }
       
       // Success notification
-      toast({
-        title: "Session scheduled!",
+      toast.success("Session scheduled!", {
         description: "The skill session has been added to the calendar."
       });
       
@@ -42,10 +40,8 @@ export const useSkillSessionEvents = () => {
       return eventId;
     } catch (error) {
       console.error("Error in scheduleSkillSession:", error);
-      toast({
-        title: "Scheduling failed",
-        description: "There was a problem creating the session event.",
-        variant: "destructive"
+      toast.error("Scheduling failed", {
+        description: "There was a problem creating the session event."
       });
       return null;
     } finally {

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,7 +34,11 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
    */
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
+    
+    // Format date to consistent string for comparison (removing time portion)
     const formattedDate = format(date, 'yyyy-MM-dd');
+    
+    // Check if this date is already selected
     const existingSlotIndex = selectedTimeSlots.findIndex(
       slot => format(slot.date, 'yyyy-MM-dd') === formattedDate
     );
@@ -68,7 +73,6 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
             selected={selectedDates}
             onSelect={(value) => {
               // When in multiple mode, value is an array of dates
-              // We need to find which date was clicked by comparing with previous selections
               if (Array.isArray(value) && value.length !== selectedDates.length) {
                 // Find the date that was added or removed
                 if (value.length > selectedDates.length) {
@@ -92,6 +96,11 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
               selected: "bg-gray-200 text-gray-700",
             }}
           />
+        </div>
+        {/* Helper text showing count of selected dates */}
+        <div className="text-sm text-gray-500 mt-1">
+          {selectedTimeSlots.length} of 3 dates selected 
+          {selectedTimeSlots.length < 3 && " (3 dates required)"}
         </div>
       </div>
 
