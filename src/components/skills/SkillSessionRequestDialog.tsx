@@ -1,3 +1,4 @@
+
 /**
  * Dialog component for requesting a skill session
  * 
@@ -79,42 +80,44 @@ const SkillSessionRequestDialog = ({
         onOpenChange={onOpenChange}
         title={`Request Help with: ${skillTitle}`}
       >
-        <div className="space-y-6 py-4">
-          {/* Request title display */}
-          <div className="text-center mb-6">
-            <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
-            <p className="text-lg font-semibold text-gray-900">{skillTitle}</p>
-          </div>
+        {/* Wrap everything in a Form component with the onSubmit handler */}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
+            {/* Request title display */}
+            <div className="text-center mb-6">
+              <h4 className="text-sm font-medium text-gray-500">Contributing to request</h4>
+              <p className="text-lg font-semibold text-gray-900">{skillTitle}</p>
+            </div>
 
-          {/* Description Field */}
-          <DescriptionField form={form} />
+            {/* Description Field */}
+            <DescriptionField form={form} />
 
-          {/* Date and Time Selection Section - now with full width */}
-          <div className="space-y-2 w-full">
-            <TimeSlotSelectionSection
-              selectedTimeSlots={selectedTimeSlots}
-              setSelectedTimeSlots={setSelectedTimeSlots}
-              disabledDays={disabledDays}
-            />
-          </div>
+            {/* Date and Time Selection Section - now with full width */}
+            <div className="space-y-2 w-full">
+              <TimeSlotSelectionSection
+                selectedTimeSlots={selectedTimeSlots}
+                setSelectedTimeSlots={setSelectedTimeSlots}
+                disabledDays={disabledDays}
+              />
+            </div>
 
-          {/* Form Controls */}
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-          </div>
-        </div>
-      </Form>
-    </UniversalDialog>
-  </TooltipProvider>
+            {/* Form Controls */}
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </UniversalDialog>
+    </TooltipProvider>
   );
 };
 
