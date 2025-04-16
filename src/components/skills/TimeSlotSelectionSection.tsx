@@ -5,6 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import TimeSlotSelector, { TimeSlot } from "./contribution/TimeSlotSelector";
 import { FormLabel } from "@/components/ui/form";
 import { toast } from "sonner";
+import { Info } from "lucide-react";
 
 /**
  * Props for the TimeSlotSelectionSection component
@@ -19,7 +20,7 @@ interface TimeSlotSelectionSectionProps {
  * A component that handles the selection of dates and time preferences for skill sessions
  * 
  * This component allows users to:
- * 1. Select up to 3 different dates from a calendar
+ * 1. Select dates from a calendar (recommending 3 different dates)
  * 2. Set time preferences (morning/afternoon/evening) for each selected date
  */
 const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
@@ -29,7 +30,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
 }) => {
   /**
    * Handles the selection of a date from the calendar
-   * - Adds the date to selectedTimeSlots if not already selected (max 3)
+   * - Adds the date to selectedTimeSlots if not already selected 
    * - Removes the date if already selected
    */
   const handleDateSelect = (date: Date | undefined) => {
@@ -50,25 +51,18 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
       return;
     }
 
-    // Add new date if under the limit
-    if (selectedTimeSlots.length < 3) {
-      // Create a new date object with time set to noon to avoid timezone issues
-      const normalizedDate = new Date(date);
-      normalizedDate.setHours(12, 0, 0, 0);
-      
-      setSelectedTimeSlots([
-        ...selectedTimeSlots, 
-        { 
-          date: normalizedDate.toISOString(), // Store as ISO string for consistent serialization
-          preferences: [] 
-        }
-      ]);
-      console.log(`Added date: ${formattedDate}, total: ${selectedTimeSlots.length + 1}`);
-    } else {
-      toast.error("Maximum 3 dates can be selected", {
-        description: "Please remove a date before adding another one"
-      });
-    }
+    // Create a new date object with time set to noon to avoid timezone issues
+    const normalizedDate = new Date(date);
+    normalizedDate.setHours(12, 0, 0, 0);
+    
+    setSelectedTimeSlots([
+      ...selectedTimeSlots, 
+      { 
+        date: normalizedDate.toISOString(), // Store as ISO string for consistent serialization
+        preferences: [] 
+      }
+    ]);
+    console.log(`Added date: ${formattedDate}, total: ${selectedTimeSlots.length + 1}`);
   };
 
   // Get array of selected dates for calendar highlighting
@@ -78,7 +72,13 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
     <>
       {/* Calendar Section - Now full width */}
       <div className="space-y-2">
-        <FormLabel>Select exactly 3 dates that work for you</FormLabel>
+        <div className="flex items-start justify-between">
+          <FormLabel>Select dates that work for you</FormLabel>
+          <div className="text-xs text-primary flex items-center gap-1">
+            <Info size={14} />
+            <span>We recommend selecting 3 dates</span>
+          </div>
+        </div>
         <div className="w-full border rounded-lg p-4">
           <Calendar
             mode="multiple"
@@ -109,10 +109,10 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
             }}
           />
         </div>
-        {/* Helper text showing count of selected dates */}
+        {/* Helper text showing count of selected dates with recommendation */}
         <div className="text-sm text-gray-500 mt-1">
-          {selectedTimeSlots.length} of 3 dates selected 
-          {selectedTimeSlots.length < 3 && " (3 dates required)"}
+          {selectedTimeSlots.length} date{selectedTimeSlots.length !== 1 ? 's' : ''} selected 
+          {selectedTimeSlots.length === 0 && " (please select at least one date)"}
         </div>
       </div>
 

@@ -71,10 +71,10 @@ const SkillSessionRequestDialog = ({
    * Returns true if valid, false otherwise
    */
   const validateTimeSlots = () => {
-    // Check if exactly 3 dates are selected
-    if (selectedTimeSlots.length !== 3) {
+    // Check if at least 1 date is selected
+    if (selectedTimeSlots.length < 1) {
       toast.error("Date selection required", {
-        description: "Please select exactly 3 different dates for your request"
+        description: "Please select at least one date for your request"
       });
       return false;
     }
@@ -94,7 +94,7 @@ const SkillSessionRequestDialog = ({
     
     if (uniqueDates.size !== selectedTimeSlots.length) {
       toast.error("Duplicate dates detected", {
-        description: "Please select 3 different dates for your request"
+        description: "Please select different dates for your request"
       });
       return false;
     }
