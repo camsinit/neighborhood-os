@@ -1,9 +1,42 @@
-
 /**
  * Time slot utilities for handling date formatting and common operations
- * used across both request and contribution flows
  */
 import { TimeSlot } from "@/components/skills/contribution/TimeSlotSelector";
+
+/**
+ * Validate that time slots meet the required criteria
+ * 
+ * @param timeSlots Array of time slots to validate
+ * @returns Object with isValid flag and error message if invalid
+ */
+export const validateTimeSlots = (timeSlots: TimeSlot[]) => {
+  // Check if at least 1 date is selected (minimum requirement)
+  if (timeSlots.length < 1) {
+    return { 
+      isValid: false, 
+      message: "Please select at least one date for your request"
+    };
+  }
+
+  // Validate that each date has at least one time preference selected
+  if (timeSlots.some(slot => slot.preferences.length === 0)) {
+    return { 
+      isValid: false, 
+      message: "Please select at least one time preference for each selected date"
+    };
+  }
+
+  // All validations passed
+  return { isValid: true };
+};
+
+/**
+ * Normalize a date to standard format
+ */
+export const normalizeDate = (date: Date): string => {
+  // Format as YYYY-MM-DD
+  return date.toISOString().split('T')[0];
+};
 
 /**
  * Format a date string for submission with appropriate time based on preference
@@ -84,45 +117,4 @@ export const prepareTimeSlots = (selectedTimeSlots: TimeSlot[]) => {
     date: new Date(slot.date).toISOString().split('T')[0], 
     preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
   }));
-};
-
-/**
- * Validate that time slots meet the required criteria
- * 
- * @param timeSlots Array of time slots to validate
- * @param requiredDatesCount Number of required unique dates (default to 1 - minimum requirement)
- * @returns Object with isValid flag and error message if invalid
- */
-export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 1) => {
-  // Check if at least 1 date is selected (minimum requirement)
-  if (timeSlots.length < 1) {
-    return { 
-      isValid: false, 
-      message: "Please select at least one date for your request"
-    };
-  }
-
-  // Validate that each date has at least one time preference selected
-  if (timeSlots.some(slot => slot.preferences.length === 0)) {
-    return { 
-      isValid: false, 
-      message: "Please select at least one time preference for each selected date"
-    };
-  }
-
-  // Extract just the date part (YYYY-MM-DD) from each ISO string for counting unique dates
-  const uniqueDateStrings = new Set(
-    timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
-  );
-  
-  // Log detailed info about unique dates
-  console.log("Validation - Unique dates check:", {
-    selectedSlotsCount: timeSlots.length,
-    uniqueDatesCount: uniqueDateStrings.size,
-    uniqueDates: Array.from(uniqueDateStrings),
-    allDateStrings: timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
-  });
-  
-  // All validations passed
-  return { isValid: true };
 };

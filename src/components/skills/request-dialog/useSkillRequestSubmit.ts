@@ -1,21 +1,14 @@
 
 /**
  * Hook for handling skill request submission
- * 
- * This hook has been refactored to:
- * 1. Use separate service functions for database operations
- * 2. Improve error handling and validation
- * 3. Standardize date handling across the application
+ * This hook has been refactored to use the new database function for creating sessions
  */
 import { useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { TimeSlot } from "../contribution/TimeSlotSelector";
-import { 
-  createSkillSessionWithTimeSlots
-} from "./services/requestService";
-import { validateTimeSlots } from "@/utils/timeslotUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Form data structure for skill requests
@@ -43,7 +36,6 @@ export const useSkillRequestSubmit = (
 
   /**
    * Submit a skill request with selected time slots
-   * This now uses a combined transaction approach to create sessions with time slots
    */
   const submitSkillRequest = async (
     data: SkillRequestFormData,
@@ -55,29 +47,31 @@ export const useSkillRequestSubmit = (
       return;
     }
 
-    // Log input time slots array
+    // Log input time slots array for debugging
     console.log("SUBMIT REQUEST - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
     
-    // Validate time slots - require at least 1 date with time preferences
-    const validation = validateTimeSlots(selectedTimeSlots, 1);
-    if (!validation.isValid) {
-      toast.error('Validation Error', {
-        description: validation.message
-      });
+    // Validate we have at least one time slot
+    if (!selectedTimeSlots.length) {
+      toast.error('Please select at least one date and time preference');
       return;
     }
 
     // Start submission process
     setIsSubmitting(true);
     try {
-      // Create the skill session with time slots in a single transaction
-      await createSkillSessionWithTimeSlots(
-        skillId, 
-        providerId, 
-        user.id, 
-        data, 
-        selectedTimeSlots
+      // Call the database function directly using RPC
+      const { data: result, error } = await supabase.rpc(
+        'create_skill_session_with_timeslots',
+        {
+          p_skill_id: skillId,
+          p_provider_id: providerId,
+          p_requester_id: user.id,
+          p_requester_availability: data,
+          p_timeslots: selectedTimeSlots
+        }
       );
+
+      if (error) throw error;
       
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
@@ -95,17 +89,9 @@ export const useSkillRequestSubmit = (
         errorCode: error.code
       });
       
-      // Special handling for different error types
-      if (error.name === "ValidationError") {
-        // Special handling for our validation errors
-        toast.error('Request submission failed', {
-          description: error.message
-        });
-      } else {
-        toast.error('Request submission failed', {
-          description: error.message || 'Failed to submit skill request. Please try again.'
-        });
-      }
+      toast.error('Request submission failed', {
+        description: error.message || 'Failed to submit skill request. Please try again.'
+      });
     } finally {
       setIsSubmitting(false);
     }
