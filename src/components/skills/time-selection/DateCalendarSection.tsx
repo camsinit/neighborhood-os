@@ -1,10 +1,15 @@
+
 import { Calendar } from "@/components/ui/calendar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Interface for DateCalendarSection props
+ * This defines the expected properties for the date selection calendar
+ */
 interface DateCalendarSectionProps {
-  selectedTimeSlots: TimeSlot[];
+  selectedTimeSlots: { date: string; preferences: string[] }[]; // Explicitly defining the structure instead of using TimeSlot
   handleDateSelect: (date: Date | undefined) => void;
   disabledDays: { before: Date; after: Date };
   uniqueDatesCount: number;
