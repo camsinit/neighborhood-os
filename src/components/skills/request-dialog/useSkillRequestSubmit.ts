@@ -58,8 +58,8 @@ export const useSkillRequestSubmit = (
     // Log input time slots array
     console.log("SUBMIT REQUEST - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
     
-    // Validate time slots - require exactly 3 unique dates
-    const validation = validateTimeSlots(selectedTimeSlots, 3);
+    // Validate time slots - require at least 1 date with time preferences
+    const validation = validateTimeSlots(selectedTimeSlots, 1);
     if (!validation.isValid) {
       toast.error('Validation Error', {
         description: validation.message

@@ -69,11 +69,11 @@ export const createTimeSlotObjects = (
  * Validate that time slots meet the required criteria
  * 
  * @param timeSlots Array of time slots to validate
- * @param requiredDatesCount Number of required unique dates
+ * @param requiredDatesCount Number of required unique dates (default to 1 - minimum requirement)
  * @returns Object with isValid flag and error message if invalid
  */
-export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 3) => {
-  // Check if at least 1 date is selected
+export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 1) => {
+  // Check if at least 1 date is selected (minimum requirement)
   if (timeSlots.length < 1) {
     return { 
       isValid: false, 
@@ -89,8 +89,7 @@ export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 3)
     };
   }
 
-  // Validate that selected dates are unique
-  // Extract just the date part (YYYY-MM-DD) from each ISO string
+  // Extract just the date part (YYYY-MM-DD) from each ISO string for counting unique dates
   const uniqueDateStrings = new Set(
     timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
   );
@@ -103,14 +102,6 @@ export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 3)
     allDateStrings: timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
   });
   
-  // Ensure we have at least the required number of distinct dates (default: 3)
-  if (uniqueDateStrings.size < requiredDatesCount) {
-    return { 
-      isValid: false, 
-      message: `You have selected ${uniqueDateStrings.size} unique dates. Please select at least ${requiredDatesCount} different dates.`
-    };
-  }
-
   // All validations passed
   return { isValid: true };
 };

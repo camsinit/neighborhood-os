@@ -36,8 +36,8 @@ export const useContributionSubmit = (
     // Log submission input
     console.log("CONTRIBUTION SUBMIT - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
     
-    // Validate time slots
-    const validation = validateTimeSlots(selectedTimeSlots);
+    // Validate time slots - require at least 1 date with time preferences
+    const validation = validateTimeSlots(selectedTimeSlots, 1);
     if (!validation.isValid) {
       toast({
         title: "Validation error",
