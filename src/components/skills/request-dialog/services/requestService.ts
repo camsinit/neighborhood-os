@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
@@ -97,13 +98,13 @@ export const createSkillSessionWithTimeSlots = async (
     });
     
     // First try using the stored procedure (transaction)
-    // Ensure the date format is correct and all slots have preferences
+    // Extract just the YYYY-MM-DD portion of the date and ensure all slots have preferences
     const enhancedTimeSlots = selectedTimeSlots.map(slot => {
-      // Ensure date is in YYYY-MM-DD format only (no time component)
+      // Critical fix: Extract ONLY the YYYY-MM-DD part of the date
       const dateOnly = new Date(slot.date).toISOString().split('T')[0];
       
       return {
-        // CRITICAL FIX: Use date-only format to ensure consistent date parsing in PostgreSQL
+        // Send the date without any time component
         date: dateOnly,
         preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
       };
@@ -125,6 +126,8 @@ export const createSkillSessionWithTimeSlots = async (
     });
 
     if (error) {
+      console.error('Session creation error:', error);
+      
       if (error.code === 'PGRST202') {
         // Stored procedure not found, fall back to legacy approach
         console.warn("Stored procedure not found, using legacy approach");
