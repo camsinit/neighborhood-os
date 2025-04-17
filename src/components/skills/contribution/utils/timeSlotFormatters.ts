@@ -69,9 +69,10 @@ export const createTimeSlotObjects = (
  * Validate that time slots meet the required criteria
  * 
  * @param timeSlots Array of time slots to validate
+ * @param requiredDatesCount Number of required unique dates
  * @returns Object with isValid flag and error message if invalid
  */
-export const validateTimeSlots = (timeSlots: TimeSlot[]) => {
+export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 3) => {
   // Check if at least 1 date is selected
   if (timeSlots.length < 1) {
     return { 
@@ -102,11 +103,11 @@ export const validateTimeSlots = (timeSlots: TimeSlot[]) => {
     allDateStrings: timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
   });
   
-  // Ensure we have at least 3 distinct dates
-  if (uniqueDateStrings.size < 3) {
+  // Ensure we have at least the required number of distinct dates (default: 3)
+  if (uniqueDateStrings.size < requiredDatesCount) {
     return { 
       isValid: false, 
-      message: `You have selected ${uniqueDateStrings.size} unique dates. Please select at least 3 different dates.`
+      message: `You have selected ${uniqueDateStrings.size} unique dates. Please select at least ${requiredDatesCount} different dates.`
     };
   }
 

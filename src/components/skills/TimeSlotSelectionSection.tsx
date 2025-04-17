@@ -4,7 +4,7 @@ import { addDays } from "date-fns";
 import { TimeSlot } from "./contribution/TimeSlotSelector";
 import DateCalendarSection from "./time-selection/DateCalendarSection";
 import TimeSlotList from "./time-selection/TimeSlotList";
-import { normalizeDate, getUniqueDatesCount, logDateDetails } from "./time-selection/dateUtils";
+import { normalizeDate, getUniqueDatesCount, logDateDetails } from "@/utils/dateUtils";
 
 /**
  * Props for the TimeSlotSelectionSection component
@@ -115,6 +115,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         handleDateSelect={handleDateSelect}
         disabledDays={disabledDays}
         uniqueDatesCount={uniqueDatesCount}
+        requiredDatesCount={3} // Make the required dates count explicit
       />
 
       {/* Time preference selectors for selected dates */}

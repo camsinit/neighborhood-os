@@ -19,6 +19,7 @@ import {
 } from "./request-dialog/useSkillRequestSubmit";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { validateTimeSlots } from "./contribution/utils/timeSlotFormatters";
 
 /**
  * Props for the dialog component
@@ -67,58 +68,19 @@ const SkillSessionRequestDialog = ({
   };
 
   /**
-   * Validates the time slots before submission
-   * Returns true if valid, false otherwise
-   */
-  const validateTimeSlots = () => {
-    // Check if at least 1 date is selected
-    if (selectedTimeSlots.length < 1) {
-      toast.error("Date selection required", {
-        description: "Please select at least one date for your request"
-      });
-      return false;
-    }
-
-    // Validate that each date has at least one time preference selected
-    if (selectedTimeSlots.some(slot => slot.preferences.length === 0)) {
-      toast.error("Time preferences required", {
-        description: "Please select at least one time preference for each selected date"
-      });
-      return false;
-    }
-
-    // Validate that at least 3 unique dates are selected
-    // NEW: Extract just the date part (YYYY-MM-DD) from each ISO string
-    const uniqueDates = new Set(
-      selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
-    );
-    
-    // Log detailed info about unique dates
-    console.log("VALIDATION - Unique dates check:", {
-      selectedSlotsCount: selectedTimeSlots.length,
-      uniqueDatesCount: uniqueDates.size,
-      uniqueDates: Array.from(uniqueDates),
-      allDateStrings: selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
-    });
-    
-    if (uniqueDates.size < 3) {
-      toast.error(`At least 3 different dates required`, {
-        description: `You have selected ${uniqueDates.size} unique dates. Please select at least 3 different dates.`
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  /**
    * Form submission handler that validates the form data before submitting
    */
   const onSubmit = async (data: SkillRequestFormData) => {
     console.log("Form submitted with time slots:", selectedTimeSlots);
     
-    // Validate time slots
-    if (!validateTimeSlots()) {
+    // Validate time slots - require exactly 3 unique dates
+    const validationResult = validateTimeSlots(selectedTimeSlots, 3);
+    if (!validationResult.isValid) {
+      toast.error(validationResult.message.includes("unique dates") ? 
+        "At least 3 different dates required" : 
+        "Time slots validation error", {
+        description: validationResult.message
+      });
       return;
     }
     

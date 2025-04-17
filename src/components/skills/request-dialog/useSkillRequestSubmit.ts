@@ -16,6 +16,7 @@ import {
   createSkillSession, 
   addTimeSlots 
 } from "./services/requestService";
+import { validateTimeSlots } from "../contribution/utils/timeSlotFormatters";
 
 /**
  * Form data structure for skill requests
@@ -25,52 +26,6 @@ export interface SkillRequestFormData {
   availability: 'weekdays' | 'weekends' | 'both';
   timePreference: ('morning' | 'afternoon' | 'evening')[];
 }
-
-/**
- * Validate time slots meet the required criteria
- * 
- * @param timeSlots Array of time slots to validate
- * @returns Object with validation result and error message if invalid
- */
-export const validateTimeSlots = (timeSlots: TimeSlot[]) => {
-  // Client-side validation - ensure at least 3 dates are selected
-  if (timeSlots.length < 3) {
-    return {
-      isValid: false,
-      message: 'Please select at least three dates for your request'
-    };
-  }
-
-  // Ensure each date has at least one time preference
-  if (timeSlots.some(slot => slot.preferences.length === 0)) {
-    return {
-      isValid: false,
-      message: 'Please select at least one time preference for each selected date'
-    };
-  }
-
-  // Extract just the date part (YYYY-MM-DD) from each ISO string
-  const uniqueDateStrings = new Set(
-    timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
-  );
-  
-  // Log detailed information about uniqueness check
-  console.log("DATE DIAGNOSTICS:", {
-    totalSlots: timeSlots.length,
-    uniqueDatesCount: uniqueDateStrings.size,
-    uniqueDatesArray: Array.from(uniqueDateStrings)
-  });
-  
-  // Client-side check for unique dates (at least 3)
-  if (uniqueDateStrings.size < 3) {
-    return {
-      isValid: false,
-      message: `You selected ${uniqueDateStrings.size} unique dates, but 3 are required.`
-    };
-  }
-
-  return { isValid: true };
-};
 
 /**
  * Custom hook for handling the skill request submission process
@@ -103,8 +58,8 @@ export const useSkillRequestSubmit = (
     // Log input time slots array
     console.log("SUBMIT REQUEST - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
     
-    // Validate time slots
-    const validation = validateTimeSlots(selectedTimeSlots);
+    // Validate time slots - require exactly 3 unique dates
+    const validation = validateTimeSlots(selectedTimeSlots, 3);
     if (!validation.isValid) {
       toast.error('Validation Error', {
         description: validation.message
