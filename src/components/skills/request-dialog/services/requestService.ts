@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
@@ -71,8 +70,8 @@ export const createTimeSlotObjects = (
 };
 
 /**
- * Create a skill session with initial time slots in a transaction
- * This is a critical update to ensure time slots are created with the session
+ * Create a skill session with initial time slots using transaction if available,
+ * with fallback to sequential operations if the stored procedure doesn't exist
  * 
  * @param skillId The skill ID
  * @param providerId The provider ID
@@ -88,31 +87,95 @@ export const createSkillSessionWithTimeSlots = async (
   formData: SkillRequestFormData,
   selectedTimeSlots: TimeSlot[]
 ) => {
-  // Start a Supabase transaction
-  // Use any type to bypass TypeScript checking for RPC name
-  const { data, error } = await (supabase.rpc as any)('create_skill_session_with_timeslots', {
-    p_skill_id: skillId,
-    p_provider_id: providerId,
-    p_requester_id: requesterId,
-    p_requester_availability: {
+  try {
+    // First try using the stored procedure (transaction)
+    // Use any type to bypass TypeScript checking for RPC name
+    const { data, error } = await (supabase.rpc as any)('create_skill_session_with_timeslots', {
+      p_skill_id: skillId,
+      p_provider_id: providerId,
+      p_requester_id: requesterId,
+      p_requester_availability: {
+        availability: formData.availability,
+        timePreference: formData.timePreference,
+        description: formData.description,
+      },
+      p_timeslots: selectedTimeSlots.flatMap(slot => 
+        slot.preferences.map(preference => ({
+          date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
+          preference: preference
+        }))
+      )
+    });
+
+    if (error) {
+      if (error.code === 'PGRST202') {
+        // Stored procedure not found, fall back to legacy approach
+        console.warn("Stored procedure not found, using legacy approach");
+        return await createSkillSessionLegacy(skillId, providerId, requesterId, formData, selectedTimeSlots);
+      }
+      
+      // Other errors, just throw
+      console.error('Session creation error:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    // If any other error occurs, try the fallback approach
+    console.error('Transaction approach failed, trying legacy approach:', error);
+    return await createSkillSessionLegacy(skillId, providerId, requesterId, formData, selectedTimeSlots);
+  }
+};
+
+/**
+ * Legacy fallback method for creating a skill session with time slots
+ * using separate sequential operations instead of a transaction
+ */
+export const createSkillSessionLegacy = async (
+  skillId: string,
+  providerId: string,
+  requesterId: string,
+  formData: SkillRequestFormData,
+  selectedTimeSlots: TimeSlot[]
+) => {
+  console.log("Using legacy approach to create session with:", {
+    skill_id: skillId,
+    provider_id: providerId,
+    requester_id: requesterId,
+    requester_availability: {
       availability: formData.availability,
       timePreference: formData.timePreference,
       description: formData.description,
     },
-    p_timeslots: selectedTimeSlots.flatMap(slot => 
-      slot.preferences.map(preference => ({
-        date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
-        preference: preference
-      }))
-    )
+    status: 'pending_provider_times',
   });
+  
+  // First create the session
+  const { data: session, error: sessionError } = await supabase
+    .from('skill_sessions')
+    .insert({
+      skill_id: skillId,
+      provider_id: providerId,
+      requester_id: requesterId,
+      requester_availability: {
+        availability: formData.availability,
+        timePreference: formData.timePreference,
+        description: formData.description,
+      },
+      status: 'pending_provider_times',
+    })
+    .select()
+    .single();
 
-  if (error) {
-    console.error('Session creation error:', error);
-    throw error;
+  if (sessionError) {
+    console.error('Session creation error:', sessionError);
+    throw sessionError;
   }
 
-  return data;
+  // Then add the time slots
+  await addTimeSlots(session.id, selectedTimeSlots);
+  
+  return session;
 };
 
 /**

@@ -13,6 +13,7 @@ interface TimeSlotSelectionSectionProps {
   selectedTimeSlots: TimeSlot[]; 
   setSelectedTimeSlots: React.Dispatch<React.SetStateAction<TimeSlot[]>>;
   disabledDays: { before: Date; after: Date };
+  requiredDatesCount?: number; // Make this an optional prop with default value
 }
 
 /**
@@ -26,7 +27,8 @@ interface TimeSlotSelectionSectionProps {
 const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
   selectedTimeSlots,
   setSelectedTimeSlots,
-  disabledDays
+  disabledDays,
+  requiredDatesCount = 1 // Default to 1 if not provided
 }) => {
   // Count of unique dates for validation
   const uniqueDatesCount = getUniqueDatesCount(selectedTimeSlots);
@@ -115,7 +117,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         handleDateSelect={handleDateSelect}
         disabledDays={disabledDays}
         uniqueDatesCount={uniqueDatesCount}
-        requiredDatesCount={3} // This is a server requirement (not just a recommendation)
+        requiredDatesCount={requiredDatesCount} // Pass through the required date count
       />
 
       {/* Time preference selectors for selected dates */}

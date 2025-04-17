@@ -82,16 +82,22 @@ const SkillSessionRequestDialog = ({
       return;
     }
     
-    // Check if we have at least 3 different dates (database requirement)
+    // We recommend providing multiple dates for scheduling flexibility, but only require 1
     const uniqueDatesSet = new Set(
       selectedTimeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
     );
     
-    if (uniqueDatesSet.size < 3) {
-      toast.error("Please select at least 3 different dates", {
-        description: "Due to system requirements, you must provide at least 3 different dates for scheduling flexibility."
+    if (uniqueDatesSet.size < 1) {
+      toast.error("Please select at least 1 date", {
+        description: "You must provide at least one date for your request."
       });
       return;
+    } else if (uniqueDatesSet.size < 3) {
+      // Just a warning, not an error - we'll proceed with the submission
+      toast.warning("Consider adding more dates", {
+        description: "For better scheduling flexibility, we recommend providing at least 3 different dates."
+      });
+      // Still proceed with submission despite the warning
     }
     
     // If validation passes, submit the request
@@ -117,6 +123,7 @@ const SkillSessionRequestDialog = ({
                 selectedTimeSlots={selectedTimeSlots}
                 setSelectedTimeSlots={setSelectedTimeSlots}
                 disabledDays={disabledDays}
+                requiredDatesCount={1} // Change from 3 to 1 to match database requirement
               />
             </div>
 

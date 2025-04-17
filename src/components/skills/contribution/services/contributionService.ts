@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../TimeSlotSelector';
 import { LocationPreference } from '../LocationSelector';
@@ -6,6 +5,7 @@ import { createTimeSlotObjects } from '../utils/timeSlotFormatters';
 
 /**
  * Create a new skill session with time slots for contributor in a single transaction
+ * With fallback to the legacy approach if the stored procedure doesn't exist
  * 
  * @param skillRequestId ID of the skill request
  * @param requesterId ID of the requester
@@ -23,43 +23,83 @@ export const createSkillSessionWithTimeSlots = async (
   locationDetails: string,
   selectedTimeSlots: TimeSlot[]
 ) => {
-  // Extract time slots in the format expected by our stored procedure
-  const timeSlots = selectedTimeSlots.flatMap(slot => 
-    slot.preferences.map(preference => ({
-      date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
-      preference: preference
-    }))
+  try {
+    // Extract time slots in the format expected by our stored procedure
+    const timeSlots = selectedTimeSlots.flatMap(slot => 
+      slot.preferences.map(preference => ({
+        date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
+        preference: preference
+      }))
+    );
+    
+    // Log the data being sent to the procedure
+    console.log("Creating contribution session with time slots:", {
+      skill_id: skillRequestId,
+      provider_id: providerId,
+      requester_id: requesterId,
+      location_preference: location,
+      location_details: location === 'other' ? locationDetails : null,
+      timeSlots: timeSlots
+    });
+    
+    // Call the stored procedure - using any to bypass TypeScript checking for RPC name
+    // This is a temporary solution until types are regenerated
+    const { data, error } = await (supabase.rpc as any)('create_contribution_session_with_timeslots', {
+      p_skill_id: skillRequestId,
+      p_provider_id: providerId,
+      p_requester_id: requesterId,
+      p_location_preference: location,
+      p_location_details: location === 'other' ? locationDetails : null,
+      p_timeslots: timeSlots
+    });
+  
+    // Handle errors
+    if (error) {
+      if (error.code === 'PGRST202') {
+        // Stored procedure not found, fall back to legacy approach
+        console.warn("Stored procedure not found, using legacy approach");
+        return await createSessionLegacy(skillRequestId, requesterId, providerId, location, locationDetails, selectedTimeSlots);
+      }
+      
+      // Other errors, just throw
+      console.error('Session creation error:', error);
+      throw error;
+    }
+  
+    return data;
+  } catch (error) {
+    // If any other error occurs, try the fallback approach
+    console.error('Transaction approach failed, trying legacy approach:', error);
+    return await createSessionLegacy(skillRequestId, requesterId, providerId, location, locationDetails, selectedTimeSlots);
+  }
+};
+
+/**
+ * Legacy fallback method for creating a skill session with time slots
+ * using separate sequential operations instead of a transaction
+ */
+async function createSessionLegacy(
+  skillRequestId: string,
+  requesterId: string,
+  providerId: string,
+  location: LocationPreference,
+  locationDetails: string,
+  selectedTimeSlots: TimeSlot[]
+) {
+  // First create the session
+  const session = await createSkillSession(
+    skillRequestId, 
+    requesterId, 
+    providerId, 
+    location, 
+    locationDetails
   );
   
-  // Log the data being sent to the procedure
-  console.log("Creating contribution session with time slots:", {
-    skill_id: skillRequestId,
-    provider_id: providerId,
-    requester_id: requesterId,
-    location_preference: location,
-    location_details: location === 'other' ? locationDetails : null,
-    timeSlots: timeSlots
-  });
+  // Then add time slots
+  await addTimeSlots(session.id, selectedTimeSlots);
   
-  // Call the stored procedure - using any to bypass TypeScript checking for RPC name
-  // This is a temporary solution until types are regenerated
-  const { data, error } = await (supabase.rpc as any)('create_contribution_session_with_timeslots', {
-    p_skill_id: skillRequestId,
-    p_provider_id: providerId,
-    p_requester_id: requesterId,
-    p_location_preference: location,
-    p_location_details: location === 'other' ? locationDetails : null,
-    p_timeslots: timeSlots
-  });
-
-  // Handle errors
-  if (error) {
-    console.error('Session creation error:', error);
-    throw error;
-  }
-
-  return data;
-};
+  return session;
+}
 
 /**
  * Legacy method to create a new skill session for contributor

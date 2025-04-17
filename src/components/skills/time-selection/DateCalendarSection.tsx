@@ -1,91 +1,101 @@
 
-import React from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { FormLabel } from "@/components/ui/form";
-import { Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { TimeSlot } from "../contribution/TimeSlotSelector";
+import { cn } from "@/lib/utils";
 
-/**
- * Props for the DateCalendarSection component
- */
 interface DateCalendarSectionProps {
   selectedTimeSlots: TimeSlot[];
   handleDateSelect: (date: Date | undefined) => void;
   disabledDays: { before: Date; after: Date };
   uniqueDatesCount: number;
-  requiredDatesCount: number; // Now treated as a system requirement
+  requiredDatesCount: number;
 }
 
 /**
- * A component that renders the calendar for date selection
- * 
- * This component is responsible for:
- * 1. Displaying the calendar
- * 2. Handling the selection of dates
- * 3. Showing the helper text with counts
+ * Date selection calendar section
+ * Shows a calendar for selecting dates and provides feedback on selection requirements
  */
-const DateCalendarSection: React.FC<DateCalendarSectionProps> = ({
+const DateCalendarSection = ({
   selectedTimeSlots,
   handleDateSelect,
   disabledDays,
   uniqueDatesCount,
   requiredDatesCount
-}) => {
-  // Convert selectedTimeSlots to Date objects for calendar display
+}: DateCalendarSectionProps) => {
+  // Format the selected dates for the Calendar component
   const selectedDates = selectedTimeSlots.map(slot => new Date(slot.date));
+
+  // Function to determine if the selected dates meet requirements
+  const getMeetingRequirementsText = () => {
+    if (uniqueDatesCount < requiredDatesCount) {
+      return {
+        text: `Please select at least ${requiredDatesCount} different date${requiredDatesCount > 1 ? 's' : ''}.`,
+        status: 'error' as const
+      };
+    } else if (requiredDatesCount === 1 && uniqueDatesCount < 3) {
+      return {
+        text: 'For better scheduling flexibility, we recommend selecting at least 3 different dates.',
+        status: 'warning' as const
+      };
+    } else {
+      return {
+        text: 'Great! You\'ve selected enough dates for scheduling flexibility.',
+        status: 'success' as const
+      };
+    }
+  };
+
+  const requirementStatus = getMeetingRequirementsText();
 
   return (
     <div className="space-y-2">
-      {/* Header with label and info */}
-      <div className="flex items-start justify-between">
-        <FormLabel>Select dates that work for you</FormLabel>
-        <div className="text-xs text-primary flex items-center gap-1">
-          <Info size={14} />
-          <span>The system requires {requiredDatesCount} different dates</span>
-        </div>
-      </div>
-      
-      {/* Calendar container */}
-      <div className="w-full border rounded-lg p-4">
+      <h3 className="text-sm font-semibold">Select Dates</h3>
+
+      {/* Instruction text */}
+      <p className="text-xs text-gray-600 mb-1">
+        {requiredDatesCount === 1 ? 
+          "Click on dates when you're available. We recommend selecting multiple dates for flexibility." : 
+          `Click on dates when you're available. Please select at least ${requiredDatesCount} different dates.`
+        }
+      </p>
+
+      {/* Calendar component */}
+      <div className="border rounded-md p-2">
         <Calendar
           mode="multiple"
           selected={selectedDates}
-          onSelect={(value) => {
-            // When in multiple mode, value is an array of dates
-            if (Array.isArray(value) && value.length !== selectedDates.length) {
-              // Find the date that was added or removed
-              if (value.length > selectedDates.length) {
-                // A date was added - find which one
-                const newDate = value.find(date => 
-                  !selectedDates.some(d => format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
-                );
-                if (newDate) handleDateSelect(newDate);
-              } else {
-                // A date was removed - find which one
-                const removedDate = selectedDates.find(date => 
-                  !value.some(d => format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd'))
-                );
-                if (removedDate) handleDateSelect(removedDate);
-              }
+          onSelect={(dates) => {
+            // When a date is added or removed
+            if (dates && dates !== selectedDates) {
+              // Find which date was changed
+              const lastChangedDate = dates.length > selectedDates.length
+                ? dates[dates.length - 1]  // Date added
+                : selectedDates.find(d => !dates.some(    // Date removed
+                    newDate => newDate.toDateString() === d.toDateString()
+                  ));
+              
+              handleDateSelect(lastChangedDate);
             }
           }}
           disabled={disabledDays}
-          className="w-full mx-auto pointer-events-auto"
-          modifiersClassNames={{
-            selected: "bg-primary text-primary-foreground",
-          }}
+          className="rounded-md border"
         />
       </div>
-      
-      {/* Helper text showing count of selected dates with system requirement */}
-      <div className="text-sm text-gray-500 mt-1">
-        {selectedTimeSlots.length} date{selectedTimeSlots.length !== 1 ? 's' : ''} selected 
-        ({uniqueDatesCount} unique)
-        {selectedTimeSlots.length === 0 && " (please select at least one date)"}
-        {uniqueDatesCount < requiredDatesCount && uniqueDatesCount > 0 && 
-          ` (need ${requiredDatesCount - uniqueDatesCount} more to meet system requirement)`}
-      </div>
+
+      {/* Date selection status message */}
+      <Alert className={cn(
+        "py-2",
+        requirementStatus.status === 'error' ? "bg-red-50 text-red-800 border-red-200" : 
+        requirementStatus.status === 'warning' ? "bg-yellow-50 text-yellow-800 border-yellow-200" : 
+        "bg-green-50 text-green-800 border-green-200"
+      )}>
+        <InfoCircledIcon className="h-4 w-4 mr-2" />
+        <AlertDescription className="text-xs">
+          {requirementStatus.text}
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };
