@@ -5,7 +5,63 @@ import { LocationPreference } from '../LocationSelector';
 import { createTimeSlotObjects } from '../utils/timeSlotFormatters';
 
 /**
- * Create a new skill session for contributor
+ * Create a new skill session with time slots for contributor in a single transaction
+ * 
+ * @param skillRequestId ID of the skill request
+ * @param requesterId ID of the requester
+ * @param providerId ID of the provider (current user)
+ * @param location Selected location preference
+ * @param locationDetails Details for location if 'other' is selected
+ * @param selectedTimeSlots Array of selected time slots
+ * @returns Created session data or throws error
+ */
+export const createSkillSessionWithTimeSlots = async (
+  skillRequestId: string,
+  requesterId: string,
+  providerId: string,
+  location: LocationPreference,
+  locationDetails: string,
+  selectedTimeSlots: TimeSlot[]
+) => {
+  // Extract time slots in the format expected by our stored procedure
+  const timeSlots = selectedTimeSlots.flatMap(slot => 
+    slot.preferences.map(preference => ({
+      date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
+      preference: preference
+    }))
+  );
+  
+  // Log the data being sent to the procedure
+  console.log("Creating contribution session with time slots:", {
+    skill_id: skillRequestId,
+    provider_id: providerId,
+    requester_id: requesterId,
+    location_preference: location,
+    location_details: location === 'other' ? locationDetails : null,
+    timeSlots: timeSlots
+  });
+  
+  // Call the stored procedure
+  const { data, error } = await supabase.rpc('create_contribution_session_with_timeslots', {
+    p_skill_id: skillRequestId,
+    p_provider_id: providerId,
+    p_requester_id: requesterId,
+    p_location_preference: location,
+    p_location_details: location === 'other' ? locationDetails : null,
+    p_timeslots: timeSlots
+  });
+
+  // Handle errors
+  if (error) {
+    console.error('Session creation error:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+/**
+ * Legacy method to create a new skill session for contributor
  * 
  * @param skillRequestId ID of the skill request
  * @param requesterId ID of the requester

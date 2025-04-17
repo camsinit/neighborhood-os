@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from './utils/timeSlotFormatters';
-import { createSkillSession, addTimeSlots } from './services/contributionService';
+import { createSkillSessionWithTimeSlots } from './services/contributionService';
 
 /**
  * Hook for handling skill contribution submission
@@ -64,17 +64,15 @@ export const useContributionSubmit = (
         providerId: providerId === requesterId ? "WARNING: Provider is the same as requester!" : "Provider differs from requester",
       });
       
-      // Create the skill session
-      const session = await createSkillSession(
+      // Create the skill session with time slots in a single transaction
+      await createSkillSessionWithTimeSlots(
         skillRequestId,
         requesterId,
         providerId,
         location,
-        locationDetails
+        locationDetails,
+        selectedTimeSlots
       );
-      
-      // Add time slots to the session
-      await addTimeSlots(session.id, selectedTimeSlots);
 
       // Optionally add skill to user profile
       if (addToProfile) {
@@ -102,11 +100,11 @@ export const useContributionSubmit = (
         errorHint: error.hint,
       });
       
-      // Special handling for database requirement of 3 dates
-      if (error.message && error.message.includes('3 different dates')) {
+      // Display appropriate error message
+      if (error.name === "ValidationError") {
         toast({
-          title: "Please select at least 3 different dates",
-          description: "This system requires a minimum of 3 different dates for scheduling flexibility.",
+          title: "Validation Error",
+          description: error.message,
           variant: "destructive"
         });
       } else {

@@ -40,13 +40,83 @@ export const formatDateWithTimePreference = (dateStr: string, preference: string
 };
 
 /**
- * Create a skill session in the database
+ * Create time slot objects from selected time slots
+ * 
+ * @param sessionId The session ID to associate with time slots
+ * @param selectedTimeSlots The selected time slots
+ * @returns Array of time slot objects ready for database insertion
+ */
+export const createTimeSlotObjects = (
+  sessionId: string,
+  selectedTimeSlots: TimeSlot[]
+) => {
+  return selectedTimeSlots.flatMap(slot => {
+    // Ensure each date has at least one preference
+    if (slot.preferences.length === 0) {
+      console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
+      slot.preferences = ['morning'];
+    }
+    
+    // Map each preference to a time slot entry
+    return slot.preferences.map(preference => {
+      // Format the date correctly using our helper function
+      const formattedTime = formatDateWithTimePreference(slot.date, preference);
+      
+      return {
+        session_id: sessionId,
+        proposed_time: formattedTime,
+      };
+    });
+  });
+};
+
+/**
+ * Create a skill session with initial time slots in a transaction
+ * This is a critical update to ensure time slots are created with the session
  * 
  * @param skillId The skill ID
  * @param providerId The provider ID
  * @param requesterId The requester ID
  * @param formData The form data with requester preferences
+ * @param selectedTimeSlots The selected time slots
  * @returns The created session
+ */
+export const createSkillSessionWithTimeSlots = async (
+  skillId: string,
+  providerId: string,
+  requesterId: string,
+  formData: SkillRequestFormData,
+  selectedTimeSlots: TimeSlot[]
+) => {
+  // Start a Supabase transaction
+  const { data, error } = await supabase.rpc('create_skill_session_with_timeslots', {
+    p_skill_id: skillId,
+    p_provider_id: providerId,
+    p_requester_id: requesterId,
+    p_requester_availability: {
+      availability: formData.availability,
+      timePreference: formData.timePreference,
+      description: formData.description,
+    },
+    p_timeslots: selectedTimeSlots.flatMap(slot => 
+      slot.preferences.map(preference => ({
+        date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
+        preference: preference
+      }))
+    )
+  });
+
+  if (error) {
+    console.error('Session creation error:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+/**
+ * Legacy method for creating a skill session in the database
+ * @deprecated Use createSkillSessionWithTimeSlots instead
  */
 export const createSkillSession = async (
   skillId: string,
@@ -88,37 +158,6 @@ export const createSkillSession = async (
   }
 
   return session;
-};
-
-/**
- * Create time slot objects from selected time slots
- * 
- * @param sessionId The session ID to associate with time slots
- * @param selectedTimeSlots The selected time slots
- * @returns Array of time slot objects ready for database insertion
- */
-export const createTimeSlotObjects = (
-  sessionId: string,
-  selectedTimeSlots: TimeSlot[]
-) => {
-  return selectedTimeSlots.flatMap(slot => {
-    // Ensure each date has at least one preference
-    if (slot.preferences.length === 0) {
-      console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
-      slot.preferences = ['morning'];
-    }
-    
-    // Map each preference to a time slot entry
-    return slot.preferences.map(preference => {
-      // Format the date correctly using our helper function
-      const formattedTime = formatDateWithTimePreference(slot.date, preference);
-      
-      return {
-        session_id: sessionId,
-        proposed_time: formattedTime,
-      };
-    });
-  });
 };
 
 /**

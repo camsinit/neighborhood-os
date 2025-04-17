@@ -13,8 +13,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { 
-  createSkillSession, 
-  addTimeSlots 
+  createSkillSessionWithTimeSlots
 } from "./services/requestService";
 import { validateTimeSlots } from "../contribution/utils/timeSlotFormatters";
 
@@ -44,6 +43,7 @@ export const useSkillRequestSubmit = (
 
   /**
    * Submit a skill request with selected time slots
+   * This now uses a combined transaction approach to create sessions with time slots
    */
   const submitSkillRequest = async (
     data: SkillRequestFormData,
@@ -70,12 +70,15 @@ export const useSkillRequestSubmit = (
     // Start submission process
     setIsSubmitting(true);
     try {
-      // Create the skill session
-      const session = await createSkillSession(skillId, providerId, user.id, data);
+      // Create the skill session with time slots in a single transaction
+      await createSkillSessionWithTimeSlots(
+        skillId, 
+        providerId, 
+        user.id, 
+        data, 
+        selectedTimeSlots
+      );
       
-      // Add time slots to the session
-      await addTimeSlots(session.id, selectedTimeSlots);
-
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -92,12 +95,8 @@ export const useSkillRequestSubmit = (
         errorCode: error.code
       });
       
-      // Special handling for database requirement of 3 dates
-      if (error.message && error.message.includes('3 different dates')) {
-        toast.error('Please select at least 3 different dates', {
-          description: 'This system requires a minimum of 3 different dates for scheduling flexibility.'
-        });
-      } else if (error.name === "ValidationError") {
+      // Special handling for different error types
+      if (error.name === "ValidationError") {
         // Special handling for our validation errors
         toast.error('Request submission failed', {
           description: error.message
