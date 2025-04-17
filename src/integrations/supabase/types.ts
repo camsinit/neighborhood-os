@@ -1141,6 +1141,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_skill_session_with_timeslots: {
+        Args: {
+          p_skill_id: string
+          p_provider_id: string
+          p_requester_id: string
+          p_requester_availability: Json
+          p_timeslots: Json
+        }
+        Returns: Json
+      }
       get_all_neighborhoods_for_core_contributor: {
         Args: { user_uuid: string }
         Returns: {
