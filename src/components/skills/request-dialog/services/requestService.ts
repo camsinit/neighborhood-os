@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
@@ -14,29 +13,28 @@ export const formatDateWithTimePreference = (dateStr: string, preference: string
   // Create a new date object from ISO string
   const timeDate = new Date(dateStr);
   
-  // Create a UTC date with just the date portion (year, month, day)
-  const dateWithoutTime = new Date(
-    Date.UTC(timeDate.getUTCFullYear(), timeDate.getUTCMonth(), timeDate.getUTCDate())
-  );
+  // Extract just the date portion (YYYY-MM-DD) to ensure consistent formatting
+  const dateOnly = timeDate.toISOString().split('T')[0];
   
   // Add hours based on preference (using standard hours)
   // Morning: 9am, Afternoon: 1pm, Evening: 6pm
   const hours = preference === 'morning' ? 9 : 
                preference === 'afternoon' ? 13 : 18;
   
-  // Set the hours while preserving the date (in UTC to avoid timezone issues)
-  dateWithoutTime.setUTCHours(hours, 0, 0, 0);
+  // Create a properly formatted time string
+  const formattedDate = `${dateOnly}T${hours.toString().padStart(2, '0')}:00:00.000Z`;
   
   // Log detailed information for debugging
   console.log('Date formatting:', {
     originalDateStr: dateStr,
+    extractedDateOnly: dateOnly,
     preference,
     hoursAssigned: hours,
-    finalFormattedDate: dateWithoutTime.toISOString()
+    finalFormattedDate: formattedDate
   });
   
   // Return properly formatted ISO string
-  return dateWithoutTime.toISOString();
+  return formattedDate;
 };
 
 /**
@@ -100,10 +98,16 @@ export const createSkillSessionWithTimeSlots = async (
     
     // First try using the stored procedure (transaction)
     // Ensure the date format is correct and all slots have preferences
-    const enhancedTimeSlots = selectedTimeSlots.map(slot => ({
-      date: slot.date, // Keep original ISO date string - procedure will parse it
-      preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
-    }));
+    const enhancedTimeSlots = selectedTimeSlots.map(slot => {
+      // Ensure date is in YYYY-MM-DD format only (no time component)
+      const dateOnly = new Date(slot.date).toISOString().split('T')[0];
+      
+      return {
+        // CRITICAL FIX: Use date-only format to ensure consistent date parsing in PostgreSQL
+        date: dateOnly,
+        preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
+      };
+    });
     
     console.log("Using stored procedure with time slots:", JSON.stringify(enhancedTimeSlots, null, 2));
     

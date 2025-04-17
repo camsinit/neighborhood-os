@@ -1,4 +1,3 @@
-
 import { TimeSlot } from "../TimeSlotSelector";
 import { normalizeDate, logDateDetails } from "@/utils/dateUtils";
 
@@ -13,32 +12,28 @@ export const formatDateWithTimePreference = (dateStr: string, preference: string
   // Create a new date object from ISO string
   const timeDate = new Date(dateStr);
   
-  // Start by stripping time component completely to get just the date portion
-  // This creates a new date set to midnight in UTC
-  const dateWithoutTime = new Date(Date.UTC(
-    timeDate.getUTCFullYear(), 
-    timeDate.getUTCMonth(), 
-    timeDate.getUTCDate()
-  ));
+  // CRITICAL FIX: Extract just the date portion (YYYY-MM-DD) to ensure consistent formatting
+  const dateOnly = timeDate.toISOString().split('T')[0];
   
   // Add hours based on preference (using standard hours)
   // Morning: 9am, Afternoon: 1pm, Evening: 6pm
   const hours = preference === 'morning' ? 9 : 
-              preference === 'afternoon' ? 13 : 18;
+               preference === 'afternoon' ? 13 : 18;
   
-  // Set the hours while preserving the date (in UTC to avoid timezone issues)
-  dateWithoutTime.setUTCHours(hours, 0, 0, 0);
+  // Create a properly formatted time string with UTC time
+  const formattedDate = `${dateOnly}T${hours.toString().padStart(2, '0')}:00:00.000Z`;
   
   // Log detailed information for debugging
   console.log('Time slot formatting:', {
     originalDateStr: dateStr,
+    extractedDateOnly: dateOnly,
     preference,
     hoursAssigned: hours,
-    finalFormattedDate: dateWithoutTime.toISOString()
+    finalFormattedDate: formattedDate
   });
   
   // Return properly formatted ISO string
-  return dateWithoutTime.toISOString();
+  return formattedDate;
 };
 
 /**
