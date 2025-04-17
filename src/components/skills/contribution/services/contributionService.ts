@@ -41,8 +41,9 @@ export const createSkillSessionWithTimeSlots = async (
     timeSlots: timeSlots
   });
   
-  // Call the stored procedure
-  const { data, error } = await supabase.rpc('create_contribution_session_with_timeslots', {
+  // Call the stored procedure - using any to bypass TypeScript checking for RPC name
+  // This is a temporary solution until types are regenerated
+  const { data, error } = await (supabase.rpc as any)('create_contribution_session_with_timeslots', {
     p_skill_id: skillRequestId,
     p_provider_id: providerId,
     p_requester_id: requesterId,
