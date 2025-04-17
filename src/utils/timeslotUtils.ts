@@ -3,6 +3,7 @@
  * Time slot utilities for handling date formatting and common operations
  */
 import { TimeSlot } from "@/components/skills/contribution/TimeSlotSelector";
+import { Json } from "@/integrations/supabase/types"; // Import the Json type from Supabase types
 
 /**
  * Validate that time slots meet the required criteria
@@ -106,17 +107,26 @@ export const createTimeSlotObjects = (
 
 /**
  * Prepare time slots for stored procedure
- * Formats dates consistently as YYYY-MM-DD
+ * Formats dates consistently as YYYY-MM-DD and returns properly typed objects
  * 
  * @param selectedTimeSlots Selected time slots to prepare
- * @returns Formatted time slots array for stored procedure
+ * @returns Formatted time slots array for stored procedure that's compatible with Supabase Json type
  */
-export const prepareTimeSlots = (selectedTimeSlots: TimeSlot[]) => {
+export const prepareTimeSlots = (selectedTimeSlots: TimeSlot[]): Record<string, Json>[] => {
   // Extract time slots in the format expected by stored procedure
-  // Return as a plain object array with string keys that can be properly serialized
-  return selectedTimeSlots.map(slot => ({
-    // CRITICAL FIX: Use only YYYY-MM-DD format for consistent date parsing
-    date: new Date(slot.date).toISOString().split('T')[0], 
-    preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
-  }));
+  // Return as a properly typed array of objects that can be properly serialized
+  return selectedTimeSlots.map(slot => {
+    // Ensure date is in YYYY-MM-DD format
+    const formattedDate = new Date(slot.date).toISOString().split('T')[0];
+    
+    // Ensure preferences is an array of strings (even if empty)
+    const preferences = slot.preferences.length > 0 ? 
+      slot.preferences : 
+      ['morning']; // Default to morning if no preferences
+      
+    return {
+      date: formattedDate,
+      preferences: preferences
+    };
+  });
 };
