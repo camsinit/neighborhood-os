@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../TimeSlotSelector';
 import { LocationPreference } from '../LocationSelector';
@@ -25,12 +26,11 @@ export const createSkillSessionWithTimeSlots = async (
 ) => {
   try {
     // Extract time slots in the format expected by our stored procedure
-    const timeSlots = selectedTimeSlots.flatMap(slot => 
-      slot.preferences.map(preference => ({
-        date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
-        preference: preference
-      }))
-    );
+    const timeSlots = selectedTimeSlots.map(slot => ({
+      // CRITICAL FIX: Use only YYYY-MM-DD format for consistent date parsing
+      date: new Date(slot.date).toISOString().split('T')[0], 
+      preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
+    }));
     
     // Log the data being sent to the procedure
     console.log("Creating contribution session with time slots:", {
