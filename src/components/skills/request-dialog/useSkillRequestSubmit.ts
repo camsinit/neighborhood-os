@@ -1,4 +1,3 @@
-
 /**
  * Hook for handling skill request submission
  * 
@@ -15,7 +14,7 @@ import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { 
   createSkillSessionWithTimeSlots
 } from "./services/requestService";
-import { validateTimeSlots } from "../contribution/utils/timeSlotFormatters";
+import { validateTimeSlots } from "@/utils/timeslotUtils";
 
 /**
  * Form data structure for skill requests

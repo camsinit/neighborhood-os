@@ -1,4 +1,3 @@
-
 /**
  * Dialog component for requesting a skill session
  * 
@@ -19,7 +18,7 @@ import {
 } from "./request-dialog/useSkillRequestSubmit";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { validateTimeSlots } from "./contribution/utils/timeSlotFormatters";
+import { validateTimeSlots } from "@/utils/timeslotUtils";
 
 /**
  * Props for the dialog component

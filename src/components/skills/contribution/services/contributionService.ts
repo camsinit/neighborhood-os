@@ -1,8 +1,16 @@
 
+/**
+ * Contribution Service
+ * 
+ * Handles skill contribution submission and time slot management
+ */
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../TimeSlotSelector';
 import { LocationPreference } from '../LocationSelector';
-import { createTimeSlotObjects } from '../utils/timeSlotFormatters';
+import { 
+  createTimeSlotObjects, 
+  prepareTimeSlots 
+} from '@/utils/timeslotUtils';
 
 /**
  * Create a new skill session with time slots for contributor in a single transaction
@@ -25,12 +33,8 @@ export const createSkillSessionWithTimeSlots = async (
   selectedTimeSlots: TimeSlot[]
 ) => {
   try {
-    // Extract time slots in the format expected by our stored procedure
-    const timeSlots = selectedTimeSlots.map(slot => ({
-      // CRITICAL FIX: Use only YYYY-MM-DD format for consistent date parsing
-      date: new Date(slot.date).toISOString().split('T')[0], 
-      preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
-    }));
+    // Prepare time slots in the format expected by our stored procedure
+    const timeSlots = prepareTimeSlots(selectedTimeSlots);
     
     // Log the data being sent to the procedure
     console.log("Creating contribution session with time slots:", {
@@ -68,6 +72,13 @@ export const createSkillSessionWithTimeSlots = async (
   
     return data;
   } catch (error) {
+    // If any other error occurs, don't attempt fallback if it's a validation error
+    // This prevents duplicate errors from showing
+    if (error.code === 'P0001' && error.message.includes('different date')) {
+      console.error('Validation error, not attempting fallback:', error);
+      throw error;
+    }
+    
     // If any other error occurs, try the fallback approach
     console.error('Transaction approach failed, trying legacy approach:', error);
     return await createSessionLegacy(skillRequestId, requesterId, providerId, location, locationDetails, selectedTimeSlots);

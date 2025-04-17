@@ -1,7 +1,10 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
+import { 
+  createTimeSlotObjects, 
+  formatDateWithTimePreference 
+} from '@/utils/timeslotUtils';
 
 /**
  * Format a date string for submission with appropriate time based on preference
