@@ -113,6 +113,7 @@ export const createTimeSlotObjects = (
  */
 export const prepareTimeSlots = (selectedTimeSlots: TimeSlot[]) => {
   // Extract time slots in the format expected by stored procedure
+  // Return as a plain object array with string keys that can be properly serialized
   return selectedTimeSlots.map(slot => ({
     // CRITICAL FIX: Use only YYYY-MM-DD format for consistent date parsing
     date: new Date(slot.date).toISOString().split('T')[0], 

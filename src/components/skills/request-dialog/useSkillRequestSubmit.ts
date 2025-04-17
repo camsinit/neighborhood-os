@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareTimeSlots } from "@/utils/timeslotUtils";
 
 /**
  * Form data structure for skill requests
@@ -59,15 +60,19 @@ export const useSkillRequestSubmit = (
     // Start submission process
     setIsSubmitting(true);
     try {
+      // Prepare data for RPC call - this ensures compatibility with JSON types
+      const preparedTimeSlots = prepareTimeSlots(selectedTimeSlots);
+      
       // Call the database function directly using RPC
+      // Cast to 'unknown' first, then to the expected type for Supabase to handle it correctly
       const { data: result, error } = await supabase.rpc(
         'create_skill_session_with_timeslots',
         {
           p_skill_id: skillId,
           p_provider_id: providerId,
           p_requester_id: user.id,
-          p_requester_availability: data,
-          p_timeslots: selectedTimeSlots
+          p_requester_availability: data as unknown as Record<string, any>,
+          p_timeslots: preparedTimeSlots as unknown as Record<string, any>[]
         }
       );
 
