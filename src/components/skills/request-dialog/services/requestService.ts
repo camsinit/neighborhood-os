@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
@@ -88,7 +89,24 @@ export const createSkillSessionWithTimeSlots = async (
   selectedTimeSlots: TimeSlot[]
 ) => {
   try {
+    // Enhanced logging of the input data
+    console.log("SUBMIT REQUEST - Full data:", {
+      skillId,
+      providerId,
+      requesterId,
+      formData,
+      selectedTimeSlots: JSON.stringify(selectedTimeSlots, null, 2)
+    });
+    
     // First try using the stored procedure (transaction)
+    // Ensure the date format is correct and all slots have preferences
+    const enhancedTimeSlots = selectedTimeSlots.map(slot => ({
+      date: slot.date, // Keep original ISO date string - procedure will parse it
+      preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
+    }));
+    
+    console.log("Using stored procedure with time slots:", JSON.stringify(enhancedTimeSlots, null, 2));
+    
     // Use any type to bypass TypeScript checking for RPC name
     const { data, error } = await (supabase.rpc as any)('create_skill_session_with_timeslots', {
       p_skill_id: skillId,
@@ -99,12 +117,7 @@ export const createSkillSessionWithTimeSlots = async (
         timePreference: formData.timePreference,
         description: formData.description,
       },
-      p_timeslots: selectedTimeSlots.flatMap(slot => 
-        slot.preferences.map(preference => ({
-          date: new Date(slot.date).toISOString().split('T')[0], // Just the date part
-          preference: preference
-        }))
-      )
+      p_timeslots: enhancedTimeSlots
     });
 
     if (error) {
@@ -235,8 +248,20 @@ export const addTimeSlots = async (
   sessionId: string,
   selectedTimeSlots: TimeSlot[]
 ) => {
+  // Ensure all slots have at least one preference
+  const validatedTimeSlots = selectedTimeSlots.map(slot => {
+    if (slot.preferences.length === 0) {
+      console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
+      return {
+        ...slot,
+        preferences: ['morning']
+      };
+    }
+    return slot;
+  });
+  
   // Create time slot objects
-  const timeSlotPromises = createTimeSlotObjects(sessionId, selectedTimeSlots);
+  const timeSlotPromises = createTimeSlotObjects(sessionId, validatedTimeSlots);
   
   // Log time slots being inserted
   console.log("Time slots prepared for insertion:", 

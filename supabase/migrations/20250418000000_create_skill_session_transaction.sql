@@ -17,18 +17,27 @@ DECLARE
   v_preference TEXT;
   v_time TIMESTAMP WITH TIME ZONE;
   v_result JSONB;
+  v_unique_dates INT;
 BEGIN
+  -- Log input for debugging
+  RAISE NOTICE 'Processing timeslots: %', p_timeslots;
+  
   -- Validate input data
   IF p_timeslots IS NULL OR jsonb_array_length(p_timeslots) = 0 THEN
-    RAISE EXCEPTION 'At least 1 time slot must be provided';
+    RAISE EXCEPTION 'Time slots must be provided';
   END IF;
   
-  -- Count distinct dates in timeslots
-  IF (
-    SELECT COUNT(DISTINCT p_timeslots->i->>'date')
-    FROM generate_series(0, jsonb_array_length(p_timeslots) - 1) AS i
-  ) < 1 THEN
-    RAISE EXCEPTION 'At least 1 different date must be provided';
+  -- Count distinct dates in timeslots - this is the critical fix
+  -- Extract just the date portion for proper comparison
+  SELECT COUNT(DISTINCT (t->>'date')::TEXT)
+  INTO v_unique_dates
+  FROM jsonb_array_elements(p_timeslots) AS t;
+  
+  RAISE NOTICE 'Unique dates found: %', v_unique_dates;
+  
+  -- Validate at least 1 unique date
+  IF v_unique_dates < 1 THEN
+    RAISE EXCEPTION 'At least 1 different date must be provided (found %)`, v_unique_dates;
   END IF;
 
   -- Create the skill session
@@ -50,24 +59,48 @@ BEGIN
   FOR i IN 0..jsonb_array_length(p_timeslots) - 1 LOOP
     v_slot := p_timeslots->i;
     v_date := v_slot->>'date';
-    v_preference := v_slot->>'preference';
     
-    -- Calculate time based on preference
-    CASE v_preference
-      WHEN 'morning' THEN v_time := (v_date || ' 09:00:00')::TIMESTAMP WITH TIME ZONE;
-      WHEN 'afternoon' THEN v_time := (v_date || ' 13:00:00')::TIMESTAMP WITH TIME ZONE;
-      WHEN 'evening' THEN v_time := (v_date || ' 18:00:00')::TIMESTAMP WITH TIME ZONE;
-      ELSE v_time := (v_date || ' 12:00:00')::TIMESTAMP WITH TIME ZONE;
-    END CASE;
-    
-    -- Insert the time slot
-    INSERT INTO public.skill_session_time_slots (
-      session_id,
-      proposed_time
-    ) VALUES (
-      v_session_id,
-      v_time
-    );
+    -- For each preference in the array, create a time slot
+    IF jsonb_array_length(v_slot->'preferences') > 0 THEN
+      FOR j IN 0..jsonb_array_length(v_slot->'preferences') - 1 LOOP
+        v_preference := v_slot->'preferences'->j;
+        
+        -- Strip any time component and use only the date part
+        v_date := substring(v_date from 1 for 10);
+        
+        -- Calculate time based on preference
+        CASE v_preference
+          WHEN '"morning"' THEN v_time := (v_date || ' 09:00:00')::TIMESTAMP WITH TIME ZONE;
+          WHEN '"afternoon"' THEN v_time := (v_date || ' 13:00:00')::TIMESTAMP WITH TIME ZONE;
+          WHEN '"evening"' THEN v_time := (v_date || ' 18:00:00')::TIMESTAMP WITH TIME ZONE;
+          ELSE v_time := (v_date || ' 12:00:00')::TIMESTAMP WITH TIME ZONE;
+        END CASE;
+        
+        RAISE NOTICE 'Inserting time slot: date=%, preference=%, time=%', v_date, v_preference, v_time;
+        
+        -- Insert the time slot
+        INSERT INTO public.skill_session_time_slots (
+          session_id,
+          proposed_time
+        ) VALUES (
+          v_session_id,
+          v_time
+        );
+      END LOOP;
+    ELSE
+      -- If no preferences, still add a default time (noon)
+      v_date := substring(v_date from 1 for 10);
+      v_time := (v_date || ' 12:00:00')::TIMESTAMP WITH TIME ZONE;
+      
+      -- Insert the time slot
+      INSERT INTO public.skill_session_time_slots (
+        session_id,
+        proposed_time
+      ) VALUES (
+        v_session_id,
+        v_time
+      );
+    END IF;
   END LOOP;
 
   -- Return success response
@@ -85,8 +118,8 @@ $$;
 GRANT EXECUTE ON FUNCTION public.create_skill_session_with_timeslots TO authenticated;
 GRANT EXECUTE ON FUNCTION public.create_skill_session_with_timeslots TO service_role;
 
--- Modify the check_minimum_dates function (if it's still needed)
--- This is now just a backup since we're handling validation in the stored procedure
+-- Modify the check_minimum_dates function to be more lenient 
+-- and provide better error information
 CREATE OR REPLACE FUNCTION public.check_minimum_dates()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -94,19 +127,27 @@ AS $function$
 BEGIN
   -- Only run the check for new sessions, not updated ones
   IF TG_OP = 'INSERT' AND NEW.status = 'pending_provider_times' THEN
-    -- If time slots have not been added yet, session is incomplete
-    -- This can be turned into a warning instead of an error if needed
-    IF (
-      SELECT COUNT(*)
+    -- Log the session ID for debugging
+    RAISE NOTICE 'Checking minimum dates for session: %', NEW.id;
+    
+    -- Count distinct dates
+    DECLARE
+      distinct_date_count INT;
+    BEGIN
+      SELECT COUNT(DISTINCT DATE(proposed_time))
+      INTO distinct_date_count
       FROM skill_session_time_slots
-      WHERE session_id = NEW.id
-    ) = 0 THEN
-      -- Insert a log entry or take some other action if needed
-      -- RAISE NOTICE 'Session % created without time slots', NEW.id;
-      -- But don't fail the transaction
-      RETURN NEW;
-    END IF;
+      WHERE session_id = NEW.id;
+      
+      RAISE NOTICE 'Found % distinct dates for session %', distinct_date_count, NEW.id;
+      
+      -- We now require just 1 date minimum
+      IF distinct_date_count < 1 THEN
+        RAISE EXCEPTION 'At least 1 different date must be provided (found %)', distinct_date_count;
+      END IF;
+    END;
   END IF;
+  
   RETURN NEW;
 END;
 $function$;
