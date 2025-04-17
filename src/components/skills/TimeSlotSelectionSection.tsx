@@ -1,6 +1,5 @@
 
 import React from "react";
-import { addDays } from "date-fns";
 import { TimeSlot } from "./contribution/TimeSlotSelector";
 import DateCalendarSection from "./time-selection/DateCalendarSection";
 import TimeSlotList from "./time-selection/TimeSlotList";
@@ -19,10 +18,10 @@ interface TimeSlotSelectionSectionProps {
 /**
  * A component that handles the selection of dates and time preferences for skill sessions
  * 
- * This component has been refactored to:
- * 1. Use smaller sub-components for better maintainability
- * 2. Standardize date handling with utility functions
- * 3. Improve logging for debugging
+ * This component has been simplified to:
+ * 1. Focus on the core functionality of date and time selection
+ * 2. Use consistent date handling with utility functions
+ * 3. Provide clear feedback on the selection process
  */
 const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
   selectedTimeSlots,

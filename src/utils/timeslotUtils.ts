@@ -123,14 +123,6 @@ export const validateTimeSlots = (timeSlots: TimeSlot[], requiredDatesCount = 1)
     allDateStrings: timeSlots.map(slot => new Date(slot.date).toISOString().split('T')[0])
   });
   
-  // Check if we have enough unique dates
-  if (uniqueDateStrings.size < requiredDatesCount) {
-    return {
-      isValid: false,
-      message: `Please select at least ${requiredDatesCount} different date${requiredDatesCount > 1 ? 's' : ''}`
-    };
-  }
-  
   // All validations passed
   return { isValid: true };
 };

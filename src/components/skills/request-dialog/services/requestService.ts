@@ -3,7 +3,8 @@ import { TimeSlot } from '../../contribution/TimeSlotSelector';
 import { SkillRequestFormData } from '../useSkillRequestSubmit';
 import { 
   createTimeSlotObjects, 
-  formatDateWithTimePreference 
+  formatDateWithTimePreference,
+  prepareTimeSlots
 } from '@/utils/timeslotUtils';
 
 /**
@@ -34,18 +35,8 @@ export const createSkillSessionWithTimeSlots = async (
       selectedTimeSlots: JSON.stringify(selectedTimeSlots, null, 2)
     });
     
-    // First try using the stored procedure (transaction)
-    // Extract just the YYYY-MM-DD portion of the date and ensure all slots have preferences
-    const enhancedTimeSlots = selectedTimeSlots.map(slot => {
-      // Critical fix: Extract ONLY the YYYY-MM-DD part of the date
-      const dateOnly = new Date(slot.date).toISOString().split('T')[0];
-      
-      return {
-        // Send the date without any time component
-        date: dateOnly,
-        preferences: slot.preferences.length > 0 ? slot.preferences : ['morning'] // Ensure at least one preference
-      };
-    });
+    // Prepare time slots for the stored procedure
+    const enhancedTimeSlots = prepareTimeSlots(selectedTimeSlots);
     
     console.log("Using stored procedure with time slots:", JSON.stringify(enhancedTimeSlots, null, 2));
     
@@ -72,7 +63,6 @@ export const createSkillSessionWithTimeSlots = async (
       }
       
       // Other errors, just throw
-      console.error('Session creation error:', error);
       throw error;
     }
 
@@ -136,52 +126,6 @@ export const createSkillSessionLegacy = async (
 };
 
 /**
- * Legacy method for creating a skill session in the database
- * @deprecated Use createSkillSessionWithTimeSlots instead
- */
-export const createSkillSession = async (
-  skillId: string,
-  providerId: string,
-  requesterId: string,
-  formData: SkillRequestFormData
-) => {
-  console.log("Creating session with:", {
-    skill_id: skillId,
-    provider_id: providerId,
-    requester_id: requesterId,
-    requester_availability: {
-      availability: formData.availability,
-      timePreference: formData.timePreference,
-      description: formData.description,
-    },
-    status: 'pending_provider_times',
-  });
-  
-  const { data: session, error: sessionError } = await supabase
-    .from('skill_sessions')
-    .insert({
-      skill_id: skillId,
-      provider_id: providerId,
-      requester_id: requesterId,
-      requester_availability: {
-        availability: formData.availability,
-        timePreference: formData.timePreference,
-        description: formData.description,
-      },
-      status: 'pending_provider_times',
-    })
-    .select()
-    .single();
-
-  if (sessionError) {
-    console.error('Session creation error:', sessionError);
-    throw sessionError;
-  }
-
-  return session;
-};
-
-/**
  * Add time slots to a session
  * 
  * @param sessionId The session ID
@@ -192,24 +136,12 @@ export const addTimeSlots = async (
   sessionId: string,
   selectedTimeSlots: TimeSlot[]
 ) => {
-  // Ensure all slots have at least one preference
-  const validatedTimeSlots = selectedTimeSlots.map(slot => {
-    if (slot.preferences.length === 0) {
-      console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
-      return {
-        ...slot,
-        preferences: ['morning']
-      };
-    }
-    return slot;
-  });
-  
-  // Create time slot objects using the imported utility function
-  const timeSlotPromises = createTimeSlotObjects(sessionId, validatedTimeSlots);
+  // Create time slot objects
+  const timeSlotObjects = createTimeSlotObjects(sessionId, selectedTimeSlots);
   
   // Log time slots being inserted
   console.log("Time slots prepared for insertion:", 
-    timeSlotPromises.map((slot, index) => ({
+    timeSlotObjects.map((slot, index) => ({
       index,
       sessionId: slot.session_id,
       proposedTime: slot.proposed_time,
@@ -218,7 +150,7 @@ export const addTimeSlots = async (
   
   // Extract distinct dates for validation log
   const distinctDates = new Set(
-    timeSlotPromises.map(slot => 
+    timeSlotObjects.map(slot => 
       new Date(slot.proposed_time).toISOString().split('T')[0]
     )
   );
@@ -228,17 +160,10 @@ export const addTimeSlots = async (
     distinctDates: Array.from(distinctDates)
   });
 
-  // Verify at least 1 unique date - removing the 3-date requirement
-  if (distinctDates.size < 1) {
-    const error = new Error(`At least 1 date must be provided`);
-    error.name = "ValidationError";
-    throw error;
-  }
-
   // Insert the time slots
   const { error: timeSlotError } = await supabase
     .from('skill_session_time_slots')
-    .insert(timeSlotPromises);
+    .insert(timeSlotObjects);
 
   if (timeSlotError) {
     console.error('Time slot error:', timeSlotError);
