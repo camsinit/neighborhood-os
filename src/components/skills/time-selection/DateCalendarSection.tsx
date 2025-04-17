@@ -1,8 +1,6 @@
-
 import { Calendar } from "@/components/ui/calendar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { TimeSlot } from "../contribution/TimeSlotSelector";
+import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DateCalendarSectionProps {
@@ -85,13 +83,15 @@ const DateCalendarSection = ({
       </div>
 
       {/* Date selection status message */}
-      <Alert className={cn(
-        "py-2",
-        requirementStatus.status === 'error' ? "bg-red-50 text-red-800 border-red-200" : 
-        requirementStatus.status === 'warning' ? "bg-yellow-50 text-yellow-800 border-yellow-200" : 
-        "bg-green-50 text-green-800 border-green-200"
-      )}>
-        <InfoCircledIcon className="h-4 w-4 mr-2" />
+      <Alert 
+        className={cn(
+          "py-2",
+          requirementStatus.status === 'error' ? "bg-red-50 text-red-800 border-red-200" : 
+          requirementStatus.status === 'warning' ? "bg-yellow-50 text-yellow-800 border-yellow-200" : 
+          "bg-green-50 text-green-800 border-green-200"
+        )}
+      >
+        <Info className="h-4 w-4 mr-2" />
         <AlertDescription className="text-xs">
           {requirementStatus.text}
         </AlertDescription>
