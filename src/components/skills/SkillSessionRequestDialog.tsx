@@ -74,7 +74,7 @@ const SkillSessionRequestDialog = ({
     console.log("Form submitted with time slots:", selectedTimeSlots);
     
     // Validate time slots - require at least 1 date with time preferences
-    const validationResult = validateTimeSlots(selectedTimeSlots, 1);
+    const validationResult = validateTimeSlots(selectedTimeSlots);
     if (!validationResult.isValid) {
       toast.error(validationResult.message, {
         description: "Please select at least one date with time preferences"

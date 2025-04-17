@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +36,7 @@ export const useContributionSubmit = (
     console.log("CONTRIBUTION SUBMIT - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
     
     // Validate time slots - require at least 1 date with time preferences
-    const validation = validateTimeSlots(selectedTimeSlots, 1);
+    const validation = validateTimeSlots(selectedTimeSlots);
     if (!validation.isValid) {
       toast({
         title: "Validation error",
