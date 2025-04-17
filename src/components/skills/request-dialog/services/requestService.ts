@@ -7,72 +7,6 @@ import {
 } from '@/utils/timeslotUtils';
 
 /**
- * Format a date string for submission with appropriate time based on preference
- * 
- * @param dateStr ISO string date to format
- * @param preference Time preference (morning, afternoon, evening)
- * @returns Formatted ISO date string with appropriate time
- */
-export const formatDateWithTimePreference = (dateStr: string, preference: string): string => {
-  // Create a new date object from ISO string
-  const timeDate = new Date(dateStr);
-  
-  // Extract just the date portion (YYYY-MM-DD) to ensure consistent formatting
-  const dateOnly = timeDate.toISOString().split('T')[0];
-  
-  // Add hours based on preference (using standard hours)
-  // Morning: 9am, Afternoon: 1pm, Evening: 6pm
-  const hours = preference === 'morning' ? 9 : 
-               preference === 'afternoon' ? 13 : 18;
-  
-  // Create a properly formatted time string
-  const formattedDate = `${dateOnly}T${hours.toString().padStart(2, '0')}:00:00.000Z`;
-  
-  // Log detailed information for debugging
-  console.log('Date formatting:', {
-    originalDateStr: dateStr,
-    extractedDateOnly: dateOnly,
-    preference,
-    hoursAssigned: hours,
-    finalFormattedDate: formattedDate
-  });
-  
-  // Return properly formatted ISO string
-  return formattedDate;
-};
-
-/**
- * Create time slot objects from selected time slots
- * 
- * @param sessionId The session ID to associate with time slots
- * @param selectedTimeSlots The selected time slots
- * @returns Array of time slot objects ready for database insertion
- */
-export const createTimeSlotObjects = (
-  sessionId: string,
-  selectedTimeSlots: TimeSlot[]
-) => {
-  return selectedTimeSlots.flatMap(slot => {
-    // Ensure each date has at least one preference
-    if (slot.preferences.length === 0) {
-      console.warn(`Date ${slot.date} has no preferences, adding 'morning' as default`);
-      slot.preferences = ['morning'];
-    }
-    
-    // Map each preference to a time slot entry
-    return slot.preferences.map(preference => {
-      // Format the date correctly using our helper function
-      const formattedTime = formatDateWithTimePreference(slot.date, preference);
-      
-      return {
-        session_id: sessionId,
-        proposed_time: formattedTime,
-      };
-    });
-  });
-};
-
-/**
  * Create a skill session with initial time slots using transaction if available,
  * with fallback to sequential operations if the stored procedure doesn't exist
  * 
@@ -270,7 +204,7 @@ export const addTimeSlots = async (
     return slot;
   });
   
-  // Create time slot objects
+  // Create time slot objects using the imported utility function
   const timeSlotPromises = createTimeSlotObjects(sessionId, validatedTimeSlots);
   
   // Log time slots being inserted
