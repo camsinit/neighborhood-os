@@ -26,6 +26,7 @@ export const createSkillSessionWithTimeSlots = async (
 ) => {
   try {
     // First, create the session
+    // CRITICAL FIX: Add empty requester_availability JSON object that's required by the database schema
     const { data: session, error: sessionError } = await supabase
       .from('skill_sessions')
       .insert({
@@ -34,7 +35,9 @@ export const createSkillSessionWithTimeSlots = async (
         requester_id: requesterId,
         location_preference: location,
         location_details: locationDetails,
-        status: 'pending_requester_confirmation'
+        status: 'pending_requester_confirmation',
+        // Add the missing required field
+        requester_availability: {} // Empty JSON object as default value
       })
       .select()
       .single();
