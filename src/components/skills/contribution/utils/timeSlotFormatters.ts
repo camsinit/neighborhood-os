@@ -1,5 +1,6 @@
 
 import { TimeSlot } from "../TimeSlotSelector";
+import { normalizeDate, logDateDetails } from "@/utils/dateUtils";
 
 /**
  * Format a date string for submission with appropriate time based on preference

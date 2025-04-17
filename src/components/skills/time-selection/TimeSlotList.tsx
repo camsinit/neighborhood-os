@@ -1,7 +1,7 @@
 
 import React from "react";
 import TimeSlotSelector, { TimeSlot } from "../contribution/TimeSlotSelector";
-import { format } from "date-fns";
+import { formatDateForDisplay } from "@/utils/dateUtils"; // Updated import from centralized utils
 
 /**
  * Props for the TimeSlotList component
