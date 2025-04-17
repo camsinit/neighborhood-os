@@ -14,7 +14,7 @@ interface DateCalendarSectionProps {
   handleDateSelect: (date: Date | undefined) => void;
   disabledDays: { before: Date; after: Date };
   uniqueDatesCount: number;
-  requiredDatesCount: number; // Now used as recommended count
+  requiredDatesCount: number; // Now treated as a system requirement
 }
 
 /**
@@ -42,7 +42,7 @@ const DateCalendarSection: React.FC<DateCalendarSectionProps> = ({
         <FormLabel>Select dates that work for you</FormLabel>
         <div className="text-xs text-primary flex items-center gap-1">
           <Info size={14} />
-          <span>We recommend selecting {requiredDatesCount} dates</span>
+          <span>The system requires {requiredDatesCount} different dates</span>
         </div>
       </div>
       
@@ -78,13 +78,13 @@ const DateCalendarSection: React.FC<DateCalendarSectionProps> = ({
         />
       </div>
       
-      {/* Helper text showing count of selected dates with recommendation */}
+      {/* Helper text showing count of selected dates with system requirement */}
       <div className="text-sm text-gray-500 mt-1">
         {selectedTimeSlots.length} date{selectedTimeSlots.length !== 1 ? 's' : ''} selected 
         ({uniqueDatesCount} unique)
         {selectedTimeSlots.length === 0 && " (please select at least one date)"}
         {uniqueDatesCount < requiredDatesCount && uniqueDatesCount > 0 && 
-          ` (we recommend at least ${requiredDatesCount} different dates)`}
+          ` (need ${requiredDatesCount - uniqueDatesCount} more to meet system requirement)`}
       </div>
     </div>
   );

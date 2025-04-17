@@ -115,7 +115,7 @@ const TimeSlotSelectionSection: React.FC<TimeSlotSelectionSectionProps> = ({
         handleDateSelect={handleDateSelect}
         disabledDays={disabledDays}
         uniqueDatesCount={uniqueDatesCount}
-        requiredDatesCount={3} // This is now just a recommended count, not required
+        requiredDatesCount={3} // This is a server requirement (not just a recommendation)
       />
 
       {/* Time preference selectors for selected dates */}

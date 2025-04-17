@@ -156,9 +156,9 @@ export const addTimeSlots = async (
     distinctDates: Array.from(distinctDates)
   });
 
-  // Verify we have at least 3 distinct dates before proceeding
-  if (distinctDates.size < 3) {
-    const error = new Error(`At least 3 different dates must be provided (found ${distinctDates.size})`);
+  // Verify at least 1 unique date - removing the 3-date requirement
+  if (distinctDates.size < 1) {
+    const error = new Error(`At least 1 date must be provided`);
     error.name = "ValidationError";
     throw error;
   }

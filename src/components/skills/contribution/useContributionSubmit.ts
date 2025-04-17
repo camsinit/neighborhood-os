@@ -102,11 +102,20 @@ export const useContributionSubmit = (
         errorHint: error.hint,
       });
       
-      toast({
-        title: "Error",
-        description: "Failed to submit skill contribution. Please try again.",
-        variant: "destructive"
-      });
+      // Special handling for database requirement of 3 dates
+      if (error.message && error.message.includes('3 different dates')) {
+        toast({
+          title: "Please select at least 3 different dates",
+          description: "This system requires a minimum of 3 different dates for scheduling flexibility.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit skill contribution. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

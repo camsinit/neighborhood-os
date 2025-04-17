@@ -89,6 +89,13 @@ export const addTimeSlots = async (
     distinctDates: Array.from(distinctDates)
   });
 
+  // Verify at least 1 unique date is provided
+  if (distinctDates.size < 1) {
+    const error = new Error(`At least 1 date must be provided`);
+    error.name = "ValidationError";
+    throw error;
+  }
+
   // Insert the time slots
   const { error: timeSlotError } = await supabase
     .from('skill_session_time_slots')

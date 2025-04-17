@@ -92,7 +92,12 @@ export const useSkillRequestSubmit = (
         errorCode: error.code
       });
       
-      if (error.name === "ValidationError") {
+      // Special handling for database requirement of 3 dates
+      if (error.message && error.message.includes('3 different dates')) {
+        toast.error('Please select at least 3 different dates', {
+          description: 'This system requires a minimum of 3 different dates for scheduling flexibility.'
+        });
+      } else if (error.name === "ValidationError") {
         // Special handling for our validation errors
         toast.error('Request submission failed', {
           description: error.message
