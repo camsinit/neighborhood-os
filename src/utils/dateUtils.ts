@@ -1,8 +1,9 @@
+
 /**
- * Utility functions for date handling in time slot selection
+ * Central date utilities for the application
  * 
- * NOTICE: This file is being retained for backward compatibility.
- * New code should use the centralized date utilities in src/utils/dateUtils.ts
+ * This file provides standardized date functions used across the application.
+ * All date-related utility functions should be centralized here.
  */
 
 /**
@@ -60,7 +61,22 @@ export const logDateDetails = (context: string, date: Date): void => {
   });
 };
 
-import { normalizeDate as normalizeDateOriginal, getUniqueDatesCount as getUniqueDatesCountOriginal, logDateDetails as logDateDetailsOriginal } from '@/utils/dateUtils';
-
-// Export the functions directly from the central utilities
-export { normalizeDateOriginal as normalizeDate, getUniqueDatesCountOriginal as getUniqueDatesCount, logDateDetailsOriginal as logDateDetails };
+/**
+ * Format a date for display in the UI
+ * 
+ * @param dateString ISO date string
+ * @returns Formatted date string for display
+ */
+export const formatDateForDisplay = (dateString: string): string => {
+  // Create a new date from the ISO string
+  const date = new Date(dateString);
+  
+  // Format as "Month Day, Year" (e.g., "April 19, 2025")
+  const options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  };
+  
+  return date.toLocaleDateString('en-US', options);
+};

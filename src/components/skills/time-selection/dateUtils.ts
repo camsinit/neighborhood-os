@@ -6,7 +6,10 @@
  * New code should use the centralized date utilities in src/utils/dateUtils.ts
  */
 
-import { normalizeDate, getUniqueDatesCount, logDateDetails } from '@/utils/dateUtils';
-
-// Export the functions directly from the central utilities
-export { normalizeDate, getUniqueDatesCount, logDateDetails };
+// Re-export the functions from the central utilities
+export { 
+  normalizeDate, 
+  getUniqueDatesCount, 
+  logDateDetails,
+  formatDateForDisplay 
+} from '@/utils/dateUtils';

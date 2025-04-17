@@ -28,8 +28,8 @@ BEGIN
   END IF;
   
   -- Count distinct dates in timeslots - this is the critical fix
-  -- Extract just the date portion for proper comparison
-  SELECT COUNT(DISTINCT (t->>'date')::TEXT)
+  -- Extract just the date portion (up to 10 characters) for proper comparison
+  SELECT COUNT(DISTINCT substring((t->>'date')::TEXT from 1 for 10))
   INTO v_unique_dates
   FROM jsonb_array_elements(p_timeslots) AS t;
   
@@ -37,7 +37,7 @@ BEGIN
   
   -- Validate at least 1 unique date
   IF v_unique_dates < 1 THEN
-    RAISE EXCEPTION 'At least 1 different date must be provided (found %)`, v_unique_dates;
+    RAISE EXCEPTION 'At least 1 different date must be provided (found %)', v_unique_dates;
   END IF;
 
   -- Create the skill session
