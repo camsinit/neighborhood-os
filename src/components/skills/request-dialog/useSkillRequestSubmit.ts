@@ -90,6 +90,7 @@ export const useSkillRequestSubmit = (
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Also invalidate notifications
       onClose();
     } catch (error: any) {
       console.error('Error submitting skill request:', error);
