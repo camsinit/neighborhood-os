@@ -7,224 +7,30 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
-import { SkillRequestNotification } from "../skills/types/skillTypes";
+// Use our new hook for fetching and prepping notifications
+import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 
+/**
+ * The notification icon/popover. Now it's smart about querying the broadcast notification list,
+ * but has no DB/data logic; that all lives in the custom hook!
+ */
 interface NotificationsPopoverProps {
   children?: ReactNode;
 }
 
-type NotificationActionType = "view" | "rsvp" | "comment" | "help" | "respond" | "share" | "confirm";
-
 const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
-  
-  const { data: notifications, refetch } = useQuery({
-    queryKey: ["notifications", showArchived],
-    queryFn: async () => {
-      // Fetch data from multiple tables concurrently
-      const [safetyUpdates, events, supportRequests, skillRequests] = await Promise.all([
-        // Safety updates query
-        supabase
-          .from("safety_updates")
-          .select(`
-            id, 
-            title, 
-            type, 
-            created_at, 
-            is_read, 
-            is_archived,
-            profiles:author_id (
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('is_archived', showArchived)
-          .order("created_at", { ascending: false })
-          .limit(5),
-        
-        // Events query
-        supabase
-          .from("events")
-          .select(`
-            id, 
-            title, 
-            created_at, 
-            is_read, 
-            is_archived,
-            profiles:host_id (
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('is_archived', showArchived)
-          .order("created_at", { ascending: false })
-          .limit(5),
-          
-        // Support requests query  
-        supabase
-          .from("support_requests")
-          .select(`
-            id, 
-            title, 
-            created_at, 
-            is_read, 
-            is_archived,
-            category,
-            profiles:user_id (
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('is_archived', showArchived)
-          .order("created_at", { ascending: false })
-          .limit(5),
-          
-        // Skill requests query - Fixed to use proper foreign key relationship
-        supabase
-          .from("skill_sessions")
-          .select(`
-            id,
-            created_at,
-            status,
-            skill_id,
-            requester_id,
-            provider_id,
-            requester:requester_id (
-              id
-            ),
-            skill:skill_id (
-              id,
-              title,
-              description,
-              availability,
-              time_preferences
-            )
-          `)
-          .eq('status', 'pending_provider_times')
-          .order("created_at", { ascending: false })
-          .limit(5)
-      ]);
 
-      // Get requester profiles in a separate query since the relation is not directly accessible
-      const requesterIds = skillRequests.data?.map(session => session.requester_id) || [];
-      const { data: requesterProfiles } = await supabase
-        .from("profiles")
-        .select('id, display_name, avatar_url')
-        .in('id', requesterIds);
+  // Our new hook provides the notifications and refetch
+  const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-      // Create a lookup map for requester profiles
-      const profilesMap = (requesterProfiles || []).reduce((map, profile) => {
-        map[profile.id] = profile;
-        return map;
-      }, {} as Record<string, any>);
-
-      // Process the results into notification objects
-      return [
-        // Safety notifications
-        ...(safetyUpdates.data?.map(update => ({
-          itemId: update.id,
-          title: update.title,
-          type: "safety" as const,
-          created_at: update.created_at,
-          isRead: update.is_read,
-          isArchived: update.is_archived,
-          context: {
-            contextType: "safety_alert" as const,
-            neighborName: update.profiles?.display_name,
-            avatarUrl: update.profiles?.avatar_url
-          },
-          actionLabel: "Comment",
-          actionType: "comment" as NotificationActionType
-        })) || []),
-        
-        // Event notifications
-        ...(events.data?.map(event => ({
-          itemId: event.id,
-          title: event.title,
-          type: "event" as const,
-          created_at: event.created_at,
-          isRead: event.is_read,
-          isArchived: event.is_archived,
-          context: {
-            contextType: "event_invite" as const,
-            neighborName: event.profiles?.display_name,
-            avatarUrl: event.profiles?.avatar_url
-          },
-          actionLabel: "RSVP",
-          actionType: "rsvp" as NotificationActionType
-        })) || []),
-        
-        // Support request notifications
-        ...(supportRequests.data?.map(request => {
-          const actionType: NotificationActionType = 
-            request.category === 'care' ? "help" :
-            request.category === 'goods' ? "respond" :
-            request.category === 'skills' ? "share" : "view";
-
-          return {
-            itemId: request.id,
-            title: request.title,
-            type: "support" as const,
-            created_at: request.created_at,
-            isRead: request.is_read,
-            isArchived: request.is_archived,
-            context: {
-              contextType: "help_request" as const,
-              neighborName: request.profiles?.display_name,
-              avatarUrl: request.profiles?.avatar_url
-            },
-            actionLabel: request.category === 'care' ? "Help" :
-                        request.category === 'goods' ? "Respond" :
-                        request.category === 'skills' ? "Share" : "View",
-            actionType
-          };
-        }) || []),
-        
-        // Skill request notifications - now using the separate profile lookup
-        ...(skillRequests.data?.map(session => {
-          // Look up requester profile from our map
-          const requesterProfile = profilesMap[session.requester_id] || {};
-          
-          // Convert skill session data into a notification format
-          const skillRequestData: SkillRequestNotification = {
-            skillId: session.skill_id,
-            requesterId: session.requester_id,
-            providerId: session.provider_id,
-            skillTitle: session.skill?.title || "Unnamed skill",
-            requesterName: requesterProfile.display_name || null,
-            requesterAvatar: requesterProfile.avatar_url || null,
-            timePreferences: session.skill?.time_preferences || null,
-            availability: session.skill?.availability || null
-          };
-          
-          return {
-            itemId: session.id,
-            title: session.skill?.title || "New skill request",
-            type: "skills" as const,
-            created_at: session.created_at,
-            isRead: false, // Skill sessions don't have a is_read flag yet
-            isArchived: false, // Skill sessions don't have is_archived yet
-            context: {
-              contextType: "skill_request" as const,
-              neighborName: requesterProfile.display_name || null,
-              avatarUrl: requesterProfile.avatar_url || null,
-              skillRequestData
-            },
-            actionLabel: "Confirm",
-            actionType: "confirm" as NotificationActionType
-          };
-        }) || [])
-      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
-    },
-  });
-
-  const handleItemClick = (type: "safety" | "event" | "support" | "skills", id: string) => {
+  // Handles clicking an item for any notification type.
+  const handleItemClick = (type: any, id: string) => {
+    // Optionally, could still fire an event to highlight and scroll UI
     const event = new CustomEvent('openItemDialog', {
       detail: { type, id }
     });
@@ -252,11 +58,12 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
         section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
-    
+
     refetch();
   };
 
-  const hasUnreadNotifications = notifications?.some(n => !n.isRead && !n.isArchived);
+  // If any non-archived notification is unread, the bell turns red
+  const hasUnreadNotifications = notifications?.some(n => !n.is_read && !n.is_archived);
 
   return (
     <Popover>
@@ -293,8 +100,13 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
           {notifications?.length ? (
             notifications.map((notification) => (
               <NotificationItem
-                key={notification.itemId}
-                {...notification}
+                key={notification.id}
+                title={notification.title}
+                itemId={notification.id}
+                type={notification.type}
+                isRead={notification.is_read}
+                isArchived={notification.is_archived}
+                context={notification.context}
                 onClose={() => refetch()}
                 onItemClick={handleItemClick}
               />
