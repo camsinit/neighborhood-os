@@ -126,8 +126,8 @@ export const fetchSkillNotifications = async () => {
   const combinedData = {
     ...skillSessionsResult,
     data: [
-      ...(skillSessionsResult.data || []) as SkillSession[],
-      ...(notificationsResult.data || []) as SkillNotification[]
+      ...(skillSessionsResult.data || []) as unknown as SkillSession[],
+      ...(notificationsResult.data || []) as unknown as SkillNotification[]
     ] as SkillNotificationItem[]
   };
   
