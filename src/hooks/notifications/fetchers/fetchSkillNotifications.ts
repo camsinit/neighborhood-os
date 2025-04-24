@@ -2,6 +2,49 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
+ * Defines the two types of data we're working with
+ * This helps TypeScript understand what properties each type has
+ */
+interface SkillSession {
+  id: string;
+  created_at: string;
+  status: string;
+  skill_id: string;
+  requester_id: string;
+  provider_id: string;
+  requester: { id: string } | null;
+  skill: {
+    id: string;
+    title: string;
+    description: string;
+    availability: string | null;
+    time_preferences: string[] | null;
+  } | null;
+}
+
+interface SkillNotification {
+  id: string;
+  created_at: string;
+  title: string;
+  content_id: string;
+  content_type: string;
+  notification_type: string;
+  is_read: boolean;
+  is_archived: boolean;
+  metadata: any;
+  user_id: string;
+  actor_id: string;
+  actor: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
+// Define a union type for our result data
+export type SkillNotificationItem = SkillSession | SkillNotification;
+
+/**
  * Fetches skill notifications (requests, completions, etc)
  * 
  * This function has been enhanced to fetch:
@@ -83,10 +126,28 @@ export const fetchSkillNotifications = async () => {
   const combinedData = {
     ...skillSessionsResult,
     data: [
-      ...(skillSessionsResult.data || []),
-      ...(notificationsResult.data || [])
-    ]
+      ...(skillSessionsResult.data || []) as SkillSession[],
+      ...(notificationsResult.data || []) as SkillNotification[]
+    ] as SkillNotificationItem[]
   };
   
   return combinedData;
+};
+
+/**
+ * Type guard to check if an item is a skill session
+ * This helps TypeScript understand when we're working with a skill session
+ */
+export const isSkillSession = (item: SkillNotificationItem): item is SkillSession => {
+  // Check for key properties that would exist in a skill session but not in a notification
+  return item && 'skill_id' in item && 'requester_id' in item && 'provider_id' in item;
+};
+
+/**
+ * Type guard to check if an item is a notification
+ * This helps TypeScript understand when we're working with a notification
+ */
+export const isNotification = (item: SkillNotificationItem): item is SkillNotification => {
+  // Check for key properties that would exist in a notification but not in a skill session
+  return item && 'notification_type' in item && 'metadata' in item && 'actor_id' in item;
 };

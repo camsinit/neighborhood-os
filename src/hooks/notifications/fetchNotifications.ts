@@ -1,4 +1,3 @@
-
 /**
  * Main function to fetch all notifications from various sources
  */
@@ -7,27 +6,11 @@ import { BaseNotification, ProfileData } from "./types";
 import { fetchSafetyNotifications } from "./fetchers/fetchSafetyNotifications";
 import { fetchEventNotifications } from "./fetchers/fetchEventNotifications";
 import { fetchSupportNotifications } from "./fetchers/fetchSupportNotifications";
-import { fetchSkillNotifications } from "./fetchers/fetchSkillNotifications";
+import { fetchSkillNotifications, isSkillSession, isNotification, SkillNotificationItem } from "./fetchers/fetchSkillNotifications";
 import { fetchGoodsNotifications } from "./fetchers/fetchGoodsNotifications";
 import { fetchUserProfiles } from "./fetchers/fetchUserProfiles";
 import { createProfilesMap } from "./fetchers/createProfilesMap";
 import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
-
-/**
- * Helper function to check if an item is a skill session
- */
-const isSkillSession = (item: any): boolean => {
-  // Check for key properties that would exist in a skill session but not in a notification
-  return item && 'skill_id' in item && 'requester_id' in item && 'provider_id' in item;
-};
-
-/**
- * Helper function to check if an item is a notification
- */
-const isNotification = (item: any): boolean => {
-  // Check for key properties that would exist in a notification but not in a skill session
-  return item && 'notification_type' in item && 'metadata' in item && 'actor_id' in item;
-};
 
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
   console.log("[fetchAllNotifications] Starting to fetch all notifications, showArchived:", showArchived);
@@ -83,7 +66,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   // This processes two different types of data in the skillRequests array:
   // 1. Skill sessions that come from the skill_sessions table
   // 2. Notifications that come from the notifications table
-  const skillNotifications = skillRequests.map(item => {
+  const skillNotifications = skillRequests.map((item: SkillNotificationItem) => {
     // Handle notification type items (from notifications table)
     if (isNotification(item)) {
       const actorProfile = item.actor_id ? profilesMap[item.actor_id] || { display_name: null, avatar_url: null } : null;
@@ -138,8 +121,8 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
         requesterId: item.requester_id,
         providerId: item.provider_id,
         skillTitle: item.skill?.title || "Unnamed skill",
-        requesterName: requesterProfile.display_name || null,
-        requesterAvatar: requesterProfile.avatar_url || null,
+        requesterName: requesterProfile?.display_name || null,
+        requesterAvatar: requesterProfile?.avatar_url || null,
         timePreferences: item.skill?.time_preferences || null,
         availability: item.skill?.availability || null
       };
@@ -153,8 +136,8 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
         is_archived: false,
         context: {
           contextType: "skill_request" as const,
-          neighborName: requesterProfile.display_name || null,
-          avatarUrl: requesterProfile.avatar_url || null,
+          neighborName: requesterProfile?.display_name || null,
+          avatarUrl: requesterProfile?.avatar_url || null,
           skillRequestData
         }
       };

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -36,6 +35,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { skillId, action, skillTitle, changes, providerId, requesterId } = await req.json() as UpdateRequest;
 
     console.log(`[notify-skills-changes] Processing ${action} notification for skill: ${skillTitle}`);
+    console.log(`[notify-skills-changes] Request details: providerId=${providerId}, requesterId=${requesterId}`);
 
     // When a skill is modified, update any related activities to keep them in sync
     if (action === 'update' && skillId) {
@@ -67,6 +67,8 @@ const handler = async (req: Request): Promise<Response> => {
         
       if (profileError) {
         console.error('[notify-skills-changes] Error fetching requester profile:', profileError);
+      } else {
+        console.log('[notify-skills-changes] Fetched requester profile:', requesterProfile);
       }
       
       // Create a notification for the provider
