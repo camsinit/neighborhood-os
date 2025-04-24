@@ -14,6 +14,8 @@ import { createProfilesMap } from "./fetchers/createProfilesMap";
 import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
 
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
+  console.log("[fetchAllNotifications] Starting to fetch all notifications, showArchived:", showArchived);
+  
   // Fetch everything concurrently, so the user doesn't wait for each database call
   const [
     safetyUpdatesResult, 
@@ -29,6 +31,11 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
     fetchGoodsNotifications(showArchived)
   ]);
   
+  console.log("[fetchAllNotifications] Skill requests result:", {
+    count: skillRequestsResult.data?.length || 0,
+    error: skillRequestsResult.error?.message || null
+  });
+  
   // Extract data (or empty if API errors)
   const safetyUpdates = safetyUpdatesResult.data || [];
   const events = eventsResult.data || [];
@@ -41,11 +48,53 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   const goodsUserIds = goodsItems.map(item => item.user_id) || [];
   const allUserIds = [...requesterIds, ...goodsUserIds];
   
+  console.log("[fetchAllNotifications] User IDs to fetch profiles for:", allUserIds);
+  
   // Fetch the actual user profile data
   const userProfilesResult = await fetchUserProfiles(allUserIds);
   const userProfiles = userProfilesResult.data || [];
   const profilesMap = createProfilesMap(userProfiles);
 
+  // Process skill requests with detailed logging
+  const skillNotifications = skillRequests.map(session => {
+    const requesterProfile = profilesMap[session.requester_id] || { display_name: null, avatar_url: null };
+    
+    console.log("[fetchAllNotifications] Processing skill session:", { 
+      sessionId: session.id,
+      skillId: session.skill_id,
+      requester: session.requester_id,
+      provider: session.provider_id,
+      status: session.status,
+      skillTitle: session.skill?.title
+    });
+    
+    const skillRequestData: SkillRequestNotification = {
+      skillId: session.skill_id,
+      requesterId: session.requester_id,
+      providerId: session.provider_id,
+      skillTitle: session.skill?.title || "Unnamed skill",
+      requesterName: requesterProfile.display_name || null,
+      requesterAvatar: requesterProfile.avatar_url || null,
+      timePreferences: session.skill?.time_preferences || null,
+      availability: session.skill?.availability || null
+    };
+    
+    return {
+      id: session.id,
+      title: session.skill?.title || "New skill request",
+      type: "skills" as const,
+      created_at: session.created_at,
+      is_read: false, // see original code logic
+      is_archived: false,
+      context: {
+        contextType: "skill_request" as const,
+        neighborName: requesterProfile.display_name || null,
+        avatarUrl: requesterProfile.avatar_url || null,
+        skillRequestData
+      }
+    };
+  });
+  
   // Return final sorted notifications
   const allNotifications: BaseNotification[] = [
     ...safetyUpdates.map(update => ({
@@ -87,33 +136,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
         avatarUrl: request.profiles?.avatar_url || null
       }
     })),
-    ...skillRequests.map(session => {
-      const requesterProfile = profilesMap[session.requester_id] || { display_name: null, avatar_url: null };
-      const skillRequestData: SkillRequestNotification = {
-        skillId: session.skill_id,
-        requesterId: session.requester_id,
-        providerId: session.provider_id,
-        skillTitle: session.skill?.title || "Unnamed skill",
-        requesterName: requesterProfile.display_name || null,
-        requesterAvatar: requesterProfile.avatar_url || null,
-        timePreferences: session.skill?.time_preferences || null,
-        availability: session.skill?.availability || null
-      };
-      return {
-        id: session.id,
-        title: session.skill?.title || "New skill request",
-        type: "skills" as const,
-        created_at: session.created_at,
-        is_read: false, // see original code logic
-        is_archived: false,
-        context: {
-          contextType: "skill_request" as const,
-          neighborName: requesterProfile.display_name || null,
-          avatarUrl: requesterProfile.avatar_url || null,
-          skillRequestData
-        }
-      };
-    }),
+    ...skillNotifications,
     ...goodsItems.map(item => {
       const userProfile = profilesMap[item.user_id] || { display_name: null, avatar_url: null };
       return {
@@ -131,6 +154,9 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
       };
     })
   ];
+  
+  console.log("[fetchAllNotifications] Final notification count:", allNotifications.length);
+  
   return allNotifications.sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );

@@ -50,7 +50,13 @@ export const useSkillRequestSubmit = (
     }
 
     // Log input time slots array for debugging
-    console.log("SUBMIT REQUEST - Input time slots:", JSON.stringify(selectedTimeSlots, null, 2));
+    console.log("[submitSkillRequest] Starting request submission:", {
+      skillId,
+      providerId,
+      requesterId: user.id,
+      formData: JSON.stringify(data, null, 2),
+      timeSlots: JSON.stringify(selectedTimeSlots, null, 2)
+    });
     
     // Validate we have at least one time slot
     if (!selectedTimeSlots.length) {
@@ -64,6 +70,8 @@ export const useSkillRequestSubmit = (
       // Prepare data for RPC call - this ensures compatibility with JSON types
       const preparedTimeSlots = prepareTimeSlots(selectedTimeSlots);
       
+      console.log("[submitSkillRequest] Prepared time slots for RPC:", preparedTimeSlots);
+      
       // Convert form data to a simple Record object that Supabase can serialize
       // This fixes the TypeScript error by ensuring our object has the right structure
       const formDataForRpc: Record<string, Json> = {
@@ -74,6 +82,12 @@ export const useSkillRequestSubmit = (
       
       // Call the database function directly using RPC
       // Using proper typing to ensure compatibility with Supabase
+      console.log("[submitSkillRequest] Making RPC call with params:", {
+        p_skill_id: skillId,
+        p_provider_id: providerId,
+        p_requester_id: user.id
+      });
+      
       const { data: result, error } = await supabase.rpc(
         'create_skill_session_with_timeslots',
         {
@@ -85,7 +99,12 @@ export const useSkillRequestSubmit = (
         }
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("[submitSkillRequest] RPC error:", error);
+        throw error;
+      }
+      
+      console.log("[submitSkillRequest] Success! Result:", result);
       
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
@@ -93,10 +112,10 @@ export const useSkillRequestSubmit = (
       queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Also invalidate notifications
       onClose();
     } catch (error: any) {
-      console.error('Error submitting skill request:', error);
+      console.error('[submitSkillRequest] Error submitting skill request:', error);
       
       // Enhanced error logging
-      console.error('Error context:', {
+      console.error('[submitSkillRequest] Error context:', {
         skillId,
         providerId,
         requesterId: user?.id,
