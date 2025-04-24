@@ -52,6 +52,7 @@ export const fetchSkillNotifications = async () => {
       is_read,
       is_archived,
       metadata,
+      user_id,
       actor_id,
       actor:actor_id (
         id,

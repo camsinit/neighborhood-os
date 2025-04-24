@@ -13,6 +13,22 @@ import { fetchUserProfiles } from "./fetchers/fetchUserProfiles";
 import { createProfilesMap } from "./fetchers/createProfilesMap";
 import { SkillRequestNotification } from "@/components/skills/types/skillTypes";
 
+/**
+ * Helper function to check if an item is a skill session
+ */
+const isSkillSession = (item: any): boolean => {
+  // Check for key properties that would exist in a skill session but not in a notification
+  return item && 'skill_id' in item && 'requester_id' in item && 'provider_id' in item;
+};
+
+/**
+ * Helper function to check if an item is a notification
+ */
+const isNotification = (item: any): boolean => {
+  // Check for key properties that would exist in a notification but not in a skill session
+  return item && 'notification_type' in item && 'metadata' in item && 'actor_id' in item;
+};
+
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
   console.log("[fetchAllNotifications] Starting to fetch all notifications, showArchived:", showArchived);
   
@@ -44,12 +60,13 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   const goodsItems = goodsItemsResult.data || [];
   
   // Build up all the user IDs to fetch their profiles
+  // Using type guards to safely extract IDs
   const requesterIds = skillRequests
-    .filter(item => item.requester_id) // Only process skill sessions, not notifications
+    .filter(isSkillSession)
     .map(session => session.requester_id) || [];
     
   const actorIds = skillRequests
-    .filter(item => item.actor_id) // Only process notifications, not skill sessions
+    .filter(isNotification)
     .map(notification => notification.actor_id) || [];
     
   const goodsUserIds = goodsItems.map(item => item.user_id) || [];
@@ -68,7 +85,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   // 2. Notifications that come from the notifications table
   const skillNotifications = skillRequests.map(item => {
     // Handle notification type items (from notifications table)
-    if (item.notification_type === 'skills') {
+    if (isNotification(item)) {
       const actorProfile = item.actor_id ? profilesMap[item.actor_id] || { display_name: null, avatar_url: null } : null;
       
       console.log("[fetchAllNotifications] Processing skill notification:", { 
@@ -104,7 +121,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
     } 
     
     // Handle skill session type items (from skill_sessions table)
-    else {
+    else if (isSkillSession(item)) {
       const requesterProfile = item.requester_id ? profilesMap[item.requester_id] || { display_name: null, avatar_url: null } : null;
       
       console.log("[fetchAllNotifications] Processing skill session:", { 
@@ -139,6 +156,24 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
           neighborName: requesterProfile.display_name || null,
           avatarUrl: requesterProfile.avatar_url || null,
           skillRequestData
+        }
+      };
+    }
+    
+    // Fallback for any unexpected item format
+    else {
+      console.warn("[fetchAllNotifications] Unrecognized item format:", item);
+      return {
+        id: item.id || "unknown",
+        title: "Unknown notification",
+        type: "skills" as const,
+        created_at: item.created_at || new Date().toISOString(),
+        is_read: false,
+        is_archived: false,
+        context: {
+          contextType: "skill_request" as const,
+          neighborName: null,
+          avatarUrl: null
         }
       };
     }
