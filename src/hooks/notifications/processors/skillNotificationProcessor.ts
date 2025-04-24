@@ -1,30 +1,30 @@
-
 /**
  * This file handles the processing of skill notifications
  * It contains utility functions for transforming skill notification data
  */
 import { BaseNotification } from "../types";
 import { ProfileData } from "../types";
+import { 
+  SkillNotificationItem,
+  SkillSession as FetchedSkillSession,
+  SkillNotification,
+  isSkillSession,
+  isNotification
+} from "../fetchers/fetchSkillNotifications";
 
 /**
  * Type definitions to help TypeScript understand our data structures
  */
 // Define the shape of a skill session
-export interface SkillSession {
-  id: string;
-  created_at: string;
-  status: string;
-  skill_id: string;
-  requester_id: string;
-  provider_id: string;
+interface SkillSession extends FetchedSkillSession {
+  requester?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
   skill?: {
     title?: string;
     time_preferences?: string[];
     availability?: string;
-  };
-  requester?: {
-    display_name?: string;
-    avatar_url?: string;
   };
 }
 
@@ -87,10 +87,10 @@ export const processSkillNotifications = (
   console.log("[processSkillNotifications] Processing skill notifications:", skillRequests.length);
   
   // Map through the combined data, using our type guards to determine how to process each item
-  return skillRequests.map((item) => {
+  return skillRequests.map((item): BaseNotification => {
     // Handle notification type items (from notifications table)
     if (isNotification(item)) {
-      const actorProfile = item.actor_id ? profilesMap[item.actor_id] || { display_name: null, avatar_url: null } : null;
+      const actorProfile = item.actor_id ? profilesMap[item.actor_id] : null;
       
       console.log("[processSkillNotifications] Processing skill notification:", { 
         id: item.id,
@@ -126,7 +126,7 @@ export const processSkillNotifications = (
     
     // Handle skill session type items (from skill_sessions table)
     else if (isSkillSession(item)) {
-      const requesterProfile = item.requester_id ? profilesMap[item.requester_id] || { display_name: null, avatar_url: null } : null;
+      const requesterProfile = item.requester_id ? profilesMap[item.requester_id] : null;
       
       console.log("[processSkillNotifications] Processing skill session:", { 
         sessionId: item.id,
@@ -165,17 +165,13 @@ export const processSkillNotifications = (
     // Fallback for any unexpected item format
     else {
       console.warn("[processSkillNotifications] Unrecognized item format:", item);
-      // Fixed the error: Use type assertion to avoid 'never' type errors
-      const fallbackId = typeof item === 'object' && item !== null && 'id' in item ? String(item.id) : "unknown";
-      const fallbackDate = typeof item === 'object' && item !== null && 'created_at' in item 
-        ? String(item.created_at) 
-        : new Date().toISOString();
-      
       return {
-        id: fallbackId,
+        id: typeof item === 'object' && item !== null ? String(item.id || 'unknown') : 'unknown',
         title: "Unknown notification",
         type: "skills" as const,
-        created_at: fallbackDate,
+        created_at: typeof item === 'object' && item !== null ? 
+          String(item.created_at || new Date().toISOString()) : 
+          new Date().toISOString(),
         is_read: false,
         is_archived: false,
         context: {

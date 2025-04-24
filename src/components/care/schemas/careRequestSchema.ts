@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 /**
@@ -12,9 +11,6 @@ export const careRequestSchema = z.object({
   
   // Description is optional
   description: z.string().optional(),
-  
-  // Request type must be either 'need' or 'offer'
-  requestType: z.enum(['need', 'offer']),
   
   // Care category is required
   careCategory: z.string(),
@@ -48,7 +44,6 @@ export const careCategories = [
 export interface CareRequestFormProps {
   onClose: () => void;
   initialValues?: {
-    requestType?: 'need' | 'offer' | null;
     careCategory?: string;
   };
   editMode?: boolean;
