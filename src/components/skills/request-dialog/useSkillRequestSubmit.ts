@@ -106,6 +106,34 @@ export const useSkillRequestSubmit = (
       
       console.log("[submitSkillRequest] Success! Result:", result);
       
+      // Call our notification edge function to notify the provider
+      try {
+        // First, get the skill title
+        const { data: skillData } = await supabase
+          .from('skills_exchange')
+          .select('title')
+          .eq('id', skillId)
+          .single();
+
+        if (skillData) {
+          // Call the edge function to notify the provider
+          const notifyResponse = await supabase.functions.invoke('notify-skills-changes', {
+            body: {
+              action: 'request',
+              skillId,
+              skillTitle: skillData.title,
+              providerId,
+              requesterId: user.id
+            }
+          });
+          
+          console.log("[submitSkillRequest] Notification function response:", notifyResponse);
+        }
+      } catch (notifyError) {
+        console.error("[submitSkillRequest] Error notifying provider:", notifyError);
+        // We don't throw here as the session was already created successfully
+      }
+      
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });

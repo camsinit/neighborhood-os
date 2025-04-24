@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -57,8 +58,19 @@ const handler = async (req: Request): Promise<Response> => {
     if (action === 'request' && skillId && providerId && requesterId) {
       console.log(`[notify-skills-changes] Creating notification for skill request: providerId=${providerId}, requesterId=${requesterId}`);
       
+      // First, get requester's profile information to include in notification
+      const { data: requesterProfile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', requesterId)
+        .single();
+        
+      if (profileError) {
+        console.error('[notify-skills-changes] Error fetching requester profile:', profileError);
+      }
+      
       // Create a notification for the provider
-      const { error: notificationError } = await supabaseClient
+      const { data: notificationData, error: notificationError } = await supabaseClient
         .from('notifications')
         .insert({
           user_id: providerId,
@@ -71,15 +83,19 @@ const handler = async (req: Request): Promise<Response> => {
           action_label: 'View Request',
           metadata: {
             skillId,
-            requesterId
+            requesterId,
+            skillTitle,
+            requesterName: requesterProfile?.display_name || null,
+            requesterAvatar: requesterProfile?.avatar_url || null
           }
-        });
+        })
+        .select();
         
       if (notificationError) {
         console.error('[notify-skills-changes] Error creating notification:', notificationError);
         throw notificationError;
       } else {
-        console.log('[notify-skills-changes] Successfully created notification for provider');
+        console.log('[notify-skills-changes] Successfully created notification for provider:', notificationData);
       }
     }
 

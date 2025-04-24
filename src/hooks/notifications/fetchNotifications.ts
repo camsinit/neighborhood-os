@@ -44,9 +44,16 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   const goodsItems = goodsItemsResult.data || [];
   
   // Build up all the user IDs to fetch their profiles
-  const requesterIds = skillRequests.map(session => session.requester_id) || [];
+  const requesterIds = skillRequests
+    .filter(item => item.requester_id) // Only process skill sessions, not notifications
+    .map(session => session.requester_id) || [];
+    
+  const actorIds = skillRequests
+    .filter(item => item.actor_id) // Only process notifications, not skill sessions
+    .map(notification => notification.actor_id) || [];
+    
   const goodsUserIds = goodsItems.map(item => item.user_id) || [];
-  const allUserIds = [...requesterIds, ...goodsUserIds];
+  const allUserIds = [...requesterIds, ...actorIds, ...goodsUserIds];
   
   console.log("[fetchAllNotifications] User IDs to fetch profiles for:", allUserIds);
   
@@ -56,43 +63,85 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   const profilesMap = createProfilesMap(userProfiles);
 
   // Process skill requests with detailed logging
-  const skillNotifications = skillRequests.map(session => {
-    const requesterProfile = profilesMap[session.requester_id] || { display_name: null, avatar_url: null };
+  // This processes two different types of data in the skillRequests array:
+  // 1. Skill sessions that come from the skill_sessions table
+  // 2. Notifications that come from the notifications table
+  const skillNotifications = skillRequests.map(item => {
+    // Handle notification type items (from notifications table)
+    if (item.notification_type === 'skills') {
+      const actorProfile = item.actor_id ? profilesMap[item.actor_id] || { display_name: null, avatar_url: null } : null;
+      
+      console.log("[fetchAllNotifications] Processing skill notification:", { 
+        id: item.id,
+        title: item.title,
+        metadata: item.metadata
+      });
+      
+      // Map notification data directly
+      return {
+        id: item.id,
+        title: item.title || "Skill notification",
+        type: "skills" as const,
+        created_at: item.created_at,
+        is_read: item.is_read || false,
+        is_archived: item.is_archived || false,
+        context: {
+          contextType: "skill_request" as const,
+          neighborName: actorProfile?.display_name || item.metadata?.requesterName || null,
+          avatarUrl: actorProfile?.avatar_url || item.metadata?.requesterAvatar || null,
+          skillRequestData: {
+            skillId: item.metadata?.skillId || item.content_id,
+            requesterId: item.metadata?.requesterId || item.actor_id,
+            providerId: item.user_id,
+            skillTitle: item.metadata?.skillTitle || item.title,
+            requesterName: actorProfile?.display_name || item.metadata?.requesterName || null,
+            requesterAvatar: actorProfile?.avatar_url || item.metadata?.requesterAvatar || null,
+            timePreferences: null,
+            availability: null
+          }
+        }
+      };
+    } 
     
-    console.log("[fetchAllNotifications] Processing skill session:", { 
-      sessionId: session.id,
-      skillId: session.skill_id,
-      requester: session.requester_id,
-      provider: session.provider_id,
-      status: session.status,
-      skillTitle: session.skill?.title
-    });
-    
-    const skillRequestData: SkillRequestNotification = {
-      skillId: session.skill_id,
-      requesterId: session.requester_id,
-      providerId: session.provider_id,
-      skillTitle: session.skill?.title || "Unnamed skill",
-      requesterName: requesterProfile.display_name || null,
-      requesterAvatar: requesterProfile.avatar_url || null,
-      timePreferences: session.skill?.time_preferences || null,
-      availability: session.skill?.availability || null
-    };
-    
-    return {
-      id: session.id,
-      title: session.skill?.title || "New skill request",
-      type: "skills" as const,
-      created_at: session.created_at,
-      is_read: false, // see original code logic
-      is_archived: false,
-      context: {
-        contextType: "skill_request" as const,
-        neighborName: requesterProfile.display_name || null,
-        avatarUrl: requesterProfile.avatar_url || null,
-        skillRequestData
-      }
-    };
+    // Handle skill session type items (from skill_sessions table)
+    else {
+      const requesterProfile = item.requester_id ? profilesMap[item.requester_id] || { display_name: null, avatar_url: null } : null;
+      
+      console.log("[fetchAllNotifications] Processing skill session:", { 
+        sessionId: item.id,
+        skillId: item.skill_id,
+        requester: item.requester_id,
+        provider: item.provider_id,
+        status: item.status,
+        skillTitle: item.skill?.title
+      });
+      
+      const skillRequestData: SkillRequestNotification = {
+        skillId: item.skill_id,
+        requesterId: item.requester_id,
+        providerId: item.provider_id,
+        skillTitle: item.skill?.title || "Unnamed skill",
+        requesterName: requesterProfile.display_name || null,
+        requesterAvatar: requesterProfile.avatar_url || null,
+        timePreferences: item.skill?.time_preferences || null,
+        availability: item.skill?.availability || null
+      };
+      
+      return {
+        id: item.id,
+        title: item.skill?.title || "New skill request",
+        type: "skills" as const,
+        created_at: item.created_at,
+        is_read: false,
+        is_archived: false,
+        context: {
+          contextType: "skill_request" as const,
+          neighborName: requesterProfile.display_name || null,
+          avatarUrl: requesterProfile.avatar_url || null,
+          skillRequestData
+        }
+      };
+    }
   });
   
   // Return final sorted notifications
