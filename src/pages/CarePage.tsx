@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
+import AddCareRequestDialog from "@/components/care/AddCareRequestDialog";
 import ItemRequestDialog from "@/components/support/ItemRequestDialog";
 import { Button } from "@/components/ui/button";
 import { HeartHandshake, Search, Plus } from "lucide-react";
@@ -8,14 +10,23 @@ import { Input } from "@/components/ui/input";
 import ArchiveButton from "@/components/mutual-support/ArchiveButton";
 import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
+import NotificationPopover from "@/components/notifications/NotificationPopover";
 
+/**
+ * CarePage component
+ * 
+ * Displays a list of care requests and offers with search functionality
+ * Uses NotificationPopover for consistent UI across the application
+ */
 const CarePage = () => {
   const [hoveredRequestId, setHoveredRequestId] = useState<string | null>(null);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Set up event listener for highlighting items when navigated to from notifications
   useEffect(() => {
+    // This creates a listener that will highlight the specified support item when triggered
     const handleHighlightItem = createHighlightListener("support");
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     return () => {
@@ -23,12 +34,14 @@ const CarePage = () => {
     };
   }, []);
 
+  // Fetch all support requests
   const {
     data: requests,
     isLoading,
     refetch
   } = useSupportRequests();
 
+  // Filter requests to only show care category and match search query
   const careRequests = requests?.filter(req => 
     req.category === 'care' && 
     !req.is_archived &&
@@ -39,6 +52,7 @@ const CarePage = () => {
 
   return (
     <div className="relative min-h-screen">
+      {/* Background gradient */}
       <div 
         className="absolute inset-0 pointer-events-none" 
         style={{ 
@@ -63,6 +77,7 @@ const CarePage = () => {
 
               <div className="bg-white rounded-lg p-6 shadow-lg">
                 <div className="flex items-center justify-between mb-6">
+                  {/* Search input */}
                   <div className="relative w-[280px]">
                     <Input
                       type="text"
@@ -74,6 +89,7 @@ const CarePage = () => {
                     <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                   </div>
 
+                  {/* Add request button */}
                   <div className="flex gap-2">
                     <Button 
                       onClick={() => setIsAddRequestOpen(true)}
@@ -85,6 +101,7 @@ const CarePage = () => {
                   </div>
                 </div>
 
+                {/* Empty state */}
                 {careRequests.length === 0 ? (
                   <div className="max-w-4xl mx-auto mt-8">
                     <Button 
@@ -100,42 +117,52 @@ const CarePage = () => {
                     </Button>
                   </div>
                 ) : (
+                  /* Care request list */
                   <div className="space-y-4">
                     {careRequests.map(request => (
-                      <div 
+                      <NotificationPopover
                         key={request.id}
-                        className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow flex justify-between items-start"
+                        title={request.title}
+                        type="support"
+                        itemId={request.id}
+                        description={request.description}
+                        onAction={() => setSelectedRequest(request)}
+                        actionLabel={request.request_type === 'need' ? "I Can Help" : "Contact Me"}
+                        isArchived={request.is_archived}
                       >
-                        <div className="flex-grow cursor-pointer" onClick={() => setSelectedRequest(request)}>
-                          <h3 className="font-medium text-lg">{request.title}</h3>
-                          <p className="text-gray-600 mt-1">{request.description}</p>
-                          <div className="mt-2">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                              {request.request_type === 'offer' ? 'Offering Help' : 'Needs Help'}
-                            </span>
+                        <div 
+                          className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow flex justify-between items-start"
+                        >
+                          <div className="flex-grow cursor-pointer">
+                            <h3 className="font-medium text-lg">{request.title}</h3>
+                            <p className="text-gray-600 mt-1">{request.description}</p>
+                            <div className="mt-2">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                request.request_type === 'offer' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {request.request_type === 'offer' ? 'Offering Help' : 'Needs Help'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <ArchiveButton 
+                              requestId={request.id}
+                              tableName="care_requests"
+                              onArchiveComplete={refetch}
+                            />
+
+                            <Button
+                              className="min-w-[120px] transition-colors duration-200"
+                              variant={hoveredRequestId === request.id ? "default" : "secondary"}
+                              onMouseEnter={() => setHoveredRequestId(request.id)}
+                              onMouseLeave={() => setHoveredRequestId(null)}
+                            >
+                              {hoveredRequestId === request.id ? "I can Help!" : "Care Needed"}
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <ArchiveButton 
-                            requestId={request.id}
-                            tableName="care_requests"
-                            onArchiveComplete={refetch}
-                          />
-
-                          <Button
-                            className="min-w-[120px] transition-colors duration-200"
-                            variant={hoveredRequestId === request.id ? "default" : "secondary"}
-                            onMouseEnter={() => setHoveredRequestId(request.id)}
-                            onMouseLeave={() => setHoveredRequestId(null)}
-                            onClick={() => setSelectedRequest(request)}
-                          >
-                            {hoveredRequestId === request.id ? "I can Help!" : "Care Needed"}
-                          </Button>
-                        </div>
-                      </div>
+                      </NotificationPopover>
                     ))}
                   </div>
                 )}
@@ -145,10 +172,10 @@ const CarePage = () => {
         </div>
       </div>
 
-      <AddSupportRequestDialog 
+      {/* Dialogs */}
+      <AddCareRequestDialog 
         open={isAddRequestOpen}
         onOpenChange={setIsAddRequestOpen}
-        view="care"
       />
 
       <ItemRequestDialog

@@ -8,6 +8,12 @@ interface AddCareRequestDialogProps {
   initialRequestType?: "need" | "offer";
 }
 
+/**
+ * AddCareRequestDialog component
+ * 
+ * This dialog displays a form for creating care requests or offers
+ * It uses the UniversalDialog component for consistent UI
+ */
 const AddCareRequestDialog = ({ 
   open, 
   onOpenChange,
@@ -34,4 +40,3 @@ const AddCareRequestDialog = ({
 };
 
 export default AddCareRequestDialog;
-
