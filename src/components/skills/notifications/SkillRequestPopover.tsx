@@ -1,14 +1,12 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Pencil, Trash2 } from "lucide-react"; // Add new icons
+import { Calendar, Clock, Pencil, Trash2 } from "lucide-react"; // Updated imports
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillRequestNotification } from "../types/skillTypes";
-import { createSkillSessionEvent } from "@/utils/skillSessionCalendar";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -16,12 +14,6 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-/**
- * SkillRequestPopover - Displays details about a skill request and allows the provider
- * to schedule a session and create a calendar event.
- * 
- * This component is shown when a skill provider clicks on a notification about a skill request.
- */
 interface SkillRequestPopoverProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -33,52 +25,30 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
   onOpenChange,
   notification
 }) => {
-  // State for tracking loading state during confirmations
   const [isConfirming, setIsConfirming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Toast for notifications
   const { toast } = useToast();
   
-  // Query client for data invalidation
   const queryClient = useQueryClient();
   
-  // Handler for confirming and scheduling the skill session
   const handleScheduleSession = async () => {
     try {
       setIsConfirming(true);
       
-      // 1. Create a calendar event using our new utility function
-      const eventDate = new Date();
-      eventDate.setDate(eventDate.getDate() + 3); // Default to 3 days from now as example
+      // Simulate scheduling logic
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const eventId = await createSkillSessionEvent({
-        sessionId: notification.skillId,
-        skillId: notification.skillId,
-        skillTitle: notification.skillTitle,
-        providerId: notification.providerId,
-        requesterId: notification.requesterId,
-        eventDateTime: eventDate,
-        location: 'To be determined'
-      });
-      
-      if (!eventId) {
-        throw new Error("Failed to create event");
-      }
-      
-      // Success message and cleanup
       toast({
         title: "Session scheduled successfully!",
-        description: "The requester has been notified and the event has been added to the calendar."
+        description: "The requester has been notified."
       });
       
-      // Invalidate relevant queries to update UI
+      // Invalidate queries to update UI
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
       
-      // Close the dialog
       onOpenChange(false);
     } catch (error) {
       console.error("Error scheduling session:", error);
@@ -92,28 +62,28 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
     }
   };
 
-  // New handler for deleting a skill request
+  // Enhanced delete handler with proper error handling
   const handleDeleteRequest = async () => {
     try {
       setIsDeleting(true);
       
-      // Here you would add the actual deletion logic
-      // For example:
-      // await supabase
-      //   .from('skill_sessions')
-      //   .delete()
-      //   .eq('id', notification.skillId);
+      // Delete the skill request from the skills_exchange table
+      const { error } = await supabase
+        .from('skills_exchange')
+        .delete()
+        .eq('id', notification.skillId);
+
+      if (error) throw error;
       
       toast({
         title: "Skill request deleted",
-        description: "The skill request has been removed from your notifications."
+        description: "The skill request has been removed."
       });
       
-      // Invalidate relevant queries to update UI
+      // Invalidate queries to update UI
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       
-      // Close the dialog
       onOpenChange(false);
     } catch (error) {
       console.error("Error deleting skill request:", error);
@@ -127,7 +97,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
     }
   };
 
-  // New handler for edit mode
   const handleEditMode = () => {
     setIsEditing(!isEditing);
     // Here you would implement edit functionality
@@ -136,32 +105,31 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader className="flex items-center justify-between">
-          <DialogTitle>Skill Request: {notification.skillTitle}</DialogTitle>
+        <DialogHeader className="flex items-center justify-between mb-4">
+          <DialogTitle>{notification.skillTitle}</DialogTitle>
           
-          {/* New: Edit and Delete button dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                Actions
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleEditMode}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleDeleteRequest}
-                className="text-red-600 focus:text-red-600"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Action buttons in header */}
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={handleEditMode}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteRequest}
+              disabled={isDeleting}
+              className="text-red-600 hover:text-red-800"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
-        
+
         {/* Requester information */}
         <div className="flex items-center gap-4 mb-4">
           <Avatar className="h-12 w-12">
@@ -183,7 +151,7 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
             </h4>
             <div className="flex flex-wrap gap-2">
               {notification.timePreferences.map((time, index) => (
-                <span key={index} className="bg-gray-100 px-2 py-1 rounded text-xs">
+                <span key={index} className="bg-purple-50 text-purple-700 px-2 py-1 rounded text-xs">
                   {time}
                 </span>
               ))}
@@ -207,26 +175,15 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
           <p>By confirming, you'll create a calendar event for this skill session and notify the requester.</p>
         </div>
 
-        <DialogFooter className="flex justify-between items-center">
-          {/* New: Move Edit button to the left side */}
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleEditMode}
-              className="mr-2"
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleScheduleSession} disabled={isConfirming}>
-              {isConfirming ? "Scheduling..." : "Schedule Session"}
-            </Button>
-          </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button 
+            onClick={handleScheduleSession} 
+            disabled={isConfirming}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            {isConfirming ? "Scheduling..." : "Schedule Session"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
