@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
-import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew"; // Import the new dialog component
+import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -104,6 +104,53 @@ const SafetyUpdates = () => {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>{selectedUpdate?.title}</DialogTitle>
+              {user && user.id === selectedUpdate?.author_id && (
+                <div className="flex items-center gap-2 absolute right-12 top-4">
+                  <EditSafetyUpdateDialog update={selectedUpdate}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="hover:bg-secondary"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </EditSafetyUpdateDialog>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this safety update?")) {
+                        supabase
+                          .from('safety_updates')
+                          .delete()
+                          .eq('id', selectedUpdate.id)
+                          .eq('author_id', user.id)
+                          .then(({ error }) => {
+                            if (error) {
+                              toast({
+                                title: "Error",
+                                description: "Failed to delete safety update",
+                                variant: "destructive"
+                              });
+                              return;
+                            }
+                            toast({
+                              title: "Success",
+                              description: "Safety update deleted successfully"
+                            });
+                            setSelectedUpdate(null);
+                            queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+                          });
+                      }
+                    }}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              )}
             </div>
           </DialogHeader>
           <div className="space-y-6">
@@ -126,51 +173,7 @@ const SafetyUpdates = () => {
             </div>
             <p className="text-gray-700">{selectedUpdate?.description}</p>
             {selectedUpdate && (
-              <>
-                <SafetyUpdateComments updateId={selectedUpdate.id} />
-                {user && user.id === selectedUpdate?.author_id && (
-                  <div className="flex items-center justify-end gap-2 mt-4 border-t pt-4">
-                    <EditSafetyUpdateDialog update={selectedUpdate}>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="hover:bg-secondary"
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </EditSafetyUpdateDialog>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        // Add delete confirmation and functionality
-                        if (window.confirm("Are you sure you want to delete this safety update?")) {
-                          // Delete the safety update
-                          supabase
-                            .from('safety_updates')
-                            .delete()
-                            .eq('id', selectedUpdate.id)
-                            .eq('author_id', user.id)
-                            .then(({ error }) => {
-                              if (error) {
-                                toast.error("Failed to delete safety update");
-                                return;
-                              }
-                              toast.success("Safety update deleted successfully");
-                              setSelectedUpdate(null);
-                              queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
-                            });
-                        }
-                      }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                )}
-              </>
+              <SafetyUpdateComments updateId={selectedUpdate.id} />
             )}
           </div>
         </DialogContent>
