@@ -1,9 +1,4 @@
 
-/**
- * SafetyTypeField component
- * 
- * This component renders the dropdown field for selecting safety update types
- */
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
@@ -21,14 +16,14 @@ export function SafetyTypeField({ form }: SafetyTypeFieldProps) {
       name="type"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Type of Safety Update</FormLabel>
+          <FormLabel>Type</FormLabel>
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select update type" />
+                <SelectValue placeholder="Select type" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>

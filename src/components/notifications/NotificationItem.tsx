@@ -1,8 +1,7 @@
-
 import { HighlightableItemType } from "@/utils/highlightNavigation";
 import { BaseNotification } from "@/hooks/notifications/types";
 import DefaultNotificationItem from "./items/DefaultNotificationItem";
-import SkillNotificationItem from "./items/SkillNotificationItem";
+import { SkillNotificationItem } from "./items/SkillNotificationItem";
 import { useState } from "react";
 
 interface NotificationItemProps {

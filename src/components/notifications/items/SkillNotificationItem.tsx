@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
@@ -17,6 +16,7 @@ interface SkillNotificationItemProps {
   onArchive: (e: React.MouseEvent) => void;
 }
 
+// Export as named export instead of default
 export const SkillNotificationItem = ({
   title,
   itemId,
