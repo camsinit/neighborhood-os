@@ -30,7 +30,7 @@ export default function SafetyUpdateForm({ onClose, existingData, mode = 'create
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Alert", // Changed from 'General'
+      type: existingData?.type || "Emergency", // Changed from 'Alert'
       imageUrl: existingData?.imageUrl || ""
     },
   });

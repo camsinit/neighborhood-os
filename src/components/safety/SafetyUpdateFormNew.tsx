@@ -20,7 +20,7 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Alert",
+      type: existingData?.type || "Emergency", // Changed from 'Alert'
       imageUrl: existingData?.imageUrl || "",
     },
   });
