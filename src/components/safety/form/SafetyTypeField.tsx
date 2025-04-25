@@ -27,6 +27,7 @@ export const SafetyTypeField = ({ form }: SafetyTypeFieldProps) => {
       name="type"
       render={({ field }) => (
         <FormItem>
+          {/* Changed from "Type of Safety Update" to just "Type" */}
           <FormLabel>Type</FormLabel>
           <FormControl>
             <Select onValueChange={field.onChange} defaultValue={field.value}>

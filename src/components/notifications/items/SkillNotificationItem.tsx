@@ -7,14 +7,16 @@ import SkillRequestPopover from "@/components/skills/notifications/SkillRequestP
 import NotificationPopover from "../NotificationPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
 
+// Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {
   title: string;
   itemId: string;
-  context: BaseNotification['context'];
+  context?: BaseNotification['context']; // Make context optional
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
+  onItemClick?: (type: string, id: string) => void; // Add optional onItemClick
 }
 
 export const SkillNotificationItem = ({
@@ -24,12 +26,14 @@ export const SkillNotificationItem = ({
   isRead = false,
   isArchived = false,
   onClose,
-  onArchive
+  onArchive,
+  onItemClick
 }: SkillNotificationItemProps) => {
   const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
 
   // Only render if we have the correct context type
-  if (context?.contextType !== 'skill_request') {
+  // Add a fallback check to avoid null/undefined issues
+  if (!context || context.contextType !== 'skill_request') {
     return null;
   }
 

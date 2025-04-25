@@ -16,6 +16,7 @@ export const safetyUpdateSchema = z.object({
 
 export type SafetyUpdateFormData = z.infer<typeof safetyUpdateSchema>;
 
+// Simplified to just the three required types
 export const SAFETY_UPDATE_TYPES = [
   { value: "Alert", label: "Alert" },
   { value: "Maintenance", label: "Maintenance" },

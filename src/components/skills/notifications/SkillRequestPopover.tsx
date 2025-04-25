@@ -2,13 +2,19 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Pencil, Trash2 } from "lucide-react"; // Add new icons
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillRequestNotification } from "../types/skillTypes";
 import { createSkillSessionEvent } from "@/utils/skillSessionCalendar";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 /**
  * SkillRequestPopover - Displays details about a skill request and allows the provider
@@ -29,6 +35,8 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
 }) => {
   // State for tracking loading state during confirmations
   const [isConfirming, setIsConfirming] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   
   // Toast for notifications
   const { toast } = useToast();
@@ -84,11 +92,74 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
     }
   };
 
+  // New handler for deleting a skill request
+  const handleDeleteRequest = async () => {
+    try {
+      setIsDeleting(true);
+      
+      // Here you would add the actual deletion logic
+      // For example:
+      // await supabase
+      //   .from('skill_sessions')
+      //   .delete()
+      //   .eq('id', notification.skillId);
+      
+      toast({
+        title: "Skill request deleted",
+        description: "The skill request has been removed from your notifications."
+      });
+      
+      // Invalidate relevant queries to update UI
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
+      
+      // Close the dialog
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error deleting skill request:", error);
+      toast({
+        title: "Failed to delete request",
+        description: "There was an issue deleting this skill request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // New handler for edit mode
+  const handleEditMode = () => {
+    setIsEditing(!isEditing);
+    // Here you would implement edit functionality
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+        <DialogHeader className="flex items-center justify-between">
           <DialogTitle>Skill Request: {notification.skillTitle}</DialogTitle>
+          
+          {/* New: Edit and Delete button dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleEditMode}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={handleDeleteRequest}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </DialogHeader>
         
         {/* Requester information */}
@@ -136,11 +207,26 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
           <p>By confirming, you'll create a calendar event for this skill session and notify the requester.</p>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleScheduleSession} disabled={isConfirming}>
-            {isConfirming ? "Scheduling..." : "Schedule Session"}
-          </Button>
+        <DialogFooter className="flex justify-between items-center">
+          {/* New: Move Edit button to the left side */}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleEditMode}
+              className="mr-2"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button onClick={handleScheduleSession} disabled={isConfirming}>
+              {isConfirming ? "Scheduling..." : "Schedule Session"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

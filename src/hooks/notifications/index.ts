@@ -1,17 +1,32 @@
 
 /**
- * This file exports all the notification-related functionality
- * from a single entry point for easier imports elsewhere
+ * IMPORTANT: This file has been refactored into smaller components
+ * Now it just re-exports functionality from the new location
  */
+import {
+  useNotifications,
+  BaseNotification,
+  NotificationContext,
+  NotificationContextType
+} from "./useNotifications";
 
-// Re-export the main hook
-export { useNotifications } from "./useNotifications";
+import {
+  archiveNotification,
+  archiveNotificationWithType,
+  markAsRead,
+  getTableName
+} from "./notificationActions";
 
-// Re-export types
-export * from "./types";
+export {
+  useNotifications,
+  archiveNotification,
+  archiveNotificationWithType,
+  markAsRead,
+  getTableName
+};
 
-// Re-export actions
-export * from "./notificationActions";
-
-// Re-export fetch functions
-export { fetchAllNotifications } from "./fetchNotifications";
+export type {
+  BaseNotification,
+  NotificationContext,
+  NotificationContextType
+};

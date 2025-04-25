@@ -12,7 +12,7 @@ interface NotificationItemProps {
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
-  onArchive: (e: React.MouseEvent) => void; // Added missing prop
+  onArchive: (e: React.MouseEvent) => void; 
   onItemClick: (type: HighlightableItemType, id: string) => void;
   context?: BaseNotification['context'];
 }
@@ -20,8 +20,18 @@ interface NotificationItemProps {
 const NotificationItem = (props: NotificationItemProps) => {
   // Render skill notifications with special handling
   if (props.type === 'skills' && props.context?.contextType === 'skill_request') {
+    // Pass only the properties that SkillNotificationItem expects
     return (
-      <SkillNotificationItem {...props} />
+      <SkillNotificationItem 
+        title={props.title}
+        itemId={props.itemId}
+        context={props.context} // Context is now optional in SkillNotificationItem
+        isRead={props.isRead}
+        isArchived={props.isArchived}
+        onClose={props.onClose}
+        onArchive={props.onArchive}
+        onItemClick={props.onItemClick} // Pass the onItemClick callback
+      />
     );
   }
 

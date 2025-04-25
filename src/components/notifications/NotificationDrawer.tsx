@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { Bell, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { useNotifications } from "@/hooks/notifications";
+import { useNotifications, archiveNotification } from "@/hooks/notifications";
 import { 
   Drawer,
   DrawerClose,
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationItem from "./NotificationItem";
-import { archiveNotification } from "@/hooks/notifications";
 
 /**
  * A drawer component for notifications that slides in from the right side

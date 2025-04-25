@@ -1,3 +1,4 @@
+
 /**
  * NotificationsSection Component
  * 
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationItem from "@/components/notifications/NotificationItem";
 import { useNavigate } from "react-router-dom";
-import { useNotifications } from "@/hooks/notifications";
+import { useNotifications, archiveNotification } from "@/hooks/notifications"; // Add missing import
 
 /**
  * Component to display the notifications section on the homepage

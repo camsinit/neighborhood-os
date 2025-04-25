@@ -1,3 +1,4 @@
+
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -10,6 +11,7 @@ import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
+import { archiveNotification } from "@/hooks/notifications"; // Add missing import
 
 /**
  * The notification icon/popover. Now it's smart about querying the broadcast notification list,
