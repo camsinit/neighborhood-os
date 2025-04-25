@@ -62,15 +62,20 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
         </Avatar>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
-              {update.title}
-            </h3>
-            <span 
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeStyles.bg} ${typeStyles.text}`}
-            >
-              <IconComponent className="w-3 h-3 mr-1" />
-              {update.type}
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {update.title}
+              </h3>
+              <span 
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeStyles.bg} ${typeStyles.text}`}
+              >
+                <IconComponent className="w-3 h-3 mr-1" />
+                {update.type}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              {format(new Date(update.created_at), 'MMM d')}
             </span>
           </div>
 
@@ -80,8 +85,6 @@ const SafetyUpdateCard = ({ update, onClick }: SafetyUpdateCardProps) => {
 
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span className="font-medium">{update.profiles?.display_name}</span>
-            <span>•</span>
-            <span>{format(new Date(update.created_at), 'MMM d, yyyy')}</span>
           </div>
         </div>
       </div>
