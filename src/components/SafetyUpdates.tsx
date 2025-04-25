@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
@@ -12,12 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { SafetyUpdateComments } from "./safety/SafetyUpdateComments";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Pencil } from "lucide-react";
+import { User, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew"; // Import the new dialog component
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * SafetyUpdates component displays a list of safety updates for the neighborhood
@@ -57,6 +59,9 @@ const SafetyUpdates = () => {
       window.removeEventListener('opensafetyDialog', handleOpenSafetyDialog as EventListener);
     };
   }, [safetyUpdates]); // Use the array directly
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   return (
     <>
@@ -99,18 +104,6 @@ const SafetyUpdates = () => {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>{selectedUpdate?.title}</DialogTitle>
-              {user && user.id === selectedUpdate?.author_id && (
-                <EditSafetyUpdateDialog update={selectedUpdate}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="hover:bg-secondary"
-                  >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                </EditSafetyUpdateDialog>
-              )}
             </div>
           </DialogHeader>
           <div className="space-y-6">
@@ -133,7 +126,51 @@ const SafetyUpdates = () => {
             </div>
             <p className="text-gray-700">{selectedUpdate?.description}</p>
             {selectedUpdate && (
-              <SafetyUpdateComments updateId={selectedUpdate.id} />
+              <>
+                <SafetyUpdateComments updateId={selectedUpdate.id} />
+                {user && user.id === selectedUpdate?.author_id && (
+                  <div className="flex items-center justify-end gap-2 mt-4 border-t pt-4">
+                    <EditSafetyUpdateDialog update={selectedUpdate}>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="hover:bg-secondary"
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    </EditSafetyUpdateDialog>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        // Add delete confirmation and functionality
+                        if (window.confirm("Are you sure you want to delete this safety update?")) {
+                          // Delete the safety update
+                          supabase
+                            .from('safety_updates')
+                            .delete()
+                            .eq('id', selectedUpdate.id)
+                            .eq('author_id', user.id)
+                            .then(({ error }) => {
+                              if (error) {
+                                toast.error("Failed to delete safety update");
+                                return;
+                              }
+                              toast.success("Safety update deleted successfully");
+                              setSelectedUpdate(null);
+                              queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+                            });
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </DialogContent>
