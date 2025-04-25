@@ -1,4 +1,3 @@
-
 // Replace DialogWrapper with UniversalDialog
 import UniversalDialog from "@/components/ui/universal-dialog";
 import SafetyUpdateFormNew from "./SafetyUpdateFormNew";
@@ -26,6 +25,7 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
       open={open}
       onOpenChange={onOpenChange}
       title="Share Safety Update"
+      description="Share important safety information with your neighbors. Add details and optionally include an image to help illustrate the situation."
       maxWidth="sm"
     >
       {/* Pass onSuccess instead of onClose */}
