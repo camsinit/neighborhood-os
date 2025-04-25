@@ -1,4 +1,3 @@
-
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -10,7 +9,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationItem from "./NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
-// Use our new hook for fetching and prepping notifications
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 
 /**
@@ -25,12 +23,9 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
-  // Our new hook provides the notifications and refetch
   const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  // Handles clicking an item for any notification type.
   const handleItemClick = (type: any, id: string) => {
-    // Optionally, could still fire an event to highlight and scroll UI
     const event = new CustomEvent('openItemDialog', {
       detail: { type, id }
     });
@@ -62,7 +57,12 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
     refetch();
   };
 
-  // If any non-archived notification is unread, the bell turns red
+  const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    await archiveNotification(notificationId);
+    refetch();
+  };
+
   const hasUnreadNotifications = notifications?.some(n => !n.is_read && !n.is_archived);
 
   return (
@@ -108,6 +108,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
                 isArchived={notification.is_archived}
                 context={notification.context}
                 onClose={() => refetch()}
+                onArchive={(e) => handleArchive(e, notification.id)}
                 onItemClick={handleItemClick}
               />
             ))

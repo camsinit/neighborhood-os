@@ -1,4 +1,3 @@
-
 /**
  * NotificationsSection Component
  * 
@@ -63,6 +62,12 @@ const NotificationsSection = () => {
     refetch();
   };
 
+  const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    await archiveNotification(notificationId);
+    refetch();
+  };
+
   return (
     <section>
       {/* Section header with archive toggle button */}
@@ -93,6 +98,7 @@ const NotificationsSection = () => {
                   isRead={notification.is_read}
                   isArchived={notification.is_archived}
                   onClose={() => refetch()}
+                  onArchive={(e) => handleArchive(e, notification.id)}
                   onItemClick={handleItemClick}
                   context={notification.context}
                 />

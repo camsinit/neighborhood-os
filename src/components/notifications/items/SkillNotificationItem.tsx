@@ -1,22 +1,22 @@
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
 import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import NotificationPopover from "../NotificationPopover";
-import { SkillNotificationContext } from "@/hooks/notifications/types";
+import { BaseNotification } from "@/hooks/notifications/types";
 
 interface SkillNotificationItemProps {
   title: string;
   itemId: string;
-  context: SkillNotificationContext;
+  context: BaseNotification['context'];
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
 }
 
-// Export as named export instead of default
 export const SkillNotificationItem = ({
   title,
   itemId,
@@ -27,6 +27,11 @@ export const SkillNotificationItem = ({
   onArchive
 }: SkillNotificationItemProps) => {
   const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
+
+  // Only render if we have the correct context type
+  if (context?.contextType !== 'skill_request') {
+    return null;
+  }
 
   return (
     <div className="mb-2">

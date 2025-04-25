@@ -1,4 +1,3 @@
-
 /**
  * NotificationDrawer Component
  * 
@@ -7,7 +6,7 @@
  * user's notifications.
  */
 import React, { useState } from 'react';
-import { Bell } from "lucide-react";
+import { Bell, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useNotifications } from "@/hooks/notifications";
@@ -21,7 +20,7 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationItem from "./NotificationItem";
-import { Archive } from "lucide-react";
+import { archiveNotification } from "@/hooks/notifications";
 
 /**
  * A drawer component for notifications that slides in from the right side
@@ -52,6 +51,15 @@ const NotificationDrawer = () => {
     window.dispatchEvent(event);
     
     // Refresh the notifications after clicking
+    refetch();
+  };
+
+  /**
+   * Handle archiving a notification
+   */
+  const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation();
+    await archiveNotification(notificationId);
     refetch();
   };
 
@@ -113,6 +121,7 @@ const NotificationDrawer = () => {
                   isRead={notification.is_read}
                   isArchived={notification.is_archived}
                   onClose={() => refetch()}
+                  onArchive={(e) => handleArchive(e, notification.id)}
                   onItemClick={handleItemClick}
                   context={notification.context}
                 />
