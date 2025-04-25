@@ -102,56 +102,7 @@ const SafetyUpdates = () => {
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
         <DialogContent className="sm:max-w-[600px] bg-white p-6 rounded-lg shadow-lg">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle>{selectedUpdate?.title}</DialogTitle>
-              {user && user.id === selectedUpdate?.author_id && (
-                <div className="flex items-center gap-2 absolute right-12 top-4">
-                  <EditSafetyUpdateDialog update={selectedUpdate}>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="hover:bg-secondary"
-                    >
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  </EditSafetyUpdateDialog>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to delete this safety update?")) {
-                        supabase
-                          .from('safety_updates')
-                          .delete()
-                          .eq('id', selectedUpdate.id)
-                          .eq('author_id', user.id)
-                          .then(({ error }) => {
-                            if (error) {
-                              toast({
-                                title: "Error",
-                                description: "Failed to delete safety update",
-                                variant: "destructive"
-                              });
-                              return;
-                            }
-                            toast({
-                              title: "Success",
-                              description: "Safety update deleted successfully"
-                            });
-                            setSelectedUpdate(null);
-                            queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
-                          });
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </div>
+            <DialogTitle>{selectedUpdate?.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
             <div className="flex items-center gap-4">
@@ -172,6 +123,56 @@ const SafetyUpdates = () => {
               </div>
             </div>
             <p className="text-gray-700">{selectedUpdate?.description}</p>
+            
+            {/* Moved Edit and Delete buttons here */}
+            {user && user.id === selectedUpdate?.author_id && (
+              <div className="flex items-center gap-2">
+                <EditSafetyUpdateDialog update={selectedUpdate}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="hover:bg-secondary"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </EditSafetyUpdateDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to delete this safety update?")) {
+                      supabase
+                        .from('safety_updates')
+                        .delete()
+                        .eq('id', selectedUpdate.id)
+                        .eq('author_id', user.id)
+                        .then(({ error }) => {
+                          if (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to delete safety update",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+                          toast({
+                            title: "Success",
+                            description: "Safety update deleted successfully"
+                          });
+                          setSelectedUpdate(null);
+                          queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+                        });
+                    }
+                  }}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            )}
+            
             {selectedUpdate && (
               <SafetyUpdateComments updateId={selectedUpdate.id} />
             )}
