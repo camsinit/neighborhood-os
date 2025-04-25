@@ -3,9 +3,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
 import { useState } from "react";
-import { SkillRequestPopover } from "@/components/skills/notifications/SkillRequestPopover";
+import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import NotificationPopover from "../NotificationPopover";
-import { SkillNotificationContext } from "../types";
+import { SkillNotificationContext } from "@/hooks/notifications/types";
 
 interface SkillNotificationItemProps {
   title: string;

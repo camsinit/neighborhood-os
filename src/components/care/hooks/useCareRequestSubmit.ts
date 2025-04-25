@@ -36,7 +36,6 @@ export const useCareRequestSubmit = (
     action: 'create' | 'update' | 'delete' | 'confirm',
     careRequestTitle: string, 
     userId: string,
-    requestType: string | undefined,
     neighborhoodId: string,
     changes?: string
   ) => {
@@ -50,7 +49,6 @@ export const useCareRequestSubmit = (
             action,
             careRequestTitle,
             userId,
-            requestType,
             neighborhoodId,
             changes
           }
@@ -91,7 +89,7 @@ export const useCareRequestSubmit = (
       const requestData = {
         title: data.title,
         description: data.description || '',
-        request_type: data.requestType,
+        request_type: 'need', // Default to 'need' since we removed the field
         care_category: data.careCategory,
         valid_until: data.validUntil.toISOString(),
         user_id: user.id,
@@ -130,7 +128,6 @@ export const useCareRequestSubmit = (
           action,
           data.title,
           user.id,
-          data.requestType,
           neighborhoodData.id,
           data.description
         );
@@ -188,7 +185,6 @@ export const useCareRequestSubmit = (
         'delete',
         title,
         user.id,
-        existingRequest?.request_type,
         neighborhoodData.id
       );
 

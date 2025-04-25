@@ -41,6 +41,14 @@ export interface NotificationContext {
 }
 
 /**
+ * Skill Notification Context with specific fields for skill requests
+ */
+export interface SkillNotificationContext extends NotificationContext {
+  contextType: "skill_request";
+  skillRequestData: SkillRequestNotification;
+}
+
+/**
  * Mapping from notification types to their database tables
  */
 export type NotificationTableMap = {

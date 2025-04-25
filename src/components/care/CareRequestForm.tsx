@@ -14,7 +14,6 @@ import {
   CareRequestFormProps 
 } from './schemas/careRequestSchema';
 import { 
-  RequestTypeField,
   TitleField,
   DescriptionField,
   CareCategoryField,
@@ -60,7 +59,6 @@ const CareRequestForm = ({
   const defaultValues = {
     title: existingRequest?.title || '',
     description: existingRequest?.description || '',
-    requestType: existingRequest?.request_type || initialValues.requestType || 'need',
     careCategory: existingRequest?.care_category || initialValues.careCategory || 'meal_prep',
     validUntil: existingRequest?.valid_until ? new Date(existingRequest.valid_until) : addDays(new Date(), 7),
   };
@@ -86,9 +84,6 @@ const CareRequestForm = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Request Type - Need or Offer */}
-        <RequestTypeField form={form} />
-
         {/* Title */}
         <TitleField form={form} />
 

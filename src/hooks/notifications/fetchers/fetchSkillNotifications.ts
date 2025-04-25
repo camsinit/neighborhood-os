@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Defines the two types of data we're working with
  * This helps TypeScript understand what properties each type has
  */
-interface SkillSession {
+export interface SkillSession {
   id: string;
   created_at: string;
   status: string;
@@ -22,10 +22,10 @@ interface SkillSession {
   } | null;
 }
 
-interface SkillNotification {
+export interface SkillNotification {
   id: string;
   created_at: string;
-  title: string;
+  title: string | null;
   content_id: string;
   content_type: string;
   notification_type: string;

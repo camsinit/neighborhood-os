@@ -37,3 +37,10 @@ export const CareRequestFormFields = ({
     </div>
   );
 };
+
+// Make sure to export all the form field components
+export { TitleField } from "./TitleField";
+export { DescriptionField } from "./DescriptionField";
+export { CareCategoryField } from "./CareCategoryField";
+export { ValidUntilField } from "./ValidUntilField";
+export { FormButtons } from "./FormButtons";

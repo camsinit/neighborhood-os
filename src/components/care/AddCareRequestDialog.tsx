@@ -5,35 +5,28 @@ import CareRequestForm from "./CareRequestForm";
 interface AddCareRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialRequestType?: "need" | "offer";
 }
 
 /**
  * AddCareRequestDialog component
  * 
- * This dialog displays a form for creating care requests or offers
+ * This dialog displays a form for creating care requests
  * It uses the UniversalDialog component for consistent UI
  */
 const AddCareRequestDialog = ({ 
   open, 
   onOpenChange,
-  initialRequestType = "need"
 }: AddCareRequestDialogProps) => {
-  // Get the dialog title based on the request type
-  const getDialogTitle = () => {
-    return initialRequestType === 'need' ? 'Request Care' : 'Offer Care';
-  };
-  
   return (
     <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={getDialogTitle()}
+      title="Request Care"
       maxWidth="sm"
     >
       <CareRequestForm 
         onClose={() => onOpenChange(false)}
-        initialValues={{ requestType: initialRequestType }}
+        initialValues={{}} // No need to specify requestType anymore
       />
     </UniversalDialog>
   );

@@ -1,22 +1,23 @@
+
 /**
  * This file handles the processing of skill notifications
  * It contains utility functions for transforming skill notification data
  */
 import { BaseNotification } from "../types";
 import { ProfileData } from "../types";
-import { 
-  SkillNotificationItem,
-  SkillSession as FetchedSkillSession,
-  SkillNotification,
-  isSkillSession,
-  isNotification
-} from "../fetchers/fetchSkillNotifications";
+import { SkillNotificationItem } from "../fetchers/fetchSkillNotifications";
 
 /**
  * Type definitions to help TypeScript understand our data structures
  */
 // Define the shape of a skill session
-interface SkillSession extends FetchedSkillSession {
+export interface SkillSession {
+  id: string;
+  created_at: string;
+  skill_id: string;
+  requester_id: string;
+  provider_id: string;
+  status: string;
   requester?: {
     display_name?: string;
     avatar_url?: string;
@@ -41,9 +42,6 @@ export interface SkillNotification {
   is_read: boolean;
   is_archived: boolean;
 }
-
-// Union type for items that could be either a session or notification
-export type SkillNotificationItem = SkillSession | SkillNotification;
 
 /**
  * Type guard to check if an item is a skill session
@@ -81,7 +79,7 @@ export function isNotification(item: any): item is SkillNotification {
  * @returns An array of processed notifications
  */
 export const processSkillNotifications = (
-  skillRequests: SkillNotificationItem[],
+  skillRequests: any[],
   profilesMap: Record<string, ProfileData>
 ): BaseNotification[] => {
   console.log("[processSkillNotifications] Processing skill notifications:", skillRequests.length);
