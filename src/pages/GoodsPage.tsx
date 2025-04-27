@@ -10,9 +10,6 @@ import { createHighlightListener } from "@/utils/highlightNavigation";
  * 
  * The actual implementation has been moved to the GoodsPageContainer component
  * to keep this file clean and focused on routing concerns.
- * 
- * We've ensured the background gradient is properly applied with CSS variables
- * and z-index management to make sure it shows beneath the content.
  */
 const GoodsPage = () => {
   // Add event listener for highlighting goods items
@@ -31,27 +28,19 @@ const GoodsPage = () => {
   }, []);
 
   return (
-    // Wrapper div with relative positioning for the gradient
-    <div className="relative min-h-screen">
-      {/* 
-        Background gradient using the goods-color CSS variable
-        The gradient starts with the section color at reduced opacity at the top
-        and fades to completely transparent toward the bottom
-        
-        We ensure z-index is explicitly set to 0 to position behind content
-      */}
-      <div 
-        className="absolute inset-0 pointer-events-none" 
-        style={{ 
-          background: `linear-gradient(to bottom, hsla(var(--goods-color), 0.15) 0%, hsla(var(--goods-color), 0) 60%)`,
-          zIndex: 0 
-        }}
-        aria-hidden="true"
-      />
-      
-      {/* Content div placed above the gradient background with explicit z-index */}
+    <div className="page-gradient goods-gradient">
       <div className="relative z-10">
-        <GoodsPageContainer />
+        <div className="min-h-full w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-8">
+              <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
+              
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
+                <GoodsPageContainer />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

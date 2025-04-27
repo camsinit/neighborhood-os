@@ -1,7 +1,11 @@
+
 import { NotificationItem } from "./items/NotificationItem";
 import { useNotifications } from "@/hooks/notifications";
 import { Button } from "@/components/ui/button";
 import { BellRing, Check } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NotificationsSectionProps {
   onClose?: () => void;
@@ -10,7 +14,10 @@ interface NotificationsSectionProps {
 
 export function NotificationsSection({ onClose, showArchived = false }: NotificationsSectionProps) {
   const { data: notifications, isLoading } = useNotifications(showArchived);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
+  // Sort notifications by relevance score (higher first), then by date (newer first)
   const sortedNotifications = notifications?.sort((a, b) => {
     // First sort by relevance score (higher first)
     const relevanceDiff = (b.relevance_score || 0) - (a.relevance_score || 0);
@@ -19,6 +26,34 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
     // Then by date (newer first)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
+
+  // Function to mark all notifications as read
+  const markAllAsRead = async () => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', supabase.auth.getUser().then(res => res.data.user?.id))
+        .eq('is_archived', showArchived);
+
+      if (error) throw error;
+
+      // Invalidate and refetch notifications
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      
+      toast({
+        title: "Success",
+        description: "All notifications marked as read",
+      });
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+      toast({
+        title: "Error",
+        description: "Failed to mark notifications as read",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="p-4 text-center text-gray-500">Loading notifications...</div>;
@@ -49,7 +84,7 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
             variant="ghost"
             size="sm"
             className="text-xs"
-            onClick={() => {/* Implement mark all as read */}}
+            onClick={markAllAsRead}
           >
             <Check className="h-4 w-4 mr-1" />
             Mark all as read

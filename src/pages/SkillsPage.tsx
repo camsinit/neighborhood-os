@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -17,6 +18,15 @@ const categoryIcons = {
   wellness: Heart,
 } as const;
 
+/**
+ * SkillsPage - Display and management of community skills
+ * 
+ * This page allows users to:
+ * - Browse skills by category
+ * - Search for specific skills
+ * - Toggle between different views
+ * - Access skill requests
+ */
 const SkillsPage = () => {
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
@@ -52,18 +62,9 @@ const SkillsPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <div 
-        className="absolute inset-0 pointer-events-none" 
-        style={{ 
-          background: `linear-gradient(to bottom, hsla(var(--skills-color), 0.15) 0%, hsla(var(--skills-color), 0) 60%)`,
-          zIndex: 0 
-        }}
-        aria-hidden="true"
-      />
-      
+    <div className="page-gradient skills-gradient">
       <div className="relative z-10">
-        <div className="min-h-full w-full bg-white">
+        <div className="min-h-full w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
@@ -75,7 +76,7 @@ const SkillsPage = () => {
                 </p>
               </GlowingDescriptionBox>
 
-              <div className="bg-white rounded-lg p-6 shadow-lg">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <div className="mb-6 flex items-center">
                   {React.createElement(getCategoryIcon(selectedCategory), {
                     className: "h-5 w-5 text-gray-700 mr-2"

@@ -51,19 +51,9 @@ const CarePage = () => {
   ) || [];
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background gradient */}
-      <div 
-        className="absolute inset-0 pointer-events-none" 
-        style={{ 
-          background: `linear-gradient(to bottom, hsla(var(--care-color), 0.15) 0%, hsla(var(--care-color), 0) 60%)`,
-          zIndex: 0 
-        }}
-        aria-hidden="true"
-      />
-      
+    <div className="page-gradient care-gradient">
       <div className="relative z-10">
-        <div className="min-h-full w-full bg-white">
+        <div className="min-h-full w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
@@ -75,7 +65,7 @@ const CarePage = () => {
                 </p>
               </GlowingDescriptionBox>
 
-              <div className="bg-white rounded-lg p-6 shadow-lg">
+              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <div className="flex items-center justify-between mb-6">
                   {/* Search input */}
                   <div className="relative w-[280px]">

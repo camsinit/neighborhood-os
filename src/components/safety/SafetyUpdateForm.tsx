@@ -70,7 +70,7 @@ export default function SafetyUpdateForm({ onClose, existingData, mode = 'create
         form.reset({
           title: "",
           description: "",
-          type: "Alert",
+          type: "General Safety", // Fixed to match schema
           imageUrl: ""
         });
       }
