@@ -492,6 +492,7 @@ export type Database = {
           is_read: boolean | null
           metadata: Json | null
           notification_type: Database["public"]["Enums"]["notification_type"]
+          relevance_score: number | null
           title: string
           user_id: string
         }
@@ -507,6 +508,7 @@ export type Database = {
           is_read?: boolean | null
           metadata?: Json | null
           notification_type: Database["public"]["Enums"]["notification_type"]
+          relevance_score?: number | null
           title: string
           user_id: string
         }
@@ -522,6 +524,7 @@ export type Database = {
           is_read?: boolean | null
           metadata?: Json | null
           notification_type?: Database["public"]["Enums"]["notification_type"]
+          relevance_score?: number | null
           title?: string
           user_id?: string
         }

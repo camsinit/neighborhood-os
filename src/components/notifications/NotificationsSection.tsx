@@ -1,121 +1,70 @@
-
-/**
- * NotificationsSection Component
- * 
- * This component handles displaying the notifications section of the HomePage,
- * including the header, archive toggle button, and the list of notifications.
- */
-import { useState } from "react";
-import { Archive } from "lucide-react";
+import { NotificationItem } from "./items/NotificationItem";
+import { useNotifications } from "@/hooks/notifications";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import NotificationItem from "@/components/notifications/NotificationItem";
-import { useNavigate } from "react-router-dom";
-import { useNotifications, archiveNotification } from "@/hooks/notifications"; // Add missing import
+import { BellRing, Check } from "lucide-react";
 
-/**
- * Component to display the notifications section on the homepage
- */
-const NotificationsSection = () => {
-  // Track whether we're showing archived notifications
-  const [showArchived, setShowArchived] = useState(false);
-  const navigate = useNavigate();
-  
-  // Fetch notifications with our custom hook
-  const { data: notifications, refetch } = useNotifications(showArchived);
+interface NotificationsSectionProps {
+  onClose?: () => void;
+  showArchived?: boolean;
+}
 
-  /**
-   * Handle clicks on notification items
-   * 
-   * Navigates to the appropriate page and highlights the relevant item
-   */
-  const handleItemClick = (
-    type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", 
-    id: string
-  ) => {
-    // Map notification types to their respective routes
-    const routeMap = {
-      safety: "/safety",
-      event: "/calendar",
-      support: "/care",
-      skills: "/skills",
-      goods: "/goods",
-      neighbors: "/neighbors"
-    };
+export function NotificationsSection({ onClose, showArchived = false }: NotificationsSectionProps) {
+  const { data: notifications, isLoading } = useNotifications(showArchived);
 
-    // Navigate to the appropriate page
-    navigate(routeMap[type]);
-
-    // Dispatch an event that the target page will listen for
-    const event = new CustomEvent('highlightItem', {
-      detail: {
-        type,
-        id,
-      }
-    });
+  const sortedNotifications = notifications?.sort((a, b) => {
+    // First sort by relevance score (higher first)
+    const relevanceDiff = (b.relevance_score || 0) - (a.relevance_score || 0);
+    if (relevanceDiff !== 0) return relevanceDiff;
     
-    // Small delay to ensure navigation completes first
-    setTimeout(() => {
-      window.dispatchEvent(event);
-    }, 100);
+    // Then by date (newer first)
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
-    // Refresh notifications after taking action
-    refetch();
-  };
+  if (isLoading) {
+    return <div className="p-4 text-center text-gray-500">Loading notifications...</div>;
+  }
 
-  const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
-    e.stopPropagation();
-    await archiveNotification(notificationId);
-    refetch();
-  };
+  if (!notifications?.length) {
+    return (
+      <div className="p-8 text-center">
+        <BellRing className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-semibold text-gray-900">No notifications</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          {showArchived 
+            ? "No archived notifications to show"
+            : "When you receive notifications, they'll show up here"}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <section>
-      {/* Section header with archive toggle button */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center" 
-          onClick={() => setShowArchived(!showArchived)}
-        >
-          <Archive className="h-4 w-4 mr-2" />
-          {showArchived ? "Show Active" : "Show Archived"}
-        </Button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-4">
+        <h3 className="text-lg font-semibold">
+          {showArchived ? "Archived Notifications" : "Recent Notifications"}
+        </h3>
+        {!showArchived && notifications.some(n => !n.is_read) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs"
+            onClick={() => {/* Implement mark all as read */}}
+          >
+            <Check className="h-4 w-4 mr-1" />
+            Mark all as read
+          </Button>
+        )}
       </div>
-      
-      {/* Notification list container */}
-      <div className="bg-white rounded-lg shadow-sm p-4 h-[600px] px-0 py-[3px]">
-        <ScrollArea className="h-[550px]">
-          {notifications?.length ? (
-            <div className="space-y-1">
-              {notifications.map(notification => (
-                <NotificationItem
-                  key={notification.id}
-                  title={notification.title}
-                  type={notification.type}
-                  itemId={notification.id}
-                  isRead={notification.is_read}
-                  isArchived={notification.is_archived}
-                  onClose={() => refetch()}
-                  onArchive={(e) => handleArchive(e, notification.id)}
-                  onItemClick={handleItemClick}
-                  context={notification.context}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">
-                {showArchived ? "No archived notifications" : "No new notifications"}
-              </p>
-            </div>
-          )}
-        </ScrollArea>
+      <div className="space-y-2 px-4">
+        {sortedNotifications?.map((notification) => (
+          <NotificationItem
+            key={notification.id}
+            notification={notification}
+            onSelect={() => {/* Implement notification action */}}
+          />
+        ))}
       </div>
-    </section>
+    </div>
   );
-};
-
-export default NotificationsSection;
+}
