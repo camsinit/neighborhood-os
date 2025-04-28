@@ -28,8 +28,6 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   onDeleteItem,
   isDeletingItem = false,
   onRefetch,
-  onRequestSelect = () => {},
-  onNewOffer = () => {}
 }) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
@@ -44,83 +42,85 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   };
   
   return (
-    <div className="min-h-[88px] flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2">
-      {goodsItems.map((item) => (
-        <Popover 
-          key={item.id}
-          open={openPopoverId === item.id}
-          onOpenChange={(open) => setOpenPopoverId(open ? item.id : null)}
-        >
-          <PopoverTrigger asChild>
-            <div className="flex items-stretch rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group mb-2">
-              {(item.image_url || (item.images && item.images.length > 0)) && (
-                <div className="w-32 h-full flex-shrink-0">
-                  <img 
-                    src={item.image_url || item.images?.[0]} 
-                    alt={item.title}
-                    className="h-full w-full object-cover rounded-l-lg"
-                  />
-                </div>
-              )}
-              
-              <div className="flex-grow flex items-center p-4">
-                <div className="flex items-center gap-3 flex-grow">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={item.profiles?.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {item.profiles?.display_name?.[0] || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <h4 className="font-medium text-gray-900">{item.title}</h4>
-                    <p className="text-sm text-gray-500 line-clamp-1">
-                      {item.description}
-                    </p>
+    <div className="w-full">
+      <div className="space-y-4">
+        {goodsItems.map((item) => (
+          <Popover 
+            key={item.id}
+            open={openPopoverId === item.id}
+            onOpenChange={(open) => setOpenPopoverId(open ? item.id : null)}
+          >
+            <PopoverTrigger asChild>
+              <div className="flex items-center p-4 border-b w-full hover:bg-gray-50 transition-colors">
+                {(item.image_url || (item.images && item.images.length > 0)) && (
+                  <div className="w-24 h-24 flex-shrink-0 mr-4">
+                    <img 
+                      src={item.image_url || item.images?.[0]} 
+                      alt={item.title}
+                      className="h-full w-full object-cover rounded"
+                    />
                   </div>
-                </div>
+                )}
                 
-                <div className="flex gap-2 ml-4">
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(item);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  {onDeleteItem && (
+                <div className="flex-grow flex items-center p-4">
+                  <div className="flex items-center gap-3 flex-grow">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={item.profiles?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {item.profiles?.display_name?.[0] || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <h4 className="font-medium text-gray-900">{item.title}</h4>
+                      <p className="text-sm text-gray-500 line-clamp-1">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 ml-4">
                     <Button 
                       variant="ghost"
                       size="sm"
-                      className="text-red-600"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDeleteItem(item);
+                        handleEdit(item);
                       }}
-                      disabled={isDeletingItem}
                     >
-                      Delete
+                      Edit
                     </Button>
-                  )}
+                    {onDeleteItem && (
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteItem(item);
+                        }}
+                        disabled={isDeletingItem}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </PopoverTrigger>
-          
-          <PopoverContent className="w-[300px] p-0" sideOffset={5}>
-            <RequestDetailCard 
-              request={item} 
-              getUrgencyClass={() => ''} 
-              getUrgencyLabel={() => ''} 
-              onDeleteItem={onDeleteItem} 
-              isDeletingItem={isDeletingItem} 
-              onEdit={() => handleEdit(item)} 
-            />
-          </PopoverContent>
-        </Popover>
-      ))}
+            </PopoverTrigger>
+            
+            <PopoverContent className="w-[300px] p-0" sideOffset={5}>
+              <RequestDetailCard 
+                request={item} 
+                getUrgencyClass={() => ''} 
+                getUrgencyLabel={() => ''} 
+                onDeleteItem={onDeleteItem} 
+                isDeletingItem={isDeletingItem} 
+                onEdit={() => handleEdit(item)} 
+              />
+            </PopoverContent>
+          </Popover>
+        ))}
+      </div>
 
       <UniversalDialog
         open={!!itemToEdit}
