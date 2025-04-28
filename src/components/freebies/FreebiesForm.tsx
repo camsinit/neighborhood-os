@@ -6,23 +6,11 @@
  * It reuses the existing GoodsForm component for now since the functionality is the same.
  */
 import GoodsForm from '@/components/goods/GoodsForm';
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsItemCategory, GoodsFormProps } from "@/components/support/types/formTypes";
 
-// Define types for the props
-interface FreebiesFormProps {
-  mode?: 'add' | 'edit';
-  onClose: () => void;
-  initialValues?: {
-    title?: string;
-    description?: string;
-    category?: GoodsItemCategory;
-    requestType?: 'need' | 'offer';
-    images?: string[];
-    availableDays?: number;
-    urgency?: string;
-  };
-  requestId?: string;
-  initialRequestType?: 'need' | 'offer';
+// Define types for the props - using the existing GoodsFormProps type
+interface FreebiesFormProps extends GoodsFormProps {
+  // Any additional props specific to FreebiesForm can be added here
   forceDefaultDisplay?: boolean;
 }
 
