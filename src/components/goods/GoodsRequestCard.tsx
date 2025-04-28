@@ -4,8 +4,8 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import RequestDetailCard from './components/RequestDetailCard';
-import { Button } from "@/components/ui/button"; // Import Button directly
 
 interface GoodsRequestCardProps {
   request: GoodsExchangeItem;
@@ -29,8 +29,8 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <div className="w-full flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group mb-3">
-          {/* Profile and title section */}
+        <div className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group transition-all duration-200">
+          {/* Profile and content section */}
           <div className="flex items-center gap-3 flex-grow">
             <Avatar className="h-10 w-10">
               <AvatarImage src={request.profiles?.avatar_url || undefined} />
@@ -47,31 +47,14 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
           </div>
           
           {/* Action buttons */}
-          <div className="flex gap-2 ml-4">
+          <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button 
               variant="ghost"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Handle edit action
-              }}
+              className="hover:bg-gray-100"
             >
-              Edit
+              View Details
             </Button>
-            {onDeleteItem && (
-              <Button 
-                variant="ghost"
-                size="sm"
-                className="text-red-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteItem(request);
-                }}
-                disabled={isDeletingItem}
-              >
-                Delete
-              </Button>
-            )}
           </div>
           
           {/* Urgency badge */}
@@ -85,7 +68,6 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
         </div>
       </PopoverTrigger>
       
-      {/* Popover content */}
       <PopoverContent className="w-[300px] p-0" sideOffset={5}>
         <RequestDetailCard
           request={request}

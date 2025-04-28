@@ -8,21 +8,13 @@ import ModuleLayout from "@/components/layout/ModuleLayout";
  * GoodsPage component
  * 
  * This page allows users to browse, offer, and request items in the community.
- * 
- * The actual implementation has been moved to the GoodsPageContainer component
- * to keep this file clean and focused on routing concerns.
+ * Using the ModuleLayout for consistent styling across all modules.
  */
 const GoodsPage = () => {
   // Add event listener for highlighting goods items
   useEffect(() => {
-    // Use our utility to create a consistent highlight listener for goods items
-    // This will handle finding elements by data-goods-id and applying animations
     const handleHighlightItem = createHighlightListener("goods");
-    
-    // Add event listener when component mounts
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
-    
-    // Remove event listener when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
     };
