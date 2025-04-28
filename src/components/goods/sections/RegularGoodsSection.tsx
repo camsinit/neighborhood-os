@@ -32,7 +32,7 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   if (!hasRequests) return null;
 
   return (
-    <div className="mt-8">
+    <div className="space-y-2">
       <GoodsRequestsSection 
         goodsRequests={requests} 
         urgentRequests={urgentRequests} 

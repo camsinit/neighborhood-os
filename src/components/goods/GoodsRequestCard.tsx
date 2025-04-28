@@ -29,25 +29,25 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <div className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group transition-all duration-200">
+        <div className="min-h-[88px] flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2">
           {/* Profile and content section */}
           <div className="flex items-center gap-3 flex-grow">
-            <Avatar className="h-10 w-10">
+            <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={request.profiles?.avatar_url || undefined} />
               <AvatarFallback>
                 {request.profiles?.display_name?.[0] || '?'}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-              <h4 className="font-medium text-gray-900">{request.title}</h4>
+            <div className="flex flex-col flex-grow min-w-0">
+              <h4 className="font-medium text-gray-900 truncate">{request.title}</h4>
               <p className="text-sm text-gray-500 line-clamp-1">
                 {request.description}
               </p>
             </div>
           </div>
           
-          {/* Action buttons */}
-          <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Action buttons - always visible */}
+          <div className="flex gap-2 ml-4">
             <Button 
               variant="ghost"
               size="sm"
@@ -60,7 +60,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
           {/* Urgency badge */}
           {request.urgency && (
             <Badge 
-              className={`${getUrgencyClass(request.urgency)} absolute right-2 top-1/2 transform -translate-y-1/2 group-hover:opacity-0 transition-opacity`}
+              className={`${getUrgencyClass(request.urgency)} absolute right-2 top-2`}
             >
               {getUrgencyLabel(request.urgency)}
             </Badge>

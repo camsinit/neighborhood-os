@@ -9,7 +9,7 @@ import GoodsRequestCard from './GoodsRequestCard';
  * This formats an email with helpful subject and body text for contacting
  * the person who posted the item
  */
-const createContactEmailLink = (request: GoodsExchangeItem) => {
+export const createContactEmailLink = (request: GoodsExchangeItem) => {
   // Get display name and item details (with fallbacks)
   const posterName = request.profiles?.display_name || "Neighbor";
   const itemTitle = request.title || "your posted item";
@@ -68,7 +68,7 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   }
 
   return (
-    <>
+    <div className="space-y-2 w-full">
       {regularRequests.map((request) => (
         <GoodsRequestCard
           key={request.id}
@@ -83,7 +83,7 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
           isDeletingItem={isDeletingItem}
         />
       ))}
-    </>
+    </div>
   );
 };
 
