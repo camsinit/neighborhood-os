@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
@@ -6,18 +5,17 @@ import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import NotificationPopover from "../NotificationPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { HighlightableItemType } from "@/utils/highlightNavigation"; // Add this import
+import { HighlightableItemType } from "@/utils/highlightNavigation";
 
-// Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {
   title: string;
   itemId: string;
-  context?: BaseNotification['context']; // Make context optional
+  context?: BaseNotification['context'];
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
-  onItemClick?: (type: string, id: string) => void; // Keep as string for compatibility
+  onItemClick?: (type: string, id: string) => void;
 }
 
 export const SkillNotificationItem = ({
@@ -32,8 +30,6 @@ export const SkillNotificationItem = ({
 }: SkillNotificationItemProps) => {
   const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
 
-  // Only render if we have the correct context type
-  // Add a fallback check to avoid null/undefined issues
   if (!context || context.contextType !== 'skill_request') {
     return null;
   }

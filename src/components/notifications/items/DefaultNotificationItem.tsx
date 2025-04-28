@@ -4,12 +4,12 @@ import BaseNotificationItem from "./BaseNotificationItem";
 
 interface DefaultNotificationItemProps {
   title: string;
-  type: HighlightableItemType; // Ensure this matches the expected type
+  type: HighlightableItemType; 
   itemId: string;
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
-  onItemClick: (type: HighlightableItemType, id: string) => void; // Ensure parameter type is consistent
+  onItemClick: (type: HighlightableItemType, id: string) => void;
   context?: {
     neighborName?: string;
     avatarUrl?: string;

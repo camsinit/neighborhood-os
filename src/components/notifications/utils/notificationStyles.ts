@@ -1,98 +1,77 @@
 
-/**
- * This file contains utility functions for notification styles
- * It defines color schemes and icons for each notification type
- */
-import { 
-  AlertTriangle, 
-  Calendar, 
-  HelpCircle, 
-  PackageOpen, 
-  ShoppingBag, 
-  UserPlus 
+import {
+  Bell,
+  Calendar,
+  MessageSquare,
+  Shield,
+  ShoppingCart,
+  User,
+  CheckCircle,
+  AlertTriangle,
+  Gift,
+  UserPlus
 } from "lucide-react";
 import { HighlightableItemType } from "@/utils/highlightNavigation";
 
-/**
- * Interface defining the style properties for different notification types
- */
-interface NotificationStyle {
-  icon: any;
-  textColor: string;
-  backgroundColor: string;
-  hoverColor: string;
-  borderColor: string;
-}
+// Define the style mapping for each notification type
+export const getNotificationStyle = (type: HighlightableItemType) => {
+  const styles: Record<HighlightableItemType, {
+    backgroundColor: string;
+    hoverColor: string;
+    borderColor: string;
+    textColor: string;
+    icon: React.ElementType;
+  }> = {
+    event: {
+      backgroundColor: 'bg-blue-50',
+      hoverColor: 'hover:bg-blue-100',
+      borderColor: 'border-blue-500',
+      textColor: 'text-blue-700',
+      icon: Calendar
+    },
+    skills: {
+      backgroundColor: 'bg-green-50',
+      hoverColor: 'hover:bg-green-100',
+      borderColor: 'border-green-500',
+      textColor: 'text-green-700',
+      icon: CheckCircle
+    },
+    goods: {
+      backgroundColor: 'bg-orange-50',
+      hoverColor: 'hover:bg-orange-100',
+      borderColor: 'border-orange-500',
+      textColor: 'text-orange-700',
+      icon: ShoppingCart
+    },
+    freebies: {
+      backgroundColor: 'bg-orange-50',
+      hoverColor: 'hover:bg-orange-100',
+      borderColor: 'border-orange-500',
+      textColor: 'text-orange-700',
+      icon: Gift
+    },
+    support: {
+      backgroundColor: 'bg-purple-50',
+      hoverColor: 'hover:bg-purple-100',
+      borderColor: 'border-purple-500',
+      textColor: 'text-purple-700',
+      icon: MessageSquare
+    },
+    safety: {
+      backgroundColor: 'bg-red-50',
+      hoverColor: 'hover:bg-red-100',
+      borderColor: 'border-red-500',
+      textColor: 'text-red-700',
+      icon: AlertTriangle
+    },
+    neighbors: {
+      backgroundColor: 'bg-teal-50',
+      hoverColor: 'hover:bg-teal-100',
+      borderColor: 'border-teal-500',
+      textColor: 'text-teal-700',
+      icon: UserPlus
+    }
+  };
 
-/**
- * Returns style properties for a notification based on its type
- * 
- * @param type The notification type
- * @returns Style properties for the notification
- */
-export const getNotificationStyle = (type: HighlightableItemType): NotificationStyle => {
-  switch (type) {
-    case "safety":
-      return {
-        icon: AlertTriangle,
-        textColor: "text-red-600",
-        backgroundColor: "bg-red-50",
-        hoverColor: "hover:bg-red-100",
-        borderColor: "border-red-500"
-      };
-      
-    case "event":
-      return {
-        icon: Calendar,
-        textColor: "text-blue-600",
-        backgroundColor: "bg-blue-50",
-        hoverColor: "hover:bg-blue-100",
-        borderColor: "border-blue-500"
-      };
-      
-    case "support":
-      return {
-        icon: HelpCircle,
-        textColor: "text-purple-600",
-        backgroundColor: "bg-purple-50",
-        hoverColor: "hover:bg-purple-100",
-        borderColor: "border-purple-500"
-      };
-      
-    case "skills":
-      return {
-        icon: PackageOpen,
-        textColor: "text-green-600",
-        backgroundColor: "bg-green-50",
-        hoverColor: "hover:bg-green-100",
-        borderColor: "border-green-500"
-      };
-      
-    case "goods":
-      return {
-        icon: ShoppingBag,
-        textColor: "text-amber-600",
-        backgroundColor: "bg-amber-50",
-        hoverColor: "hover:bg-amber-100",
-        borderColor: "border-amber-500"
-      };
-      
-    case "neighbors":
-      return {
-        icon: UserPlus,
-        textColor: "text-teal-600",
-        backgroundColor: "bg-teal-50",
-        hoverColor: "hover:bg-teal-100",
-        borderColor: "border-teal-500"
-      };
-      
-    default:
-      return {
-        icon: Calendar,
-        textColor: "text-gray-600",
-        backgroundColor: "bg-gray-50",
-        hoverColor: "hover:bg-gray-100",
-        borderColor: "border-gray-500"
-      };
-  }
+  return styles[type] || styles.event;
 };
