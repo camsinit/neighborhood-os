@@ -2,9 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Grid2x2, ArrowLeft, MessageSquarePlus } from "lucide-react";
+import { Search, Grid2x2, ArrowLeft } from "lucide-react";
 import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import AddSupportRequestDialog from "../AddSupportRequestDialog";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface SkillsHeaderProps {
   showCategories: boolean;
@@ -82,20 +83,22 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Skill Requests button */}
-        <Button 
-          variant="outline" 
-          size="default"
-          className={`gap-2 hover:bg-gray-200 ${showRequests ? 'bg-gray-100' : 'bg-white'}`}
-          onClick={() => setShowRequests(!showRequests)}
+        {/* Toggle group for offers/requests view */}
+        <ToggleGroup type="single" defaultValue={showRequests ? "requests" : "offers"} 
+          onValueChange={(value) => {
+            // Only change state if a value is selected (prevents deselection)
+            if (value) {
+              setShowRequests(value === "requests");
+            }
+          }}
         >
-          <MessageSquarePlus className="h-4 w-4" />
-          <span>Skill Requests</span>
-        </Button>
+          <ToggleGroupItem value="offers" className="text-sm">Offers</ToggleGroupItem>
+          <ToggleGroupItem value="requests" className="text-sm">Requests</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Request and Offer buttons with GREEN theme instead of purple */}
+        {/* Request and Offer buttons with GREEN theme */}
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}

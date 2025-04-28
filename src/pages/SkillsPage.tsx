@@ -7,7 +7,6 @@ import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import { createHighlightListener } from "@/utils/highlightNavigation";
-import SkillRequestsButton from "@/components/skills/SkillRequestsButton";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 
 const categoryIcons = {
