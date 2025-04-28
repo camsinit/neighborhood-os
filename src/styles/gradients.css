@@ -18,7 +18,7 @@
   /* Calendar gradient: Bright blue with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(221.2, 100%, 53.3%, 0.3) 0%,
-    hsla(221.2, 10%, 53.3%, 0.1) 100%
+    hsla(221.2, 15%, 97%, 0.2) 100%
   );
 }
 
@@ -26,7 +26,7 @@
   /* Skills gradient: Vibrant green with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(142.1, 100%, 36.3%, 0.3) 0%,
-    hsla(142.1, 10%, 36.3%, 0.1) 100%
+    hsla(142.1, 15%, 97%, 0.2) 100%
   );
 }
 
@@ -34,7 +34,7 @@
   /* Goods gradient: Bright orange with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(24.6, 100%, 53.1%, 0.3) 0%,
-    hsla(24.6, 10%, 53.1%, 0.1) 100%
+    hsla(24.6, 15%, 97%, 0.2) 100%
   );
 }
 
@@ -42,7 +42,7 @@
   /* Safety gradient: Bright red with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(0, 100%, 60.2%, 0.3) 0%,
-    hsla(0, 10%, 60.2%, 0.1) 100%
+    hsla(0, 15%, 97%, 0.2) 100%
   );
 }
 
@@ -50,7 +50,7 @@
   /* Care gradient: Rich purple with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(262.1, 100%, 57.8%, 0.3) 0%,
-    hsla(262.1, 10%, 57.8%, 0.1) 100%
+    hsla(262.1, 15%, 97%, 0.2) 100%
   );
 }
 
@@ -58,6 +58,6 @@
   /* Neighbors gradient: Rich purple with reduced opacity */
   background: linear-gradient(to bottom,
     hsla(262.1, 100%, 57.8%, 0.3) 0%,
-    hsla(262.1, 10%, 57.8%, 0.1) 100%
+    hsla(262.1, 15%, 97%, 0.2) 100%
   );
 }
