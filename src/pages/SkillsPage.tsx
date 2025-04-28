@@ -61,50 +61,48 @@ const SkillsPage = () => {
 
   return (
     <div className="page-gradient skills-gradient">
-      <div className="relative z-10">
-        <div className="min-h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-100/80 to-purple-200/50 backdrop-blur-sm rounded-lg shadow-sm">
-          <div className="py-8">
-            <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
+      <div className="relative z-10 min-h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-100/80 to-purple-200/50 backdrop-blur-sm rounded-lg shadow-sm">
+        <div className="py-8">
+          <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
+          
+          <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+            <p className="text-gray-700 text-sm">
+              Share your expertise and learn from others. Connect with neighbors to exchange 
+              skills, teach, learn, and grow together as a community.
+            </p>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
+            <div className="mb-6 flex items-center">
+              {React.createElement(getCategoryIcon(selectedCategory), {
+                className: "h-5 w-5 text-gray-700 mr-2"
+              })}
+              <h3 className="text-lg font-semibold text-gray-900">
+                {showCategories ? 'Categories' : 
+                  (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 
+                    searchQuery ? `Search: "${searchQuery}"` : 
+                      showRequests ? 'Skill Requests' : 'All Skills')}
+              </h3>
+            </div>
+
+            <SkillsHeader 
+              showCategories={showCategories}
+              onViewChange={handleViewChange}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              showRequests={showRequests}
+              setShowRequests={setShowRequests}
+            />
             
-            <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
-              <p className="text-gray-700 text-sm">
-                Share your expertise and learn from others. Connect with neighbors to exchange 
-                skills, teach, learn, and grow together as a community.
-              </p>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
-              <div className="mb-6 flex items-center">
-                {React.createElement(getCategoryIcon(selectedCategory), {
-                  className: "h-5 w-5 text-gray-700 mr-2"
-                })}
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {showCategories ? 'Categories' : 
-                    (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 
-                      searchQuery ? `Search: "${searchQuery}"` : 
-                        showRequests ? 'Skill Requests' : 'All Skills')}
-                </h3>
-              </div>
-
-              <SkillsHeader 
-                showCategories={showCategories}
-                onViewChange={handleViewChange}
+            {showCategories ? (
+              <CategoryView onCategoryClick={handleCategoryClick} />
+            ) : (
+              <SkillsList 
+                selectedCategory={selectedCategory}
                 searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
                 showRequests={showRequests}
-                setShowRequests={setShowRequests}
               />
-              
-              {showCategories ? (
-                <CategoryView onCategoryClick={handleCategoryClick} />
-              ) : (
-                <SkillsList 
-                  selectedCategory={selectedCategory}
-                  searchQuery={searchQuery}
-                  showRequests={showRequests}
-                />
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
