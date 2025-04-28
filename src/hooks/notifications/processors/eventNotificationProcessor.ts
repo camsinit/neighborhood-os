@@ -20,11 +20,11 @@ export const processEventNotifications = (events: any[]): BaseNotification[] => 
     title: event.title,
     content_type: "events",
     content_id: event.id,
-    notification_type: "event",
+    notification_type: "event", // This matches the HighlightableItemType
     created_at: event.created_at,
-    updated_at: event.created_at, // Fallback if no updated_at
-    is_read: event.is_read,
-    is_archived: event.is_archived,
+    updated_at: event.created_at || event.created_at, // Ensure updated_at is present
+    is_read: event.is_read || false,
+    is_archived: event.is_archived || false,
     context: {
       contextType: "event_invite",
       neighborName: event.profiles?.display_name || null,

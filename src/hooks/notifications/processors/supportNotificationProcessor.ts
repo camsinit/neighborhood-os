@@ -20,11 +20,11 @@ export const processSupportNotifications = (supportRequests: any[]): BaseNotific
     title: request.title,
     content_type: "support_requests",
     content_id: request.id,
-    notification_type: "support",
+    notification_type: "support", // This matches the HighlightableItemType
     created_at: request.created_at,
-    updated_at: request.created_at, // Fallback if no updated_at
-    is_read: request.is_read,
-    is_archived: request.is_archived,
+    updated_at: request.created_at || request.created_at, // Ensure updated_at is present
+    is_read: request.is_read || false,
+    is_archived: request.is_archived || false,
     context: {
       contextType: "help_request",
       neighborName: request.profiles?.display_name || null,

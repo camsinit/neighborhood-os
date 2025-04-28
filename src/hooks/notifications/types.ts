@@ -1,4 +1,5 @@
 
+// Define BaseNotification interface with proper types
 export interface BaseNotification {
   id: string;
   user_id: string;
@@ -17,11 +18,11 @@ export interface BaseNotification {
     contextType: string;
     [key: string]: any;
   };
-  relevance_score?: number; // Add relevance_score property
-  type?: string; // Add type property for compatibility with existing code
+  relevance_score?: number;
+  notification_type_display?: string; // Optional display name
 }
 
-export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support";
+export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors";
 
 // Add ProfileData type to fix imports
 export interface ProfileData {
@@ -30,7 +31,7 @@ export interface ProfileData {
   avatar_url?: string;
 }
 
-// Add NotificationContext and NotificationContextType for compatibility
+// Add NotificationContext interface
 export interface NotificationContext {
   notifications: BaseNotification[];
   refetch: () => void;

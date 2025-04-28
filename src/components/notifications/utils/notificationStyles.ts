@@ -1,6 +1,6 @@
 
 import { Bell, Calendar, Shield, HandHelping, Check, Archive, Package, Users } from "lucide-react";
-import { NotificationContextType } from "@/hooks/notifications";
+// Remove incorrect import for NotificationContextType
 
 export interface NotificationStyle {
   backgroundColor: string;

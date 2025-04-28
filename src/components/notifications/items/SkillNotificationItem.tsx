@@ -6,6 +6,7 @@ import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import NotificationPopover from "../NotificationPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
+import { HighlightableItemType } from "@/utils/highlightNavigation"; // Add this import
 
 // Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {
@@ -16,7 +17,7 @@ interface SkillNotificationItemProps {
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
-  onItemClick?: (type: string, id: string) => void; // Add optional onItemClick
+  onItemClick?: (type: string, id: string) => void; // Keep as string for compatibility
 }
 
 export const SkillNotificationItem = ({

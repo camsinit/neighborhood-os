@@ -20,11 +20,11 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
     title: update.title,
     content_type: "safety_updates",
     content_id: update.id,
-    notification_type: "safety",
+    notification_type: "safety", // This matches the HighlightableItemType
     created_at: update.created_at,
-    updated_at: update.created_at, // Fallback if no updated_at
-    is_read: update.is_read,
-    is_archived: update.is_archived,
+    updated_at: update.created_at || update.created_at, // Ensure updated_at is present
+    is_read: update.is_read || false,
+    is_archived: update.is_archived || false,
     context: {
       contextType: "safety_alert",
       neighborName: update.profiles?.display_name || null,

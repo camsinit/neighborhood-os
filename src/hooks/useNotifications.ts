@@ -6,11 +6,7 @@
 import {
   useNotifications,
   BaseNotification,
-  NotificationContext,
-  NotificationContextType,
-  archiveNotification,
-  markAsRead,
-  getTableName
+  // Remove incorrect imports for NotificationContext and NotificationContextType
 } from "./notifications";
 
 export {
@@ -22,6 +18,5 @@ export {
 
 export type {
   BaseNotification,
-  NotificationContext,
-  NotificationContextType
+  // Remove incorrect type exports
 };

@@ -1,204 +1,83 @@
-
 /**
  * This file handles the processing of skill notifications
  * It contains utility functions for transforming skill notification data
  */
 import { BaseNotification, ProfileData } from "../types";
-import { SkillNotificationItem } from "../fetchers/fetchSkillNotifications";
+import { isNotification, isSkillSession } from "../fetchers/fetchSkillNotifications";
 
 /**
- * Type definitions to help TypeScript understand our data structures
- */
-// Define the shape of a skill session
-export interface SkillSession {
-  id: string;
-  created_at: string;
-  skill_id: string;
-  requester_id: string;
-  provider_id: string;
-  status: string;
-  requester?: {
-    display_name?: string;
-    avatar_url?: string;
-  } | null;
-  skill?: {
-    id: string;
-    title: string;
-    description: string;
-    availability: string | null;
-    time_preferences: string[] | null;
-  } | null;
-}
-
-// Define the shape of a notification
-export interface SkillNotification {
-  id: string;
-  created_at: string;
-  title: string | null;
-  content_id: string;
-  content_type: string;
-  notification_type: string;
-  is_read: boolean;
-  is_archived: boolean;
-  metadata: any;
-  user_id: string;
-  actor_id: string;
-  actor: {
-    id: string;
-    display_name: string | null;
-    avatar_url: string | null;
-  } | null;
-}
-
-/**
- * Type guard to check if an item is a skill session
+ * Processes skill notifications
  * 
- * This helps TypeScript understand what properties are available
- */
-export function isSkillSession(item: any): item is SkillSession {
-  // Check for properties that uniquely identify a skill session
-  return item && 
-    typeof item === 'object' && 
-    'requester_id' in item && 
-    'provider_id' in item &&
-    'skill_id' in item;
-}
-
-/**
- * Type guard to check if an item is a notification
- * 
- * This helps TypeScript understand what properties are available
- */
-export function isNotification(item: any): item is SkillNotification {
-  // Check for properties that uniquely identify a notification
-  return item && 
-    typeof item === 'object' && 
-    'actor_id' in item && 
-    'content_type' in item && 
-    'metadata' in item;
-}
-
-/**
- * Processes skill notifications (both skill sessions and notifications)
- * 
- * @param skillRequests - The combined list of skill sessions and notifications
- * @param profilesMap - Map of user IDs to profile data
+ * @param skillNotifications - Raw skill notifications data
+ * @param profilesMap - Map of user profiles by ID
  * @returns An array of processed notifications
  */
 export const processSkillNotifications = (
-  skillRequests: any[],
-  profilesMap: Record<string, ProfileData>
+  skillNotifications: any[],
+  profilesMap: Record<string, ProfileData> = {}
 ): BaseNotification[] => {
-  console.log("[processSkillNotifications] Processing skill notifications:", skillRequests.length);
+  console.log("[processSkillNotifications] Processing skill notifications:", skillNotifications.length);
   
-  // Map through the combined data, using our type guards to determine how to process each item
-  return skillRequests.map((item): BaseNotification => {
-    // Handle notification type items (from notifications table)
-    if (isNotification(item)) {
-      const actorProfile = item.actor_id ? profilesMap[item.actor_id] : null;
+  const result: BaseNotification[] = [];
+  
+  for (const item of skillNotifications) {
+    // Handle skill sessions (pending provider action)
+    if (isSkillSession(item)) {
+      const skillSession = item;
       
-      console.log("[processSkillNotifications] Processing skill notification:", { 
-        id: item.id,
-        title: item.title,
-        metadata: item.metadata
-      });
-      
-      // Map notification data directly
-      return {
-        id: item.id,
-        user_id: item.user_id,
-        actor_id: item.actor_id,
-        title: item.title || "Skill notification",
-        content_type: item.content_type,
-        content_id: item.content_id,
-        notification_type: item.notification_type,
-        created_at: item.created_at,
-        updated_at: item.created_at, // Fallback if no updated_at
-        is_read: item.is_read || false,
-        is_archived: item.is_archived || false,
-        context: {
-          contextType: "skill_request",
-          neighborName: actorProfile?.display_name || item.metadata?.requesterName || null,
-          avatarUrl: actorProfile?.avatar_url || item.metadata?.requesterAvatar || null,
-          skillRequestData: {
-            skillId: item.metadata?.skillId || item.content_id,
-            requesterId: item.metadata?.requesterId || item.actor_id,
-            providerId: item.user_id,
-            skillTitle: item.metadata?.skillTitle || item.title,
-            requesterName: actorProfile?.display_name || item.metadata?.requesterName || null,
-            requesterAvatar: actorProfile?.avatar_url || item.metadata?.requesterAvatar || null,
-            timePreferences: null,
-            availability: null
+      // Only process sessions with valid skill data
+      if (skillSession.skill) {
+        result.push({
+          id: skillSession.id,
+          user_id: skillSession.provider_id || "unknown",
+          title: skillSession.skill.title || "Skill Request",
+          content_type: "skill_sessions",
+          content_id: skillSession.id,
+          notification_type: "skills",
+          created_at: skillSession.created_at,
+          updated_at: skillSession.created_at,
+          is_read: false,
+          is_archived: false,
+          context: {
+            contextType: "skill_request",
+            skillId: skillSession.skill_id,
+            requesterId: skillSession.requester_id,
+            skillTitle: skillSession.skill.title,
+            skillDescription: skillSession.skill.description,
+            availability: skillSession.skill.availability,
+            timePreferences: skillSession.skill.time_preferences,
+            skillRequestData: skillSession
           }
-        }
-      };
-    } 
-    
-    // Handle skill session type items (from skill_sessions table)
-    else if (isSkillSession(item)) {
-      const requesterProfile = item.requester_id ? profilesMap[item.requester_id] : null;
-      
-      console.log("[processSkillNotifications] Processing skill session:", { 
-        sessionId: item.id,
-        skillId: item.skill_id,
-        requester: item.requester_id,
-        provider: item.provider_id,
-        status: item.status,
-        skillTitle: item.skill?.title
-      });
-      
-      return {
-        id: item.id,
-        user_id: item.provider_id,
-        actor_id: item.requester_id,
-        title: item.skill?.title || "New skill request",
-        content_type: "skill_session",
-        content_id: item.skill_id,
-        notification_type: "skills",
-        created_at: item.created_at,
-        updated_at: item.created_at, // Fallback if no updated_at
-        is_read: false,
-        is_archived: false,
-        context: {
-          contextType: "skill_request",
-          neighborName: requesterProfile?.display_name || null,
-          avatarUrl: requesterProfile?.avatar_url || null,
-          skillRequestData: {
-            skillId: item.skill_id,
-            requesterId: item.requester_id,
-            providerId: item.provider_id,
-            skillTitle: item.skill?.title || "Unnamed skill",
-            requesterName: requesterProfile?.display_name || null,
-            requesterAvatar: requesterProfile?.avatar_url || null,
-            timePreferences: item.skill?.time_preferences || null,
-            availability: item.skill?.availability || null
-          }
-        }
-      };
+        });
+      }
     }
     
-    // Fallback for any unexpected item format
-    else {
-      console.warn("[processSkillNotifications] Unrecognized item format:", item);
-      return {
-        id: typeof item === 'object' && item !== null ? String(item.id || 'unknown') : 'unknown',
-        user_id: "unknown",
-        title: "Unknown notification",
-        content_type: "unknown",
-        content_id: typeof item === 'object' && item !== null ? String(item.id || 'unknown') : 'unknown',
+    // Handle skill notifications
+    else if (isNotification(item)) {
+      const notification = item;
+      const actorProfile = notification.actor_id ? profilesMap[notification.actor_id] : null;
+      
+      result.push({
+        id: notification.id,
+        user_id: notification.user_id || "unknown",
+        actor_id: notification.actor_id,
+        title: notification.title || "Skill Notification",
+        content_type: notification.content_type,
+        content_id: notification.content_id,
         notification_type: "skills",
-        created_at: typeof item === 'object' && item !== null ? 
-          String(item.created_at || new Date().toISOString()) : 
-          new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        is_read: false,
-        is_archived: false,
+        created_at: notification.created_at,
+        updated_at: notification.updated_at || notification.created_at,
+        is_read: notification.is_read,
+        is_archived: notification.is_archived,
         context: {
           contextType: "skill_request",
-          neighborName: null,
-          avatarUrl: null
+          neighborName: actorProfile?.display_name || notification.actor?.display_name || null,
+          avatarUrl: actorProfile?.avatar_url || notification.actor?.avatar_url || null,
+          metadata: notification.metadata
         }
-      };
+      });
     }
-  });
+  }
+  
+  return result;
 };
