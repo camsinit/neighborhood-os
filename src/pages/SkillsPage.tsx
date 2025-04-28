@@ -61,7 +61,7 @@ const SkillsPage = () => {
 
   return (
     <div className="page-gradient skills-gradient">
-      <div className="relative z-10 min-h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-100/80 to-purple-200/50 backdrop-blur-sm rounded-lg shadow-sm">
+      <div className="relative z-10 min-h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-100/80 to-purple-200/50 backdrop-blur-sm rounded-lg shadow-sm bg-opacity-90">
         <div className="py-8">
           <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
           
