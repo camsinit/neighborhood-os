@@ -48,7 +48,7 @@ const SkillsHeader = ({
   return (
     <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
       <div className="flex items-center gap-4">
-        {/* Search input field - now between Types and Skill Requests */}
+        {/* Search input field */}
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input 
@@ -60,7 +60,7 @@ const SkillsHeader = ({
           />
         </div>
 
-        {/* Toggle button to switch between categories and list view */}
+        {/* Toggle button */}
         <Button
           variant="outline"
           onClick={onViewChange}
@@ -81,7 +81,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Toggle button for switching between offers and requests */}
+        {/* Skill Requests button */}
         <Button 
           variant="outline" 
           size="default"
@@ -94,24 +94,24 @@ const SkillsHeader = ({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Request and Offer buttons with consistent hover styling */}
+        {/* Request and Offer buttons with purple theme */}
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
-          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0 hover:text-white"
+          className="bg-[#9b87f5] hover:bg-[#8B5CF6] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Request
         </Button>
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('offer')} 
-          className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white whitespace-nowrap border-0 hover:text-white"
+          className="bg-[#9b87f5] hover:bg-[#8B5CF6] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Offer
         </Button>
       </div>
 
-      {/* Dialog for creating new skill offers/requests */}
+      {/* Dialog */}
       <AddSupportRequestDialog
         open={isAddSkillOpen}
         onOpenChange={setIsAddSkillOpen}
