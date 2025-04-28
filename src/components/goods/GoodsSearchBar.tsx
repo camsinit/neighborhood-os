@@ -4,6 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+/**
+ * GoodsSearchBar Component
+ * 
+ * This component provides the search and filter functionality at the top of the Goods page,
+ * including search input and tabs for switching between Available items and Requests.
+ * 
+ * @param searchQuery - The current search text
+ * @param onSearchChange - Function to update search text
+ * @param onRequestItem - Function to trigger request item dialog
+ * @param onOfferItem - Function to trigger offer item dialog
+ * @param activeTab - Currently selected tab ('offers' or 'needs')
+ * @param onTabChange - Function to handle tab changes
+ */
 interface GoodsSearchBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
@@ -25,6 +38,7 @@ const GoodsSearchBar = ({
     <div className="flex items-center justify-between mb-6 gap-4">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
+          {/* Search input with icon */}
           <div className="relative w-[180px]">
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             <Input 
@@ -37,12 +51,16 @@ const GoodsSearchBar = ({
           </div>
         </div>
 
-        <TabsList>
-          <TabsTrigger value="offers" onClick={() => onTabChange("offers")}>Available</TabsTrigger>
-          <TabsTrigger value="needs" onClick={() => onTabChange("needs")}>Requests</TabsTrigger>
-        </TabsList>
+        {/* IMPORTANT: We need to wrap TabsList within a Tabs component */}
+        <Tabs value={activeTab} onValueChange={onTabChange}>
+          <TabsList>
+            <TabsTrigger value="offers">Available</TabsTrigger>
+            <TabsTrigger value="needs">Requests</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
+      {/* Action buttons */}
       <div className="flex gap-2">
         <Button 
           onClick={onRequestItem} 

@@ -5,7 +5,7 @@ import GoodsSections from './GoodsSections';
 import GoodsPageHeader from './GoodsPageHeader';
 import GoodsSearchBar from './GoodsSearchBar';
 import GoodsDialogs from './GoodsDialogs';
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs } from "@/components/ui/tabs";
 import EmptyState from "@/components/ui/empty-state";
 import { PackageSearch, Gift } from "lucide-react";
 
@@ -61,6 +61,7 @@ const GoodsPageContainer = () => {
       {/* Main content area */}
       <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
         <div className="p-6">
+          {/* Ensure the Tabs component is passed the value and onValueChange props */}
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <GoodsSections 
               searchQuery={searchQuery}
