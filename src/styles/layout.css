@@ -1,0 +1,43 @@
+
+/* Improved styling for dialog components to match chat aesthetic */
+.sm\:max-w-\[600px\] {
+  max-width: 600px !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Cleaner background handling */
+[class*="bg-white"] {
+  background-color: white !important;
+}
+
+/* Dialog content styling */
+[data-radix-dialog-content] {
+  border-radius: var(--radius) !important;
+  padding: 1.25rem !important; 
+}
+
+/* Input field styling to match chat input */
+.input-chat-style {
+  @apply rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
+}
+
+/* Button styling inspired by chat interaction buttons */
+.btn-chat-style {
+  @apply rounded-lg font-medium transition-all duration-200 hover:opacity-90 active:scale-95;
+}
+
+/* Module button styling for theme-colored buttons */
+.module-button {
+  @apply rounded-lg font-medium transition-all duration-200 text-white border-0;
+}
+
+/* Module header styling */
+.module-header {
+  @apply mb-6 flex items-center;
+}
+
+/* Module description styling */
+.module-description {
+  @apply mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm;
+}

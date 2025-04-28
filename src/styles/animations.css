@@ -1,0 +1,35 @@
+
+/* Rainbow highlight animation for element navigation */
+.rainbow-highlight {
+  animation: glow-pulse 5s ease-in-out;
+  outline: 3px solid transparent;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes glow-pulse {
+  0% { 
+    outline-color: rgba(74, 222, 128, 0.7);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.7); 
+  }
+  50% { 
+    outline-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.7); 
+  }
+  100% { 
+    outline-color: rgba(74, 222, 128, 0);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0); 
+  }
+}
+
+/* Scale animation for interactive elements */
+.scale-animation {
+  animation: quick-scale 300ms ease-in-out;
+}
+
+@keyframes quick-scale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}

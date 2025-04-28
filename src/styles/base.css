@@ -1,0 +1,62 @@
+
+/* Base styling to match chat aesthetic */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font for consistent typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styling to match chat aesthetic */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    
+    --radius: 0.75rem;
+    
+    /* Section-specific color variables */
+    --calendar-color: 221.2 83.2% 53.3%;
+    --calendar-light: 221.2 83.2% 96%;
+    
+    --safety-color: 0 84.2% 60.2%;
+    --safety-light: 0 84.2% 96%;
+    
+    --skills-color: 142.1 76.2% 36.3%;
+    --skills-light: 142.1 76.2% 96%;
+    
+    --goods-color: 24.6 95% 53.1%;
+    --goods-light: 24.6 95% 96%;
+    
+    --care-color: 262.1 83.3% 57.8%;
+    --care-light: 262.1 83.3% 96%;
+    
+    --neighbors-color: 262.1 83.3% 57.8%;
+    --neighbors-light: 262.1 83.3% 96%;
+  }
+}

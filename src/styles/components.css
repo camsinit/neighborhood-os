@@ -1,0 +1,37 @@
+
+/* Typography styles inspired by the chat component */
+@layer components {
+  .heading-xl {
+    @apply text-2xl font-bold tracking-tight;
+  }
+  
+  .heading-lg {
+    @apply text-xl font-semibold;
+  }
+  
+  .heading-md {
+    @apply text-lg font-medium;
+  }
+  
+  .body-text {
+    @apply text-sm leading-relaxed font-normal;
+  }
+  
+  .caption-text {
+    @apply text-xs text-muted-foreground;
+  }
+  
+  /* Card styling based on chat messages */
+  .chat-card {
+    @apply rounded-lg px-4 py-3 shadow-chat hover:shadow-chat-hover transition-shadow duration-200;
+  }
+
+  /* Module card styling for consistent component appearance */
+  .module-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg;
+  }
+
+  .module-card-sm {
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm;
+  }
+}

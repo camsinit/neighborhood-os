@@ -1,0 +1,57 @@
+
+/* Page gradient backgrounds */
+.page-gradient {
+  position: relative;
+  min-height: 100vh;
+}
+
+.page-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Module-specific gradient backgrounds */
+.calendar-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--calendar-color), 0.15) 0%, 
+    hsla(var(--calendar-light), 0.05) 100%
+  );
+}
+
+.skills-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--skills-color), 0.15) 0%, 
+    hsla(var(--skills-light), 0.05) 100%
+  );
+}
+
+.goods-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--goods-color), 0.15) 0%, 
+    hsla(var(--goods-light), 0.05) 100%
+  );
+}
+
+.safety-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--safety-color), 0.15) 0%, 
+    hsla(var(--safety-light), 0.05) 100%
+  );
+}
+
+.care-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--care-color), 0.15) 0%, 
+    hsla(var(--care-light), 0.05) 100%
+  );
+}
+
+.neighbors-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--neighbors-color), 0.15) 0%, 
+    hsla(var(--neighbors-light), 0.05) 100%
+  );
+}
