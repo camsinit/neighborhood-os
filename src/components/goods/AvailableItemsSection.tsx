@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -15,17 +16,21 @@ import { GoodsItemCategory } from "@/components/support/types/formTypes";
  */
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
-  onRequestSelect: (request: GoodsExchangeItem) => void;
-  onNewOffer: () => void;
-  onRefetch: () => void;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
+  onRefetch: () => void;
+  // Adding these props to fix type errors, with default no-op implementations
+  onRequestSelect?: (request: GoodsExchangeItem) => void;
+  onNewOffer?: () => void;
 }
+
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
   onDeleteItem,
   isDeletingItem = false,
-  onRefetch
+  onRefetch,
+  onRequestSelect = () => {},
+  onNewOffer = () => {}
 }) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);

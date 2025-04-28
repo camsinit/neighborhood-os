@@ -1,12 +1,10 @@
+
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 import GoodsSections from './GoodsSections';
 import GoodsPageHeader from './GoodsPageHeader';
-import GoodsSearchBar from './GoodsSearchBar';
 import GoodsDialogs from './GoodsDialogs';
 import { Tabs } from "@/components/ui/tabs";
-import EmptyState from "@/components/ui/empty-state";
-import { PackageSearch, Gift } from "lucide-react";
 
 /**
  * GoodsPageContainer Component
@@ -47,20 +45,11 @@ const GoodsPageContainer = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search and filter section */}
-      <GoodsSearchBar 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onRequestItem={handleAddRequest}
-        onOfferItem={handleAddItem}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
-
       {/* Main content area with simplified structure */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <GoodsSections 
           searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           goodsData={goodsData}
           isLoading={isLoading}
           showUrgent={showUrgent}
@@ -71,6 +60,7 @@ const GoodsPageContainer = () => {
           onOfferItem={handleAddItem}
           onRequestItem={handleAddRequest}
           activeTab={activeTab}
+          onTabChange={handleTabChange}
         />
       </Tabs>
 

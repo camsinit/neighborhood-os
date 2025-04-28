@@ -255,12 +255,17 @@ export const submitGoodsForm = async (
     
   } catch (error) {
     console.error("Error in goods form submission:", error);
-    toast.dismiss(loadingToastId);
+    // Ensure we're dismissing the toast with the correct type
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+    }
     toast.error("There was a problem with your request. Please try again.");
     throw error;
     
   } finally {
     // Ensure loading toast is dismissed in all cases
-    toast.dismiss(loadingToastId);
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+    }
   }
 };

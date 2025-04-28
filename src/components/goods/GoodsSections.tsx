@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch } from './utils/sectionHelpers';
@@ -8,13 +9,14 @@ import { TabsContent } from "@/components/ui/tabs";
 import UrgentGoodsSection from './sections/UrgentGoodsSection';
 import RegularGoodsSection from './sections/RegularGoodsSection';
 import EmptyState from "@/components/ui/empty-state";
-import { PackageSearch, Gift } from "lucide-react";
+import { PackageSearch } from "lucide-react";
 import GoodsSearchBar from './GoodsSearchBar';
 
 interface GoodsSectionsProps {
   goodsData: GoodsExchangeItem[];
   isLoading: boolean;
   searchQuery: string;
+  onSearchChange: (query: string) => void;
   showUrgent: boolean;
   showRequests: boolean;
   showAvailable: boolean;
@@ -23,6 +25,7 @@ interface GoodsSectionsProps {
   onOfferItem: () => void;
   onRequestItem: () => void;
   activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 /**
@@ -40,6 +43,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   goodsData = [],
   isLoading,
   searchQuery,
+  onSearchChange,
   showUrgent,
   showRequests,
   showAvailable,
@@ -47,7 +51,8 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   onRefresh,
   onOfferItem,
   onRequestItem,
-  activeTab
+  activeTab,
+  onTabChange
 }) => {
   const {
     handleDeleteGoodsItem,
@@ -65,19 +70,21 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
   return (
     <>
+      {/* Search bar and filter controls */}
       <GoodsSearchBar 
         searchQuery={searchQuery}
-        onSearchChange={() => {}}  // Pass the actual handler
+        onSearchChange={onSearchChange}
         onRequestItem={onRequestItem}
         onOfferItem={onOfferItem}
         activeTab={activeTab}
-        onTabChange={() => {}}  // Pass the actual handler
+        onTabChange={onTabChange}
         goodsItems={available}
         onDeleteItem={handleDeleteGoodsItem}
         isDeletingItem={isDeletingItem}
         onRefetch={onRefresh}
       />
 
+      {/* Needs tab content */}
       <TabsContent value="needs" className="p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg space-y-4">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
