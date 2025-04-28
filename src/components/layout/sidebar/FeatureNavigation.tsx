@@ -9,7 +9,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * FeatureNavigation component
  * 
  * Displays the feature navigation items with their respective theme colors
- * Order: Calendar, Skills, Items, Safety, Neighbors
+ * Order: Calendar, Skills, Freebies, Safety, Neighbors
  */
 const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
@@ -34,9 +34,9 @@ const FeatureNavigation = () => {
     },
     { 
       icon: Gift, 
-      label: "Items", 
-      href: "/goods", 
-      color: moduleThemeColors.goods.primary
+      label: "Freebies", 
+      href: "/freebies", 
+      color: moduleThemeColors.freebies ? moduleThemeColors.freebies.primary : moduleThemeColors.goods.primary
     },
     { 
       icon: Shield, 
