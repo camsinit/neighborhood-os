@@ -50,6 +50,22 @@ const SkillsHeader = ({
   return (
     <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
       <div className="flex items-center gap-4">
+        {/* Request and Offer buttons - Moved from the bottom to here */}
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('need')}
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Request
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('offer')} 
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Offer
+        </Button>
+
         {/* Search input field */}
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
@@ -97,23 +113,7 @@ const SkillsHeader = ({
         </ToggleGroup>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Request and Offer buttons with GREEN theme */}
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('need')}
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Request
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('offer')} 
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Offer
-        </Button>
-      </div>
+      {/* Removed the buttons div since buttons were moved to the top */}
 
       {/* Dialog */}
       <AddSupportRequestDialog
