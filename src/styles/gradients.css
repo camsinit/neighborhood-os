@@ -38,14 +38,6 @@
   );
 }
 
-.freebies-gradient::before {
-  /* Freebies gradient: Bright orange with reduced opacity (same as goods) */
-  background: linear-gradient(to bottom,
-    hsla(24.6, 100%, 53.1%, 0.3) 0%,
-    hsla(24.6, 15%, 97%, 0.2) 100%
-  );
-}
-
 .safety-gradient::before {
   /* Safety gradient: Bright red with reduced opacity */
   background: linear-gradient(to bottom,

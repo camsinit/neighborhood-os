@@ -4,7 +4,7 @@ import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import { highlightItem, HighlightableItemType } from "@/utils/highlightNavigation";
+import { highlightItem } from "@/utils/highlightNavigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -103,7 +103,7 @@ const ActivityItem = ({
   /**
    * Determine the activity type and corresponding item type for highlighting
    */
-  const getActivityItemType = (): HighlightableItemType => {
+  const getActivityItemType = () => {
     // Extract the base type from activity_type (e.g., skill_offered → skills)
     const baseType = activity.activity_type.split('_')[0];
     
