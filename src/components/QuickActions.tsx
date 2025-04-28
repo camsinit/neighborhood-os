@@ -97,27 +97,39 @@ const QuickActions = () => {
    */
   const ActionColumn = ({ 
     title, 
-    actions 
+    actions,
+    moduleType
   }: { 
     title: string, 
-    actions: typeof goodsActions 
+    actions: Array<{
+      icon: any; 
+      label: string; 
+      onClick: () => void;
+      moduleTheme: "goods" | "skills" | "calendar" | "safety";
+    }>,
+    moduleType: "goods" | "skills" | "calendar" | "safety"
   }) => (
     <div className="flex flex-col gap-2">
-      {/* Column heading */}
-      <h3 className="text-sm font-medium text-gray-700 mb-1">{title}</h3>
+      {/* Column heading with colored accent */}
+      <h3 
+        className="text-sm font-semibold mb-2 pb-1 border-b-2" 
+        style={{ borderColor: moduleThemeColors[moduleType].primary }}
+      >
+        {title}
+      </h3>
       
-      {/* Actions in this column */}
-      <div className="space-y-2">
+      {/* Actions in this column with enhanced styling */}
+      <div className="space-y-3">
         {actions.map(action => (
           <ModuleButton
             key={action.label}
             moduleTheme={action.moduleTheme}
-            variant="outline"
-            className="w-full justify-start"
+            variant="filled"
+            className="w-full justify-start text-white shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]"
             onClick={action.onClick}
           >
-            <action.icon className="h-4 w-4 mr-2" />
-            <span className="text-xs">{action.label}</span>
+            <action.icon className="h-5 w-5 mr-2" />
+            <span className="text-sm font-medium">{action.label}</span>
           </ModuleButton>
         ))}
       </div>
@@ -135,10 +147,10 @@ const QuickActions = () => {
       </div>
 
       {/* Three-column grid for organized actions */}
-      <div className="grid grid-cols-3 gap-4">
-        <ActionColumn title="Items" actions={goodsActions} />
-        <ActionColumn title="Skills" actions={skillsActions} />
-        <ActionColumn title="Events & Safety" actions={otherActions} />
+      <div className="grid grid-cols-3 gap-6">
+        <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />
+        <ActionColumn title="Skills" actions={skillsActions} moduleType="skills" />
+        <ActionColumn title="Events & Safety" actions={otherActions} moduleType="calendar" />
       </div>
 
       {/* Dialog components */}

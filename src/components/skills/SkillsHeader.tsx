@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,18 +95,18 @@ const SkillsHeader = ({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Request and Offer buttons with purple theme */}
+        {/* Request and Offer buttons with GREEN theme instead of purple */}
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}
-          className="bg-[#9b87f5] hover:bg-[#8B5CF6] text-white whitespace-nowrap border-0 hover:text-white"
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Request
         </Button>
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('offer')} 
-          className="bg-[#9b87f5] hover:bg-[#8B5CF6] text-white whitespace-nowrap border-0 hover:text-white"
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
         >
           Offer
         </Button>
