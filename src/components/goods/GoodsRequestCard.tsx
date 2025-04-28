@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,10 +28,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="min-h-[88px] w-full flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2"
-        >
+        <div className="w-full flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative">
           {/* Profile and content section */}
           <div className="flex items-center gap-3 flex-grow">
             <Avatar className="h-10 w-10 flex-shrink-0">
@@ -49,7 +45,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
             </div>
           </div>
           
-          {/* Action buttons - always visible */}
+          {/* Action buttons */}
           <div className="flex gap-2 ml-4">
             <Button 
               variant="ghost"
@@ -68,7 +64,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
               {getUrgencyLabel(request.urgency)}
             </Badge>
           )}
-        </Button>
+        </div>
       </PopoverTrigger>
       
       <PopoverContent className="w-[300px] p-0" sideOffset={5}>
