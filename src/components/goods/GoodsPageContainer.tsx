@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 import GoodsSections from './GoodsSections';
@@ -58,27 +57,22 @@ const GoodsPageContainer = () => {
         onTabChange={handleTabChange}
       />
 
-      {/* Main content area */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
-        <div className="p-6">
-          {/* Ensure the Tabs component is passed the value and onValueChange props */}
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <GoodsSections 
-              searchQuery={searchQuery}
-              goodsData={goodsData}
-              isLoading={isLoading}
-              showUrgent={showUrgent}
-              showRequests={showRequests}
-              showAvailable={showAvailable}
-              onRequestSelect={setSelectedRequest}
-              onRefresh={refetch}
-              onOfferItem={handleAddItem}
-              onRequestItem={handleAddRequest}
-              activeTab={activeTab}
-            />
-          </Tabs>
-        </div>
-      </div>
+      {/* Main content area with simplified structure */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <GoodsSections 
+          searchQuery={searchQuery}
+          goodsData={goodsData}
+          isLoading={isLoading}
+          showUrgent={showUrgent}
+          showRequests={showRequests}
+          showAvailable={showAvailable}
+          onRequestSelect={setSelectedRequest}
+          onRefresh={refetch}
+          onOfferItem={handleAddItem}
+          onRequestItem={handleAddRequest}
+          activeTab={activeTab}
+        />
+      </Tabs>
 
       {/* Dialogs */}
       <GoodsDialogs 

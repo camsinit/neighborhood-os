@@ -66,7 +66,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   return (
     <div>
       {/* Tab content for "Requests" view */}
-      <TabsContent value="needs">
+      <TabsContent value="needs" className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
             icon={PackageSearch}
@@ -100,7 +100,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
       </TabsContent>
 
       {/* Tab content for "Available" view */}
-      <TabsContent value="offers">
+      <TabsContent value="offers" className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6">
         {available.length === 0 ? (
           <EmptyState
             icon={Gift}
