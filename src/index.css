@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,6 +54,9 @@
     
     --care-color: 262.1 83.3% 57.8%;
     --care-light: 262.1 83.3% 96%;
+    
+    --neighbors-color: 262.1 83.3% 57.8%;
+    --neighbors-light: 262.1 83.3% 96%;
   }
 }
 
@@ -81,6 +85,15 @@
   /* Card styling based on chat messages */
   .chat-card {
     @apply rounded-lg px-4 py-3 shadow-chat hover:shadow-chat-hover transition-shadow duration-200;
+  }
+
+  /* Module card styling for consistent component appearance */
+  .module-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg;
+  }
+
+  .module-card-sm {
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm;
   }
 }
 
@@ -147,6 +160,21 @@
   @apply rounded-lg font-medium transition-all duration-200 hover:opacity-90 active:scale-95;
 }
 
+/* Module button styling for theme-colored buttons */
+.module-button {
+  @apply rounded-lg font-medium transition-all duration-200 text-white border-0;
+}
+
+/* Module header styling */
+.module-header {
+  @apply mb-6 flex items-center;
+}
+
+/* Module description styling */
+.module-description {
+  @apply mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm;
+}
+
 /* Page gradient backgrounds */
 .page-gradient {
   position: relative;
@@ -161,7 +189,7 @@
   pointer-events: none;
 }
 
-/* Calendar page gradient */
+/* Module-specific gradient backgrounds */
 .calendar-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--calendar-color), 0.15) 0%, 
@@ -169,7 +197,6 @@
   );
 }
 
-/* Safety page gradient */
 .safety-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--safety-color), 0.15) 0%, 
@@ -177,7 +204,6 @@
   );
 }
 
-/* Skills page gradient */
 .skills-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--skills-color), 0.15) 0%, 
@@ -185,7 +211,6 @@
   );
 }
 
-/* Goods page gradient */
 .goods-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--goods-color), 0.15) 0%, 
@@ -193,10 +218,16 @@
   );
 }
 
-/* Care page gradient */
 .care-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--care-color), 0.15) 0%, 
     hsla(var(--care-light), 0.05) 100%
+  );
+}
+
+.neighbors-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--neighbors-color), 0.15) 0%, 
+    hsla(var(--neighbors-light), 0.05) 100%
   );
 }

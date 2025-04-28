@@ -1,6 +1,8 @@
+
 import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
 import { useEffect } from "react";
 import { createHighlightListener } from "@/utils/highlightNavigation";
+import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**
  * GoodsPage component
@@ -27,26 +29,13 @@ const GoodsPage = () => {
   }, []);
 
   return (
-    <div className="page-gradient goods-gradient">
-      <div className="relative z-10">
-        <div className="min-h-full w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="py-8">
-              <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
-              
-              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
-                <p className="text-gray-700 text-sm">
-                  Share resources with your neighbors through our community exchange. 
-                  Offer items you no longer need, or find things you're looking for.
-                </p>
-              </div>
-
-              <GoodsPageContainer />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ModuleLayout
+      title="Goods Exchange"
+      themeColor="goods"
+      description="Share resources with your neighbors through our community exchange. Offer items you no longer need, or find things you're looking for."
+    >
+      <GoodsPageContainer />
+    </ModuleLayout>
   );
 };
 

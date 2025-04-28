@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { UserDirectory } from "@/components/neighbors/UserDirectory";
 import { Input } from "@/components/ui/input";
@@ -8,15 +9,14 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
+import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**
  * NeighborsPage Component
  * 
  * This page displays a directory of neighbors in the user's neighborhood.
- * UPDATED: Now more resilient to missing neighborhood data and uses our
- * centralized highlighting system
+ * Now using the centralized module structure for consistent styling.
  */
 const NeighborsPage = () => {
   // State for the search functionality
@@ -145,42 +145,28 @@ const NeighborsPage = () => {
   }
 
   // User has a neighborhood, show the neighbors directory with enhanced UI
-  return <div className="page-gradient neighbors-gradient">
-      <div className="relative z-10">
-        <div className="min-h-full w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="py-8">
-              <h2 className="text-2xl font-bold text-gray-900">My Neighbors</h2>
-              
-              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
-                <div className="flex items-start">
-                  <div className="mr-3 mt-1 bg-blue-100 p-2 rounded-full">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">{currentNeighborhood?.name}</h3>
-                    <p className="text-gray-700 text-sm mt-1">
-                      Welcome to your neighborhood community! Connect with neighbors, discover shared interests, and build meaningful connections.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="relative w-[280px]">
-                    <Input type="text" placeholder="Search neighbors..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
-                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-
-                <UserDirectory searchQuery={searchQuery} />
-              </div>
-            </div>
-          </div>
+  return (
+    <ModuleLayout
+      title="My Neighbors"
+      themeColor="neighbors"
+      description="Welcome to your neighborhood community! Connect with neighbors, discover shared interests, and build meaningful connections."
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="relative w-[280px]">
+          <Input 
+            type="text" 
+            placeholder="Search neighbors..." 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+            className="pl-10" 
+          />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
         </div>
       </div>
-    </div>;
+
+      <UserDirectory searchQuery={searchQuery} />
+    </ModuleLayout>
+  );
 };
 
 export default NeighborsPage;
