@@ -68,24 +68,22 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   }
 
   return (
-    <div className="w-full">
-      <div className="space-y-2">
-        {regularRequests.map((request) => (
-          <GoodsRequestCard
-            key={request.id}
-            request={request}
-            isOpen={openPopoverId === request.id}
-            onOpenChange={(open) => {
-              setOpenPopoverId(open ? request.id : null);
-            }}
-            getUrgencyClass={getUrgencyClass}
-            getUrgencyLabel={getUrgencyLabel}
-            onDeleteItem={onDeleteItem}
-            isDeletingItem={isDeletingItem}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {regularRequests.map((request) => (
+        <GoodsRequestCard
+          key={request.id}
+          request={request}
+          isOpen={openPopoverId === request.id}
+          onOpenChange={(open) => {
+            setOpenPopoverId(open ? request.id : null);
+          }}
+          getUrgencyClass={getUrgencyClass}
+          getUrgencyLabel={getUrgencyLabel}
+          onDeleteItem={onDeleteItem}
+          isDeletingItem={isDeletingItem}
+        />
+      ))}
+    </>
   );
 };
 

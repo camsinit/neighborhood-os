@@ -65,7 +65,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
   return (
     <>
-      <TabsContent value="needs">
+      <TabsContent value="needs" className="p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg space-y-4">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
             icon={PackageSearch}
@@ -108,16 +108,14 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
             onAction={onOfferItem}
           />
         ) : (
-          <div className="mt-4">
-            <AvailableItemsSection 
-              goodsItems={available}
-              onRequestSelect={onRequestSelect}
-              onNewOffer={onOfferItem}
-              onRefetch={onRefresh}
-              onDeleteItem={handleDeleteGoodsItem}
-              isDeletingItem={isDeletingItem}
-            />
-          </div>
+          <AvailableItemsSection 
+            goodsItems={available}
+            onRequestSelect={onRequestSelect}
+            onNewOffer={onOfferItem}
+            onRefetch={onRefresh}
+            onDeleteItem={handleDeleteGoodsItem}
+            isDeletingItem={isDeletingItem}
+          />
         )}
       </TabsContent>
     </>
