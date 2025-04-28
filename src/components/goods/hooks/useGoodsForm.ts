@@ -6,14 +6,19 @@ import { useGoodsFormState } from "./useGoodsFormState";
 import { useGoodsFormHandlers } from "./useGoodsFormHandlers";
 import { useGoodsFormSubmit } from "./useGoodsFormSubmit";
 import { GoodsFormProps } from "@/components/support/types/formTypes";
+import { toast } from "sonner";
 
 export const useGoodsForm = ({ 
   onClose, 
   initialValues, 
   initialRequestType 
 }: Pick<GoodsFormProps, 'onClose' | 'initialValues' | 'initialRequestType'>) => {
+  // Get the current user and neighborhood
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
+  
+  // Log the neighborhood data for debugging purposes
+  console.log("[useGoodsForm] Current neighborhood:", neighborhood);
   
   // We'll pass the initialRequestType directly to useGoodsFormState
   // since we've updated it to handle both "need" and "request"
@@ -43,6 +48,11 @@ export const useGoodsForm = ({
     setRequestFormData,
     setSelectedCategory
   );
+
+  // Ensure we have a neighborhood before submitting
+  if (!neighborhood) {
+    console.warn("[useGoodsForm] No neighborhood selected");
+  }
   
   const { handleSubmit } = useGoodsFormSubmit(
     isOfferForm,

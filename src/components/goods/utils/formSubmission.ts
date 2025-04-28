@@ -168,6 +168,13 @@ export const submitGoodsForm = async (
   goodsItemId?: string
 ) => {
   try {
+    // Make sure we have a neighborhood ID
+    if (!neighborhoodId) {
+      console.error("Missing neighborhood_id in submission");
+      toast.error("There was a problem: Missing neighborhood information");
+      return null;
+    }
+
     const loadingToast = toast.loading(
       mode === 'delete' 
         ? "Removing your item..." 
@@ -259,7 +266,13 @@ export const submitGoodsForm = async (
             neighborhood_id: neighborhoodId
           };
       
+      // Add debug logging to ensure neighborhood_id is present
       console.log("Creating goods exchange item:", formattedData);
+      console.log("Neighborhood ID check:", {
+        providedId: neighborhoodId,
+        formattedId: formattedData.neighborhood_id,
+        userId: userId
+      });
       
       const { error, data: insertedData } = await supabase
         .from('goods_exchange')
