@@ -8,6 +8,8 @@ import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import ModuleLayout from "@/components/layout/ModuleLayout";
+import { Button } from "@/components/ui/button"; // Import Button component
+import AddSupportRequestDialog from "@/components/AddSupportRequestDialog"; // Import dialog
 
 const categoryIcons = {
   creative: Palette,
@@ -31,6 +33,10 @@ const SkillsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showRequests, setShowRequests] = useState(false);
+  
+  // Add state for the dialog control
+  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
 
   useEffect(() => {
     const handleHighlightItem = createHighlightListener("skills");
@@ -59,6 +65,12 @@ const SkillsPage = () => {
     if (!category) return BookOpen;
     return categoryIcons[category] || BookOpen;
   };
+  
+  // Function to open the dialog for adding skills
+  const openSkillDialog = (mode: 'offer' | 'need') => {
+    setDialogMode(mode);
+    setIsAddSkillOpen(true);
+  };
 
   return (
     <ModuleLayout
@@ -66,16 +78,38 @@ const SkillsPage = () => {
       themeColor="skills"
       description="Share your expertise and learn from others. Connect with neighbors to exchange skills, teach, learn, and grow together as a community."
     >
-      <div className="mb-6 flex items-center">
-        {React.createElement(getCategoryIcon(selectedCategory), {
-          className: "h-5 w-5 text-gray-700 mr-2"
-        })}
-        <h3 className="text-lg font-semibold text-gray-900">
-          {showCategories ? 'Categories' : 
-            (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 
-              searchQuery ? `Search: "${searchQuery}"` : 
-                showRequests ? 'Skill Requests' : 'All Skills')}
-        </h3>
+      {/* Modified header section with buttons on the right */}
+      <div className="mb-6 flex items-center justify-between">
+        {/* Left side - Icon and title */}
+        <div className="flex items-center">
+          {React.createElement(getCategoryIcon(selectedCategory), {
+            className: "h-5 w-5 text-gray-700 mr-2"
+          })}
+          <h3 className="text-lg font-semibold text-gray-900">
+            {showCategories ? 'Categories' : 
+              (selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 
+                searchQuery ? `Search: "${searchQuery}"` : 
+                  showRequests ? 'Skill Requests' : 'All Skills')}
+          </h3>
+        </div>
+        
+        {/* Right side - Action buttons */}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => openSkillDialog('need')}
+            className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+          >
+            Request
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => openSkillDialog('offer')} 
+            className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+          >
+            Offer
+          </Button>
+        </div>
       </div>
 
       <SkillsHeader 
@@ -85,6 +119,7 @@ const SkillsPage = () => {
         setSearchQuery={setSearchQuery}
         showRequests={showRequests}
         setShowRequests={setShowRequests}
+        openSkillDialog={openSkillDialog}
       />
       
       {showCategories ? (
@@ -96,6 +131,14 @@ const SkillsPage = () => {
           showRequests={showRequests}
         />
       )}
+      
+      {/* Dialog moved to the page level */}
+      <AddSupportRequestDialog
+        open={isAddSkillOpen}
+        onOpenChange={setIsAddSkillOpen}
+        initialRequestType={dialogMode}
+        view="skills"
+      />
     </ModuleLayout>
   );
 };

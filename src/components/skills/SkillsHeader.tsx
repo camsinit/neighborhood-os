@@ -14,6 +14,8 @@ interface SkillsHeaderProps {
   setSearchQuery: (query: string) => void;
   showRequests: boolean;
   setShowRequests: (show: boolean) => void;
+  // Add new props to pass the dialog functions
+  openSkillDialog: (mode: 'offer' | 'need') => void;
 }
 
 /**
@@ -28,8 +30,10 @@ const SkillsHeader = ({
   searchQuery,
   setSearchQuery,
   showRequests,
-  setShowRequests
+  setShowRequests,
+  openSkillDialog // Add this prop
 }: SkillsHeaderProps) => {
+  // Remove the dialog state and functions since we'll move them to SkillsPage
   // State for the add skill dialog
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
@@ -40,12 +44,6 @@ const SkillsHeader = ({
       onViewChange();
     }
   }, [searchQuery, showCategories, onViewChange]);
-
-  // Function to open the dialog for adding skills
-  const openSkillDialog = (mode: 'offer' | 'need') => {
-    setDialogMode(mode);
-    setIsAddSkillOpen(true);
-  };
 
   return (
     <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
@@ -108,24 +106,6 @@ const SkillsHeader = ({
             Requests
           </ToggleGroupItem>
         </ToggleGroup>
-      </div>
-
-      {/* Request and Offer buttons - Moved to the right */}
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('need')}
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Request
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('offer')} 
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Offer
-        </Button>
       </div>
 
       {/* Dialog */}
