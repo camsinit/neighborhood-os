@@ -16,7 +16,6 @@ export type ModuleThemeColor =
   | 'calendar'
   | 'skills'
   | 'goods'
-  | 'freebies' // Added this to support the freebies module
   | 'safety'
   | 'care'
   | 'neighbors';

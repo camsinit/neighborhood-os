@@ -9,7 +9,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * FeatureNavigation component
  * 
  * Displays the feature navigation items with their respective theme colors
- * Order: Calendar, Skills, Freebies, Safety, Neighbors
+ * Order: Calendar, Skills, Items, Safety, Neighbors
  */
 const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
@@ -34,9 +34,9 @@ const FeatureNavigation = () => {
     },
     { 
       icon: Gift, 
-      label: "Freebies", 
-      href: "/freebies", // Make sure this links to /freebies, not /goods
-      color: moduleThemeColors.freebies ? moduleThemeColors.freebies.primary : moduleThemeColors.goods.primary
+      label: "Items", 
+      href: "/goods", 
+      color: moduleThemeColors.goods.primary
     },
     { 
       icon: Shield, 
@@ -56,10 +56,8 @@ const FeatureNavigation = () => {
     <div className="space-y-1">
       {featureNavItems.map((item) => {
         // Check if current path matches this nav item
-        // Add special handling for /goods path to highlight the Freebies item
         const isActive = location.pathname === item.href || 
-                        location.pathname.startsWith(item.href + '/') ||
-                        (item.href === '/freebies' && location.pathname === '/goods');
+                        location.pathname.startsWith(item.href + '/');
         return (
           <Link key={item.href} to={item.href}>
             <Button

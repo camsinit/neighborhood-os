@@ -1,3 +1,4 @@
+
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -11,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
-import { HighlightableItemType } from "@/utils/highlightNavigation";
+import { HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type
 
 /**
  * The notification icon/popover. Now it's smart about querying the broadcast notification list,
@@ -27,7 +28,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
 
   const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  const handleItemClick = (notificationType: HighlightableItemType, id: string) => {
+  const handleItemClick = (notificationType: HighlightableItemType, id: string) => { // Use the proper type
     const event = new CustomEvent('openItemDialog', {
       detail: { type: notificationType, id }
     });
@@ -105,7 +106,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
                 key={notification.id}
                 title={notification.title}
                 itemId={notification.id}
-                type={notification.notification_type as HighlightableItemType}
+                type={notification.notification_type as HighlightableItemType} // Cast to HighlightableItemType
                 isRead={notification.is_read}
                 isArchived={notification.is_archived}
                 context={notification.context}
