@@ -92,7 +92,7 @@ const SkillsHeader = ({
           }}
           className="w-auto"
         >
-          <TabsList className="bg-gray-100 p-1">
+          <TabsList className="bg-gray-100 p-1 rounded-full">
             <TabsTrigger 
               value="offers" 
               className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full"
@@ -101,7 +101,7 @@ const SkillsHeader = ({
             </TabsTrigger>
             <TabsTrigger 
               value="requests" 
-              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full"
+              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full text-gray-600"
             >
               Requests
             </TabsTrigger>
