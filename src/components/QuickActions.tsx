@@ -1,9 +1,12 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
+import ModuleButton from "./ui/module-button";
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 /**
  * QuickActions component displays common actions for users to interact with the community.
@@ -14,7 +17,7 @@ import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
  * - Sharing or requesting skills
  * - Adding safety updates
  * 
- * Now displayed as a 3-column grid at the top of the homepage
+ * Now organized into columns by module type for better usability
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -24,9 +27,8 @@ const QuickActions = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<string | undefined>();
 
-  // All actions in a single array for a more flexible grid layout
-  const allActions = [
-    // Goods actions (orange)
+  // Goods/Items actions (orange theme)
+  const goodsActions = [
     { 
       icon: Package, 
       label: "Share an item", 
@@ -35,7 +37,7 @@ const QuickActions = () => {
         setRequestView('goods');
         setIsAddRequestOpen(true);
       },
-      className: "text-[#F97316] border-[#F97316]"
+      moduleTheme: 'goods' as const
     },
     { 
       icon: Package, 
@@ -45,45 +47,82 @@ const QuickActions = () => {
         setRequestView('goods');
         setIsAddRequestOpen(true);
       },
-      className: "text-[#F97316] border-[#F97316]"
-    },
-    
-    // Skills actions (purple)
+      moduleTheme: 'goods' as const
+    }
+  ];
+  
+  // Skills actions (green theme)
+  const skillsActions = [
     { 
       icon: Wrench, 
-      label: "Share a Skill", 
+      label: "Share a skill", 
       onClick: () => {
         setInitialRequestType("offer");
         setRequestView('skills');
         setIsAddRequestOpen(true);
       },
-      className: "text-[#9b87f5] border-[#9b87f5]"
+      moduleTheme: 'skills' as const
     },
     { 
       icon: HelpCircle, 
-      label: "Request a Skill", 
+      label: "Request a skill", 
       onClick: () => {
         setInitialRequestType("need");
         setRequestView('skills');
         setIsAddRequestOpen(true);
       },
-      className: "text-[#9b87f5] border-[#9b87f5]"
-    },
-    
-    // Other actions (blue and red)
+      moduleTheme: 'skills' as const
+    }
+  ];
+  
+  // Events & Safety actions (blue and red themes)
+  const otherActions = [
     { 
       icon: Calendar, 
       label: "Add Event", 
       onClick: () => setIsAddEventOpen(true),
-      className: "text-[#0EA5E9] border-[#0EA5E9]"
+      moduleTheme: 'calendar' as const
     },
     { 
       icon: AlertTriangle, 
       label: "Add Safety Update", 
       onClick: () => setIsSafetyUpdateOpen(true),
-      className: "text-[#EA384C] border-[#EA384C]"
+      moduleTheme: 'safety' as const
     }
   ];
+
+  /**
+   * ActionColumn component for displaying a column of actions with a header
+   * This helps organize actions by their module type
+   */
+  const ActionColumn = ({ 
+    title, 
+    actions 
+  }: { 
+    title: string, 
+    actions: typeof goodsActions 
+  }) => (
+    <div className="flex flex-col gap-2">
+      {/* Column heading */}
+      <h3 className="text-sm font-medium text-gray-700 mb-1">{title}</h3>
+      
+      {/* Actions in this column */}
+      <div className="space-y-2">
+        {actions.map(action => (
+          <ModuleButton
+            key={action.label}
+            moduleTheme={action.moduleTheme}
+            variant="outline"
+            className="w-full justify-start"
+            onClick={action.onClick}
+          >
+            <action.icon className="h-4 w-4 mr-2" />
+            <span className="text-xs">{action.label}</span>
+          </ModuleButton>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full">
@@ -95,21 +134,11 @@ const QuickActions = () => {
         </p>
       </div>
 
-      {/* Fixed 3-column grid for all actions with smaller buttons */}
+      {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-4">
-        {allActions.map(action => (
-          <Button 
-            key={action.label} 
-            variant="outline" 
-            className={`flex items-center justify-center h-12 py-1 border-2 bg-transparent hover:bg-transparent ${action.className}`} 
-            onClick={action.onClick}
-          >
-            <div className="flex items-center">
-              <action.icon className="h-4 w-4 mr-2" />
-              <span className="text-xs">{action.label}</span>
-            </div>
-          </Button>
-        ))}
+        <ActionColumn title="Items" actions={goodsActions} />
+        <ActionColumn title="Skills" actions={skillsActions} />
+        <ActionColumn title="Events & Safety" actions={otherActions} />
       </div>
 
       {/* Dialog components */}
