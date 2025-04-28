@@ -13,7 +13,7 @@ import { getModuleThemeColor } from "@/theme/moduleTheme";
  * @param variant - Button variant (filled or outline)
  */
 interface ModuleButtonProps extends Omit<ButtonProps, 'variant'> {
-  moduleTheme: 'calendar' | 'skills' | 'goods' | 'safety' | 'care' | 'neighbors';
+  moduleTheme: 'calendar' | 'skills' | 'goods' | 'safety' | 'neighbors';
   variant?: 'filled' | 'outline';
 }
 

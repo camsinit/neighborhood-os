@@ -34,7 +34,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
     });
     window.dispatchEvent(event);
 
-    if (notificationType === 'event' || notificationType === 'support') {
+    if (notificationType === 'event') {
       toast({
         title: "Navigating to item",
         description: "The relevant section has been highlighted for you.",
@@ -42,9 +42,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
       });
 
       setTimeout(() => {
-        const section = notificationType === 'event' ? 
-          document.querySelector('.calendar-container') : 
-          document.querySelector('.mutual-support-container');
+        const section = document.querySelector('.calendar-container');
         
         if (section) {
           section.classList.add('highlight-section');

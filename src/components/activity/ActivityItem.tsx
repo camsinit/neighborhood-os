@@ -1,3 +1,4 @@
+
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -63,14 +64,6 @@ const getActivityBadgeLabel = (activityType: string): string => {
     case 'good_requested':
       return 'Item Request';
       
-    // Care activities
-    case 'care_offered':
-      return 'Care Offered';
-    case 'care_requested':
-      return 'Care Request';
-    case 'care_completed':
-      return 'Care Complete';
-      
     // Safety activities
     case 'safety_update':
       return 'Safety Update';
@@ -112,7 +105,6 @@ const ActivityItem = ({
       case 'skill': return 'skills';
       case 'event': return 'event';
       case 'good': return 'goods';
-      case 'care': return 'support';
       case 'safety': return 'safety';
       default: return 'event'; // Default fallback
     }

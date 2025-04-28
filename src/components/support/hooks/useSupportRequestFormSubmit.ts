@@ -53,7 +53,6 @@ export const useSupportRequestFormSubmit = (
         neighborhood_id: neighborhoodData.id,
         image_url: formData.imageUrl,
         // Include additional fields if they exist
-        care_category: formData.care_category,
         goods_category: formData.goods_category,
         urgency: formData.urgency,
         skill_category: formData.skill_category,
@@ -94,12 +93,9 @@ export const useSupportRequestFormSubmit = (
         refreshEvents.goods();
       } else if (formData.category === 'skills') {
         refreshEvents.skills();
-      } else if (formData.category === 'care') {
-        refreshEvents.care();
       } else {
-        // Generic refresh for other types - we don't have a specific "support" event
-        // Using a common refresh event instead
-        refreshEvents.goods(); // Using goods as a fallback
+        // Generic refresh for other types - using goods as a fallback
+        refreshEvents.goods();
       }
 
       // Close the form

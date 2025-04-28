@@ -50,15 +50,6 @@ export const getNotificationStyle = (type: HighlightableItemType): NotificationS
         borderColor: "border-blue-500"
       };
       
-    case "support":
-      return {
-        icon: HelpCircle,
-        textColor: "text-purple-600",
-        backgroundColor: "bg-purple-50",
-        hoverColor: "hover:bg-purple-100",
-        borderColor: "border-purple-500"
-      };
-      
     case "skills":
       return {
         icon: PackageOpen,

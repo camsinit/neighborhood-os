@@ -30,8 +30,6 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
       case "event":
         return <Calendar className="h-5 w-5 text-blue-500" />;
-      case "support":
-        return <MessageSquare className="h-5 w-5 text-purple-500" />;
       case "skills":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "goods":
