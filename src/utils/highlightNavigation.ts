@@ -17,6 +17,7 @@ export type HighlightableItemType =
   | "support"   // Support/care requests 
   | "skills"    // Skills exchange
   | "goods"     // Goods exchange items
+  | "freebies"  // Freebies exchange items (renamed from goods)
   | "neighbors"; // Neighbor profiles
 
 /**
@@ -36,6 +37,7 @@ export const routeMap: Record<HighlightableItemType, string> = {
   support: "/care",
   skills: "/skills",
   goods: "/goods",
+  freebies: "/freebies", // Added freebies route
   neighbors: "/neighbors"
 };
 
@@ -48,6 +50,7 @@ export const dataAttributeMap: Record<HighlightableItemType, string> = {
   support: "data-care-id",
   skills: "data-skill-id", 
   goods: "data-goods-id",
+  freebies: "data-freebies-id", // Added freebies data attribute
   neighbors: "data-neighbor-id"
 };
 
@@ -60,6 +63,7 @@ export const readableTypeNames: Record<HighlightableItemType, string> = {
   support: "Care Request",
   skills: "Skill",
   goods: "Goods Item",
+  freebies: "Freebie Item", // Added freebies readable name
   neighbors: "Neighbor Profile"
 };
 

@@ -29,6 +29,14 @@ export const moduleThemeColors = {
     lightVariable: "--goods-light",
     icon: "Gift"
   },
+  // Add freebies theme colors - using the same colors as goods since it's essentially the same module
+  freebies: {
+    primary: "#F97316", // orange
+    light: "#FFEDD5",
+    variable: "--freebies-color", 
+    lightVariable: "--freebies-light",
+    icon: "Gift"
+  },
   safety: {
     primary: "#EA384C", // red
     light: "#FEE2E2",
