@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 import type {
@@ -6,8 +5,9 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 2000
+const TOAST_LIMIT = 3
+const TOAST_REMOVE_DELAY = 3000 // 3 seconds
+const LOADING_TIMEOUT = 10000 // 10 seconds auto-dismiss for loading toasts
 
 type ToasterToast = ToastProps & {
   id: string
@@ -55,6 +55,11 @@ interface State {
 }
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const loadingToasts = new Map<string, {
+  timeoutId: ReturnType<typeof setTimeout>,
+  toastId: string
+}>();
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
@@ -143,12 +148,28 @@ type Toast = Omit<ToasterToast, "id">
 function toast({ ...props }: Toast) {
   const id = genId()
 
+  // Set up auto-dismiss for loading toasts
+  if (props.variant === 'default' && props.title?.toLowerCase().includes('loading')) {
+    const timeoutId = setTimeout(() => {
+      dismissLoadingToast(id);
+    }, LOADING_TIMEOUT);
+    
+    loadingToasts.set(id, {
+      timeoutId,
+      toastId: id
+    });
+  }
+
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+
+  const dismiss = () => {
+    dismissLoadingToast(id);
+    dispatch({ type: "DISMISS_TOAST", toastId: id })
+  }
 
   dispatch({
     type: "ADD_TOAST",
@@ -186,6 +207,15 @@ function useToast() {
     ...state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+  }
+}
+
+function dismissLoadingToast(toastId: string) {
+  const loadingToast = loadingToasts.get(toastId);
+  if (loadingToast) {
+    clearTimeout(loadingToast.timeoutId);
+    loadingToasts.delete(toastId);
+    dispatch({ type: "DISMISS_TOAST", toastId: loadingToast.toastId });
   }
 }
 

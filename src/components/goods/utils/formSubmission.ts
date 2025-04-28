@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from '@/components/support/types/formTypes';
@@ -167,15 +166,17 @@ export const submitGoodsForm = async (
   mode: 'create' | 'update' | 'delete' = 'create',
   goodsItemId?: string
 ) => {
+  let loadingToastId: string | undefined;
+  
   try {
-    // Make sure we have a neighborhood ID
     if (!neighborhoodId) {
       console.error("Missing neighborhood_id in submission");
       toast.error("There was a problem: Missing neighborhood information");
       return null;
     }
 
-    const loadingToast = toast.loading(
+    // Show loading toast with timeout
+    loadingToastId = toast.loading(
       mode === 'delete' 
         ? "Removing your item..." 
         : mode === 'update' 
@@ -186,44 +187,23 @@ export const submitGoodsForm = async (
     let formattedData, data;
     
     if (mode === 'delete' && goodsItemId) {
-      // Handle deletion
-      const title = isOfferForm ? itemFormData.title : requestFormData.title;
-      
       console.log(`Deleting goods item: ${goodsItemId}`);
       
       const { error, data: deletedData } = await supabase
         .from('goods_exchange')
         .delete()
         .eq('id', goodsItemId)
-        .eq('user_id', userId) // Ensure only the owner can delete
+        .eq('user_id', userId)
         .select();
       
-      if (error) {
-        console.error("Error deleting goods item:", error);
-        toast.error("There was a problem deleting your item.");
-        throw error;
-      }
-      
+      if (error) throw error;
       data = deletedData;
       
-      // Notify the edge function about the deletion
-      if (title) {
-        await notifyGoodsChanges(
-          goodsItemId,
-          'delete',
-          title,
-          userId,
-          isOfferForm ? 'offer' : 'need',
-          neighborhoodId
-        );
-      }
     } else if (mode === 'update' && goodsItemId) {
-      // Handle update
       formattedData = isOfferForm
         ? await formatOfferSubmission(itemFormData, userId)
         : await formatRequestSubmission(requestFormData, userId);
       
-      // Remove the user_id from the update as we don't want to change the owner
       const { user_id, ...updateData } = formattedData;
       
       console.log("Updating goods exchange item:", goodsItemId, updateData);
@@ -232,100 +212,65 @@ export const submitGoodsForm = async (
         .from('goods_exchange')
         .update({ ...updateData, neighborhood_id: neighborhoodId })
         .eq('id', goodsItemId)
-        .eq('user_id', userId) // Ensure only the owner can update
+        .eq('user_id', userId)
         .select();
       
-      if (error) {
-        console.error("Error updating goods form:", error);
-        toast.error("There was a problem updating your item.");
-        throw error;
-      }
-      
+      if (error) throw error;
       data = updatedData;
       
-      // Notify the edge function about the update
-      await notifyGoodsChanges(
-        goodsItemId,
-        'update',
-        formattedData.title,
-        userId,
-        isOfferForm ? 'offer' : 'need',
-        neighborhoodId,
-        isOfferForm ? formattedData.goods_category : undefined,
-        !isOfferForm ? formattedData.urgency : undefined
-      );
     } else {
-      // Handle creation (default)
       formattedData = isOfferForm
-        ? {
-            ...await formatOfferSubmission(itemFormData, userId),
-            neighborhood_id: neighborhoodId
-          }
-        : {
-            ...await formatRequestSubmission(requestFormData, userId),
-            neighborhood_id: neighborhoodId
-          };
+        ? { ...await formatOfferSubmission(itemFormData, userId), neighborhood_id: neighborhoodId }
+        : { ...await formatRequestSubmission(requestFormData, userId), neighborhood_id: neighborhoodId };
       
-      // Add debug logging to ensure neighborhood_id is present
       console.log("Creating goods exchange item:", formattedData);
-      console.log("Neighborhood ID check:", {
-        providedId: neighborhoodId,
-        formattedId: formattedData.neighborhood_id,
-        userId: userId
-      });
       
       const { error, data: insertedData } = await supabase
         .from('goods_exchange')
         .insert(formattedData)
         .select();
       
-      if (error) {
-        console.error("Error submitting goods form:", error);
-        toast.error("There was a problem submitting your item.");
-        throw error;
-      }
-      
+      if (error) throw error;
       data = insertedData;
-      
-      // Notify the edge function about the creation
-      if (data && data.length > 0) {
-        await notifyGoodsChanges(
-          data[0].id,
-          'create',
-          formattedData.title,
-          userId,
-          isOfferForm ? 'offer' : 'need',
-          neighborhoodId,
-          isOfferForm ? formattedData.goods_category : undefined,
-          !isOfferForm ? formattedData.urgency : undefined
-        );
-      }
     }
     
-    console.log("Successfully processed goods item:", data);
-    
-    // Dismiss the loading toast and show a success message
-    toast.dismiss(loadingToast);
-    
-    // Show appropriate success message based on the operation
-    if (mode === 'delete') {
-      toast.success("Your item was successfully removed!");
-    } else if (mode === 'update') {
-      toast.success("Your item was updated successfully!");
-    } else {
-      // Only show one success message with specific wording based on the form type
-      toast.success(isOfferForm ? "Your item was offered successfully!" : "Your request was submitted successfully!");
+    // Dismiss loading toast and show success
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+      loadingToastId = undefined;
     }
     
-    // Trigger a refresh of the goods data by dispatching a custom event
-    console.log("Dispatching goods-form-submitted event");
-    const customEvent = new Event('goods-form-submitted');
-    document.dispatchEvent(customEvent);
+    toast.success(
+      mode === 'delete' 
+        ? "Item removed successfully"
+        : mode === 'update'
+        ? "Item updated successfully"
+        : isOfferForm 
+          ? "Item offered successfully!" 
+          : "Request submitted successfully!"
+    );
+    
+    // Trigger a refresh of the goods data
+    document.dispatchEvent(new Event('goods-form-submitted'));
     
     return data;
+    
   } catch (error) {
     console.error("Error in goods form submission:", error);
+    
+    // Always dismiss loading toast on error
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+      loadingToastId = undefined;
+    }
+    
     toast.error("There was a problem with your request. Please try again.");
     throw error;
+    
+  } finally {
+    // Ensure loading toast is dismissed in all cases
+    if (loadingToastId) {
+      toast.dismiss(loadingToastId);
+    }
   }
 };
