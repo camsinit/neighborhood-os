@@ -7,9 +7,9 @@ import { GoodsSectionsLoadingState } from './states/EmptyAndLoadingStates';
 import { TabsContent } from "@/components/ui/tabs";
 import UrgentGoodsSection from './sections/UrgentGoodsSection';
 import RegularGoodsSection from './sections/RegularGoodsSection';
-import AvailableItemsSection from './AvailableItemsSection';
 import EmptyState from "@/components/ui/empty-state";
 import { PackageSearch, Gift } from "lucide-react";
+import GoodsSearchBar from './GoodsSearchBar';
 
 interface GoodsSectionsProps {
   goodsData: GoodsExchangeItem[];
@@ -65,6 +65,19 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
 
   return (
     <>
+      <GoodsSearchBar 
+        searchQuery={searchQuery}
+        onSearchChange={() => {}}  // Pass the actual handler
+        onRequestItem={onRequestItem}
+        onOfferItem={onOfferItem}
+        activeTab={activeTab}
+        onTabChange={() => {}}  // Pass the actual handler
+        goodsItems={available}
+        onDeleteItem={handleDeleteGoodsItem}
+        isDeletingItem={isDeletingItem}
+        onRefetch={onRefresh}
+      />
+
       <TabsContent value="needs" className="p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg space-y-4">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
@@ -95,27 +108,6 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
               onRequestItem={onRequestItem}
             />
           </>
-        )}
-      </TabsContent>
-
-      <TabsContent value="offers" className="p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
-        {available.length === 0 ? (
-          <EmptyState
-            icon={Gift}
-            title="No Items Available"
-            description="Be the first to share an item with your neighbors"
-            actionLabel="Offer an Item"
-            onAction={onOfferItem}
-          />
-        ) : (
-          <AvailableItemsSection 
-            goodsItems={available}
-            onRequestSelect={onRequestSelect}
-            onNewOffer={onOfferItem}
-            onRefetch={onRefresh}
-            onDeleteItem={handleDeleteGoodsItem}
-            isDeletingItem={isDeletingItem}
-          />
         )}
       </TabsContent>
     </>

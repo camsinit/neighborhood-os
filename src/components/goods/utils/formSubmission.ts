@@ -166,23 +166,21 @@ export const submitGoodsForm = async (
   mode: 'create' | 'update' | 'delete' = 'create',
   goodsItemId?: string
 ) => {
-  let loadingToastId: string | undefined;
-  
+  // Initialize loadingToastId as a string
+  let loadingToastId: string = toast.loading(
+    mode === 'delete' 
+      ? "Removing your item..." 
+      : mode === 'update' 
+        ? "Updating your item..." 
+        : "Submitting your item..."
+  );
+
   try {
     if (!neighborhoodId) {
       console.error("Missing neighborhood_id in submission");
       toast.error("There was a problem: Missing neighborhood information");
       return null;
     }
-
-    // Show loading toast with timeout
-    loadingToastId = toast.loading(
-      mode === 'delete' 
-        ? "Removing your item..." 
-        : mode === 'update' 
-          ? "Updating your item..." 
-          : "Submitting your item..."
-    );
     
     let formattedData, data;
     
@@ -257,20 +255,12 @@ export const submitGoodsForm = async (
     
   } catch (error) {
     console.error("Error in goods form submission:", error);
-    
-    // Always dismiss loading toast on error
-    if (loadingToastId) {
-      toast.dismiss(loadingToastId);
-      loadingToastId = undefined;
-    }
-    
+    toast.dismiss(loadingToastId);
     toast.error("There was a problem with your request. Please try again.");
     throw error;
     
   } finally {
     // Ensure loading toast is dismissed in all cases
-    if (loadingToastId) {
-      toast.dismiss(loadingToastId);
-    }
+    toast.dismiss(loadingToastId);
   }
 };
