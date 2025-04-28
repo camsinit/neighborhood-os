@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { format } from "date-fns";
 import { AlertTriangle, Calendar, CheckCircle, MessageSquare, ShoppingCart, UserPlus } from "lucide-react";
+import { HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type
 
 interface NotificationItemProps {
   notification: BaseNotification & { relevance_score?: number };
@@ -24,7 +25,7 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
 
   // Get icon based on notification type (you can expand this)
   const getTypeIcon = () => {
-    switch (notification.notification_type) {
+    switch (notification.notification_type as HighlightableItemType) { // Cast to HighlightableItemType
       case "safety":
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
       case "event":

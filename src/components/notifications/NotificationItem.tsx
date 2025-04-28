@@ -7,14 +7,14 @@ import { useState } from "react";
 
 interface NotificationItemProps {
   title: string;
-  type: HighlightableItemType; // Changed from string to HighlightableItemType
+  type: HighlightableItemType; // Using HighlightableItemType instead of string
   itemId: string;
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void; 
-  onItemClick: (type: HighlightableItemType, id: string) => void; // Updated parameter type
-  context?: BaseNotification['context'];
+  onItemClick: (type: HighlightableItemType, id: string) => void;
+  context?: BaseNotification['context']; // Using BaseNotification's context type
 }
 
 const NotificationItem = (props: NotificationItemProps) => {
@@ -25,12 +25,12 @@ const NotificationItem = (props: NotificationItemProps) => {
       <SkillNotificationItem 
         title={props.title}
         itemId={props.itemId}
-        context={props.context} // Context is now optional in SkillNotificationItem
+        context={props.context}
         isRead={props.isRead}
         isArchived={props.isArchived}
         onClose={props.onClose}
         onArchive={props.onArchive}
-        onItemClick={(type, id) => props.onItemClick(type as HighlightableItemType, id)} // Type cast for safety
+        onItemClick={(type, id) => props.onItemClick(type as HighlightableItemType, id)}
       />
     );
   }

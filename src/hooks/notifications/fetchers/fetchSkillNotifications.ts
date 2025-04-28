@@ -25,6 +25,7 @@ export interface SkillSession {
 export interface SkillNotification {
   id: string;
   created_at: string;
+  updated_at: string; // Add this missing property
   title: string | null;
   content_id: string;
   content_type: string;
@@ -88,6 +89,7 @@ export const fetchSkillNotifications = async () => {
     .select(`
       id,
       created_at,
+      updated_at, // Make sure we're selecting updated_at from the database
       title,
       content_id,
       content_type,

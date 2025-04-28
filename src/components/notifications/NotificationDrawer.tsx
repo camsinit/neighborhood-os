@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationItem from "./NotificationItem";
+import { HighlightableItemType } from '@/utils/highlightNavigation';
 
 /**
  * A drawer component for notifications that slides in from the right side
@@ -41,7 +42,7 @@ const NotificationDrawer = () => {
    * Navigates to the appropriate page and highlights the item
    */
   const handleItemClick = (
-    notificationType: string,
+    notificationType: HighlightableItemType, // Use HighlightableItemType instead of string
     id: string
   ) => {
     // Create a custom event to notify other components
@@ -116,7 +117,7 @@ const NotificationDrawer = () => {
                 <NotificationItem
                   key={notification.id}
                   title={notification.title}
-                  type={notification.notification_type}
+                  type={notification.notification_type as HighlightableItemType} // Cast to HighlightableItemType
                   itemId={notification.id}
                   isRead={notification.is_read}
                   isArchived={notification.is_archived}

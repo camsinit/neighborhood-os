@@ -1,81 +1,98 @@
 
-import { Bell, Calendar, Shield, HandHelping, Check, Archive, Package, Users } from "lucide-react";
-// Remove incorrect import for NotificationContextType
+/**
+ * This file contains utility functions for notification styles
+ * It defines color schemes and icons for each notification type
+ */
+import { 
+  AlertTriangle, 
+  Calendar, 
+  HelpCircle, 
+  PackageOpen, 
+  ShoppingBag, 
+  UserPlus 
+} from "lucide-react";
+import { HighlightableItemType } from "@/utils/highlightNavigation";
 
-export interface NotificationStyle {
+/**
+ * Interface defining the style properties for different notification types
+ */
+interface NotificationStyle {
+  icon: any;
+  textColor: string;
   backgroundColor: string;
   hoverColor: string;
-  textColor: string;
   borderColor: string;
-  icon: typeof Bell | typeof Calendar | typeof Shield | typeof HandHelping | typeof Package | typeof Users;
-  // New property for badges
-  badgeColor: string;
 }
 
 /**
- * Gets the appropriate style for a notification based on its type
- * Enhanced with more distinctive colors and new badge color property
+ * Returns style properties for a notification based on its type
  * 
  * @param type The notification type
- * @returns An object containing style information
+ * @returns Style properties for the notification
  */
-export const getNotificationStyle = (
-  type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors"
-): NotificationStyle => {
+export const getNotificationStyle = (type: HighlightableItemType): NotificationStyle => {
   switch (type) {
     case "safety":
       return {
+        icon: AlertTriangle,
+        textColor: "text-red-600",
         backgroundColor: "bg-red-50",
         hoverColor: "hover:bg-red-100",
-        textColor: "text-red-700",
-        borderColor: "border-red-200",
-        badgeColor: "bg-red-500",
-        icon: Shield
+        borderColor: "border-red-500"
       };
+      
     case "event":
       return {
-        backgroundColor: "bg-violet-50",
-        hoverColor: "hover:bg-violet-100",
-        textColor: "text-violet-700",
-        borderColor: "border-violet-200",
-        badgeColor: "bg-violet-500",
-        icon: Calendar
-      };
-    case "support":
-      return {
-        backgroundColor: "bg-orange-50",
-        hoverColor: "hover:bg-orange-100",
-        textColor: "text-orange-700",
-        borderColor: "border-orange-200",
-        badgeColor: "bg-orange-500",
-        icon: HandHelping
-      };
-    case "skills":
-      return {
+        icon: Calendar,
+        textColor: "text-blue-600",
         backgroundColor: "bg-blue-50",
         hoverColor: "hover:bg-blue-100",
-        textColor: "text-blue-700",
-        borderColor: "border-blue-200",
-        badgeColor: "bg-blue-500",
-        icon: Bell
+        borderColor: "border-blue-500"
       };
-    case "goods":
+      
+    case "support":
       return {
+        icon: HelpCircle,
+        textColor: "text-purple-600",
+        backgroundColor: "bg-purple-50",
+        hoverColor: "hover:bg-purple-100",
+        borderColor: "border-purple-500"
+      };
+      
+    case "skills":
+      return {
+        icon: PackageOpen,
+        textColor: "text-green-600",
         backgroundColor: "bg-green-50",
         hoverColor: "hover:bg-green-100",
-        textColor: "text-green-700",
-        borderColor: "border-green-200",
-        badgeColor: "bg-green-500",
-        icon: Package
+        borderColor: "border-green-500"
       };
-    case "neighbors":
+      
+    case "goods":
       return {
+        icon: ShoppingBag,
+        textColor: "text-amber-600",
         backgroundColor: "bg-amber-50",
         hoverColor: "hover:bg-amber-100",
-        textColor: "text-amber-700",
-        borderColor: "border-amber-200",
-        badgeColor: "bg-amber-500",
-        icon: Users
+        borderColor: "border-amber-500"
+      };
+      
+    case "neighbors":
+      return {
+        icon: UserPlus,
+        textColor: "text-teal-600",
+        backgroundColor: "bg-teal-50",
+        hoverColor: "hover:bg-teal-100",
+        borderColor: "border-teal-500"
+      };
+      
+    default:
+      return {
+        icon: Calendar,
+        textColor: "text-gray-600",
+        backgroundColor: "bg-gray-50",
+        hoverColor: "hover:bg-gray-100",
+        borderColor: "border-gray-500"
       };
   }
 };
