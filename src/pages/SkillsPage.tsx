@@ -5,7 +5,6 @@ import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
-import GlowingDescriptionBox from "@/components/ui/glowing-description-box";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import SkillRequestsButton from "@/components/skills/SkillRequestsButton";
 
@@ -64,7 +63,7 @@ const SkillsPage = () => {
     <div className="page-gradient skills-gradient">
       <div className="relative z-10">
         <div className="min-h-full w-full">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-100/80 to-purple-200/50 backdrop-blur-sm rounded-lg shadow-sm">
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
               
