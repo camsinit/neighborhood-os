@@ -1,24 +1,25 @@
 
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { format } from 'date-fns';
+import { CalendarDays } from 'lucide-react'; // Import the calendar icon
 import BaseGoodsCard from './BaseGoodsCard';
 
 interface RequestGoodsCardProps {
   request: GoodsExchangeItem;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
   onSelect: () => void;
 }
 
 const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
   request,
-  getUrgencyClass,
-  getUrgencyLabel,
   onSelect
 }) => {
+  // Format the valid_until date if it exists
+  const formattedDate = request.valid_until 
+    ? format(new Date(request.valid_until), 'MMM d, yyyy')
+    : null;
+
   return (
     <BaseGoodsCard onClick={onSelect}>
       {/* Main content container */}
@@ -39,29 +40,16 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center">
-          <Button 
-            variant="ghost"
-            size="sm"
-            className="hover:bg-gray-100"
-          >
-            View Details
-          </Button>
-        </div>
+        {/* Need By Date */}
+        {formattedDate && (
+          <div className="flex items-center gap-1.5 text-sm text-gray-600">
+            <CalendarDays className="h-4 w-4" />
+            <span>Need by {formattedDate}</span>
+          </div>
+        )}
       </div>
-
-      {/* Urgency badge - contained within the card */}
-      {request.urgency && (
-        <div className="absolute top-2 right-2">
-          <Badge className={getUrgencyClass(request.urgency)}>
-            {getUrgencyLabel(request.urgency)}
-          </Badge>
-        </div>
-      )}
     </BaseGoodsCard>
   );
 };
 
 export default RequestGoodsCard;
-

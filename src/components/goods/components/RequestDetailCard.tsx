@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { createContactEmailLink } from '../utils/contactUtils';
+import { format } from 'date-fns';
+import { CalendarDays } from 'lucide-react';
 
 interface RequestDetailCardProps {
   request: GoodsExchangeItem;
@@ -26,19 +28,23 @@ const RequestDetailCard = ({
   isDeletingItem,
   onEdit
 }: RequestDetailCardProps) => {
-  // Get current user to check item ownership
   const currentUser = useUser();
   const isOwner = currentUser && currentUser.id === request.user_id;
+  
+  const formattedDate = request.valid_until 
+    ? format(new Date(request.valid_until), 'MMMM d, yyyy')
+    : null;
   
   return (
     <Card className="border-0 shadow-none relative">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{request.title}</CardTitle>
-          {request.urgency && (
-            <span className={`${getUrgencyClass(request.urgency)} text-xs px-2 py-1 rounded-full ml-2 inline-block`}>
-              {getUrgencyLabel(request.urgency)}
-            </span>
+          {formattedDate && (
+            <div className="text-sm text-gray-600 flex items-center gap-1.5">
+              <CalendarDays className="h-4 w-4" />
+              <span>Need by {formattedDate}</span>
+            </div>
           )}
         </div>
       </CardHeader>

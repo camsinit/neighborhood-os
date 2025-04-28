@@ -9,8 +9,6 @@ interface GoodsRequestCardProps {
   request: GoodsExchangeItem;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
 }
@@ -19,8 +17,6 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   request,
   isOpen,
   onOpenChange,
-  getUrgencyClass,
-  getUrgencyLabel,
   onDeleteItem,
   isDeletingItem = false
 }) => {
@@ -30,8 +26,6 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
         <div className="w-full">
           <RequestGoodsCard
             request={request}
-            getUrgencyClass={getUrgencyClass}
-            getUrgencyLabel={getUrgencyLabel}
             onSelect={() => onOpenChange(true)}
           />
         </div>
@@ -40,8 +34,6 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
       <PopoverContent className="w-[300px] p-0" sideOffset={5}>
         <RequestDetailCard
           request={request}
-          getUrgencyClass={getUrgencyClass}
-          getUrgencyLabel={getUrgencyLabel}
           onDeleteItem={onDeleteItem}
           isDeletingItem={isDeletingItem}
         />
