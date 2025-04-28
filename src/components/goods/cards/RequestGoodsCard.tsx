@@ -25,7 +25,7 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
       <div className="flex-grow flex items-center p-4 gap-4">
         {/* Avatar and content section */}
         <div className="flex items-center gap-3 flex-grow min-w-0">
-          <Avatar className="h-10 w-10 flex-shrink-0">
+          <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={request.profiles?.avatar_url || undefined} />
             <AvatarFallback>
               {request.profiles?.display_name?.[0] || '?'}
@@ -51,7 +51,7 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
         </div>
       </div>
 
-      {/* Urgency badge - now contained within the card */}
+      {/* Urgency badge - contained within the card */}
       {request.urgency && (
         <div className="absolute top-2 right-2">
           <Badge className={getUrgencyClass(request.urgency)}>
@@ -64,3 +64,4 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
 };
 
 export default RequestGoodsCard;
+

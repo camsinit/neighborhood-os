@@ -18,7 +18,8 @@ const BaseGoodsCard: React.FC<BaseGoodsCardProps> = ({
     <div 
       onClick={onClick}
       className={cn(
-        "w-full h-32 flex items-stretch rounded-lg border border-gray-200",
+        // Set fixed height to ensure consistency across all cards
+        "w-full h-24 flex items-stretch rounded-lg border border-gray-200",
         "hover:border-gray-300 bg-white cursor-pointer transition-colors shadow-sm",
         "relative overflow-hidden",
         className
@@ -30,3 +31,4 @@ const BaseGoodsCard: React.FC<BaseGoodsCardProps> = ({
 };
 
 export default BaseGoodsCard;
+

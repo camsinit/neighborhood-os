@@ -32,9 +32,9 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
 
   return (
     <BaseGoodsCard onClick={onClick}>
-      {/* Image section */}
+      {/* Image section with fixed dimensions */}
       {(item.image_url || (item.images && item.images.length > 0)) && (
-        <div className="w-32 h-32 flex-shrink-0">
+        <div className="w-24 h-24 flex-shrink-0">
           <img 
             src={item.image_url || item.images?.[0]} 
             alt={item.title}
@@ -46,7 +46,7 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
       {/* Content section */}
       <div className="flex-grow flex items-center p-4">
         <div className="flex items-center gap-3 flex-grow min-w-0">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={item.profiles?.avatar_url || undefined} />
             <AvatarFallback>
               {item.profiles?.display_name?.[0] || '?'}
@@ -85,3 +85,4 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
 };
 
 export default AvailableGoodsCard;
+
