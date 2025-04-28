@@ -166,14 +166,14 @@ export const submitGoodsForm = async (
   mode: 'create' | 'update' | 'delete' = 'create',
   goodsItemId?: string
 ) => {
-  // Initialize loadingToastId as a string
+  // Initialize loadingToastId with explicit string type and use toString() for toast.loading return value
   let loadingToastId: string = toast.loading(
     mode === 'delete' 
       ? "Removing your item..." 
       : mode === 'update' 
         ? "Updating your item..." 
         : "Submitting your item..."
-  );
+  ).toString();
 
   try {
     if (!neighborhoodId) {

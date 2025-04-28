@@ -28,17 +28,6 @@ interface GoodsSectionsProps {
   onTabChange: (tab: string) => void;
 }
 
-/**
- * GoodsSections component
- * 
- * This component manages the display of different sections of goods items:
- * - Urgent requests (high priority needs)
- * - Regular requests (normal priority needs)
- * - Available items (things neighbors are offering)
- * 
- * It also handles filtering, loading states, and passes appropriate props
- * to each section component.
- */
 const GoodsSections: React.FC<GoodsSectionsProps> = ({
   goodsData = [],
   isLoading,
@@ -69,8 +58,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   }
 
   return (
-    <>
-      {/* Search bar and filter controls */}
+    <div className="space-y-6">
       <GoodsSearchBar 
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
@@ -117,7 +105,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
           </>
         )}
       </TabsContent>
-    </>
+    </div>
   );
 };
 
