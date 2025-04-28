@@ -1,7 +1,6 @@
 
 /* Base styling to match chat aesthetic */
 @tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 /* Import Inter font for consistent typography */

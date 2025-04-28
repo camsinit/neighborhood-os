@@ -1,5 +1,7 @@
 
 /* Typography styles inspired by the chat component */
+@tailwind components;
+
 @layer components {
   .heading-xl {
     @apply text-2xl font-bold tracking-tight;
