@@ -22,7 +22,7 @@ import SkillsPage from './pages/SkillsPage';
 import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
-import CarePage from './pages/CarePage';
+// Removed CarePage import
 import WaitlistAdmin from './pages/WaitlistAdmin';
 
 // Import components
@@ -126,7 +126,7 @@ function App() {
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
-                <Route path="/care" element={<CarePage />} />
+                {/* Removed Care page route */}
                 
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />

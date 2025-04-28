@@ -1,4 +1,3 @@
-
 /**
  * Navigation and Highlighting Utility
  * 
@@ -14,7 +13,6 @@ import { highlightElement } from "@/utils/highlightAnimation";
 export type HighlightableItemType = 
   | "safety"    // Safety updates
   | "event"     // Calendar events
-  | "support"   // Support/care requests 
   | "skills"    // Skills exchange
   | "goods"     // Goods exchange items
   | "neighbors"; // Neighbor profiles
@@ -33,7 +31,6 @@ export interface HighlightItemDetail {
 export const routeMap: Record<HighlightableItemType, string> = {
   safety: "/safety",
   event: "/calendar", 
-  support: "/care",
   skills: "/skills",
   goods: "/goods",
   neighbors: "/neighbors"
@@ -44,8 +41,7 @@ export const routeMap: Record<HighlightableItemType, string> = {
  */
 export const dataAttributeMap: Record<HighlightableItemType, string> = {
   safety: "data-safety-id",
-  event: "data-event-id",
-  support: "data-care-id",
+  event: "data-event-id", 
   skills: "data-skill-id", 
   goods: "data-goods-id",
   neighbors: "data-neighbor-id"
@@ -57,7 +53,6 @@ export const dataAttributeMap: Record<HighlightableItemType, string> = {
 export const readableTypeNames: Record<HighlightableItemType, string> = {
   safety: "Safety Update",
   event: "Event", 
-  support: "Care Request",
   skills: "Skill",
   goods: "Goods Item",
   neighbors: "Neighbor Profile"

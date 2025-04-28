@@ -11,12 +11,10 @@ export type ActivityType =
   | 'skill_requested' 
   | 'good_shared' 
   | 'good_requested' 
-  | 'care_offered' 
-  | 'care_requested' 
   | 'safety_update';
 
 // Define valid content tables for type safety
-export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange' | 'care_requests';
+export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange';
 
 // Define the shape of metadata to ensure type safety
 export interface ActivityMetadata {

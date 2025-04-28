@@ -36,7 +36,6 @@ export const refreshEvents = {
   goods: () => dispatchRefreshEvent('goods-form-submitted'),
   safety: () => dispatchRefreshEvent('safety-update-submitted'),
   events: () => dispatchRefreshEvent('event-submitted'),
-  care: () => dispatchRefreshEvent('care-request-submitted'),
   skills: () => dispatchRefreshEvent('skill-submitted'),
   profile: () => dispatchRefreshEvent('profile-updated'),
 };

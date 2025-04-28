@@ -56,7 +56,7 @@ export const fetchContentTitles = async (
   const fetchPromises: Promise<void>[] = [];
   
   // Type-safe mapping of content types to their tables
-  const validTables: ContentTable[] = ['events', 'safety_updates', 'skills_exchange', 'goods_exchange', 'care_requests'];
+  const validTables: ContentTable[] = ['events', 'safety_updates', 'skills_exchange', 'goods_exchange'];
   
   // Create a promise for each table that has IDs to fetch
   validTables.forEach(table => {

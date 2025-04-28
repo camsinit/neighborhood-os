@@ -36,13 +36,6 @@ export const moduleThemeColors = {
     lightVariable: "--safety-light",
     icon: "Shield"
   },
-  care: {
-    primary: "#7E69AB", // secondary purple
-    light: "#F5F3FF",
-    variable: "--care-color",
-    lightVariable: "--care-light",
-    icon: "Heart"
-  },
   neighbors: {
     primary: "#7E69AB", // secondary purple
     light: "#F5F3FF",

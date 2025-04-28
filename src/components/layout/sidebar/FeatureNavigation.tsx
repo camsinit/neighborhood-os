@@ -17,6 +17,7 @@ const FeatureNavigation = () => {
   
   // Define navigation items with their respective theme colors
   // Each item has a specific color that represents its category
+  // Removed care module from the feature nav items
   const featureNavItems = [
     { 
       icon: Calendar, 
