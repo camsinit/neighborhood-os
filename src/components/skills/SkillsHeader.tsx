@@ -83,7 +83,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Tabs for offers/requests view - styled like Items page */}
+        {/* Tabs for offers/requests view - styled to exactly match the image */}
         <Tabs 
           value={showRequests ? "requests" : "offers"}
           onValueChange={(value) => {
@@ -92,16 +92,17 @@ const SkillsHeader = ({
           }}
           className="w-auto"
         >
-          <TabsList className="bg-gray-100 p-1 rounded-full">
+          {/* Setting bg-slate-100 for the lighter background color shown in the image */}
+          <TabsList className="bg-slate-100 p-1 rounded-full">
             <TabsTrigger 
               value="offers" 
-              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full"
+              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full font-medium"
             >
               Available
             </TabsTrigger>
             <TabsTrigger 
               value="requests" 
-              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full text-gray-600"
+              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full text-slate-500 font-medium"
             >
               Requests
             </TabsTrigger>
