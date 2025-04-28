@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -197,13 +196,6 @@
   );
 }
 
-.safety-gradient::before {
-  background: linear-gradient(to bottom, 
-    hsla(var(--safety-color), 0.15) 0%, 
-    hsla(var(--safety-light), 0.05) 100%
-  );
-}
-
 .skills-gradient::before {
   background: linear-gradient(to bottom, 
     hsla(var(--skills-color), 0.15) 0%, 
@@ -215,6 +207,13 @@
   background: linear-gradient(to bottom, 
     hsla(var(--goods-color), 0.15) 0%, 
     hsla(var(--goods-light), 0.05) 100%
+  );
+}
+
+.safety-gradient::before {
+  background: linear-gradient(to bottom, 
+    hsla(var(--safety-color), 0.15) 0%, 
+    hsla(var(--safety-light), 0.05) 100%
   );
 }
 

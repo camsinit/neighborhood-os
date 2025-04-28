@@ -16,8 +16,8 @@ export const moduleThemeColors = {
     icon: "Calendar"
   },
   skills: {
-    primary: "#9b87f5", // purple
-    light: "#EDE9FE",
+    primary: "#22C55E", // green
+    light: "#DCFCE7",
     variable: "--skills-color",
     lightVariable: "--skills-light",
     icon: "Brain"
