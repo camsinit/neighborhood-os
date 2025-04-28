@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch } from './utils/sectionHelpers';
@@ -71,8 +72,8 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
         onRefetch={onRefresh}
       />
 
-      {/* Needs tab content - removed backdrop-blur-sm and adjusted spacing */}
-      <TabsContent value="needs" className="p-6 bg-white/60 rounded-lg shadow-lg w-full">
+      {/* Needs tab content - reset to minimal styling */}
+      <TabsContent value="needs" className="w-full">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
             icon={PackageSearch}
