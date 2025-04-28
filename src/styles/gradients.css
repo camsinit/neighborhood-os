@@ -15,49 +15,49 @@
 
 /* Module-specific gradient backgrounds */
 .calendar-gradient::before {
-  /* Calendar gradient: Bright blue to very light blue */
+  /* Calendar gradient: Bright blue with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(221.2, 100%, 53.3%, 1) 0%,
+    hsla(221.2, 100%, 53.3%, 0.3) 0%,
     hsla(221.2, 10%, 53.3%, 0.1) 100%
   );
 }
 
 .skills-gradient::before {
-  /* Skills gradient: Vibrant green to very light green */
+  /* Skills gradient: Vibrant green with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(142.1, 100%, 36.3%, 1) 0%,
+    hsla(142.1, 100%, 36.3%, 0.3) 0%,
     hsla(142.1, 10%, 36.3%, 0.1) 100%
   );
 }
 
 .goods-gradient::before {
-  /* Goods gradient: Bright orange to very light orange */
+  /* Goods gradient: Bright orange with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(24.6, 100%, 53.1%, 1) 0%,
+    hsla(24.6, 100%, 53.1%, 0.3) 0%,
     hsla(24.6, 10%, 53.1%, 0.1) 100%
   );
 }
 
 .safety-gradient::before {
-  /* Safety gradient: Bright red to very light red */
+  /* Safety gradient: Bright red with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(0, 100%, 60.2%, 1) 0%,
+    hsla(0, 100%, 60.2%, 0.3) 0%,
     hsla(0, 10%, 60.2%, 0.1) 100%
   );
 }
 
 .care-gradient::before {
-  /* Care gradient: Rich purple to very light purple */
+  /* Care gradient: Rich purple with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(262.1, 100%, 57.8%, 1) 0%,
+    hsla(262.1, 100%, 57.8%, 0.3) 0%,
     hsla(262.1, 10%, 57.8%, 0.1) 100%
   );
 }
 
 .neighbors-gradient::before {
-  /* Neighbors gradient: Rich purple to very light purple */
+  /* Neighbors gradient: Rich purple with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(262.1, 100%, 57.8%, 1) 0%,
+    hsla(262.1, 100%, 57.8%, 0.3) 0%,
     hsla(262.1, 10%, 57.8%, 0.1) 100%
   );
 }
