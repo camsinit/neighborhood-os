@@ -27,7 +27,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
   onDeleteItem,
   isDeletingItem = false,
-  onRefetch,
+  onRefetch
 }) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
@@ -51,13 +51,13 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             onOpenChange={(open) => setOpenPopoverId(open ? item.id : null)}
           >
             <PopoverTrigger asChild>
-              <div className="flex items-center p-4 border-b w-full hover:bg-gray-50 transition-colors">
+              <div className="w-full flex items-stretch border border-gray-200 hover:border-gray-300 bg-white cursor-pointer transition-colors">
                 {(item.image_url || (item.images && item.images.length > 0)) && (
-                  <div className="w-24 h-24 flex-shrink-0 mr-4">
+                  <div className="w-32 h-32 flex-shrink-0">
                     <img 
                       src={item.image_url || item.images?.[0]} 
                       alt={item.title}
-                      className="h-full w-full object-cover rounded"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 )}
@@ -70,8 +70,8 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                         {item.profiles?.display_name?.[0] || '?'}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      <h4 className="font-medium text-gray-900">{item.title}</h4>
+                    <div className="flex flex-col min-w-0">
+                      <h4 className="font-medium text-gray-900 truncate">{item.title}</h4>
                       <p className="text-sm text-gray-500 line-clamp-1">
                         {item.description}
                       </p>
