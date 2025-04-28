@@ -16,13 +16,17 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
   
   return safetyUpdates.map(update => ({
     id: update.id,
+    user_id: update.author_id || "unknown",
     title: update.title,
-    type: "safety" as const,
+    content_type: "safety_updates",
+    content_id: update.id,
+    notification_type: "safety",
     created_at: update.created_at,
+    updated_at: update.created_at, // Fallback if no updated_at
     is_read: update.is_read,
     is_archived: update.is_archived,
     context: {
-      contextType: "safety_alert" as const,
+      contextType: "safety_alert",
       neighborName: update.profiles?.display_name || null,
       avatarUrl: update.profiles?.avatar_url || null
     }

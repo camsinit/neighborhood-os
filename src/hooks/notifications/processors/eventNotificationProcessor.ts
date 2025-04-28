@@ -16,13 +16,17 @@ export const processEventNotifications = (events: any[]): BaseNotification[] => 
   
   return events.map(event => ({
     id: event.id,
+    user_id: event.host_id || "unknown",
     title: event.title,
-    type: "event" as const,
+    content_type: "events",
+    content_id: event.id,
+    notification_type: "event",
     created_at: event.created_at,
+    updated_at: event.created_at, // Fallback if no updated_at
     is_read: event.is_read,
     is_archived: event.is_archived,
     context: {
-      contextType: "event_invite" as const,
+      contextType: "event_invite",
       neighborName: event.profiles?.display_name || null,
       avatarUrl: event.profiles?.avatar_url || null
     }

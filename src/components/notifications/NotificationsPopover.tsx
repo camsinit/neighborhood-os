@@ -27,13 +27,13 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
 
   const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  const handleItemClick = (type: any, id: string) => {
+  const handleItemClick = (notificationType: string, id: string) => {
     const event = new CustomEvent('openItemDialog', {
-      detail: { type, id }
+      detail: { type: notificationType, id }
     });
     window.dispatchEvent(event);
 
-    if (type === 'event' || type === 'support') {
+    if (notificationType === 'event' || notificationType === 'support') {
       toast({
         title: "Navigating to item",
         description: "The relevant section has been highlighted for you.",
@@ -41,7 +41,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
       });
 
       setTimeout(() => {
-        const section = type === 'event' ? 
+        const section = notificationType === 'event' ? 
           document.querySelector('.calendar-container') : 
           document.querySelector('.mutual-support-container');
         
@@ -105,7 +105,7 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
                 key={notification.id}
                 title={notification.title}
                 itemId={notification.id}
-                type={notification.type}
+                type={notification.notification_type}
                 isRead={notification.is_read}
                 isArchived={notification.is_archived}
                 context={notification.context}

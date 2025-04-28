@@ -1,3 +1,4 @@
+
 /**
  * NotificationDrawer Component
  * 
@@ -40,12 +41,12 @@ const NotificationDrawer = () => {
    * Navigates to the appropriate page and highlights the item
    */
   const handleItemClick = (
-    type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors",
+    notificationType: string,
     id: string
   ) => {
     // Create a custom event to notify other components
     const event = new CustomEvent('openItemDialog', {
-      detail: { type, id }
+      detail: { type: notificationType, id }
     });
     window.dispatchEvent(event);
     
@@ -115,7 +116,7 @@ const NotificationDrawer = () => {
                 <NotificationItem
                   key={notification.id}
                   title={notification.title}
-                  type={notification.type}
+                  type={notification.notification_type}
                   itemId={notification.id}
                   isRead={notification.is_read}
                   isArchived={notification.is_archived}

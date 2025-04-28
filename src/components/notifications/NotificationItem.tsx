@@ -7,13 +7,13 @@ import { useState } from "react";
 
 interface NotificationItemProps {
   title: string;
-  type: HighlightableItemType;
+  type: string;
   itemId: string;
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void; 
-  onItemClick: (type: HighlightableItemType, id: string) => void;
+  onItemClick: (type: string, id: string) => void;
   context?: BaseNotification['context'];
 }
 

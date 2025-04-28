@@ -30,10 +30,22 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   // Function to mark all notifications as read
   const markAllAsRead = async () => {
     try {
+      const user = await supabase.auth.getUser();
+      const userId = user.data.user?.id;
+      
+      if (!userId) {
+        toast({
+          title: "Error",
+          description: "User not authenticated",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const { error } = await supabase
         .from('notifications')
         .update({ is_read: true })
-        .eq('user_id', supabase.auth.getUser().then(res => res.data.user?.id))
+        .eq('user_id', userId)
         .eq('is_archived', showArchived);
 
       if (error) throw error;

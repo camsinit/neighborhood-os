@@ -3,8 +3,7 @@
  * This file handles the processing of skill notifications
  * It contains utility functions for transforming skill notification data
  */
-import { BaseNotification } from "../types";
-import { ProfileData } from "../types";
+import { BaseNotification, ProfileData } from "../types";
 import { SkillNotificationItem } from "../fetchers/fetchSkillNotifications";
 
 /**
@@ -21,12 +20,14 @@ export interface SkillSession {
   requester?: {
     display_name?: string;
     avatar_url?: string;
-  };
+  } | null;
   skill?: {
-    title?: string;
-    time_preferences?: string[];
-    availability?: string;
-  };
+    id: string;
+    title: string;
+    description: string;
+    availability: string | null;
+    time_preferences: string[] | null;
+  } | null;
 }
 
 // Define the shape of a notification
@@ -36,11 +37,17 @@ export interface SkillNotification {
   title: string | null;
   content_id: string;
   content_type: string;
-  user_id: string;
-  actor_id: string;
-  metadata: any;
+  notification_type: string;
   is_read: boolean;
   is_archived: boolean;
+  metadata: any;
+  user_id: string;
+  actor_id: string;
+  actor: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 /**
@@ -99,13 +106,18 @@ export const processSkillNotifications = (
       // Map notification data directly
       return {
         id: item.id,
+        user_id: item.user_id,
+        actor_id: item.actor_id,
         title: item.title || "Skill notification",
-        type: "skills" as const,
+        content_type: item.content_type,
+        content_id: item.content_id,
+        notification_type: item.notification_type,
         created_at: item.created_at,
+        updated_at: item.created_at, // Fallback if no updated_at
         is_read: item.is_read || false,
         is_archived: item.is_archived || false,
         context: {
-          contextType: "skill_request" as const,
+          contextType: "skill_request",
           neighborName: actorProfile?.display_name || item.metadata?.requesterName || null,
           avatarUrl: actorProfile?.avatar_url || item.metadata?.requesterAvatar || null,
           skillRequestData: {
@@ -137,13 +149,18 @@ export const processSkillNotifications = (
       
       return {
         id: item.id,
+        user_id: item.provider_id,
+        actor_id: item.requester_id,
         title: item.skill?.title || "New skill request",
-        type: "skills" as const,
+        content_type: "skill_session",
+        content_id: item.skill_id,
+        notification_type: "skills",
         created_at: item.created_at,
+        updated_at: item.created_at, // Fallback if no updated_at
         is_read: false,
         is_archived: false,
         context: {
-          contextType: "skill_request" as const,
+          contextType: "skill_request",
           neighborName: requesterProfile?.display_name || null,
           avatarUrl: requesterProfile?.avatar_url || null,
           skillRequestData: {
@@ -165,15 +182,19 @@ export const processSkillNotifications = (
       console.warn("[processSkillNotifications] Unrecognized item format:", item);
       return {
         id: typeof item === 'object' && item !== null ? String(item.id || 'unknown') : 'unknown',
+        user_id: "unknown",
         title: "Unknown notification",
-        type: "skills" as const,
+        content_type: "unknown",
+        content_id: typeof item === 'object' && item !== null ? String(item.id || 'unknown') : 'unknown',
+        notification_type: "skills",
         created_at: typeof item === 'object' && item !== null ? 
           String(item.created_at || new Date().toISOString()) : 
           new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         is_read: false,
         is_archived: false,
         context: {
-          contextType: "skill_request" as const,
+          contextType: "skill_request",
           neighborName: null,
           avatarUrl: null
         }

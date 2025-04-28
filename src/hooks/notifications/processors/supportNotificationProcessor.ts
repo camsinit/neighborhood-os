@@ -16,13 +16,17 @@ export const processSupportNotifications = (supportRequests: any[]): BaseNotific
   
   return supportRequests.map(request => ({
     id: request.id,
+    user_id: request.user_id || "unknown",
     title: request.title,
-    type: "support" as const,
+    content_type: "support_requests",
+    content_id: request.id,
+    notification_type: "support",
     created_at: request.created_at,
+    updated_at: request.created_at, // Fallback if no updated_at
     is_read: request.is_read,
     is_archived: request.is_archived,
     context: {
-      contextType: "help_request" as const,
+      contextType: "help_request",
       neighborName: request.profiles?.display_name || null,
       avatarUrl: request.profiles?.avatar_url || null
     }

@@ -3,8 +3,7 @@
  * This file handles the processing of goods notifications
  * It contains utility functions for transforming goods notification data
  */
-import { BaseNotification } from "../types";
-import { ProfileData } from "../types";
+import { BaseNotification, ProfileData } from "../types";
 
 /**
  * Processes goods exchange notifications
@@ -24,13 +23,17 @@ export const processGoodsNotifications = (
     
     return {
       id: item.id,
+      user_id: item.user_id || "unknown",
       title: item.title,
-      type: "goods" as const,
+      content_type: "goods_exchange",
+      content_id: item.id,
+      notification_type: "goods",
       created_at: item.created_at,
+      updated_at: item.created_at, // Fallback if no updated_at
       is_read: item.is_read,
       is_archived: item.is_archived,
       context: {
-        contextType: item.request_type === "offer" ? "goods_offer" as const : "goods_request" as const,
+        contextType: item.request_type === "offer" ? "goods_offer" : "goods_request",
         neighborName: userProfile.display_name || null,
         avatarUrl: userProfile.avatar_url || null
       }

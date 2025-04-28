@@ -1,3 +1,4 @@
+
 export interface BaseNotification {
   id: string;
   user_id: string;
@@ -17,6 +18,22 @@ export interface BaseNotification {
     [key: string]: any;
   };
   relevance_score?: number; // Add relevance_score property
+  type?: string; // Add type property for compatibility with existing code
 }
 
 export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support";
+
+// Add ProfileData type to fix imports
+export interface ProfileData {
+  id: string;
+  display_name?: string;
+  avatar_url?: string;
+}
+
+// Add NotificationContext and NotificationContextType for compatibility
+export interface NotificationContext {
+  notifications: BaseNotification[];
+  refetch: () => void;
+}
+
+export type NotificationContextType = React.Context<NotificationContext>;

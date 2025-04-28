@@ -6,8 +6,6 @@
 import {
   useNotifications,
   BaseNotification,
-  NotificationContext,
-  NotificationContextType
 } from "./useNotifications";
 
 import {
@@ -27,6 +25,4 @@ export {
 
 export type {
   BaseNotification,
-  NotificationContext,
-  NotificationContextType
 };
