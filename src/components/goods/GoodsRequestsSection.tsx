@@ -1,3 +1,4 @@
+
 // Import React dependencies and types
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
@@ -87,6 +88,5 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   );
 };
 
-// Export the component and the helper function
-export { createContactEmailLink };
+// Export only the component (createContactEmailLink is already exported above)
 export default GoodsRequestsSection;
