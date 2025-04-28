@@ -13,12 +13,12 @@ const MainNavigation = () => {
   // Get current location to determine which nav item is active
   const location = useLocation();
   
-  // Main navigation item (Home/Dashboard) - This is the main entry point
+  // Main navigation item (Home) - This is the main entry point
   const mainNavItems = [
     { 
       icon: Home, 
       label: "Home", 
-      href: "/home" // Updated to use /home path directly
+      href: "/home" // Standardized to use /home path
     }
   ];
 

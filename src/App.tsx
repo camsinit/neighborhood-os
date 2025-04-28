@@ -130,11 +130,11 @@ function App() {
                 
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
-                
-                {/* Redirects */}
-                <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               </Route>
 
+              {/* Redirect /dashboard to /home for backward compatibility */}
+              <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+              
               {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

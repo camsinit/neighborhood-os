@@ -64,9 +64,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  // Handle special case for join pages to avoid infinite loops
+  // Handle special cases for join pages to avoid infinite loops
   const isJoinPage = location.pathname === '/join' || location.pathname.startsWith('/join/');
-  const isHomePage = location.pathname === '/home' || location.pathname === '/dashboard';
+  const isHomePage = location.pathname === '/home'; // Simplified home page check
   
   // If user has no neighborhood and trying to access a page that requires one,
   // redirect to join page - except for the join page itself and home page to avoid loops
