@@ -22,7 +22,8 @@ export interface BaseNotification {
   notification_type_display?: string; // Optional display name
 }
 
-export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors";
+// Use the HighlightableItemType from the highlightNavigation file
+// We'll import it directly from there instead of redefining it here
 
 // Add ProfileData type to fix imports
 export interface ProfileData {

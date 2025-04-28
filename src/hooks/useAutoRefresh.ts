@@ -17,9 +17,19 @@ export const useAutoRefresh = (
   eventNames: string[],
   refreshDelay: number = 500
 ) => {
-  const queryClient = useQueryClient();
+  // Try to get the QueryClient, but don't throw if unavailable
+  let queryClient;
+  try {
+    queryClient = useQueryClient();
+  } catch (error) {
+    console.error("QueryClient not available, auto-refresh will not work:", error);
+    return; // Exit early if QueryClient isn't available
+  }
   
   useEffect(() => {
+    // Only set up listeners if queryClient is available
+    if (!queryClient) return;
+    
     // Create a handler function for the events
     const handleRefresh = (event: Event) => {
       console.log(`Event "${event.type}" triggered, refreshing queries: ${queryKeys.join(', ')}`);
