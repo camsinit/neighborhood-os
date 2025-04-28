@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, Heart, Gift, Brain, Shield, Users } from "lucide-react";
+import { Calendar, Gift, Brain, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * FeatureNavigation component
  * 
  * Displays the feature navigation items with their respective theme colors
- * The order has been updated as requested and each item has a unique color
+ * Order: Calendar, Skills, Items, Safety, Neighbors
  */
 const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
@@ -16,7 +16,6 @@ const FeatureNavigation = () => {
   
   // Define navigation items with their respective theme colors
   // Each item has a specific color that represents its category
-  // Order has been changed as requested: Calendar, Skills, Goods, Care, Safety, Neighbors
   const featureNavItems = [
     { 
       icon: Calendar, 
@@ -32,15 +31,9 @@ const FeatureNavigation = () => {
     },
     { 
       icon: Gift, 
-      label: "Items", // Updated from "Stuff" to "Items"
+      label: "Items", 
       href: "/goods", 
-      color: "#F97316" // Items (formerly Goods) uses an orange theme
-    },
-    { 
-      icon: Heart, 
-      label: "Care", 
-      href: "/care", 
-      color: "#22C55E" // Care uses a green theme
+      color: "#F97316" // Items uses an orange theme
     },
     { 
       icon: Shield, 
@@ -73,9 +66,8 @@ const FeatureNavigation = () => {
             >
               <item.icon 
                 className="h-5 w-5" 
-                color={item.color} // Apply the theme color to the icon
+                color={item.color}
                 style={{
-                  // Add a subtle transition effect on the icon
                   transition: 'transform 0.2s ease-in-out'
                 }}
               />
