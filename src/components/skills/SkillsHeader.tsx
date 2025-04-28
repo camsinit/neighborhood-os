@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Grid2x2, ArrowLeft } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Changed from ToggleGroup to Tabs
 
 /**
  * Props for the SkillsHeader component
@@ -83,31 +83,30 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Toggle group for offers/requests view - styled like Items page */}
-        <ToggleGroup 
-          type="single" 
-          defaultValue={showRequests ? "requests" : "offers"} 
-          className="bg-gray-100 rounded-md p-1"
+        {/* Tabs for offers/requests view - styled like Items page */}
+        <Tabs 
+          value={showRequests ? "requests" : "offers"}
           onValueChange={(value) => {
-            // Only change state if a value is selected (prevents deselection)
-            if (value) {
-              setShowRequests(value === "requests");
-            }
+            // Only change state if a value is selected
+            setShowRequests(value === "requests");
           }}
+          className="w-auto"
         >
-          <ToggleGroupItem 
-            value="offers" 
-            className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm rounded-md"
-          >
-            Offers
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="requests" 
-            className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm rounded-md"
-          >
-            Requests
-          </ToggleGroupItem>
-        </ToggleGroup>
+          <TabsList className="bg-gray-100 p-1">
+            <TabsTrigger 
+              value="offers" 
+              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full"
+            >
+              Available
+            </TabsTrigger>
+            <TabsTrigger 
+              value="requests" 
+              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full"
+            >
+              Requests
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
     </div>
   );

@@ -32,6 +32,11 @@ const categoryIcons = {
  * - Offer or request skills via dialog forms
  */
 const SkillsPage = () => {
+  // Log version info to help with debugging
+  useEffect(() => {
+    console.log("[SkillsPage] Component mounted, version: 2025-04-28 updated");
+  }, []);
+  
   // State for controlling page views and filters
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
