@@ -7,8 +7,6 @@ interface RegularGoodsSectionProps {
   requests: GoodsExchangeItem[];
   urgentRequests: GoodsExchangeItem[];
   onRequestSelect: (request: GoodsExchangeItem) => void;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem: boolean;
   showRequests: boolean;
@@ -19,8 +17,6 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   requests,
   urgentRequests,
   onRequestSelect,
-  getUrgencyClass,
-  getUrgencyLabel,
   onDeleteItem,
   isDeletingItem,
   showRequests
@@ -37,8 +33,6 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
         goodsRequests={requests} 
         urgentRequests={urgentRequests} 
         onRequestSelect={onRequestSelect} 
-        getUrgencyClass={getUrgencyClass} 
-        getUrgencyLabel={getUrgencyLabel} 
         onDeleteItem={onDeleteItem}
         isDeletingItem={isDeletingItem}
       />

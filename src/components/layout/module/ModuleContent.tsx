@@ -18,8 +18,9 @@ const ModuleContent = ({
 }: ModuleContentProps) => {
   return (
     <div className="min-h-full w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={cn("py-8", className)}>
+      {/* This div will have the gradient applied based on theme color in ModuleContainer */}
+      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)}>
+        <div className="py-8">
           {children}
         </div>
       </div>

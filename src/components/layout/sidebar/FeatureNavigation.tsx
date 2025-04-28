@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Calendar, Gift, Brain, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 /**
  * FeatureNavigation component
@@ -21,31 +22,33 @@ const FeatureNavigation = () => {
       icon: Calendar, 
       label: "Calendar", 
       href: "/calendar", 
-      color: "#0EA5E9" // Calendar uses a bright blue theme
+      // Using moduleThemeColors to ensure consistent colors across the app
+      color: moduleThemeColors.calendar.primary
     },
     { 
       icon: Brain, 
       label: "Skills", 
       href: "/skills", 
-      color: "#9b87f5" // Skills uses a purple theme
+      // Updated to green from moduleThemeColors
+      color: moduleThemeColors.skills.primary
     },
     { 
       icon: Gift, 
       label: "Items", 
       href: "/goods", 
-      color: "#F97316" // Items uses an orange theme
+      color: moduleThemeColors.goods.primary
     },
     { 
       icon: Shield, 
       label: "Safety", 
       href: "/safety", 
-      color: "#EA384C" // Safety uses a red theme
+      color: moduleThemeColors.safety.primary
     },
     { 
       icon: Users,
       label: "Neighbors",
       href: "/neighbors",
-      color: "#7E69AB" // Neighbors uses a secondary purple theme
+      color: moduleThemeColors.neighbors.primary
     },
   ];
 

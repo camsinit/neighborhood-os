@@ -56,8 +56,6 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             <PopoverContent className="w-[300px] p-0" sideOffset={5}>
               <RequestDetailCard
                 request={item}
-                getUrgencyClass={() => ''}
-                getUrgencyLabel={() => ''}
                 onDeleteItem={onDeleteItem}
                 isDeletingItem={isDeletingItem}
                 onEdit={() => handleEdit(item)}
