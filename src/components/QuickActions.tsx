@@ -113,19 +113,19 @@ const QuickActions = () => {
       {/* Column heading with colored accent */}
       <h3 
         className="text-sm font-semibold mb-2 pb-1 border-b-2" 
-        style={{ borderColor: moduleThemeColors[moduleType].primary }}
+        style={{ borderColor: moduleThemeColors[moduleType].light }}
       >
         {title}
       </h3>
       
-      {/* Actions in this column with enhanced styling */}
+      {/* Actions in this column with enhanced styling but less saturated colors */}
       <div className="space-y-3">
         {actions.map(action => (
           <ModuleButton
             key={action.label}
             moduleTheme={action.moduleTheme}
-            variant="filled"
-            className="w-full justify-start text-white shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]"
+            variant="pastel"  // Changed from "filled" to "pastel" for less saturated colors
+            className="w-full justify-start shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]"
             onClick={action.onClick}
           >
             <action.icon className="h-5 w-5 mr-2" />
