@@ -1,4 +1,3 @@
-
 /* Base styling to match chat aesthetic */
 @tailwind base;
 @tailwind utilities;
@@ -39,23 +38,23 @@
     
     --radius: 0.75rem;
     
-    /* Section-specific color variables */
-    --calendar-color: 221.2 83.2% 53.3%;
-    --calendar-light: 221.2 83.2% 96%;
+    /* Section-specific color variables - updated with full saturation values */
+    --calendar-color: 221.2 100% 53.3%;
+    --calendar-light: 221.2 10% 96%;
     
-    --safety-color: 0 84.2% 60.2%;
-    --safety-light: 0 84.2% 96%;
+    --skills-color: 142.1 100% 36.3%;
+    --skills-light: 142.1 10% 96%;
     
-    --skills-color: 142.1 76.2% 36.3%;
-    --skills-light: 142.1 76.2% 96%;
+    --goods-color: 24.6 100% 53.1%;
+    --goods-light: 24.6 10% 96%;
     
-    --goods-color: 24.6 95% 53.1%;
-    --goods-light: 24.6 95% 96%;
+    --safety-color: 0 100% 60.2%;
+    --safety-light: 0 10% 96%;
     
-    --care-color: 262.1 83.3% 57.8%;
-    --care-light: 262.1 83.3% 96%;
+    --care-color: 262.1 100% 57.8%;
+    --care-light: 262.1 10% 96%;
     
-    --neighbors-color: 262.1 83.3% 57.8%;
-    --neighbors-light: 262.1 83.3% 96%;
+    --neighbors-color: 262.1 100% 57.8%;
+    --neighbors-light: 262.1 10% 96%;
   }
 }
