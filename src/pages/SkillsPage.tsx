@@ -8,9 +8,11 @@ import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import ModuleLayout from "@/components/layout/ModuleLayout";
-import { Button } from "@/components/ui/button"; // Import Button component
-import AddSupportRequestDialog from "@/components/AddSupportRequestDialog"; // Import dialog
+import { Button } from "@/components/ui/button";
+import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
+import { toast } from "sonner"; // Import toast for notification
 
+// Object mapping skill categories to their respective icons
 const categoryIcons = {
   creative: Palette,
   trade: Wrench,
@@ -27,31 +29,44 @@ const categoryIcons = {
  * - Search for specific skills
  * - Toggle between different views
  * - Access skill requests
+ * - Offer or request skills via dialog forms
  */
 const SkillsPage = () => {
+  // State for controlling page views and filters
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showRequests, setShowRequests] = useState(false);
   
-  // Add state for the dialog control
+  // State for dialog control - offering or requesting skills
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
 
+  // Set up event listener for navigation highlighting
   useEffect(() => {
+    // Create a handler for the highlightItem event to mark this page as active
     const handleHighlightItem = createHighlightListener("skills");
     
+    // Add the event listener when component mounts
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
+    
+    // Log to help debug version issues
+    console.log("[SkillsPage] Component mounted, version: 2025-04-28");
+    
+    // Clean up event listener when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+      console.log("[SkillsPage] Component unmounted");
     };
   }, []);
 
+  // Handles selecting a specific skill category
   const handleCategoryClick = (category: SkillCategory) => {
     setSelectedCategory(category);
     setShowCategories(false);
   };
 
+  // Toggles between category view and list view
   const handleViewChange = () => {
     setShowCategories(!showCategories);
     if (showCategories) {
@@ -61,6 +76,7 @@ const SkillsPage = () => {
     }
   };
 
+  // Helper to get the appropriate icon for a category
   const getCategoryIcon = (category: SkillCategory | null) => {
     if (!category) return BookOpen;
     return categoryIcons[category] || BookOpen;
@@ -68,6 +84,8 @@ const SkillsPage = () => {
   
   // Function to open the dialog for adding skills
   const openSkillDialog = (mode: 'offer' | 'need') => {
+    // Notify user we're opening the dialog with a quick toast
+    toast.info(mode === 'offer' ? "Ready to share your skills!" : "Looking for help with something?");
     setDialogMode(mode);
     setIsAddSkillOpen(true);
   };
@@ -78,7 +96,7 @@ const SkillsPage = () => {
       themeColor="skills"
       description="Share your expertise and learn from others. Connect with neighbors to exchange skills, teach, learn, and grow together as a community."
     >
-      {/* Modified header section with buttons on the right */}
+      {/* Main header section with icon, title and action buttons */}
       <div className="mb-6 flex items-center justify-between">
         {/* Left side - Icon and title */}
         <div className="flex items-center">
@@ -112,6 +130,7 @@ const SkillsPage = () => {
         </div>
       </div>
 
+      {/* Search, filters and view toggles */}
       <SkillsHeader 
         showCategories={showCategories}
         onViewChange={handleViewChange}
@@ -122,6 +141,7 @@ const SkillsPage = () => {
         openSkillDialog={openSkillDialog}
       />
       
+      {/* Main content - either categories or list of skills */}
       {showCategories ? (
         <CategoryView onCategoryClick={handleCategoryClick} />
       ) : (
@@ -132,7 +152,7 @@ const SkillsPage = () => {
         />
       )}
       
-      {/* Dialog moved to the page level */}
+      {/* Dialog for adding new skills */}
       <AddSupportRequestDialog
         open={isAddSkillOpen}
         onOpenChange={setIsAddSkillOpen}

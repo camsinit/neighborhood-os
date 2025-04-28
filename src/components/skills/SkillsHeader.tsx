@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Grid2x2, ArrowLeft } from "lucide-react";
-import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
-import AddSupportRequestDialog from "../AddSupportRequestDialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+/**
+ * Props for the SkillsHeader component
+ */
 interface SkillsHeaderProps {
   showCategories: boolean;
   onViewChange: () => void;
@@ -14,7 +15,7 @@ interface SkillsHeaderProps {
   setSearchQuery: (query: string) => void;
   showRequests: boolean;
   setShowRequests: (show: boolean) => void;
-  // Add new props to pass the dialog functions
+  // Function to open the skill dialog
   openSkillDialog: (mode: 'offer' | 'need') => void;
 }
 
@@ -22,7 +23,7 @@ interface SkillsHeaderProps {
  * SkillsHeader - The navigation header for the Skills Exchange page
  * 
  * This component allows users to toggle between different views,
- * search for skills, and create new skill offers or requests.
+ * search for skills, and filter between offers and requests.
  */
 const SkillsHeader = ({ 
   showCategories, 
@@ -31,12 +32,13 @@ const SkillsHeader = ({
   setSearchQuery,
   showRequests,
   setShowRequests,
-  openSkillDialog // Add this prop
+  openSkillDialog // This prop is passed from the parent but not used directly in the header anymore
 }: SkillsHeaderProps) => {
-  // Remove the dialog state and functions since we'll move them to SkillsPage
-  // State for the add skill dialog
-  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
+  // Log to help debug version issues
+  useEffect(() => {
+    console.log("[SkillsHeader] Component rendered, version: 2025-04-28");
+    return () => console.log("[SkillsHeader] Component will unmount");
+  }, []);
 
   // If user searches while in categories view, switch to list view automatically
   useEffect(() => {
@@ -81,7 +83,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Toggle group for offers/requests view - Updated styling to match Items page */}
+        {/* Toggle group for offers/requests view - styled like Items page */}
         <ToggleGroup 
           type="single" 
           defaultValue={showRequests ? "requests" : "offers"} 
@@ -107,14 +109,6 @@ const SkillsHeader = ({
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-
-      {/* Dialog */}
-      <AddSupportRequestDialog
-        open={isAddSkillOpen}
-        onOpenChange={setIsAddSkillOpen}
-        initialRequestType={dialogMode}
-        view="skills"
-      />
     </div>
   );
 };
