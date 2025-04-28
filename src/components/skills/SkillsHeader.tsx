@@ -50,22 +50,6 @@ const SkillsHeader = ({
   return (
     <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
       <div className="flex items-center gap-4">
-        {/* Request and Offer buttons - Moved from the bottom to here */}
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('need')}
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Request
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => openSkillDialog('offer')} 
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-        >
-          Offer
-        </Button>
-
         {/* Search input field */}
         <div className="relative w-[200px] flex-shrink-0">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
@@ -99,8 +83,11 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Toggle group for offers/requests view */}
-        <ToggleGroup type="single" defaultValue={showRequests ? "requests" : "offers"} 
+        {/* Toggle group for offers/requests view - Updated styling to match Items page */}
+        <ToggleGroup 
+          type="single" 
+          defaultValue={showRequests ? "requests" : "offers"} 
+          className="bg-gray-100 rounded-md p-1"
           onValueChange={(value) => {
             // Only change state if a value is selected (prevents deselection)
             if (value) {
@@ -108,12 +95,38 @@ const SkillsHeader = ({
             }
           }}
         >
-          <ToggleGroupItem value="offers" className="text-sm">Offers</ToggleGroupItem>
-          <ToggleGroupItem value="requests" className="text-sm">Requests</ToggleGroupItem>
+          <ToggleGroupItem 
+            value="offers" 
+            className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm rounded-md"
+          >
+            Offers
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="requests" 
+            className="text-sm px-4 py-1 data-[state=on]:bg-white data-[state=on]:shadow-sm rounded-md"
+          >
+            Requests
+          </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      {/* Removed the buttons div since buttons were moved to the top */}
+      {/* Request and Offer buttons - Moved to the right */}
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('need')}
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Request
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('offer')} 
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Offer
+        </Button>
+      </div>
 
       {/* Dialog */}
       <AddSupportRequestDialog
