@@ -29,7 +29,10 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <div className="min-h-[88px] flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2">
+        <Button 
+          variant="ghost" 
+          className="min-h-[88px] w-full flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2"
+        >
           {/* Profile and content section */}
           <div className="flex items-center gap-3 flex-grow">
             <Avatar className="h-10 w-10 flex-shrink-0">
@@ -65,7 +68,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
               {getUrgencyLabel(request.urgency)}
             </Badge>
           )}
-        </div>
+        </Button>
       </PopoverTrigger>
       
       <PopoverContent className="w-[300px] p-0" sideOffset={5}>
