@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -9,8 +10,6 @@ import { CalendarDays } from 'lucide-react';
 
 interface RequestDetailCardProps {
   request: GoodsExchangeItem;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
   onEdit?: () => void;
@@ -22,8 +21,6 @@ interface RequestDetailCardProps {
  */
 const RequestDetailCard = ({
   request,
-  getUrgencyClass,
-  getUrgencyLabel,
   onDeleteItem,
   isDeletingItem,
   onEdit
@@ -38,18 +35,17 @@ const RequestDetailCard = ({
   return (
     <Card className="border-0 shadow-none relative">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{request.title}</CardTitle>
-          {formattedDate && (
-            <div className="text-sm text-gray-600 flex items-center gap-1.5">
-              <CalendarDays className="h-4 w-4" />
-              <span>Need by {formattedDate}</span>
-            </div>
-          )}
-        </div>
+        <CardTitle className="text-lg">{request.title}</CardTitle>
       </CardHeader>
       
       <CardContent>
+        {formattedDate && (
+          <div className="text-sm text-gray-600 flex items-center gap-1.5 mb-3">
+            <CalendarDays className="h-4 w-4" />
+            <span>Need by {formattedDate}</span>
+          </div>
+        )}
+        
         <p>{request.description}</p>
         
         <div className="mt-4">

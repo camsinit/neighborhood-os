@@ -7,8 +7,6 @@ interface GoodsRequestsSectionProps {
   goodsRequests: GoodsExchangeItem[];
   urgentRequests: GoodsExchangeItem[];
   onRequestSelect: React.Dispatch<React.SetStateAction<GoodsExchangeItem | null>>;
-  getUrgencyClass: (urgency: string) => string;
-  getUrgencyLabel: (urgency: string) => string;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
 }
@@ -17,8 +15,6 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   goodsRequests, 
   urgentRequests,
   onRequestSelect,
-  getUrgencyClass,
-  getUrgencyLabel,
   onDeleteItem,
   isDeletingItem = false
 }) => {
@@ -43,8 +39,6 @@ const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
           onOpenChange={(open) => {
             setOpenPopoverId(open ? request.id : null);
           }}
-          getUrgencyClass={getUrgencyClass}
-          getUrgencyLabel={getUrgencyLabel}
           onDeleteItem={onDeleteItem}
           isDeletingItem={isDeletingItem}
         />
