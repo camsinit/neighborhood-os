@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
@@ -39,18 +38,15 @@ const CalendarPage = () => {
             <div className="py-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Community Calendar</h2>
-                
-                {/* GodModeSelector has been disabled and returns null */}
                 <GodModeSelector />
               </div>
               
-              {/* Using our standardized GlowingDescriptionBox with consistent margins */}
-              <GlowingDescriptionBox colorClass="calendar-color">
+              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
                 <p className="text-gray-700 text-sm">
                   Stay connected with your community through local events. View upcoming gatherings, 
                   create new events, and join your neighbors in building stronger connections.
                 </p>
-              </GlowingDescriptionBox>
+              </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <CommunityCalendar />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useEffect } from "react";
 import SkillsList from "@/components/skills/SkillsList";
@@ -69,12 +68,12 @@ const SkillsPage = () => {
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Skills Exchange</h2>
               
-              <GlowingDescriptionBox colorClass="skills-color">
+              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
                 <p className="text-gray-700 text-sm">
                   Share your expertise and learn from others. Connect with neighbors to exchange 
                   skills, teach, learn, and grow together as a community.
                 </p>
-              </GlowingDescriptionBox>
+              </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <div className="mb-6 flex items-center">

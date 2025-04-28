@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSupportRequests } from "@/utils/queries/useSupportRequests";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
@@ -58,12 +57,12 @@ const CarePage = () => {
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Care Support</h2>
               
-              <GlowingDescriptionBox colorClass="care-color">
+              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
                 <p className="text-gray-700 text-sm">
                   Connect with neighbors for mutual care and support. Whether offering or seeking 
                   assistance, build a stronger community through compassionate connections.
                 </p>
-              </GlowingDescriptionBox>
+              </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <div className="flex items-center justify-between mb-6">

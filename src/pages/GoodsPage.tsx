@@ -1,4 +1,3 @@
-
 import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
 import { useEffect } from "react";
 import { createHighlightListener } from "@/utils/highlightNavigation";
@@ -35,9 +34,14 @@ const GoodsPage = () => {
             <div className="py-8">
               <h2 className="text-2xl font-bold text-gray-900">Goods Exchange</h2>
               
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
-                <GoodsPageContainer />
+              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+                <p className="text-gray-700 text-sm">
+                  Share resources with your neighbors through our community exchange. 
+                  Offer items you no longer need, or find things you're looking for.
+                </p>
               </div>
+
+              <GoodsPageContainer />
             </div>
           </div>
         </div>

@@ -41,12 +41,12 @@ const SafetyPage = () => {
                 <h2 className="text-2xl font-bold text-gray-900">Safety Updates</h2>
               </div>
               
-              <GlowingDescriptionBox colorClass="safety-color">
+              <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
                 <p className="text-gray-700 text-sm">
                   Stay informed about safety matters in your community. Share updates, receive alerts, 
                   and work together to maintain a secure neighborhood environment.
                 </p>
-              </GlowingDescriptionBox>
+              </div>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
                 <SafetyUpdates />
