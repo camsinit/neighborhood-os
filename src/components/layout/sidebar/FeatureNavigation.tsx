@@ -35,7 +35,7 @@ const FeatureNavigation = () => {
     { 
       icon: Gift, 
       label: "Freebies", 
-      href: "/freebies", 
+      href: "/freebies", // Make sure this links to /freebies, not /goods
       color: moduleThemeColors.freebies ? moduleThemeColors.freebies.primary : moduleThemeColors.goods.primary
     },
     { 
@@ -56,8 +56,10 @@ const FeatureNavigation = () => {
     <div className="space-y-1">
       {featureNavItems.map((item) => {
         // Check if current path matches this nav item
+        // Add special handling for /goods path to highlight the Freebies item
         const isActive = location.pathname === item.href || 
-                        location.pathname.startsWith(item.href + '/');
+                        location.pathname.startsWith(item.href + '/') ||
+                        (item.href === '/freebies' && location.pathname === '/goods');
         return (
           <Link key={item.href} to={item.href}>
             <Button
