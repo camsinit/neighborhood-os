@@ -17,6 +17,7 @@ import { GoodsItemFormData, GoodsRequestFormData, GoodsItemCategory, RequestType
  */
 export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | GoodsRequestFormData>, initialRequestType?: RequestType | null) => {
   // Set initial request type from initialRequestType prop, initialValues, or default to "offer"
+  // First check if initialValues exists before trying to access its properties
   const requestTypeFromValues = initialValues?.requestType || initialRequestType || "offer";
   
   // Convert "request" to "need" to match the expected types in GoodsItemFormData
@@ -41,11 +42,13 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
     // Set the requestType properly
     requestType: "offer",
     // Handle availableDays - only relevant for offer forms
-    availableDays: isOfferForm && 'availableDays' in initialValues 
+    // First check if initialValues exists, then check if the property exists on initialValues
+    availableDays: isOfferForm && initialValues && 'availableDays' in initialValues 
       ? (initialValues as Partial<GoodsItemFormData>).availableDays || 30 
       : 30,
     // Handle images - only relevant for offer forms
-    images: isOfferForm && 'images' in initialValues
+    // First check if initialValues exists, then check if the property exists on initialValues
+    images: isOfferForm && initialValues && 'images' in initialValues
       ? (initialValues as Partial<GoodsItemFormData>).images || []
       : []
   });
@@ -55,7 +58,8 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     // Handle urgency - only relevant for request forms
-    urgency: !isOfferForm && 'urgency' in initialValues
+    // First check if initialValues exists, then check if the property exists on initialValues
+    urgency: !isOfferForm && initialValues && 'urgency' in initialValues
       ? (initialValues as Partial<GoodsRequestFormData>).urgency || "medium"
       : "medium",
     // Use the initialValues category if available, otherwise use default
