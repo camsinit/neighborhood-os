@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -72,16 +71,14 @@ const GoodsSearchBar = ({
         </div>
       </div>
 
-      <div className="min-h-[88px] flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2">
-        {activeTab === 'offers' && (
-          <AvailableItemsSection
-            goodsItems={goodsItems}
-            onDeleteItem={onDeleteItem}
-            isDeletingItem={isDeletingItem}
-            onRefetch={onRefetch}
-          />
-        )}
-      </div>
+      {activeTab === 'offers' && (
+        <AvailableItemsSection
+          goodsItems={goodsItems}
+          onDeleteItem={onDeleteItem}
+          isDeletingItem={isDeletingItem}
+          onRefetch={onRefetch}
+        />
+      )}
     </div>
   );
 };

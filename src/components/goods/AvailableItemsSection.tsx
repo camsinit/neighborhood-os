@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -45,7 +44,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   };
   
   return (
-    <>
+    <div className="min-h-[88px] flex items-center p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative mb-2">
       {goodsItems.map((item) => (
         <Popover 
           key={item.id}
@@ -147,7 +146,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
           />
         )}
       </UniversalDialog>
-    </>
+    </div>
   );
 };
 
