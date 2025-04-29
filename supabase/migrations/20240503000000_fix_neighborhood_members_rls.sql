@@ -19,7 +19,7 @@ CREATE POLICY "Neighborhood creators can manage memberships" ON neighborhood_mem
   USING (
     EXISTS (
       SELECT 1 FROM neighborhoods n
-      WHERE n.id = neighborhood_members.neighborhood_id
+      WHERE n.oid = neighborhood_members.neighborhood_id
       AND n.created_by = auth.uid()
     )
   );

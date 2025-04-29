@@ -1289,6 +1289,10 @@ export type Database = {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
+      users_share_neighborhood: {
+        Args: { user_a: string; user_b: string }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_type:
