@@ -41,7 +41,21 @@ export function useNeighborhoodData() {
         
         console.log("[useNeighborhoodData] Fetching neighborhoods for user:", user.id);
         
-        // First check if user created any neighborhoods
+        // Try to use our safe RPC function first
+        try {
+          const { data: rpcData, error: rpcError } = await supabase
+            .rpc('get_user_neighborhoods_simple', { user_uuid: user.id });
+            
+          if (!rpcError && rpcData && rpcData.length > 0) {
+            setNeighborhoods(rpcData);
+            setIsLoading(false);
+            return;
+          }
+        } catch (rpcErr) {
+          console.warn("[useNeighborhoodData] RPC error, falling back:", rpcErr);
+        }
+        
+        // Fall back to checking created neighborhoods
         const { data: createdNeighborhoods, error: createdError } = await supabase
           .from('neighborhoods')
           .select('id, name')
@@ -64,25 +78,43 @@ export function useNeighborhoodData() {
           return;
         }
 
-        // Call our RPC function that safely checks membership
-        // NOTE: We need to use explicit typing because TypeScript doesn't know about our custom RPC functions
-        const { data: membershipData, error: membershipError } = await supabase
-          .rpc('get_user_neighborhoods', {
-            user_uuid: user.id
-          }) as {
-            data: Neighborhood[] | null;
-            error: Error | null;
-          };
-        
+        // Next try direct membership query
+        const { data: memberships, error: membershipError } = await supabase
+          .from('neighborhood_members')
+          .select('neighborhood_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+          
         if (membershipError) {
-          throw membershipError;
+          console.warn("[useNeighborhoodData] Error checking memberships:", membershipError);
+        } else if (memberships && memberships.length > 0) {
+          // We have memberships, now get full neighborhood details
+          const neighborhoodIds = memberships.map(m => m.neighborhood_id);
+          
+          const { data: neighborhoodData, error: neighborhoodError } = await supabase
+            .from('neighborhoods')
+            .select('id, name')
+            .in('id', neighborhoodIds);
+            
+          if (neighborhoodError) {
+            console.warn("[useNeighborhoodData] Error getting neighborhoods:", neighborhoodError);
+          } else if (neighborhoodData) {
+            // Format with joined_at date
+            const formattedNeighborhoods = neighborhoodData.map(n => ({
+              id: n.id,
+              name: n.name,
+              joined_at: new Date().toISOString() // Default value since we don't have joined_at
+            }));
+            
+            setNeighborhoods(formattedNeighborhoods);
+            setIsLoading(false);
+            return;
+          }
         }
         
-        if (membershipData) {
-          setNeighborhoods(membershipData);
-        } else {
-          setNeighborhoods([]);
-        }
+        // If we get here, we found no neighborhoods
+        setNeighborhoods([]);
+        
       } catch (err: any) {
         console.error("[useNeighborhoodData] Error fetching neighborhoods:", err);
         setError(err instanceof Error ? err : new Error(err.message || 'Unknown error'));

@@ -2,15 +2,13 @@
 /**
  * Utility functions for neighborhood membership operations
  * 
- * These functions have been updated to use security definer functions
- * to avoid the infinite recursion issues in RLS policies.
+ * These functions use our new security definer functions to avoid recursion.
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses the simple policy structure to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -21,24 +19,21 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // With our simplified RLS policies, we can now directly query the table
-    // The policies will ensure users can only see their own memberships
+    // Call our security definer function
     const { data, error } = await supabase
-      .from('neighborhood_members')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('neighborhood_id', neighborhoodId)
-      .eq('status', 'active')
-      .maybeSingle();
+      .rpc('user_is_neighborhood_member', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
             
     if (error) {
-      console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
+      console.error(`[checkNeighborhoodMembership] Error checking membership for ${neighborhoodId}:`, error);
       return false;
     }
             
     return !!data;
   } catch (err) {
-    console.error("[NeighborhoodUtils] Error in checkNeighborhoodMembership:", err);
+    console.error("[checkNeighborhoodMembership] Error:", err);
     return false;
   }
 }
@@ -55,25 +50,21 @@ export async function addNeighborhoodMember(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Direct insert with our simplified RLS policies
+    // Use our add_neighborhood_member function
     const { data, error } = await supabase
-      .from('neighborhood_members')
-      .insert({
-        user_id: userId,
-        neighborhood_id: neighborhoodId,
-        status: 'active'
-      })
-      .select('id')
-      .single();
+      .rpc('add_neighborhood_member', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
 
     if (error) {
-      console.error("[NeighborhoodUtils] Error adding neighborhood member:", error);
+      console.error("[addNeighborhoodMember] Error:", error);
       return false;
     }
 
     return !!data;
   } catch (err) {
-    console.error("[NeighborhoodUtils] Error in addNeighborhoodMember:", err);
+    console.error("[addNeighborhoodMember] Error:", err);
     return false;
   }
 }
@@ -90,22 +81,21 @@ export async function checkUserCreatedNeighborhood(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Direct query to neighborhoods table
+    // Call our security definer function
     const { data, error } = await supabase
-      .from('neighborhoods')
-      .select('id')
-      .eq('id', neighborhoodId)
-      .eq('created_by', userId)
-      .maybeSingle();
+      .rpc('user_created_neighborhood', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
 
     if (error) {
-      console.error("[NeighborhoodUtils] Error checking if user created neighborhood:", error);
+      console.error("[checkUserCreatedNeighborhood] Error:", error);
       return false;
     }
 
     return !!data;
   } catch (err) {
-    console.error("[NeighborhoodUtils] Error in checkUserCreatedNeighborhood:", err);
+    console.error("[checkUserCreatedNeighborhood] Error:", err);
     return false;
   }
 }

@@ -2,8 +2,7 @@
 /**
  * Neighborhood fetching utilities
  * 
- * These utilities have been updated to work with our security definer functions
- * and avoid the infinite recursion issues in RLS policies.
+ * These utilities use our new security definer functions to avoid recursion.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -19,9 +18,9 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   error: Error | null;
 }> => {
   try {
-    // Try direct query with the user_created_neighborhood function to avoid recursion
     console.log(`[fetchCreatedNeighborhoods] Fetching neighborhoods created by user ${userId}`);
     
+    // Direct query to neighborhoods table - should be protected by RLS
     const { data, error } = await supabase
       .from("neighborhoods")
       .select("id, name, created_by")
@@ -48,58 +47,54 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
 };
 
 /**
- * Fetch all neighborhoods (using our security definer function)
+ * Fetch neighborhood memberships for a specific user
  * 
- * Uses the get_all_neighborhoods_safe RPC function to bypass RLS
- * for authorized users.
- * 
- * @returns Array of all neighborhoods
+ * @param userId - The ID of the user
+ * @returns Neighborhood memberships
  */
-export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
+export const fetchUserMemberships = async (userId: string): Promise<{
+  data: { neighborhood_id: string }[] | null;
+  error: Error | null;
+}> => {
   try {
-    // Use the security definer RPC function
-    const { data, error } = await supabase
-      .rpc("get_all_neighborhoods_safe");
+    console.log(`[fetchUserMemberships] Fetching memberships for user ${userId}`);
     
-    if (error) {
-      console.error("[fetchAllNeighborhoods] Error:", error.message);
-      return [];
+    // Use our simplified RPC function if available
+    try {
+      const { data, error } = await supabase
+        .rpc('get_user_neighborhood_memberships', { 
+          user_uuid: userId 
+        });
+        
+      if (!error && data) {
+        console.log(`[fetchUserMemberships] Found ${data.length} memberships via RPC`);
+        return { data, error: null };
+      }
+    } catch (rpcErr) {
+      console.warn("[fetchUserMemberships] RPC error, falling back to direct query:", rpcErr);
     }
     
-    console.log(`[fetchAllNeighborhoods] Found ${data?.length || 0} neighborhoods`);
-    
-    return data as Neighborhood[];
-  } catch (error) {
-    console.error("[fetchAllNeighborhoods] Unexpected error:", error);
-    return [];
-  }
-};
-
-/**
- * Fetch members of a specific neighborhood
- * 
- * Uses our security definer function to avoid recursion
- * 
- * @param neighborhoodId - The ID of the neighborhood to get members for
- * @returns Array of user IDs who are members of the neighborhood
- */
-export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
-  try {
-    // Use our security definer function
+    // Fall back to direct query
     const { data, error } = await supabase
-      .rpc("get_neighborhood_members_safe", { neighborhood_uuid: neighborhoodId });
-    
+      .from('neighborhood_members')
+      .select('neighborhood_id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+      
     if (error) {
-      console.error("[fetchNeighborhoodMembers] Error:", error.message);
-      return [];
+      console.error("[fetchUserMemberships] Error:", error.message);
+      return { data: null, error };
     }
     
-    console.log(`[fetchNeighborhoodMembers] Found ${data?.length || 0} members for neighborhood ${neighborhoodId}`);
+    console.log(`[fetchUserMemberships] Found ${data?.length || 0} memberships for user ${userId}`);
     
-    return data || [];
-  } catch (error) {
-    console.error("[fetchNeighborhoodMembers] Unexpected error:", error);
-    return [];
+    return { data, error: null };
+  } catch (error: any) {
+    console.error("[fetchUserMemberships] Unexpected error:", error);
+    return { 
+      data: null, 
+      error: new Error(error.message || "Unknown error in fetchUserMemberships") 
+    };
   }
 };
 
@@ -111,7 +106,7 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
  */
 export const checkCoreContributorAccess = async (userId: string): Promise<boolean> => {
   try {
-    // Use a security definer function if available
+    // Use our security definer function
     const { data, error } = await supabase
       .rpc("user_is_core_contributor_with_access", { user_uuid: userId });
     
@@ -135,7 +130,7 @@ export const checkCoreContributorAccess = async (userId: string): Promise<boolea
  */
 export const fetchAllNeighborhoodsForCoreContributor = async (userId: string): Promise<Neighborhood[]> => {
   try {
-    // Use a dedicated RPC function
+    // Use our security definer function
     const { data, error } = await supabase
       .rpc("get_all_neighborhoods_for_core_contributor", { user_uuid: userId });
     

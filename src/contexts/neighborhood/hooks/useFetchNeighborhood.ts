@@ -2,15 +2,14 @@
 /**
  * Hook for fetching neighborhood data
  *
- * This simplified version has removed core contributor functionality.
+ * This version uses our new security definer functions to avoid recursion.
  */
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../types';
 import { 
   fetchCreatedNeighborhoods,
-  checkCoreContributorAccess,
-  fetchAllNeighborhoodsForCoreContributor
+  fetchUserMemberships
 } from '../utils/neighborhoodFetchUtils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,7 +36,7 @@ export function useFetchNeighborhood(
     setIsLoading: (isLoading: boolean) => void;
   }
 ) {
-  // State variables for neighborhood data - removed core contributor related state
+  // State for neighborhood data
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
 
   // The main fetch function that retrieves neighborhood data
@@ -58,30 +57,53 @@ export function useFetchNeighborhood(
         return;
       }
 
-      // Check if the user has created any neighborhoods
-      const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
-      
-      if (createdError) {
-        console.warn("[useFetchNeighborhood] Error getting created neighborhoods:", createdError);
-      } else if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-        // Found created neighborhoods
-        console.log("[useFetchNeighborhood] Found created neighborhoods:", createdNeighborhoods);
-        setCurrentNeighborhood(createdNeighborhoods[0]);
-        completeFetch(startTime);
-        return;
+      console.log(`[useFetchNeighborhood] Fetching neighborhoods for user ${user.id} (attempt ${fetchAttempts})`);
+
+      // First try RPC function that uses security definer permissions
+      try {
+        // Try calling our safe RPC function
+        const { data, error } = await supabase
+          .rpc('get_user_neighborhoods_simple', {
+            user_uuid: user.id
+          });
+        
+        if (error) {
+          console.warn("[useFetchNeighborhood] RPC error:", error);
+        } else if (data && data.length > 0) {
+          console.log("[useFetchNeighborhood] Found neighborhoods via RPC:", data);
+          setCurrentNeighborhood(data[0] as Neighborhood);
+          completeFetch(startTime);
+          return;
+        }
+      } catch (rpcErr) {
+        console.warn("[useFetchNeighborhood] RPC exception:", rpcErr);
+      }
+
+      // Try direct query for neighborhoods the user created
+      try {
+        const { data: createdNeighborhoods, error: createdError } = 
+          await fetchCreatedNeighborhoods(user.id);
+        
+        if (createdError) {
+          console.warn("[useFetchNeighborhood] Error checking created neighborhoods:", createdError);
+        } else if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+          console.log("[useFetchNeighborhood] Found created neighborhoods:", createdNeighborhoods);
+          setCurrentNeighborhood(createdNeighborhoods[0]);
+          completeFetch(startTime);
+          return;
+        }
+      } catch (err) {
+        console.warn("[useFetchNeighborhood] Error in created neighborhoods check:", err);
       }
       
-      // SAFE FALLBACK: Try direct membership
+      // Fall back to direct neighborhood membership query
       try {
-        // Get direct membership
-        const { data: memberships, error: membershipError } = await supabase
-          .from('neighborhood_members')
-          .select('neighborhood_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+        // Get membership data
+        const { data: memberships, error: membershipError } = 
+          await fetchUserMemberships(user.id);
         
         if (membershipError) {
-          console.warn("[useFetchNeighborhood] Error getting neighborhood memberships:", membershipError);
+          console.warn("[useFetchNeighborhood] Error checking memberships:", membershipError);
         } else if (memberships && memberships.length > 0) {
           // Found membership - now get the neighborhood details
           const { data: neighborhood, error: neighborhoodError } = await supabase
@@ -126,7 +148,7 @@ export function useFetchNeighborhood(
     setIsLoading
   ]);
 
-  // Return simplified data and functions (removed core contributor related data)
+  // Return data and functions
   return {
     currentNeighborhood,
     setCurrentNeighborhood,
