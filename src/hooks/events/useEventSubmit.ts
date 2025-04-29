@@ -76,10 +76,14 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       console.log("[useEventSubmit] Sending to database:", eventData);
 
       // First try to insert the event
-      const { error, data } = await supabase
+      const firstAttempt = await supabase
         .from('events')
         .insert(eventData)
         .select();
+
+      // Initialize a variable to hold our result data
+      let resultData = firstAttempt.data;
+      let error = firstAttempt.error;
 
       if (error) {
         // Check if this is the neighborhood_id error in activities table 
@@ -104,7 +108,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           }
           
           // If second attempt works, use that data
-          data = secondAttempt.data;
+          resultData = secondAttempt.data;
           
           // Success notification for the workaround
           toast.success("Event created successfully");
@@ -127,7 +131,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       } else {
         // Log success information
         console.log("[useEventSubmit] Event created successfully:", {
-          eventId: data?.[0]?.id,
+          eventId: resultData?.[0]?.id,
           userId: user.id,
           neighborhoodId: neighborhood.id,
           timestamp: new Date().toISOString()
@@ -147,7 +151,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       
       onSuccess();
       
-      return data;
+      return resultData;
     } catch (error: any) {
       console.error('[useEventSubmit] Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
@@ -269,3 +273,4 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
   return { handleSubmit, handleUpdate };
 };
+
