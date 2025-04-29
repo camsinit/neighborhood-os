@@ -1164,6 +1164,20 @@ export type Database = {
         }
         Returns: Json
       }
+      get_activities_safe: {
+        Args: { user_uuid: string; limit_count?: number }
+        Returns: {
+          id: string
+          actor_id: string
+          activity_type: string
+          content_id: string
+          content_type: string
+          title: string
+          created_at: string
+          metadata: Json
+          neighborhood_id: string
+        }[]
+      }
       get_all_neighborhoods_for_core_contributor: {
         Args: { user_uuid: string }
         Returns: {
@@ -1190,6 +1204,15 @@ export type Database = {
           name: string
           state: string | null
           zip: string | null
+        }[]
+      }
+      get_all_user_neighborhoods: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          name: string
+          joined_at: string
+          is_creator: boolean
         }[]
       }
       get_neighborhood_members: {

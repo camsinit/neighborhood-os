@@ -2,7 +2,7 @@
 /**
  * Neighborhood fetching utilities
  * 
- * These utilities use our new security definer functions to avoid recursion.
+ * These utilities use our security definer functions to avoid recursion.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -20,11 +20,11 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   try {
     console.log(`[fetchCreatedNeighborhoods] Fetching neighborhoods created by user ${userId}`);
     
-    // Direct query to neighborhoods table - should be protected by RLS
+    // Use our safe RPC function instead of direct table query
     const { data, error } = await supabase
-      .from("neighborhoods")
-      .select("id, name, created_by")
-      .eq("created_by", userId);
+      .rpc('get_user_created_neighborhoods', { 
+        user_uuid: userId 
+      });
     
     if (error) {
       console.error("[fetchCreatedNeighborhoods] Error:", error.message);
@@ -63,9 +63,9 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
       return [];
     }
     
-    // Use the get_user_neighborhoods_simple RPC function added in the migrations
+    // Use the get_all_user_neighborhoods function which includes both created and member neighborhoods
     const { data, error } = await supabase
-      .rpc('get_user_neighborhoods_simple', {
+      .rpc('get_all_user_neighborhoods', {
         user_uuid: user.id
       });
     
@@ -75,7 +75,15 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
     }
     
     console.log(`[fetchAllNeighborhoods] Found ${data?.length || 0} accessible neighborhoods`);
-    return data as Neighborhood[] || [];
+    
+    // Transform the data to match our Neighborhood type
+    const neighborhoods = data.map(n => ({
+      id: n.id,
+      name: n.name,
+      // Add other fields if needed
+    }));
+    
+    return neighborhoods as Neighborhood[] || [];
   } catch (error: any) {
     console.error("[fetchAllNeighborhoods] Unexpected error:", error);
     return [];
@@ -95,28 +103,12 @@ export const fetchUserMemberships = async (userId: string): Promise<{
   try {
     console.log(`[fetchUserMemberships] Fetching memberships for user ${userId}`);
     
-    // Use our simplified RPC function if available
-    try {
-      const { data, error } = await supabase
-        .rpc('get_user_neighborhood_memberships', { 
-          user_uuid: userId 
-        });
-        
-      if (!error && data) {
-        console.log(`[fetchUserMemberships] Found ${data.length} memberships via RPC`);
-        return { data, error: null };
-      }
-    } catch (rpcErr) {
-      console.warn("[fetchUserMemberships] RPC error, falling back to direct query:", rpcErr);
-    }
-    
-    // Fall back to direct query
+    // Always use our safe RPC function
     const { data, error } = await supabase
-      .from('neighborhood_members')
-      .select('neighborhood_id')
-      .eq('user_id', userId)
-      .eq('status', 'active');
-      
+      .rpc('get_user_neighborhood_memberships', { 
+        user_uuid: userId 
+      });
+        
     if (error) {
       console.error("[fetchUserMemberships] Error:", error.message);
       return { data: null, error };
