@@ -2,8 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Grid2x2, ArrowLeft } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Changed from ToggleGroup to Tabs
+import { Search, Grid2x2, ArrowLeft, ChevronDown } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu"; // Import dropdown components
 
 /**
  * Props for the SkillsHeader component
@@ -83,31 +88,32 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Tabs for offers/requests view - using !important styling overrides */}
-        <Tabs 
-          value={showRequests ? "requests" : "offers"}
-          onValueChange={(value) => {
-            // Only change state if a value is selected
-            setShowRequests(value === "requests");
-          }}
-          className="w-auto"
-        >
-          {/* Using !important flag (!) to force override the base styles */}
-          <TabsList className="!bg-slate-100 !p-1 !rounded-full">
-            <TabsTrigger 
-              value="offers" 
-              className="!px-6 !py-1.5 data-[state=active]:!bg-white data-[state=active]:!shadow-sm !rounded-full !font-medium"
+        {/* Dropdown menu replacing the tabs */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="bg-slate-100 hover:bg-slate-200"
+            >
+              {showRequests ? 'Requests' : 'Available'}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="bg-white w-[130px]">
+            <DropdownMenuItem 
+              className={`font-medium ${!showRequests ? 'bg-slate-100' : ''}`}
+              onClick={() => setShowRequests(false)}
             >
               Available
-            </TabsTrigger>
-            <TabsTrigger 
-              value="requests" 
-              className="!px-6 !py-1.5 data-[state=active]:!bg-white data-[state=active]:!shadow-sm !rounded-full !text-slate-500 !font-medium"
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className={`font-medium ${showRequests ? 'bg-slate-100' : ''}`}
+              onClick={() => setShowRequests(true)}
             >
               Requests
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
