@@ -83,7 +83,7 @@ const SkillsHeader = ({
           )}
         </Button>
 
-        {/* Tabs for offers/requests view - styled to exactly match the image */}
+        {/* Tabs for offers/requests view - using !important styling overrides */}
         <Tabs 
           value={showRequests ? "requests" : "offers"}
           onValueChange={(value) => {
@@ -92,17 +92,17 @@ const SkillsHeader = ({
           }}
           className="w-auto"
         >
-          {/* Setting bg-slate-100 for the lighter background color shown in the image */}
-          <TabsList className="bg-slate-100 p-1 rounded-full">
+          {/* Using !important flag (!) to force override the base styles */}
+          <TabsList className="!bg-slate-100 !p-1 !rounded-full">
             <TabsTrigger 
               value="offers" 
-              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full font-medium"
+              className="!px-6 !py-1.5 data-[state=active]:!bg-white data-[state=active]:!shadow-sm !rounded-full !font-medium"
             >
               Available
             </TabsTrigger>
             <TabsTrigger 
               value="requests" 
-              className="px-6 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-full text-slate-500 font-medium"
+              className="!px-6 !py-1.5 data-[state=active]:!bg-white data-[state=active]:!shadow-sm !rounded-full !text-slate-500 !font-medium"
             >
               Requests
             </TabsTrigger>
