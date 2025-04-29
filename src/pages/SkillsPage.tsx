@@ -115,40 +115,18 @@ const SkillsPage = () => {
                   showRequests ? 'Skill Requests' : 'All Skills')}
           </h3>
         </div>
-        
-        {/* Action buttons were here but now moved to the header's bottom section */}
       </div>
 
-      {/* Search, filters and view toggles - Now includes the action buttons */}
-      <div className="flex flex-col gap-4">
-        <SkillsHeader 
-          showCategories={showCategories}
-          onViewChange={handleViewChange}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          showRequests={showRequests}
-          setShowRequests={setShowRequests}
-          openSkillDialog={openSkillDialog}
-        />
-        
-        {/* Action buttons moved here from the header */}
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => openSkillDialog('need')}
-            className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-          >
-            Request
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => openSkillDialog('offer')} 
-            className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
-          >
-            Offer
-          </Button>
-        </div>
-      </div>
+      {/* Search, filters and view toggles - Now passing the openSkillDialog function to SkillsHeader */}
+      <SkillsHeader 
+        showCategories={showCategories}
+        onViewChange={handleViewChange}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showRequests={showRequests}
+        setShowRequests={setShowRequests}
+        openSkillDialog={openSkillDialog}
+      />
       
       {/* Main content - either categories or list of skills */}
       {showCategories ? (

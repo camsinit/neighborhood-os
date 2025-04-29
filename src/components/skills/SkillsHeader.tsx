@@ -37,7 +37,7 @@ const SkillsHeader = ({
   setSearchQuery,
   showRequests,
   setShowRequests,
-  openSkillDialog // This prop is passed from the parent but not used directly in the header anymore
+  openSkillDialog // Now we're actually using this prop
 }: SkillsHeaderProps) => {
   // Log to help debug version issues
   useEffect(() => {
@@ -114,6 +114,22 @@ const SkillsHeader = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Action buttons moved here from the SkillsPage */}
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('need')}
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Request
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => openSkillDialog('offer')} 
+          className="bg-[#22C55E] hover:bg-[#16A34A] text-white whitespace-nowrap border-0 hover:text-white"
+        >
+          Offer
+        </Button>
       </div>
     </div>
   );
