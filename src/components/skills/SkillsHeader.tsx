@@ -67,7 +67,7 @@ const SkillsHeader = ({
           />
         </div>
 
-        {/* Toggle button */}
+        {/* Toggle button - Changed background to white/gray and text from "Types" to "Categories" */}
         <Button
           variant="outline"
           onClick={onViewChange}
@@ -78,7 +78,7 @@ const SkillsHeader = ({
           {!showCategories ? (
             <>
               <Grid2x2 className="h-4 w-4 mr-2" />
-              Types
+              Categories
             </>
           ) : (
             <>

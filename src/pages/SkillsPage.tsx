@@ -116,7 +116,22 @@ const SkillsPage = () => {
           </h3>
         </div>
         
-        {/* Right side - Action buttons */}
+        {/* Action buttons were here but now moved to the header's bottom section */}
+      </div>
+
+      {/* Search, filters and view toggles - Now includes the action buttons */}
+      <div className="flex flex-col gap-4">
+        <SkillsHeader 
+          showCategories={showCategories}
+          onViewChange={handleViewChange}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          showRequests={showRequests}
+          setShowRequests={setShowRequests}
+          openSkillDialog={openSkillDialog}
+        />
+        
+        {/* Action buttons moved here from the header */}
         <div className="flex items-center gap-2">
           <Button 
             variant="outline"
@@ -134,17 +149,6 @@ const SkillsPage = () => {
           </Button>
         </div>
       </div>
-
-      {/* Search, filters and view toggles */}
-      <SkillsHeader 
-        showCategories={showCategories}
-        onViewChange={handleViewChange}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        showRequests={showRequests}
-        setShowRequests={setShowRequests}
-        openSkillDialog={openSkillDialog}
-      />
       
       {/* Main content - either categories or list of skills */}
       {showCategories ? (
