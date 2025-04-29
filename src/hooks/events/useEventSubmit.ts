@@ -1,4 +1,3 @@
-
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -60,11 +59,9 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Transform the form data to match database schema
       const eventData = transformEventFormData(formData, user.id, neighborhood.id);
 
-      // Create the event in the database
+      // Create the event in the database - we can now use the direct createEvent function
+      // since the neighborhood_id column exists in the activities table
       const data = await createEvent(eventData, user.id, formData.title);
-      
-      // Success notification 
-      toast.success("Event created successfully");
       
       // Invalidate the events query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['events'] });

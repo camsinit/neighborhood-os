@@ -19,6 +19,7 @@ export type Database = {
           id: string
           is_public: boolean | null
           metadata: Json | null
+          neighborhood_id: string | null
           title: string
         }
         Insert: {
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           metadata?: Json | null
+          neighborhood_id?: string | null
           title: string
         }
         Update: {
@@ -41,6 +43,7 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           metadata?: Json | null
+          neighborhood_id?: string | null
           title?: string
         }
         Relationships: [
@@ -49,6 +52,13 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
         ]

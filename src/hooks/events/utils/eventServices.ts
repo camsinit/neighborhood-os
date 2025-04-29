@@ -1,11 +1,10 @@
-
 /**
  * Event services for database operations
  * 
  * Handles the actual database operations for events, abstracting the Supabase calls
  */
 import { supabase } from "@/integrations/supabase/client";
-import { handleActivitiesTableWorkaround } from "./activityWorkaround";
+import { toast } from "sonner";
 
 /**
  * Create a new event in the database
@@ -19,43 +18,36 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
   // Log the actual data being sent to the database for debugging
   console.log("[eventServices] Sending to database:", eventData);
 
-  // First try to insert the event
+  // Insert the event - now that the activities table has neighborhood_id, we don't need special handling
   const { error, data } = await supabase
     .from('events')
     .insert(eventData)
     .select();
 
-  // Initialize a variable to hold our result data
-  let resultData = data;
-
   if (error) {
-    // Check if this is the neighborhood_id error in activities table 
-    // (We know this specific error happens during the trigger operation)
-    if (error.code === '42703' && error.message.includes('activities')) {
-      // This is a known issue with the activities trigger - we'll try a modified approach
-      resultData = await handleActivitiesTableWorkaround(eventData, userId, formTitle);
-    } else {
-      // Log detailed error information for other errors
-      console.error("[eventServices] Error inserting event:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        timestamp: new Date().toISOString()
-      });
-      throw error;
-    }
-  } else {
-    // Log success information
-    console.log("[eventServices] Event created successfully:", {
-      eventId: resultData?.[0]?.id,
+    // Log detailed error information
+    console.error("[eventServices] Error inserting event:", {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
       timestamp: new Date().toISOString()
     });
+    throw error;
   }
+
+  // Log success information
+  console.log("[eventServices] Event created successfully:", {
+    eventId: data?.[0]?.id,
+    timestamp: new Date().toISOString()
+  });
   
-  return resultData;
+  // Show success toast
+  toast.success("Event created successfully");
+  
+  return data;
 };
 
 /**
