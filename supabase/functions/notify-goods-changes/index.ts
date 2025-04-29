@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -48,6 +49,8 @@ const handler = async (req: Request): Promise<Response> => {
       category
     } = await req.json() as UpdateRequest;
 
+    console.log(`[notify-goods-changes] Processing ${action} for goods item: ${goodsItemTitle} in neighborhood: ${neighborhoodId}`);
+
     // Only create activities for new items or significant updates
     if (action === 'create') {
       const activityType = requestType === 'offer' ? 'good_shared' : 'good_requested';
@@ -69,8 +72,10 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
       if (createError) {
-        console.error('Error creating activity:', createError);
+        console.error('[notify-goods-changes] Error creating activity:', createError);
         throw createError;
+      } else {
+        console.log(`[notify-goods-changes] Successfully created activity for: ${goodsItemTitle}`);
       }
     }
 
@@ -82,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
     });
   } catch (error) {
-    console.error('Error in notify-goods-changes:', error);
+    console.error('[notify-goods-changes] Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
