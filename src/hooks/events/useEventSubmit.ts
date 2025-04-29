@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -92,23 +91,51 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           // This is a known issue with the activities trigger - we'll try a modified approach
           console.log("[useEventSubmit] Detected activities table error, attempting workaround...");
           
-          // Try inserting again but without the neighborhood_id to avoid the trigger error
-          // This should be a temporary fix until the activities table is updated
-          delete eventData.neighborhood_id;
+          // IMPORTANT: Create a clone of the original data to avoid modifying the original
+          // We need to keep neighborhood_id for the events table but avoid it for the activities trigger
+          const modifiedEventData = { ...eventData };
           
-          const secondAttempt = await supabase
+          // Instead of trying to insert to both tables at once (which fails due to activities trigger),
+          // we'll split this into two operations: first insert to events, then manually create the activity
+          const insertResult = await supabase
             .from('events')
-            .insert(eventData)
+            .insert(modifiedEventData)
             .select();
             
-          if (secondAttempt.error) {
-            // If second attempt also fails, log and throw error
-            console.error("[useEventSubmit] Second attempt failed:", secondAttempt.error);
-            throw secondAttempt.error;
+          if (insertResult.error) {
+            // If insertion still fails, log and throw error
+            console.error("[useEventSubmit] Event insertion failed:", insertResult.error);
+            throw insertResult.error;
           }
           
-          // If second attempt works, use that data
-          resultData = secondAttempt.data;
+          resultData = insertResult.data;
+          
+          // If the event was created successfully, but we still need to create an activity
+          if (resultData && resultData[0]) {
+            // Now manually create the activity record without using the neighborhood_id field
+            try {
+              const { error: activityError } = await supabase
+                .from('activities')
+                .insert({
+                  actor_id: user.id,
+                  activity_type: 'event_created',
+                  content_id: resultData[0].id,
+                  content_type: 'events',
+                  title: formData.title
+                  // Intentionally omit neighborhood_id here
+                });
+                
+              if (activityError) {
+                // Log the activity creation error but don't throw - event was still created
+                console.warn("[useEventSubmit] Activity creation failed, but event was created:", activityError);
+              } else {
+                console.log("[useEventSubmit] Activity created successfully");
+              }
+            } catch (activityError) {
+              console.warn("[useEventSubmit] Activity creation error:", activityError);
+              // Don't throw, as the event was still created
+            }
+          }
           
           // Success notification for the workaround
           toast.success("Event created successfully");
@@ -273,4 +300,3 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
   return { handleSubmit, handleUpdate };
 };
-
