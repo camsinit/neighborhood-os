@@ -11,10 +11,11 @@ interface UpdateRequest {
   action: 'update' | 'delete';
   safetyUpdateTitle: string;
   changes?: string;
+  userId?: string;
+  neighborhoodId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -25,14 +26,22 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    // Extract data from the request
-    const { safetyUpdateId, action, safetyUpdateTitle, changes } = await req.json() as UpdateRequest;
+    const { 
+      safetyUpdateId, 
+      action, 
+      safetyUpdateTitle, 
+      changes,
+      userId,
+      neighborhoodId 
+    } = await req.json() as UpdateRequest;
 
-    console.log(`Processing ${action} notification for safety update: ${safetyUpdateTitle}`);
+    console.log(`[notify-safety-changes] Processing ${action} notification for safety update: ${safetyUpdateTitle}`);
+    
+    if (neighborhoodId) {
+      console.log(`[notify-safety-changes] Neighborhood ID: ${neighborhoodId}`);
+    }
 
-    // When a safety update is modified, update any related activities to keep them in sync
     if (action === 'update' && safetyUpdateId) {
-      // Update any activities related to this safety update
       const { error: activityError } = await supabaseClient
         .from('activities')
         .update({ title: safetyUpdateTitle })
@@ -40,10 +49,10 @@ const handler = async (req: Request): Promise<Response> => {
         .eq('content_id', safetyUpdateId);
 
       if (activityError) {
-        console.error('Error updating activities:', activityError);
+        console.error('[notify-safety-changes] Error updating activities:', activityError);
         throw activityError;
       } else {
-        console.log(`Successfully updated related activities for safety update: ${safetyUpdateTitle}`);
+        console.log(`[notify-safety-changes] Successfully updated related activities for safety update: ${safetyUpdateTitle}`);
       }
     }
 
@@ -55,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
     });
   } catch (error) {
-    console.error('Error in notify-safety-changes:', error);
+    console.error('[notify-safety-changes] Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
@@ -63,5 +72,4 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-// Attach the handler to Deno's serve function
 serve(handler);
