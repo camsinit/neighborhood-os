@@ -88,7 +88,7 @@ export const coreModules: ModuleDefinition[] = [
   },
   {
     id: 'goods',
-    name: 'Items',
+    name: 'Freebies',
     description: 'Items exchange and sharing',
     themeColor: 'goods',
     path: '/goods',

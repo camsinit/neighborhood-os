@@ -22,7 +22,7 @@ const GoodsPage = () => {
 
   return (
     <ModuleLayout
-      title="Goods Exchange"
+      title="Freebies Exchange"
       themeColor="goods"
       description="Share resources with your neighbors through our community exchange. Offer items you no longer need, or find things you're looking for."
     >

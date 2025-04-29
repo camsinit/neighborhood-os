@@ -7,8 +7,8 @@
  */
 const GoodsPageHeader = () => {
   return <>
-      {/* Updated page title from "Stuff" to "Items" */}
-      <h2 className="text-2xl font-bold text-gray-900">Items</h2>
+      {/* Updated page title from "Items" to "Freebies" */}
+      <h2 className="text-2xl font-bold text-gray-900">Freebies</h2>
     </>;
 };
 export default GoodsPageHeader;
