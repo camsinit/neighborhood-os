@@ -55,10 +55,18 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
   try {
     console.log("[fetchAllNeighborhoods] Fetching all accessible neighborhoods");
     
+    // First get the current user's ID
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.warn("[fetchAllNeighborhoods] No authenticated user found");
+      return [];
+    }
+    
     // Use the get_user_neighborhoods_simple RPC function added in the migrations
     const { data, error } = await supabase
       .rpc('get_user_neighborhoods_simple', {
-        user_uuid: supabase.auth.getUser().then(res => res.data.user?.id)
+        user_uuid: user.id
       });
     
     if (error) {
