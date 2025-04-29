@@ -1,8 +1,10 @@
-import { supabase } from "@/integrations/supabase/client";
+
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { transformEventFormData, transformEventUpdateData } from "./utils/eventDataTransformer";
+import { createEvent, updateEvent } from "./utils/eventServices";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -55,118 +57,14 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Transform the date and time fields into a single ISO timestamp
-      const combinedTime = formData.date && formData.time 
-        ? `${formData.date}T${formData.time}` 
-        : null;
+      // Transform the form data to match database schema
+      const eventData = transformEventFormData(formData, user.id, neighborhood.id);
 
-      // IMPORTANT: Filter the form data to only include fields that exist in the events table
-      // This ensures we don't try to insert fields like isRecurring that are UI-only
-      const eventData = {
-        title: formData.title,
-        description: formData.description,
-        time: combinedTime, // Use the combined timestamp
-        location: formData.location,
-        host_id: user.id,
-        neighborhood_id: neighborhood.id // Use the neighborhood.id (string) not the whole object
-      };
-
-      // Log the actual data being sent to the database for debugging
-      console.log("[useEventSubmit] Sending to database:", eventData);
-
-      // First try to insert the event
-      const firstAttempt = await supabase
-        .from('events')
-        .insert(eventData)
-        .select();
-
-      // Initialize a variable to hold our result data
-      let resultData = firstAttempt.data;
-      let error = firstAttempt.error;
-
-      if (error) {
-        // Check if this is the neighborhood_id error in activities table 
-        // (We know this specific error happens during the trigger operation)
-        if (error.code === '42703' && error.message.includes('activities')) {
-          // This is a known issue with the activities trigger - we'll try a modified approach
-          console.log("[useEventSubmit] Detected activities table error, attempting workaround...");
-          
-          // IMPORTANT: Create a clone of the original data to avoid modifying the original
-          // We need to keep neighborhood_id for the events table but avoid it for the activities trigger
-          const modifiedEventData = { ...eventData };
-          
-          // Instead of trying to insert to both tables at once (which fails due to activities trigger),
-          // we'll split this into two operations: first insert to events, then manually create the activity
-          const insertResult = await supabase
-            .from('events')
-            .insert(modifiedEventData)
-            .select();
-            
-          if (insertResult.error) {
-            // If insertion still fails, log and throw error
-            console.error("[useEventSubmit] Event insertion failed:", insertResult.error);
-            throw insertResult.error;
-          }
-          
-          resultData = insertResult.data;
-          
-          // If the event was created successfully, but we still need to create an activity
-          if (resultData && resultData[0]) {
-            // Now manually create the activity record without using the neighborhood_id field
-            try {
-              const { error: activityError } = await supabase
-                .from('activities')
-                .insert({
-                  actor_id: user.id,
-                  activity_type: 'event_created',
-                  content_id: resultData[0].id,
-                  content_type: 'events',
-                  title: formData.title
-                  // Intentionally omit neighborhood_id here
-                });
-                
-              if (activityError) {
-                // Log the activity creation error but don't throw - event was still created
-                console.warn("[useEventSubmit] Activity creation failed, but event was created:", activityError);
-              } else {
-                console.log("[useEventSubmit] Activity created successfully");
-              }
-            } catch (activityError) {
-              console.warn("[useEventSubmit] Activity creation error:", activityError);
-              // Don't throw, as the event was still created
-            }
-          }
-          
-          // Success notification for the workaround
-          toast.success("Event created successfully");
-          console.log("[useEventSubmit] Successfully created event with workaround");
-        } else {
-          // Log detailed error information for other errors
-          console.error("[useEventSubmit] Error inserting event:", {
-            error: {
-              message: error.message,
-              details: error.details,
-              hint: error.hint,
-              code: error.code
-            },
-            userId: user.id,
-            neighborhoodId: neighborhood.id,
-            timestamp: new Date().toISOString()
-          });
-          throw error;
-        }
-      } else {
-        // Log success information
-        console.log("[useEventSubmit] Event created successfully:", {
-          eventId: resultData?.[0]?.id,
-          userId: user.id,
-          neighborhoodId: neighborhood.id,
-          timestamp: new Date().toISOString()
-        });
-
-        // Success notification
-        toast.success("Event created successfully");
-      }
+      // Create the event in the database
+      const data = await createEvent(eventData, user.id, formData.title);
+      
+      // Success notification 
+      toast.success("Event created successfully");
       
       // Invalidate the events query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['events'] });
@@ -178,7 +76,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       
       onSuccess();
       
-      return resultData;
+      return data;
     } catch (error: any) {
       console.error('[useEventSubmit] Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
@@ -210,69 +108,11 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Transform the date and time fields into a single ISO timestamp
-      const combinedTime = formData.date && formData.time 
-        ? `${formData.date}T${formData.time}` 
-        : null;
+      // Transform the update data
+      const eventData = transformEventUpdateData(formData);
 
-      // IMPORTANT: Filter to only include fields that exist in the database schema
-      const eventData = {
-        title: formData.title,
-        description: formData.description,
-        time: combinedTime, // Use the combined timestamp
-        location: formData.location
-        // Do NOT include UI-only fields like isRecurring, recurrencePattern, etc.
-      };
-
-      // Log the actual data being sent to the database for debugging
-      console.log("[useEventSubmit] Sending update to database:", {
-        eventId,
-        ...eventData
-      });
-
-      const { error, data } = await supabase
-        .from('events')
-        .update(eventData)
-        .eq('id', eventId)
-        .eq('host_id', user.id)
-        .select();
-
-      if (error) {
-        // Log detailed error information
-        console.error("[useEventSubmit] Error updating event:", {
-          error: {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          },
-          eventId,
-          userId: user.id,
-          timestamp: new Date().toISOString()
-        });
-        throw error;
-      }
-
-      // Log success information
-      console.log("[useEventSubmit] Event updated successfully:", {
-        eventId,
-        userId: user.id,
-        timestamp: new Date().toISOString()
-      });
-
-      // After successful update, also update any activities related to this event
-      // This ensures that the activity feed shows the updated event title
-      const { error: activityError } = await supabase
-        .from('activities')
-        .update({ title: formData.title })
-        .eq('content_type', 'events')
-        .eq('content_id', eventId);
-        
-      if (activityError) {
-        console.error("[useEventSubmit] Error updating related activities:", activityError);
-      } else {
-        console.log("[useEventSubmit] Successfully updated related activities");
-      }
+      // Update the event in the database
+      const data = await updateEvent(eventId, eventData, user.id, formData.title);
 
       // Success notification
       toast.success("Event updated successfully");
@@ -284,7 +124,6 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       // Dispatch a custom event to signal that an event was updated
-      // This will trigger a data refresh in components listening for this event
       const customEvent = new Event('event-submitted');
       document.dispatchEvent(customEvent);
       
