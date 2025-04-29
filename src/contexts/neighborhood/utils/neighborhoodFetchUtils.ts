@@ -47,7 +47,35 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
 };
 
 /**
- * Fetch neighborhood memberships for a specific user
+ * Fetch all neighborhoods (for authorized users)
+ * 
+ * @returns Promise with array of all neighborhoods the user can access
+ */
+export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
+  try {
+    console.log("[fetchAllNeighborhoods] Fetching all accessible neighborhoods");
+    
+    // Use the get_user_neighborhoods_simple RPC function added in the migrations
+    const { data, error } = await supabase
+      .rpc('get_user_neighborhoods_simple', {
+        user_uuid: supabase.auth.getUser().then(res => res.data.user?.id)
+      });
+    
+    if (error) {
+      console.error("[fetchAllNeighborhoods] Error:", error.message);
+      return [];
+    }
+    
+    console.log(`[fetchAllNeighborhoods] Found ${data?.length || 0} accessible neighborhoods`);
+    return data as Neighborhood[] || [];
+  } catch (error: any) {
+    console.error("[fetchAllNeighborhoods] Unexpected error:", error);
+    return [];
+  }
+};
+
+/**
+ * Fetch user memberships for a specific user
  * 
  * @param userId - The ID of the user
  * @returns Neighborhood memberships
