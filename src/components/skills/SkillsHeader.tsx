@@ -53,15 +53,15 @@ const SkillsHeader = ({
   }, [searchQuery, showCategories, onViewChange]);
 
   return (
-    <div className="flex items-center justify-between py-2 pb-6 flex-nowrap gap-4">
-      <div className="flex items-center gap-4">
-        {/* Search input field */}
-        <div className="relative w-[200px] flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+    <div className="flex items-center justify-between py-1 pb-4 flex-nowrap gap-2">
+      <div className="flex items-center gap-2">
+        {/* Search input field - Reduced width and adjusted left padding */}
+        <div className="relative w-[160px] flex-shrink-0">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input 
             type="search" 
-            placeholder="Search for skills..." 
-            className="pl-10" 
+            placeholder="Search skills..." 
+            className="pl-8" 
             value={searchQuery} 
             onChange={e => setSearchQuery(e.target.value)} 
           />
