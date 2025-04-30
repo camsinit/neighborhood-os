@@ -5,7 +5,7 @@ import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import ModuleLayout from "@/components/layout/ModuleLayout";
-import LoggingControls from "@/components/debug/LoggingControls";
+// Removed LoggingControls import as it's now in DiagnosticsPanel
 
 /**
  * CalendarPage component
@@ -42,7 +42,7 @@ const CalendarPage = () => {
         <GodModeSelector />
       </div>
       <CommunityCalendar />
-      <LoggingControls />
+      {/* Removed LoggingControls component from here */}
     </ModuleLayout>
   );
 }

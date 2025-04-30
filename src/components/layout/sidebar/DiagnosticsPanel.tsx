@@ -7,6 +7,7 @@
  */
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood';
+import LoggingControls from '@/components/debug/LoggingControls';
 
 // Define the component props interface
 interface DiagnosticsPanelProps {
@@ -17,6 +18,7 @@ interface DiagnosticsPanelProps {
 /**
  * DiagnosticsPanel displays basic debugging information in the sidebar
  * This simplified version has removed the core contributor functionality
+ * Now includes the LoggingControls component
  */
 const DiagnosticsPanel = ({ 
   user,
@@ -48,6 +50,9 @@ const DiagnosticsPanel = ({
           <span className="text-amber-700">⚠️ No neighborhood</span>
         )}
       </div>
+      
+      {/* Integrated LoggingControls component */}
+      <LoggingControls />
     </div>
   );
 };
