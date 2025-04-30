@@ -14,6 +14,21 @@ interface DayCellProps {
   onAddEvent?: (date: Date) => void; // Add callback for handling new event creation
 }
 
+/**
+ * DayCell component represents a single day in the calendar grid
+ * 
+ * It displays:
+ * - The date number
+ * - Events scheduled for that date
+ * - An "add event" button that appears on hover
+ * 
+ * @param date - The date this cell represents
+ * @param isCurrentMonth - Whether this date is in the current month (for styling)
+ * @param events - List of events for this date
+ * @param isLoading - Whether events are loading
+ * @param className - Additional CSS classes
+ * @param onAddEvent - Callback function when user clicks "+" button to add an event
+ */
 const DayCell = ({ 
   date, 
   isCurrentMonth = true, 
@@ -29,13 +44,14 @@ const DayCell = ({
         ${isToday(date) ? 'outline outline-1 outline-[#0EA5E9] outline-offset-[-1px] z-10' : ''}
         ${className}
       `}
+      data-date={format(date, 'yyyy-MM-dd')} // Add data attribute for date identification
     >
       {/* Add Event Button - Hidden by default, shown on hover */}
       <button
-        onClick={() => onAddEvent?.(date)}
+        onClick={() => onAddEvent?.(date)} // Pass the cell's date to the callback
         className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 
                  opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-        aria-label="Add event"
+        aria-label={`Add event on ${format(date, 'MMM d, yyyy')}`} // Improved accessibility
       >
         <Plus className="h-4 w-4 text-gray-600" />
       </button>
