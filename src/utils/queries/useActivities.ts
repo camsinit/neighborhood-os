@@ -29,19 +29,21 @@ export const useActivities = () => {
     retry: 1, // Only retry once to avoid repeated errors
     staleTime: 2 * 60 * 1000, // 2 minutes
     
-    // Updated error handling using onError property directly at root level (for v5)
-    onError: (error: Error) => {
-      console.error("[useActivities] Error fetching activities:", error);
-        
-      // Check for common RLS errors
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (
-        errorMessage.includes("infinite recursion") || 
-        errorMessage.includes("permission denied") ||
-        errorMessage.includes("violates row-level security")
-      ) {
-        // This is likely an RLS policy issue
-        console.warn("[useActivities] Detected RLS policy error:", errorMessage);
+    // In TanStack Query v5, onError is part of meta options
+    meta: {
+      onError: (error: Error) => {
+        console.error("[useActivities] Error fetching activities:", error);
+          
+        // Check for common RLS errors
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (
+          errorMessage.includes("infinite recursion") || 
+          errorMessage.includes("permission denied") ||
+          errorMessage.includes("violates row-level security")
+        ) {
+          // This is likely an RLS policy issue
+          console.warn("[useActivities] Detected RLS policy error:", errorMessage);
+        }
       }
     }
   });
