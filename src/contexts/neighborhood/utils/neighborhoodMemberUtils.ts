@@ -3,6 +3,7 @@
  * Utility functions for neighborhood membership operations
  * 
  * These functions use security definer functions to avoid recursive RLS issues.
+ * They have been updated to fix recursion problems in RLS policies.
  */
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,33 +19,24 @@ export const checkNeighborhoodMembership = async (
   neighborhoodId: string
 ): Promise<boolean> => {
   try {
-    // Try to use the security definer function
+    console.log(`[checkNeighborhoodMembership] Checking if user ${userId} is a member of ${neighborhoodId}`);
+    
+    // Direct query approach to avoid recursion
     const { data, error } = await supabase
-      .rpc('user_is_neighborhood_member', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
+      .from('neighborhood_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active')
+      .maybeSingle();
       
     if (error) {
-      console.error("[checkNeighborhoodMembership] RPC error:", error);
-      
-      // Fall back to direct query if RPC fails
-      const { data: memberData, error: memberError } = await supabase
-        .from('neighborhood_members')
-        .select('neighborhood_id')
-        .eq('user_id', userId)
-        .eq('neighborhood_id', neighborhoodId)
-        .eq('status', 'active')
-        .maybeSingle();
-        
-      if (memberError) {
-        console.error("[checkNeighborhoodMembership] Fallback query error:", memberError);
-        return false;
-      }
-      
-      return !!memberData;
+      // Log the error but don't throw - return false instead
+      console.error("[checkNeighborhoodMembership] Query error:", error);
+      return false;
     }
     
+    // Return true if we found a record, false otherwise
     return !!data;
   } catch (error) {
     console.error("[checkNeighborhoodMembership] Unexpected error:", error);
@@ -64,32 +56,23 @@ export const checkUserCreatedNeighborhood = async (
   neighborhoodId: string
 ): Promise<boolean> => {
   try {
-    // Try to use a security definer function
+    console.log(`[checkUserCreatedNeighborhood] Checking if user ${userId} created neighborhood ${neighborhoodId}`);
+    
+    // Direct query approach - simple and avoids recursion
     const { data, error } = await supabase
-      .rpc('user_created_neighborhood', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
+      .from('neighborhoods')
+      .select('id')
+      .eq('id', neighborhoodId)
+      .eq('created_by', userId)
+      .maybeSingle();
       
     if (error) {
-      console.error("[checkUserCreatedNeighborhood] RPC error:", error);
-      
-      // Fall back to direct query if RPC fails
-      const { data: neighborhoodData, error: neighborhoodError } = await supabase
-        .from('neighborhoods')
-        .select('id')
-        .eq('id', neighborhoodId)
-        .eq('created_by', userId)
-        .maybeSingle();
-        
-      if (neighborhoodError) {
-        console.error("[checkUserCreatedNeighborhood] Fallback query error:", neighborhoodError);
-        return false;
-      }
-      
-      return !!neighborhoodData;
+      // Log the error but don't throw - return false instead
+      console.error("[checkUserCreatedNeighborhood] Query error:", error);
+      return false;
     }
     
+    // Return true if we found a record, false otherwise
     return !!data;
   } catch (error) {
     console.error("[checkUserCreatedNeighborhood] Unexpected error:", error);
@@ -109,34 +92,31 @@ export const addNeighborhoodMember = async (
   neighborhoodId: string
 ): Promise<boolean> => {
   try {
-    // Try to use a security definer function
-    const { data, error } = await supabase
-      .rpc('add_neighborhood_member', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
+    console.log(`[addNeighborhoodMember] Adding user ${userId} to neighborhood ${neighborhoodId}`);
+    
+    // First check if the user is already a member
+    const isMember = await checkNeighborhoodMembership(userId, neighborhoodId);
+    
+    if (isMember) {
+      console.log("[addNeighborhoodMember] User is already a member");
+      return true; // Already a member, consider it success
+    }
+    
+    // Direct insert - simple and avoids recursion
+    const { error } = await supabase
+      .from('neighborhood_members')
+      .insert({
+        user_id: userId,
+        neighborhood_id: neighborhoodId,
+        status: 'active'
       });
       
     if (error) {
-      console.error("[addNeighborhoodMember] RPC error:", error);
-      
-      // Fall back to direct insert if RPC fails
-      const { error: insertError } = await supabase
-        .from('neighborhood_members')
-        .insert({
-          user_id: userId,
-          neighborhood_id: neighborhoodId,
-          status: 'active'
-        });
-        
-      if (insertError) {
-        console.error("[addNeighborhoodMember] Fallback insert error:", insertError);
-        return false;
-      }
-      
-      return true;
+      console.error("[addNeighborhoodMember] Insert error:", error);
+      return false;
     }
     
-    return !!data;
+    return true;
   } catch (error) {
     console.error("[addNeighborhoodMember] Unexpected error:", error);
     return false;
