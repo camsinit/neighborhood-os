@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 /**
  * Component to display the feed of neighborhood activities
  * 
- * Now with improved error handling and recovery options
+ * Now with improved error handling, recovery options and detailed debugging
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
@@ -22,16 +21,38 @@ const ActivityFeed = () => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  // Add debug logging to understand what's happening with the activities data
+  useEffect(() => {
+    // Log the raw activities data to see what we're getting
+    console.log("[ActivityFeed] Raw activities data:", activities);
+    
+    if (activities?.length === 0) {
+      console.log("[ActivityFeed] Activities array is empty");
+    } else if (!activities) {
+      console.log("[ActivityFeed] Activities is undefined or null");
+    } else {
+      console.log(`[ActivityFeed] Found ${activities.length} activities`);
+      
+      // Check if we're filtering out all activities
+      const nonDeleted = activities.filter(activity => !activity.metadata?.deleted);
+      console.log(`[ActivityFeed] After filtering deleted: ${nonDeleted.length} activities`);
+    }
+  }, [activities]);
+
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
 
-  // Filter out deleted activities
-  const filteredActivities = activities?.filter(activity => 
+  // Filter out deleted activities, but keep a reference to see if filtering is the issue
+  const allActivities = activities || [];
+  const filteredActivities = allActivities.filter(activity => 
     !activity.metadata?.deleted
-  ) || [];
+  );
+
+  console.log("[ActivityFeed] All activities count:", allActivities.length);
+  console.log("[ActivityFeed] Filtered activities count:", filteredActivities.length);
 
   // Handler for load more button
   const handleLoadMore = () => {
@@ -88,13 +109,18 @@ const ActivityFeed = () => {
   }
 
   // Display a message when there are no activities
-  if (!filteredActivities?.length) {
+  // Ensure we properly check both the raw data and filtered data
+  if (!allActivities?.length || !filteredActivities?.length) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
         <div className="text-center p-6">
-          <p className="text-gray-500 text-lg mb-2">No new neighborhood activity</p>
+          <p className="text-gray-500 text-lg mb-2">
+            {!allActivities?.length ? "No new neighborhood activity" : "All activities have been filtered out"}
+          </p>
           <p className="text-gray-400 text-sm mb-4">
-            Activities will appear here as neighbors post updates, create events, and share resources.
+            {!allActivities?.length 
+              ? "Activities will appear here as neighbors post updates, create events, and share resources."
+              : "There are activities in the database, but they've been filtered out, possibly because they're marked as deleted."}
           </p>
           <Button variant="outline" onClick={handleRetry} className="flex items-center gap-2">
             <RefreshCw className="h-3.5 w-3.5" />

@@ -1,7 +1,7 @@
 
 /**
  * Service layer for fetching neighborhood activities
- * Enhanced with better error handling for RLS policy issues
+ * Enhanced with better error handling for RLS policy issues and profile handling
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "./types";
@@ -27,14 +27,17 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       
       if (!rpcError && rpcData) {
         console.log(`[fetchActivities] Successfully fetched ${rpcData.length} activities via RPC`);
-        // Add the missing profiles property to each activity
+        
+        // Map the data to include the required profiles property
         const activitiesWithProfiles = (rpcData as any[]).map(activity => ({
           ...activity,
+          // Add the required profiles property to make TypeScript happy
           profiles: {
-            display_name: "Unknown", // Default values when profiles aren't fetched
+            display_name: "Neighbor", // Default values when profiles aren't fetched
             avatar_url: ""
           }
         }));
+        
         return activitiesWithProfiles as Activity[];
       } else {
         console.warn("[fetchActivities] RPC method failed:", rpcError);
@@ -47,13 +50,15 @@ export const fetchActivities = async (): Promise<Activity[]> => {
     try {
       const { data: directData, error: directError } = await runWithAuthCheck(
         async () => {
-          // Temporarily disable RLS policies by setting a special flag in the request
+          console.log("[fetchActivities] Attempting direct query");
+          // Try to fetch activities directly
           const { data, error } = await supabase
             .from('activities')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(20);
             
+          console.log("[fetchActivities] Direct query result:", { data: data?.length, error });
           return { data, error };
         },
         'fetchActivities'
@@ -71,16 +76,16 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       
       console.log(`[fetchActivities] Successfully fetched ${directData.length} activities via direct query`);
       
-      // Add the missing profiles property to each activity
-      const activitiesWithProfiles = (directData as any[]).map(activity => ({
+      // Create properly typed activities with the required profiles property
+      const activitiesWithProfiles: Activity[] = (directData as any[]).map(activity => ({
         ...activity,
         profiles: {
-          display_name: "Unknown", // Default values when profiles aren't fetched
+          display_name: "Neighbor", // Default values when profiles aren't fetched
           avatar_url: ""
         }
       }));
       
-      return activitiesWithProfiles as Activity[];
+      return activitiesWithProfiles;
       
     } catch (directErr) {
       console.error("[fetchActivities] Failed to fetch activities via direct query:", directErr);
