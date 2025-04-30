@@ -27,7 +27,15 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       
       if (!rpcError && rpcData) {
         console.log(`[fetchActivities] Successfully fetched ${rpcData.length} activities via RPC`);
-        return rpcData as Activity[];
+        // Add the missing profiles property to each activity
+        const activitiesWithProfiles = (rpcData as any[]).map(activity => ({
+          ...activity,
+          profiles: {
+            display_name: "Unknown", // Default values when profiles aren't fetched
+            avatar_url: ""
+          }
+        }));
+        return activitiesWithProfiles as Activity[];
       } else {
         console.warn("[fetchActivities] RPC method failed:", rpcError);
       }
@@ -62,7 +70,17 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       }
       
       console.log(`[fetchActivities] Successfully fetched ${directData.length} activities via direct query`);
-      return directData as Activity[];
+      
+      // Add the missing profiles property to each activity
+      const activitiesWithProfiles = (directData as any[]).map(activity => ({
+        ...activity,
+        profiles: {
+          display_name: "Unknown", // Default values when profiles aren't fetched
+          avatar_url: ""
+        }
+      }));
+      
+      return activitiesWithProfiles as Activity[];
       
     } catch (directErr) {
       console.error("[fetchActivities] Failed to fetch activities via direct query:", directErr);
@@ -91,6 +109,7 @@ const getMockActivities = (): Activity[] => {
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   
+  // Mock data with the required profiles property
   return [
     {
       id: '1',
@@ -102,6 +121,10 @@ const getMockActivities = (): Activity[] => {
       created_at: now.toISOString(),
       metadata: {
         description: 'Join us for a neighborhood BBQ at the park!'
+      },
+      profiles: {
+        display_name: "Jane Neighbor",
+        avatar_url: ""
       }
     },
     {
@@ -114,6 +137,10 @@ const getMockActivities = (): Activity[] => {
       created_at: yesterday.toISOString(),
       metadata: {
         description: 'I can help teach basic programming skills'
+      },
+      profiles: {
+        display_name: "Mark Helper",
+        avatar_url: ""
       }
     },
     {
@@ -126,6 +153,10 @@ const getMockActivities = (): Activity[] => {
       created_at: lastWeek.toISOString(),
       metadata: {
         description: 'Main Street will be closed for repairs next weekend'
+      },
+      profiles: {
+        display_name: "Jane Neighbor",
+        avatar_url: ""
       }
     }
   ];

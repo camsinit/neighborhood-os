@@ -41,7 +41,7 @@ const HomePage = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
             
             {error ? (
-              <Alert variant="warning" className="mb-6">
+              <Alert variant="destructive" className="mb-6">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Database Access Issue</AlertTitle>
                 <AlertDescription className="mt-2">

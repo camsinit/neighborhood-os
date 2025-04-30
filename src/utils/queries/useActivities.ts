@@ -22,24 +22,28 @@ export { isContentDeleted };
 export const useActivities = () => {
   const { toast } = useToast();
 
+  // Using the updated TanStack Query v5 format for onError
   const query = useQuery({
     queryKey: ["activities"],
     queryFn: fetchActivities,
     retry: 1, // Only retry once to avoid repeated errors
     staleTime: 2 * 60 * 1000, // 2 minutes
-    // Add onError callback for better error handling
-    onError: (error) => {
-      console.error("[useActivities] Error fetching activities:", error);
-      
-      // Check for common RLS errors
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (
-        errorMessage.includes("infinite recursion") || 
-        errorMessage.includes("permission denied") ||
-        errorMessage.includes("violates row-level security")
-      ) {
-        // This is likely an RLS policy issue
-        console.warn("[useActivities] Detected RLS policy error:", errorMessage);
+    meta: {
+      // In v5 of React Query, onError is passed in meta
+      // or you can use the onError property of the useQuery result
+      errorHandler: (error: Error) => {
+        console.error("[useActivities] Error fetching activities:", error);
+        
+        // Check for common RLS errors
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (
+          errorMessage.includes("infinite recursion") || 
+          errorMessage.includes("permission denied") ||
+          errorMessage.includes("violates row-level security")
+        ) {
+          // This is likely an RLS policy issue
+          console.warn("[useActivities] Detected RLS policy error:", errorMessage);
+        }
       }
     }
   });
