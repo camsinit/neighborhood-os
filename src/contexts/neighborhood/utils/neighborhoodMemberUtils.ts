@@ -18,7 +18,7 @@ export const checkNeighborhoodMembership = async (
   neighborhoodId: string
 ): Promise<boolean> => {
   try {
-    // Try to use a security definer function
+    // Try to use the security definer function
     const { data, error } = await supabase
       .rpc('user_is_neighborhood_member', {
         user_uuid: userId,
