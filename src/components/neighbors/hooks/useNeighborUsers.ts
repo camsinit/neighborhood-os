@@ -42,19 +42,34 @@ export const useNeighborUsers = () => {
             throw error;
           }
           
+          // Type safely check if profiles exist and is an array
+          if (!profiles || !Array.isArray(profiles)) {
+            console.warn("[useNeighborUsers] No profiles returned or invalid data format");
+            return [];
+          }
+          
           console.log("[useNeighborUsers] Fetched profiles as fallback:", {
-            count: profiles?.length || 0
+            count: profiles.length
           });
+          
+          // Create an array of IDs for the email lookup
+          const userIds = profiles.map((p: any) => p.id);
           
           // Get the user emails through a separate RPC call
           const { data: authUsers, error: authError } = await supabase
             .rpc('get_visible_user_emails', {
-              user_ids: profiles.map((p: any) => p.id)
+              user_ids: userIds
             });
             
           if (authError) {
             console.error("[useNeighborUsers] Error fetching auth users:", authError);
             throw authError;
+          }
+          
+          // Type safely check if authUsers exists and is an array
+          if (!authUsers || !Array.isArray(authUsers)) {
+            console.warn("[useNeighborUsers] No auth users returned or invalid data format");
+            return [];
           }
           
           // Transform data into expected format
@@ -103,9 +118,9 @@ export const useNeighborUsers = () => {
           throw memberError;
         }
         
-        // If no members found, return empty array
-        if (!memberData || memberData.length === 0) {
-          console.log("[useNeighborUsers] No members found, returning empty array");
+        // Type safely check if memberData exists and is an array
+        if (!memberData || !Array.isArray(memberData)) {
+          console.log("[useNeighborUsers] No members found or invalid data format, returning empty array");
           return [];
         }
         

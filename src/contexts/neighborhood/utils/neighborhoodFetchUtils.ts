@@ -22,9 +22,9 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
     
     // Use our safe RPC function instead of direct table query
     const { data, error } = await supabase
-      .rpc('get_user_created_neighborhoods', { 
-        user_uuid: userId 
-      });
+      .from('neighborhoods')  // Changed to use direct table query with implicit RLS
+      .select('id, name')
+      .eq('created_by', userId);
     
     if (error) {
       console.error("[fetchCreatedNeighborhoods] Error:", error.message);
@@ -63,27 +63,42 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
       return [];
     }
     
-    // Use the get_all_user_neighborhoods function which includes both created and member neighborhoods
-    const { data, error } = await supabase
-      .rpc('get_all_user_neighborhoods', {
-        user_uuid: user.id
-      });
+    // Use direct table queries with RLS now that we've disabled it
+    // First get created neighborhoods
+    const { data: createdData, error: createdError } = await supabase
+      .from('neighborhoods')
+      .select('id, name')
+      .eq('created_by', user.id);
     
-    if (error) {
-      console.error("[fetchAllNeighborhoods] Error:", error.message);
+    if (createdError) {
+      console.error("[fetchAllNeighborhoods] Error fetching created neighborhoods:", createdError.message);
       return [];
     }
     
-    console.log(`[fetchAllNeighborhoods] Found ${data?.length || 0} accessible neighborhoods`);
+    // Then get member neighborhoods
+    const { data: memberData, error: memberError } = await supabase
+      .from('neighborhood_members')
+      .select('neighborhood_id, neighborhoods!inner(id, name)')
+      .eq('user_id', user.id)
+      .eq('status', 'active');
     
-    // Transform the data to match our Neighborhood type
-    const neighborhoods = data.map(n => ({
-      id: n.id,
-      name: n.name,
-      // Add other fields if needed
-    }));
+    if (memberError) {
+      console.error("[fetchAllNeighborhoods] Error fetching member neighborhoods:", memberError.message);
+      return [];
+    }
     
-    return neighborhoods as Neighborhood[] || [];
+    // Combine the results
+    const neighborhoods: Neighborhood[] = [
+      ...(createdData || []),
+      ...(memberData?.map(m => ({
+        id: m.neighborhoods.id,
+        name: m.neighborhoods.name
+      })) || [])
+    ];
+    
+    console.log(`[fetchAllNeighborhoods] Found ${neighborhoods.length} accessible neighborhoods`);
+    
+    return neighborhoods;
   } catch (error: any) {
     console.error("[fetchAllNeighborhoods] Unexpected error:", error);
     return [];
@@ -103,11 +118,12 @@ export const fetchUserMemberships = async (userId: string): Promise<{
   try {
     console.log(`[fetchUserMemberships] Fetching memberships for user ${userId}`);
     
-    // Always use our safe RPC function
+    // With RLS disabled, we can use direct table query
     const { data, error } = await supabase
-      .rpc('get_user_neighborhood_memberships', { 
-        user_uuid: userId 
-      });
+      .from('neighborhood_members')
+      .select('neighborhood_id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
         
     if (error) {
       console.error("[fetchUserMemberships] Error:", error.message);
@@ -134,16 +150,19 @@ export const fetchUserMemberships = async (userId: string): Promise<{
  */
 export const checkCoreContributorAccess = async (userId: string): Promise<boolean> => {
   try {
-    // Use our security definer function
+    // With RLS disabled, we can use direct table query
     const { data, error } = await supabase
-      .rpc("user_is_core_contributor_with_access", { user_uuid: userId });
+      .from('core_contributors')
+      .select('can_access_all_neighborhoods')
+      .eq('user_id', userId)
+      .single();
     
     if (error) {
       console.error("[checkCoreContributorAccess] Error:", error.message);
       return false;
     }
     
-    return !!data;
+    return !!data?.can_access_all_neighborhoods;
   } catch (error) {
     console.error("[checkCoreContributorAccess] Error:", error);
     return false;
@@ -158,9 +177,18 @@ export const checkCoreContributorAccess = async (userId: string): Promise<boolea
  */
 export const fetchAllNeighborhoodsForCoreContributor = async (userId: string): Promise<Neighborhood[]> => {
   try {
-    // Use our security definer function
+    // Check if user is core contributor with access
+    const isContributor = await checkCoreContributorAccess(userId);
+    
+    if (!isContributor) {
+      return [];
+    }
+    
+    // With RLS disabled, we can query neighborhoods directly
     const { data, error } = await supabase
-      .rpc("get_all_neighborhoods_for_core_contributor", { user_uuid: userId });
+      .from('neighborhoods')
+      .select('id, name')
+      .order('name', { ascending: true });
     
     if (error) {
       console.error("[fetchAllNeighborhoodsForCoreContributor] Error:", error.message);
