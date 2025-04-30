@@ -23,6 +23,9 @@ import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
 import { useToast } from "@/components/ui/use-toast";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { createLogger } from "@/utils/logger";
+
+const logger = createLogger('CommunityCalendar');
 
 const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());

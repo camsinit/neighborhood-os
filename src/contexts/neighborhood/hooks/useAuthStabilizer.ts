@@ -7,6 +7,9 @@
  */
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('AuthStabilizer');
 
 /**
  * Custom hook to stabilize authentication state
@@ -26,7 +29,7 @@ export function useAuthStabilizer(user: User | null | undefined) {
       // Small delay to ensure auth is fully processed
       const timer = setTimeout(() => {
         setIsAuthStable(true);
-        console.log("[useAuthStabilizer] Auth state stabilized:", { 
+        logger.debug("Auth state stabilized:", { 
           isLoggedIn: !!user, 
           userId: user?.id
         });

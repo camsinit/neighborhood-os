@@ -1,3 +1,4 @@
+
 /**
  * Hook for monitoring neighborhood data loading state
  *
@@ -6,6 +7,9 @@
 import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '../types';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('NeighborhoodMonitor');
 
 /**
  * Props for the useNeighborhoodMonitor hook
@@ -35,17 +39,21 @@ export function useNeighborhoodMonitor({
   setIsLoading,
   setError
 }: UseNeighborhoodMonitorProps) {
-  // Log state changes for debugging
+  // Log state changes for debugging only when something important changes
   useEffect(() => {
-    console.log("[useNeighborhoodMonitor] State updated:", {
-      currentNeighborhood,
-      isLoading,
-      error: error?.message || null,
-      userId: user?.id,
-      fetchAttempts,
-      timestamp: new Date().toISOString()
-    });
-  }, [currentNeighborhood, isLoading, error, user, fetchAttempts]);
+    // Only log when something important changes - not on every render
+    if (isLoading || error || fetchAttempts > 0) {
+      logger.debug("State updated:", {
+        hasNeighborhood: !!currentNeighborhood,
+        neighborhoodId: currentNeighborhood?.id,
+        isLoading,
+        error: error?.message || null,
+        userId: user?.id,
+        fetchAttempts,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [currentNeighborhood?.id, isLoading, error, user?.id, fetchAttempts]);
   
   // Add a safety timeout to ensure loading state is eventually cleared
   useEffect(() => {
@@ -58,7 +66,7 @@ export function useNeighborhoodMonitor({
     // even if the fetch operation gets stuck
     const safetyTimer = setTimeout(() => {
       if (isLoading) {
-        console.warn("[useNeighborhoodMonitor] Safety timeout triggered - fetch operation took too long");
+        logger.warn("Safety timeout triggered - fetch operation took too long");
         setIsLoading(false);
         setError(new Error("Neighborhood data fetch timed out"));
       }

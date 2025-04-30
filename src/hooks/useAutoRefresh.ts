@@ -1,6 +1,9 @@
 
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('AutoRefresh');
 
 /**
  * Custom hook to automatically refresh data when specific events occur
@@ -22,13 +25,12 @@ export const useAutoRefresh = (
   useEffect(() => {
     // Create a handler function for the events
     const handleRefresh = (event: Event) => {
-      console.log(`Event "${event.type}" triggered, refreshing queries: ${queryKeys.join(', ')}`);
+      logger.debug(`Event "${event.type}" triggered refreshing ${queryKeys.length} queries`);
       
       // Add a small delay to ensure the database has time to update
       setTimeout(() => {
         // Invalidate each query key to trigger a refetch
         queryKeys.forEach(key => {
-          console.log(`Invalidating query: ${key}`);
           queryClient.invalidateQueries({ queryKey: [key] });
         });
       }, refreshDelay);
@@ -36,14 +38,14 @@ export const useAutoRefresh = (
 
     // Add event listeners for each event name
     eventNames.forEach(eventName => {
-      console.log(`Setting up listener for "${eventName}" event`);
+      logger.debug(`Setting up listener for "${eventName}" event`);
       document.addEventListener(eventName, handleRefresh);
     });
     
     // Clean up event listeners when component unmounts
     return () => {
       eventNames.forEach(eventName => {
-        console.log(`Removing listener for "${eventName}" event`);
+        logger.debug(`Removing listener for "${eventName}" event`);
         document.removeEventListener(eventName, handleRefresh);
       });
     };

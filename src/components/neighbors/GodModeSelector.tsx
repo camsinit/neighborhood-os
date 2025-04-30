@@ -7,7 +7,6 @@
  */
 const GodModeSelector = () => {
   // This component has been disabled and returns null
-  console.log("[GodModeSelector] Component disabled");
   return null;
 };
 

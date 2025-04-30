@@ -10,6 +10,9 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Neighborhood } from "@/contexts/neighborhood/types";
+import { createLogger } from "@/utils/logger";
+
+const logger = createLogger('CurrentNeighborhood');
 
 /**
  * Custom hook to get the current neighborhood
@@ -45,14 +48,17 @@ export const useCurrentNeighborhood = (): Neighborhood | null => {
           timestamp: new Date().toISOString()
         });
         
-        console.log("[useCurrentNeighborhood] Auth Context Check:", {
-          authContextExists: !!authResult,
-          authUserId: authResult?.[0]?.id,
-          currentUserId: user?.id,
-          neighborhoodID: currentNeighborhood?.id
-        });
+        // Only log if there's a problem
+        if (!authResult || authResult[0]?.id !== user?.id) {
+          logger.warn("Auth Context Check Failed:", {
+            authContextExists: !!authResult,
+            authUserId: authResult?.[0]?.id,
+            currentUserId: user?.id,
+            neighborhoodID: currentNeighborhood?.id
+          });
+        }
       } catch (error) {
-        console.error("[useCurrentNeighborhood] Auth context check failed:", error);
+        logger.error("Auth context check failed:", error);
       }
     };
     
@@ -62,27 +68,15 @@ export const useCurrentNeighborhood = (): Neighborhood | null => {
     }
   }, [user, currentNeighborhood]);
   
-  // Log the current neighborhood status with enhanced details for better debugging
-  console.log("[useCurrentNeighborhood] Checking neighborhood context:", { 
-    hasNeighborhood: !!currentNeighborhood?.id,
-    neighborhoodId: currentNeighborhood?.id,
-    neighborhoodName: currentNeighborhood?.name,
-    timestamp: new Date().toISOString(),
-    authStatus: !!user,
-    userId: user?.id,
-  });
-  
   // UPDATED: Return the entire neighborhood object (or null) instead of just the ID
   if (!currentNeighborhood?.id) {
-    console.warn("[useCurrentNeighborhood] No neighborhood selected - returning null");
+    logger.debug("No neighborhood selected - returning null");
     return null;
   }
   
-  console.log("[useCurrentNeighborhood] ✅ Valid neighborhood found:", { 
+  logger.debug("Valid neighborhood found:", { 
     neighborhoodId: currentNeighborhood.id,
-    neighborhoodName: currentNeighborhood.name,
-    timestamp: new Date().toISOString(),
-    userId: user?.id
+    neighborhoodName: currentNeighborhood.name
   });
   
   return currentNeighborhood;

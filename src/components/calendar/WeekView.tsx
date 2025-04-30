@@ -4,6 +4,10 @@ import { Event } from "@/types/calendar";
 import DayCell from "./DayCell";
 import AddEventDialog from "../AddEventDialog";
 import { format } from "date-fns";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for the WeekView component
+const logger = createLogger('WeekView');
 
 interface WeekViewProps {
   weekDates: Date[];
@@ -34,7 +38,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
 
   // Handler for adding a new event
   const handleAddEvent = (date: Date) => {
-    console.log("[WeekView] Opening add event dialog for date:", format(date, 'yyyy-MM-dd'));
+    logger.debug(`Opening add event dialog for date: ${format(date, 'yyyy-MM-dd')}`);
     setSelectedDate(date);
     setIsAddEventOpen(true);
   };

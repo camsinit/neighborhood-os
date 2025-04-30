@@ -4,6 +4,10 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from
 import { Event } from '@/types/calendar';
 import DayCell from './DayCell';
 import AddEventDialog from '../AddEventDialog';
+import { createLogger } from '@/utils/logger';
+
+// Create a logger for the MonthView component
+const logger = createLogger('MonthView');
 
 interface MonthViewProps {
   currentDate: Date;
@@ -35,7 +39,7 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
 
   // Handler for adding new events - stores the selected date and opens dialog
   const handleAddEvent = (date: Date) => {
-    console.log("[MonthView] Opening add event dialog for date:", format(date, 'yyyy-MM-dd'));
+    logger.debug(`Opening add event dialog for date: ${format(date, 'yyyy-MM-dd')}`);
     setSelectedDate(date);
     setIsAddEventOpen(true);
   };

@@ -13,6 +13,9 @@ import {
   fetchAllNeighborhoodsForCoreContributor
 } from '../utils/neighborhoodFetchUtils';
 import { supabase } from '@/integrations/supabase/client';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('FetchNeighborhood');
 
 /**
  * Custom hook that focuses on fetching neighborhood data
@@ -62,10 +65,10 @@ export function useFetchNeighborhood(
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
       if (createdError) {
-        console.warn("[useFetchNeighborhood] Error getting created neighborhoods:", createdError);
+        logger.warn("Error getting created neighborhoods:", createdError);
       } else if (createdNeighborhoods && createdNeighborhoods.length > 0) {
         // Found created neighborhoods
-        console.log("[useFetchNeighborhood] Found created neighborhoods:", createdNeighborhoods);
+        logger.debug("Found created neighborhoods:", createdNeighborhoods.length);
         setCurrentNeighborhood(createdNeighborhoods[0]);
         completeFetch(startTime);
         return;
@@ -81,7 +84,7 @@ export function useFetchNeighborhood(
           .eq('status', 'active');
         
         if (membershipError) {
-          console.warn("[useFetchNeighborhood] Error getting neighborhood memberships:", membershipError);
+          logger.warn("Error getting neighborhood memberships:", membershipError);
         } else if (memberships && memberships.length > 0) {
           // Found membership - now get the neighborhood details
           const { data: neighborhood, error: neighborhoodError } = await supabase
@@ -91,19 +94,19 @@ export function useFetchNeighborhood(
             .single();
           
           if (neighborhoodError) {
-            console.warn("[useFetchNeighborhood] Error getting neighborhood details:", neighborhoodError);
+            logger.warn("Error getting neighborhood details:", neighborhoodError);
           } else if (neighborhood) {
-            console.log("[useFetchNeighborhood] Found neighborhood via membership:", neighborhood);
+            logger.debug("Found neighborhood via membership:", neighborhood.name);
             setCurrentNeighborhood(neighborhood as Neighborhood);
             completeFetch(startTime);
             return;
           }
         }
       } catch (memErr) {
-        console.warn("[useFetchNeighborhood] Exception in membership check:", memErr);
+        logger.warn("Exception in membership check:", memErr);
       }
       
-      console.log("[useFetchNeighborhood] No neighborhoods found (attempt " + fetchAttempts + ")");
+      logger.debug("No neighborhoods found (attempt " + fetchAttempts + ")");
       setCurrentNeighborhood(null);
       
       // Always ensure loading is set to false when done

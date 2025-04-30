@@ -5,6 +5,7 @@ import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { createHighlightListener } from "@/utils/highlightNavigation";
 import ModuleLayout from "@/components/layout/ModuleLayout";
+import LoggingControls from "@/components/debug/LoggingControls";
 
 /**
  * CalendarPage component
@@ -41,6 +42,7 @@ const CalendarPage = () => {
         <GodModeSelector />
       </div>
       <CommunityCalendar />
+      <LoggingControls />
     </ModuleLayout>
   );
 }
