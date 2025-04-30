@@ -30,7 +30,6 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
    * Create a new safety update
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
-    // Check user authentication
     if (!user) {
       toast.error("You must be logged in to create a safety update");
       return;
@@ -69,26 +68,6 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         console.error("[useSafetyUpdateSubmit] Error:", error);
         setError(error);
         throw error;
-      }
-
-      // Call the edge function to handle activity feed updates
-      if (data && data.length > 0) {
-        const safetyUpdateId = data[0].id;
-        
-        const { error: edgeFunctionError } = await supabase.functions.invoke(
-          'notify-safety-changes', {
-          body: {
-            safetyUpdateId,
-            action: 'update',
-            safetyUpdateTitle: formData.title,
-            userId: user.id,
-            neighborhoodId: neighborhood.id,
-          }
-        });
-
-        if (edgeFunctionError) {
-          console.error("[useSafetyUpdateSubmit] Error calling edge function:", edgeFunctionError);
-        }
       }
 
       // Success handling
@@ -150,22 +129,6 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         console.error("[useSafetyUpdateSubmit] Error:", error);
         setError(error);
         throw error;
-      }
-
-      // Call edge function to update activities
-      const { error: edgeFunctionError } = await supabase.functions.invoke(
-        'notify-safety-changes', {
-        body: {
-          safetyUpdateId: updateId,
-          action: 'update',
-          safetyUpdateTitle: formData.title,
-          userId: user.id,
-          neighborhoodId: neighborhood?.id,
-        }
-      });
-
-      if (edgeFunctionError) {
-        console.error("[useSafetyUpdateSubmit] Error calling edge function:", edgeFunctionError);
       }
 
       // Success handling

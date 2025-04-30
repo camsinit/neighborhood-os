@@ -7,7 +7,8 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * This version uses direct table access since RLS is temporarily disabled
+ * This updated version uses the simplified RLS policies to avoid 
+ * the recursion issue when fetching neighbor information
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -30,30 +31,23 @@ export const useNeighborUsers = () => {
         console.log("[useNeighborUsers] No neighborhood found, fetching all profiles as fallback");
         
         try {
-          // Since RLS is disabled, we can directly query profiles
+          // Simple query to get all profiles
           const { data: profiles, error } = await supabase
             .from('profiles')
-            .select('*')
-            .limit(20);
+            .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
+            .limit(20); // Limit to a reasonable number
             
           if (error) {
             console.error("[useNeighborUsers] Error fetching profiles:", error);
             throw error;
           }
           
-          if (!profiles || !Array.isArray(profiles)) {
-            console.warn("[useNeighborUsers] No profiles returned or invalid data format");
-            return [];
-          }
-          
           console.log("[useNeighborUsers] Fetched profiles as fallback:", {
-            count: profiles.length
+            count: profiles?.length || 0
           });
           
-          // Create an array of IDs for the email lookup
-          const userIds = profiles.map((p: any) => p.id);
-          
-          // Get the user emails through the auth.users_view (since RLS is disabled)
+          // Get the user emails
+          const userIds = profiles.map(p => p.id);
           const { data: authUsers, error: authError } = await supabase
             .from('auth_users_view')
             .select('id, email, created_at')
@@ -66,7 +60,7 @@ export const useNeighborUsers = () => {
           
           // Transform data into expected format
           const usersWithProfiles = profiles.map((profile: any) => {
-            const authUser = authUsers?.find((u: any) => u.id === profile.id);
+            const authUser = authUsers.find((u: any) => u.id === profile.id);
             
             return {
               id: profile.id,
@@ -95,33 +89,14 @@ export const useNeighborUsers = () => {
         }
       }
 
-      // For neighborhoods, directly query the members with a join
+      // For neighborhoods, use direct queries with our simplified RLS policies
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // Since RLS is disabled, we can directly join the tables
+        // Get member IDs directly - our simplified policies should handle access control
         const { data: memberData, error: memberError } = await supabase
           .from('neighborhood_members')
-          .select(`
-            user_id,
-            status,
-            joined_at,
-            profiles:user_id(
-              display_name, 
-              avatar_url, 
-              address, 
-              phone_number, 
-              access_needs,
-              email_visible,
-              phone_visible,
-              address_visible,
-              needs_visible,
-              bio
-            ),
-            users:user_id(
-              email
-            )
-          `)
+          .select('user_id')
           .eq('neighborhood_id', currentNeighborhood.id)
           .eq('status', 'active');
           
@@ -130,31 +105,70 @@ export const useNeighborUsers = () => {
           throw memberError;
         }
         
-        if (!memberData || !Array.isArray(memberData)) {
-          console.log("[useNeighborUsers] No members found or invalid data format, returning empty array");
+        // Extract user IDs from member data
+        const memberIds = memberData.map(m => m.user_id);
+        
+        // If no members found, return empty array
+        if (!memberIds || memberIds.length === 0) {
+          console.log("[useNeighborUsers] No members found, returning empty array");
           return [];
         }
         
+        // Also add creator as a member if not already included
+        const creatorId = currentNeighborhood.created_by;
+        if (creatorId && !memberIds.includes(creatorId)) {
+          memberIds.push(creatorId);
+        }
+        
         console.log("[useNeighborUsers] Found neighborhood members:", {
-          memberCount: memberData.length,
+          memberCount: memberIds.length,
           neighborhoodId: currentNeighborhood.id
         });
         
+        // Fetch profiles for all members
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url, address, email_visible, phone_visible, address_visible, needs_visible, phone_number, access_needs, bio')
+          .in('id', memberIds);
+          
+        if (profilesError) {
+          console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
+          throw profilesError;
+        }
+        
+        // Get auth details (emails)
+        const { data: authUsers, error: authError } = await supabase
+          .from('auth_users_view')
+          .select('id, email, created_at')
+          .in('id', memberIds);
+          
+        if (authError) {
+          console.error("[useNeighborUsers] Error fetching auth users:", authError);
+          throw authError;
+        }
+        
+        // Debug log 
+        console.log("[useNeighborUsers] Found neighbors:", {
+          memberCount: memberIds.length,
+          profilesCount: profiles?.length || 0,
+          authUsersCount: authUsers?.length || 0
+        });
+        
         // Transform data into expected format
-        const usersWithProfiles = memberData.map((member: any) => {
-          const profile = member.profiles || {};
+        const usersWithProfiles = profiles.map((profile: any) => {
+          const authUser = authUsers.find((u: any) => u.id === profile.id);
           
           return {
-            id: member.user_id,
-            email: member.users?.email,
-            created_at: member.joined_at,
+            id: profile.id,
+            email: authUser?.email,
+            created_at: authUser?.created_at,
             roles: ['user'], // Default role
             profiles: {
               display_name: profile.display_name || 'Neighbor',
               avatar_url: profile.avatar_url,
-              address: profile.address_visible ? profile.address : null,
-              phone_number: profile.phone_visible ? profile.phone_number : null,
-              access_needs: profile.needs_visible ? profile.access_needs : null,
+              address: profile.address,
+              phone_number: profile.phone_number,
+              access_needs: profile.access_needs,
               email_visible: profile.email_visible,
               phone_visible: profile.phone_visible,
               address_visible: profile.address_visible,

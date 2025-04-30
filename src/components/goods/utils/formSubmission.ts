@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from '@/components/support/types/formTypes';
@@ -22,7 +21,7 @@ export const formatOfferSubmission = async (
   validUntil.setDate(validUntil.getDate() + (itemFormData.availableDays || 30));
   
   // Debug log to verify what we're submitting
-  console.log('[formatOfferSubmission] Formatting offer submission:', {
+  console.log('Formatting offer submission:', {
     title: itemFormData.title,
     description: itemFormData.description,
     category: 'goods', 
@@ -64,7 +63,7 @@ export const formatRequestSubmission = async (
   validUntil.setDate(validUntil.getDate() + 30);
   
   // Debug log to verify what we're submitting
-  console.log('[formatRequestSubmission] Formatting request submission:', {
+  console.log('Formatting request submission:', {
     title: requestFormData.title,
     description: requestFormData.description,
     category: 'goods',
@@ -110,8 +109,6 @@ export const notifyGoodsChanges = async (
   urgency?: string,
 ) => {
   try {
-    console.log(`[notifyGoodsChanges] Notifying about ${action} for goods item: ${goodsItemTitle} in neighborhood: ${neighborhoodId}`);
-    
     // Call the edge function
     const { error } = await supabase.functions.invoke(
       'notify-goods-changes',
@@ -179,19 +176,16 @@ export const submitGoodsForm = async (
   ).toString();
 
   try {
-    // Validate neighborhood ID
     if (!neighborhoodId) {
-      console.error("[submitGoodsForm] Missing neighborhood_id in submission");
+      console.error("Missing neighborhood_id in submission");
       toast.error("There was a problem: Missing neighborhood information");
       return null;
     }
     
-    console.log(`[submitGoodsForm] Submitting goods form (${mode}) for user: ${userId} in neighborhood: ${neighborhoodId}`);
-    
     let formattedData, data;
     
     if (mode === 'delete' && goodsItemId) {
-      console.log(`[submitGoodsForm] Deleting goods item: ${goodsItemId}`);
+      console.log(`Deleting goods item: ${goodsItemId}`);
       
       const { error, data: deletedData } = await supabase
         .from('goods_exchange')
@@ -200,23 +194,8 @@ export const submitGoodsForm = async (
         .eq('user_id', userId)
         .select();
       
-      if (error) {
-        console.error("[submitGoodsForm] Error deleting goods item:", error);
-        throw error;
-      }
+      if (error) throw error;
       data = deletedData;
-      
-      // After successful deletion, notify edge function
-      if (data && data.length > 0) {
-        await notifyGoodsChanges(
-          goodsItemId,
-          'delete',
-          data[0].title,
-          userId,
-          data[0].request_type,
-          neighborhoodId
-        );
-      }
       
     } else if (mode === 'update' && goodsItemId) {
       formattedData = isOfferForm
@@ -225,7 +204,7 @@ export const submitGoodsForm = async (
       
       const { user_id, ...updateData } = formattedData;
       
-      console.log("[submitGoodsForm] Updating goods exchange item:", goodsItemId, updateData);
+      console.log("Updating goods exchange item:", goodsItemId, updateData);
       
       const { error, data: updatedData } = await supabase
         .from('goods_exchange')
@@ -234,63 +213,29 @@ export const submitGoodsForm = async (
         .eq('user_id', userId)
         .select();
       
-      if (error) {
-        console.error("[submitGoodsForm] Error updating goods item:", error);
-        throw error;
-      }
+      if (error) throw error;
       data = updatedData;
-      
-      // After successful update, notify edge function
-      if (data && data.length > 0) {
-        await notifyGoodsChanges(
-          goodsItemId,
-          'update',
-          data[0].title,
-          userId,
-          data[0].request_type,
-          neighborhoodId,
-          data[0].goods_category,
-          data[0].urgency
-        );
-      }
       
     } else {
       formattedData = isOfferForm
         ? { ...await formatOfferSubmission(itemFormData, userId), neighborhood_id: neighborhoodId }
         : { ...await formatRequestSubmission(requestFormData, userId), neighborhood_id: neighborhoodId };
       
-      console.log("[submitGoodsForm] Creating goods exchange item:", formattedData);
+      console.log("Creating goods exchange item:", formattedData);
       
       const { error, data: insertedData } = await supabase
         .from('goods_exchange')
         .insert(formattedData)
         .select();
       
-      if (error) {
-        console.error("[submitGoodsForm] Error inserting goods item:", error);
-        throw error;
-      }
+      if (error) throw error;
       data = insertedData;
-      
-      // After successful creation, notify edge function
-      if (data && data.length > 0) {
-        await notifyGoodsChanges(
-          data[0].id,
-          'create',
-          data[0].title,
-          userId,
-          data[0].request_type,
-          neighborhoodId,
-          data[0].goods_category,
-          data[0].urgency
-        );
-      }
     }
     
     // Dismiss loading toast and show success
     if (loadingToastId) {
       toast.dismiss(loadingToastId);
-      loadingToastId = '';
+      loadingToastId = undefined;
     }
     
     toast.success(
@@ -309,7 +254,7 @@ export const submitGoodsForm = async (
     return data;
     
   } catch (error) {
-    console.error("[submitGoodsForm] Error in goods form submission:", error);
+    console.error("Error in goods form submission:", error);
     // Ensure we're dismissing the toast with the correct type
     if (loadingToastId) {
       toast.dismiss(loadingToastId);

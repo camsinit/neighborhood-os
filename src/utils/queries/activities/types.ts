@@ -20,14 +20,7 @@ export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'go
 export interface ActivityMetadata {
   deleted?: boolean;
   original_title?: string;
-  description?: string;
   [key: string]: any;
-}
-
-// Profile information that must be included with each activity
-export interface ActivityProfile {
-  display_name: string;
-  avatar_url: string;
 }
 
 // Main Activity interface
@@ -40,6 +33,8 @@ export interface Activity {
   title: string;
   created_at: string;
   metadata?: ActivityMetadata;
-  neighborhood_id?: string; // Optional for backward compatibility
-  profiles: ActivityProfile; // This is required according to the error message
+  profiles: {
+    display_name: string;
+    avatar_url: string;
+  };
 }

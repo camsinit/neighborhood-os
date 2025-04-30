@@ -129,6 +129,45 @@ export type Database = {
           },
         ]
       }
+      core_contributors: {
+        Row: {
+          can_access_all_neighborhoods: boolean | null
+          created_at: string
+          created_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          can_access_all_neighborhoods?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          can_access_all_neighborhoods?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_contributors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_contributors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "auth_users_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -1125,18 +1164,18 @@ export type Database = {
         }
         Returns: Json
       }
-      get_activities_safe: {
-        Args: { user_uuid: string; limit_count?: number }
+      get_all_neighborhoods_for_core_contributor: {
+        Args: { user_uuid: string }
         Returns: {
-          id: string
-          actor_id: string
-          activity_type: string
-          content_id: string
-          content_type: string
-          title: string
+          address: string | null
+          city: string | null
           created_at: string
-          metadata: Json
-          neighborhood_id: string
+          created_by: string
+          geo_boundary: Json | null
+          id: string
+          name: string
+          state: string | null
+          zip: string | null
         }[]
       }
       get_all_neighborhoods_safe: {
@@ -1151,15 +1190,6 @@ export type Database = {
           name: string
           state: string | null
           zip: string | null
-        }[]
-      }
-      get_all_user_neighborhoods: {
-        Args: { user_uuid: string }
-        Returns: {
-          id: string
-          name: string
-          joined_at: string
-          is_creator: boolean
         }[]
       }
       get_neighborhood_members: {
@@ -1251,12 +1281,12 @@ export type Database = {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
-      user_is_neighborhood_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+      user_is_core_contributor_with_access: {
+        Args: { user_uuid: string }
         Returns: boolean
       }
-      users_share_neighborhood: {
-        Args: { user_a: string; user_b: string }
+      user_is_neighborhood_member: {
+        Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
     }

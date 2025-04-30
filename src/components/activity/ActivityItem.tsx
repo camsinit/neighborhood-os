@@ -84,16 +84,7 @@ const ActivityItem = ({
   const navigate = useNavigate();
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
-  
-  // Safely handle the date - sometimes created_at might be missing or invalid
-  let timeAgo = "recent";
-  try {
-    if (activity.created_at) {
-      timeAgo = getCompactTimeAgo(new Date(activity.created_at));
-    }
-  } catch (error) {
-    console.error("[ActivityItem] Error parsing date:", error);
-  }
+  const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
   
   // Check if this is a skill-related activity
   const isSkillActivity = activity.activity_type === 'skill_offered' || 
@@ -101,9 +92,6 @@ const ActivityItem = ({
                           
   // Check if the content has been deleted
   const isDeleted = activity.metadata?.deleted === true;
-  
-  // Ensure we have a profiles object even if it's missing in the data
-  const profiles = activity.profiles || { display_name: "Neighbor", avatar_url: "" };
 
   /**
    * Determine the activity type and corresponding item type for highlighting
@@ -169,7 +157,7 @@ const ActivityItem = ({
             <TooltipTrigger asChild>
               <div className="flex-shrink-0 mr-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={profiles.avatar_url} />
+                  <AvatarImage src={activity.profiles.avatar_url} />
                   <AvatarFallback>
                     <User className="h-4 w-4" />
                   </AvatarFallback>
@@ -177,7 +165,7 @@ const ActivityItem = ({
               </div>
             </TooltipTrigger>
             <TooltipContent className="bg-gray-800 text-white">
-              <p>{profiles.display_name || "Neighbor"}</p>
+              <p>{activity.profiles.display_name || "Neighbor"}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

@@ -1,4 +1,3 @@
-
 /**
  * Event services for database operations
  * 
@@ -26,38 +25,22 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
     .select();
 
   if (error) {
-    // Check for Row Level Security (RLS) errors
-    if (error.code === '42501' || error.message.includes('policy')) {
-      console.error("[eventServices] RLS policy error - likely neighborhood access issue:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        timestamp: new Date().toISOString()
-      });
-      
-      throw new Error("You don't have permission to create events in this neighborhood. Please check your neighborhood membership.");
-    } else {
-      // Log detailed error information for other types of errors
-      console.error("[eventServices] Error inserting event:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        timestamp: new Date().toISOString()
-      });
-      throw error;
-    }
+    // Log detailed error information
+    console.error("[eventServices] Error inserting event:", {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
+      timestamp: new Date().toISOString()
+    });
+    throw error;
   }
 
   // Log success information
   console.log("[eventServices] Event created successfully:", {
     eventId: data?.[0]?.id,
-    neighborhoodId: eventData.neighborhood_id,
     timestamp: new Date().toISOString()
   });
   
@@ -97,40 +80,23 @@ export const updateEvent = async (
     .select();
 
   if (error) {
-    // Check for Row Level Security (RLS) errors
-    if (error.code === '42501' || error.message.includes('policy')) {
-      console.error("[eventServices] RLS policy error - likely neighborhood access issue:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        eventId,
-        timestamp: new Date().toISOString()
-      });
-      
-      throw new Error("You don't have permission to update events in this neighborhood. Please check your neighborhood membership.");
-    } else {
-      // Log detailed error information for other types of errors
-      console.error("[eventServices] Error updating event:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        eventId,
-        timestamp: new Date().toISOString()
-      });
-      throw error;
-    }
+    // Log detailed error information
+    console.error("[eventServices] Error updating event:", {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
+      eventId,
+      timestamp: new Date().toISOString()
+    });
+    throw error;
   }
 
   // Log success information
   console.log("[eventServices] Event updated successfully:", {
     eventId,
-    neighborhoodId: eventData.neighborhood_id,
     timestamp: new Date().toISOString()
   });
 

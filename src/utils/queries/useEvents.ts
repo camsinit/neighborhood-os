@@ -1,5 +1,4 @@
 
-
 import { useQuery } from "@tanstack/react-query";
 import { Event } from "@/types/calendar";
 import { supabase } from "@/integrations/supabase/client";

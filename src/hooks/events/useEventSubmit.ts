@@ -1,4 +1,3 @@
-
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";

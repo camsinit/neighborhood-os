@@ -1,5 +1,4 @@
 
-
 /**
  * Utility functions to handle the activities table operations
  * 
