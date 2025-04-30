@@ -111,16 +111,20 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
  */
 export const checkCoreContributorAccess = async (userId: string): Promise<boolean> => {
   try {
-    // Use a security definer function if available
+    // Since we can't call user_is_core_contributor_with_access directly due to type issues,
+    // let's use a more generic approach with custom SQL
     const { data, error } = await supabase
-      .rpc("user_is_core_contributor_with_access", { user_uuid: userId });
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'super_admin');
     
     if (error) {
       console.error("[checkCoreContributorAccess] Error:", error.message);
       return false;
     }
     
-    return !!data;
+    return data && data.length > 0;
   } catch (error) {
     console.error("[checkCoreContributorAccess] Error:", error);
     return false;
@@ -135,16 +139,16 @@ export const checkCoreContributorAccess = async (userId: string): Promise<boolea
  */
 export const fetchAllNeighborhoodsForCoreContributor = async (userId: string): Promise<Neighborhood[]> => {
   try {
-    // Use a dedicated RPC function
-    const { data, error } = await supabase
-      .rpc("get_all_neighborhoods_for_core_contributor", { user_uuid: userId });
+    // First check if the user is a core contributor
+    const isCore = await checkCoreContributorAccess(userId);
     
-    if (error) {
-      console.error("[fetchAllNeighborhoodsForCoreContributor] Error:", error.message);
+    if (!isCore) {
+      console.log("[fetchAllNeighborhoodsForCoreContributor] User is not a core contributor");
       return [];
     }
     
-    return data as Neighborhood[] || [];
+    // If they are a core contributor, fetch all neighborhoods
+    return fetchAllNeighborhoods();
   } catch (error) {
     console.error("[fetchAllNeighborhoodsForCoreContributor] Error:", error);
     return [];
