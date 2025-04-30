@@ -1,21 +1,23 @@
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 /**
  * Component to display the feed of neighborhood activities
- * Now with load more button and initial limit of 4 items
+ * 
+ * Now with improved error handling and recovery options
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
   const [displayCount, setDisplayCount] = useState(4);
-  const { data: activities, isLoading } = useActivities();
+  const { data: activities, isLoading, error, refetch } = useActivities();
   const { toast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -35,6 +37,15 @@ const ActivityFeed = () => {
   const handleLoadMore = () => {
     setDisplayCount(prev => prev + 4);
   };
+  
+  // Handler for retry
+  const handleRetry = () => {
+    refetch();
+    toast({
+      title: "Retrying...",
+      description: "Attempting to fetch neighborhood activities",
+    });
+  };
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
@@ -51,12 +62,45 @@ const ActivityFeed = () => {
       </div>
     );
   }
+  
+  // Display error state
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-6">
+        <AlertTitle>Error loading activity feed</AlertTitle>
+        <AlertDescription className="mt-2">
+          <p className="text-sm mb-4">
+            We couldn't load the neighborhood activity feed due to a database permission issue.
+            This is likely related to the recent Row-Level Security policy changes.
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleRetry}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Retry Loading Activities
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   // Display a message when there are no activities
   if (!filteredActivities?.length) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500 text-lg">No new neighborhood activity</p>
+        <div className="text-center p-6">
+          <p className="text-gray-500 text-lg mb-2">No new neighborhood activity</p>
+          <p className="text-gray-400 text-sm mb-4">
+            Activities will appear here as neighbors post updates, create events, and share resources.
+          </p>
+          <Button variant="outline" onClick={handleRetry} className="flex items-center gap-2">
+            <RefreshCw className="h-3.5 w-3.5" />
+            Refresh
+          </Button>
+        </div>
       </div>
     );
   }
