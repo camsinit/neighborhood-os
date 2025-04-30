@@ -7,8 +7,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * This updated version uses RPC functions to avoid the recursion issue
- * when fetching neighbor information
+ * This version uses direct table access since RLS is temporarily disabled
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -31,18 +30,17 @@ export const useNeighborUsers = () => {
         console.log("[useNeighborUsers] No neighborhood found, fetching all profiles as fallback");
         
         try {
-          // Use our RPC function to get profiles safely
+          // Since RLS is disabled, we can directly query profiles
           const { data: profiles, error } = await supabase
-            .rpc('get_publicly_visible_profiles', {
-              limit_num: 20
-            });
+            .from('profiles')
+            .select('*')
+            .limit(20);
             
           if (error) {
             console.error("[useNeighborUsers] Error fetching profiles:", error);
             throw error;
           }
           
-          // Type safely check if profiles exist and is an array
           if (!profiles || !Array.isArray(profiles)) {
             console.warn("[useNeighborUsers] No profiles returned or invalid data format");
             return [];
@@ -55,26 +53,20 @@ export const useNeighborUsers = () => {
           // Create an array of IDs for the email lookup
           const userIds = profiles.map((p: any) => p.id);
           
-          // Get the user emails through a separate RPC call
+          // Get the user emails through the auth.users_view (since RLS is disabled)
           const { data: authUsers, error: authError } = await supabase
-            .rpc('get_visible_user_emails', {
-              user_ids: userIds
-            });
+            .from('auth_users_view')
+            .select('id, email, created_at')
+            .in('id', userIds);
             
           if (authError) {
             console.error("[useNeighborUsers] Error fetching auth users:", authError);
             throw authError;
           }
           
-          // Type safely check if authUsers exists and is an array
-          if (!authUsers || !Array.isArray(authUsers)) {
-            console.warn("[useNeighborUsers] No auth users returned or invalid data format");
-            return [];
-          }
-          
           // Transform data into expected format
           const usersWithProfiles = profiles.map((profile: any) => {
-            const authUser = authUsers.find((u: any) => u.id === profile.id);
+            const authUser = authUsers?.find((u: any) => u.id === profile.id);
             
             return {
               id: profile.id,
@@ -103,22 +95,41 @@ export const useNeighborUsers = () => {
         }
       }
 
-      // For neighborhoods, use RPC function for member data
+      // For neighborhoods, directly query the members with a join
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // Get members using our RPC function
+        // Since RLS is disabled, we can directly join the tables
         const { data: memberData, error: memberError } = await supabase
-          .rpc('get_neighborhood_members_with_profiles', {
-            neighborhood_uuid: currentNeighborhood.id
-          });
+          .from('neighborhood_members')
+          .select(`
+            user_id,
+            status,
+            joined_at,
+            profiles:user_id(
+              display_name, 
+              avatar_url, 
+              address, 
+              phone_number, 
+              access_needs,
+              email_visible,
+              phone_visible,
+              address_visible,
+              needs_visible,
+              bio
+            ),
+            users:user_id(
+              email
+            )
+          `)
+          .eq('neighborhood_id', currentNeighborhood.id)
+          .eq('status', 'active');
           
         if (memberError) {
           console.error("[useNeighborUsers] Error fetching neighborhood members:", memberError);
           throw memberError;
         }
         
-        // Type safely check if memberData exists and is an array
         if (!memberData || !Array.isArray(memberData)) {
           console.log("[useNeighborUsers] No members found or invalid data format, returning empty array");
           return [];
@@ -131,22 +142,24 @@ export const useNeighborUsers = () => {
         
         // Transform data into expected format
         const usersWithProfiles = memberData.map((member: any) => {
+          const profile = member.profiles || {};
+          
           return {
             id: member.user_id,
-            email: member.email,
-            created_at: null, // We don't have this information in the response
+            email: member.users?.email,
+            created_at: member.joined_at,
             roles: ['user'], // Default role
             profiles: {
-              display_name: member.display_name || 'Neighbor',
-              avatar_url: member.avatar_url,
-              address: member.address_visible ? member.address : null,
-              phone_number: member.phone_visible ? member.phone_number : null,
-              access_needs: member.needs_visible ? member.access_needs : null,
-              email_visible: member.email_visible,
-              phone_visible: member.phone_visible,
-              address_visible: member.address_visible,
-              needs_visible: member.needs_visible,
-              bio: member.bio
+              display_name: profile.display_name || 'Neighbor',
+              avatar_url: profile.avatar_url,
+              address: profile.address_visible ? profile.address : null,
+              phone_number: profile.phone_visible ? profile.phone_number : null,
+              access_needs: profile.needs_visible ? profile.access_needs : null,
+              email_visible: profile.email_visible,
+              phone_visible: profile.phone_visible,
+              address_visible: profile.address_visible,
+              needs_visible: profile.needs_visible,
+              bio: profile.bio
             }
           };
         });

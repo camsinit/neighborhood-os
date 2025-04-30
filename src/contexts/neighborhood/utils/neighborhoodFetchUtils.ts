@@ -2,7 +2,7 @@
 /**
  * Neighborhood fetching utilities
  * 
- * These utilities use our security definer functions to avoid recursion.
+ * These utilities use direct table queries since RLS is temporarily disabled.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -20,9 +20,9 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
   try {
     console.log(`[fetchCreatedNeighborhoods] Fetching neighborhoods created by user ${userId}`);
     
-    // Use our safe RPC function instead of direct table query
+    // Use direct table query instead of RPC since RLS is disabled
     const { data, error } = await supabase
-      .from('neighborhoods')  // Changed to use direct table query with implicit RLS
+      .from('neighborhoods')
       .select('id, name')
       .eq('created_by', userId);
     
@@ -63,7 +63,7 @@ export const fetchAllNeighborhoods = async (): Promise<Neighborhood[]> => {
       return [];
     }
     
-    // Use direct table queries with RLS now that we've disabled it
+    // Use direct table queries since RLS is disabled
     // First get created neighborhoods
     const { data: createdData, error: createdError } = await supabase
       .from('neighborhoods')
