@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -31,17 +32,18 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Processing ${action} notification for event: ${eventTitle}`);
 
     // Get all RSVPs for this event along with user profiles
+    // Use explicit table aliases to avoid ambiguous column references
     const { data: rsvps, error: rsvpError } = await supabaseClient
-      .from('event_rsvps')
+      .from('event_rsvps as er')  // Add table alias
       .select(`
-        user_id,
-        profiles:user_id (
+        er.user_id,
+        profiles:er.user_id (  // Use table alias in the join
           id,
           username,
           notification_preferences
         )
       `)
-      .eq('event_id', eventId);
+      .eq('er.event_id', eventId);  // Use table alias for the column reference
 
     if (rsvpError) {
       console.error('Error fetching RSVPs:', rsvpError);
