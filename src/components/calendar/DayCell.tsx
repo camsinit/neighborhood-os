@@ -3,7 +3,7 @@ import { format, isToday } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus } from "lucide-react"; // Import the Plus icon
 import EventCard from "../EventCard";
-import { Event } from "@/types/calendar";
+import { Event } from "@/types/localTypes"; // Import from localTypes instead of calendar
 
 interface DayCellProps {
   date: Date;
@@ -69,10 +69,8 @@ const DayCell = ({
           events.map((event) => (
             <EventCard 
               key={event.id} 
-              event={{
-                ...event,
-                color: "bg-blue-100 border-blue-300",
-              }}
+              event={event}
+              // Note: We don't need to pass color anymore as it's handled within EventCard
             />
           ))
         )}
