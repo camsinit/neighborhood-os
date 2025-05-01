@@ -120,25 +120,17 @@ const RSVPButton = ({
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
-        // Add RSVP - Use explicit object with all fields we need to insert
-        // This avoids ambiguous column references in the database triggers
+        // Add RSVP - Use explicit object with only the essential fields
         logger.debug("Adding RSVP with:", { 
           eventId, 
-          userId: user.id,
-          neighborhoodId: eventNeighborhoodId 
+          userId: user.id
         });
         
-        // Create an explicit insert object that avoids column ambiguity
+        // Create a minimal insert object that avoids column ambiguity
         const rsvpData = {
           event_id: eventId,
           user_id: user.id
         };
-        
-        // Only add neighborhood_id if we have it
-        if (eventNeighborhoodId) {
-          // @ts-ignore - We're adding a dynamic property
-          rsvpData.neighborhood_id = eventNeighborhoodId;
-        }
         
         const { error } = await supabase
           .from('event_rsvps')
