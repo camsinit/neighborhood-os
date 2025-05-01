@@ -2,9 +2,11 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Event } from "@/types/localTypes"; // Changed from calendar to localTypes
 import { format, parseISO } from "date-fns";
-import { ClockIcon, MapPinIcon, UserIcon } from "lucide-react";
+import { ClockIcon, MapPinIcon, UserIcon, Pencil } from "lucide-react";
 import RSVPButton from "./RSVPButton";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { useUser } from "@supabase/auth-helpers-react";
+import EditEventDialog from "./EditEventDialog";
 
 interface EventHoverCardProps {
   event: Event;
@@ -14,10 +16,18 @@ interface EventHoverCardProps {
 /**
  * EventHoverCard component displays a hover card with event details
  * 
+ * This component:
+ * - Shows detailed event information when hovering over an event in the calendar
+ * - Shows either an RSVP button or Edit button depending on if the user is the host
+ * 
  * @param event - The event data to display
  * @param children - The trigger element that activates the hover card
  */
 const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
+  // Get the current user to check if they're the host
+  const user = useUser();
+  const isHost = user && user.id === event.host_id;
+  
   // Parse the event time
   const eventDate = parseISO(event.time);
   
@@ -65,12 +75,21 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
             </p>
           )}
           
-          {/* RSVP Button */}
-          <RSVPButton 
-            eventId={event.id} 
-            neighborhoodId={event.neighborhood_id}
-            className="mt-2 w-full" 
-          />
+          {/* Conditionally show Edit button or RSVP button based on whether user is the host */}
+          {isHost ? (
+            <EditEventDialog event={event}>
+              <button className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors">
+                <Pencil className="h-4 w-4" />
+                Edit Event
+              </button>
+            </EditEventDialog>
+          ) : (
+            <RSVPButton 
+              eventId={event.id} 
+              neighborhoodId={event.neighborhood_id}
+              className="mt-2 w-full" 
+            />
+          )}
         </div>
       </HoverCardContent>
     </HoverCard>
