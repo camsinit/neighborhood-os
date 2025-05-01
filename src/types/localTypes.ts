@@ -39,6 +39,7 @@ export interface Event {
   recurrence_pattern?: string;
   recurrence_end_date?: string;
   created_at: string;
+  neighborhood_id: string; // Add neighborhood_id field which is required for activities
   profiles?: Profile; // Profile of the host
 }
 

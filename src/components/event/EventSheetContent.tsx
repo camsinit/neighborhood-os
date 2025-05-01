@@ -1,6 +1,6 @@
 
 import { Clock, MapPin, User } from "lucide-react";
-import { format } from "date-fns";
+import { parseISO } from "date-fns";
 import {
   SheetContent,
   SheetDescription,
@@ -9,6 +9,9 @@ import {
 } from "@/components/ui/sheet";
 import RSVPButton from "./RSVPButton";
 import { Event } from "@/types/localTypes";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EventSheetContentProps {
   event: Event;
@@ -29,7 +32,33 @@ interface EventSheetContentProps {
  * @param EditButton - Optional component for editing the event (shown to hosts only)
  */
 const EventSheetContent = ({ event, EditButton }: EventSheetContentProps) => {
-  const eventDate = new Date(event.time);
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>("America/Los_Angeles");
+  
+  // Get the neighborhood timezone
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (event.neighborhood_id) {
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', event.neighborhood_id)
+          .single();
+          
+        if (!error && data) {
+          setNeighborhoodTimezone(data.timezone || "America/Los_Angeles");
+        }
+      }
+    };
+    
+    fetchNeighborhoodTimezone();
+  }, [event.neighborhood_id]);
+  
+  // Format the event date in the neighborhood timezone
+  const formattedDate = formatInNeighborhoodTimezone(
+    parseISO(event.time),
+    "EEEE, MMMM d, yyyy 'at' h:mm a",
+    neighborhoodTimezone
+  );
   
   return (
     <SheetContent className="overflow-y-auto">
@@ -42,7 +71,7 @@ const EventSheetContent = ({ event, EditButton }: EventSheetContentProps) => {
           {/* Date and Time */}
           <div className="flex items-center gap-2 text-gray-600 mt-4">
             <Clock className="h-4 w-4" />
-            <span>{format(eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
+            <span>{formattedDate}</span>
           </div>
           
           {/* Location */}
@@ -69,7 +98,11 @@ const EventSheetContent = ({ event, EditButton }: EventSheetContentProps) => {
       
       {/* RSVP Button */}
       <div className="mt-6">
-        <RSVPButton eventId={event.id} className="w-full" />
+        <RSVPButton 
+          eventId={event.id} 
+          neighborhoodId={event.neighborhood_id} 
+          className="w-full hover:bg-blue-500" 
+        />
       </div>
     </SheetContent>
   );

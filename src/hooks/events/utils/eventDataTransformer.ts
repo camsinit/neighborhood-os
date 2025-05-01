@@ -1,4 +1,6 @@
 
+import { toNeighborhoodTimezone } from "@/utils/dateUtils";
+
 /**
  * Transforms event form data into the format required by the database
  * 
@@ -9,8 +11,7 @@
  */
 export const transformEventFormData = (formData: any, userId: string, neighborhoodId: string) => {
   // Construct the proper date time string
-  // We need to ensure the date is interpreted correctly without timezone shifting
-  // First, create a date object from the form date and time
+  // We need to ensure the date is interpreted correctly in the neighborhood's timezone
   const dateStr = `${formData.date}T${formData.time}`;
   
   // Log the date string to help with debugging
@@ -24,7 +25,7 @@ export const transformEventFormData = (formData: any, userId: string, neighborho
     neighborhood_id: neighborhoodId,
     // Explicitly format the time to ensure consistency
     time: dateStr,
-    // Include these fields only for UI display, not stored in DB yet
+    // Include these fields only for UI display
     is_recurring: formData.isRecurring || false,
     recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
     recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null
@@ -39,7 +40,7 @@ export const transformEventFormData = (formData: any, userId: string, neighborho
  */
 export const transformEventUpdateData = (formData: any) => {
   // Construct the proper date time string
-  // We need to ensure the date is interpreted correctly without timezone shifting
+  // We need to ensure the date is interpreted correctly in the neighborhood's timezone
   const dateStr = `${formData.date}T${formData.time}`;
   
   // Log the date string to help with debugging
@@ -51,7 +52,7 @@ export const transformEventUpdateData = (formData: any) => {
     location: formData.location,
     // Explicitly format the time to ensure consistency
     time: dateStr,
-    // Include these fields only for UI display, not stored in DB yet
+    // Include these fields for UI display
     is_recurring: formData.isRecurring || false,
     recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
     recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null

@@ -2,8 +2,9 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Event } from "@/types/localTypes"; // Changed from calendar to localTypes
 import { format, parseISO } from "date-fns";
-import { LocateIcon, MapPinIcon, ClockIcon, UserIcon } from "lucide-react";
+import { ClockIcon, MapPinIcon, UserIcon } from "lucide-react";
 import RSVPButton from "./RSVPButton";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 
 interface EventHoverCardProps {
   event: Event;
@@ -20,9 +21,9 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
   // Parse the event time
   const eventDate = parseISO(event.time);
   
-  // Calculate the specific time for display
-  const formattedTime = format(eventDate, "h:mm a");
-  const formattedDate = format(eventDate, "EEEE, MMMM d, yyyy");
+  // Calculate the specific time for display - now using timezone support
+  const formattedTime = formatInNeighborhoodTimezone(eventDate, "h:mm a", "America/Los_Angeles");
+  const formattedDate = formatInNeighborhoodTimezone(eventDate, "EEEE, MMMM d, yyyy", "America/Los_Angeles");
   
   return (
     <HoverCard>
@@ -65,7 +66,11 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
           )}
           
           {/* RSVP Button */}
-          <RSVPButton eventId={event.id} className="mt-2 w-full" />
+          <RSVPButton 
+            eventId={event.id} 
+            neighborhoodId={event.neighborhood_id}
+            className="mt-2 w-full" 
+          />
         </div>
       </HoverCardContent>
     </HoverCard>

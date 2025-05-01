@@ -134,18 +134,21 @@ export type Database = {
           created_at: string
           event_id: string
           id: string
+          neighborhood_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           event_id: string
           id?: string
+          neighborhood_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           event_id?: string
           id?: string
+          neighborhood_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -154,6 +157,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
             referencedColumns: ["id"]
           },
           {
@@ -416,6 +426,7 @@ export type Database = {
           id: string
           name: string
           state: string | null
+          timezone: string
           zip: string | null
         }
         Insert: {
@@ -427,6 +438,7 @@ export type Database = {
           id?: string
           name: string
           state?: string | null
+          timezone?: string
           zip?: string | null
         }
         Update: {
@@ -438,6 +450,7 @@ export type Database = {
           id?: string
           name?: string
           state?: string | null
+          timezone?: string
           zip?: string | null
         }
         Relationships: [
@@ -1150,6 +1163,7 @@ export type Database = {
           id: string
           name: string
           state: string | null
+          timezone: string
           zip: string | null
         }[]
       }

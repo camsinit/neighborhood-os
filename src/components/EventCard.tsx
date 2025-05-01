@@ -2,7 +2,7 @@
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Pencil, Clock, Users } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import EventHoverCard from "./event/EventHoverCard";
@@ -10,6 +10,7 @@ import EventSheetContent from "./event/EventSheetContent";
 import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 
 /**
  * EventCard component displays an event in the calendar
@@ -29,8 +30,35 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   const user = useUser();
   const [isRsvped, setIsRsvped] = useState(false);
   const [rsvpCount, setRsvpCount] = useState(0);
-  const displayTime = format(new Date(event.time), 'h:mm a');
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>("America/Los_Angeles");
+  
+  // Format display time using the neighborhood timezone
+  const displayTime = formatInNeighborhoodTimezone(
+    parseISO(event.time),
+    'h:mm a',
+    neighborhoodTimezone
+  );
+  
   const isHost = user?.id === event.host_id;
+
+  // Get the neighborhood timezone
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (event.neighborhood_id) {
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', event.neighborhood_id)
+          .single();
+          
+        if (!error && data) {
+          setNeighborhoodTimezone(data.timezone || "America/Los_Angeles");
+        }
+      }
+    };
+    
+    fetchNeighborhoodTimezone();
+  }, [event.neighborhood_id]);
 
   // Check if the current user has RSVP'd to this event and get the count
   useEffect(() => {
@@ -90,8 +118,6 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   };
 
   // Create a complete event object with all required fields
-  // Note: We're NOT adding color to the event object itself
-  // We're using it directly in the UI elements where needed
   const eventWithRequiredProps = {
     ...event,
     created_at: event.created_at || new Date().toISOString() // Ensure created_at exists
@@ -100,7 +126,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   const eventPreview = (
     <div 
       data-event-id={event.id}
-      className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full`}
+      className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors`}
     >
       <div className="font-medium line-clamp-2">{event.title}</div>
       {rsvpCount > 0 && (

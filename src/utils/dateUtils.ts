@@ -5,6 +5,8 @@
  * This file provides standardized date functions used across the application.
  * All date-related utility functions should be centralized here.
  */
+import { format, parseISO } from 'date-fns';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 /**
  * Normalize a date to an ISO string
@@ -23,6 +25,53 @@ export const normalizeDate = (date: Date): string => {
   ));
   
   return normalized.toISOString();
+};
+
+/**
+ * Format a date in the specified timezone
+ * 
+ * @param date Date to format
+ * @param format Format string to use
+ * @param timezone Timezone to use (e.g. 'America/Los_Angeles')
+ * @returns Formatted date string
+ */
+export const formatInNeighborhoodTimezone = (
+  date: Date | string,
+  formatString: string,
+  timezone: string = 'America/Los_Angeles'
+): string => {
+  // Convert string dates to Date objects if needed
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return formatInTimeZone(dateObj, timezone, formatString);
+};
+
+/**
+ * Convert a date and time to the specified timezone
+ * 
+ * @param date Date string or object
+ * @param timezone Timezone to use (e.g. 'America/Los_Angeles')
+ * @returns Date object in the specified timezone
+ */
+export const toNeighborhoodTimezone = (
+  date: Date | string,
+  timezone: string = 'America/Los_Angeles'
+): Date => {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return toZonedTime(dateObj, timezone);
+};
+
+/**
+ * Format date for display in the timezone of the neighborhood
+ * 
+ * @param dateString ISO date string
+ * @param timezone Timezone of the neighborhood
+ * @returns Formatted date string for display
+ */
+export const formatDateForDisplay = (
+  dateString: string,
+  timezone: string = 'America/Los_Angeles'
+): string => {
+  return formatInNeighborhoodTimezone(dateString, 'MMMM d, yyyy h:mm a', timezone);
 };
 
 /**
@@ -59,24 +108,4 @@ export const logDateDetails = (context: string, date: Date): void => {
     month: date.getMonth() + 1, // 0-based, so add 1
     day: date.getDate()
   });
-};
-
-/**
- * Format a date for display in the UI
- * 
- * @param dateString ISO date string
- * @returns Formatted date string for display
- */
-export const formatDateForDisplay = (dateString: string): string => {
-  // Create a new date from the ISO string
-  const date = new Date(dateString);
-  
-  // Format as "Month Day, Year" (e.g., "April 19, 2025")
-  const options: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  };
-  
-  return date.toLocaleDateString('en-US', options);
 };

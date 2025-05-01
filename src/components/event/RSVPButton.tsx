@@ -13,6 +13,7 @@ const logger = createLogger('RSVPButton');
 
 interface RSVPButtonProps {
   eventId: string;
+  neighborhoodId?: string; // Add optional neighborhoodId prop
   initialRSVPState?: boolean;
   className?: string;
 }
@@ -21,13 +22,47 @@ interface RSVPButtonProps {
  * RSVPButton component allows users to RSVP to events
  * 
  * @param eventId - The ID of the event to RSVP to
+ * @param neighborhoodId - The ID of the neighborhood the event belongs to
  * @param initialRSVPState - Whether the user has already RSVPed
  * @param className - Additional CSS classes for styling
  */
-const RSVPButton = ({ eventId, initialRSVPState = false, className }: RSVPButtonProps) => {
+const RSVPButton = ({ 
+  eventId, 
+  neighborhoodId, 
+  initialRSVPState = false, 
+  className 
+}: RSVPButtonProps) => {
   const user = useUser();
   const [hasRSVPed, setHasRSVPed] = useState(initialRSVPState);
   const [isLoading, setIsLoading] = useState(false);
+  const [eventNeighborhoodId, setEventNeighborhoodId] = useState<string | null>(neighborhoodId || null);
+
+  // Fetch the neighborhood_id from the event if not provided
+  useEffect(() => {
+    const fetchEventNeighborhoodId = async () => {
+      if (!neighborhoodId && eventId) {
+        try {
+          const { data, error } = await supabase
+            .from('events')
+            .select('neighborhood_id')
+            .eq('id', eventId)
+            .single();
+          
+          if (error) {
+            throw error;
+          }
+          
+          if (data?.neighborhood_id) {
+            setEventNeighborhoodId(data.neighborhood_id);
+          }
+        } catch (error) {
+          logger.error("Error fetching event neighborhood_id:", error);
+        }
+      }
+    };
+    
+    fetchEventNeighborhoodId();
+  }, [eventId, neighborhoodId]);
 
   // Check if user has RSVPed on component mount
   useEffect(() => {
@@ -85,16 +120,20 @@ const RSVPButton = ({ eventId, initialRSVPState = false, className }: RSVPButton
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
-        // Add RSVP - Only including required fields: event_id and user_id
-        logger.debug("Adding RSVP with:", { eventId, userId: user.id });
+        // Add RSVP - Include neighborhood_id from event
+        logger.debug("Adding RSVP with:", { 
+          eventId, 
+          userId: user.id,
+          neighborhoodId: eventNeighborhoodId 
+        });
         
         const { error } = await supabase
           .from('event_rsvps')
           .insert([
             { 
               event_id: eventId, 
-              user_id: user.id
-              // Explicitly NOT including neighborhood_id as it's not in the schema
+              user_id: user.id,
+              neighborhood_id: eventNeighborhoodId
             }
           ]);
 
@@ -123,7 +162,7 @@ const RSVPButton = ({ eventId, initialRSVPState = false, className }: RSVPButton
       onClick={toggleRSVP}
       disabled={isLoading}
       variant={hasRSVPed ? "default" : "outline"}
-      className={className}
+      className={`hover:bg-blue-500 hover:text-white transition-colors ${className}`}
     >
       {isLoading ? (
         <>
