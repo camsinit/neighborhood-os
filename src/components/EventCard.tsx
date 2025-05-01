@@ -31,6 +31,8 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   const [isRsvped, setIsRsvped] = useState(false);
   const [rsvpCount, setRsvpCount] = useState(0);
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>("America/Los_Angeles");
+  // Add state to track hover state for showing edit button
+  const [isHovering, setIsHovering] = useState(false);
   
   // Format display time using the neighborhood timezone
   const displayTime = formatInNeighborhoodTimezone(
@@ -39,6 +41,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
     neighborhoodTimezone
   );
   
+  // Check if current user is the host of the event
   const isHost = user?.id === event.host_id;
 
   // Get the neighborhood timezone
@@ -97,12 +100,13 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
     setRsvpCount(count || 0);
   };
 
-  const EditButton = () => isHost ? (
+  // Edit Button component with white styling for the hover state
+  const EditButton = () => isHost && isHovering ? (
     <EditEventDialog 
       event={event}
       onDelete={onDelete}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 text-white">
         <Pencil className="h-4 w-4" />
         Edit
       </div>
@@ -118,17 +122,26 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   };
 
   // Create a simple event object with just the required fields from our Event type
-  // No color property needed - we use getEventColor() for styling
   const eventWithRequiredProps = {
     ...event,
     created_at: event.created_at || new Date().toISOString()
   };
 
+  // Event preview card with hover effect for showing edit button
   const eventPreview = (
     <div 
       data-event-id={event.id}
-      className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors`}
+      className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
+      {/* Host edit button - only shows when hovering on events you created */}
+      {isHost && isHovering && (
+        <div className="absolute right-1 top-1 z-10 bg-blue-500 rounded p-1 shadow-sm">
+          <EditButton />
+        </div>
+      )}
+      
       <div className="font-medium line-clamp-2">{event.title}</div>
       {rsvpCount > 0 && (
         <div className="flex items-center gap-1 text-gray-600 mt-1">

@@ -156,6 +156,7 @@ const RSVPButton = ({
     }
   };
 
+  // Updated button styling to use blue background on hover
   return (
     <Button
       onClick={toggleRSVP}
