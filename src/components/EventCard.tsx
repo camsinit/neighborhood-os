@@ -118,6 +118,8 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   };
 
   // Create a complete event object with all required fields
+  // Note: We're not adding any 'color' property here since it's not needed
+  // Color is determined by the getEventColor() function above
   const eventWithRequiredProps = {
     ...event,
     created_at: event.created_at || new Date().toISOString() // Ensure created_at exists
