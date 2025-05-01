@@ -3,7 +3,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Event } from "@/types/localTypes"; // Changed from calendar to localTypes
 import { format, parseISO } from "date-fns";
 import { LocateIcon, MapPinIcon, ClockIcon, UserIcon } from "lucide-react";
-import EventSheetContent from "./EventSheetContent";
+import RSVPButton from "./RSVPButton";
 
 interface EventHoverCardProps {
   event: Event;
@@ -63,6 +63,9 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
               {event.description}
             </p>
           )}
+          
+          {/* RSVP Button */}
+          <RSVPButton eventId={event.id} className="mt-2 w-full" />
         </div>
       </HoverCardContent>
     </HoverCard>

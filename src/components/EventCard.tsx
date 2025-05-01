@@ -11,7 +11,21 @@ import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * EventCard component displays an event in the calendar
+ * 
+ * This component:
+ * - Shows a compact view of the event in the calendar grid
+ * - Changes color based on RSVP status
+ * - Shows event details on hover
+ * - Opens a full event sheet when clicked
+ * - Shows edit controls for event hosts
+ * 
+ * @param event - The event data to display
+ * @param onDelete - Callback function when event is deleted
+ */
 const EventCard = ({ event, onDelete }: EventCardProps) => {
+  // Get current user and set up state
   const user = useUser();
   const [isRsvped, setIsRsvped] = useState(false);
   const [rsvpCount, setRsvpCount] = useState(0);
@@ -75,12 +89,12 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
     return "border-gray-300 bg-gray-100";
   };
 
-  // Create a complete event object with all required fields and UI-specific properties
+  // Create a complete event object with all required fields
+  // Note: We're NOT adding color to the event object itself anymore
+  // We're using it directly in the UI elements where needed
   const eventWithRequiredProps = {
     ...event,
-    created_at: event.created_at || new Date().toISOString(), // Ensure created_at exists
-    // Add color as a UI-specific property, not part of the Event type from the database
-    color: getEventColor() 
+    created_at: event.created_at || new Date().toISOString() // Ensure created_at exists
   };
 
   const eventPreview = (

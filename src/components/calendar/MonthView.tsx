@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from 'date-fns';
-import { Event } from '@/types/calendar';
+import { Event } from '@/types/localTypes'; // Update import to localTypes
 import DayCell from './DayCell';
 import AddEventDialog from '../AddEventDialog';
 import { createLogger } from '@/utils/logger';

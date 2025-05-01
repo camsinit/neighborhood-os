@@ -1,59 +1,75 @@
 
-import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Clock, User, MapPin } from "lucide-react";
+import { Clock, MapPin, User } from "lucide-react";
 import { format } from "date-fns";
+import {
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import RSVPButton from "./RSVPButton";
-import { EventCardProps } from "./types";
-import RSVPList from "./RSVPList";
+import { Event } from "@/types/localTypes";
 
-interface EventSheetContentProps extends EventCardProps {
-  EditButton: () => JSX.Element | null;
+interface EventSheetContentProps {
+  event: Event;
+  EditButton?: React.FC;
 }
 
+/**
+ * EventSheetContent displays detailed information about an event in a slide-out sheet
+ * 
+ * This component shows:
+ * - Event title and description
+ * - Date, time, and location details
+ * - Host information
+ * - RSVP button for users to indicate attendance
+ * - Edit button for event hosts
+ * 
+ * @param event - The event data to display
+ * @param EditButton - Optional component for editing the event (shown to hosts only)
+ */
 const EventSheetContent = ({ event, EditButton }: EventSheetContentProps) => {
-  // Format the event time for display
-  const displayTime = format(new Date(event.time), 'h:mm a');
-
+  const eventDate = new Date(event.time);
+  
   return (
-    <SheetContent>
+    <SheetContent className="overflow-y-auto">
       <SheetHeader>
-        <SheetTitle>{event.title}</SheetTitle>
+        <div className="flex justify-between items-center">
+          <SheetTitle className="text-xl font-bold pr-8">{event.title}</SheetTitle>
+          {EditButton && <EditButton />}
+        </div>
+        <SheetDescription>
+          {/* Date and Time */}
+          <div className="flex items-center gap-2 text-gray-600 mt-4">
+            <Clock className="h-4 w-4" />
+            <span>{format(eventDate, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
+          </div>
+          
+          {/* Location */}
+          <div className="flex items-center gap-2 text-gray-600 mt-2">
+            <MapPin className="h-4 w-4" />
+            <span>{event.location}</span>
+          </div>
+          
+          {/* Host */}
+          <div className="flex items-center gap-2 text-gray-600 mt-2">
+            <User className="h-4 w-4" />
+            <span>Hosted by {event.profiles?.display_name || "Unknown"}</span>
+          </div>
+        </SheetDescription>
       </SheetHeader>
-      <div className="mt-6 space-y-4">
-        {/* Host information */}
-        <div className="flex items-center gap-2">
-          <User className="h-5 w-5 text-gray-500" />
-          <span className="text-gray-700">{event.profiles?.display_name || 'Anonymous'}</span>
-        </div>
-        
-        {/* Event time */}
-        <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-gray-500" />
-          <span className="text-gray-700">{displayTime}</span>
-        </div>
-        
-        {/* Event location */}
-        <div className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-gray-500" />
-          <span className="text-gray-700">{event.location}</span>
-        </div>
-        
-        {/* Event description */}
-        <div className="pt-4 border-t">
-          <h3 className="font-medium mb-2">About this event</h3>
-          <p className="text-gray-600">{event.description}</p>
-        </div>
-        
-        {/* RSVP list - NEW! */}
-        <div className="pt-4 border-t">
-          <RSVPList eventId={event.id} />
-        </div>
-        
-        {/* Action buttons */}
-        <div className="flex gap-2">
-          <RSVPButton eventId={event.id} />
-          <EditButton />
-        </div>
+      
+      {/* Description */}
+      <div className="mt-6">
+        <h3 className="font-medium mb-2">About this event</h3>
+        <p className="text-gray-700 whitespace-pre-wrap">
+          {event.description || "No description provided."}
+        </p>
+      </div>
+      
+      {/* RSVP Button */}
+      <div className="mt-6">
+        <RSVPButton eventId={event.id} className="w-full" />
       </div>
     </SheetContent>
   );

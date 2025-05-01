@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Event } from "@/types/calendar";
+import { Event } from "@/types/localTypes"; // Updated import
 import { supabase } from "@/integrations/supabase/client";
 
 /**

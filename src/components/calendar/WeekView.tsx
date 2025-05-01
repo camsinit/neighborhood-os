@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Event } from "@/types/calendar";
+import { Event } from "@/types/localTypes"; // Update import to use localTypes
 import DayCell from "./DayCell";
 import AddEventDialog from "../AddEventDialog";
 import { format } from "date-fns";

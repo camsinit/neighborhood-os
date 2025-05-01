@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   addWeeks, 
@@ -24,6 +23,7 @@ import { addScaleAnimation } from "@/utils/animations";
 import { useToast } from "@/components/ui/use-toast";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
+import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
 
 const logger = createLogger('CommunityCalendar');
 
@@ -111,15 +111,18 @@ const CommunityCalendar = () => {
     addScaleAnimation(document.querySelector('.calendar-container'));
   };
 
-  const getEventsForDate = (date: Date) => {
+  // Type-safe function to get events for a specific date
+  const getEventsForDate = (date: Date): LocalEvent[] => {
     if (!events) return [];
+    
+    // Convert fetched events to LocalEvent type with required properties
     return events.filter(event => {
       const eventDate = parseISO(event.time);
       return isEqual(
         new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()),
         new Date(date.getFullYear(), date.getMonth(), date.getDate())
       );
-    });
+    }) as LocalEvent[]; // Type assertion here as we know the structure matches
   };
 
   const handleAddEvent = async () => {
@@ -142,14 +145,14 @@ const CommunityCalendar = () => {
         {view === 'week' ? (
           <WeekView 
             weekDates={weekDates}
-            events={events}
+            events={events as LocalEvent[] | undefined}
             isLoading={isLoading}
             getEventsForDate={getEventsForDate}
           />
         ) : (
           <MonthView 
             currentDate={currentDate}
-            events={events || []}
+            events={events as LocalEvent[] || []}
             isLoading={isLoading}
           />
         )}
