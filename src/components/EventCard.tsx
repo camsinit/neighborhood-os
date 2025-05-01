@@ -75,6 +75,12 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
     return "border-gray-300 bg-gray-100";
   };
 
+  // Create a complete event object with all required fields
+  const eventWithRequiredProps = {
+    ...event,
+    created_at: event.created_at || new Date().toISOString() // Ensure created_at exists
+  };
+
   const eventPreview = (
     <div 
       data-event-id={event.id}
@@ -93,11 +99,11 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <EventHoverCard event={event} EditButton={EditButton}>
+        <EventHoverCard event={eventWithRequiredProps}>
           {eventPreview}
         </EventHoverCard>
       </SheetTrigger>
-      <EventSheetContent event={event} EditButton={EditButton} />
+      <EventSheetContent event={eventWithRequiredProps} EditButton={EditButton} />
     </Sheet>
   );
 };

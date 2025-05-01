@@ -1,6 +1,6 @@
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Event } from "@/types/calendar";
+import { Event } from "@/types/localTypes"; // Changed from calendar to localTypes
 import { format, parseISO } from "date-fns";
 import { LocateIcon, MapPinIcon, ClockIcon, UserIcon } from "lucide-react";
 import EventSheetContent from "./EventSheetContent";
