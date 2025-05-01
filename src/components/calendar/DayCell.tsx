@@ -70,7 +70,6 @@ const DayCell = ({
             <EventCard 
               key={event.id} 
               event={event}
-              // We no longer pass color here - it's handled in EventCard
             />
           ))
         )}
