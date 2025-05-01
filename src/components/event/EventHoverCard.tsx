@@ -1,81 +1,68 @@
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Clock, User, MapPin, Users } from "lucide-react";
-import { format } from "date-fns";
-import RSVPButton from "./RSVPButton";
-import { EventCardProps } from "./types";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Event } from "@/types/calendar";
+import { format, parseISO } from "date-fns";
+import { LocateIcon, MapPinIcon, ClockIcon, UserIcon } from "lucide-react";
+import EventSheetContent from "./EventSheetContent";
 
-interface EventHoverCardProps extends EventCardProps {
+interface EventHoverCardProps {
+  event: Event;
   children: React.ReactNode;
-  EditButton: () => JSX.Element | null;
 }
 
 /**
- * EventHoverCard - A component that shows event details on hover
+ * EventHoverCard component displays a hover card with event details
  * 
- * This component wraps its children with a hover card that displays
- * more detailed information about an event when hovered over, including
- * time, host, location, attendee count, and actions.
+ * @param event - The event data to display
+ * @param children - The trigger element that activates the hover card
  */
-const EventHoverCard = ({ event, children, EditButton }: EventHoverCardProps) => {
-  const displayTime = format(new Date(event.time), 'h:mm a');
-  const [rsvpCount, setRsvpCount] = useState(0);
+const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
+  // Parse the event time
+  const eventDate = parseISO(event.time);
   
-  // Get RSVP count for this event
-  useEffect(() => {
-    const fetchRsvpCount = async () => {
-      // Query the database to get the count of RSVPs for this event
-      const { count, error } = await supabase
-        .from('event_rsvps')
-        .select('id', { count: 'exact', head: true })
-        .eq('event_id', event.id);
-        
-      // Handle any errors that occur during the fetch
-      if (error) {
-        console.error('Error fetching RSVP count:', error);
-        return;
-      }
-      
-      // Update the state with the count (or 0 if null)
-      setRsvpCount(count || 0);
-    };
-    
-    fetchRsvpCount();
-  }, [event.id]);
-
+  // Calculate the specific time for display
+  const formattedTime = format(eventDate, "h:mm a");
+  const formattedDate = format(eventDate, "EEEE, MMMM d, yyyy");
+  
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
         {children}
       </HoverCardTrigger>
-      <HoverCardContent className="w-80">
+      <HoverCardContent 
+        className="w-80" 
+        side="left" 
+        align="start"
+        sideOffset={5}
+        alignOffset={5}
+      >
         <div className="space-y-2">
-          <h4 className="font-semibold">{event.title}</h4>
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="h-4 w-4 text-gray-500" />
-            <span>{displayTime}</span>
+          <h4 className="text-lg font-medium">{event.title}</h4>
+          
+          {/* Date and Time */}
+          <div className="flex items-center gap-2 text-gray-600">
+            <ClockIcon className="h-4 w-4" />
+            <span>{formattedDate} at {formattedTime}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <User className="h-4 w-4 text-gray-500" />
-            <span>{event.profiles?.display_name || 'Anonymous'}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="h-4 w-4 text-gray-500" />
+          
+          {/* Location */}
+          <div className="flex items-center gap-2 text-gray-600">
+            <MapPinIcon className="h-4 w-4" />
             <span>{event.location}</span>
           </div>
-          {rsvpCount > 0 && (
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4 text-gray-500" />
-              <span>{rsvpCount} attendee{rsvpCount !== 1 ? 's' : ''}</span>
-            </div>
-          )}
-          <p className="text-sm text-gray-600">{event.description}</p>
-          <div className="flex gap-2">
-            <RSVPButton eventId={event.id} />
-            <EditButton />
+          
+          {/* Host */}
+          <div className="flex items-center gap-2 text-gray-600">
+            <UserIcon className="h-4 w-4" />
+            <span>Hosted by {event.profiles?.display_name || "Unknown"}</span>
           </div>
+          
+          {/* Description preview */}
+          {event.description && (
+            <p className="text-sm text-gray-500 line-clamp-3">
+              {event.description}
+            </p>
+          )}
         </div>
       </HoverCardContent>
     </HoverCard>

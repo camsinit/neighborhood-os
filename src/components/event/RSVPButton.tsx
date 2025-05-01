@@ -1,123 +1,143 @@
 
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
+import { Check, Loader2 } from "lucide-react";
+import { createLogger } from "@/utils/logger";
+import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+
+// Setup logger
+const logger = createLogger('RSVPButton');
 
 interface RSVPButtonProps {
   eventId: string;
+  initialRSVPState?: boolean;
+  className?: string;
 }
 
-const RSVPButton = ({ eventId }: RSVPButtonProps) => {
-  const [isRsvped, setIsRsvped] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+/**
+ * RSVPButton component allows users to RSVP to events
+ * 
+ * @param eventId - The ID of the event to RSVP to
+ * @param initialRSVPState - Whether the user has already RSVPed
+ * @param className - Additional CSS classes for styling
+ */
+const RSVPButton = ({ eventId, initialRSVPState = false, className }: RSVPButtonProps) => {
   const user = useUser();
+  const [hasRSVPed, setHasRSVPed] = useState(initialRSVPState);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Check if user has RSVPed on component mount
   useEffect(() => {
-    if (user && eventId) {
-      checkRsvpStatus();
-    }
-  }, [user, eventId]);
+    const checkRSVP = async () => {
+      if (!user) return;
+      
+      setIsLoading(true);
+      
+      try {
+        // Query for existing RSVP
+        const { data, error } = await supabase
+          .from('event_rsvps')
+          .select('id')
+          .eq('event_id', eventId)
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-  const checkRsvpStatus = async () => {
-    if (!user) return;
+        if (error) {
+          throw error;
+        }
 
-    try {
-      const { data, error } = await supabase
-        .from('event_rsvps')
-        .select()
-        .eq('event_id', eventId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking RSVP status:', error);
-        return;
+        setHasRSVPed(!!data);
+      } catch (error) {
+        logger.error("Error checking RSVP:", error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      setIsRsvped(!!data);
-    } catch (error) {
-      console.error('Error checking RSVP status:', error);
-    }
-  };
+    checkRSVP();
+  }, [eventId, user]);
 
-  const handleRSVP = async () => {
+  const toggleRSVP = async () => {
     if (!user) {
-      toast.error("Please log in to RSVP");
+      toast.error("Please log in to RSVP for this event");
       return;
     }
 
     setIsLoading(true);
+
     try {
-      if (isRsvped) {
-        // Cancel RSVP
-        const { error: deleteError } = await supabase
+      if (hasRSVPed) {
+        // Remove RSVP
+        const { error } = await supabase
           .from('event_rsvps')
           .delete()
           .eq('event_id', eventId)
           .eq('user_id', user.id);
 
-        if (deleteError) throw deleteError;
+        if (error) {
+          logger.error("Error removing RSVP:", error);
+          throw error;
+        }
 
-        // Delete the notification
-        await supabase
-          .from('notifications')
-          .delete()
-          .eq('content_id', eventId)
-          .eq('user_id', user.id)
-          .eq('content_type', 'event_rsvp');
-
+        toast.success("You've removed your RSVP");
+        setHasRSVPed(false);
       } else {
-        // Create RSVP
-        const { error: rsvpError } = await supabase
+        // Add RSVP - Only including required fields: event_id and user_id
+        logger.debug("Adding RSVP with:", { eventId, userId: user.id });
+        
+        const { error } = await supabase
           .from('event_rsvps')
-          .insert({
-            event_id: eventId,
-            user_id: user.id
-          });
-
-        if (rsvpError) throw rsvpError;
-
-        // Create notification
-        const { error: notificationError } = await supabase
-          .from('notifications')
-          .insert({
-            user_id: user.id,
-            actor_id: user.id,
-            title: "Event RSVP Confirmation",
-            content_type: 'event_rsvp',
-            content_id: eventId,
-            notification_type: 'event',
-            action_type: 'view',
-            action_label: 'View Event',
-            metadata: {
-              event_id: eventId,
-              rsvp_status: 'confirmed'
+          .insert([
+            { 
+              event_id: eventId, 
+              user_id: user.id
+              // Explicitly NOT including neighborhood_id as it's not in the schema
             }
-          });
+          ]);
 
-        if (notificationError) throw notificationError;
+        if (error) {
+          logger.error("Error adding RSVP:", error);
+          throw error;
+        }
+
+        toast.success("You've successfully RSVP'd to this event");
+        setHasRSVPed(true);
       }
-
-      setIsRsvped(!isRsvped);
-      toast(isRsvped ? "RSVP cancelled" : "Successfully RSVP'd to event!");
-    } catch (error) {
-      console.error('Error updating RSVP:', error);
-      toast.error("Failed to update RSVP");
+      
+      // Dispatch event to refresh any components displaying RSVPs
+      dispatchRefreshEvent('event-rsvp-updated');
+      
+    } catch (error: any) {
+      console.error("Error updating RSVP:", error);
+      toast.error(`Failed to update RSVP: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Button 
-      variant={isRsvped ? "destructive" : "default"}
-      className="flex-1"
-      onClick={handleRSVP}
+    <Button
+      onClick={toggleRSVP}
       disabled={isLoading}
+      variant={hasRSVPed ? "default" : "outline"}
+      className={className}
     >
-      {isRsvped ? "Cancel RSVP" : "RSVP"}
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Loading...
+        </>
+      ) : hasRSVPed ? (
+        <>
+          <Check className="mr-2 h-4 w-4" />
+          Going
+        </>
+      ) : (
+        "RSVP"
+      )}
     </Button>
   );
 };
