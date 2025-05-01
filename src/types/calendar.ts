@@ -13,6 +13,8 @@ export type CalendarEvents = {
   [key: number]: CalendarEvent[];
 };
 
+// This Event type is no longer used - we use the one from localTypes.ts instead
+// Keeping it here for backward compatibility in case other files still import from here
 export type Event = {
   id: string;
   title: string;

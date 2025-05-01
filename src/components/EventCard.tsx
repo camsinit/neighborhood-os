@@ -90,7 +90,7 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
   };
 
   // Create a complete event object with all required fields
-  // Note: We're NOT adding color to the event object itself anymore
+  // Note: We're NOT adding color to the event object itself
   // We're using it directly in the UI elements where needed
   const eventWithRequiredProps = {
     ...event,
