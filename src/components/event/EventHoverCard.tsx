@@ -78,7 +78,7 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
           {/* Conditionally show Edit button or RSVP button based on whether user is the host */}
           {isHost ? (
             <EditEventDialog event={event}>
-              <button className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors">
+              <button className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors">
                 <Pencil className="h-4 w-4" />
                 Edit Event
               </button>
@@ -87,7 +87,7 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
             <RSVPButton 
               eventId={event.id} 
               neighborhoodId={event.neighborhood_id}
-              className="mt-2 w-full" 
+              className="mt-2 w-full bg-blue-500 hover:bg-blue-600" 
             />
           )}
         </div>

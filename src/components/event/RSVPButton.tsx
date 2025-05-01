@@ -156,13 +156,13 @@ const RSVPButton = ({
     }
   };
 
-  // Updated button styling to use blue background on hover
+  // Updated button styling to use blue background by default
   return (
     <Button
       onClick={toggleRSVP}
       disabled={isLoading}
       variant={hasRSVPed ? "default" : "outline"}
-      className={`hover:bg-blue-500 hover:text-white transition-colors ${className}`}
+      className={`bg-blue-500 hover:bg-blue-600 text-white transition-colors ${className}`}
     >
       {isLoading ? (
         <>
