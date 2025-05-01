@@ -117,12 +117,11 @@ const EventCard = ({ event, onDelete }: EventCardProps) => {
     return "border-gray-300 bg-gray-100";
   };
 
-  // Create a complete event object with all required fields
-  // Note: We're not adding any 'color' property here since it's not needed
-  // Color is determined by the getEventColor() function above
+  // Create a simple event object with just the required fields from our Event type
+  // No color property needed - we use getEventColor() for styling
   const eventWithRequiredProps = {
     ...event,
-    created_at: event.created_at || new Date().toISOString() // Ensure created_at exists
+    created_at: event.created_at || new Date().toISOString()
   };
 
   const eventPreview = (
