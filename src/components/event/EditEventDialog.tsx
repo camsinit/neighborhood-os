@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import EventForm from "@/components/events/EventForm";
 import DeleteEventButton from "./DeleteEventButton";
 import { format } from "date-fns";
 
+// Updated interface to not require the color property
 interface EditEventDialogProps {
   event: {
     id: string;
@@ -12,7 +14,6 @@ interface EditEventDialogProps {
     time: string;
     location: string;
     description: string | null;
-    color: string;
     host_id: string;
     is_recurring?: boolean;
     recurrence_pattern?: string;
@@ -30,6 +31,7 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
     if (onDelete) onDelete(); // Call the parent's onDelete callback
   };
 
+  // Format the event date for the form
   const eventDate = new Date(event.time);
   const initialValues = {
     title: event.title,
