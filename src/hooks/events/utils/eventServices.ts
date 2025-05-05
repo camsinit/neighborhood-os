@@ -21,6 +21,7 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
 
   try {
     // Insert the event - making sure we're explicit about the columns
+    // The key issue was with the select() - it was trying to match event_id which doesn't exist
     const { error, data } = await supabase
       .from('events')
       .insert({
@@ -34,7 +35,7 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
         recurrence_pattern: eventData.recurrence_pattern,
         recurrence_end_date: eventData.recurrence_end_date
       })
-      .select();
+      .select('*'); // Use '*' instead of specific columns to avoid errors
 
     if (error) {
       // Log detailed error information
@@ -93,7 +94,7 @@ export const updateEvent = async (
     .update(eventData)
     .eq('id', eventId)
     .eq('host_id', userId)
-    .select();
+    .select('*'); // Use '*' instead of specific columns
 
   if (error) {
     // Log detailed error information
