@@ -1,3 +1,4 @@
+
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -52,16 +53,31 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       console.log("[useEventSubmit] Attempting to insert event:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
+        formData: { 
+          ...formData, 
+          title: formData.title,
+          description: formData.description?.substring(0, 20) + '...',
+          date: formData.date,
+          time: formData.time,
+          location: formData.location
+        },
         timestamp: new Date().toISOString()
       });
 
       // Transform the form data to match database schema
       const eventData = transformEventFormData(formData, user.id, neighborhood.id);
+      
+      // Log the transformed data that will be sent to the database
+      console.log("[useEventSubmit] Transformed event data:", eventData);
 
-      // Create the event in the database - we can now use the direct createEvent function
-      // since the neighborhood_id column exists in the activities table
+      // Create the event in the database
       const data = await createEvent(eventData, user.id, formData.title);
+      
+      // Log success after database operation
+      console.log("[useEventSubmit] Event created successfully:", {
+        eventId: data?.[0]?.id,
+        timestamp: new Date().toISOString()
+      });
       
       // Invalidate the events query to refresh the data
       queryClient.invalidateQueries({ queryKey: ['events'] });
@@ -76,7 +92,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       return data;
     } catch (error: any) {
       console.error('[useEventSubmit] Error creating event:', error);
-      toast.error("Failed to create event. Please try again.");
+      toast.error(`Failed to create event: ${error.message}`);
       
       // Re-throw the error for the component to handle if needed
       throw error;
@@ -129,7 +145,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       return data;
     } catch (error: any) {
       console.error('[useEventSubmit] Error updating event:', error);
-      toast.error("Failed to update event. Please try again.");
+      toast.error(`Failed to update event: ${error.message}`);
       throw error;
     }
   };

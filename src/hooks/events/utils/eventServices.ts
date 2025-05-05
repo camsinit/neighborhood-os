@@ -1,3 +1,4 @@
+
 /**
  * Event services for database operations
  * 
@@ -18,36 +19,51 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
   // Log the actual data being sent to the database for debugging
   console.log("[eventServices] Sending to database:", eventData);
 
-  // Insert the event - now that the activities table has neighborhood_id, we don't need special handling
-  const { error, data } = await supabase
-    .from('events')
-    .insert(eventData)
-    .select();
+  try {
+    // Insert the event - making sure we're explicit about the columns
+    const { error, data } = await supabase
+      .from('events')
+      .insert({
+        title: eventData.title,
+        description: eventData.description,
+        location: eventData.location,
+        time: eventData.time,
+        host_id: userId,
+        neighborhood_id: eventData.neighborhood_id,
+        is_recurring: eventData.is_recurring || false,
+        recurrence_pattern: eventData.recurrence_pattern,
+        recurrence_end_date: eventData.recurrence_end_date
+      })
+      .select();
 
-  if (error) {
-    // Log detailed error information
-    console.error("[eventServices] Error inserting event:", {
-      error: {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      },
+    if (error) {
+      // Log detailed error information
+      console.error("[eventServices] Error inserting event:", {
+        error: {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        },
+        timestamp: new Date().toISOString()
+      });
+      throw error;
+    }
+
+    // Log success information
+    console.log("[eventServices] Event created successfully:", {
+      eventId: data?.[0]?.id,
       timestamp: new Date().toISOString()
     });
+    
+    // Show success toast
+    toast.success("Event created successfully");
+    
+    return data;
+  } catch (error) {
+    console.error("[eventServices] Caught exception creating event:", error);
     throw error;
   }
-
-  // Log success information
-  console.log("[eventServices] Event created successfully:", {
-    eventId: data?.[0]?.id,
-    timestamp: new Date().toISOString()
-  });
-  
-  // Show success toast
-  toast.success("Event created successfully");
-  
-  return data;
 };
 
 /**

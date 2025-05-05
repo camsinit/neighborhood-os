@@ -17,15 +17,17 @@ export const transformEventFormData = (formData: any, userId: string, neighborho
   // Log the date string to help with debugging
   console.log(`[transformEventFormData] Original date string: ${dateStr}`);
   
+  // Ensure the time field is in the correct format: YYYY-MM-DDTHH:MM
+  // This provides a standardized format for the database
   return {
     title: formData.title,
-    description: formData.description,
+    description: formData.description || '', // Ensure description is never null
     location: formData.location,
     host_id: userId,
     neighborhood_id: neighborhoodId,
     // Explicitly format the time to ensure consistency
     time: dateStr,
-    // Include these fields only for UI display
+    // Include these fields only for UI display if they exist in the form data
     is_recurring: formData.isRecurring || false,
     recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
     recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null
@@ -48,7 +50,7 @@ export const transformEventUpdateData = (formData: any) => {
   
   return {
     title: formData.title,
-    description: formData.description,
+    description: formData.description || '', // Ensure description is never null
     location: formData.location,
     // Explicitly format the time to ensure consistency
     time: dateStr,
