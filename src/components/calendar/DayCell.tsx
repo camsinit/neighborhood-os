@@ -59,11 +59,13 @@ const DayCell = ({
       <div className="p-2">
         <span className="text-lg font-medium">{format(date, 'd')}</span>
       </div>
-      <div className="space-y-0 p-2">
+      
+      {/* Add a scrollable container for events when they overflow */}
+      <div className="space-y-0 p-2 max-h-[calc(100%-40px)] overflow-y-auto">
         {isLoading ? (
           <div className="space-y-2">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full mb-2" />
+            <Skeleton className="h-8 w-full mb-2" />
           </div>
         ) : (
           events.map((event) => (

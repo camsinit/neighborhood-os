@@ -1,3 +1,4 @@
+
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { Pencil, Clock, Users } from "lucide-react";
@@ -114,7 +115,13 @@ const EventCard = ({
   };
 
   // Event preview card with hover effect for showing edit button
-  const eventPreview = <div data-event-id={event.id} className={`rounded-md px-2 py-1.5 mb-1 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+  // Added mb-2 (margin-bottom) to create space between events
+  const eventPreview = <div 
+      data-event-id={event.id} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      onMouseEnter={() => setIsHovering(true)} 
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {/* Host edit button - only shows when hovering on events you created */}
       {isHost && isHovering}
       
