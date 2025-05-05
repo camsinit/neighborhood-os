@@ -20,9 +20,8 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
   console.log("[eventServices] Sending to database:", eventData);
 
   try {
-    // Insert the event - making sure we're explicit about the columns
-    // The key issue was with the select() - it was trying to match event_id which doesn't exist
-    const { error, data } = await supabase
+    // CRITICAL FIX: First insert the event WITHOUT trying to select anything back
+    const { error } = await supabase
       .from('events')
       .insert({
         title: eventData.title,
@@ -34,8 +33,7 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
         is_recurring: eventData.is_recurring || false,
         recurrence_pattern: eventData.recurrence_pattern,
         recurrence_end_date: eventData.recurrence_end_date
-      })
-      .select('*'); // Use '*' instead of specific columns to avoid errors
+      });
 
     if (error) {
       // Log detailed error information
@@ -49,6 +47,22 @@ export const createEvent = async (eventData: any, userId: string, formTitle: str
         timestamp: new Date().toISOString()
       });
       throw error;
+    }
+
+    // Then fetch the newly created event separately
+    // We'll find it by matching all the attributes we just created
+    const { data, error: fetchError } = await supabase
+      .from('events')
+      .select('*')
+      .eq('host_id', userId)
+      .eq('title', eventData.title)
+      .eq('time', eventData.time)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (fetchError) {
+      console.error("[eventServices] Error fetching newly created event:", fetchError);
+      // Don't throw here - we already created the event successfully
     }
 
     // Log success information
