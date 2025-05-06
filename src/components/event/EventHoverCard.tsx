@@ -19,6 +19,7 @@ interface EventHoverCardProps {
  * This component:
  * - Shows detailed event information when hovering over an event in the calendar
  * - Shows either an RSVP button or Edit button depending on if the user is the host
+ * - Uses a high z-index to ensure the popover appears above the sidebar
  * 
  * @param event - The event data to display
  * @param children - The trigger element that activates the hover card
@@ -41,11 +42,10 @@ const EventHoverCard = ({ event, children }: EventHoverCardProps) => {
         {children}
       </HoverCardTrigger>
       <HoverCardContent 
-        className="w-80" 
-        side="left" 
-        align="start"
+        className="w-80 z-[100]" // Added a high z-index to ensure it shows above the sidebar
         sideOffset={5}
         alignOffset={5}
+        align="start"
       >
         <div className="space-y-2">
           <h4 className="text-lg font-medium">{event.title}</h4>

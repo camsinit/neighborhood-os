@@ -109,3 +109,43 @@ export const logDateDetails = (context: string, date: Date): void => {
     day: date.getDate()
   });
 };
+
+/**
+ * Ensures a date string and time string are properly combined and preserved
+ * to avoid timezone issues that could shift the date.
+ * 
+ * @param dateStr Date string in YYYY-MM-DD format
+ * @param timeStr Time string in HH:MM format
+ * @returns Combined date-time ISO string that preserves the intended date
+ */
+export const combineDateAndTime = (dateStr: string, timeStr: string): string => {
+  // Log the inputs for debugging
+  console.log(`[combineDateAndTime] Combining date: ${dateStr}, time: ${timeStr}`);
+  
+  // First, ensure we have valid strings
+  if (!dateStr || !timeStr) {
+    console.error('[combineDateAndTime] Invalid date or time string provided');
+    return '';
+  }
+  
+  // Create a date object using the local representation to preserve the exact date
+  // This avoids timezone conversion issues that can shift dates
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  
+  // Create a date in the local timezone to avoid date shifting 
+  const localDate = new Date(year, month - 1, day, hours, minutes);
+  
+  // Log the resulting date for debugging
+  console.log('[combineDateAndTime] Created local date:', {
+    input: { dateStr, timeStr },
+    localDate: localDate.toString(),
+    iso: localDate.toISOString(),
+    year, month, day, hours, minutes
+  });
+  
+  // Format the result as YYYY-MM-DDThh:mm
+  const formattedDate = `${dateStr}T${timeStr}`;
+  
+  return formattedDate;
+};
