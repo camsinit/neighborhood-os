@@ -12,7 +12,7 @@ import { toast } from "sonner";
  * 
  * @param eventData - The event data to insert
  * @param userId - Current user's ID
- * @param formTitle - The form title (needed for activity fallback)
+ * @param formTitle - The form title (no longer needed but kept for backward compatibility)
  * @returns The created event data or throws an error
  */
 export const createEvent = async (eventData: any, userId: string, formTitle: string) => {
