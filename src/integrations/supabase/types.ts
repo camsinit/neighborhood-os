@@ -1129,7 +1129,9 @@ export type Database = {
         Returns: undefined
       }
       check_neighborhood_access: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args:
+          | { neighborhood_id: string }
+          | { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
       check_neighborhood_limit: {
