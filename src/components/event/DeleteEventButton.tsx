@@ -25,7 +25,7 @@ interface DeleteEventButtonProps {
   hostId: string;
   eventTitle: string;
   onDelete?: () => void;
-  onSheetClose?: () => void; // New prop to handle sheet closure
+  onSheetClose?: () => void; 
 }
 
 const DeleteEventButton = ({ 
@@ -46,7 +46,7 @@ const DeleteEventButton = ({
 
   /**
    * Handle delete button click
-   * This function deletes the event and refreshes the events data
+   * This function ensures the sheet is closed first, then deletes the event
    */
   const handleDelete = async () => {
     // Check if the user is authorized to delete this event
@@ -54,11 +54,22 @@ const DeleteEventButton = ({
       toast.error("You don't have permission to delete this event");
       return;
     }
+    
+    // First close the sheet if a callback is provided
+    // This ensures the UI remains interactive
+    if (onSheetClose) {
+      onSheetClose();
+    }
 
+    // Short timeout to allow sheet animation to complete
+    // This prevents the UI from becoming unresponsive
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Set loading state while performing the deletion
     setIsLoading(true);
+    
     try {
-      // First delete the event
+      // Delete the event
       const { error: deleteError } = await supabase
         .from('events')
         .delete()
@@ -90,19 +101,15 @@ const DeleteEventButton = ({
       // Show success message
       toast.success("Event deleted successfully");
       
-      // Close the sheet if a callback is provided
-      if (onSheetClose) {
-        onSheetClose();
-      }
-      
       // Invalidate and refetch the events query to update the UI
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       // Dispatch a custom event to trigger data refresh in components listening for this event
       refreshEvents.eventsDelete(); // Use the predefined event for event deletion
       
-      // Call onDelete callback if provided
+      // Call onDelete callback if provided (after sheet has closed)
       if (onDelete) onDelete();
+      
     } catch (error) {
       console.error('Error in delete operation:', error);
       toast.error("Failed to delete event. Please try again.");

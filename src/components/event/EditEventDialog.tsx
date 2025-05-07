@@ -34,7 +34,7 @@ interface EditEventDialogProps {
   };
   onDelete?: () => void;
   children?: React.ReactNode;
-  onSheetClose?: () => void; // New prop to handle sheet closure
+  onSheetClose?: () => void; // Prop to handle sheet closure
 }
 
 /**
@@ -95,7 +95,17 @@ const EditEventDialog = ({
   // Handle event deletion
   const handleDelete = async () => {
     setIsDeleting(true);
+    
     try {
+      // Close the parent sheet first if the callback is provided
+      if (onSheetClose) {
+        onSheetClose();
+      }
+      
+      // Add a small delay to ensure sheet animation completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Now proceed with deletion
       const { error } = await supabase
         .from('events')
         .delete()
@@ -112,13 +122,12 @@ const EditEventDialog = ({
       setIsDeleteDialogOpen(false);
       setOpen(false);
       
-      // Close sheet if needed
-      if (onSheetClose) {
-        onSheetClose();
+      // Call onDelete callback if provided (after everything else is done)
+      if (onDelete) {
+        setTimeout(() => {
+          onDelete();
+        }, 100);
       }
-      
-      // Call onDelete callback if provided
-      if (onDelete) onDelete();
       
     } catch (error: any) {
       console.error('Error deleting event:', error);

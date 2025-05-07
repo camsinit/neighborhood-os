@@ -40,6 +40,7 @@ const EventSheetContent = ({
   // Function to close the sheet
   const handleSheetClose = () => {
     if (onOpenChange) {
+      // Pass false to the onOpenChange prop to close the sheet
       onOpenChange(false);
     }
   };

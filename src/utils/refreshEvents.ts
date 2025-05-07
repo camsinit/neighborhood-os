@@ -42,7 +42,22 @@ export const refreshEvents = {
   goods: () => dispatchRefreshEvent('goods-form-submitted'),
   safety: () => dispatchRefreshEvent('safety-update-submitted'),
   events: () => dispatchRefreshEvent('event-submitted'),
-  eventsDelete: () => dispatchRefreshEvent('event-deleted'),
+  eventsDelete: () => {
+    // Dispatch both the event-deleted event for data refresh
+    dispatchRefreshEvent('event-deleted');
+    
+    // And dispatch a DOM event for UI cleanup
+    // This is crucial for fixing the overlay issue
+    document.dispatchEvent(new Event('event-deleted'));
+    
+    // Force cleanup of any leftover Radix UI overlays
+    setTimeout(() => {
+      const overlays = document.querySelectorAll('[data-state="open"].fixed.inset-0');
+      overlays.forEach(element => {
+        element.remove();
+      });
+    }, 300);
+  },
   eventsUpdate: () => dispatchRefreshEvent('event-updated'),
   skills: () => dispatchRefreshEvent('skill-submitted'),
   profile: () => dispatchRefreshEvent('profile-updated'),

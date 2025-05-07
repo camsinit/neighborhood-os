@@ -98,8 +98,12 @@ const EventCard = ({
   const handleDelete = () => {
     // Close the sheet when the event is deleted
     setIsSheetOpen(false);
-    // Call the onDelete callback if provided
-    if (onDelete) onDelete();
+    
+    // Add a small delay before calling onDelete to ensure sheet animations complete
+    setTimeout(() => {
+      // Call the onDelete callback if provided
+      if (onDelete) onDelete();
+    }, 200);
   };
 
   // Edit Button component with white styling for the hover state
@@ -107,6 +111,7 @@ const EventCard = ({
     <EditEventDialog 
       event={event} 
       onDelete={handleDelete}
+      onSheetClose={onSheetClose}
     >
       <div className="flex items-center gap-2 text-white">
         <Pencil className="h-4 w-4" />
@@ -127,6 +132,11 @@ const EventCard = ({
   const eventWithRequiredProps = {
     ...event,
     created_at: event.created_at || new Date().toISOString()
+  };
+  
+  // Function to handle sheet closing
+  const handleSheetClose = () => {
+    setIsSheetOpen(false);
   };
 
   // Event preview card with hover effect for showing edit button

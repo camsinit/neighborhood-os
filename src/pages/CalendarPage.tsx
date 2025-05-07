@@ -26,9 +26,24 @@ const CalendarPage = () => {
     // Add the event listener
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     
-    // Clean up the listener when component unmounts
+    // Listen for event deletion events to ensure UI updates properly
+    const handleEventDeleted = () => {
+      console.log("Event deleted, ensuring UI cleanup");
+      
+      // Force any remaining overlay elements to be removed
+      // This helps with edge cases where the Sheet overlay doesn't get properly removed
+      const overlays = document.querySelectorAll('[data-state="open"].fixed.inset-0');
+      overlays.forEach(element => {
+        element.remove();
+      });
+    };
+    
+    document.addEventListener('event-deleted', handleEventDeleted);
+    
+    // Clean up the listeners when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+      document.removeEventListener('event-deleted', handleEventDeleted);
     };
   }, []);
 
@@ -42,7 +57,6 @@ const CalendarPage = () => {
         <GodModeSelector />
       </div>
       <CommunityCalendar />
-      {/* Removed LoggingControls component from here */}
     </ModuleLayout>
   );
 }
