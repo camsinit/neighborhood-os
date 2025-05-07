@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -6,7 +5,6 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
-
 interface CalendarHeaderProps {
   view: 'week' | 'month';
   currentDate: Date;
@@ -23,38 +21,36 @@ interface CalendarHeaderProps {
  * @param props - Component props
  */
 const CalendarHeader = (props: CalendarHeaderProps) => {
-  const { 
-    view, 
-    currentDate, 
-    setView, 
-    handlePreviousWeek, 
-    handleNextWeek, 
-    handleToday, 
-    setIsAddEventOpen 
+  const {
+    view,
+    currentDate,
+    setView,
+    handlePreviousWeek,
+    handleNextWeek,
+    handleToday,
+    setIsAddEventOpen
   } = props;
-  
-  const { currentNeighborhood } = useNeighborhood();
+  const {
+    currentNeighborhood
+  } = useNeighborhood();
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
-  
+
   // Fetch neighborhood timezone
   useEffect(() => {
     const fetchNeighborhoodTimezone = async () => {
       if (currentNeighborhood?.id) {
-        const { data, error } = await supabase
-          .from('neighborhoods')
-          .select('timezone')
-          .eq('id', currentNeighborhood.id)
-          .single();
-          
+        const {
+          data,
+          error
+        } = await supabase.from('neighborhoods').select('timezone').eq('id', currentNeighborhood.id).single();
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
         }
       }
     };
-    
     fetchNeighborhoodTimezone();
   }, [currentNeighborhood?.id]);
-  
+
   // Format the current date according to the view and neighborhood timezone
   const formattedDate = useMemo(() => {
     if (view === 'week') {
@@ -63,7 +59,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
     }
   }, [currentDate, view, neighborhoodTimezone]);
-  
+
   // Get the timezone abbreviation for display
   const getTimezoneAbbreviation = () => {
     // This is a simple function to get timezone abbreviation
@@ -72,21 +68,17 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     if (neighborhoodTimezone.includes('Denver')) return 'MT';
     if (neighborhoodTimezone.includes('Chicago')) return 'CT';
     if (neighborhoodTimezone.includes('New_York')) return 'ET';
-    
+
     // For other timezones, return the last part after the "/"
     const parts = neighborhoodTimezone.split('/');
     return parts[parts.length - 1].replace('_', ' ');
   };
-
-  return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+  return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
       <div className="flex items-center space-x-2">
         <CalendarIcon className="h-5 w-5 text-blue-500" />
         <h2 className="text-xl font-semibold flex flex-col sm:flex-row sm:items-center gap-1">
           <span>{formattedDate}</span>
-          <span className="text-xs text-gray-500 sm:ml-2">
-            ({getTimezoneAbbreviation()} - {neighborhoodTimezone.replace('_', ' ')})
-          </span>
+          
         </h2>
       </div>
       
@@ -104,32 +96,18 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
         </div>
         
         <div className="flex rounded-md shadow-sm">
-          <Button
-            variant={view === 'week' ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => setView('week')}
-          >
+          <Button variant={view === 'week' ? "secondary" : "outline"} size="sm" onClick={() => setView('week')}>
             Week
           </Button>
-          <Button
-            variant={view === 'month' ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => setView('month')}
-          >
+          <Button variant={view === 'month' ? "secondary" : "outline"} size="sm" onClick={() => setView('month')}>
             Month
           </Button>
         </div>
         
-        <Button 
-          onClick={() => setIsAddEventOpen(true)}
-          size="sm"
-          className="ml-auto"
-        >
+        <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
           <Plus className="h-4 w-4 mr-1" /> Add Event
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CalendarHeader;
