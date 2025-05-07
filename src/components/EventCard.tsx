@@ -36,6 +36,8 @@ const EventCard = ({
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>("America/Los_Angeles");
   // Add state to track hover state for showing edit button
   const [isHovering, setIsHovering] = useState(false);
+  // Add state to control the Sheet open state
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Format display time using the neighborhood timezone
   const displayTime = formatInNeighborhoodTimezone(parseISO(event.time), 'h:mm a', neighborhoodTimezone);
@@ -92,13 +94,26 @@ const EventCard = ({
     setRsvpCount(count || 0);
   };
 
+  // Handle event deletion
+  const handleDelete = () => {
+    // Close the sheet when the event is deleted
+    setIsSheetOpen(false);
+    // Call the onDelete callback if provided
+    if (onDelete) onDelete();
+  };
+
   // Edit Button component with white styling for the hover state
-  const EditButton = () => isHost && isHovering ? <EditEventDialog event={event} onDelete={onDelete}>
+  const EditButton = ({ onSheetClose }: { onSheetClose?: () => void }) => isHost ? (
+    <EditEventDialog 
+      event={event} 
+      onDelete={handleDelete}
+    >
       <div className="flex items-center gap-2 text-white">
         <Pencil className="h-4 w-4" />
         Edit
       </div>
-    </EditEventDialog> : null;
+    </EditEventDialog>
+  ) : null;
 
   // Determine event color based on RSVP status
   const getEventColor = () => {
@@ -131,13 +146,21 @@ const EventCard = ({
           <span>{rsvpCount}</span>
         </div>}
     </div>;
-  return <Sheet>
+
+  return (
+    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
         <EventHoverCard event={eventWithRequiredProps}>
           {eventPreview}
         </EventHoverCard>
       </SheetTrigger>
-      <EventSheetContent event={eventWithRequiredProps} EditButton={EditButton} />
-    </Sheet>;
+      <EventSheetContent 
+        event={eventWithRequiredProps} 
+        EditButton={EditButton} 
+        onOpenChange={setIsSheetOpen}
+      />
+    </Sheet>
+  );
 };
+
 export default EventCard;

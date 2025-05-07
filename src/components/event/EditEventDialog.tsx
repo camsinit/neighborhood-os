@@ -34,6 +34,7 @@ interface EditEventDialogProps {
   };
   onDelete?: () => void;
   children?: React.ReactNode;
+  onSheetClose?: () => void; // New prop to handle sheet closure
 }
 
 /**
@@ -42,7 +43,12 @@ interface EditEventDialogProps {
  * This component displays a modal dialog for editing an existing event.
  * It also includes a confirmation dialog for deleting events.
  */
-const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) => {
+const EditEventDialog = ({ 
+  event, 
+  onDelete, 
+  children, 
+  onSheetClose 
+}: EditEventDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -105,6 +111,11 @@ const EditEventDialog = ({ event, onDelete, children }: EditEventDialogProps) =>
       // Close dialogs
       setIsDeleteDialogOpen(false);
       setOpen(false);
+      
+      // Close sheet if needed
+      if (onSheetClose) {
+        onSheetClose();
+      }
       
       // Call onDelete callback if provided
       if (onDelete) onDelete();

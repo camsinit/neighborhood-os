@@ -18,13 +18,16 @@ import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
  * 
  * @param event - The event data to display
  * @param EditButton - Optional edit button component
+ * @param onOpenChange - Function to control the sheet's open state
  */
 const EventSheetContent = ({ 
   event, 
-  EditButton 
+  EditButton,
+  onOpenChange
 }: { 
   event: any;
-  EditButton?: React.FC;
+  EditButton?: React.FC<{onSheetClose?: () => void}>;
+  onOpenChange?: (open: boolean) => void;
 }) => {
   // Get current authenticated user
   const user = useUser();
@@ -33,6 +36,13 @@ const EventSheetContent = ({
   const [attendees, setAttendees] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
+  
+  // Function to close the sheet
+  const handleSheetClose = () => {
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+  };
   
   // Check if current user is the event host
   const isHost = user?.id === event.host_id;
@@ -153,7 +163,7 @@ const EventSheetContent = ({
       <SheetHeader className="mb-4">
         <SheetTitle className="text-xl font-bold flex justify-between items-start">
           <span>{event.title}</span>
-          {EditButton && <EditButton />}
+          {EditButton && <EditButton onSheetClose={handleSheetClose} />}
         </SheetTitle>
       </SheetHeader>
 

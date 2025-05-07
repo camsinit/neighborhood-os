@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 /**
  * DeleteEventButton component
@@ -18,15 +18,23 @@ import { dispatchRefreshEvent } from "@/utils/refreshEvents";
  * @param hostId - ID of the event host
  * @param eventTitle - Title of the event (for notifications)
  * @param onDelete - Optional callback function after successful deletion
+ * @param onSheetClose - Optional callback to close parent sheet when event is deleted
  */
 interface DeleteEventButtonProps {
   eventId: string;
   hostId: string;
   eventTitle: string;
   onDelete?: () => void;
+  onSheetClose?: () => void; // New prop to handle sheet closure
 }
 
-const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEventButtonProps) => {
+const DeleteEventButton = ({ 
+  eventId, 
+  hostId, 
+  eventTitle, 
+  onDelete, 
+  onSheetClose 
+}: DeleteEventButtonProps) => {
   // State to track the loading state of the delete operation
   const [isLoading, setIsLoading] = useState(false);
   
@@ -82,11 +90,16 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
       // Show success message
       toast.success("Event deleted successfully");
       
+      // Close the sheet if a callback is provided
+      if (onSheetClose) {
+        onSheetClose();
+      }
+      
       // Invalidate and refetch the events query to update the UI
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       // Dispatch a custom event to trigger data refresh in components listening for this event
-      dispatchRefreshEvent('event-submitted');
+      refreshEvents.eventsDelete(); // Use the predefined event for event deletion
       
       // Call onDelete callback if provided
       if (onDelete) onDelete();
