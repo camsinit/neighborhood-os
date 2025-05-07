@@ -138,14 +138,15 @@ const EventSheetContent = ({
         setIsRsvped(false);
         toast.success("RSVP removed");
       } else {
-        // Add RSVP
+        // Add RSVP - Use minimal data structure to avoid issues
+        const rsvpData = {
+          event_id: event.id,
+          user_id: user.id
+        };
+        
         await supabase
           .from('event_rsvps')
-          .insert({
-            event_id: event.id,
-            user_id: user.id,
-            neighborhood_id: event.neighborhood_id
-          });
+          .insert(rsvpData);
           
         setIsRsvped(true);
         toast.success("RSVP confirmed!");
@@ -153,9 +154,9 @@ const EventSheetContent = ({
       
       // Refresh attendees list
       fetchAttendees();
-    } catch (error) {
+    } catch (error: any) {
       console.error('RSVP error:', error);
-      toast.error("Failed to update RSVP");
+      toast.error(`Failed to update RSVP: ${error.message}`);
     }
   };
 
