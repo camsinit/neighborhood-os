@@ -24,4 +24,5 @@ export interface EventFormProps {
   event_id?: string; // This is the redundant ID field
   mode?: 'create' | 'edit';
   deleteButton?: React.ReactNode;
+  neighborhoodTimezone?: string; // Added timezone prop
 }

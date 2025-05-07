@@ -3,34 +3,7 @@ import { useEventForm } from "@/hooks/events/useEventForm";
 import EventFormBasicFields from "./form/EventFormBasicFields";
 import EventFormRecurrenceFields from "./form/EventFormRecurrenceFields";
 import EventFormFooter from "./form/EventFormFooter";
-
-/**
- * Interface for the EventForm component props
- * 
- * @param onClose - Function to call when the form should close
- * @param onAddEvent - Optional callback for when an event is added
- * @param initialValues - Optional initial values for the form fields
- * @param eventId - Optional ID if editing an existing event
- * @param mode - Whether we're creating or editing an event
- * @param deleteButton - Optional delete button component
- */
-interface EventFormProps {
-  onClose: () => void;
-  onAddEvent?: (event: any) => void;
-  initialValues?: {
-    title?: string;
-    description?: string;
-    date?: string;
-    time?: string;
-    location?: string;
-    isRecurring?: boolean;
-    recurrencePattern?: string;
-    recurrenceEndDate?: string;
-  };
-  eventId?: string;
-  mode?: 'create' | 'edit';
-  deleteButton?: React.ReactNode;
-}
+import { EventFormProps } from "./types/eventFormTypes";
 
 /**
  * EventForm component for creating and editing events
@@ -44,7 +17,8 @@ const EventForm = ({
   initialValues = {},
   eventId,
   mode = 'create',
-  deleteButton
+  deleteButton,
+  neighborhoodTimezone = 'America/Los_Angeles'
 }: EventFormProps) => {
   // Use our custom hook to manage form state and submission
   const {
@@ -71,7 +45,8 @@ const EventForm = ({
     onClose,
     onAddEvent,
     eventId,
-    mode
+    mode,
+    neighborhoodTimezone // Pass the neighborhood timezone to the event form hook
   });
 
   return (

@@ -5,6 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { transformEventFormData, transformEventUpdateData } from "./utils/eventDataTransformer";
 import { createEvent, updateEvent } from "./utils/eventServices";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -27,6 +29,31 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
   
   // Get the current neighborhood
   const neighborhood = useCurrentNeighborhood();
+
+  // State to store neighborhood timezone
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
+
+  // Fetch neighborhood timezone when neighborhood changes
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (neighborhood?.id) {
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', neighborhood.id)
+          .single();
+          
+        if (data && !error) {
+          setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
+          console.log(`[useEventSubmit] Fetched neighborhood timezone: ${data.timezone}`);
+        } else {
+          console.error('[useEventSubmit] Error fetching timezone:', error);
+        }
+      }
+    };
+    
+    fetchNeighborhoodTimezone();
+  }, [neighborhood?.id]);
 
   /**
    * Handles the submission of a new event
@@ -53,6 +80,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       console.log("[useEventSubmit] Attempting to insert event:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
+        neighborhoodTimezone,
         formData: { 
           ...formData, 
           title: formData.title,
@@ -64,8 +92,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Transform the form data to match database schema
-      const eventData = transformEventFormData(formData, user.id, neighborhood.id);
+      // Transform the form data to match database schema, using the neighborhood timezone
+      const eventData = transformEventFormData(formData, user.id, neighborhood.id, neighborhoodTimezone);
       
       // Log the transformed data that will be sent to the database
       console.log("[useEventSubmit] Transformed event data:", eventData);
@@ -117,12 +145,13 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       console.log("[useEventSubmit] Attempting to update event:", {
         eventId,
         userId: user.id,
+        neighborhoodTimezone,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
         timestamp: new Date().toISOString()
       });
 
-      // Transform the update data
-      const eventData = transformEventUpdateData(formData);
+      // Transform the update data, using the neighborhood timezone
+      const eventData = transformEventUpdateData(formData, neighborhoodTimezone);
 
       // Update the event in the database
       const data = await updateEvent(eventId, eventData, user.id, formData.title);

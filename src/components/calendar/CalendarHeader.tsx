@@ -1,6 +1,12 @@
+
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus, CalendarDays, Calendar } from "lucide-react";
-import { format, startOfWeek, endOfWeek } from "date-fns";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { format } from "date-fns";
+import { useNeighborhood } from "@/contexts/neighborhood";
+import { useMemo, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+
 interface CalendarHeaderProps {
   view: 'week' | 'month';
   currentDate: Date;
@@ -10,50 +16,120 @@ interface CalendarHeaderProps {
   handleToday: () => void;
   setIsAddEventOpen: (open: boolean) => void;
 }
-const CalendarHeader = ({
-  view,
-  currentDate,
-  setView,
-  handlePreviousWeek,
-  handleNextWeek,
-  handleToday,
-  setIsAddEventOpen
-}: CalendarHeaderProps) => {
-  const weekStart = startOfWeek(currentDate);
-  const weekEnd = endOfWeek(currentDate);
-  const periodLabel = format(currentDate, 'MMMM');
-  return <div className="space-y-4 mb-8">
-      <div className="flex flex-col gap-4">
-        
+
+/**
+ * CalendarHeader component displays navigation and controls for the calendar
+ * 
+ * @param props - Component props
+ */
+const CalendarHeader = (props: CalendarHeaderProps) => {
+  const { 
+    view, 
+    currentDate, 
+    setView, 
+    handlePreviousWeek, 
+    handleNextWeek, 
+    handleToday, 
+    setIsAddEventOpen 
+  } = props;
+  
+  const { currentNeighborhood } = useNeighborhood();
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
+  
+  // Fetch neighborhood timezone
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (currentNeighborhood?.id) {
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', currentNeighborhood.id)
+          .single();
+          
+        if (data && !error) {
+          setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
+        }
+      }
+    };
+    
+    fetchNeighborhoodTimezone();
+  }, [currentNeighborhood?.id]);
+  
+  // Format the current date according to the view and neighborhood timezone
+  const formattedDate = useMemo(() => {
+    if (view === 'week') {
+      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
+    } else {
+      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
+    }
+  }, [currentDate, view, neighborhoodTimezone]);
+  
+  // Get the timezone abbreviation for display
+  const getTimezoneAbbreviation = () => {
+    // This is a simple function to get timezone abbreviation
+    // Returns basic timezone abbreviations for common US timezones
+    if (neighborhoodTimezone.includes('Los_Angeles')) return 'PT';
+    if (neighborhoodTimezone.includes('Denver')) return 'MT';
+    if (neighborhoodTimezone.includes('Chicago')) return 'CT';
+    if (neighborhoodTimezone.includes('New_York')) return 'ET';
+    
+    // For other timezones, return the last part after the "/"
+    const parts = neighborhoodTimezone.split('/');
+    return parts[parts.length - 1].replace('_', ' ');
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+      <div className="flex items-center space-x-2">
+        <CalendarIcon className="h-5 w-5 text-blue-500" />
+        <h2 className="text-xl font-semibold flex flex-col sm:flex-row sm:items-center gap-1">
+          <span>{formattedDate}</span>
+          <span className="text-xs text-gray-500 sm:ml-2">
+            ({getTimezoneAbbreviation()} - {neighborhoodTimezone.replace('_', ' ')})
+          </span>
+        </h2>
       </div>
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-medium text-gray-700">{periodLabel}</h3>
-        <div className="flex items-center gap-6">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'week' ? 'border-primary' : ''}`} onClick={() => setView('week')}>
-              <CalendarDays className="h-4 w-4" />
-              Week
-            </Button>
-            <Button variant="outline" size="sm" className={`bg-white text-gray-900 hover:bg-gray-100 ${view === 'month' ? 'border-primary' : ''}`} onClick={() => setView('month')}>
-              <Calendar className="h-4 w-4" />
-              Month
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handlePreviousWeek}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handleToday}>Today</Button>
-            <Button variant="outline" size="sm" className="bg-white text-gray-900 hover:bg-gray-100" onClick={handleNextWeek}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button size="sm" onClick={() => setIsAddEventOpen(true)} className="flex items-center gap-2 ml-4 bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 text-white">
-              <Plus className="h-4 w-4" />
-              Add Event
-            </Button>
-          </div>
+      
+      <div className="flex flex-wrap gap-2">
+        <div className="flex rounded-md shadow-sm">
+          <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleToday}>
+            Today
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleNextWeek}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+        
+        <div className="flex rounded-md shadow-sm">
+          <Button
+            variant={view === 'week' ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setView('week')}
+          >
+            Week
+          </Button>
+          <Button
+            variant={view === 'month' ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setView('month')}
+          >
+            Month
+          </Button>
+        </div>
+        
+        <Button 
+          onClick={() => setIsAddEventOpen(true)}
+          size="sm"
+          className="ml-auto"
+        >
+          <Plus className="h-4 w-4 mr-1" /> Add Event
+        </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CalendarHeader;

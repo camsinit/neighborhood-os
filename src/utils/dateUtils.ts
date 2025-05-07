@@ -5,7 +5,7 @@
  * This file provides standardized date functions used across the application.
  * All date-related utility functions should be centralized here.
  */
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, formatISO } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 /**
@@ -116,11 +116,16 @@ export const logDateDetails = (context: string, date: Date): void => {
  * 
  * @param dateStr Date string in YYYY-MM-DD format
  * @param timeStr Time string in HH:MM format
+ * @param timezone Timezone of the neighborhood (default: 'America/Los_Angeles')
  * @returns Combined date-time ISO string that preserves the intended date
  */
-export const combineDateAndTime = (dateStr: string, timeStr: string): string => {
+export const combineDateAndTime = (
+  dateStr: string, 
+  timeStr: string, 
+  timezone: string = 'America/Los_Angeles'
+): string => {
   // Log the inputs for debugging
-  console.log(`[combineDateAndTime] Combining date: ${dateStr}, time: ${timeStr}`);
+  console.log(`[combineDateAndTime] Combining date: ${dateStr}, time: ${timeStr}, timezone: ${timezone}`);
   
   // First, ensure we have valid strings
   if (!dateStr || !timeStr) {
@@ -128,24 +133,51 @@ export const combineDateAndTime = (dateStr: string, timeStr: string): string => 
     return '';
   }
   
-  // Create a date object using the local representation to preserve the exact date
-  // This avoids timezone conversion issues that can shift dates
+  // Parse the date and time components
   const [year, month, day] = dateStr.split('-').map(Number);
   const [hours, minutes] = timeStr.split(':').map(Number);
   
-  // Create a date in the local timezone to avoid date shifting 
+  // Create a date in the local timezone first
   const localDate = new Date(year, month - 1, day, hours, minutes);
   
+  // Convert to the neighborhood's timezone to ensure the date/time is preserved as intended
+  // This is the key fix - creating a date in the correct timezone context
+  const zonedDate = toZonedTime(localDate, timezone);
+  
+  // Format to ISO 8601 in the neighborhood timezone
+  // This preserves the exact date and time as input by the user
+  const formattedDate = formatISO(zonedDate);
+  
   // Log the resulting date for debugging
-  console.log('[combineDateAndTime] Created local date:', {
-    input: { dateStr, timeStr },
+  console.log('[combineDateAndTime] Result:', {
+    input: { dateStr, timeStr, timezone },
     localDate: localDate.toString(),
-    iso: localDate.toISOString(),
-    year, month, day, hours, minutes
+    zonedDate: zonedDate.toString(),
+    formattedIso: formattedDate
   });
   
-  // Format the result as YYYY-MM-DDThh:mm
-  const formattedDate = `${dateStr}T${timeStr}`;
-  
   return formattedDate;
+};
+
+/**
+ * Returns a list of common timezones for selection
+ * This is used in timezone selection dropdowns
+ * 
+ * @returns Array of timezone objects with name and display name
+ */
+export const getCommonTimezones = (): { value: string, label: string }[] => {
+  return [
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+    { value: 'America/Denver', label: 'Mountain Time (MT)' },
+    { value: 'America/Chicago', label: 'Central Time (CT)' },
+    { value: 'America/New_York', label: 'Eastern Time (ET)' },
+    { value: 'America/Anchorage', label: 'Alaska Time' },
+    { value: 'Pacific/Honolulu', label: 'Hawaii Time' },
+    { value: 'America/Puerto_Rico', label: 'Atlantic Time' },
+    { value: 'Europe/London', label: 'GMT/UTC' },
+    { value: 'Europe/Paris', label: 'Central European Time' },
+    { value: 'Asia/Tokyo', label: 'Japan Time' },
+    { value: 'Asia/Shanghai', label: 'China Time' },
+    { value: 'Australia/Sydney', label: 'Australian Eastern Time' }
+  ];
 };

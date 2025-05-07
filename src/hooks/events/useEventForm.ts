@@ -26,6 +26,7 @@ interface UseEventFormProps {
   onAddEvent?: (event: any) => void;
   eventId?: string;
   mode?: 'create' | 'edit';
+  neighborhoodTimezone?: string; // Add timezone parameter
 }
 
 /**
@@ -42,7 +43,8 @@ export const useEventForm = ({
   onClose,
   onAddEvent,
   eventId,
-  mode = 'create'
+  mode = 'create',
+  neighborhoodTimezone = 'America/Los_Angeles' // Default timezone
 }: UseEventFormProps) => {
   // Initialize form state from initial values or defaults
   const [title, setTitle] = useState(initialValues.title || "");
@@ -105,6 +107,9 @@ export const useEventForm = ({
       isRecurring,
       recurrencePattern,
       recurrenceEndDate,
+      
+      // Include the timezone for correct date/time handling
+      timezone: neighborhoodTimezone
     };
 
     // Log the form data to help with debugging
