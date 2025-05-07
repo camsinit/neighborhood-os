@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Calendar, Gift, Brain, Shield, Users } from "lucide-react";
+import { Calendar, Gift, Brain, Info, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { moduleThemeColors } from "@/theme/moduleTheme";
@@ -40,7 +40,7 @@ const FeatureNavigation = () => {
       color: moduleThemeColors.goods.primary
     },
     { 
-      icon: Shield, 
+      icon: Info, 
       label: "Updates", 
       href: "/safety", 
       color: moduleThemeColors.safety.primary

@@ -1,4 +1,3 @@
-
 /**
  * Module Theme Registry
  * 
@@ -34,7 +33,7 @@ export const moduleThemeColors = {
     light: "#FEE2E2",
     variable: "--safety-color", 
     lightVariable: "--safety-light",
-    icon: "Shield"
+    icon: "Info" // Changed from Shield to Info
   },
   neighbors: {
     primary: "#7E69AB", // secondary purple
@@ -101,7 +100,7 @@ export const coreModules: ModuleDefinition[] = [
     description: 'Neighborhood updates and information',
     themeColor: 'safety',
     path: '/safety',
-    icon: 'Shield',
+    icon: 'Info', // Changed from Shield to Info
     isEnabled: true
   },
   {
