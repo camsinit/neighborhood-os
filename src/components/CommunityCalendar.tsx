@@ -1,15 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { 
   addWeeks, 
   subWeeks, 
   startOfWeek, 
-  endOfWeek,
   addDays,
   addMonths,
   subMonths, 
   startOfMonth, 
   endOfMonth,
-  eachDayOfInterval,
   parseISO,
   isEqual,
   isSameMonth,
@@ -25,19 +24,34 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
 import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
 
+// Create a logger for the CommunityCalendar component
 const logger = createLogger('CommunityCalendar');
 
+/**
+ * CommunityCalendar component
+ * 
+ * This component displays events in either a week or month view.
+ * It allows users to navigate between weeks/months and add new events.
+ */
 const CommunityCalendar = () => {
+  // State for current date and view mode
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  
+  // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();
   const { toast } = useToast();
   
   // Set up auto-refresh for calendar events
-  // This will listen for the event-submitted event and refresh the data
-  useAutoRefresh(['events'], ['event-submitted']);
+  // This will listen for multiple events that should trigger a calendar refresh
+  useAutoRefresh(
+    ['events'], 
+    ['event-submitted', 'event-deleted', 'event-updated'],
+    100 // Refresh with minimal delay for better user experience
+  );
 
+  // Handle event navigation (e.g. from notifications)
   useEffect(() => {
     const handleNavigateToEvent = (e: CustomEvent) => {
       const eventId = e.detail.eventId;
@@ -83,12 +97,11 @@ const CommunityCalendar = () => {
     };
   }, [events, currentDate, toast]);
 
+  // Calculate date ranges based on current view
   const weekStart = startOfWeek(currentDate);
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
+  // Handle navigation functions
   const handlePrevious = () => {
     if (view === 'week') {
       setCurrentDate(subWeeks(currentDate, 1));
@@ -125,7 +138,9 @@ const CommunityCalendar = () => {
     }) as LocalEvent[]; // Type assertion here as we know the structure matches
   };
 
+  // Handle event addition and trigger refetch
   const handleAddEvent = async () => {
+    logger.debug("Event added, refreshing data");
     await refetch();
   };
 

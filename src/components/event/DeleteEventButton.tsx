@@ -1,10 +1,24 @@
+
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 
+/**
+ * DeleteEventButton component
+ * 
+ * This button allows event hosts to delete their events and automatically refreshes
+ * the calendar view to reflect the deletion without requiring a page reload.
+ * 
+ * @param eventId - ID of the event to delete
+ * @param hostId - ID of the event host
+ * @param eventTitle - Title of the event (for notifications)
+ * @param onDelete - Optional callback function after successful deletion
+ */
 interface DeleteEventButtonProps {
   eventId: string;
   hostId: string;
@@ -13,15 +27,27 @@ interface DeleteEventButtonProps {
 }
 
 const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEventButtonProps) => {
+  // State to track the loading state of the delete operation
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get the current authenticated user
   const user = useUser();
+  
+  // Get the query client for cache invalidation
+  const queryClient = useQueryClient();
 
+  /**
+   * Handle delete button click
+   * This function deletes the event and refreshes the events data
+   */
   const handleDelete = async () => {
+    // Check if the user is authorized to delete this event
     if (!user || user.id !== hostId) {
       toast.error("You don't have permission to delete this event");
       return;
     }
 
+    // Set loading state while performing the deletion
     setIsLoading(true);
     try {
       // First delete the event
@@ -53,7 +79,16 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
         console.error('Error notifying users:', notifyError);
       }
 
+      // Show success message
       toast.success("Event deleted successfully");
+      
+      // Invalidate and refetch the events query to update the UI
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      
+      // Dispatch a custom event to trigger data refresh in components listening for this event
+      dispatchRefreshEvent('event-submitted');
+      
+      // Call onDelete callback if provided
       if (onDelete) onDelete();
     } catch (error) {
       console.error('Error in delete operation:', error);
@@ -63,8 +98,10 @@ const DeleteEventButton = ({ eventId, hostId, eventTitle, onDelete }: DeleteEven
     }
   };
 
+  // Don't render the button if the user doesn't have permission
   if (!user || user.id !== hostId) return null;
 
+  // Render the delete button
   return (
     <Button
       variant="destructive"

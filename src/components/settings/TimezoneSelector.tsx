@@ -27,10 +27,27 @@ const TimezoneSelector = () => {
   
   // Set the initial timezone when the neighborhood loads
   useEffect(() => {
-    if (currentNeighborhood?.timezone) {
-      setTimezone(currentNeighborhood.timezone);
+    // Check if neighborhood has a timezone field
+    if (currentNeighborhood) {
+      // Fetch the timezone directly from the database to ensure we have the latest value
+      const fetchNeighborhoodTimezone = async () => {
+        if (currentNeighborhood.id) {
+          const { data, error } = await supabase
+            .from('neighborhoods')
+            .select('timezone')
+            .eq('id', currentNeighborhood.id)
+            .single();
+            
+          if (data && !error) {
+            setTimezone(data.timezone || 'America/Los_Angeles');
+            console.log(`[TimezoneSelector] Using timezone: ${data.timezone}`);
+          }
+        }
+      };
+      
+      fetchNeighborhoodTimezone();
     }
-  }, [currentNeighborhood?.timezone]);
+  }, [currentNeighborhood]);
   
   // Handle timezone selection
   const handleTimezoneChange = async (value: string) => {

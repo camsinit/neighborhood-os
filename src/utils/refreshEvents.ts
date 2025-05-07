@@ -9,6 +9,9 @@
 /**
  * Dispatch a custom event to trigger data refresh
  * 
+ * This function provides a consistent way to notify components about data changes
+ * without tight coupling between components.
+ * 
  * @param eventName - The name of the event to dispatch
  * @param detail - Optional details to include with the event
  */
@@ -31,11 +34,23 @@ export const dispatchRefreshEvent = (
 
 /**
  * Predefined refresh events for different sections of the app
+ * 
+ * Using these predefined functions ensures consistency in event naming
+ * across different parts of the application.
  */
 export const refreshEvents = {
   goods: () => dispatchRefreshEvent('goods-form-submitted'),
   safety: () => dispatchRefreshEvent('safety-update-submitted'),
   events: () => dispatchRefreshEvent('event-submitted'),
+  eventsDelete: () => dispatchRefreshEvent('event-deleted'),
+  eventsUpdate: () => dispatchRefreshEvent('event-updated'),
   skills: () => dispatchRefreshEvent('skill-submitted'),
   profile: () => dispatchRefreshEvent('profile-updated'),
 };
+
+/**
+ * Get the global query client instance
+ * 
+ * This provides direct access to the query client for manual invalidations
+ * when the component doesn't have access to the useQueryClient hook.
+ */

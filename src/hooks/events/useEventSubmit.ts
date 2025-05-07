@@ -7,6 +7,7 @@ import { transformEventFormData, transformEventUpdateData } from "./utils/eventD
 import { createEvent, updateEvent } from "./utils/eventServices";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -98,7 +99,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Log the transformed data that will be sent to the database
       console.log("[useEventSubmit] Transformed event data:", eventData);
 
-      // Create the event in the database
+      // Create the event in the database (service now handles activity creation)
       const data = await createEvent(eventData, user.id, formData.title);
       
       // Log success after database operation
@@ -107,13 +108,12 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
       
-      // Invalidate the events query to refresh the data
+      // BUGFIX: Using queryClient invalidation instead of document event to avoid double activity creation
       queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] }); 
       
-      // Dispatch a custom event to signal that an event was created
-      // This will trigger a data refresh in components listening for this event
-      const customEvent = new Event('event-submitted');
-      document.dispatchEvent(customEvent);
+      // Use the centralized refresh event dispatcher for consistent behavior
+      dispatchRefreshEvent('event-submitted');
       
       onSuccess();
       
@@ -159,15 +159,13 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Success notification
       toast.success("Event updated successfully");
       
-      // Invalidate queries to refresh the data
-      // This will update all components that display event data, including notifications and activity feed
+      // BUGFIX: Using queryClient invalidation instead of document event to avoid double activity creation
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
-      // Dispatch a custom event to signal that an event was updated
-      const customEvent = new Event('event-submitted');
-      document.dispatchEvent(customEvent);
+      // Use the centralized refresh event dispatcher for consistent behavior
+      dispatchRefreshEvent('event-submitted');
       
       onSuccess();
       
