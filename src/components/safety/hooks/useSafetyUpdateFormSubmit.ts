@@ -73,13 +73,34 @@ export const useSafetyUpdateFormSubmit = (
       }
 
       // Call the edge function to update activities
-      const newUpdateId = mode === 'edit' ? updateId : response.data?.[0]?.id;
-      if (newUpdateId) {
+      // Now using safety_update_id for consistency
+      let safetyUpdateId: string;
+      
+      if (mode === 'edit' && updateId) {
+        // For updates, we need to fetch the safety_update_id
+        const { data: fetchedUpdate, error: fetchError } = await supabase
+          .from('safety_updates')
+          .select('safety_update_id')
+          .eq('id', updateId)
+          .single();
+          
+        if (fetchError) {
+          console.error("Error fetching safety_update_id:", fetchError);
+          safetyUpdateId = updateId; // Fallback to primary key
+        } else {
+          safetyUpdateId = fetchedUpdate.safety_update_id;
+        }
+      } else {
+        // For new items, get the safety_update_id from the response
+        safetyUpdateId = response.data?.[0]?.safety_update_id || response.data?.[0]?.id;
+      }
+      
+      if (safetyUpdateId) {
         // Call our edge function to handle activity feed updates
         const { error: edgeFunctionError } = await supabase.functions.invoke(
           'notify-safety-changes', {
           body: {
-            safetyUpdateId: newUpdateId,
+            safetyUpdateId: safetyUpdateId,
             action: action,
             safetyUpdateTitle: data.title,
             userId: user.id,

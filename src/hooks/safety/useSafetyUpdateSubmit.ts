@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -82,6 +81,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         props.onSuccess();
       }
       
+      // Now use safety_update_id for activity feed and notifications
+      if (data && data[0]) {
+        console.log("[useSafetyUpdateSubmit] Successfully created safety update with ID:", data[0].id);
+        console.log("[useSafetyUpdateSubmit] safety_update_id:", data[0].safety_update_id);
+      }
+      
       return data;
     } catch (err) {
       console.error('Error creating safety update:', err);
@@ -114,6 +119,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       });
 
       // Update the safety update
+      // The safety_update_id remains the same as it's automatically set to id
       const { error, data } = await supabase
         .from('safety_updates')
         .update({

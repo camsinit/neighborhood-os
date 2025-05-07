@@ -17,6 +17,7 @@ export interface Profile {
  */
 export interface SafetyUpdate {
   id: string;
+  safety_update_id: string; // Added redundant ID field
   title: string;
   description: string;
   type: string;
@@ -30,6 +31,7 @@ export interface SafetyUpdate {
  */
 export interface Event {
   id: string;
+  event_id: string; // Existing redundant ID field
   title: string;
   description: string;
   time: string;
@@ -74,6 +76,7 @@ export interface SupportRequest {
  */
 export interface GoodsExchangeItem {
   id: string;
+  goods_item_id: string; // Added redundant ID field
   title: string;
   description: string;
   category: string; // Always 'goods'
@@ -97,6 +100,7 @@ export interface GoodsExchangeItem {
  */
 export interface SkillExchangeItem {
   id: string;
+  skill_id: string; // Added redundant ID field
   title: string;
   description: string;
   request_type: 'need' | 'offer';
@@ -110,3 +114,4 @@ export interface SkillExchangeItem {
   time_preferences?: string[];
   profiles?: Profile; // Profile of the provider/requester
 }
+

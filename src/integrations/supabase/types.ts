@@ -68,6 +68,7 @@ export type Database = {
           archived_at: string | null
           archived_by: string | null
           care_category: string
+          care_request_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -84,6 +85,7 @@ export type Database = {
           archived_at?: string | null
           archived_by?: string | null
           care_category: string
+          care_request_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -100,6 +102,7 @@ export type Database = {
           archived_at?: string | null
           archived_by?: string | null
           care_category?: string
+          care_request_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -250,6 +253,7 @@ export type Database = {
           created_at: string
           description: string | null
           goods_category: string | null
+          goods_item_id: string | null
           id: string
           image_url: string | null
           images: string[] | null
@@ -270,6 +274,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           goods_category?: string | null
+          goods_item_id?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -290,6 +295,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           goods_category?: string | null
+          goods_item_id?: string | null
           id?: string
           image_url?: string | null
           images?: string[] | null
@@ -651,6 +657,7 @@ export type Database = {
           is_archived: boolean | null
           is_read: boolean | null
           neighborhood_id: string
+          safety_update_id: string | null
           title: string
           type: string
         }
@@ -662,6 +669,7 @@ export type Database = {
           is_archived?: boolean | null
           is_read?: boolean | null
           neighborhood_id: string
+          safety_update_id?: string | null
           title: string
           type: string
         }
@@ -673,6 +681,7 @@ export type Database = {
           is_archived?: boolean | null
           is_read?: boolean | null
           neighborhood_id?: string
+          safety_update_id?: string | null
           title?: string
           type?: string
         }
@@ -844,6 +853,7 @@ export type Database = {
           neighborhood_id: string
           request_type: string
           skill_category: string
+          skill_id: string | null
           time_preferences: string[] | null
           title: string
           user_id: string
@@ -859,6 +869,7 @@ export type Database = {
           neighborhood_id: string
           request_type: string
           skill_category: string
+          skill_id?: string | null
           time_preferences?: string[] | null
           title: string
           user_id: string
@@ -874,6 +885,7 @@ export type Database = {
           neighborhood_id?: string
           request_type?: string
           skill_category?: string
+          skill_id?: string | null
           time_preferences?: string[] | null
           title?: string
           user_id?: string

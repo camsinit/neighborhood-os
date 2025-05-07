@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -52,6 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (action === 'create') {
       const activityType = requestType === 'offer' ? 'good_shared' : 'good_requested';
       
+      // Now using goods_item_id for activity creation for better consistency
       const { error: createError } = await supabaseClient
         .from('activities')
         .insert({

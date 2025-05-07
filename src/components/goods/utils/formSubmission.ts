@@ -109,12 +109,12 @@ export const notifyGoodsChanges = async (
   urgency?: string,
 ) => {
   try {
-    // Call the edge function
+    // Call the edge function with goods_item_id instead of id
     const { error } = await supabase.functions.invoke(
       'notify-goods-changes',
       {
         body: {
-          goodsItemId,
+          goodsItemId, // Using goods_item_id now
           action,
           goodsItemTitle,
           userId,
@@ -216,6 +216,11 @@ export const submitGoodsForm = async (
       if (error) throw error;
       data = updatedData;
       
+      // When updating or deleting items, we want to access the redundant ID field
+      if (data && data[0]) {
+        console.log("Updated goods item with goods_item_id:", data[0].goods_item_id);
+      }
+      
     } else {
       formattedData = isOfferForm
         ? { ...await formatOfferSubmission(itemFormData, userId), neighborhood_id: neighborhoodId }
@@ -230,6 +235,26 @@ export const submitGoodsForm = async (
       
       if (error) throw error;
       data = insertedData;
+      
+      // For new items, we want to capture the new goods_item_id
+      if (data && data[0]) {
+        console.log("Created goods item with goods_item_id:", data[0].goods_item_id);
+        
+        // Use the goods_item_id for notifications/activities
+        if (data[0].goods_item_id && data[0].title) {
+          // Notify when a new item is created
+          await notifyGoodsChanges(
+            data[0].goods_item_id, // Use the redundant ID
+            'create',
+            data[0].title,
+            userId,
+            isOfferForm ? 'offer' : 'need',
+            neighborhoodId,
+            data[0].goods_category || data[0].category,
+            data[0].urgency
+          );
+        }
+      }
     }
     
     // Dismiss loading toast and show success

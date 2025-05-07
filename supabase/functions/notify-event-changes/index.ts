@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -60,6 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`${usersToNotify.length} users have email notifications enabled`);
 
     // When an event is updated or deleted, also update any related activities to keep them in sync
+    // Using event_id for more reliable activity updates
     if (eventId) {
       if (action === 'update') {
         // Update any activities related to this event

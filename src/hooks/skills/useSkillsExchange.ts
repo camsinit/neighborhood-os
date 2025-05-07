@@ -82,22 +82,28 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         throw error;
       }
 
-      // Log success information
-      console.log("[useSkillsExchange] Skill exchange created successfully:", {
-        skillId: data?.[0]?.id,
-        userId: user.id,
-        neighborhoodId: neighborhood.id,
-        mode,
-        timestamp: new Date().toISOString()
-      });
+      // Log success information including the new skill_id for reference
+      if (data && data[0]) {
+        console.log("[useSkillsExchange] Skill exchange created successfully:", {
+          skillId: data[0].id,
+          skill_id: data[0].skill_id, // Access the new redundant ID
+          userId: user.id,
+          neighborhoodId: neighborhood.id,
+          mode,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       onSuccess();
+      
+      return data;
     } catch (error) {
       console.error('Error creating skill exchange:', error);
       toast.error("Failed to create skill exchange. Please try again.");
+      throw error;
     }
   };
 
@@ -153,20 +159,26 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         throw error;
       }
 
-      // Log success information
-      console.log("[useSkillsExchange] Skill exchange updated successfully:", {
-        skillId,
-        userId: user.id,
-        mode,
-        timestamp: new Date().toISOString()
-      });
+      // Log success information including the skill_id
+      if (data && data[0]) {
+        console.log("[useSkillsExchange] Skill exchange updated successfully:", {
+          skillId,
+          skill_id: data[0].skill_id, // Accessing the redundant ID
+          userId: user.id,
+          mode,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       toast.success('Skill exchange updated successfully!');
       onSuccess();
+      
+      return data;
     } catch (error) {
       console.error('Error updating skill exchange:', error);
       toast.error("Failed to update skill exchange. Please try again.");
+      throw error;
     }
   };
 

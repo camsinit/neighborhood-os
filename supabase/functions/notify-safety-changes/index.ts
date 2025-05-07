@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -33,6 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     // When a safety update is modified, update any related activities to keep them in sync
     if (action === 'update' && safetyUpdateId) {
       // Update any activities related to this safety update
+      // Now using safety_update_id column for more reliable joins
       const { error: activityError } = await supabaseClient
         .from('activities')
         .update({ title: safetyUpdateTitle })

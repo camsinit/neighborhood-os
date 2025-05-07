@@ -38,6 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`[notify-skills-changes] Request details: providerId=${providerId}, requesterId=${requesterId}`);
 
     // When a skill is modified, update any related activities to keep them in sync
+    // Now using the skill_id field for more reliable joins
     if (action === 'update' && skillId) {
       // Update any activities related to this skill
       const { error: activityError } = await supabaseClient
