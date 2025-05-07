@@ -97,8 +97,8 @@ export const coreModules: ModuleDefinition[] = [
   },
   {
     id: 'safety',
-    name: 'Safety',
-    description: 'Neighborhood safety and updates',
+    name: 'Updates',
+    description: 'Neighborhood updates and information',
     themeColor: 'safety',
     path: '/safety',
     icon: 'Shield',

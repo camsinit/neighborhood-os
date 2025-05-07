@@ -6,11 +6,11 @@ import { createHighlightListener } from "@/utils/highlightNavigation";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**
- * SafetyPage - Main page for viewing and creating safety updates
+ * SafetyPage - Main page for viewing and creating updates
  * 
- * This page displays community safety updates and allows users to:
- * - View all safety updates
- * - Create new safety updates via the button next to the search box
+ * This page displays community updates and allows users to:
+ * - View all updates
+ * - Create new updates via the button next to the search box
  * - View detailed information about each update
  */
 const SafetyPage = () => {
@@ -33,9 +33,9 @@ const SafetyPage = () => {
 
   return (
     <ModuleLayout
-      title="Safety Updates"
+      title="Updates"
       themeColor="safety"
-      description="Stay informed about safety matters in your community. Share updates, receive alerts, and work together to maintain a secure neighborhood environment."
+      description="Stay informed about important updates in your community. Share information, receive alerts, and work together to maintain a secure neighborhood environment."
     >
       <SafetyUpdates />
     </ModuleLayout>
