@@ -206,19 +206,22 @@ const RSVPButton = ({
         // Prepare minimal data object for inserting RSVP
         const rsvpData = {
           event_id: eventId,
-          user_id: user.id
+          user_id: user.id,
+          // Include neighborhood_id for trigger if available
+          neighborhood_id: eventNeighborhoodId
         };
         
         // Log the exact data structure and SQL representation
         logger.debug(`${COMPONENT_ID}: [${opTxnId}] Adding RSVP with data:`, {
           payload: rsvpData,
-          sqlEquivalent: `INSERT INTO event_rsvps (event_id, user_id) VALUES ('${eventId}', '${user.id}')`
+          sqlEquivalent: `INSERT INTO event_rsvps (event_id, user_id${eventNeighborhoodId ? ', neighborhood_id' : ''}) VALUES ('${eventId}', '${user.id}'${eventNeighborhoodId ? `, '${eventNeighborhoodId}'` : ''})`
         });
         
-        // Insert RSVP with no returning clause
-        const { error } = await supabase
+        // Insert RSVP
+        const { data, error } = await supabase
           .from('event_rsvps')
-          .insert(rsvpData);
+          .insert(rsvpData)
+          .select();  // Added select to verify the created record
 
         if (error) {
           logger.error(`${COMPONENT_ID}: [${opTxnId}] Error adding RSVP:`, {
@@ -234,7 +237,10 @@ const RSVPButton = ({
           throw error;
         }
 
-        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Successfully added RSVP`);
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Successfully added RSVP:`, {
+          responseData: data,
+          recordCreated: !!data?.length
+        });
         toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
       }
