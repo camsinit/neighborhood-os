@@ -6,6 +6,7 @@ import { RSVPButtonProps } from "./types";
 import { useRSVPState } from "./useRSVPState";
 import { useEventNeighborhood } from "./useEventNeighborhood";
 import { rsvpService } from "./rsvpService";
+import { useUser } from "@supabase/auth-helpers-react";
 import { createLogger } from "@/utils/logger";
 
 // Setup logger for this component
@@ -31,6 +32,9 @@ const RSVPButton = ({
   // For tracking operations
   const COMPONENT_ID = "RSVPButton-" + eventId.substring(0, 8);
   
+  // Get current user
+  const user = useUser();
+  
   // Get neighborhood ID (fetches from API if not provided)
   const eventNeighborhoodId = useEventNeighborhood(eventId, neighborhoodId);
   
@@ -41,8 +45,7 @@ const RSVPButton = ({
     isLoading, 
     setIsLoading,
     generateTransactionId,
-    setTransactionId,
-    user
+    setTransactionId
   } = useRSVPState(eventId, initialRSVPState);
 
   /**

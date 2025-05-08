@@ -1,4 +1,3 @@
-
 /**
  * This file contains utilities for dispatching refresh events
  * across the application. These events are used to trigger refetching
@@ -33,4 +32,25 @@ export const dispatchRefreshEvent = (eventName: string) => {
   } catch (error) {
     console.error(`[refreshEvents] Error dispatching ${eventName} event:`, error);
   }
+};
+
+/**
+ * Helper object with named methods for refreshing different parts of the application
+ * 
+ * This object is used by various components throughout the application
+ * to trigger data refreshes in other components.
+ */
+export const refreshEvents = {
+  // Event-related refresh methods
+  eventsUpdate: () => dispatchRefreshEvent('event-updated'),
+  eventsDelete: () => dispatchRefreshEvent('event-deleted'),
+  eventsSubmit: () => dispatchRefreshEvent('event-submitted'),
+  rsvpUpdate: () => dispatchRefreshEvent('event-rsvp-updated'),
+  
+  // Other module refresh methods
+  profile: () => dispatchRefreshEvent('profile-updated'),
+  activities: () => dispatchRefreshEvent('activities-updated'),
+  skills: () => dispatchRefreshEvent('skills-updated'),
+  safety: () => dispatchRefreshEvent('safety-updated'),
+  goods: () => dispatchRefreshEvent('goods-updated'),
 };
