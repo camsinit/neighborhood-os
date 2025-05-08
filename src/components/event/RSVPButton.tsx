@@ -8,12 +8,12 @@ import { Check, Loader2 } from "lucide-react";
 import { createLogger } from "@/utils/logger";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 
-// Setup logger with TRACE level for detailed logging
+// Setup logger for detailed logging
 const logger = createLogger('RSVPButton');
 
 interface RSVPButtonProps {
   eventId: string;
-  neighborhoodId?: string; // Add optional neighborhoodId prop
+  neighborhoodId?: string; 
   initialRSVPState?: boolean;
   className?: string;
 }
@@ -74,11 +74,10 @@ const RSVPButton = ({
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      // Query for existing RSVP
-      const checkRsvpStatus = async () => {
+    const checkRsvpStatus = async () => {
+      setIsLoading(true);
+      
+      try {
         logger.debug(`Checking RSVP status for event ${eventId} and user ${user.id}`);
         const { data, error } = await supabase
           .from('event_rsvps')
@@ -95,14 +94,14 @@ const RSVPButton = ({
         const hasRSVP = !!data;
         logger.debug(`User ${user.id} has${hasRSVP ? '' : ' not'} RSVPed to event ${eventId}`);
         setHasRSVPed(hasRSVP);
+      } catch (error) {
+        logger.error("Error checking RSVP:", error);
+      } finally {
         setIsLoading(false);
-      };
+      }
+    };
       
-      checkRsvpStatus();
-    } catch (error) {
-      logger.error("Error checking RSVP:", error);
-      setIsLoading(false);
-    }
+    checkRsvpStatus();
   }, [eventId, user]);
 
   const toggleRSVP = async () => {
@@ -128,49 +127,27 @@ const RSVPButton = ({
           throw error;
         }
 
-        logger.debug(`Successfully removed RSVP for event ${eventId}`);
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
-        // Add RSVP - Use a minimal object with only the required fields
-        // This is crucial to avoid the "record 'new' has no field 'description'" error
+        // Add RSVP - Using a minimal object with only required fields
         const rsvpData = {
           event_id: eventId,
           user_id: user.id
         };
         
-        // Enhanced logging to inspect the exact data structure before insert
-        logger.debug("Adding RSVP with minimal data object:", rsvpData);
-        console.log("RSVP Data to be inserted:", JSON.stringify(rsvpData));
+        logger.debug("Adding RSVP with data:", rsvpData);
         
-        // Log the raw SQL query that will be executed (for debugging)
-        logger.debug(`Executing INSERT INTO event_rsvps (event_id, user_id) VALUES ('${eventId}', '${user.id}')`);
-        
-        // Fixed: Remove the returning option that was causing the TypeScript error
+        // Fixed: Use insert without returning option
         const { error } = await supabase
           .from('event_rsvps')
-          .insert(rsvpData, { 
-            count: 'exact'
-          });
+          .insert(rsvpData);
 
         if (error) {
-          // Enhanced error logging with more details
           logger.error("Error adding RSVP:", error);
-          logger.error("Error details:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
-          });
-          
-          // Fixed: Use the correct RPC function name as a string literal
-          // Log table structure to verify schema
-          logger.debug("Cannot directly inspect table structure in SQL client");
-          
           throw error;
         }
 
-        logger.debug(`Successfully added RSVP for event ${eventId}`);
         toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
       }
