@@ -8,7 +8,7 @@ import { Check, Loader2 } from "lucide-react";
 import { createLogger } from "@/utils/logger";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 
-// Setup logger
+// Setup logger with TRACE level for detailed logging
 const logger = createLogger('RSVPButton');
 
 interface RSVPButtonProps {
@@ -32,6 +32,7 @@ const RSVPButton = ({
   initialRSVPState = false, 
   className 
 }: RSVPButtonProps) => {
+  // Get current authenticated user
   const user = useUser();
   const [hasRSVPed, setHasRSVPed] = useState(initialRSVPState);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +43,7 @@ const RSVPButton = ({
     const fetchEventNeighborhoodId = async () => {
       if (!neighborhoodId && eventId) {
         try {
+          logger.debug(`Fetching neighborhood_id for event ${eventId}`);
           const { data, error } = await supabase
             .from('events')
             .select('neighborhood_id')
@@ -53,6 +55,7 @@ const RSVPButton = ({
           }
           
           if (data?.neighborhood_id) {
+            logger.debug(`Found neighborhood_id: ${data.neighborhood_id} for event ${eventId}`);
             setEventNeighborhoodId(data.neighborhood_id);
           }
         } catch (error) {
@@ -66,13 +69,17 @@ const RSVPButton = ({
 
   // Check if user has RSVPed on component mount
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      logger.debug("No user logged in, skipping RSVP check");
+      return;
+    }
     
     setIsLoading(true);
     
     try {
       // Query for existing RSVP
       const checkRsvpStatus = async () => {
+        logger.debug(`Checking RSVP status for event ${eventId} and user ${user.id}`);
         const { data, error } = await supabase
           .from('event_rsvps')
           .select('id')
@@ -81,10 +88,13 @@ const RSVPButton = ({
           .maybeSingle();
 
         if (error) {
+          logger.error("Error checking RSVP status:", error);
           throw error;
         }
 
-        setHasRSVPed(!!data);
+        const hasRSVP = !!data;
+        logger.debug(`User ${user.id} has${hasRSVP ? '' : ' not'} RSVPed to event ${eventId}`);
+        setHasRSVPed(hasRSVP);
         setIsLoading(false);
       };
       
@@ -106,6 +116,7 @@ const RSVPButton = ({
     try {
       if (hasRSVPed) {
         // Remove RSVP
+        logger.debug(`Removing RSVP for event ${eventId} and user ${user.id}`);
         const { error } = await supabase
           .from('event_rsvps')
           .delete()
@@ -117,6 +128,7 @@ const RSVPButton = ({
           throw error;
         }
 
+        logger.debug(`Successfully removed RSVP for event ${eventId}`);
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
@@ -127,17 +139,47 @@ const RSVPButton = ({
           user_id: user.id
         };
         
-        logger.debug("Adding RSVP with minimalist data object:", rsvpData);
+        // Enhanced logging to inspect the exact data structure before insert
+        logger.debug("Adding RSVP with minimal data object:", rsvpData);
+        console.log("RSVP Data to be inserted:", JSON.stringify(rsvpData));
         
+        // Log the raw SQL query that will be executed (for debugging)
+        logger.debug(`Executing INSERT INTO event_rsvps (event_id, user_id) VALUES ('${eventId}', '${user.id}')`);
+        
+        // Attempt the insert with explicit columns to ensure no extra fields are sent
         const { error } = await supabase
           .from('event_rsvps')
-          .insert([rsvpData]);
+          .insert(rsvpData, { 
+            count: 'exact',
+            returning: 'minimal'
+          });
 
         if (error) {
+          // Enhanced error logging with more details
           logger.error("Error adding RSVP:", error);
+          logger.error("Error details:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
+          
+          // Log table structure to verify schema
+          logger.debug("Checking event_rsvps table structure...");
+          const { data: tableInfo, error: tableError } = await supabase
+            .rpc('inspect_table_columns', { table_name: 'event_rsvps' })
+            .select('*');
+            
+          if (!tableError && tableInfo) {
+            logger.debug("Table structure:", tableInfo);
+          } else if (tableError) {
+            logger.error("Error inspecting table:", tableError);
+          }
+          
           throw error;
         }
 
+        logger.debug(`Successfully added RSVP for event ${eventId}`);
         toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
       }
