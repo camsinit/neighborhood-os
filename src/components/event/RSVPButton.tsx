@@ -8,8 +8,13 @@ import { Check, Loader2 } from "lucide-react";
 import { createLogger } from "@/utils/logger";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 
-// Setup logger for detailed logging
+// Setup enhanced logger with detailed configuration
 const logger = createLogger('RSVPButton');
+
+// Define a transaction ID generator to track request flows
+const generateTransactionId = () => {
+  return `txn-${Math.random().toString(36).substring(2, 10)}`;
+};
 
 interface RSVPButtonProps {
   eventId: string;
@@ -32,18 +37,34 @@ const RSVPButton = ({
   initialRSVPState = false, 
   className 
 }: RSVPButtonProps) => {
+  // For tracking operations
+  const COMPONENT_ID = "RSVPButton-" + eventId.substring(0, 8);
+  
   // Get current authenticated user
   const user = useUser();
   const [hasRSVPed, setHasRSVPed] = useState(initialRSVPState);
   const [isLoading, setIsLoading] = useState(false);
   const [eventNeighborhoodId, setEventNeighborhoodId] = useState<string | null>(neighborhoodId || null);
+  const [transactionId, setTransactionId] = useState<string>("");
+
+  // Trace initial props
+  useEffect(() => {
+    logger.debug(`${COMPONENT_ID}: Initialized with props:`, { 
+      eventId, 
+      neighborhoodId, 
+      initialRSVPState, 
+      hasUser: !!user 
+    });
+  }, []);
 
   // Fetch the neighborhood_id from the event if not provided
   useEffect(() => {
     const fetchEventNeighborhoodId = async () => {
       if (!neighborhoodId && eventId) {
+        const opTxnId = generateTransactionId();
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Fetching neighborhood_id for event ${eventId}`);
+        
         try {
-          logger.debug(`Fetching neighborhood_id for event ${eventId}`);
           const { data, error } = await supabase
             .from('events')
             .select('neighborhood_id')
@@ -51,15 +72,26 @@ const RSVPButton = ({
             .single();
           
           if (error) {
+            logger.error(`${COMPONENT_ID}: [${opTxnId}] Error fetching event neighborhood_id:`, {
+              error: {
+                message: error.message,
+                code: error.code,
+                details: error.details,
+                hint: error.hint
+              },
+              eventId
+            });
             throw error;
           }
           
           if (data?.neighborhood_id) {
-            logger.debug(`Found neighborhood_id: ${data.neighborhood_id} for event ${eventId}`);
+            logger.debug(`${COMPONENT_ID}: [${opTxnId}] Found neighborhood_id: ${data.neighborhood_id} for event ${eventId}`);
             setEventNeighborhoodId(data.neighborhood_id);
+          } else {
+            logger.warn(`${COMPONENT_ID}: [${opTxnId}] No neighborhood_id found for event ${eventId}`);
           }
-        } catch (error) {
-          logger.error("Error fetching event neighborhood_id:", error);
+        } catch (error: any) {
+          logger.error(`${COMPONENT_ID}: [${opTxnId}] Exception fetching neighborhood_id:`, error);
         }
       }
     };
@@ -70,15 +102,25 @@ const RSVPButton = ({
   // Check if user has RSVPed on component mount
   useEffect(() => {
     if (!user) {
-      logger.debug("No user logged in, skipping RSVP check");
+      logger.debug(`${COMPONENT_ID}: No user logged in, skipping RSVP check`);
       return;
     }
     
     const checkRsvpStatus = async () => {
+      const opTxnId = generateTransactionId();
+      setTransactionId(opTxnId);
       setIsLoading(true);
       
+      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Starting RSVP status check for event=${eventId} user=${user.id}`);
+      
       try {
-        logger.debug(`Checking RSVP status for event ${eventId} and user ${user.id}`);
+        // Trace the exact query we're about to execute
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Executing query:`, {
+          table: 'event_rsvps',
+          action: 'select',
+          filters: { event_id: eventId, user_id: user.id }
+        });
+        
         const { data, error } = await supabase
           .from('event_rsvps')
           .select('id')
@@ -87,16 +129,25 @@ const RSVPButton = ({
           .maybeSingle();
 
         if (error) {
-          logger.error("Error checking RSVP status:", error);
+          logger.error(`${COMPONENT_ID}: [${opTxnId}] Error checking RSVP status:`, {
+            error: {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint
+            },
+            query: { event_id: eventId, user_id: user.id }
+          });
           throw error;
         }
 
         const hasRSVP = !!data;
-        logger.debug(`User ${user.id} has${hasRSVP ? '' : ' not'} RSVPed to event ${eventId}`);
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] RSVP status check result: user ${user.id} has${hasRSVP ? '' : ' not'} RSVPed to event ${eventId}`);
         setHasRSVPed(hasRSVP);
-      } catch (error) {
-        logger.error("Error checking RSVP:", error);
+      } catch (error: any) {
+        logger.error(`${COMPONENT_ID}: [${opTxnId}] Exception checking RSVP:`, error);
       } finally {
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Completed RSVP status check, isLoading -> false`);
         setIsLoading(false);
       }
     };
@@ -110,12 +161,26 @@ const RSVPButton = ({
       return;
     }
 
+    const opTxnId = generateTransactionId();
+    setTransactionId(opTxnId);
     setIsLoading(true);
+
+    logger.debug(`${COMPONENT_ID}: [${opTxnId}] Starting toggleRSVP operation - current state:`, {
+      hasRSVPed,
+      eventId,
+      userId: user.id,
+      neighborhoodId: eventNeighborhoodId
+    });
 
     try {
       if (hasRSVPed) {
         // Remove RSVP
-        logger.debug(`Removing RSVP for event ${eventId} and user ${user.id}`);
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Removing RSVP with query:`, {
+          table: 'event_rsvps',
+          action: 'delete',
+          filters: { event_id: eventId, user_id: user.id }
+        });
+        
         const { error } = await supabase
           .from('event_rsvps')
           .delete()
@@ -123,42 +188,78 @@ const RSVPButton = ({
           .eq('user_id', user.id);
 
         if (error) {
-          logger.error("Error removing RSVP:", error);
+          logger.error(`${COMPONENT_ID}: [${opTxnId}] Error removing RSVP:`, {
+            error: {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint
+            }
+          });
           throw error;
         }
 
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Successfully removed RSVP`);
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
-        // Add RSVP - Using a minimal object with only required fields
+        // Prepare minimal data object for inserting RSVP
         const rsvpData = {
           event_id: eventId,
           user_id: user.id
         };
         
-        logger.debug("Adding RSVP with data:", rsvpData);
+        // Log the exact data structure and SQL representation
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Adding RSVP with data:`, {
+          payload: rsvpData,
+          sqlEquivalent: `INSERT INTO event_rsvps (event_id, user_id) VALUES ('${eventId}', '${user.id}')`
+        });
         
-        // Fixed: Use insert without returning option
+        // Insert RSVP with no returning clause
         const { error } = await supabase
           .from('event_rsvps')
           .insert(rsvpData);
 
         if (error) {
-          logger.error("Error adding RSVP:", error);
+          logger.error(`${COMPONENT_ID}: [${opTxnId}] Error adding RSVP:`, {
+            error: {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint,
+              fullError: JSON.stringify(error)
+            },
+            requestPayload: rsvpData
+          });
           throw error;
         }
 
+        logger.debug(`${COMPONENT_ID}: [${opTxnId}] Successfully added RSVP`);
         toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
       }
       
-      // Dispatch event to refresh any components displaying RSVPs
+      // Dispatch refresh event
+      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Dispatching refresh event`);
       dispatchRefreshEvent('event-rsvp-updated');
       
     } catch (error: any) {
-      console.error("Error updating RSVP:", error);
+      // Enhanced error logging with context
+      logger.error(`${COMPONENT_ID}: [${opTxnId}] Error in toggleRSVP operation:`, {
+        error: error.message,
+        stack: error.stack,
+        context: {
+          user: user?.id,
+          event: eventId,
+          operation: hasRSVPed ? 'remove' : 'add',
+          state: { hasRSVPed, isLoading }
+        }
+      });
+      
+      console.error(`${COMPONENT_ID}: [${opTxnId}] Error updating RSVP:`, error);
       toast.error(`Failed to update RSVP: ${error.message}`);
     } finally {
+      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Completed toggleRSVP operation, isLoading -> false`);
       setIsLoading(false);
     }
   };
@@ -170,6 +271,7 @@ const RSVPButton = ({
       disabled={isLoading}
       variant={hasRSVPed ? "default" : "outline"}
       className={`bg-blue-500 hover:bg-blue-600 text-white transition-colors ${className}`}
+      data-transaction-id={transactionId} // For debugging
     >
       {isLoading ? (
         <>
