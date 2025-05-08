@@ -120,17 +120,14 @@ const RSVPButton = ({
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
       } else {
-        // Add RSVP - Use explicit object with only the essential fields
-        logger.debug("Adding RSVP with:", { 
-          eventId, 
-          userId: user.id
-        });
-        
-        // Create a minimal insert object that avoids column ambiguity
+        // Add RSVP - Use a minimal object with only the required fields
+        // This is crucial to avoid the "record 'new' has no field 'description'" error
         const rsvpData = {
           event_id: eventId,
           user_id: user.id
         };
+        
+        logger.debug("Adding RSVP with minimalist data object:", rsvpData);
         
         const { error } = await supabase
           .from('event_rsvps')

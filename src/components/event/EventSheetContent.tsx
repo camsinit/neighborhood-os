@@ -1,4 +1,3 @@
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -138,11 +137,14 @@ const EventSheetContent = ({
         setIsRsvped(false);
         toast.success("RSVP removed");
       } else {
-        // Add RSVP - Use minimal data structure to avoid issues
+        // Add RSVP - Use a minimal data structure to avoid issues
+        // This is crucial to avoid the "record 'new' has no field 'description'" error
         const rsvpData = {
           event_id: event.id,
           user_id: user.id
         };
+        
+        console.log("Adding RSVP with minimalist data object:", rsvpData);
         
         await supabase
           .from('event_rsvps')
