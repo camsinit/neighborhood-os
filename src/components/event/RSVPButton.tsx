@@ -207,7 +207,6 @@ const RSVPButton = ({
         const rsvpData = {
           event_id: eventId,
           user_id: user.id,
-          // Include neighborhood_id for trigger if available
           neighborhood_id: eventNeighborhoodId
         };
         
@@ -245,9 +244,11 @@ const RSVPButton = ({
         setHasRSVPed(true);
       }
       
-      // Dispatch refresh event
-      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Dispatching refresh event`);
+      // Dispatch refresh event to update all components that display activities
+      // This is important since we're now using only one trigger to create activities
+      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Dispatching refresh events`);
       dispatchRefreshEvent('event-rsvp-updated');
+      dispatchRefreshEvent('activities-updated');
       
     } catch (error: any) {
       // Enhanced error logging with context

@@ -11,14 +11,34 @@ import { ChevronDown } from "lucide-react";
 /**
  * Component to display the feed of neighborhood activities
  * Now with load more button and initial limit of 4 items
+ * Also listens for events to auto-refresh the feed
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
   const [displayCount, setDisplayCount] = useState(4);
-  const { data: activities, isLoading } = useActivities();
+  const { data: activities, isLoading, refetch } = useActivities();
   const { toast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Set up event listener for activity updates
+  useEffect(() => {
+    // Function to handle the refresh event
+    const handleRefresh = () => {
+      console.log("[ActivityFeed] Received activities-updated event, refreshing data");
+      refetch();
+    };
+
+    // Listen for custom refresh events
+    window.addEventListener('activities-updated', handleRefresh);
+    window.addEventListener('event-rsvp-updated', handleRefresh);
+    
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('activities-updated', handleRefresh);
+      window.removeEventListener('event-rsvp-updated', handleRefresh);
+    };
+  }, [refetch]);
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
