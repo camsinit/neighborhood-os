@@ -66,13 +66,13 @@ const RSVPButton = ({
 
   // Check if user has RSVPed on component mount
   useEffect(() => {
-    const checkRSVP = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
-      
-      try {
-        // Query for existing RSVP
+    if (!user) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Query for existing RSVP
+      const checkRsvpStatus = async () => {
         const { data, error } = await supabase
           .from('event_rsvps')
           .select('id')
@@ -85,14 +85,14 @@ const RSVPButton = ({
         }
 
         setHasRSVPed(!!data);
-      } catch (error) {
-        logger.error("Error checking RSVP:", error);
-      } finally {
         setIsLoading(false);
-      }
-    };
-
-    checkRSVP();
+      };
+      
+      checkRsvpStatus();
+    } catch (error) {
+      logger.error("Error checking RSVP:", error);
+      setIsLoading(false);
+    }
   }, [eventId, user]);
 
   const toggleRSVP = async () => {
