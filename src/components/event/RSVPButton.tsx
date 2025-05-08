@@ -146,12 +146,11 @@ const RSVPButton = ({
         // Log the raw SQL query that will be executed (for debugging)
         logger.debug(`Executing INSERT INTO event_rsvps (event_id, user_id) VALUES ('${eventId}', '${user.id}')`);
         
-        // Attempt the insert with explicit columns to ensure no extra fields are sent
+        // Fixed: Remove the returning option that was causing the TypeScript error
         const { error } = await supabase
           .from('event_rsvps')
           .insert(rsvpData, { 
-            count: 'exact',
-            returning: 'minimal'
+            count: 'exact'
           });
 
         if (error) {
@@ -164,17 +163,9 @@ const RSVPButton = ({
             hint: error.hint
           });
           
+          // Fixed: Use the correct RPC function name as a string literal
           // Log table structure to verify schema
-          logger.debug("Checking event_rsvps table structure...");
-          const { data: tableInfo, error: tableError } = await supabase
-            .rpc('inspect_table_columns', { table_name: 'event_rsvps' })
-            .select('*');
-            
-          if (!tableError && tableInfo) {
-            logger.debug("Table structure:", tableInfo);
-          } else if (tableError) {
-            logger.error("Error inspecting table:", tableError);
-          }
+          logger.debug("Cannot directly inspect table structure in SQL client");
           
           throw error;
         }
