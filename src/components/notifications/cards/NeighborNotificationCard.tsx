@@ -20,13 +20,6 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   notification,
   onDismiss,
 }) => {
-  // Set action verb and object type for this notification
-  notification.context = {
-    ...notification.context,
-    actionVerb: "joined",
-    objectType: "the neighborhood"
-  };
-  
   // Handle viewing neighbor profile
   const handleViewNeighbor = async () => {
     // Navigate to the neighbors section and highlight this neighbor

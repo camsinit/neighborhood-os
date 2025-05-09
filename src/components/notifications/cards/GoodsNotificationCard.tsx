@@ -24,17 +24,6 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
   const itemCategory = notification.context?.goodsCategory;
   const itemCondition = notification.context?.condition;
   
-  // Determine the action verb and object type based on notification context
-  const actionType = notification.context?.actionType || "posted";
-  const itemType = notification.context?.itemType || "an item";
-  
-  // Update the notification context with these values
-  notification.context = {
-    ...notification.context,
-    actionVerb: actionType,
-    objectType: itemType
-  };
-  
   // Handle viewing goods details
   const handleViewGoods = async () => {
     // Navigate to the goods details

@@ -24,13 +24,6 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   // Get the safety update type
   const safetyType = notification.context?.safetyType || 'alert';
   
-  // Set action verb and object type for this notification
-  notification.context = {
-    ...notification.context,
-    actionVerb: "posted",
-    objectType: "a safety update"
-  };
-  
   // Handle viewing safety details
   const handleViewSafety = async () => {
     // Navigate to the safety details
