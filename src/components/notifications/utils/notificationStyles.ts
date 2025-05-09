@@ -1,4 +1,3 @@
-
 /**
  * This file defines styling properties for different types of notifications
  * These styles are used to provide visual differentiation between notification types
@@ -12,7 +11,7 @@ import {
   UserPlus,
   Clock
 } from "lucide-react";
-import { HighlightableItemType } from "@/utils/highlightNavigation";
+import { HighlightableItemType } from "@/utils/highlight/types";
 
 /**
  * Interface for styling properties of a notification
@@ -118,7 +117,9 @@ export const getNotificationTypeName = (
  * @param timestamp The timestamp to format
  * @returns A human-readable time string (e.g., "3h ago")
  */
-export const getTimeAgo = (timestamp: string): string => {
+export const getTimeAgo = (
+  timestamp: string
+): string => {
   const now = new Date();
   const date = new Date(timestamp);
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
