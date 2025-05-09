@@ -10,7 +10,7 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./NotificationCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Lightbulb } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -36,6 +36,20 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
   // Extract skill info from context
   const skillData = notification.context?.skillRequestData || {};
   const skillId = notification.context?.skillId || notification.content_id;
+  
+  // Get actor name for descriptive text
+  const actorName = notification.context?.neighborName || 
+    notification.profiles?.display_name || "Someone";
+  
+  // Generate descriptive text based on notification action
+  let actionText = `${actorName} requested your skill`;
+  if (notification.action_type === "offer") {
+    actionText = `${actorName} offered to share a skill with you`;
+  } else if (notification.action_type === "accept") {
+    actionText = `${actorName} accepted your skill request`;
+  } else if (notification.action_type === "decline") {
+    actionText = `${actorName} declined your skill request`;
+  }
   
   // Handle viewing skill details
   const handleViewDetails = async () => {
@@ -114,6 +128,14 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
         onDismiss={onDismiss}
         showActions={false}
       >
+        {/* Skill request action description */}
+        <div className="mt-1 flex items-start gap-1">
+          <Lightbulb className="h-3.5 w-3.5 text-indigo-500 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-gray-700">
+            {actionText}
+          </p>
+        </div>
+        
         {notification.context?.skillTitle && (
           <div className="mt-2">
             <Badge variant="outline" className="font-normal mb-1">

@@ -1,3 +1,4 @@
+
 /**
  * SkillSessionNotificationCard.tsx
  * 
@@ -31,6 +32,24 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
   const sessionTime = notification.context?.sessionTime ? 
     parseISO(notification.context.sessionTime) : null;
   
+  // Get actor name for descriptive text
+  const actorName = notification.context?.neighborName || 
+    notification.profiles?.display_name || "A neighbor";
+  
+  // Generate descriptive text based on notification action
+  let actionText = `${actorName} scheduled a skill session`;
+  if (notification.action_type === "request") {
+    actionText = `${actorName} requested a skill session`;
+  } else if (notification.action_type === "confirm") {
+    actionText = `${actorName} confirmed a skill session`;
+  } else if (notification.action_type === "cancel") {
+    actionText = `${actorName} cancelled a skill session`;
+  } else if (notification.action_type === "reschedule") {
+    actionText = `${actorName} rescheduled a skill session`;
+  } else if (notification.action_type === "complete") {
+    actionText = `${actorName} completed a skill session`;
+  }
+  
   // Handle viewing session details - redirects to calendar if there's an event,
   // otherwise to the skill details
   const handleViewSession = async () => {
@@ -49,6 +68,14 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
       onAction={handleViewSession}
       onDismiss={onDismiss}
     >
+      {/* Session action description */}
+      <div className="mt-1 flex items-start gap-1">
+        <Clock className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-gray-700">
+          {actionText}
+        </p>
+      </div>
+      
       {/* Session specific details */}
       <div className="mt-1 text-xs text-gray-600">
         {notification.context?.summary && (

@@ -38,6 +38,7 @@ export const processSkillNotifications = (
           content_type: "skill_sessions",
           content_id: skillSession.id,
           notification_type: "skills",
+          action_type: "request", // Add action type for descriptive text
           created_at: skillSession.created_at,
           updated_at: skillSession.created_at,
           is_read: false,
@@ -55,7 +56,9 @@ export const processSkillNotifications = (
             skillRequestData: skillSession,
             // Add additional context for improved UI
             actionRequired: true,
-            actionLabel: "Respond to request"
+            actionLabel: "Respond to request",
+            // Add descriptive summary
+            summary: `${requesterProfile?.display_name || "Someone"} has requested your skill: ${skillSession.skill.title}`
           },
           // High relevance for requests requiring action
           relevance_score: 3
@@ -76,6 +79,7 @@ export const processSkillNotifications = (
         content_type: notification.content_type,
         content_id: notification.content_id,
         notification_type: "skills",
+        action_type: notification.action_type || "request", // Add action type for descriptive text
         created_at: notification.created_at,
         updated_at: notification.updated_at || notification.created_at,
         is_read: notification.is_read,

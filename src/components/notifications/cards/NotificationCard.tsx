@@ -25,6 +25,7 @@ export interface NotificationCardProps {
   showActions?: boolean; // Whether to show action buttons
   showTimestamp?: boolean; // Whether to show timestamp
   showTypeLabel?: boolean; // Whether to show notification type label
+  children?: React.ReactNode; // Children for the specialized content
 }
 
 /**
@@ -39,6 +40,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   showActions = true,
   showTimestamp = true,
   showTypeLabel = true,
+  children,
 }) => {
   // Extract common notification properties
   const {
@@ -171,12 +173,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             </p>
           )}
 
-          {/* Render any children notification components might provide */}
-          {notification.context?.summary && (
-            <p className="text-xs text-gray-600 mt-1">
-              {notification.context.summary}
-            </p>
-          )}
+          {/* Render child components for specialized notification content */}
+          {children}
         </div>
       </div>
       

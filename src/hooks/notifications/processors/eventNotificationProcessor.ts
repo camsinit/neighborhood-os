@@ -25,10 +25,16 @@ export const processEventNotifications = (events: any[]): BaseNotification[] => 
     updated_at: event.created_at || event.created_at, // Ensure updated_at is present
     is_read: event.is_read || false,
     is_archived: event.is_archived || false,
+    // Add action_type to improve descriptive text
+    action_type: "create", // Default to create
     context: {
       contextType: "event_invite",
       neighborName: event.profiles?.display_name || null,
-      avatarUrl: event.profiles?.avatar_url || null
+      avatarUrl: event.profiles?.avatar_url || null,
+      // Add event details for UI display
+      eventTime: event.start_time || null,
+      location: event.location || null,
+      summary: `${event.profiles?.display_name || "Someone"} created an event: ${event.title}`
     }
   }));
 };

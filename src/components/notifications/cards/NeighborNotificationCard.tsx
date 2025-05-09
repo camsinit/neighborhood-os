@@ -28,17 +28,26 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
     if (onDismiss) onDismiss();
   };
 
+  // Extract actor name for descriptive text
+  const actorName = notification.context?.neighborName || 
+    notification.profiles?.display_name || "A neighbor";
+  
+  // Create descriptive text based on action type
+  const actionText = notification.action_type === "join" 
+    ? `${actorName} joined your neighborhood`
+    : `${actorName} updated their profile`;
+
   return (
     <NotificationCard
       notification={notification}
       onAction={handleViewNeighbor}
       onDismiss={onDismiss}
     >
-      {/* Neighbor specific details */}
+      {/* Descriptive text about the action */}
       <div className="mt-1 flex items-start gap-1">
         <UserPlus className="h-3.5 w-3.5 text-purple-500 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-gray-700">
-          {notification.context?.summary || "A new neighbor has joined your community"}
+          {actionText}
         </p>
       </div>
       

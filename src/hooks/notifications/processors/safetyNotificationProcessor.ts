@@ -21,6 +21,7 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
     content_type: "safety_updates",
     content_id: update.id,
     notification_type: "safety", // This matches the HighlightableItemType
+    action_type: "create", // Default action type for descriptive text
     created_at: update.created_at,
     updated_at: update.created_at || update.created_at, // Ensure updated_at is present
     is_read: update.is_read || false,
@@ -28,7 +29,10 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
     context: {
       contextType: "safety_alert",
       neighborName: update.profiles?.display_name || null,
-      avatarUrl: update.profiles?.avatar_url || null
+      avatarUrl: update.profiles?.avatar_url || null,
+      safetyType: update.type || 'alert',
+      // Add descriptive summary
+      summary: update.description || `Important safety information from ${update.profiles?.display_name || "a neighbor"}`
     }
   }));
 };

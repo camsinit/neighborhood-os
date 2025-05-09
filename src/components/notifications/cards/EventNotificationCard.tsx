@@ -27,6 +27,22 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
     new Date(notification.context.eventTime) : null;
   const eventLocation = notification.context?.location;
   
+  // Get actor name for descriptive text
+  const actorName = notification.context?.neighborName || 
+    notification.profiles?.display_name || "Someone";
+  
+  // Generate action text based on notification action type
+  let actionText = `${actorName} shared an event`;
+  if (notification.action_type === "create") {
+    actionText = `${actorName} created an event`;
+  } else if (notification.action_type === "update") {
+    actionText = `${actorName} updated an event`;
+  } else if (notification.action_type === "rsvp") {
+    actionText = `${actorName} is attending an event`;
+  } else if (notification.action_type === "cancel") {
+    actionText = `${actorName} canceled an event`;
+  }
+  
   // Handle viewing event details
   const handleViewEvent = async () => {
     // Navigate to the event details
@@ -41,6 +57,14 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
       onAction={handleViewEvent}
       onDismiss={onDismiss}
     >
+      {/* Event action description */}
+      <div className="mt-1 flex items-start gap-1">
+        <Calendar className="h-3.5 w-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-gray-700">
+          {actionText}
+        </p>
+      </div>
+      
       {/* Event specific details */}
       {eventTime && (
         <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
