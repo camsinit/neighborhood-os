@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
 import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
-import NotificationPopover from "../NotificationPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { HighlightableItemType } from "@/utils/highlightNavigation"; // Add this import
+import { HighlightableItemType } from "@/utils/highlightNavigation"; 
+// Fixed import below - using named import instead of default import
+import { NotificationPopover } from "../NotificationsPopover"; 
 
 // Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {

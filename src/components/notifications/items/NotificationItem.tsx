@@ -40,7 +40,10 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
 
   // Get icon based on notification type
   const getTypeIcon = () => {
-    switch (notification.notification_type) {
+    // First validate that notification.notification_type is a valid HighlightableItemType
+    const notificationType = notification.notification_type;
+    
+    switch (notificationType) {
       case "safety":
         return <AlertTriangle className="h-5 w-5 text-red-500" />;
       case "event":
@@ -101,11 +104,15 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
     if (
       notification.notification_type && 
       notification.content_id &&
-      Object.values(HighlightableItemType).includes(notification.notification_type as HighlightableItemType)
+      // Check if notification_type is a valid HighlightableItemType
+      ["safety", "event", "skills", "goods", "neighbors"].includes(notification.notification_type)
     ) {
+      // Cast the type to HighlightableItemType since we've verified it's valid
+      const notificationType = notification.notification_type as HighlightableItemType;
+      
       // Use the highlightItem utility to navigate and highlight the item
       highlightItem(
-        notification.notification_type as HighlightableItemType, 
+        notificationType, 
         notification.content_id,
         true // Show toast notification
       );

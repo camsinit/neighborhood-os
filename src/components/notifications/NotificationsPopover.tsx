@@ -13,16 +13,62 @@ import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
 import { HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type
+import { BaseNotification } from "@/hooks/notifications/types";
 
 /**
- * The notification icon/popover. Now it's smart about querying the broadcast notification list,
+ * Props for the popover component that shows notification content
+ */
+interface NotificationPopoverProps {
+  children: ReactNode;
+  title: string;
+  type: string;
+  itemId: string;
+  onAction?: () => void;
+  actionLabel?: string;
+  isArchived?: boolean;
+}
+
+/**
+ * Individual notification popover component - for use in skill notification items
+ */
+export const NotificationPopover = ({ 
+  children, 
+  title, 
+  type, 
+  itemId, 
+  onAction, 
+  actionLabel = "View",
+  isArchived = false 
+}: NotificationPopoverProps) => {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        {children}
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-4">
+        <h3 className="font-semibold mb-2">{title}</h3>
+        <div className="text-sm text-gray-500 mb-4">
+          Click the button below to {actionLabel.toLowerCase()} this {type}.
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={onAction} size="sm">
+            {actionLabel}
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+/**
+ * The main notifications popover. Now it's smart about querying the broadcast notification list,
  * but has no DB/data logic; that all lives in the custom hook!
  */
-interface NotificationsPopoverProps {
+interface NotificationsPopoverMainProps {
   children?: ReactNode;
 }
 
-const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
+const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
@@ -99,18 +145,11 @@ const NotificationsPopover = ({ children }: NotificationsPopoverProps) => {
         </div>
         <ScrollArea className="h-[300px]">
           {notifications?.length ? (
-            notifications.map((notification) => (
+            notifications.map((notification: BaseNotification) => (
               <NotificationItem
                 key={notification.id}
-                title={notification.title}
-                itemId={notification.id}
-                type={notification.notification_type as HighlightableItemType} // Cast to HighlightableItemType
-                isRead={notification.is_read}
-                isArchived={notification.is_archived}
-                context={notification.context}
-                onClose={() => refetch()}
-                onArchive={(e) => handleArchive(e, notification.id)}
-                onItemClick={handleItemClick}
+                notification={notification}
+                onSelect={() => refetch()}
               />
             ))
           ) : (
