@@ -77,13 +77,23 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-200 overflow-hidden mb-2 group", 
+        "transition-all duration-200 overflow-hidden mb-2 group relative", // Added relative positioning
         isUnread 
           ? "bg-white border-l-4 border-l-blue-500 shadow" 
           : "bg-gray-50 border-gray-100",
         className
       )}
     >
+      {/* Type badge now positioned absolutely in the top right corner */}
+      {showTypeLabel && (
+        <Badge 
+          variant={isUnread ? "default" : "outline"} 
+          className="text-[10px] h-5 absolute top-2 right-2 z-10"
+        >
+          {typeName}
+        </Badge>
+      )}
+      
       <div 
         className={cn(
           "flex items-start p-3 gap-3 cursor-pointer",
@@ -117,15 +127,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           
           {/* Status badges */}
           <div className="flex gap-1 flex-shrink-0 mt-2">
-            {showTypeLabel && (
-              <Badge 
-                variant={isUnread ? "default" : "outline"} 
-                className="text-[10px] h-5 hidden sm:flex"
-              >
-                {typeName}
-              </Badge>
-            )}
-            
             {context?.actionRequired && (
               <Badge 
                 variant="destructive"
