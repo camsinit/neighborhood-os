@@ -12,8 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
-import { HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type
-import { BaseNotification } from "@/hooks/notifications/types";
+import { highlightItem, HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type and function
 
 /**
  * Props for the popover component that shows notification content
@@ -74,34 +73,19 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
 
   const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  const handleItemClick = (notificationType: HighlightableItemType, id: string) => { // Use the proper type
-    const event = new CustomEvent('openItemDialog', {
-      detail: { type: notificationType, id }
-    });
-    window.dispatchEvent(event);
-
-    if (notificationType === 'event') {
-      toast({
-        title: "Navigating to item",
-        description: "The relevant section has been highlighted for you.",
-        duration: 3000,
-      });
-
-      setTimeout(() => {
-        const section = document.querySelector('.calendar-container');
-        
-        if (section) {
-          section.classList.add('highlight-section');
-          setTimeout(() => {
-            section.classList.remove('highlight-section');
-          }, 2000);
-        }
-
-        section?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+  // Function to handle item clicks
+  const handleItemClick = (notificationType: string, id: string) => {
+    // Only proceed if we have a valid notification type
+    if (["safety", "event", "skills", "goods", "neighbors"].includes(notificationType)) {
+      // Cast the string to our HighlightableItemType since we've verified it's valid
+      const validType = notificationType as HighlightableItemType;
+      
+      // Use our highlightItem utility to navigate and highlight the content
+      highlightItem(validType, id, true);
+      
+      // Close the popover by refetching (which will trigger a rerender)
+      refetch();
     }
-
-    refetch();
   };
 
   const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
@@ -145,12 +129,13 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
         </div>
         <ScrollArea className="h-[300px]">
           {notifications?.length ? (
-            notifications.map((notification: BaseNotification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                onSelect={() => refetch()}
-              />
+            notifications.map((notification) => (
+              <div key={notification.id} className="p-2">
+                <NotificationItem
+                  notification={notification}
+                  onSelect={() => refetch()}
+                />
+              </div>
             ))
           ) : (
             <div className="p-4 text-center text-sm text-gray-500">

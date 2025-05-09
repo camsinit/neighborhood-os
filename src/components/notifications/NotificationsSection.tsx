@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
+import { useState } from "react";
 
 interface NotificationsSectionProps {
   onClose?: () => void;
@@ -51,6 +52,7 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   const { data: notifications, isLoading } = useNotifications(showArchived);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [isMarkingRead, setIsMarkingRead] = useState(false);
 
   // Sort notifications by relevance score (higher first), then by date (newer first)
   const sortedNotifications = notifications?.sort((a, b) => {
@@ -69,6 +71,7 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   // Function to mark all notifications as read
   const markAllAsRead = async () => {
     try {
+      setIsMarkingRead(true);
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
       
@@ -81,13 +84,31 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         return;
       }
       
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_archived', showArchived);
+      // Update notifications in all tables in parallel
+      const tables = [
+        'safety_updates', 
+        'events', 
+        'support_requests', 
+        'skill_sessions',
+        'goods_exchange', 
+        'neighborhood_members'
+      ];
 
-      if (error) throw error;
+      await Promise.all(tables.map(async (table) => {
+        try {
+          const { error } = await supabase
+            .from(table)
+            .update({ is_read: true })
+            .eq('user_id', userId)
+            .eq('is_archived', showArchived);
+            
+          if (error) {
+            console.warn(`Error updating ${table}:`, error);
+          }
+        } catch (err) {
+          console.error(`Error updating ${table}:`, err);
+        }
+      }));
 
       // Invalidate and refetch notifications
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -103,8 +124,13 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         description: "Failed to mark notifications as read",
         variant: "destructive",
       });
+    } finally {
+      setIsMarkingRead(false);
     }
   };
+
+  // Calculate unread count
+  const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
 
   if (isLoading) {
     return (
@@ -132,18 +158,30 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-4">
-        <h3 className="text-lg font-semibold">
-          {showArchived ? "Archived Notifications" : "Recent Notifications"}
-        </h3>
-        {!showArchived && notifications.some(n => !n.is_read) && (
+        <div>
+          <h3 className="text-lg font-semibold">
+            {showArchived ? "Archived Notifications" : "Recent Notifications"}
+          </h3>
+          {!showArchived && unreadCount > 0 && (
+            <p className="text-xs text-gray-500">
+              You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+        {!showArchived && unreadCount > 0 && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="text-xs"
+            className="text-xs flex items-center gap-1"
             onClick={markAllAsRead}
+            disabled={isMarkingRead}
           >
-            <Check className="h-4 w-4 mr-1" />
-            Mark all as read
+            {isMarkingRead ? (
+              <Clock className="h-3.5 w-3.5 mr-1 animate-spin" />
+            ) : (
+              <Check className="h-3.5 w-3.5 mr-1" />
+            )}
+            Mark all read
           </Button>
         )}
       </div>

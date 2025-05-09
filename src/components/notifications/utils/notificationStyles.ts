@@ -1,89 +1,152 @@
 
 /**
- * This file contains utility functions for notification styles
- * It defines color schemes and icons for each notification type
+ * This file defines styling properties for different types of notifications
+ * These styles are used to provide visual differentiation between notification types
  */
 import { 
-  AlertTriangle, 
+  Bell, 
   Calendar, 
-  HelpCircle, 
-  PackageOpen, 
-  ShoppingBag, 
-  UserPlus 
+  CheckCircle, 
+  AlertTriangle, 
+  ShoppingCart, 
+  UserPlus,
+  Clock
 } from "lucide-react";
 import { HighlightableItemType } from "@/utils/highlightNavigation";
 
 /**
- * Interface defining the style properties for different notification types
+ * Interface for styling properties of a notification
  */
 interface NotificationStyle {
-  icon: any;
-  textColor: string;
-  backgroundColor: string;
-  hoverColor: string;
-  borderColor: string;
+  icon: any; // The icon component to display
+  backgroundColor: string; // Background color class for the notification item
+  hoverColor: string; // Background color class when hovering
+  borderColor: string; // Border color class for the left border
+  textColor: string; // Text color class for the title or important text
 }
 
 /**
- * Returns style properties for a notification based on its type
+ * Get styling properties for a specific notification type
  * 
- * @param type The notification type
- * @returns Style properties for the notification
+ * @param type The type of notification
+ * @returns Styling properties for the notification
  */
-export const getNotificationStyle = (type: HighlightableItemType): NotificationStyle => {
+export const getNotificationStyle = (
+  type: string
+): NotificationStyle => {
+  // Define styles based on notification type
   switch (type) {
     case "safety":
       return {
         icon: AlertTriangle,
-        textColor: "text-red-600",
         backgroundColor: "bg-red-50",
         hoverColor: "hover:bg-red-100",
-        borderColor: "border-red-500"
+        borderColor: "border-red-500",
+        textColor: "text-red-700"
       };
-      
     case "event":
       return {
         icon: Calendar,
-        textColor: "text-blue-600",
         backgroundColor: "bg-blue-50",
         hoverColor: "hover:bg-blue-100",
-        borderColor: "border-blue-500"
+        borderColor: "border-blue-500",
+        textColor: "text-blue-700"
       };
-      
     case "skills":
       return {
-        icon: PackageOpen,
-        textColor: "text-green-600",
+        icon: CheckCircle,
         backgroundColor: "bg-green-50",
         hoverColor: "hover:bg-green-100",
-        borderColor: "border-green-500"
+        borderColor: "border-green-500",
+        textColor: "text-green-700"
       };
-      
     case "goods":
       return {
-        icon: ShoppingBag,
-        textColor: "text-amber-600",
+        icon: ShoppingCart,
         backgroundColor: "bg-amber-50",
         hoverColor: "hover:bg-amber-100",
-        borderColor: "border-amber-500"
+        borderColor: "border-amber-500",
+        textColor: "text-amber-700"
       };
-      
     case "neighbors":
       return {
         icon: UserPlus,
-        textColor: "text-teal-600",
-        backgroundColor: "bg-teal-50",
-        hoverColor: "hover:bg-teal-100",
-        borderColor: "border-teal-500"
+        backgroundColor: "bg-purple-50",
+        hoverColor: "hover:bg-purple-100", 
+        borderColor: "border-purple-500",
+        textColor: "text-purple-700"
       };
-      
     default:
       return {
-        icon: Calendar,
-        textColor: "text-gray-600",
-        backgroundColor: "bg-gray-50",
+        icon: Bell,
+        backgroundColor: "bg-gray-50", 
         hoverColor: "hover:bg-gray-100",
-        borderColor: "border-gray-500"
+        borderColor: "border-gray-300",
+        textColor: "text-gray-700"
       };
   }
+};
+
+/**
+ * Get a readable description for a notification type
+ * 
+ * @param type The notification type
+ * @returns A human-readable name for the notification type
+ */
+export const getNotificationTypeName = (
+  type: string
+): string => {
+  switch (type) {
+    case "safety":
+      return "Safety Update";
+    case "event":
+      return "Event";
+    case "skills":
+      return "Skills";
+    case "goods":
+      return "Goods Exchange";
+    case "neighbors":
+      return "New Neighbor";
+    default:
+      return "Notification";
+  }
+};
+
+/**
+ * Get a formatted time string from a timestamp
+ * 
+ * @param timestamp The timestamp to format
+ * @returns A human-readable time string (e.g., "3h ago")
+ */
+export const getTimeAgo = (timestamp: string): string => {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  // Less than a minute
+  if (seconds < 60) {
+    return "just now";
+  }
+  
+  // Less than an hour
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+  
+  // Less than a day
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+  
+  // Less than a week
+  const days = Math.floor(hours / 24);
+  if (days < 7) {
+    return `${days}d ago`;
+  }
+  
+  // More than a week
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w ago`;
 };

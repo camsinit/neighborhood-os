@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { HighlightableItemType } from "@/utils/highlightNavigation";
 import { highlightItem } from "@/utils/highlightNavigation";
+import { getNotificationStyle, getTimeAgo } from "../utils/notificationStyles";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * Enhanced NotificationItem component with better visual design and context
@@ -26,6 +28,10 @@ interface NotificationItemProps {
 }
 
 export function NotificationItem({ notification, onSelect }: NotificationItemProps) {
+  // Get notification style based on type
+  const style = getNotificationStyle(notification.notification_type);
+  const Icon = style.icon;
+
   // Helper function to get relevance-based styles
   const getRelevanceStyles = (score?: number) => {
     switch (score) {
@@ -34,28 +40,7 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
       case 2: // Medium relevance
         return "bg-yellow-50 border-yellow-200 hover:bg-yellow-100";
       default: // Low relevance or undefined
-        return "bg-gray-50 border-gray-200 hover:bg-gray-100";
-    }
-  };
-
-  // Get icon based on notification type
-  const getTypeIcon = () => {
-    // First validate that notification.notification_type is a valid HighlightableItemType
-    const notificationType = notification.notification_type;
-    
-    switch (notificationType) {
-      case "safety":
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
-      case "event":
-        return <Calendar className="h-5 w-5 text-blue-500" />;
-      case "skills":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "goods":
-        return <ShoppingCart className="h-5 w-5 text-orange-500" />;
-      case "neighbors":
-        return <UserPlus className="h-5 w-5 text-teal-500" />;
-      default:
-        return <Bell className="h-5 w-5 text-gray-500" />;
+        return style.backgroundColor + " " + style.hoverColor;
     }
   };
 
@@ -93,6 +78,14 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
     }
   };
 
+  // Get a formatted time string
+  const getFormattedTime = () => {
+    const timeAgo = getTimeAgo(notification.created_at);
+    const fullDate = format(new Date(notification.created_at), "MMM d, h:mm a");
+    
+    return { timeAgo, fullDate };
+  };
+
   // Handle click on the notification item
   const handleClick = () => {
     // Call the onSelect callback if provided
@@ -119,34 +112,72 @@ export function NotificationItem({ notification, onSelect }: NotificationItemPro
     }
   };
 
+  // Format time display
+  const { timeAgo, fullDate } = getFormattedTime();
+
   return (
     <div
       className={cn(
-        "flex items-start gap-4 p-4 rounded-lg border cursor-pointer transition-colors",
+        "flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors",
         getRelevanceStyles(notification.relevance_score),
-        !notification.is_read && "font-medium border-l-4 border-l-blue-500"
+        !notification.is_read && "font-medium border-l-4", 
+        !notification.is_read && style.borderColor
       )}
       onClick={handleClick}
+      title={fullDate} // Show full timestamp on hover
     >
       {/* Icon section */}
       <div className="flex-shrink-0 mt-1">
-        {getTypeIcon()}
+        {notification.context?.avatarUrl ? (
+          <div className="h-9 w-9 rounded-full overflow-hidden border border-gray-200">
+            <img 
+              src={notification.context.avatarUrl} 
+              alt={notification.context.neighborName || ''}
+              className="h-full w-full object-cover" 
+            />
+          </div>
+        ) : (
+          <div className={`p-2 rounded-full ${style.backgroundColor}`}>
+            <Icon className={`h-5 w-5 ${style.textColor}`} />
+          </div>
+        )}
       </div>
       
       {/* Content section */}
-      <div className="flex-1">
-        {/* Header with time */}
+      <div className="flex-1 space-y-1">
+        {/* Header with metadata */}
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">
-            {format(new Date(notification.created_at), 'MMM d, h:mm a')}
+          <span className={`text-xs ${notification.is_read ? 'text-gray-400' : 'text-gray-500 font-medium'}`}>
+            {timeAgo}
           </span>
+          
+          {/* Only show status badge for unread high priority items */}
+          {!notification.is_read && notification.relevance_score === 3 && (
+            <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-auto">
+              Action needed
+            </Badge>
+          )}
         </div>
         
-        {/* Main message */}
-        <p className="text-sm mb-1">{getDescriptiveMessage()}</p>
+        {/* Main message with context */}
+        <p className={cn(
+          "text-sm leading-snug", 
+          notification.is_read ? "text-gray-600" : style.textColor
+        )}>
+          {getDescriptiveMessage()}
+        </p>
+        
+        {/* Additional context if available */}
+        {notification.context?.summary && (
+          <p className="text-xs text-gray-500 mt-0.5 italic">
+            {notification.context.summary}
+          </p>
+        )}
         
         {/* Action hint */}
-        <p className="text-xs text-gray-500 mt-1">Click to view</p>
+        <p className="text-xs text-gray-400 mt-1">
+          {notification.context?.actionRequired ? "Click to respond" : "Click to view"}
+        </p>
       </div>
     </div>
   );
