@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 
 /**
  * Header component props
@@ -20,7 +21,7 @@ interface HeaderProps {
  * Header component
  * 
  * Displays the top navigation bar with user profile dropdown
- * - Simplified to remove dashboard title and notifications
+ * - Now includes the enhanced notification button
  */
 const Header = ({
   onOpenSettings
@@ -70,7 +71,10 @@ const Header = ({
   };
 
   return (
-    <header className="h-16 px-4 border-b flex items-center justify-end">
+    <header className="h-16 px-4 border-b flex items-center justify-end gap-2">
+      {/* Add the enhanced notification button */}
+      <NotificationDrawer />
+      
       {/* User profile dropdown menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

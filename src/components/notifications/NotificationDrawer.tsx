@@ -3,14 +3,16 @@
  * NotificationDrawer.tsx
  * 
  * Enhanced notification drawer with modern design and specialized notification cards
+ * - Now with improved scrolling for better user experience
  */
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { BellRing } from "lucide-react"; // Changed from Bell to BellRing for better visibility
 import { NotificationsSection } from "./NotificationsSection";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/hooks/notifications";
+import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea import
 
 /**
  * A full drawer component for displaying notifications with tabs for filtering
@@ -27,10 +29,16 @@ export default function NotificationDrawer() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        {/* Enhanced notification button styling for better visibility */}
+        <Button 
+          variant="outline" 
+          size="lg" 
+          className="relative flex items-center gap-2 border-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
+        >
+          <BellRing className="h-5 w-5 text-purple-600" />
+          <span className="hidden sm:inline text-sm font-medium">Notifications</span>
           {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
+            <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 h-5 w-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -47,26 +55,31 @@ export default function NotificationDrawer() {
             <TabsTrigger value="archived">Archived</TabsTrigger>
           </TabsList>
           
+          {/* Wrap content in ScrollArea for smooth scrolling experience */}
           <TabsContent 
             value="active" 
-            className="flex-1 overflow-auto mt-2"
+            className="flex-1 mt-2 px-0"
             tabIndex={-1}
           >
-            <NotificationsSection 
-              onClose={() => setOpen(false)} 
-              showArchived={false}
-            />
+            <ScrollArea className="h-[calc(100vh-150px)]">
+              <NotificationsSection 
+                onClose={() => setOpen(false)} 
+                showArchived={false}
+              />
+            </ScrollArea>
           </TabsContent>
           
           <TabsContent 
             value="archived" 
-            className="flex-1 overflow-auto mt-2"
+            className="flex-1 mt-2 px-0"
             tabIndex={-1}
           >
-            <NotificationsSection 
-              onClose={() => setOpen(false)} 
-              showArchived={true}
-            />
+            <ScrollArea className="h-[calc(100vh-150px)]">
+              <NotificationsSection 
+                onClose={() => setOpen(false)} 
+                showArchived={true}
+              />
+            </ScrollArea>
           </TabsContent>
         </Tabs>
       </SheetContent>
