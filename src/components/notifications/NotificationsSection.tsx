@@ -84,51 +84,47 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         return;
       }
       
-      // Fix: Use the proper table names as literal strings to avoid type instantiation issues
-      // And handle each update separately with proper explicit typing
+      // Explicitly define each update operation without using .from() with dynamic types
+      // This avoids the deep type instantiation issue
       
       // Update safety_updates table
-      const safetyResult = await supabase
-        .from("safety_updates")
+      const { error: safetyError } = await supabase.from("safety_updates" as const)
         .update({ is_read: true })
-        .eq("user_id", userId)
+        .eq("author_id", userId)
         .eq("is_archived", showArchived);
         
-      if (safetyResult.error) {
-        console.error("Error updating safety notifications:", safetyResult.error);
+      if (safetyError) {
+        console.error("Error updating safety notifications:", safetyError);
       }
       
       // Update events table
-      const eventsResult = await supabase
-        .from("events")
+      const { error: eventsError } = await supabase.from("events" as const)
         .update({ is_read: true })
         .eq("host_id", userId)
         .eq("is_archived", showArchived);
         
-      if (eventsResult.error) {
-        console.error("Error updating event notifications:", eventsResult.error);
+      if (eventsError) {
+        console.error("Error updating event notifications:", eventsError);
       }
       
       // Update support_requests table
-      const supportResult = await supabase
-        .from("support_requests")
+      const { error: supportError } = await supabase.from("support_requests" as const)
         .update({ is_read: true })
         .eq("user_id", userId)
         .eq("is_archived", showArchived);
         
-      if (supportResult.error) {
-        console.error("Error updating support notifications:", supportResult.error);
+      if (supportError) {
+        console.error("Error updating support notifications:", supportError);
       }
       
       // Update goods_exchange table
-      const goodsResult = await supabase
-        .from("goods_exchange")
+      const { error: goodsError } = await supabase.from("goods_exchange" as const)
         .update({ is_read: true })
         .eq("user_id", userId)
         .eq("is_archived", showArchived);
         
-      if (goodsResult.error) {
-        console.error("Error updating goods notifications:", goodsResult.error);
+      if (goodsError) {
+        console.error("Error updating goods notifications:", goodsError);
       }
       
       // Invalidate and refetch notifications
