@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-import { createHighlightListener } from "@/utils/highlightNavigation";
+import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**

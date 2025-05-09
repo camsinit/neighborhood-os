@@ -1,8 +1,7 @@
-
 import { useEffect } from "react";
 import SafetyUpdates from "@/components/SafetyUpdates";
 import { useToast } from "@/components/ui/use-toast";
-import { createHighlightListener } from "@/utils/highlightNavigation";
+import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**

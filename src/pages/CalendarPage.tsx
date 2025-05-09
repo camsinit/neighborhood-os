@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import CommunityCalendar from "@/components/CommunityCalendar";
 import GodModeSelector from "@/components/neighbors/GodModeSelector";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { createHighlightListener } from "@/utils/highlightNavigation";
+import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
 // Removed LoggingControls import as it's now in DiagnosticsPanel
 

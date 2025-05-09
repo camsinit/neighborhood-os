@@ -1,14 +1,14 @@
 
-import { HighlightableItemType } from "@/utils/highlightNavigation";
-import { BaseNotification } from "@/hooks/notifications/types";
-import DefaultNotificationItem from "./items/DefaultNotificationItem";
-import { SkillNotificationItem } from "./items/SkillNotificationItem";
-import { NotificationItem as EnhancedNotificationItem } from "./items/NotificationItem";
-
 /**
  * Main NotificationItem component that delegates to the appropriate
  * specialized notification item component based on type
  */
+import { HighlightableItemType } from "@/utils/highlight";
+import { BaseNotification } from "@/hooks/notifications/types";
+import DefaultNotificationItem from "./items/DefaultNotificationItem";
+import { SkillNotificationItem } from "./items/SkillNotificationItem";
+import NotificationItem from "./items/NotificationItem"; // Import as default, not named
+
 interface NotificationItemProps {
   notification: BaseNotification;
   onSelect?: () => void;
@@ -18,7 +18,7 @@ interface NotificationItemProps {
  * Router component that renders the appropriate notification item
  * based on the notification type and context
  */
-const NotificationItem = ({ notification, onSelect }: NotificationItemProps) => {
+const NotificationItemRouter = ({ notification, onSelect }: NotificationItemProps) => {
   // For backward compatibility, let's use our existing specialized components 
   // for certain notification types
   if (notification.notification_type === 'skills' && notification.context?.contextType === 'skill_request') {
@@ -43,11 +43,11 @@ const NotificationItem = ({ notification, onSelect }: NotificationItemProps) => 
 
   // For all other notifications, use our enhanced notification item component
   return (
-    <EnhancedNotificationItem
+    <NotificationItem
       notification={notification}
       onSelect={onSelect}
     />
   );
 };
 
-export default NotificationItem;
+export default NotificationItemRouter;

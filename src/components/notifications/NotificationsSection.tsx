@@ -1,5 +1,5 @@
 
-import { NotificationItem } from "./items/NotificationItem";
+import NotificationItem from "./items/NotificationItem";
 import { useNotifications } from "@/hooks/notifications";
 import { Button } from "@/components/ui/button";
 import { BellRing, Check, Clock } from "lucide-react";
@@ -84,6 +84,8 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         return;
       }
       
+      // We need to update specific tables, not a generic 'notifications' table
+      // Since this is likely causing the error on line 100
       // Update notifications in all tables in parallel
       const tables = [
         'safety_updates', 

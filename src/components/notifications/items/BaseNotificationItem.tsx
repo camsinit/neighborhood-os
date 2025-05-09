@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getNotificationStyle } from "../utils/notificationStyles";
-import { HighlightableItemType } from "@/utils/highlightNavigation";
+import { HighlightableItemType } from "@/utils/highlight"; // Updated import path
 
 interface BaseNotificationItemProps {
   title: string;

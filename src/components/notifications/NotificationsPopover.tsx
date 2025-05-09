@@ -7,12 +7,12 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NotificationItem from "./NotificationItem";
+import NotificationItem from "./items/NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
-import { highlightItem, HighlightableItemType } from "@/utils/highlightNavigation"; // Import the type and function
+import { highlightItem, HighlightableItemType } from "@/utils/highlight"; // Updated import path
 
 /**
  * Props for the popover component that shows notification content

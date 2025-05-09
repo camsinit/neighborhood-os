@@ -1,5 +1,5 @@
 
-import { HighlightableItemType } from "@/utils/highlightNavigation";
+import { HighlightableItemType } from "@/utils/highlight"; // Updated import path
 import BaseNotificationItem from "./BaseNotificationItem";
 
 interface DefaultNotificationItemProps {

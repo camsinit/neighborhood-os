@@ -1,7 +1,6 @@
-
 import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
 import { useEffect } from "react";
-import { createHighlightListener } from "@/utils/highlightNavigation";
+import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
 
 /**

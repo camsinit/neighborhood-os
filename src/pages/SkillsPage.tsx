@@ -6,7 +6,7 @@ import SkillsHeader from "@/components/skills/SkillsHeader";
 import CategoryView from "@/components/skills/CategoryView";
 import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { BookOpen, GraduationCap, Heart, Palette, Wrench, Code } from "lucide-react";
-import { createHighlightListener } from "@/utils/highlightNavigation";
+import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import { Button } from "@/components/ui/button";
 import AddSupportRequestDialog from "@/components/AddSupportRequestDialog";
