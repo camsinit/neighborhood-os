@@ -22,10 +22,11 @@ export interface BaseNotification {
   };
   relevance_score?: number;
   notification_type_display?: string; // Optional display name
-  // Profiles is not officially part of the type but might be present in some cases
+  // Add profiles property to fix type errors
   profiles?: {
     display_name?: string;
     avatar_url?: string;
+    [key: string]: any;
   };
 }
 
