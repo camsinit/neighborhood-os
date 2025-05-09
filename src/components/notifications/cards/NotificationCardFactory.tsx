@@ -7,7 +7,7 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import NotificationCard from "./NotificationCard";
+import NotificationCard from "./base/NotificationCard";
 import EventNotificationCard from "./EventNotificationCard";
 import SafetyNotificationCard from "./SafetyNotificationCard";
 import SkillRequestNotificationCard from "./SkillRequestNotificationCard";

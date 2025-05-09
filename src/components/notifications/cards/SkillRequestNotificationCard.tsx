@@ -7,7 +7,7 @@
  */
 import React, { useState } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./NotificationCard";
+import { NotificationCard } from "./base/NotificationCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Lightbulb } from "lucide-react";

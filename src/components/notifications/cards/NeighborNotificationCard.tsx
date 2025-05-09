@@ -6,7 +6,7 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./NotificationCard";
+import { NotificationCard } from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";

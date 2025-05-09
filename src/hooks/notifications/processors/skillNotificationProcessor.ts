@@ -7,6 +7,28 @@ import { BaseNotification, ProfileData } from "../types";
 import { isNotification, isSkillSession } from "../fetchers/fetchSkillNotifications";
 
 /**
+ * Interface defining the structure of a skill notification
+ */
+interface SkillNotification {
+  id: string;
+  user_id: string;
+  actor_id?: string;
+  title?: string;
+  content_type: string;
+  content_id: string;
+  action_type?: string; // Add this property to fix the TypeScript error
+  created_at: string;
+  updated_at?: string;
+  is_read?: boolean;
+  is_archived?: boolean;
+  actor?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
+  metadata?: any;
+}
+
+/**
  * Processes skill notifications with enhanced context information
  * 
  * @param skillNotifications - Raw skill notifications data
@@ -68,7 +90,7 @@ export const processSkillNotifications = (
     
     // Handle skill notifications
     else if (isNotification(item)) {
-      const notification = item;
+      const notification = item as SkillNotification; // Ensure type safety with our interface
       const actorProfile = notification.actor_id ? profilesMap[notification.actor_id] : null;
       
       result.push({
@@ -79,7 +101,7 @@ export const processSkillNotifications = (
         content_type: notification.content_type,
         content_id: notification.content_id,
         notification_type: "skills",
-        action_type: notification.action_type || "request", // Add action type for descriptive text
+        action_type: notification.action_type || "request", // Now this property exists in our interface
         created_at: notification.created_at,
         updated_at: notification.updated_at || notification.created_at,
         is_read: notification.is_read,
@@ -100,3 +122,4 @@ export const processSkillNotifications = (
   
   return result;
 };
+

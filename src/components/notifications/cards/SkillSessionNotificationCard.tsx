@@ -7,7 +7,7 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./NotificationCard";
+import { NotificationCard } from "./base/NotificationCard";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock } from "lucide-react";
 import { format, parseISO } from "date-fns";

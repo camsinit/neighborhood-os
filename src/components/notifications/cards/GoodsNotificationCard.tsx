@@ -6,7 +6,7 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./NotificationCard";
+import { NotificationCard } from "./base/NotificationCard";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
