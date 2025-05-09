@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,11 +35,15 @@ const BaseNotificationItem = ({
   context,
   children
 }: BaseNotificationItemProps) => {
+  // State for tracking removal animation
   const [isRemoving, setIsRemoving] = useState(false);
   const [height, setHeight] = useState<number | undefined>();
+  
+  // Get style information for this notification type
   const style = getNotificationStyle(type);
   const Icon = style.icon;
 
+  // Handle archiving a notification
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const element = e.currentTarget.closest('.notification-item');
@@ -51,13 +56,19 @@ const BaseNotificationItem = ({
     }, 300);
   };
 
+  // Determine the styling based on read status
+  const bgColor = isRead ? 'bg-gray-50' : style.backgroundColor;
+  const hoverColor = isRead ? 'hover:bg-gray-100' : style.hoverColor;
+  const borderColor = isRead ? 'border-gray-200' : style.borderColor;
+  const textColor = isRead ? 'text-gray-600' : style.textColor;
+  const fontWeight = isRead ? 'font-normal' : 'font-medium';
+
   return (
     <div 
-      className={`notification-item h-[64px] flex items-center justify-between py-2 group cursor-pointer
-        ${style.backgroundColor} ${style.hoverColor} pr-6 pl-4 rounded-lg 
-        transition-all duration-300 overflow-hidden border-l-4 ${style.borderColor}
+      className={`notification-item flex items-center justify-between py-3 group cursor-pointer
+        ${bgColor} ${hoverColor} pr-6 pl-4 rounded-lg 
+        transition-all duration-300 overflow-hidden border-l-4 ${borderColor}
         ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
-        ${isRead ? 'opacity-75' : ''}
       `}
       style={{
         height: isRemoving ? 0 : height,
@@ -74,10 +85,12 @@ const BaseNotificationItem = ({
             <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
           </Avatar>
         ) : (
-          <Icon className={`h-5 w-5 flex-shrink-0 ${style.textColor}`} />
+          <div className={`rounded-full p-1 ${isRead ? 'bg-gray-100' : style.backgroundColor}`}>
+            <Icon className={`h-4 w-4 flex-shrink-0 ${textColor}`} />
+          </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className={`text-base font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
+          <h3 className={`text-base ${fontWeight} truncate ${textColor}`}>
             {title}
           </h3>
           {children}
