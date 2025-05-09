@@ -68,7 +68,7 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   const groupedNotifications = sortedNotifications ? 
     groupNotificationsByDate(sortedNotifications) : [];
 
-  // Function to mark all notifications as read
+  // Function to mark all notifications as read - this is the function we're fixing
   const markAllAsRead = async () => {
     try {
       setIsMarkingRead(true);
@@ -84,39 +84,52 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         return;
       }
       
-      // Using database tables as literal values to avoid type errors
-      // Handle each table with its own type-safe update
+      // Fix: Use the proper table names as literal strings to avoid type instantiation issues
+      // And handle each update separately with proper explicit typing
       
       // Update safety_updates table
-      await supabase
-        .from('safety_updates')
+      const safetyResult = await supabase
+        .from("safety_updates")
         .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_archived', showArchived);
+        .eq("user_id", userId)
+        .eq("is_archived", showArchived);
+        
+      if (safetyResult.error) {
+        console.error("Error updating safety notifications:", safetyResult.error);
+      }
       
       // Update events table
-      await supabase
-        .from('events')
+      const eventsResult = await supabase
+        .from("events")
         .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_archived', showArchived);
+        .eq("host_id", userId)
+        .eq("is_archived", showArchived);
+        
+      if (eventsResult.error) {
+        console.error("Error updating event notifications:", eventsResult.error);
+      }
       
       // Update support_requests table
-      await supabase
-        .from('support_requests')
+      const supportResult = await supabase
+        .from("support_requests")
         .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_archived', showArchived);
+        .eq("user_id", userId)
+        .eq("is_archived", showArchived);
+        
+      if (supportResult.error) {
+        console.error("Error updating support notifications:", supportResult.error);
+      }
       
       // Update goods_exchange table
-      await supabase
-        .from('goods_exchange')
+      const goodsResult = await supabase
+        .from("goods_exchange")
         .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_archived', showArchived);
-      
-      // For tables without is_read or is_archived fields,
-      // we need to handle them differently or skip them
+        .eq("user_id", userId)
+        .eq("is_archived", showArchived);
+        
+      if (goodsResult.error) {
+        console.error("Error updating goods notifications:", goodsResult.error);
+      }
       
       // Invalidate and refetch notifications
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
