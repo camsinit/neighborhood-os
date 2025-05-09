@@ -1,5 +1,14 @@
+/* Existing animations (e.g., fade-in) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-/* Rainbow highlight animation for element navigation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Rainbow highlight animation for items */
 .rainbow-highlight {
   animation: glow-pulse 5s ease-in-out;
   outline: 3px solid transparent;
@@ -23,12 +32,12 @@
   }
 }
 
-/* Scale animation for interactive elements */
+/* Scale animation for buttons */
 .scale-animation {
-  animation: quick-scale 300ms ease-in-out;
+  animation: scale-pop 0.3s ease-in-out;
 }
 
-@keyframes quick-scale {
+@keyframes scale-pop {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }

@@ -1,3 +1,4 @@
+
 /**
  * This file handles the processing of skill notifications
  * It contains utility functions for transforming skill notification data
@@ -6,11 +7,11 @@ import { BaseNotification, ProfileData } from "../types";
 import { isNotification, isSkillSession } from "../fetchers/fetchSkillNotifications";
 
 /**
- * Processes skill notifications
+ * Processes skill notifications with enhanced context information
  * 
  * @param skillNotifications - Raw skill notifications data
  * @param profilesMap - Map of user profiles by ID
- * @returns An array of processed notifications
+ * @returns An array of processed notifications with rich context
  */
 export const processSkillNotifications = (
   skillNotifications: any[],
@@ -27,6 +28,9 @@ export const processSkillNotifications = (
       
       // Only process sessions with valid skill data
       if (skillSession.skill) {
+        // Get requester profile for context
+        const requesterProfile = skillSession.requester_id ? profilesMap[skillSession.requester_id] : null;
+        
         result.push({
           id: skillSession.id,
           user_id: skillSession.provider_id || "unknown",
@@ -46,8 +50,15 @@ export const processSkillNotifications = (
             skillDescription: skillSession.skill.description,
             availability: skillSession.skill.availability,
             timePreferences: skillSession.skill.time_preferences,
-            skillRequestData: skillSession
-          }
+            neighborName: requesterProfile?.display_name || "Someone",
+            avatarUrl: requesterProfile?.avatar_url || null,
+            skillRequestData: skillSession,
+            // Add additional context for improved UI
+            actionRequired: true,
+            actionLabel: "Respond to request"
+          },
+          // High relevance for requests requiring action
+          relevance_score: 3
         });
       }
     }
@@ -71,10 +82,14 @@ export const processSkillNotifications = (
         is_archived: notification.is_archived,
         context: {
           contextType: "skill_request",
-          neighborName: actorProfile?.display_name || notification.actor?.display_name || null,
+          neighborName: actorProfile?.display_name || notification.actor?.display_name || "A neighbor",
           avatarUrl: actorProfile?.avatar_url || notification.actor?.avatar_url || null,
-          metadata: notification.metadata
-        }
+          metadata: notification.metadata,
+          // Add derived context for UI
+          summary: `${actorProfile?.display_name || "Someone"} is interested in your skill`
+        },
+        // Medium relevance for general skill notifications
+        relevance_score: 2
       });
     }
   }

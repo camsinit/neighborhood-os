@@ -2,15 +2,50 @@
 import { NotificationItem } from "./items/NotificationItem";
 import { useNotifications } from "@/hooks/notifications";
 import { Button } from "@/components/ui/button";
-import { BellRing, Check } from "lucide-react";
+import { BellRing, Check, Clock } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { BaseNotification } from "@/hooks/notifications/types";
+import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 
 interface NotificationsSectionProps {
   onClose?: () => void;
   showArchived?: boolean;
 }
+
+/**
+ * Groups notifications by time period (Today, Yesterday, This Week, Earlier)
+ */
+const groupNotificationsByDate = (notifications: BaseNotification[]) => {
+  // Create groups
+  const groups: {
+    title: string;
+    notifications: BaseNotification[];
+  }[] = [
+    { title: "Today", notifications: [] },
+    { title: "Yesterday", notifications: [] },
+    { title: "This Week", notifications: [] },
+    { title: "Earlier", notifications: [] },
+  ];
+
+  // Sort notifications into groups
+  notifications.forEach(notification => {
+    const date = new Date(notification.created_at);
+    if (isToday(date)) {
+      groups[0].notifications.push(notification);
+    } else if (isYesterday(date)) {
+      groups[1].notifications.push(notification);
+    } else if (isThisWeek(date)) {
+      groups[2].notifications.push(notification);
+    } else {
+      groups[3].notifications.push(notification);
+    }
+  });
+
+  // Filter out empty groups
+  return groups.filter(group => group.notifications.length > 0);
+};
 
 export function NotificationsSection({ onClose, showArchived = false }: NotificationsSectionProps) {
   const { data: notifications, isLoading } = useNotifications(showArchived);
@@ -26,6 +61,10 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
     // Then by date (newer first)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
+
+  // Group notifications by date
+  const groupedNotifications = sortedNotifications ? 
+    groupNotificationsByDate(sortedNotifications) : [];
 
   // Function to mark all notifications as read
   const markAllAsRead = async () => {
@@ -68,7 +107,12 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
   };
 
   if (isLoading) {
-    return <div className="p-4 text-center text-gray-500">Loading notifications...</div>;
+    return (
+      <div className="p-8 text-center">
+        <Clock className="mx-auto h-8 w-8 animate-spin text-gray-400" />
+        <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
+      </div>
+    );
   }
 
   if (!notifications?.length) {
@@ -103,15 +147,21 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
           </Button>
         )}
       </div>
-      <div className="space-y-2 px-4">
-        {sortedNotifications?.map((notification) => (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            onSelect={() => {/* Implement notification action */}}
-          />
-        ))}
-      </div>
+
+      {groupedNotifications.map((group) => (
+        <div key={group.title} className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-500 px-4">{group.title}</h4>
+          <div className="space-y-2 px-4">
+            {group.notifications.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                onSelect={onClose}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
