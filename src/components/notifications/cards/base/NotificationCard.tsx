@@ -7,12 +7,15 @@
  */
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
-import { Badge } from "@/components/ui/badge";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
-import NotificationActions from "./NotificationActions";
+import { Badge } from "@/components/ui/badge";
+import {
+  NotificationAvatar,
+  NotificationContent,
+  NotificationTimeStamp,
+  NotificationActions
+} from "../../elements";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -59,12 +62,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   const avatarUrl = context?.avatarUrl || 
     notification.profiles?.avatar_url || null;
   
-  // Format the timestamp as relative time (e.g. "5 minutes ago")
-  const formattedTime = formatDistanceToNow(new Date(created_at), { 
-    addSuffix: true,
-    includeSeconds: true 
-  });
-
   // Get notification type display name
   const typeName = notification_type_display || 
     notification_type.charAt(0).toUpperCase() + notification_type.slice(1);
@@ -94,66 +91,54 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         )}
         onClick={handleCardClick}
       >
-        {/* Avatar section */}
-        <Avatar className="h-10 w-10 mt-0.5 flex-shrink-0">
-          {avatarUrl ? (
-            <AvatarImage src={avatarUrl} alt={actorName} />
-          ) : (
-            <AvatarFallback className={isUnread ? "bg-blue-100 text-blue-600" : "bg-gray-200"}>
-              {actorName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          )}
-        </Avatar>
+        {/* Avatar section using our new reusable component */}
+        <NotificationAvatar
+          url={avatarUrl}
+          name={actorName}
+          isUnread={isUnread}
+          className="mt-0.5"
+        />
         
-        {/* Content section */}
-        <div className="flex-1 min-w-0">
-          {/* Title and badge row */}
-          <div className="flex items-start justify-between gap-2">
-            <h4 className={cn(
-              "text-sm leading-tight mb-1",
-              isUnread ? "font-medium text-gray-900" : "font-normal text-gray-700"
-            )}>
-              {title}
-            </h4>
-            
-            {/* Status badges */}
-            <div className="flex gap-1 flex-shrink-0">
-              {showTypeLabel && (
-                <Badge 
-                  variant={isUnread ? "default" : "outline"} 
-                  className="text-[10px] h-5 hidden sm:flex"
-                >
-                  {typeName}
-                </Badge>
-              )}
-              
-              {context?.actionRequired && (
-                <Badge 
-                  variant="destructive"
-                  className="text-[10px] h-5"
-                >
-                  Action needed
-                </Badge>
-              )}
-            </div>
-          </div>
-          
-          {/* Timestamp */}
+        {/* Content section using our new reusable component */}
+        <NotificationContent
+          title={title}
+          isUnread={isUnread}
+        >
+          {/* Timestamp using our new reusable component */}
           {showTimestamp && (
-            <p className={cn(
-              "text-[11px]",
-              isUnread ? "text-gray-700" : "text-gray-500"  
-            )}>
-              {formattedTime}
-            </p>
+            <NotificationTimeStamp
+              date={created_at}
+              isUnread={isUnread}
+            />
           )}
-
+          
           {/* Render child components for specialized notification content */}
           {children}
-        </div>
+          
+          {/* Status badges */}
+          <div className="flex gap-1 flex-shrink-0 mt-2">
+            {showTypeLabel && (
+              <Badge 
+                variant={isUnread ? "default" : "outline"} 
+                className="text-[10px] h-5 hidden sm:flex"
+              >
+                {typeName}
+              </Badge>
+            )}
+            
+            {context?.actionRequired && (
+              <Badge 
+                variant="destructive"
+                className="text-[10px] h-5"
+              >
+                Action needed
+              </Badge>
+            )}
+          </div>
+        </NotificationContent>
       </div>
       
-      {/* Action buttons */}
+      {/* Action buttons using our new reusable component */}
       {showActions && !is_archived && (
         <NotificationActions 
           id={id} 

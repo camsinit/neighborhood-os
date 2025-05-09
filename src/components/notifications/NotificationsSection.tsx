@@ -1,8 +1,8 @@
-
 /**
  * NotificationsSection.tsx
  * 
  * Redesigned component that displays notifications in a clear, organized way.
+ * Now using our new reusable components.
  */
 import { Button } from "@/components/ui/button";
 import { BellRing, Check, Clock, CircleDot } from "lucide-react";
@@ -12,10 +12,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/notifications";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
-import { cn } from "@/lib/utils";
 
 interface NotificationsSectionProps {
   onClose?: () => void;

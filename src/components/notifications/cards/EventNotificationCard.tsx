@@ -8,10 +8,13 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { highlightItem } from "@/utils/highlight";
+import { 
+  NotificationBadge,
+  NotificationDescription
+} from "../elements";
 
 interface EventNotificationCardProps {
   notification: BaseNotification;
@@ -57,13 +60,13 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
       onAction={handleViewEvent}
       onDismiss={onDismiss}
     >
-      {/* Event action description */}
-      <div className="mt-1 flex items-start gap-1">
-        <Calendar className="h-3.5 w-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-700">
-          {actionText}
-        </p>
-      </div>
+      {/* Event action description using our new reusable component */}
+      <NotificationDescription
+        text={actionText}
+        type="event"
+        icon={Calendar}
+        iconColor="blue-500"
+      />
       
       {/* Event specific details */}
       {eventTime && (
@@ -73,11 +76,14 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
         </div>
       )}
       
+      {/* Location badge using our new reusable component */}
       {eventLocation && (
         <div className="mt-1">
-          <Badge variant="outline" className="font-normal text-xs">
-            {eventLocation}
-          </Badge>
+          <NotificationBadge 
+            label={eventLocation}
+            variant="outline"
+            className="font-normal text-xs"
+          />
         </div>
       )}
     </NotificationCard>
