@@ -10,6 +10,7 @@ import { NotificationCard } from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
+import { NotificationDescription } from "../elements";
 
 interface NeighborNotificationCardProps {
   notification: BaseNotification;
@@ -43,13 +44,13 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
       onAction={handleViewNeighbor}
       onDismiss={onDismiss}
     >
-      {/* Descriptive text about the action */}
-      <div className="mt-1 flex items-start gap-1">
-        <UserPlus className="h-3.5 w-3.5 text-purple-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-700">
-          {actionText}
-        </p>
-      </div>
+      {/* Descriptive text using our reusable component */}
+      <NotificationDescription
+        text={actionText}
+        type="neighbors"
+        icon={UserPlus}
+        iconColor="purple-500"
+      />
       
       {/* Welcome/Visit profile button */}
       <div className="mt-2">

@@ -9,6 +9,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Archive, Check } from "lucide-react";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
+import { cn } from "@/lib/utils";  // Added the missing import
 
 export interface NotificationActionsProps {
   id: string;

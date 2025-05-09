@@ -8,7 +8,6 @@
 import React, { useState } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Lightbulb } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +16,10 @@ import { toast } from "sonner";
 import { markAsRead } from "@/hooks/notifications";
 import { highlightItem } from "@/utils/highlight";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
+import { 
+  NotificationBadge, 
+  NotificationDescription 
+} from "../elements";
 
 interface SkillRequestNotificationCardProps {
   notification: BaseNotification;
@@ -128,19 +131,22 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
         onDismiss={onDismiss}
         showActions={false}
       >
-        {/* Skill request action description */}
-        <div className="mt-1 flex items-start gap-1">
-          <Lightbulb className="h-3.5 w-3.5 text-indigo-500 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-gray-700">
-            {actionText}
-          </p>
-        </div>
+        {/* Skill request action description using our reusable component */}
+        <NotificationDescription
+          text={actionText}
+          type="skills"
+          icon={Lightbulb}
+          iconColor="indigo-500"
+        />
         
+        {/* Skill information with badge */}
         {notification.context?.skillTitle && (
           <div className="mt-2">
-            <Badge variant="outline" className="font-normal mb-1">
-              {notification.context.skillTitle}
-            </Badge>
+            <NotificationBadge 
+              label={notification.context.skillTitle}
+              variant="outline" 
+              className="font-normal mb-1"
+            />
             
             {notification.context?.skillDescription && (
               <p className="text-xs text-gray-600 mt-1 line-clamp-2">

@@ -7,9 +7,12 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
+import { 
+  NotificationBadge,
+  NotificationDescription
+} from "../elements";
 
 interface GoodsNotificationCardProps {
   notification: BaseNotification;
@@ -55,13 +58,13 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
       onAction={handleViewGoods}
       onDismiss={onDismiss}
     >
-      {/* Goods action description */}
-      <div className="mt-1 flex items-start gap-1">
-        <ShoppingCart className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-700">
-          {actionText}
-        </p>
-      </div>
+      {/* Goods action description using our reusable component */}
+      <NotificationDescription
+        text={actionText}
+        type="goods"
+        icon={ShoppingCart}
+        iconColor="amber-500"
+      />
       
       {/* Additional context if available */}
       {notification.context?.summary && (
@@ -70,17 +73,22 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
         </p>
       )}
       
+      {/* Category and condition badges using our reusable component */}
       <div className="mt-1 flex gap-1 flex-wrap">
         {itemCategory && (
-          <Badge variant="outline" className="font-normal text-xs">
-            {itemCategory}
-          </Badge>
+          <NotificationBadge 
+            label={itemCategory}
+            variant="outline"
+            className="font-normal text-xs"
+          />
         )}
         
         {itemCondition && (
-          <Badge variant="outline" className="font-normal text-xs">
-            {itemCondition}
-          </Badge>
+          <NotificationBadge 
+            label={itemCondition}
+            variant="outline"
+            className="font-normal text-xs"
+          />
         )}
       </div>
     </NotificationCard>

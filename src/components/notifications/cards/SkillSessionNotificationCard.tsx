@@ -8,12 +8,15 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { highlightItem } from "@/utils/highlight";
 import { useQueryClient } from "@tanstack/react-query";
+import { 
+  NotificationBadge,
+  NotificationDescription
+} from "../elements";
 
 interface SkillSessionNotificationCardProps {
   notification: BaseNotification;
@@ -68,13 +71,13 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
       onAction={handleViewSession}
       onDismiss={onDismiss}
     >
-      {/* Session action description */}
-      <div className="mt-1 flex items-start gap-1">
-        <Clock className="h-3.5 w-3.5 text-green-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-700">
-          {actionText}
-        </p>
-      </div>
+      {/* Session action description using our reusable component */}
+      <NotificationDescription
+        text={actionText}
+        type="skills"
+        icon={Clock}
+        iconColor="green-500"
+      />
       
       {/* Session specific details */}
       <div className="mt-1 text-xs text-gray-600">

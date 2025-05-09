@@ -8,9 +8,12 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
+import { 
+  NotificationBadge,
+  NotificationDescription
+} from "../elements";
 
 interface SafetyNotificationCardProps {
   notification: BaseNotification;
@@ -53,13 +56,13 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
       onDismiss={onDismiss}
       className={!notification.is_read ? "border-l-red-500" : ""}
     >
-      {/* Safety action description */}
-      <div className="mt-1 flex items-start gap-1">
-        <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-gray-700">
-          {actionText}
-        </p>
-      </div>
+      {/* Safety action description using our reusable component */}
+      <NotificationDescription
+        text={actionText}
+        type="safety"
+        icon={AlertTriangle}
+        iconColor="red-500"
+      />
       
       {/* Additional context if available */}
       {notification.context?.summary && (
@@ -68,14 +71,14 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
         </p>
       )}
       
+      {/* Safety type badge using our reusable component */}
       {safetyType && (
         <div className="mt-2">
-          <Badge 
-            variant={safetyType === 'emergency' ? "destructive" : "outline"} 
-            className={safetyType === 'emergency' ? "font-medium" : "font-normal"}
-          >
-            {safetyType.toUpperCase()}
-          </Badge>
+          <NotificationBadge 
+            label={safetyType.toUpperCase()}
+            variant={safetyType === 'emergency' ? "destructive" : "outline"}
+            isHighlighted={safetyType === 'emergency'}
+          />
         </div>
       )}
     </NotificationCard>
