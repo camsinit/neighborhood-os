@@ -1,5 +1,5 @@
 
-import NotificationItem from "./items/NotificationItem";
+import NotificationItem from "./NotificationItem";
 import { useNotifications } from "@/hooks/notifications";
 import { Button } from "@/components/ui/button";
 import { BellRing, Check, Clock } from "lucide-react";
@@ -84,33 +84,65 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         return;
       }
       
-      // We need to update specific tables, not a generic 'notifications' table
-      // Since this is likely causing the error on line 100
-      // Update notifications in all tables in parallel
-      const tables = [
-        'safety_updates', 
-        'events', 
-        'support_requests', 
-        'skill_sessions',
-        'goods_exchange', 
-        'neighborhood_members'
-      ];
+      // Updated approach: Use fixed table names as literals instead of dynamic strings
+      // This fixes the TypeScript error about table names
+      const updatePromises = [];
+      
+      // Update safety_updates table
+      updatePromises.push(
+        supabase
+          .from('safety_updates')
+          .update({ is_read: true })
+          .eq('user_id', userId)
+          .eq('is_archived', showArchived)
+      );
+      
+      // Update events table
+      updatePromises.push(
+        supabase
+          .from('events')
+          .update({ is_read: true })
+          .eq('user_id', userId)
+          .eq('is_archived', showArchived)
+      );
+      
+      // Update support_requests table
+      updatePromises.push(
+        supabase
+          .from('support_requests')
+          .update({ is_read: true })
+          .eq('user_id', userId)
+          .eq('is_archived', showArchived)
+      );
+      
+      // Update skill_sessions table
+      updatePromises.push(
+        supabase
+          .from('skill_sessions')
+          .update({ is_read: true })
+          .eq('requester_id', userId)
+          .eq('is_archived', showArchived)
+      );
+      
+      // Update goods_exchange table
+      updatePromises.push(
+        supabase
+          .from('goods_exchange')
+          .update({ is_read: true })
+          .eq('user_id', userId)
+          .eq('is_archived', showArchived)
+      );
+      
+      // Update neighborhood_members table
+      updatePromises.push(
+        supabase
+          .from('neighborhood_members')
+          .update({ is_read: true })
+          .eq('user_id', userId)
+      );
 
-      await Promise.all(tables.map(async (table) => {
-        try {
-          const { error } = await supabase
-            .from(table)
-            .update({ is_read: true })
-            .eq('user_id', userId)
-            .eq('is_archived', showArchived);
-            
-          if (error) {
-            console.warn(`Error updating ${table}:`, error);
-          }
-        } catch (err) {
-          console.error(`Error updating ${table}:`, err);
-        }
-      }));
+      // Execute all update queries in parallel
+      await Promise.all(updatePromises);
 
       // Invalidate and refetch notifications
       queryClient.invalidateQueries({ queryKey: ["notifications"] });

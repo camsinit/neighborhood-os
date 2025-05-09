@@ -15,11 +15,18 @@ export interface BaseNotification {
   created_at: string;
   updated_at: string;
   context?: {
-    contextType: string;
+    contextType?: string;
+    neighborName?: string;
+    avatarUrl?: string;
     [key: string]: any;
   };
   relevance_score?: number;
   notification_type_display?: string; // Optional display name
+  // Profiles is not officially part of the type but might be present in some cases
+  profiles?: {
+    display_name?: string;
+    avatar_url?: string;
+  };
 }
 
 export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors";

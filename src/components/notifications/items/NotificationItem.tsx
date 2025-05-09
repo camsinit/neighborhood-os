@@ -48,6 +48,23 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
     if (onSelect) onSelect();
   };
   
+  // Build context object safely by checking if properties exist
+  // This fixes the issue where profiles might not exist on the notification
+  const context = {
+    neighborName: notification.context?.neighborName || null,
+    avatarUrl: notification.context?.avatarUrl || null
+  };
+  
+  // If there's profile data available, use it
+  if ('profiles' in notification) {
+    // Use type assertion to access profiles since TypeScript doesn't know about it
+    const profiles = (notification as any).profiles;
+    if (profiles) {
+      context.neighborName = profiles.display_name || context.neighborName;
+      context.avatarUrl = profiles.avatar_url || context.avatarUrl;
+    }
+  }
+  
   return (
     <BaseNotificationItem
       title={notification.title}
@@ -57,11 +74,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
       isArchived={notification.is_archived || false}
       onClose={onSelect || (() => {})}
       onItemClick={handleItemClick}
-      context={{
-        neighborName: notification.profiles?.display_name,
-        avatarUrl: notification.profiles?.avatar_url,
-        ...notification.context
-      }}
+      context={context}
     />
   );
 };
