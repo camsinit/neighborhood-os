@@ -1,17 +1,18 @@
 
+/**
+ * useNotificationsPopoverData.ts
+ * 
+ * Custom hook to fetch notification data for the notifications popover
+ */
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllNotifications } from "@/hooks/notifications/fetchNotifications";
+import { useNotifications } from "@/hooks/notifications";
 
 /**
- * Encapsulates the data logic for the NotificationsPopover: fetching, error handling, and sorting notifications.
- * Returns notifications, loading, error and a convenient refetch method.
+ * Custom hook that provides notification data for the popover
+ * @param showArchived Whether to show archived notifications
+ * @returns Query result with notification data
  */
 export const useNotificationsPopoverData = (showArchived: boolean) => {
-  return useQuery({
-    queryKey: ["notifications", showArchived],
-    queryFn: async () => {
-      // Use our refactored fetchAllNotifications (all mapping logic inside)
-      return fetchAllNotifications(showArchived);
-    }
-  });
+  // Leverage our main notifications hook
+  return useNotifications(showArchived);
 };

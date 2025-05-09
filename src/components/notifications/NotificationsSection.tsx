@@ -1,6 +1,9 @@
 
-import NotificationItem from "./items/NotificationItem";
-import { useNotifications } from "@/hooks/notifications";
+/**
+ * NotificationsSection.tsx
+ * 
+ * Redesigned component that displays notifications in a clear, organized way.
+ */
 import { Button } from "@/components/ui/button";
 import { BellRing, Check, Clock, CircleDot } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -10,6 +13,9 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useNotifications } from "@/hooks/notifications";
+import NotificationCardFactory from "./cards/NotificationCardFactory";
+import { cn } from "@/lib/utils";
 
 interface NotificationsSectionProps {
   onClose?: () => void;
@@ -50,7 +56,7 @@ const groupNotificationsByDate = (notifications: BaseNotification[]) => {
 };
 
 export function NotificationsSection({ onClose, showArchived = false }: NotificationsSectionProps) {
-  const { data: notifications, isLoading } = useNotifications(showArchived);
+  const { data: notifications, isLoading, refetch } = useNotifications(showArchived);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isMarkingRead, setIsMarkingRead] = useState(false);
@@ -84,9 +90,6 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
         });
         return;
       }
-      
-      // Explicitly define each update operation without using .from() with dynamic types
-      // This avoids the deep type instantiation issue
       
       // Update safety_updates table
       const { error: safetyError } = await supabase.from("safety_updates" as const)
@@ -130,6 +133,7 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
       
       // Invalidate and refetch notifications
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      refetch();
       
       toast({
         title: "Success",
@@ -149,22 +153,6 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
-
-  // Format notification time to display relative time
-  const formatNotificationTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return "just now";
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    
-    // For older notifications, show the actual date
-    return format(date, 'MMM d, h:mm a');
-  };
 
   if (isLoading) {
     return (
@@ -191,7 +179,8 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between px-4">
+      <div className={cn("flex items-center justify-between px-4 sticky top-0 bg-white z-10 py-2", 
+        unreadCount > 0 ? "shadow-sm" : "")}>
         <div>
           <h3 className="text-lg font-semibold">
             {showArchived ? "Archived Notifications" : "Recent Notifications"}
@@ -225,33 +214,11 @@ export function NotificationsSection({ onClose, showArchived = false }: Notifica
           <h4 className="text-sm font-medium text-gray-500 px-4">{group.title}</h4>
           <div className="space-y-3 px-4">
             {group.notifications.map((notification) => (
-              <div key={notification.id} className="notification-wrapper relative">
-                {/* Unread indicator */}
-                {!notification.is_read && (
-                  <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2">
-                    <CircleDot className="h-3 w-3 text-blue-500" />
-                  </div>
-                )}
-                <div className={`notification-container ${!notification.is_read ? 'pl-3' : ''}`}>
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onSelect={onClose}
-                  />
-                  {/* Show timestamp with higher contrast for unread */}
-                  <div className={`text-xs mt-0.5 ${notification.is_read ? 'text-gray-400' : 'text-gray-600 font-medium'}`}>
-                    {formatNotificationTime(notification.created_at)}
-                    {notification.notification_type && (
-                      <Badge 
-                        variant={notification.is_read ? "outline" : "info"}
-                        className="ml-2 text-[10px] py-0 px-1.5 h-4"
-                      >
-                        {notification.notification_type_display || notification.notification_type}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <NotificationCardFactory
+                key={notification.id}
+                notification={notification}
+                onDismiss={() => refetch()}
+              />
             ))}
           </div>
         </div>

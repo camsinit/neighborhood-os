@@ -1,4 +1,9 @@
 
+/**
+ * NotificationsPopover.tsx
+ * 
+ * Enhanced notifications popover with modern design and specialized notification cards
+ */
 import { Archive, Bell } from "lucide-react";
 import {
   Popover,
@@ -7,12 +12,13 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NotificationItem from "./items/NotificationItem";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
-import { highlightItem, HighlightableItemType } from "@/utils/highlight"; // Updated import path
+import { highlightItem, HighlightableItemType } from "@/utils/highlight";
+import NotificationCardFactory from "./cards/NotificationCardFactory";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 /**
  * Props for the popover component that shows notification content
@@ -73,28 +79,8 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
 
   const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  // Function to handle item clicks
-  const handleItemClick = (notificationType: string, id: string) => {
-    // Only proceed if we have a valid notification type
-    if (["safety", "event", "skills", "goods", "neighbors"].includes(notificationType)) {
-      // Cast the string to our HighlightableItemType since we've verified it's valid
-      const validType = notificationType as HighlightableItemType;
-      
-      // Use our highlightItem utility to navigate and highlight the content
-      highlightItem(validType, id, true);
-      
-      // Close the popover by refetching (which will trigger a rerender)
-      refetch();
-    }
-  };
-
-  const handleArchive = async (e: React.MouseEvent, notificationId: string) => {
-    e.stopPropagation();
-    await archiveNotification(notificationId);
-    refetch();
-  };
-
-  const hasUnreadNotifications = notifications?.some(n => !n.is_read && !n.is_archived);
+  // Calculate unread count
+  const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
 
   return (
     <Popover>
@@ -106,43 +92,64 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
             className="relative hover:bg-gray-100"
           >
             <Bell className="h-5 w-5" />
-            {hasUnreadNotifications && (
-              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
             )}
           </Button>
         )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold">
-            {showArchived ? "Archived Notifications" : "Notifications"}
-          </h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-gray-500"
-            onClick={() => setShowArchived(!showArchived)}
-          >
-            <Archive className="h-4 w-4 mr-1" />
-            {showArchived ? "Show Active" : "Show Archived"}
-          </Button>
-        </div>
-        <ScrollArea className="h-[300px]">
-          {notifications?.length ? (
-            notifications.map((notification) => (
-              <div key={notification.id} className="p-2">
-                <NotificationItem
-                  notification={notification}
-                  onSelect={() => refetch()}
-                />
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-center text-sm text-gray-500">
-              {showArchived ? "No archived notifications" : "No new notifications"}
-            </div>
-          )}
-        </ScrollArea>
+        <Tabs defaultValue="active">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h4 className="font-semibold">
+              Notifications
+            </h4>
+            <TabsList className="h-8">
+              <TabsTrigger value="active" className="text-xs h-8">Active</TabsTrigger>
+              <TabsTrigger value="archived" className="text-xs h-8">Archived</TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ScrollArea className="h-[350px] px-2">
+              {notifications?.length && !showArchived ? (
+                notifications.map((notification) => (
+                  <div key={notification.id} className="py-2">
+                    <NotificationCardFactory
+                      notification={notification}
+                      onDismiss={() => refetch()}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No new notifications
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ScrollArea className="h-[350px] px-2">
+              {notifications?.length && showArchived ? (
+                notifications.map((notification) => (
+                  <div key={notification.id} className="py-2">
+                    <NotificationCardFactory
+                      notification={notification}
+                      onDismiss={() => refetch()}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No archived notifications
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </PopoverContent>
     </Popover>
   );

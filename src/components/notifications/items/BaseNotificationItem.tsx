@@ -1,10 +1,18 @@
 
+/**
+ * BaseNotificationItem.tsx
+ * 
+ * Legacy compatibility component that maintains the old API while using
+ * the new notification card system underneath.
+ */
 import React, { useState } from "react";
 import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getNotificationStyle } from "../utils/notificationStyles";
-import { HighlightableItemType } from "@/utils/highlight"; // Updated import path
+import { HighlightableItemType } from "@/utils/highlight"; 
+import { Card } from "@/components/ui/card";
+import { highlightItem } from "@/utils/highlight";
 
 interface BaseNotificationItemProps {
   title: string;
@@ -23,6 +31,8 @@ interface BaseNotificationItemProps {
 
 /**
  * Base component for notification items that handles common layout and styling
+ * This component is maintained for backward compatibility - new code should use
+ * the specialized notification cards directly.
  */
 const BaseNotificationItem = ({
   title,
@@ -56,18 +66,20 @@ const BaseNotificationItem = ({
     }, 300);
   };
 
-  // Determine the styling based on read status
-  const bgColor = isRead ? 'bg-gray-50' : style.backgroundColor;
-  const hoverColor = isRead ? 'hover:bg-gray-100' : style.hoverColor;
-  const borderColor = isRead ? 'border-gray-200' : style.borderColor;
-  const textColor = isRead ? 'text-gray-600' : style.textColor;
-  const fontWeight = isRead ? 'font-normal' : 'font-medium';
+  // Handle click to navigate to the item
+  const handleClick = () => {
+    // Use the highlight utility directly
+    highlightItem(type, itemId, true);
+    
+    // For backwards compatibility, also call the onItemClick function
+    onItemClick(type, itemId);
+  };
 
   return (
-    <div 
+    <Card 
       className={`notification-item flex items-center justify-between py-3 group cursor-pointer
-        ${bgColor} ${hoverColor} pr-6 pl-4 rounded-lg 
-        transition-all duration-300 overflow-hidden border-l-4 ${borderColor}
+        ${isRead ? 'bg-gray-50' : style.backgroundColor} hover:bg-gray-100 pr-6 pl-4 rounded-lg 
+        transition-all duration-300 overflow-hidden border-l-4 ${isRead ? 'border-gray-200' : style.borderColor}
         ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
       `}
       style={{
@@ -76,7 +88,7 @@ const BaseNotificationItem = ({
         paddingTop: isRemoving ? 0 : undefined,
         paddingBottom: isRemoving ? 0 : undefined
       }}
-      onClick={() => onItemClick(type, itemId)}
+      onClick={handleClick}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {context?.avatarUrl ? (
@@ -86,11 +98,11 @@ const BaseNotificationItem = ({
           </Avatar>
         ) : (
           <div className={`rounded-full p-1 ${isRead ? 'bg-gray-100' : style.backgroundColor}`}>
-            <Icon className={`h-4 w-4 flex-shrink-0 ${textColor}`} />
+            <Icon className={`h-4 w-4 flex-shrink-0 ${isRead ? 'text-gray-600' : style.textColor}`} />
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className={`text-base ${fontWeight} truncate ${textColor}`}>
+          <h3 className={`text-base ${isRead ? 'font-normal' : 'font-medium'} truncate ${isRead ? 'text-gray-600' : style.textColor}`}>
             {title}
           </h3>
           {children}
@@ -106,7 +118,7 @@ const BaseNotificationItem = ({
           <Archive className="h-4 w-4" />
         </Button>
       )}
-    </div>
+    </Card>
   );
 };
 
