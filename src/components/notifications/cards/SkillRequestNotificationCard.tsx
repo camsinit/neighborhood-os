@@ -37,6 +37,13 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
   const skillData = notification.context?.skillRequestData || {};
   const skillId = notification.context?.skillId || notification.content_id;
   
+  // Set the action verb and object type for this notification
+  notification.context = {
+    ...notification.context,
+    actionVerb: "requested",
+    objectType: "a skill session"
+  };
+  
   // Handle viewing skill details
   const handleViewDetails = async () => {
     // Mark as read when viewing details

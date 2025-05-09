@@ -25,6 +25,7 @@ export interface NotificationCardProps {
   showActions?: boolean; // Whether to show action buttons
   showTimestamp?: boolean; // Whether to show timestamp
   showTypeLabel?: boolean; // Whether to show notification type label
+  children?: React.ReactNode; // Add this line to accept children elements
 }
 
 /**
@@ -39,6 +40,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   showActions = true,
   showTimestamp = true,
   showTypeLabel = true,
+  children, // Add this line to accept children elements
 }) => {
   // Extract common notification properties
   const {
@@ -61,7 +63,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   
   // Format the timestamp as relative time (e.g. "5 minutes ago")
   const formattedTime = formatDistanceToNow(new Date(created_at), { 
-    addSuffix: true,
+    addSuffix: false, // Change to false to match the UI in the image (e.g., "30m ago" instead of "30 minutes ago")
     includeSeconds: true 
   });
 
@@ -130,53 +132,26 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         
         {/* Content section */}
         <div className="flex-1 min-w-0">
-          {/* Title and badge row */}
-          <div className="flex items-start justify-between gap-2">
-            <h4 className={cn(
-              "text-sm leading-tight mb-1",
-              isUnread ? "font-medium text-gray-900" : "font-normal text-gray-700"
-            )}>
-              {title}
-            </h4>
-            
-            {/* Status badges */}
-            <div className="flex gap-1 flex-shrink-0">
-              {showTypeLabel && (
-                <Badge 
-                  variant={isUnread ? "default" : "outline"} 
-                  className="text-[10px] h-5 hidden sm:flex"
-                >
-                  {typeName}
-                </Badge>
-              )}
-              
-              {context?.actionRequired && (
-                <Badge 
-                  variant="destructive"
-                  className="text-[10px] h-5"
-                >
-                  Action needed
-                </Badge>
-              )}
-            </div>
-          </div>
-          
-          {/* Timestamp */}
+          {/* First row: Timestamp */}
           {showTimestamp && (
             <p className={cn(
-              "text-[11px]",
-              isUnread ? "text-gray-700" : "text-gray-500"  
+              "text-sm text-gray-500 mb-0.5"  
             )}>
-              {formattedTime}
+              {formattedTime} ago
             </p>
           )}
 
+          {/* Second row: Action description (e.g., "Shirah created an event") */}
+          <div className="text-base font-medium text-blue-600 mb-0.5">
+            {actorName} {notification.context?.actionVerb || "updated"} {notification.context?.objectType || notification.notification_type}
+            {notification.title ? `: "${notification.title}"` : ""}
+          </div>
+
+          {/* "Click to view" text as shown in the image */}
+          <p className="text-sm text-gray-400">Click to view</p>
+          
           {/* Render any children notification components might provide */}
-          {notification.context?.summary && (
-            <p className="text-xs text-gray-600 mt-1">
-              {notification.context.summary}
-            </p>
-          )}
+          {children}
         </div>
       </div>
       

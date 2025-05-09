@@ -1,3 +1,4 @@
+
 /**
  * SkillSessionNotificationCard.tsx
  * 
@@ -30,6 +31,18 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
   const skillId = notification.context?.metadata?.skill_id || notification.content_id;
   const sessionTime = notification.context?.sessionTime ? 
     parseISO(notification.context.sessionTime) : null;
+  
+  // Determine the action verb and object type based on the notification context
+  const actionStatus = notification.context?.sessionStatus || "scheduled";
+  
+  // Update the notification context
+  notification.context = {
+    ...notification.context,
+    actionVerb: actionStatus === "confirmed" ? "confirmed" : 
+                actionStatus === "scheduled" ? "scheduled" : 
+                actionStatus === "completed" ? "completed" : "updated",
+    objectType: "a skill session"
+  };
   
   // Handle viewing session details - redirects to calendar if there's an event,
   // otherwise to the skill details

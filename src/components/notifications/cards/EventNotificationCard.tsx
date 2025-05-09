@@ -27,6 +27,17 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
     new Date(notification.context.eventTime) : null;
   const eventLocation = notification.context?.location;
   
+  // Construct action verb and object type based on notification context
+  const actionVerb = notification.context?.actionVerb || "created";
+  const objectType = notification.context?.objectType || "an event";
+  
+  // Update context with these fields
+  notification.context = {
+    ...notification.context,
+    actionVerb,
+    objectType
+  };
+  
   // Handle viewing event details
   const handleViewEvent = async () => {
     // Navigate to the event details
