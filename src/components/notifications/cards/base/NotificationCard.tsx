@@ -84,15 +84,24 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         className
       )}
     >
-      {/* Type badge now positioned absolutely in the top right corner */}
-      {showTypeLabel && (
-        <Badge 
-          variant={isUnread ? "default" : "outline"} 
-          className="text-[10px] h-5 absolute top-2 right-2 z-10"
-        >
-          {typeName}
-        </Badge>
-      )}
+      {/* Type badge and timestamp now positioned absolutely in the top right corner */}
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+        {showTimestamp && (
+          <NotificationTimeStamp
+            date={created_at}
+            isUnread={isUnread}
+          />
+        )}
+        
+        {showTypeLabel && (
+          <Badge 
+            variant={isUnread ? "default" : "outline"} 
+            className="text-[10px] h-5"
+          >
+            {typeName}
+          </Badge>
+        )}
+      </div>
       
       <div 
         className={cn(
@@ -114,14 +123,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           title={title}
           isUnread={isUnread}
         >
-          {/* Timestamp using our new reusable component */}
-          {showTimestamp && (
-            <NotificationTimeStamp
-              date={created_at}
-              isUnread={isUnread}
-            />
-          )}
-          
           {/* Render child components for specialized notification content */}
           {children}
           

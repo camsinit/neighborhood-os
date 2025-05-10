@@ -1,4 +1,3 @@
-
 /**
  * SkillSessionNotificationCard.tsx
  * 
@@ -81,12 +80,8 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
       
       {/* Session specific details */}
       <div className="mt-1 text-xs text-gray-600">
-        {notification.context?.summary && (
-          <p>{notification.context.summary}</p>
-        )}
-        
         {sessionTime && (
-          <div className="mt-1 flex items-center gap-1">
+          <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             <span>{format(sessionTime, 'PPp')}</span>
           </div>

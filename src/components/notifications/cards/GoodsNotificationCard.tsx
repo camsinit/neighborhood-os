@@ -66,13 +66,6 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
         iconColor="amber-500"
       />
       
-      {/* Additional context if available */}
-      {notification.context?.summary && (
-        <p className="text-xs text-gray-600 mt-1">
-          {notification.context.summary}
-        </p>
-      )}
-      
       {/* Category and condition badges using our reusable component */}
       <div className="mt-1 flex gap-1 flex-wrap">
         {itemCategory && (

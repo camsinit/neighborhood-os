@@ -64,13 +64,6 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
         iconColor="red-500"
       />
       
-      {/* Additional context if available */}
-      {notification.context?.summary && (
-        <p className="text-xs text-gray-600 mt-1">
-          {notification.context.summary}
-        </p>
-      )}
-      
       {/* Safety type badge using our reusable component */}
       {safetyType && (
         <div className="mt-2">
