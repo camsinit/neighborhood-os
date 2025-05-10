@@ -11,7 +11,6 @@ import { NotificationCard } from "./base/NotificationCard";
 import { AlertTriangle } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
 import { 
-  NotificationBadge,
   NotificationDescription
 } from "../elements";
 
@@ -31,14 +30,24 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create descriptive text based on safety type
-  let actionText = `${actorName} posted a safety update`;
+  // Create descriptive text based on safety type and integrate the safety type directly
+  let actionText = '';
+  
+  // Capitalize the first letter of safety type for better readability
+  const formattedSafetyType = safetyType.charAt(0).toUpperCase() + safetyType.slice(1);
+  
   if (safetyType === 'emergency') {
-    actionText = `${actorName} reported an emergency situation`;
+    // For emergencies, emphasize the urgency
+    actionText = `${actorName} reported an EMERGENCY situation`;
   } else if (safetyType === 'alert') {
+    // For alerts
     actionText = `${actorName} shared a safety alert`;
   } else if (safetyType === 'info') {
+    // For informational updates
     actionText = `${actorName} shared safety information`;
+  } else {
+    // Fallback with the formatted type included
+    actionText = `${actorName} posted a ${formattedSafetyType} safety update`;
   }
   
   // Handle viewing safety details
@@ -56,24 +65,13 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
       onDismiss={onDismiss}
       className={!notification.is_read ? "border-l-red-500" : ""}
     >
-      {/* Safety action description using our reusable component */}
+      {/* Safety action description using our reusable component with integrated safety type */}
       <NotificationDescription
         text={actionText}
         type="safety"
         icon={AlertTriangle}
         iconColor="red-500"
       />
-      
-      {/* Safety type badge using our reusable component */}
-      {safetyType && (
-        <div className="mt-2">
-          <NotificationBadge 
-            label={safetyType.toUpperCase()}
-            variant={safetyType === 'emergency' ? "destructive" : "outline"}
-            isHighlighted={safetyType === 'emergency'}
-          />
-        </div>
-      )}
     </NotificationCard>
   );
 };
