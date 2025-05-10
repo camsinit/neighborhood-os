@@ -11,8 +11,9 @@ import { NotificationCard } from "./base/NotificationCard";
 import { AlertTriangle } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
 import { 
-  NotificationDescription
+  NotificationBadge
 } from "../elements";
+import { cn } from "@/lib/utils";  // Add the missing import
 
 interface SafetyNotificationCardProps {
   notification: BaseNotification;
@@ -30,25 +31,31 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create descriptive text based on safety type and integrate the safety type directly
-  let actionText = '';
+  // Create sentence-style title with highlighted safety update title
+  const createSentenceTitle = () => {
+    const safetyTitle = notification.title || "a safety update";
+    
+    // Customize text based on safety type
+    if (safetyType === 'emergency') {
+      return `${actorName} reported EMERGENCY: [[${safetyTitle}]]`;
+    } else if (safetyType === 'alert') {
+      return `${actorName} posted safety alert: [[${safetyTitle}]]`;
+    } else if (safetyType === 'info') {
+      return `${actorName} shared safety info: [[${safetyTitle}]]`;
+    } else {
+      // Fallback format
+      return `${actorName} posted safety update: [[${safetyTitle}]]`;
+    }
+  };
   
-  // Capitalize the first letter of safety type for better readability
-  const formattedSafetyType = safetyType.charAt(0).toUpperCase() + safetyType.slice(1);
+  // Create the sentence-style title
+  const sentenceTitle = createSentenceTitle();
   
-  if (safetyType === 'emergency') {
-    // For emergencies, emphasize the urgency
-    actionText = `${actorName} reported an EMERGENCY situation`;
-  } else if (safetyType === 'alert') {
-    // For alerts
-    actionText = `${actorName} shared a safety alert`;
-  } else if (safetyType === 'info') {
-    // For informational updates
-    actionText = `${actorName} shared safety information`;
-  } else {
-    // Fallback with the formatted type included
-    actionText = `${actorName} posted a ${formattedSafetyType} safety update`;
-  }
+  // Override the notification title with our sentence format
+  const notificationWithSentenceTitle = {
+    ...notification,
+    title: sentenceTitle
+  };
   
   // Handle viewing safety details
   const handleViewSafety = async () => {
@@ -60,18 +67,22 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
 
   return (
     <NotificationCard
-      notification={notification}
+      notification={notificationWithSentenceTitle}
       onAction={handleViewSafety}
       onDismiss={onDismiss}
       className={!notification.is_read ? "border-l-red-500" : ""}
     >
-      {/* Safety action description using our reusable component with integrated safety type */}
-      <NotificationDescription
-        text={actionText}
-        type="safety"
-        icon={AlertTriangle}
-        iconColor="red-500"
-      />
+      {/* Show safety type as a badge */}
+      <div className="mt-1">
+        <NotificationBadge 
+          label={safetyType.charAt(0).toUpperCase() + safetyType.slice(1)}
+          variant="outline"
+          className={cn(
+            "font-normal text-xs",
+            safetyType === 'emergency' && "bg-red-100 text-red-800 border-red-200"
+          )}
+        />
+      </div>
     </NotificationCard>
   );
 };

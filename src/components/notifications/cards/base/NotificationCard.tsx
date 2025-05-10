@@ -74,6 +74,43 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     if (onAction) onAction();
   };
 
+  // Parse the title that might contain highlighted content within [[ ]] markers
+  // The title is expected to be in format: "ActorName is hosting [[Event Name]]"
+  const renderFormattedTitle = () => {
+    // If the title doesn't contain highlighting markers, return it as is
+    if (!title || !title.includes("[[")) {
+      return <span>{title}</span>;
+    }
+
+    // Split by the highlighting markers
+    const parts = title.split(/\[\[|\]\]/);
+    
+    // Return the formatted parts - odd indices should be highlighted
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        // This is a part that was between [[ and ]] - highlight it
+        return (
+          <span 
+            key={index} 
+            className={cn(
+              "font-medium px-0.5 rounded",
+              notification_type === "event" && "text-blue-600",
+              notification_type === "safety" && "text-red-600",
+              notification_type === "skills" && "text-green-600",
+              notification_type === "neighbors" && "text-purple-600",
+              notification_type === "goods" && "text-amber-600",
+              notification_type === "support" && "text-indigo-600",
+            )}
+          >
+            {part}
+          </span>
+        );
+      }
+      // Regular text
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   return (
     <Card 
       className={cn(
@@ -110,7 +147,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         )}
         onClick={handleCardClick}
       >
-        {/* Avatar section using our new reusable component */}
+        {/* Avatar section using our reusable component */}
         <NotificationAvatar
           url={avatarUrl}
           name={actorName}
@@ -118,10 +155,11 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
           className="mt-0.5"
         />
         
-        {/* Content section using our new reusable component */}
+        {/* Content section using our reusable component */}
         <NotificationContent
           title={title}
           isUnread={isUnread}
+          formattedTitle={renderFormattedTitle()}
         >
           {/* Render child components for specialized notification content */}
           {children}
@@ -140,7 +178,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         </NotificationContent>
       </div>
       
-      {/* Action buttons using our new reusable component */}
+      {/* Action buttons using our reusable component */}
       {showActions && !is_archived && (
         <NotificationActions 
           id={id} 

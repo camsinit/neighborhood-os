@@ -11,11 +11,7 @@ import { Calendar, Clock } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { highlightItem } from "@/utils/highlight";
-import { useQueryClient } from "@tanstack/react-query";
-import { 
-  NotificationBadge,
-  NotificationDescription
-} from "../elements";
+import { cn } from "@/lib/utils";
 
 interface SkillSessionNotificationCardProps {
   notification: BaseNotification;
@@ -26,31 +22,44 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
   notification,
   onDismiss,
 }) => {
-  const queryClient = useQueryClient();
-  
   // Extract session info from metadata
   const eventId = notification.context?.metadata?.event_id;
   const skillId = notification.context?.metadata?.skill_id || notification.content_id;
   const sessionTime = notification.context?.sessionTime ? 
     parseISO(notification.context.sessionTime) : null;
+  const skillTitle = notification.context?.skillTitle || "a skill session";
   
   // Get actor name for descriptive text
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Generate descriptive text based on notification action
-  let actionText = `${actorName} scheduled a skill session`;
-  if (notification.action_type === "request") {
-    actionText = `${actorName} requested a skill session`;
-  } else if (notification.action_type === "confirm") {
-    actionText = `${actorName} confirmed a skill session`;
-  } else if (notification.action_type === "cancel") {
-    actionText = `${actorName} cancelled a skill session`;
-  } else if (notification.action_type === "reschedule") {
-    actionText = `${actorName} rescheduled a skill session`;
-  } else if (notification.action_type === "complete") {
-    actionText = `${actorName} completed a skill session`;
-  }
+  // Create sentence-style title with highlighted skill name
+  const createSentenceTitle = () => {
+    // Different sentence formats based on notification action
+    switch(notification.action_type) {
+      case "request":
+        return `${actorName} requested [[${skillTitle}]]`;
+      case "confirm":
+        return `${actorName} confirmed [[${skillTitle}]] session`;
+      case "cancel":
+        return `${actorName} cancelled [[${skillTitle}]] session`;
+      case "reschedule":
+        return `${actorName} rescheduled [[${skillTitle}]] session`;
+      case "complete":
+        return `${actorName} completed [[${skillTitle}]] session`;
+      default:
+        return `${actorName} scheduled [[${skillTitle}]]`;
+    }
+  };
+  
+  // Create the sentence-style title
+  const sentenceTitle = createSentenceTitle();
+  
+  // Override the notification title with our sentence format
+  const notificationWithSentenceTitle = {
+    ...notification,
+    title: sentenceTitle
+  };
   
   // Handle viewing session details - redirects to calendar if there's an event,
   // otherwise to the skill details
@@ -66,27 +75,19 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
 
   return (
     <NotificationCard
-      notification={notification}
+      notification={notificationWithSentenceTitle}
       onAction={handleViewSession}
       onDismiss={onDismiss}
     >
-      {/* Session action description using our reusable component */}
-      <NotificationDescription
-        text={actionText}
-        type="skills"
-        icon={Clock}
-        iconColor="green-500"
-      />
-      
       {/* Session specific details */}
-      <div className="mt-1 text-xs text-gray-600">
-        {sessionTime && (
+      {sessionTime && (
+        <div className="mt-1 text-xs text-gray-600">
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             <span>{format(sessionTime, 'PPp')}</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
       
       {/* View in calendar button if there's an event */}
       {eventId && (

@@ -12,8 +12,7 @@ import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { highlightItem } from "@/utils/highlight";
 import { 
-  NotificationBadge,
-  NotificationDescription
+  NotificationBadge 
 } from "../elements";
 
 interface EventNotificationCardProps {
@@ -34,17 +33,34 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "Someone";
   
-  // Generate action text based on notification action type
-  let actionText = `${actorName} shared an event`;
-  if (notification.action_type === "create") {
-    actionText = `${actorName} created an event`;
-  } else if (notification.action_type === "update") {
-    actionText = `${actorName} updated an event`;
-  } else if (notification.action_type === "rsvp") {
-    actionText = `${actorName} is attending an event`;
-  } else if (notification.action_type === "cancel") {
-    actionText = `${actorName} canceled an event`;
-  }
+  // Create sentence-style title with highlighted event name
+  const createSentenceTitle = () => {
+    const eventName = notification.title || "an event";
+    const actionType = notification.action_type || "share";
+    
+    // Different sentence formats based on action type
+    switch(actionType) {
+      case "create":
+        return `${actorName} is hosting [[${eventName}]]`;
+      case "update":
+        return `${actorName} updated [[${eventName}]]`;
+      case "rsvp":
+        return `${actorName} is attending [[${eventName}]]`;
+      case "cancel":
+        return `${actorName} cancelled [[${eventName}]]`;
+      default:
+        return `${actorName} shared [[${eventName}]]`;
+    }
+  };
+  
+  // Create the sentence-style title
+  const sentenceTitle = createSentenceTitle();
+  
+  // Override the notification title with our sentence format
+  const notificationWithSentenceTitle = {
+    ...notification,
+    title: sentenceTitle
+  };
   
   // Handle viewing event details
   const handleViewEvent = async () => {
@@ -56,19 +72,11 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
 
   return (
     <NotificationCard
-      notification={notification}
+      notification={notificationWithSentenceTitle}
       onAction={handleViewEvent}
       onDismiss={onDismiss}
     >
-      {/* Event action description using our new reusable component */}
-      <NotificationDescription
-        text={actionText}
-        type="event"
-        icon={Calendar}
-        iconColor="blue-500"
-      />
-      
-      {/* Event specific details */}
+      {/* Show event specific details as secondary information */}
       {eventTime && (
         <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
           <Calendar className="h-3 w-3" />
@@ -76,7 +84,7 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
         </div>
       )}
       
-      {/* Location badge using our new reusable component */}
+      {/* Location badge */}
       {eventLocation && (
         <div className="mt-1">
           <NotificationBadge 

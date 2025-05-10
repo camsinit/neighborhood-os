@@ -10,7 +10,7 @@ import { NotificationCard } from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
-import { NotificationDescription } from "../elements";
+import { cn } from "@/lib/utils";
 
 interface NeighborNotificationCardProps {
   notification: BaseNotification;
@@ -33,25 +33,31 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create descriptive text based on action type
-  const actionText = notification.action_type === "join" 
-    ? `${actorName} joined your neighborhood`
-    : `${actorName} updated their profile`;
+  // Create sentence-style title with highlighted neighbor name
+  const createSentenceTitle = () => {
+    // For join notifications, highlight the neighbor name
+    if (notification.action_type === "join") {
+      return `[[${actorName}]] joined your neighborhood`;
+    } 
+    // For profile updates
+    return `[[${actorName}]] updated their profile`;
+  };
+  
+  // Create the sentence-style title
+  const sentenceTitle = createSentenceTitle();
+  
+  // Override the notification title with our sentence format
+  const notificationWithSentenceTitle = {
+    ...notification,
+    title: sentenceTitle
+  };
 
   return (
     <NotificationCard
-      notification={notification}
+      notification={notificationWithSentenceTitle}
       onAction={handleViewNeighbor}
       onDismiss={onDismiss}
     >
-      {/* Descriptive text using our reusable component */}
-      <NotificationDescription
-        text={actionText}
-        type="neighbors"
-        icon={UserPlus}
-        iconColor="purple-500"
-      />
-      
       {/* Welcome/Visit profile button */}
       <div className="mt-2">
         <Button

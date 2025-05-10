@@ -13,6 +13,7 @@ export interface NotificationContentProps {
   isUnread?: boolean;
   children?: React.ReactNode;
   className?: string;
+  formattedTitle?: React.ReactNode; // Added this to support formatted titles
 }
 
 /**
@@ -22,7 +23,8 @@ export const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
   isUnread = false,
   children,
-  className
+  className,
+  formattedTitle // New prop for formatted title with highlights
 }) => {
   return (
     <div className={cn("flex-1 min-w-0", className)}>
@@ -32,7 +34,8 @@ export const NotificationContent: React.FC<NotificationContentProps> = ({
           isUnread ? "font-medium text-gray-900" : "font-normal text-gray-700"
         )}
       >
-        {title}
+        {/* Use the formatted title if provided, otherwise use the plain title */}
+        {formattedTitle || title}
       </h4>
       
       {children}

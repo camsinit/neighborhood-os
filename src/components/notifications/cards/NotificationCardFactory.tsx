@@ -2,34 +2,33 @@
 /**
  * NotificationCardFactory.tsx
  * 
- * Factory component that renders the appropriate specialized notification card
- * based on the notification type and context.
+ * Factory component that creates the appropriate notification card based on the type
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import NotificationCard from "./base/NotificationCard";
 import EventNotificationCard from "./EventNotificationCard";
+import NeighborNotificationCard from "./NeighborNotificationCard";
+import GoodsNotificationCard from "./GoodsNotificationCard";
 import SafetyNotificationCard from "./SafetyNotificationCard";
 import SkillRequestNotificationCard from "./SkillRequestNotificationCard";
 import SkillSessionNotificationCard from "./SkillSessionNotificationCard";
-import GoodsNotificationCard from "./GoodsNotificationCard";
-import NeighborNotificationCard from "./NeighborNotificationCard";
 
+// Props for the NotificationCardFactory component
 interface NotificationCardFactoryProps {
   notification: BaseNotification;
   onDismiss?: () => void;
 }
 
+/**
+ * Factory component that creates the appropriate notification card based on the notification type
+ * This is the entry point for creating notification cards
+ */
 export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = ({
   notification,
-  onDismiss,
+  onDismiss
 }) => {
-  // Determine which specialized card to use based on notification type and context
-  const notificationType = notification.notification_type;
-  const contextType = notification.context?.contextType;
-  
-  // Select the appropriate card component based on type and context
-  switch (notificationType) {
+  // Determine which card component to use based on notification type and context
+  switch (notification.notification_type) {
     case "event":
       return (
         <EventNotificationCard 
@@ -37,7 +36,7 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           onDismiss={onDismiss} 
         />
       );
-      
+    
     case "safety":
       return (
         <SafetyNotificationCard 
@@ -45,10 +44,10 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           onDismiss={onDismiss} 
         />
       );
-      
+    
     case "skills":
-      // For skills, we need to check the context to determine the specific card type
-      if (contextType === "skill_request") {
+      // For skill notifications, further differentiate based on context
+      if (notification.context?.contextType === 'skill_request') {
         return (
           <SkillRequestNotificationCard 
             notification={notification} 
@@ -56,6 +55,7 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           />
         );
       } else {
+        // Default to session card for other skill notifications
         return (
           <SkillSessionNotificationCard 
             notification={notification} 
@@ -63,7 +63,7 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           />
         );
       }
-      
+    
     case "goods":
       return (
         <GoodsNotificationCard 
@@ -71,7 +71,7 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           onDismiss={onDismiss} 
         />
       );
-      
+    
     case "neighbors":
       return (
         <NeighborNotificationCard 
@@ -79,16 +79,19 @@ export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (
           onDismiss={onDismiss} 
         />
       );
-      
-    // Default case - use the base notification card
+    
     default:
+      // For unsupported types, use a generic notification card
+      // In a future iteration, we could create a DefaultNotificationCard for this case
       return (
         <NotificationCard 
-          notification={notification} 
-          onDismiss={onDismiss} 
+          notification={notification}
+          onDismiss={onDismiss}
         />
       );
   }
 };
 
 export default NotificationCardFactory;
+export { NotificationCard } from './base/NotificationCard';
+export type { NotificationCardProps } from './base/NotificationCard';

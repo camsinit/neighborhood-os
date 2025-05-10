@@ -7,12 +7,11 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { ShoppingCart } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
 import { 
-  NotificationBadge,
-  NotificationDescription
+  NotificationBadge
 } from "../elements";
+import { cn } from "@/lib/utils";
 
 interface GoodsNotificationCardProps {
   notification: BaseNotification;
@@ -32,17 +31,33 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create descriptive text based on goods action type
-  let actionText = `${actorName} posted an item`;
-  if (requestType.includes("offer")) {
-    actionText = `${actorName} offered an item`;
-  } else if (requestType.includes("request")) {
-    actionText = `${actorName} requested an item`;
-  } else if (notification.action_type === "claim") {
-    actionText = `${actorName} claimed your item`;
-  } else if (notification.action_type === "cancel") {
-    actionText = `${actorName} removed an item listing`;
-  }
+  // Create sentence-style title with highlighted item name
+  const createSentenceTitle = () => {
+    const itemName = notification.title || "an item";
+    
+    // Different sentence formats based on context and action
+    if (requestType.includes("offer")) {
+      return `${actorName} is offering [[${itemName}]]`;
+    } else if (requestType.includes("request")) {
+      return `${actorName} is looking for [[${itemName}]]`;
+    } else if (notification.action_type === "claim") {
+      return `${actorName} claimed [[${itemName}]]`;
+    } else if (notification.action_type === "cancel") {
+      return `${actorName} removed listing for [[${itemName}]]`;
+    } else {
+      // Default format
+      return `${actorName} posted [[${itemName}]]`;
+    }
+  };
+  
+  // Create the sentence-style title
+  const sentenceTitle = createSentenceTitle();
+  
+  // Override the notification title with our sentence format
+  const notificationWithSentenceTitle = {
+    ...notification,
+    title: sentenceTitle
+  };
   
   // Handle viewing goods details
   const handleViewGoods = async () => {
@@ -54,19 +69,11 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
 
   return (
     <NotificationCard
-      notification={notification}
+      notification={notificationWithSentenceTitle}
       onAction={handleViewGoods}
       onDismiss={onDismiss}
     >
-      {/* Goods action description using our reusable component */}
-      <NotificationDescription
-        text={actionText}
-        type="goods"
-        icon={ShoppingCart}
-        iconColor="amber-500"
-      />
-      
-      {/* Category and condition badges using our reusable component */}
+      {/* Category and condition badges */}
       <div className="mt-1 flex gap-1 flex-wrap">
         {itemCategory && (
           <NotificationBadge 
