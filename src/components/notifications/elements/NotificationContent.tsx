@@ -30,7 +30,7 @@ export const NotificationContent: React.FC<NotificationContentProps> = ({
     <div className={cn("flex-1 min-w-0", className)}>
       <h4 
         className={cn(
-          "text-sm leading-tight mb-1",
+          "text-base leading-tight mb-1", // Updated from text-sm to text-base to match body text
           isUnread ? "font-medium text-gray-900" : "font-normal text-gray-700"
         )}
       >

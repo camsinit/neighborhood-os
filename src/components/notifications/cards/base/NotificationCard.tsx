@@ -1,3 +1,4 @@
+
 /**
  * NotificationCard.tsx
  * 
@@ -101,11 +102,17 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         // This is a part that was between [[ and ]] - highlight it
-        return <span key={index} className={cn("font-medium px-0.5 rounded", notification_type === "event" && "text-blue-600", notification_type === "safety" && "text-red-600", notification_type === "skills" && "text-green-600", notification_type === "neighbors" && "text-purple-600", notification_type === "goods" && "text-amber-600", notification_type === "support" && "text-indigo-600")}>
+        return <span key={index} className={cn("font-medium px-0.5 rounded", 
+            notification_type === "event" && "text-blue-600", 
+            notification_type === "safety" && "text-red-600", 
+            notification_type === "skills" && "text-green-600", 
+            notification_type === "neighbors" && "text-purple-600", 
+            notification_type === "goods" && "text-amber-600", 
+            notification_type === "support" && "text-indigo-600")}>
             {part}
           </span>;
       }
-      // Regular text
+      // Regular text - updated to use base font size for consistency with body text
       return <span key={index} className="text-base">{part}</span>;
     });
   };

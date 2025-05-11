@@ -1,3 +1,4 @@
+
 /**
  * NotificationBadge.tsx
  * 
@@ -26,6 +27,19 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
 }) => {
   // Determine size class based on size prop
   const sizeClass = size === "sm" ? "text-[10px] h-5" : "";
-  return;
+  
+  return (
+    <Badge 
+      variant={variant} 
+      className={cn(
+        sizeClass,
+        isHighlighted && "animate-pulse",
+        className
+      )}
+    >
+      {label}
+    </Badge>
+  );
 };
+
 export default NotificationBadge;
