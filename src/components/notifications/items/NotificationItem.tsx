@@ -24,6 +24,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onSelect,
 }) => {
+  // State to track if this notification is currently being animated (for swipe out)
   const [isSliding, setIsSliding] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   
@@ -32,6 +33,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   
   // Animation handler for swipe out when archiving
   const handleSwipeOut = () => {
+    // Set sliding state to true to trigger animation
     setIsSliding(true);
     // Animation will last 500ms, matching our setTimeout in NotificationActions
   };
@@ -39,6 +41,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   // Determine content type and ID for navigation
   // This maps the notification type to a highlightable item type
   const getContentType = (): HighlightableItemType | undefined => {
+    // Convert notification_type to a highlightable item type if possible
     const type = notification.notification_type;
     if (
       type === "event" || 
@@ -76,17 +79,21 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           <div className="flex items-start gap-3 mb-2">
             {/* Avatar based on notification type */}
             <NotificationAvatar 
-              type={notification.notification_type}
-              profileData={notification.profile_data}
+              url={notification.profiles?.avatar_url} 
+              name={notification.profiles?.display_name || "Neighbor"} 
+              isUnread={!notification.is_read}
             />
             
             {/* Title and description area */}
             <NotificationContent 
               title={notification.title}
-              description={notification.description}
-              isRead={notification.is_read}
-              textColor={style.textColor}
-            />
+              isUnread={!notification.is_read}
+            >
+              {/* Add description as children if it exists */}
+              {notification.description && (
+                <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
+              )}
+            </NotificationContent>
           </div>
           
           {/* Actions (View and Archive buttons) */}

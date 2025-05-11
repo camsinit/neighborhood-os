@@ -20,6 +20,12 @@ export interface NotificationAvatarProps {
 /**
  * Renders an avatar for notification items with fallback to initials
  * and styling based on notification read status
+ * 
+ * @param url - Optional URL to the avatar image
+ * @param name - Name of the user for the avatar (used for alt text and fallback)
+ * @param isUnread - Whether the notification is unread (affects styling)
+ * @param className - Additional CSS classes to apply
+ * @param size - Size of the avatar (sm, md, lg)
  */
 export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   url,

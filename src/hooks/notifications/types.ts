@@ -5,6 +5,7 @@ export interface BaseNotification {
   user_id: string;
   actor_id?: string;
   title: string;
+  description?: string; // Added description field
   content_type: string;
   content_id: string;
   notification_type: string;
@@ -22,7 +23,7 @@ export interface BaseNotification {
   };
   relevance_score?: number;
   notification_type_display?: string; // Optional display name
-  // Add profiles property to fix type errors
+  // Add profiles property for user data
   profiles?: {
     display_name?: string;
     avatar_url?: string;

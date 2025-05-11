@@ -11,13 +11,19 @@ import { cn } from "@/lib/utils";
 export interface NotificationContentProps {
   title: string;
   isUnread?: boolean;
-  children?: React.ReactNode;
+  children?: React.ReactNode; // Children to render additional content like description
   className?: string;
   formattedTitle?: React.ReactNode; // Added this to support formatted titles
 }
 
 /**
  * Renders the main content area for notification items
+ * 
+ * @param title - The title of the notification
+ * @param isUnread - Whether the notification is unread (affects styling)
+ * @param children - Additional content like description or actions
+ * @param className - Additional CSS classes to apply
+ * @param formattedTitle - Optional pre-formatted title with highlights
  */
 export const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -38,6 +44,7 @@ export const NotificationContent: React.FC<NotificationContentProps> = ({
         {formattedTitle || title}
       </h4>
       
+      {/* Render children (description or other content) */}
       {children}
     </div>
   );
