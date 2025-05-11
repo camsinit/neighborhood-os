@@ -29,6 +29,60 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   /**
+   * Calls the edge function to notify about skill changes and create activities
+   * 
+   * @param skillId - The ID of the skill that changed
+   * @param action - The type of change that occurred
+   * @param data - Additional data about the skill
+   */
+  const notifySkillChanges = async (
+    skillId: string, 
+    action: 'create' | 'update' | 'delete' | 'request',
+    data: {
+      skillTitle: string;
+      providerId?: string;
+      requesterId?: string;
+      neighborhoodId?: string;
+      description?: string;
+      category?: string;
+      requestType?: string;
+    }
+  ) => {
+    try {
+      // Log the notification attempt
+      console.log(`[useSkillsExchange] Notifying skill changes:`, { 
+        skillId, 
+        action, 
+        ...data,
+        timestamp: new Date().toISOString()
+      });
+
+      // Call the edge function
+      const response = await fetch('/functions/v1/notify-skills-changes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          skillId,
+          action,
+          ...data
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error notifying skill changes: ${response.status}`);
+      }
+
+      console.log(`[useSkillsExchange] Successfully notified skill changes for ${action}`);
+      return await response.json();
+    } catch (error) {
+      console.error('[useSkillsExchange] Error notifying skill changes:', error);
+      // We don't throw here to prevent breaking the main flow
+    }
+  };
+
+  /**
    * Submits a new skill exchange (offer or request)
    * 
    * @param formData - The form data containing skill details 
@@ -83,6 +137,23 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         neighborhoodId: neighborhood.id,
         timestamp: new Date().toISOString()
       });
+
+      // Create an activity for this skill using the edge function
+      if (data && data.length > 0) {
+        await notifySkillChanges(
+          data[0].id, 
+          'create', 
+          {
+            skillTitle: formData.title,
+            providerId: mode === 'offer' ? user.id : undefined,
+            requesterId: mode === 'request' ? user.id : undefined,
+            neighborhoodId: neighborhood.id,
+            description: formData.description,
+            category: formData.category,
+            requestType: mode === 'offer' ? 'offer' : 'need'
+          }
+        );
+      }
 
       // Dispatch refresh events - ensure skill updates trigger activity feed refresh
       dispatchRefreshEvent('skills-updated');
@@ -145,6 +216,11 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     try {
       // Use service layer to update the skill
       await skillsService.updateSkill(skillId, formData, user.id);
+      
+      // Notify about skill update to update related activities
+      await notifySkillChanges(skillId, 'update', {
+        skillTitle: formData.title
+      });
 
       // Dispatch refresh events using the single dispatch function
       dispatchRefreshEvent('skills-updated');

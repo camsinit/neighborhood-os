@@ -6,8 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
-import { useAutoRefresh } from "@/hooks/useAutoRefresh"; // Import the useAutoRefresh hook
+import { ChevronDown, RefreshCw } from "lucide-react";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 
 /**
  * Component to display the feed of neighborhood activities
@@ -17,10 +17,11 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh"; // Import the useAutoRe
 const ActivityFeed = () => {
   // State for controlling displayed items
   const [displayCount, setDisplayCount] = useState(4);
-  const { data: activities, isLoading, refetch } = useActivities();
+  const { data: activities, isLoading, refetch, isRefetching } = useActivities();
   const { toast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   
   // Log for debugging
   useEffect(() => {
@@ -30,6 +31,14 @@ const ActivityFeed = () => {
     if (activities) {
       console.log("[ActivityFeed] Activities loaded:", activities.length);
     }
+    
+    // Set up periodic refetching every 30 seconds
+    const intervalId = setInterval(() => {
+      console.log("[ActivityFeed] Performing automatic periodic refresh");
+      refetch();
+    }, 30000);
+    
+    return () => clearInterval(intervalId);
   }, [activities?.length]);
   
   // Use our centralized auto-refresh hook to listen for ALL activity types
@@ -46,6 +55,17 @@ const ActivityFeed = () => {
       'skills-updated' // Explicitly listen for skill updates
     ]
   );
+
+  // Manual refresh handler
+  const handleManualRefresh = () => {
+    console.log("[ActivityFeed] Manual refresh triggered");
+    refetch();
+    setLastRefresh(new Date());
+    toast({
+      title: "Feed refreshed",
+      description: `Last updated: ${new Date().toLocaleTimeString()}`
+    });
+  };
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
@@ -83,7 +103,17 @@ const ActivityFeed = () => {
   if (!filteredActivities?.length) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500 text-lg">No new neighborhood activity</p>
+        <div className="text-center">
+          <p className="text-gray-500 text-lg mb-4">No new neighborhood activity</p>
+          <Button 
+            variant="outline" 
+            onClick={handleManualRefresh}
+            disabled={isRefetching}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
     );
   }
@@ -91,6 +121,21 @@ const ActivityFeed = () => {
   // Display the activities with load more button
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-sm text-gray-500">
+          Last updated: {lastRefresh.toLocaleTimeString()}
+        </span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleManualRefresh}
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+      
       <div className="py-2 space-y-4">
         {/* Only render the number of items we want to display */}
         {filteredActivities.slice(0, displayCount).map((activity) => (

@@ -14,7 +14,7 @@ import { refreshEvents } from '@/utils/refreshEvents';
 export const useAutoRefresh = (
   queryKeys: string[],
   events: string[],
-  debounceMs = 300
+  debounceMs = 100 // Reduced from 300ms to 100ms for quicker updates
 ) => {
   const queryClient = useQueryClient();
 
@@ -49,7 +49,10 @@ export const useAutoRefresh = (
     
     // Subscribe to each event
     events.forEach(event => {
-      const unsubscribe = refreshEvents.on(event, debouncedRefresh);
+      const unsubscribe = refreshEvents.on(event, () => {
+        console.log(`[useAutoRefresh] Event triggered: ${event}, refreshing queries:`, queryKeys);
+        debouncedRefresh();
+      });
       unsubscribers.push(unsubscribe);
     });
     

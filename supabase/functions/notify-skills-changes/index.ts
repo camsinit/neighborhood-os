@@ -10,11 +10,15 @@ const corsHeaders = {
 // Define the expected request structure
 interface UpdateRequest {
   skillId: string;
-  action: 'update' | 'delete' | 'request';
+  action: 'update' | 'delete' | 'request' | 'create'; // Added 'create' action
   skillTitle: string;
   changes?: string;
   providerId?: string;
   requesterId?: string;
+  neighborhoodId?: string; // Added neighborhoodId for activity creation
+  description?: string;    // Added description for activity creation
+  category?: string;       // Added category for the skill
+  requestType?: string;    // Added request type (offer/need)
 }
 
 // Main handler function for the edge function
@@ -32,10 +36,54 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Extract data from the request body
-    const { skillId, action, skillTitle, changes, providerId, requesterId } = await req.json() as UpdateRequest;
+    const { 
+      skillId, 
+      action, 
+      skillTitle, 
+      changes, 
+      providerId, 
+      requesterId,
+      neighborhoodId,
+      description,
+      category,
+      requestType
+    } = await req.json() as UpdateRequest;
 
     console.log(`[notify-skills-changes] Processing ${action} notification for skill: ${skillTitle}`);
-    console.log(`[notify-skills-changes] Request details: providerId=${providerId}, requesterId=${requesterId}`);
+    
+    // Handle new skill creation - create an activity record
+    if (action === 'create' && skillId && neighborhoodId) {
+      console.log(`[notify-skills-changes] Creating activity for new skill: ${skillTitle}, id: ${skillId}`);
+      
+      // Determine the activity type based on request type
+      const activityType = requestType === 'offer' ? 'skill_offered' : 'skill_requested';
+      
+      // Create a new activity record
+      const { data: activityData, error: activityError } = await supabaseClient
+        .from('activities')
+        .insert({
+          content_id: skillId,
+          content_type: 'skills_exchange',
+          title: skillTitle,
+          actor_id: requestType === 'offer' ? providerId : requesterId,
+          activity_type: activityType,
+          neighborhood_id: neighborhoodId,
+          is_public: true,
+          metadata: {
+            description: description || null,
+            category: category || null,
+            requestType: requestType || null
+          }
+        })
+        .select();
+        
+      if (activityError) {
+        console.error('[notify-skills-changes] Error creating activity record:', activityError);
+        throw activityError;
+      } else {
+        console.log('[notify-skills-changes] Successfully created activity record:', activityData);
+      }
+    }
 
     // When a skill is modified, update any related activities to keep them in sync
     // Now using the skill_id field for more reliable joins

@@ -1,4 +1,3 @@
-
 // This is the main skill form component that uses smaller, focused components
 // to create a form for offering or requesting skills
 
@@ -44,7 +43,11 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
           ? "Your neighbors with matching skill requests will be notified" 
           : "Your neighbors with matching skill offers will be notified",
       });
-      onClose();
+      
+      // Add a slight delay before closing to make sure everything gets refreshed
+      setTimeout(() => {
+        onClose();
+      }, 300);
     }
   });
 
@@ -80,7 +83,15 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       });
     }
 
-    handleSubmit(formData, mode);
+    console.log("[SkillForm] Submitting form:", { formData, mode });
+    
+    try {
+      // Submit the form data
+      await handleSubmit(formData, mode);
+      console.log("[SkillForm] Form submitted successfully");
+    } catch (error) {
+      console.error("[SkillForm] Error submitting form:", error);
+    }
   };
 
   /**

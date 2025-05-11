@@ -65,7 +65,7 @@ export const createSkill = async (
   const insertData = {
     title: formData.title,
     description: formData.description || null,
-    request_type: mode,
+    request_type: mode === 'offer' ? 'offer' : 'need', // Ensure consistent values
     user_id: userId,
     neighborhood_id: neighborhoodId,
     skill_category: formData.category,
@@ -104,6 +104,37 @@ export const createSkill = async (
       userId,
       timestamp: new Date().toISOString()
     });
+
+    // Call edge function to register the activity
+    try {
+      console.log('[skillsService.createSkill] Calling edge function to create activity...');
+      const response = await fetch('/functions/v1/notify-skills-changes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          skillId: data?.[0]?.id,
+          action: 'create',
+          skillTitle: formData.title,
+          providerId: mode === 'offer' ? userId : undefined,
+          requesterId: mode === 'request' ? userId : undefined,
+          neighborhoodId: neighborhoodId,
+          description: formData.description,
+          category: formData.category,
+          requestType: mode === 'offer' ? 'offer' : 'need'
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('[skillsService.createSkill] Edge function error:', await response.text());
+      } else {
+        console.log('[skillsService.createSkill] Activity created via edge function');
+      }
+    } catch (edgeError) {
+      // Log but don't fail if edge function fails
+      console.error('[skillsService.createSkill] Failed to call edge function:', edgeError);
+    }
 
     return data;
   } catch (error) {
