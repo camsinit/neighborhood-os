@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@supabase/auth-helpers-react";
 import * as skillsService from "@/services/skills/skillsService";
 import { toast } from "sonner";
+import { refreshEvents } from "@/utils/refreshEvents"; // Add import for activity refresh
 
 // Define the options interface for configuration
 interface SkillUpdateOptions {
@@ -55,6 +56,9 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
 
       // Dispatch custom event for any component that's listening
       window.dispatchEvent(new Event('skill-update-submitted'));
+      
+      // Add refresh event for activities feed
+      refreshEvents.skills();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {
@@ -99,6 +103,9 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       window.dispatchEvent(new CustomEvent('skill-deleted', {
         detail: { id: skillId }
       }));
+      
+      // Add refresh event for activities feed
+      refreshEvents.skills();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {
