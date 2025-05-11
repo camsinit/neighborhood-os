@@ -121,26 +121,23 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         className
       )}
     >
-      {/* Modified layout: First create a row for metadata that won't interfere with content */}
-      <div className="flex justify-end px-3 pt-2">
-        {/* Type badge and timestamp now in a flex row that doesn't overlap with content */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {showTimestamp && (
-            <NotificationTimeStamp
-              date={created_at}
-              isUnread={isUnread}
-            />
-          )}
-          
-          {showTypeLabel && (
-            <Badge 
-              variant={isUnread ? "default" : "outline"} 
-              className="text-[10px] h-5"
-            >
-              {typeName}
-            </Badge>
-          )}
-        </div>
+      {/* Type badge and timestamp now positioned absolutely in the top right corner */}
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+        {showTimestamp && (
+          <NotificationTimeStamp
+            date={created_at}
+            isUnread={isUnread}
+          />
+        )}
+        
+        {showTypeLabel && (
+          <Badge 
+            variant={isUnread ? "default" : "outline"} 
+            className="text-[10px] h-5"
+          >
+            {typeName}
+          </Badge>
+        )}
       </div>
       
       <div 
