@@ -1,15 +1,32 @@
+
 /**
  * This file contains utilities for dispatching refresh events
  * across the application. These events are used to trigger refetching
  * of data in components that display dynamic content.
  */
 
+// Use a debounce mechanism to prevent multiple dispatches in rapid succession
+const recentEvents: Record<string, number> = {};
+const DEBOUNCE_TIME = 300; // ms
+
 /**
  * Dispatches a custom event to trigger a refresh of various components
+ * 
+ * FIXED: Now includes debouncing to prevent duplicate events being dispatched
  * 
  * @param eventName - The name of the refresh event
  */
 export const dispatchRefreshEvent = (eventName: string) => {
+  // Check if this event was recently dispatched to prevent duplicates
+  const now = Date.now();
+  if (recentEvents[eventName] && now - recentEvents[eventName] < DEBOUNCE_TIME) {
+    console.log(`[refreshEvents] Skipping duplicate event dispatch: ${eventName}`);
+    return;
+  }
+  
+  // Remember when we dispatched this event
+  recentEvents[eventName] = now;
+  
   // Create and dispatch a custom event
   try {
     // List of supported event types for documentation

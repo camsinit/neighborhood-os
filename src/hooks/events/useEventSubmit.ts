@@ -18,6 +18,8 @@ interface EventSubmitProps {
  * 
  * This hook provides functions to create and update events in the database
  * 
+ * FIXED: Now prevents multiple refresh triggers when submitting events
+ * 
  * @param onSuccess - Callback function to run after successful submission
  * @returns Object containing handleSubmit and handleUpdate functions
  */
@@ -108,12 +110,12 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         timestamp: new Date().toISOString()
       });
       
-      // BUGFIX: Using queryClient invalidation instead of document event to avoid double activity creation
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] }); 
-      
-      // Use the centralized refresh event dispatcher for consistent behavior
+      // FIXED: Using a single method to refresh events and activities
+      // This prevents multiple refresh events from being triggered
       dispatchRefreshEvent('event-submitted');
+      
+      // REMOVED: No need to call individual query invalidations and refetches
+      // as the event listener in ActivityFeed will handle this
       
       onSuccess();
       
@@ -159,12 +161,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Success notification
       toast.success("Event updated successfully");
       
-      // BUGFIX: Using queryClient invalidation instead of document event to avoid double activity creation
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      
-      // Use the centralized refresh event dispatcher for consistent behavior
+      // FIXED: Using a single method to refresh events and activities
+      // This prevents multiple refresh events from being triggered
       dispatchRefreshEvent('event-submitted');
       
       onSuccess();

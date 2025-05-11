@@ -7,6 +7,7 @@ import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { useAutoRefresh } from "@/hooks/useAutoRefresh"; // Import the useAutoRefresh hook
 
 /**
  * Component to display the feed of neighborhood activities
@@ -20,25 +21,13 @@ const ActivityFeed = () => {
   const { toast } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-
-  // Set up event listener for activity updates
-  useEffect(() => {
-    // Function to handle the refresh event
-    const handleRefresh = () => {
-      console.log("[ActivityFeed] Received activities-updated event, refreshing data");
-      refetch();
-    };
-
-    // Listen for custom refresh events
-    window.addEventListener('activities-updated', handleRefresh);
-    window.addEventListener('event-rsvp-updated', handleRefresh);
-    
-    // Cleanup on unmount
-    return () => {
-      window.removeEventListener('activities-updated', handleRefresh);
-      window.removeEventListener('event-rsvp-updated', handleRefresh);
-    };
-  }, [refetch]);
+  
+  // Use our centralized auto-refresh hook instead of manual event listeners
+  // This will prevent duplicate refreshes as it's properly debounced
+  useAutoRefresh(
+    ['activities'], 
+    ['activities-updated', 'event-rsvp-updated', 'event-submitted', 'safety-updated', 'goods-updated']
+  );
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
