@@ -6,7 +6,8 @@
 
 // Create a custom event system for refreshes
 type EventType = 'activities-updated' | 'event-rsvp-updated' | 'event-submitted' | 
-                'safety-updated' | 'goods-updated' | 'skills-updated';
+                'safety-updated' | 'goods-updated' | 'skills-updated' | 
+                'event-deleted'; // Added event-deleted type
 
 // Create a simple event emitter for our refresh events
 const eventEmitter = {
@@ -33,6 +34,24 @@ const eventEmitter = {
   }
 };
 
+/**
+ * Helper function to dispatch refresh events
+ * This provides a consistent interface for triggering events across the app
+ * 
+ * @param eventType - The type of event to dispatch
+ */
+export const dispatchRefreshEvent = (eventType: EventType) => {
+  // First, emit the specific event
+  eventEmitter.emit(eventType);
+  
+  // Then, also emit the general activities update event to refresh the activity feed
+  if (eventType !== 'activities-updated') {
+    eventEmitter.emit('activities-updated');
+  }
+  
+  console.log(`[refreshEvents] Dispatched event: ${eventType}`);
+};
+
 // Shorthand methods for common module refreshes
 export const refreshEvents = {
   // General activity feed updates
@@ -40,6 +59,7 @@ export const refreshEvents = {
   
   // Module-specific refreshes
   events: () => eventEmitter.emit('event-submitted'),
+  eventsDelete: () => eventEmitter.emit('event-deleted'), // Added event deletion method
   safety: () => eventEmitter.emit('safety-updated'),
   goods: () => eventEmitter.emit('goods-updated'),
   skills: () => eventEmitter.emit('skills-updated'),

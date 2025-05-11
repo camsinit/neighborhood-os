@@ -67,7 +67,6 @@ export const rsvpService = {
     
     // Dispatch refresh events
     dispatchRefreshEvent('event-rsvp-updated');
-    dispatchRefreshEvent('activities-updated');
     
     return { success: true, data };
   },
@@ -109,7 +108,6 @@ export const rsvpService = {
     
     // Dispatch refresh events
     dispatchRefreshEvent('event-rsvp-updated');
-    dispatchRefreshEvent('activities-updated');
     
     return { success: true };
   }

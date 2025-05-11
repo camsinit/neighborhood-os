@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { refreshEvents } from "@/utils/refreshEvents"; // Import for activity refresh
+import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Updated import
 import * as skillsService from "@/services/skills/skillsService"; // Import service layer
 
 interface SkillsExchangeProps {
@@ -70,18 +70,13 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Update UI and show success message
-      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      // Dispatch refresh events using the single dispatch function
+      dispatchRefreshEvent('skills-updated');
       
-      // Explicitly invalidate activities query to refresh the activity feed
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      
-      // Dispatch refresh events for both skills AND activities feed
-      refreshEvents.skills();
-      refreshEvents.emit('skills-updated');  // Add this new event specifically for skills
-      refreshEvents.emit('activities-updated');  // Also emit a general activities update event
-      
+      // Show success message to the user
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
+      
+      // Call the onSuccess callback to close dialogs, etc.
       onSuccess();
       
       return data;
@@ -125,14 +120,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       // Use service layer to update the skill
       await skillsService.updateSkill(skillId, formData, user.id);
 
-      // Update UI and show success message
-      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      
-      // Dispatch refresh events
-      refreshEvents.skills();
-      refreshEvents.emit('skills-updated');
-      refreshEvents.emit('activities-updated');
+      // Dispatch refresh events using the single dispatch function
+      dispatchRefreshEvent('skills-updated');
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();
