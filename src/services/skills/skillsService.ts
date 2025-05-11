@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { SkillCategory, SkillWithProfile } from '@/components/skills/types/skillTypes';
 import { SkillFormData } from '@/components/skills/types/skillFormTypes';
@@ -39,8 +38,6 @@ export const fetchSkills = async (category?: SkillCategory) => {
 
 /**
  * Create a new skill
- * 
- * FIXED: Removed any reference to event_id which doesn't exist in the table
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
@@ -80,34 +77,39 @@ export const createSkill = async (
   // Log the exact SQL payload for debugging
   console.log('[skillsService.createSkill] Insert payload:', JSON.stringify(insertData, null, 2));
 
-  const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
+  try {
+    const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
 
-  if (error) {
-    // Detailed error logging
-    console.error('[skillsService.createSkill] Error creating skill:', {
-      error: {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      },
+    if (error) {
+      // Detailed error logging
+      console.error('[skillsService.createSkill] Error creating skill:', {
+        error: {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        },
+        userId,
+        neighborhoodId,
+        requestPayload: JSON.stringify(insertData),
+        timestamp: new Date().toISOString()
+      });
+      throw error;
+    }
+
+    // Log success data
+    console.log('[skillsService.createSkill] Skill created successfully:', {
+      skillId: data?.[0]?.id,
+      title: formData.title,
       userId,
-      neighborhoodId,
-      requestPayload: JSON.stringify(insertData),
       timestamp: new Date().toISOString()
     });
+
+    return data;
+  } catch (error) {
+    console.error('[skillsService.createSkill] Unexpected error:', error);
     throw error;
   }
-
-  // Log success data
-  console.log('[skillsService.createSkill] Skill created successfully:', {
-    skillId: data?.[0]?.id,
-    title: formData.title,
-    userId,
-    timestamp: new Date().toISOString()
-  });
-
-  return data;
 };
 
 /**

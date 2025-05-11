@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -14,8 +13,6 @@ interface SkillsExchangeProps {
 
 /**
  * Custom hook for submitting skills exchange requests and offers
- * 
- * Fixed: removed reference to non-existent event_id field
  */
 export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   // Get current user, query client, and neighborhood context
