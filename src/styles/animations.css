@@ -66,6 +66,22 @@
   transition: opacity 300ms, transform 300ms;
 }
 
+/* Swipe animation for archiving notifications */
+@keyframes swipe-out-right {
+  from { 
+    transform: translateX(0);
+    opacity: 1; 
+  }
+  to { 
+    transform: translateX(100%);
+    opacity: 0; 
+  }
+}
+
+.swipe-out-right {
+  animation: swipe-out-right 0.5s ease-in-out forwards;
+}
+
 /* Pulse animation for notification badge */
 @keyframes pulse-badge {
   0% {

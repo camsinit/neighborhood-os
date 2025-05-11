@@ -5,7 +5,7 @@
  * This is the base notification card component that all specialized notification
  * cards will extend. It provides the core layout and styling.
  */
-import React from "react";
+import React, { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
@@ -39,6 +39,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // Changed default to false to hide type label
   children
 }) => {
+  // Add state for animation
+  const [isAnimating, setIsAnimating] = useState(false);
+  
   // Extract common notification properties
   const {
     id,
@@ -64,6 +67,11 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // Handle click on the notification card
   const handleCardClick = () => {
     if (onAction) onAction();
+  };
+  
+  // Handle swipe animation
+  const triggerSwipeAnimation = () => {
+    setIsAnimating(true);
   };
 
   // Get the appropriate border color based on notification type
@@ -117,13 +125,14 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     });
   };
   
-  // Added CSS classes with higher specificity for the border
+  // Added CSS classes with higher specificity for the border and animation
   return <Card 
     className={cn(
       "transition-all duration-200 overflow-hidden mb-2 group relative", 
       "border-l-4 !border-l-4",  // Always show left border with !important flag
       getBorderColor(),  // Apply the border color based on notification type
-      isUnread ? "bg-white shadow" : "bg-gray-50", 
+      isUnread ? "bg-white shadow" : "bg-gray-50",
+      isAnimating && "swipe-out-right", // Apply swipe animation when archiving
       className
     )}
   >
@@ -156,8 +165,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         </NotificationContent>
       </div>
       
-      {/* Action buttons using our reusable component */}
-      {showActions && !is_archived && <NotificationActions id={id} isRead={is_read} onDismiss={onDismiss} />}
+      {/* Action buttons using our reusable component - now with animation trigger */}
+      {showActions && !is_archived && (
+        <NotificationActions 
+          id={id} 
+          isRead={is_read} 
+          onDismiss={onDismiss} 
+          triggerSwipeAnimation={triggerSwipeAnimation}
+        />
+      )}
     </Card>;
 };
 export default NotificationCard;

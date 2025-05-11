@@ -56,14 +56,19 @@ const BaseNotificationItem = ({
   // Handle archiving a notification
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Store the current height for smooth animation
     const element = e.currentTarget.closest('.notification-item');
     if (element) {
       setHeight(element.getBoundingClientRect().height);
     }
+    
+    // Trigger the swipe-out animation
     setIsRemoving(true);
+    
+    // Allow animation to finish before removing from DOM
     setTimeout(() => {
       onClose();
-    }, 300);
+    }, 500); // Match timing with CSS animation duration
   };
 
   // Handle click to navigate to the item
@@ -80,13 +85,10 @@ const BaseNotificationItem = ({
       className={`notification-item flex items-center justify-between py-3 group cursor-pointer
         ${isRead ? 'bg-gray-50' : style.backgroundColor} hover:bg-gray-100 pr-6 pl-4 rounded-lg 
         transition-all duration-300 overflow-hidden border-l-4 ${isRead ? 'border-gray-200' : style.borderColor}
-        ${isRemoving ? 'opacity-0 transform translate-x-full h-0 my-0 py-0' : 'opacity-100'}
+        ${isRemoving ? 'swipe-out-right' : 'opacity-100'}
       `}
       style={{
-        height: isRemoving ? 0 : height,
-        marginBottom: isRemoving ? 0 : undefined,
-        paddingTop: isRemoving ? 0 : undefined,
-        paddingBottom: isRemoving ? 0 : undefined
+        height: isRemoving ? height : undefined
       }}
       onClick={handleClick}
     >

@@ -16,6 +16,8 @@ export interface NotificationActionsProps {
   isRead: boolean;
   onDismiss?: () => void;
   className?: string;
+  // Add new prop for parent ref to apply animation
+  triggerSwipeAnimation?: () => void;
 }
 
 /**
@@ -25,7 +27,9 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
   isRead,
   onDismiss,
-  className
+  className,
+  // New prop with default noop function
+  triggerSwipeAnimation = () => {}
 }) => {
   // Handle viewing details (still marks as read in the background)
   const handleView = async (e: React.MouseEvent) => {
@@ -47,12 +51,19 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
   // Handle archiving
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      await archiveNotification(id);
-      if (onDismiss) onDismiss();
-    } catch (error) {
-      console.error("Error archiving notification:", error);
-    }
+    
+    // First trigger the animation
+    triggerSwipeAnimation();
+    
+    // Wait for animation to finish before actual archiving
+    setTimeout(async () => {
+      try {
+        await archiveNotification(id);
+        if (onDismiss) onDismiss();
+      } catch (error) {
+        console.error("Error archiving notification:", error);
+      }
+    }, 500); // Match this timing with the CSS animation duration
   };
 
   return (
