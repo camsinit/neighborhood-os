@@ -1,4 +1,3 @@
-
 /**
  * NotificationCard.tsx
  * 
@@ -10,12 +9,7 @@ import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  NotificationAvatar,
-  NotificationContent,
-  NotificationTimeStamp,
-  NotificationActions
-} from "../../elements";
+import { NotificationAvatar, NotificationContent, NotificationTimeStamp, NotificationActions } from "../../elements";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -40,8 +34,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   className,
   showActions = true,
   showTimestamp = true,
-  showTypeLabel = false, // Changed default to false to hide type label
-  children,
+  showTypeLabel = false,
+  // Changed default to false to hide type label
+  children
 }) => {
   // Extract common notification properties
   const {
@@ -52,19 +47,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     is_archived,
     notification_type,
     notification_type_display,
-    context,
+    context
   } = notification;
 
   // Actor info - could be from context or from profiles
-  const actorName = context?.neighborName || 
-    notification.profiles?.display_name || "A neighbor";
-  
-  const avatarUrl = context?.avatarUrl || 
-    notification.profiles?.avatar_url || null;
-  
+  const actorName = context?.neighborName || notification.profiles?.display_name || "A neighbor";
+  const avatarUrl = context?.avatarUrl || notification.profiles?.avatar_url || null;
+
   // Get notification type display name
-  const typeName = notification_type_display || 
-    notification_type.charAt(0).toUpperCase() + notification_type.slice(1);
+  const typeName = notification_type_display || notification_type.charAt(0).toUpperCase() + notification_type.slice(1);
 
   // Determine variant based on read status
   const isUnread = !is_read;
@@ -77,14 +68,21 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // Get the appropriate border color based on notification type
   // We'll now use this color for both read and unread notifications
   const getBorderColor = () => {
-    switch(notification_type) {
-      case "event": return "border-l-blue-500";
-      case "safety": return "border-l-red-500";
-      case "skills": return "border-l-green-500";
-      case "neighbors": return "border-l-purple-500";
-      case "goods": return "border-l-amber-500";
-      case "support": return "border-l-indigo-500";
-      default: return "border-l-blue-500";
+    switch (notification_type) {
+      case "event":
+        return "border-l-blue-500";
+      case "safety":
+        return "border-l-red-500";
+      case "skills":
+        return "border-l-green-500";
+      case "neighbors":
+        return "border-l-purple-500";
+      case "goods":
+        return "border-l-amber-500";
+      case "support":
+        return "border-l-indigo-500";
+      default:
+        return "border-l-blue-500";
     }
   };
 
@@ -98,105 +96,55 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
     // Split by the highlighting markers
     const parts = title.split(/\[\[|\]\]/);
-    
+
     // Return the formatted parts - odd indices should be highlighted
     return parts.map((part, index) => {
       if (index % 2 === 1) {
         // This is a part that was between [[ and ]] - highlight it
-        return (
-          <span 
-            key={index} 
-            className={cn(
-              "font-medium px-0.5 rounded",
-              notification_type === "event" && "text-blue-600",
-              notification_type === "safety" && "text-red-600",
-              notification_type === "skills" && "text-green-600",
-              notification_type === "neighbors" && "text-purple-600",
-              notification_type === "goods" && "text-amber-600",
-              notification_type === "support" && "text-indigo-600",
-            )}
-          >
+        return <span key={index} className={cn("font-medium px-0.5 rounded", notification_type === "event" && "text-blue-600", notification_type === "safety" && "text-red-600", notification_type === "skills" && "text-green-600", notification_type === "neighbors" && "text-purple-600", notification_type === "goods" && "text-amber-600", notification_type === "support" && "text-indigo-600")}>
             {part}
-          </span>
-        );
+          </span>;
       }
       // Regular text
-      return <span key={index}>{part}</span>;
+      return <span key={index} className="text-base">{part}</span>;
     });
   };
-
-  return (
-    <Card 
-      className={cn(
-        "transition-all duration-200 overflow-hidden mb-2 group relative", 
-        "border-l-4", // Always show left border
-        getBorderColor(), // Apply the border color based on notification type
-        isUnread 
-          ? "bg-white shadow" // Only background changes for unread
-          : "bg-gray-50 border-gray-100", // Light background for read
-        className
-      )}
-    >
+  return <Card className={cn("transition-all duration-200 overflow-hidden mb-2 group relative", "border-l-4",
+  // Always show left border
+  getBorderColor(),
+  // Apply the border color based on notification type
+  isUnread ? "bg-white shadow" // Only background changes for unread
+  : "bg-gray-50 border-gray-100",
+  // Light background for read
+  className)}>
       {/* Only timestamp in the top right corner now, no type badge */}
-      {showTimestamp && (
-        <div className="absolute top-2 right-2 z-10">
-          <NotificationTimeStamp
-            date={created_at}
-            isUnread={isUnread}
-          />
-        </div>
-      )}
+      {showTimestamp && <div className="absolute top-2 right-2 z-10">
+          <NotificationTimeStamp date={created_at} isUnread={isUnread} />
+        </div>}
       
-      <div 
-        className={cn(
-          "flex items-start p-3 gap-3 cursor-pointer",
-          isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
-          // Add right padding to prevent content from overlapping with timestamp
-          showTimestamp && "pr-16" // Extra right padding when timestamp is shown
-        )}
-        onClick={handleCardClick}
-      >
+      <div className={cn("flex items-start p-3 gap-3 cursor-pointer", isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
+    // Add right padding to prevent content from overlapping with timestamp
+    showTimestamp && "pr-16" // Extra right padding when timestamp is shown
+    )} onClick={handleCardClick}>
         {/* Avatar section using our reusable component */}
-        <NotificationAvatar
-          url={avatarUrl}
-          name={actorName}
-          isUnread={isUnread}
-          className="mt-0.5"
-        />
+        <NotificationAvatar url={avatarUrl} name={actorName} isUnread={isUnread} className="mt-0.5" />
         
         {/* Content section using our reusable component */}
-        <NotificationContent
-          title={title}
-          isUnread={isUnread}
-          formattedTitle={renderFormattedTitle()}
-        >
+        <NotificationContent title={title} isUnread={isUnread} formattedTitle={renderFormattedTitle()}>
           {/* Render child components for specialized notification content */}
           {children}
           
           {/* Status badges */}
           <div className="flex gap-1 flex-shrink-0 mt-2">
-            {context?.actionRequired && (
-              <Badge 
-                variant="destructive"
-                className="text-[10px] h-5"
-              >
+            {context?.actionRequired && <Badge variant="destructive" className="text-[10px] h-5">
                 Action needed
-              </Badge>
-            )}
+              </Badge>}
           </div>
         </NotificationContent>
       </div>
       
       {/* Action buttons using our reusable component */}
-      {showActions && !is_archived && (
-        <NotificationActions 
-          id={id} 
-          isRead={is_read} 
-          onDismiss={onDismiss}
-        />
-      )}
-    </Card>
-  );
+      {showActions && !is_archived && <NotificationActions id={id} isRead={is_read} onDismiss={onDismiss} />}
+    </Card>;
 };
-
 export default NotificationCard;
