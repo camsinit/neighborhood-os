@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { refreshEvents } from "@/utils/refreshEvents"; // Import for activity refresh
+import * as skillsService from "@/services/skills/skillsService"; // Import service layer
 
 interface SkillsExchangeProps {
   onSuccess: () => void;
@@ -41,62 +42,35 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
-      // Format the data according to the database schema requirements
-      // FIXED: Removed any reference to event_id which doesn't exist in the table
-      const formattedData = {
-        title: formData.title, // Required field
-        description: formData.description || null,
-        request_type: mode === 'offer' ? 'offer' : 'need',
-        user_id: user.id,
-        neighborhood_id: neighborhood.id, // Use neighborhood.id (string) instead of the whole object
-        skill_category: formData.category || 'technology', // Required field, provide default
-        valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        availability: formData.availability || null,
-        time_preferences: formData.timePreference || []
-      };
-
-      // Add detailed logging before insert operation
-      console.log("[useSkillsExchange] Attempting to insert skill exchange:", {
+      // Add detailed logging before submission
+      console.log("[useSkillsExchange] Submitting skill exchange:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         mode,
-        formData: { ...formattedData, description: formattedData.description?.substring(0, 20) + '...' },
+        formData: { 
+          title: formData.title,
+          description: formData.description?.substring(0, 20) + '...',
+          category: formData.category
+        },
         timestamp: new Date().toISOString()
       });
 
-      const { error, data } = await supabase
-        .from('skills_exchange')
-        .insert(formattedData)
-        .select();
+      // Use the service layer to create the skill
+      const data = await skillsService.createSkill(
+        formData,
+        mode,
+        user.id,
+        neighborhood.id
+      );
 
-      if (error) {
-        // Log detailed error information
-        console.error("[useSkillsExchange] Error inserting skill exchange:", {
-          error: {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          },
-          userId: user.id,
-          neighborhoodId: neighborhood.id,
-          mode,
-          timestamp: new Date().toISOString()
-        });
-        throw error;
-      }
-
-      // Log success information including the new skill_id for reference
-      if (data && data[0]) {
-        console.log("[useSkillsExchange] Skill exchange created successfully:", {
-          skillId: data[0].id,
-          skill_id: data[0].skill_id, // Access the new redundant ID
-          userId: user.id,
-          neighborhoodId: neighborhood.id,
-          mode,
-          timestamp: new Date().toISOString()
-        });
-      }
+      // Log success information
+      console.log("[useSkillsExchange] Skill exchange created successfully:", {
+        skillId: data?.[0]?.id,
+        title: formData.title,
+        userId: user.id,
+        neighborhoodId: neighborhood.id,
+        timestamp: new Date().toISOString()
+      });
 
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -108,9 +82,27 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       onSuccess();
       
       return data;
-    } catch (error) {
-      console.error('Error creating skill exchange:', error);
-      toast.error("Failed to create skill exchange. Please try again.");
+    } catch (error: any) {
+      // Enhanced error logging
+      console.error('[useSkillsExchange] Error creating skill exchange:', {
+        error: {
+          message: error.message,
+          details: error.details || null,
+          hint: error.hint || null,
+          code: error.code || null,
+          stack: error.stack || null
+        },
+        formData: {
+          title: formData.title,
+          category: formData.category
+        },
+        userId: user.id,
+        neighborhoodId: neighborhood.id,
+        timestamp: new Date().toISOString()
+      });
+      
+      // User-friendly error message with more details
+      toast.error(`Failed to create skill exchange: ${error.message || "Unknown error"}. Please try again.`);
       throw error;
     }
   };
@@ -127,57 +119,10 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
-      // Add detailed logging before update operation
-      console.log("[useSkillsExchange] Attempting to update skill exchange:", {
-        skillId,
-        userId: user.id,
-        mode,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' },
-        timestamp: new Date().toISOString()
-      });
+      // Use service layer to update the skill
+      await skillsService.updateSkill(skillId, formData, user.id);
 
-      const { error, data } = await supabase
-        .from('skills_exchange')
-        .update({
-          title: formData.title,
-          description: formData.description || null,
-          request_type: mode === 'offer' ? 'offer' : 'need',
-          skill_category: formData.category || 'technology',
-          availability: formData.availability || null,
-          time_preferences: formData.timePreference || []
-        })
-        .eq('id', skillId)
-        .eq('user_id', user.id)
-        .select();
-
-      if (error) {
-        // Log detailed error information
-        console.error("[useSkillsExchange] Error updating skill exchange:", {
-          error: {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          },
-          skillId,
-          userId: user.id,
-          mode,
-          timestamp: new Date().toISOString()
-        });
-        throw error;
-      }
-
-      // Log success information including the skill_id
-      if (data && data[0]) {
-        console.log("[useSkillsExchange] Skill exchange updated successfully:", {
-          skillId,
-          skill_id: data[0].skill_id, // Accessing the redundant ID
-          userId: user.id,
-          mode,
-          timestamp: new Date().toISOString()
-        });
-      }
-
+      // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       
       // Dispatch refresh event for activities feed
@@ -185,11 +130,9 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();
-      
-      return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating skill exchange:', error);
-      toast.error("Failed to update skill exchange. Please try again.");
+      toast.error(`Failed to update skill exchange: ${error.message || "Unknown error"}`);
       throw error;
     }
   };

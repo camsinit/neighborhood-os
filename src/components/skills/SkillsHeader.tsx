@@ -37,11 +37,11 @@ const SkillsHeader = ({
   setSearchQuery,
   showRequests,
   setShowRequests,
-  openSkillDialog // Now we're actually using this prop
+  openSkillDialog
 }: SkillsHeaderProps) => {
   // Log to help debug version issues
   useEffect(() => {
-    console.log("[SkillsHeader] Component rendered, version: 2025-04-28");
+    console.log("[SkillsHeader] Component rendered, version: 2025-05-11");
     return () => console.log("[SkillsHeader] Component will unmount");
   }, []);
 
@@ -115,7 +115,7 @@ const SkillsHeader = ({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Action buttons moved here from the SkillsPage */}
+        {/* Action buttons - Direct click without popovers */}
         <Button 
           variant="outline"
           onClick={() => openSkillDialog('need')}

@@ -53,7 +53,19 @@ export const createSkill = async (
     throw new Error('Title and category are required');
   }
 
-  const { error } = await supabase.from('skills_exchange').insert({
+  // Log the skill data we're about to insert for debugging
+  console.log('[skillsService.createSkill] Attempting to insert skill with data:', {
+    title: formData.title,
+    description: formData.description?.substring(0, 30) + '...',
+    mode,
+    category: formData.category,
+    userId,
+    neighborhoodId,
+    timestamp: new Date().toISOString()
+  });
+
+  // Create the insert data object with all fields explicitly defined
+  const insertData = {
     title: formData.title,
     description: formData.description || null,
     request_type: mode,
@@ -63,12 +75,39 @@ export const createSkill = async (
     valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     availability: formData.availability || null,
     time_preferences: formData.timePreference || null
-  });
+  };
+
+  // Log the exact SQL payload for debugging
+  console.log('[skillsService.createSkill] Insert payload:', JSON.stringify(insertData, null, 2));
+
+  const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
 
   if (error) {
-    console.error('Error creating skill:', error);
+    // Detailed error logging
+    console.error('[skillsService.createSkill] Error creating skill:', {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
+      userId,
+      neighborhoodId,
+      requestPayload: JSON.stringify(insertData),
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
+
+  // Log success data
+  console.log('[skillsService.createSkill] Skill created successfully:', {
+    skillId: data?.[0]?.id,
+    title: formData.title,
+    userId,
+    timestamp: new Date().toISOString()
+  });
+
+  return data;
 };
 
 /**
@@ -88,6 +127,14 @@ export const updateSkill = async (
   if (formData.availability !== undefined) updateData.availability = formData.availability || null;
   if (formData.timePreference !== undefined) updateData.time_preferences = formData.timePreference || null;
   
+  // Log update attempt
+  console.log('[skillsService.updateSkill] Attempting to update skill:', {
+    skillId,
+    userId,
+    updateFields: Object.keys(updateData),
+    timestamp: new Date().toISOString()
+  });
+  
   // Update the skill
   const { error } = await supabase
     .from('skills_exchange')
@@ -96,9 +143,26 @@ export const updateSkill = async (
     .eq('user_id', userId);
   
   if (error) {
-    console.error('Error updating skill:', error);
+    console.error('[skillsService.updateSkill] Error updating skill:', {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
+      skillId,
+      userId,
+      updateData: JSON.stringify(updateData),
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
+
+  console.log('[skillsService.updateSkill] Skill updated successfully:', {
+    skillId,
+    userId,
+    timestamp: new Date().toISOString()
+  });
 };
 
 /**
@@ -109,6 +173,14 @@ export const deleteSkill = async (
   skillTitle: string,
   userId: string
 ) => {
+  // Log deletion attempt
+  console.log('[skillsService.deleteSkill] Attempting to delete skill:', {
+    skillId,
+    skillTitle, 
+    userId,
+    timestamp: new Date().toISOString()
+  });
+
   // Delete the skill
   const { error } = await supabase
     .from('skills_exchange')
@@ -117,9 +189,25 @@ export const deleteSkill = async (
     .eq('user_id', userId);
 
   if (error) {
-    console.error('Error deleting skill:', error);
+    console.error('[skillsService.deleteSkill] Error deleting skill:', {
+      error: {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      },
+      skillId,
+      userId,
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
+
+  console.log('[skillsService.deleteSkill] Skill deleted successfully:', {
+    skillId,
+    userId,
+    timestamp: new Date().toISOString()
+  });
 };
 
 /**
