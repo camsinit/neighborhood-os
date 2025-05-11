@@ -6,13 +6,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Using the correct import
+import * as skillsService from "@/services/skills/skillsService"; // Added import for the skills service
 
+/**
+ * Interface defining the props for the skills exchange hook
+ * @property onSuccess - Callback function to be called when skill operations succeed
+ */
 interface SkillsExchangeProps {
   onSuccess: () => void;
 }
 
 /**
  * Custom hook for submitting skills exchange requests and offers
+ * 
+ * This hook provides methods to submit new skills or update existing ones
+ * and handles refreshing the UI after changes
  */
 export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   // Get current user, query client, and neighborhood context
@@ -20,6 +28,13 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const queryClient = useQueryClient();
   const neighborhood = useCurrentNeighborhood();
 
+  /**
+   * Submits a new skill exchange (offer or request)
+   * 
+   * @param formData - The form data containing skill details 
+   * @param mode - Whether this is an 'offer' or 'request'
+   * @returns Promise with the created data or undefined on failure
+   */
   const handleSubmit = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     // Validate required data
     if (!user) {
@@ -108,6 +123,14 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
   };
 
+  /**
+   * Updates an existing skill exchange
+   * 
+   * @param skillId - ID of the skill to update
+   * @param formData - The updated form data
+   * @param mode - Whether this is an 'offer' or 'request'
+   * @returns Promise resolving when update completes
+   */
   const handleUpdate = async (skillId: string, formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     if (!user) {
       toast.error("You must be logged in to update a skill exchange");
