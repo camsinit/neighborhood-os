@@ -7,12 +7,17 @@
  */
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Archive, Eye } from "lucide-react"; // Changed from Check to Eye icon
+import { Archive, Eye } from "lucide-react"; 
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { cn } from "@/lib/utils";  
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
+import { HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
 
 export interface NotificationActionsProps {
   id: string;
+  contentId?: string; // Add contentId prop for highlighting
+  contentType?: HighlightableItemType; // Add content type prop
   isRead: boolean;
   onDismiss?: () => void;
   className?: string;
@@ -25,15 +30,21 @@ export interface NotificationActionsProps {
  */
 const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
+  contentId, // New prop for content ID to highlight
+  contentType, // New prop for content type
   isRead,
   onDismiss,
   className,
   // New prop with default noop function
   triggerSwipeAnimation = () => {}
 }) => {
+  // Get navigate function from react-router
+  const navigate = useNavigate();
+  
   // Handle viewing details (still marks as read in the background)
   const handleView = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
     // Still mark as read when viewing
     if (!isRead) {
       try {
@@ -43,9 +54,19 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
       }
     }
     
-    // Call the onDismiss callback which will navigate to the relevant content
-    // via the parent component's handleViewX method
-    if (onDismiss) onDismiss();
+    // If we have content type and ID, navigate to it and highlight it
+    if (contentId && contentType) {
+      // Navigate and highlight the item
+      navigateAndHighlight(contentType, contentId, navigate, true);
+      
+      // We call onDismiss after a short delay to ensure navigation happens
+      setTimeout(() => {
+        if (onDismiss) onDismiss();
+      }, 100);
+    } else {
+      // If we don't have content info, just dismiss
+      if (onDismiss) onDismiss();
+    }
   };
 
   // Handle archiving

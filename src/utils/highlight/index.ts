@@ -27,3 +27,8 @@ export {
 export { 
   createHighlightListener 
 } from './createHighlightListener';
+
+// Export our new navigation utility
+export {
+  navigateAndHighlight
+} from './navigateAndHighlight';

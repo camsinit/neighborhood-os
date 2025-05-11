@@ -20,7 +20,7 @@ interface SkillNotificationItemProps {
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
-  onItemClick?: (type: string, id: string) => void; // Keep as string for compatibility
+  onItemClick?: (type: HighlightableItemType, id: string) => void; // Updated to use proper type
 }
 
 export const SkillNotificationItem = ({
@@ -57,6 +57,9 @@ export const SkillNotificationItem = ({
         onAction={() => setIsSkillRequestDialogOpen(true)}
         actionLabel="Respond"
         isArchived={isArchived}
+        // Pass content ID and type for navigation
+        contentId={context.skillRequestData?.skill?.id || itemId}
+        contentType="skills"
       >
         <div className={`notification-item h-[64px] flex items-center justify-between py-2 group cursor-pointer 
             ${style.backgroundColor} ${style.hoverColor} pr-6 pl-4 rounded-lg transition-all duration-300 overflow-hidden 

@@ -31,6 +31,9 @@ interface NotificationPopoverProps {
   onAction?: () => void;
   actionLabel?: string;
   isArchived?: boolean;
+  // New props for navigation and highlighting
+  contentId?: string;
+  contentType?: HighlightableItemType;
 }
 
 /**
@@ -43,7 +46,10 @@ export const NotificationPopover = ({
   itemId, 
   onAction, 
   actionLabel = "View",
-  isArchived = false 
+  isArchived = false,
+  // New props with default values
+  contentId,
+  contentType 
 }: NotificationPopoverProps) => {
   return (
     <Popover>
