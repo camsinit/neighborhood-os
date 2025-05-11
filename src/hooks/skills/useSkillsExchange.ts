@@ -7,6 +7,10 @@ import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Using the correct import
 import * as skillsService from "@/services/skills/skillsService"; // Added import for the skills service
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this hook
+const logger = createLogger('useSkillsExchange');
 
 /**
  * Interface defining the props for the skills exchange hook
@@ -50,13 +54,19 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   ) => {
     try {
       // Log the notification attempt
-      console.log(`[useSkillsExchange] Notifying skill changes:`, { 
+      logger.debug(`Notifying skill changes:`, { 
         skillId, 
         action, 
         ...data,
         timestamp: new Date().toISOString()
       });
 
+      logger.trace(`Preparing to call notify-skills-changes edge function with params: ${JSON.stringify({
+        skillId,
+        action,
+        ...data
+      }, null, 2)}`);
+      
       // Call the edge function
       const response = await fetch('/functions/v1/notify-skills-changes', {
         method: 'POST',
@@ -69,15 +79,20 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
           ...data
         }),
       });
+      
+      logger.trace(`Edge function response status: ${response.status}`);
 
       if (!response.ok) {
+        const responseText = await response.text();
+        logger.error(`Error in notify-skills-changes edge function: ${response.status} ${responseText}`);
         throw new Error(`Error notifying skill changes: ${response.status}`);
       }
 
-      console.log(`[useSkillsExchange] Successfully notified skill changes for ${action}`);
-      return await response.json();
+      const responseData = await response.json();
+      logger.debug(`Successfully notified skill changes for ${action}`, responseData);
+      return responseData;
     } catch (error) {
-      console.error('[useSkillsExchange] Error notifying skill changes:', error);
+      logger.error('Error notifying skill changes:', error);
       // We don't throw here to prevent breaking the main flow
     }
   };
@@ -109,7 +124,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
     try {
       // Add detailed logging before submission
-      console.log("[useSkillsExchange] Submitting skill exchange:", {
+      logger.info("Submitting skill exchange:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         mode,
@@ -121,6 +136,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         timestamp: new Date().toISOString()
       });
 
+      logger.trace(`About to call skillsService.createSkill with form data: ${JSON.stringify({
+        title: formData.title,
+        category: formData.category,
+        description: formData.description?.substring(0, 50) + (formData.description && formData.description.length > 50 ? '...' : ''),
+      })}`);
+
       // Use the service layer to create the skill
       const data = await skillsService.createSkill(
         formData,
@@ -129,8 +150,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         neighborhood.id
       );
 
-      // Log success information
-      console.log("[useSkillsExchange] Skill exchange created successfully:", {
+      // Log success information with skill ID
+      logger.info("Skill exchange created successfully:", {
         skillId: data?.[0]?.id,
         title: formData.title,
         userId: user.id,
@@ -140,6 +161,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Create an activity for this skill using the edge function
       if (data && data.length > 0) {
+        logger.trace(`Skill created with ID: ${data[0].id}, now creating activity via edge function`);
+        
         await notifySkillChanges(
           data[0].id, 
           'create', 
@@ -156,22 +179,27 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       }
 
       // Dispatch refresh events - ensure skill updates trigger activity feed refresh
+      logger.debug("Dispatching skills-updated event");
       dispatchRefreshEvent('skills-updated');
       
       // Also invalidate the queries directly to ensure immediate refresh
+      logger.debug("Manually invalidating skills-exchange query");
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      
+      logger.debug("Manually invalidating activities query");
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       
       // Show success message to the user
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       
       // Call the onSuccess callback to close dialogs, etc.
+      logger.trace("Calling onSuccess callback");
       onSuccess();
       
       return data;
     } catch (error: any) {
       // Enhanced error logging
-      console.error('[useSkillsExchange] Error creating skill exchange:', {
+      logger.error('Error creating skill exchange:', {
         error: {
           message: error.message,
           details: error.details || null,
@@ -214,6 +242,11 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
 
     try {
+      logger.debug(`Updating skill exchange: ${skillId}`, {
+        title: formData.title,
+        userId: user.id
+      });
+      
       // Use service layer to update the skill
       await skillsService.updateSkill(skillId, formData, user.id);
       
@@ -223,16 +256,18 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       });
 
       // Dispatch refresh events using the single dispatch function
+      logger.debug("Dispatching skills-updated event after update");
       dispatchRefreshEvent('skills-updated');
       
       // Also invalidate the queries directly to ensure immediate refresh
+      logger.debug("Manually invalidating queries after update");
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();
     } catch (error: any) {
-      console.error('Error updating skill exchange:', error);
+      logger.error('Error updating skill exchange:', error);
       toast.error(`Failed to update skill exchange: ${error.message || "Unknown error"}`);
       throw error;
     }

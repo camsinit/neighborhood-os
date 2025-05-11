@@ -8,6 +8,10 @@ import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this component
+const logger = createLogger('ActivityFeed');
 
 /**
  * Component to display the feed of neighborhood activities
@@ -25,16 +29,24 @@ const ActivityFeed = () => {
   
   // Log for debugging
   useEffect(() => {
-    console.log("[ActivityFeed] Component mounted, listening for activity updates");
+    logger.info("Component mounted, listening for activity updates");
     
     // Log if we have data
     if (activities) {
-      console.log("[ActivityFeed] Activities loaded:", activities.length);
+      logger.info(`Activities loaded: ${activities.length}`);
+      logger.trace(`Activity data received: ${JSON.stringify(activities.map(a => ({
+        id: a.id,
+        type: a.activity_type,
+        title: a.title,
+        content_id: a.content_id,
+        content_type: a.content_type,
+        timestamp: a.created_at
+      })), null, 2)}`);
     }
     
     // Set up periodic refetching every 30 seconds
     const intervalId = setInterval(() => {
-      console.log("[ActivityFeed] Performing automatic periodic refresh");
+      logger.debug("Performing automatic periodic refresh");
       refetch();
     }, 30000);
     
@@ -58,7 +70,7 @@ const ActivityFeed = () => {
 
   // Manual refresh handler
   const handleManualRefresh = () => {
-    console.log("[ActivityFeed] Manual refresh triggered");
+    logger.debug("Manual refresh triggered");
     refetch();
     setLastRefresh(new Date());
     toast({
@@ -69,22 +81,31 @@ const ActivityFeed = () => {
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
+    logger.trace(`Activity action triggered for ${activity.id}`);
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
 
   // Filter out deleted activities
-  const filteredActivities = activities?.filter(activity => 
-    !activity.metadata?.deleted
-  ) || [];
+  const filteredActivities = activities?.filter(activity => {
+    const isDeleted = !!activity.metadata?.deleted;
+    if (isDeleted) {
+      logger.trace(`Filtered out deleted activity: ${activity.id}`);
+    }
+    return !isDeleted;
+  }) || [];
+
+  logger.trace(`Filtered activities: ${filteredActivities.length} of ${activities?.length || 0}`);
 
   // Handler for load more button
   const handleLoadMore = () => {
+    logger.debug(`Loading more activities: ${displayCount} -> ${displayCount + 4}`);
     setDisplayCount(prev => prev + 4);
   };
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
+    logger.debug("Rendering loading skeletons");
     return (
       <div className="space-y-4 py-2">
         {[1, 2, 3, 4].map((i) => (
@@ -101,6 +122,7 @@ const ActivityFeed = () => {
 
   // Display a message when there are no activities
   if (!filteredActivities?.length) {
+    logger.debug("No activities to display");
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
         <div className="text-center">
@@ -118,6 +140,8 @@ const ActivityFeed = () => {
     );
   }
 
+  logger.trace("Rendering activity feed with data");
+  
   // Display the activities with load more button
   return (
     <>
@@ -138,13 +162,16 @@ const ActivityFeed = () => {
       
       <div className="py-2 space-y-4">
         {/* Only render the number of items we want to display */}
-        {filteredActivities.slice(0, displayCount).map((activity) => (
-          <ActivityItem 
-            key={activity.id} 
-            activity={activity} 
-            onAction={handleActivityAction}
-          />
-        ))}
+        {filteredActivities.slice(0, displayCount).map((activity) => {
+          logger.trace(`Rendering activity item: ${activity.id}, type: ${activity.activity_type}, content_id: ${activity.content_id}`);
+          return (
+            <ActivityItem 
+              key={activity.id} 
+              activity={activity} 
+              onAction={handleActivityAction}
+            />
+          );
+        })}
         
         {/* Load more button */}
         {displayCount < filteredActivities.length && (

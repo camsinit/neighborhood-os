@@ -40,9 +40,9 @@ const initConfig = (): LoggerConfig => {
     // Ignore localStorage errors
   }
   
-  // Default configuration
+  // Default configuration - changed from DEBUG to TRACE to see more detailed logs
   return {
-    level: DEFAULT_LOG_LEVEL,
+    level: LogLevel.TRACE,
     enabledModules: ['*'] // '*' means all modules enabled
   };
 };

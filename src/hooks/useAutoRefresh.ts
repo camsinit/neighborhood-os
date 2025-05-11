@@ -2,6 +2,10 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { refreshEvents } from '@/utils/refreshEvents';
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this hook
+const logger = createLogger('useAutoRefresh');
 
 /**
  * Custom hook to automatically refresh queries when specified events occur
@@ -26,7 +30,7 @@ export const useAutoRefresh = (
     const unsubscribers: (() => void)[] = [];
     
     // Log which events we're listening to for debugging
-    console.log(`[useAutoRefresh] Setting up listeners for events:`, events, 
+    logger.info(`Setting up listeners for events:`, events, 
       `to refresh queries:`, queryKeys);
     
     // Create a debounced refresh function to prevent excessive query invalidation
@@ -38,29 +42,40 @@ export const useAutoRefresh = (
       
       // Set a new timeout
       debounceTimeout = setTimeout(() => {
-        console.log('[useAutoRefresh] Refreshing queries:', queryKeys);
+        logger.info(`Refreshing queries:`, queryKeys);
         
-        // Invalidate all query keys that were provided
+        // Add trace logs for each query invalidation
         queryKeys.forEach(key => {
+          logger.trace(`Invalidating query key: [${key}]`);
           queryClient.invalidateQueries({ queryKey: [key] });
+          logger.trace(`Query invalidation complete for: [${key}]`);
         });
       }, debounceMs);
     };
     
     // Subscribe to each event
     events.forEach(event => {
+      logger.trace(`Setting up listener for event: ${event}`);
+      
       const unsubscribe = refreshEvents.on(event, () => {
-        console.log(`[useAutoRefresh] Event triggered: ${event}, refreshing queries:`, queryKeys);
+        logger.debug(`Event triggered: ${event}, refreshing queries:`, queryKeys);
+        logger.trace(`Event payload received for: ${event}`);
         debouncedRefresh();
       });
+      
       unsubscribers.push(unsubscribe);
+      logger.trace(`Listener for ${event} successfully registered`);
     });
     
     // Clean up event listeners and any pending timeout when component unmounts
     return () => {
-      console.log(`[useAutoRefresh] Cleaning up listeners for:`, events);
-      unsubscribers.forEach(unsubscribe => unsubscribe());
+      logger.info(`Cleaning up listeners for:`, events);
+      unsubscribers.forEach((unsubscribe, index) => {
+        logger.trace(`Unsubscribing from event: ${events[index] || 'unknown'}`);
+        unsubscribe();
+      });
       if (debounceTimeout) {
+        logger.trace(`Clearing debounce timeout`);
         clearTimeout(debounceTimeout);
       }
     };
