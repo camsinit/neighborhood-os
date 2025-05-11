@@ -10,9 +10,6 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
 import { AlertTriangle } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
-import { 
-  NotificationBadge
-} from "../elements";
 import { cn } from "@/lib/utils";  // Add the missing import
 
 interface SafetyNotificationCardProps {
@@ -72,17 +69,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
       onDismiss={onDismiss}
       className={!notification.is_read ? "border-l-red-500" : ""}
     >
-      {/* Show safety type as a badge */}
-      <div className="mt-1">
-        <NotificationBadge 
-          label={safetyType.charAt(0).toUpperCase() + safetyType.slice(1)}
-          variant="outline"
-          className={cn(
-            "font-normal text-xs",
-            safetyType === 'emergency' && "bg-red-100 text-red-800 border-red-200"
-          )}
-        />
-      </div>
+      {/* Removed the safety type badge that was previously displayed here */}
     </NotificationCard>
   );
 };
