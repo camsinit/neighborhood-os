@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -72,8 +73,13 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       
-      // Dispatch refresh event for activities feed
+      // Explicitly invalidate activities query to refresh the activity feed
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      
+      // Dispatch refresh events for both skills AND activities feed
       refreshEvents.skills();
+      refreshEvents.emit('skills-updated');  // Add this new event specifically for skills
+      refreshEvents.emit('activities-updated');  // Also emit a general activities update event
       
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       onSuccess();
@@ -121,9 +127,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       
-      // Dispatch refresh event for activities feed
+      // Dispatch refresh events
       refreshEvents.skills();
+      refreshEvents.emit('skills-updated');
+      refreshEvents.emit('activities-updated');
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();

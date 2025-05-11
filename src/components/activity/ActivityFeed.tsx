@@ -12,7 +12,7 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh"; // Import the useAutoRe
 /**
  * Component to display the feed of neighborhood activities
  * Now with load more button and initial limit of 4 items
- * Also listens for events to auto-refresh the feed
+ * Also listens for events to auto-refresh the feed when new skills, events, or other content is added
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
@@ -22,11 +22,18 @@ const ActivityFeed = () => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   
-  // Use our centralized auto-refresh hook instead of manual event listeners
-  // This will prevent duplicate refreshes as it's properly debounced
+  // Use our centralized auto-refresh hook to listen for ALL activity types
+  // This ensures the feed refreshes for skills, events, safety updates, etc.
   useAutoRefresh(
     ['activities'], 
-    ['activities-updated', 'event-rsvp-updated', 'event-submitted', 'safety-updated', 'goods-updated']
+    [
+      'activities-updated',
+      'event-rsvp-updated',
+      'event-submitted',
+      'safety-updated',
+      'goods-updated',
+      'skills-updated' // Explicitly listen for skill updates
+    ]
   );
 
   // Handler for when activities need special handling (like deleted items)
