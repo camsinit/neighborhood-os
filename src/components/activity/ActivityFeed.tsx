@@ -22,6 +22,16 @@ const ActivityFeed = () => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   
+  // Log for debugging
+  useEffect(() => {
+    console.log("[ActivityFeed] Component mounted, listening for activity updates");
+    
+    // Log if we have data
+    if (activities) {
+      console.log("[ActivityFeed] Activities loaded:", activities.length);
+    }
+  }, [activities?.length]);
+  
   // Use our centralized auto-refresh hook to listen for ALL activity types
   // This ensures the feed refreshes for skills, events, safety updates, etc.
   useAutoRefresh(
@@ -30,6 +40,7 @@ const ActivityFeed = () => {
       'activities-updated',
       'event-rsvp-updated',
       'event-submitted',
+      'event-deleted',
       'safety-updated',
       'goods-updated',
       'skills-updated' // Explicitly listen for skill updates

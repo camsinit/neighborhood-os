@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Updated import
-import * as skillsService from "@/services/skills/skillsService"; // Import service layer
+import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Using the correct import
 
 interface SkillsExchangeProps {
   onSuccess: () => void;
@@ -70,8 +69,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Dispatch refresh events using the single dispatch function
+      // Dispatch refresh events - ensure skill updates trigger activity feed refresh
       dispatchRefreshEvent('skills-updated');
+      
+      // Also invalidate the queries directly to ensure immediate refresh
+      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       
       // Show success message to the user
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
@@ -122,6 +125,10 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Dispatch refresh events using the single dispatch function
       dispatchRefreshEvent('skills-updated');
+      
+      // Also invalidate the queries directly to ensure immediate refresh
+      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();

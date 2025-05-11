@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory, SkillWithProfile } from './types/skillTypes';
@@ -7,6 +6,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface SkillsListProps {
   selectedCategory: SkillCategory | null;
@@ -21,12 +21,23 @@ const SkillsList = ({
 }: SkillsListProps) => {
   const user = useUser();
   
+  // Setup auto-refresh for skills data
+  useAutoRefresh(['skills-exchange'], ['skills-updated']);
+  
   const {
     data: skills,
-    isLoading
+    isLoading,
+    refetch
   } = useQuery({
     queryKey: ['skills-exchange', selectedCategory, searchQuery, showRequests],
     queryFn: async () => {
+      console.log('[SkillsList] Fetching skills with params:', {
+        category: selectedCategory,
+        searchQuery,
+        showRequests,
+        timestamp: new Date().toISOString()
+      });
+      
       // Start with a base query
       let query = supabase.from('skills_exchange').select(`
         *,
@@ -52,7 +63,16 @@ const SkillsList = ({
       }
       
       const { data, error } = await query;
-      if (error) throw error;
+      
+      if (error) {
+        console.error('[SkillsList] Error fetching skills:', error);
+        throw error;
+      }
+      
+      console.log('[SkillsList] Fetched skills:', {
+        count: data?.length || 0,
+        timestamp: new Date().toISOString()
+      });
       
       // Ensure data conforms to SkillWithProfile type
       return (data || []).map(item => ({
@@ -64,7 +84,11 @@ const SkillsList = ({
           display_name: item.profiles?.display_name || null
         }
       })) as SkillWithProfile[];
-    }
+    },
+    // Don't cache for too long to ensure fresh data
+    staleTime: 10000, // 10 seconds
+    // Enable refetching on window focus to keep data fresh
+    refetchOnWindowFocus: true,
   });
 
   if (isLoading) {

@@ -25,6 +25,10 @@ export const useAutoRefresh = (
     // Store unsubscribe functions to clean up later
     const unsubscribers: (() => void)[] = [];
     
+    // Log which events we're listening to for debugging
+    console.log(`[useAutoRefresh] Setting up listeners for events:`, events, 
+      `to refresh queries:`, queryKeys);
+    
     // Create a debounced refresh function to prevent excessive query invalidation
     const debouncedRefresh = () => {
       // Clear any pending timeout
@@ -47,13 +51,11 @@ export const useAutoRefresh = (
     events.forEach(event => {
       const unsubscribe = refreshEvents.on(event, debouncedRefresh);
       unsubscribers.push(unsubscribe);
-      
-      // Log which events we're listening to for debugging
-      console.log(`[useAutoRefresh] Listening for '${event}' event to refresh:`, queryKeys);
     });
     
     // Clean up event listeners and any pending timeout when component unmounts
     return () => {
+      console.log(`[useAutoRefresh] Cleaning up listeners for:`, events);
       unsubscribers.forEach(unsubscribe => unsubscribe());
       if (debounceTimeout) {
         clearTimeout(debounceTimeout);

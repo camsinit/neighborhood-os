@@ -1,4 +1,3 @@
-
 /**
  * SkillsContext
  * 
@@ -13,6 +12,8 @@ import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { useUser } from '@supabase/auth-helpers-react';
 import * as skillsService from '@/services/skills/skillsService';
 import { toast } from 'sonner';
+import { dispatchRefreshEvent } from '@/utils/refreshEvents';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Define the context shape
 interface SkillsContextType {
@@ -25,6 +26,7 @@ interface SkillsContextType {
   deleteSkill: (skillId: string, skillTitle: string) => Promise<void>;
   checkForDuplicates: (title: string, category: string, mode: 'offer' | 'request') => Promise<any[]>;
   isDeleting: boolean;
+  refetchSkills: () => void; // Added refetch function
 }
 
 // Create the context
@@ -37,12 +39,19 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
   const queryClient = useQueryClient();
+  
+  // Set up auto-refresh for skills data
+  useAutoRefresh(['skills-exchange', 'activities'], ['skills-updated']);
 
   // Fetch skills data
-  const { data: rawSkills = [], isLoading } = useQuery({
+  const { data: rawSkills = [], isLoading, refetch: refetchSkills } = useQuery({
     queryKey: ['skills-exchange', selectedCategory],
     queryFn: () => skillsService.fetchSkills(selectedCategory || undefined),
     enabled: !!neighborhood?.id,
+    // Don't cache for too long to ensure fresh data
+    staleTime: 10000, // 10 seconds
+    // Enable refetching on window focus to keep data fresh
+    refetchOnWindowFocus: true,
   });
 
   // Validate and transform the skills to ensure they match our expected types
@@ -72,6 +81,9 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       // Pass neighborhood.id (string) instead of the whole neighborhood object
       await skillsService.createSkill(formData, mode, user.id, neighborhood.id);
       
+      // Dispatch a refresh event
+      dispatchRefreshEvent('skills-updated');
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
@@ -92,6 +104,9 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       }
 
       await skillsService.updateSkill(skillId, formData, user.id);
+      
+      // Dispatch a refresh event
+      dispatchRefreshEvent('skills-updated');
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -114,6 +129,9 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
 
       setIsDeleting(true);
       await skillsService.deleteSkill(skillId, skillTitle, user.id);
+      
+      // Dispatch a refresh event
+      dispatchRefreshEvent('skills-updated');
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -143,7 +161,8 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
     updateSkill,
     deleteSkill,
     checkForDuplicates,
-    isDeleting
+    isDeleting,
+    refetchSkills // Expose the refetch function
   };
 
   return (
