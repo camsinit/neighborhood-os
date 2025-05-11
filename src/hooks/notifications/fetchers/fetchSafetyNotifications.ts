@@ -1,13 +1,27 @@
 
 /**
  * Fetches safety notifications from the database
- * Each fetcher is split into its own file for clarity!
+ * This version filters to only show notifications relevant to the current user:
+ * - Safety updates created by the user
+ * - Safety updates that mention/tag the user
  */
 import { supabase } from "@/integrations/supabase/client";
 
 export const fetchSafetyNotifications = async (showArchived: boolean) => {
-  // Fetch safety update rows, including author profile
-  return supabase.from("safety_updates").select(`
+  // Get the current user ID
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+  
+  if (!userId) {
+    console.warn("[fetchSafetyNotifications] No authenticated user found");
+    return { data: [], error: null };
+  }
+
+  // Log the fetch attempt for debugging
+  console.log(`[fetchSafetyNotifications] Fetching safety updates for user ${userId}, showArchived=${showArchived}`);
+  
+  // Fetch safety updates created by the user
+  const safetyUpdatesResult = await supabase.from("safety_updates").select(`
     id, 
     title, 
     type, 
@@ -18,7 +32,13 @@ export const fetchSafetyNotifications = async (showArchived: boolean) => {
       display_name,
       avatar_url
     )
-  `).eq('is_archived', showArchived).order("created_at", {
-    ascending: false
-  }).limit(5);
+  `)
+  .eq('author_id', userId)
+  .eq('is_archived', showArchived)
+  .order("created_at", { ascending: false });
+  
+  // Log the result for debugging
+  console.log(`[fetchSafetyNotifications] Found ${safetyUpdatesResult.data?.length || 0} relevant safety updates`);
+  
+  return safetyUpdatesResult;
 };

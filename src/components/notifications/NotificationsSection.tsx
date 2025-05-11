@@ -1,3 +1,4 @@
+
 /**
  * NotificationsSection.tsx
  * 
@@ -165,24 +166,30 @@ export function NotificationsSection({
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
+  
   if (isLoading) {
     return <div className="p-8 text-center">
         <Clock className="mx-auto h-8 w-8 animate-spin text-gray-400" />
         <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
       </div>;
   }
+  
   if (!notifications?.length) {
     return <div className="p-8 text-center">
         <BellRing className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-semibold text-gray-900">No notifications</h3>
         <p className="mt-1 text-sm text-gray-500">
-          {showArchived ? "No archived notifications to show" : "When you receive notifications, they'll show up here"}
+          {showArchived 
+            ? "No archived notifications to show" 
+            : "You'll receive notifications for activities that directly involve you"}
+        </p>
+        <p className="mt-1 text-sm text-gray-500">
+          {!showArchived && "For general neighborhood updates, check the activity feed"}
         </p>
       </div>;
   }
+  
   return <div className="space-y-4">
-      
-
       {groupedNotifications.map(group => <div key={group.title} className="space-y-2">
           <h4 className="text-sm font-medium text-gray-500 px-4">{group.title}</h4>
           <div className="space-y-3 px-4">

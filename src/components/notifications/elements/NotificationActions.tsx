@@ -71,11 +71,11 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={handleView} // Changed from handleRead to handleView
+        onClick={handleView}
         className="flex-1 h-8 rounded-none text-xs text-gray-600 hover:bg-gray-50"
       >
-        <Eye className="h-3.5 w-3.5 mr-1" /> {/* Changed from Check to Eye icon */}
-        View {/* Changed from "Mark read" to "View" */}
+        <Eye className="h-3.5 w-3.5 mr-1" />
+        View
       </Button>
       <Button
         variant="ghost"

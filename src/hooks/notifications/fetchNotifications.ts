@@ -1,6 +1,6 @@
-
 /**
  * Main function to fetch all notifications from various sources
+ * Updated to only return notifications directly relevant to the current user
  */
 import { BaseNotification } from "./types";
 
@@ -22,9 +22,10 @@ import { processGoodsNotifications } from "./processors/goodsNotificationProcess
 import { isSkillSession, isNotification } from "./fetchers/fetchSkillNotifications";
 
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
-  console.log("[fetchAllNotifications] Starting to fetch all notifications, showArchived:", showArchived);
+  console.log("[fetchAllNotifications] Starting to fetch all relevant notifications, showArchived:", showArchived);
   
   // Fetch everything concurrently, so the user doesn't wait for each database call
+  // Each fetcher is now responsible for filtering by user relevance
   const [
     safetyUpdatesResult, 
     eventsResult, 
@@ -72,6 +73,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   const profilesMap = createProfilesMap(userProfiles);
 
   // Process notifications using our specialized processors
+  // Each processor remains the same, but now they're processing filtered data
   const safetyNotifications = processSafetyNotifications(safetyUpdates);
   const eventNotifications = processEventNotifications(events);
   const supportNotifications = processSupportNotifications(supportRequests);
@@ -87,7 +89,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
     ...goodsNotifications
   ];
   
-  console.log("[fetchAllNotifications] Final notification count:", allNotifications.length);
+  console.log("[fetchAllNotifications] Final relevant notification count:", allNotifications.length);
   
   // Sort by creation date, most recent first
   return allNotifications.sort((a, b) => 

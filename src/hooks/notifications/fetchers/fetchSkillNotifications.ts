@@ -25,7 +25,7 @@ export interface SkillSession {
 export interface SkillNotification {
   id: string;
   created_at: string;
-  updated_at: string; // Add this missing property
+  updated_at: string;
   title: string | null;
   content_id: string;
   content_type: string;
@@ -46,20 +46,29 @@ export interface SkillNotification {
 export type SkillNotificationItem = SkillSession | SkillNotification;
 
 /**
- * Fetches skill notifications (requests, completions, etc)
+ * Fetches skill notifications that are directly relevant to the current user
  * 
  * This function has been enhanced to fetch:
- * 1. Skill sessions with pending status
- * 2. Notifications related to skill requests
+ * 1. Skill sessions where the user is the provider (pending their action)
+ * 2. Skill sessions where the user is the requester
+ * 3. Notifications related to skill requests where the user is directly involved
  * 
- * @param showArchived - Whether to include archived notifications
- * @returns Supabase query result with skill sessions and notifications
+ * @returns Supabase query result with relevant skill sessions and notifications
  */
 export const fetchSkillNotifications = async () => {
   console.log("[fetchSkillNotifications] Starting to fetch skill notifications");
   
-  // First get skill sessions that are pending provider action
-  const skillSessionsResult = await supabase
+  // Get the current user ID
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+  
+  if (!userId) {
+    console.warn("[fetchSkillNotifications] No authenticated user found");
+    return { data: [], error: null };
+  }
+  
+  // First get skill sessions where the user is the provider (action needed)
+  const providerSessionsResult = await supabase
     .from("skill_sessions")
     .select(`
       id,
@@ -79,17 +88,42 @@ export const fetchSkillNotifications = async () => {
         time_preferences
       )
     `)
+    .eq('provider_id', userId)
     .eq('status', 'pending_provider_times')
+    .order("created_at", { ascending: false });
+  
+  // Then get skill sessions where the user is the requester
+  const requesterSessionsResult = await supabase
+    .from("skill_sessions")
+    .select(`
+      id,
+      created_at,
+      status,
+      skill_id,
+      requester_id,
+      provider_id,
+      requester:requester_id (
+        id
+      ),
+      skill:skill_id (
+        id,
+        title,
+        description,
+        availability,
+        time_preferences
+      )
+    `)
+    .eq('requester_id', userId)
     .order("created_at", { ascending: false })
     .limit(5);
   
-  // Then get specific skill-related notifications 
+  // Then get specific skill-related notifications where the user is directly involved
   const notificationsResult = await supabase
     .from("notifications")
     .select(`
       id,
       created_at,
-      updated_at, // Make sure we're selecting updated_at from the database
+      updated_at,
       title,
       content_id,
       content_type,
@@ -106,29 +140,32 @@ export const fetchSkillNotifications = async () => {
       )
     `)
     .eq('notification_type', 'skills')
-    .eq('content_type', 'skill_request')
+    .eq('user_id', userId)
     .eq('is_archived', false)
     .order("created_at", { ascending: false });
   
   // Log the results for debugging
-  console.log("[fetchSkillNotifications] Skill sessions query result:", {
-    count: skillSessionsResult.data?.length || 0,
-    error: skillSessionsResult.error?.message || null,
-    statusCode: skillSessionsResult.status,
+  console.log("[fetchSkillNotifications] Provider sessions query result:", {
+    count: providerSessionsResult.data?.length || 0,
+    error: providerSessionsResult.error?.message || null,
+  });
+  
+  console.log("[fetchSkillNotifications] Requester sessions query result:", {
+    count: requesterSessionsResult.data?.length || 0,
+    error: requesterSessionsResult.error?.message || null,
   });
   
   console.log("[fetchSkillNotifications] Skill notifications query result:", {
     count: notificationsResult.data?.length || 0,
     error: notificationsResult.error?.message || null,
-    statusCode: notificationsResult.status,
-    data: notificationsResult.data
   });
   
-  // Combine the data from both queries
+  // Combine the data from all queries
   const combinedData = {
-    ...skillSessionsResult,
+    ...providerSessionsResult,
     data: [
-      ...(skillSessionsResult.data || []) as unknown as SkillSession[],
+      ...(providerSessionsResult.data || []) as unknown as SkillSession[],
+      ...(requesterSessionsResult.data || []) as unknown as SkillSession[],
       ...(notificationsResult.data || []) as unknown as SkillNotification[]
     ] as SkillNotificationItem[]
   };
@@ -145,10 +182,6 @@ export const isSkillSession = (item: SkillNotificationItem): item is SkillSessio
   return item && 'skill_id' in item && 'requester_id' in item && 'provider_id' in item;
 };
 
-/**
- * Type guard to check if an item is a notification
- * This helps TypeScript understand when we're working with a notification
- */
 export const isNotification = (item: SkillNotificationItem): item is SkillNotification => {
   // Check for key properties that would exist in a notification but not in a skill session
   return item && 'notification_type' in item && 'metadata' in item && 'actor_id' in item;
