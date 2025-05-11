@@ -116,23 +116,23 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       return <span key={index} className="text-base">{part}</span>;
     });
   };
-  return <Card className={cn("transition-all duration-200 overflow-hidden mb-2 group relative", "border-l-4",
-  // Always show left border
-  getBorderColor(),
-  // Apply the border color based on notification type
-  isUnread ? "bg-white shadow" // Only background changes for unread
-  : "bg-gray-50 border-gray-100",
-  // Light background for read
-  className)}>
+  return <Card className={cn("transition-all duration-200 overflow-hidden mb-2 group relative", 
+                            "border-l-4",  // Always show left border
+                            getBorderColor(),  // Apply the border color based on notification type
+                            isUnread ? "bg-white shadow" // Only background changes for unread
+                                     : "bg-gray-50 border-gray-100",  // Light background for read
+                            className)}>
       {/* Only timestamp in the top right corner now, no type badge */}
       {showTimestamp && <div className="absolute top-2 right-2 z-10">
           <NotificationTimeStamp date={created_at} isUnread={isUnread} />
         </div>}
       
-      <div className={cn("flex items-start p-3 gap-3 cursor-pointer", isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
-    // Add right padding to prevent content from overlapping with timestamp
-    showTimestamp && "pr-16" // Extra right padding when timestamp is shown
-    )} onClick={handleCardClick}>
+      <div className={cn("flex items-start p-3 gap-3 cursor-pointer", 
+                        isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
+                        // Add right padding to prevent content from overlapping with timestamp
+                        showTimestamp && "pr-16" // Extra right padding when timestamp is shown
+                        )} 
+           onClick={handleCardClick}>
         {/* Avatar section using our reusable component */}
         <NotificationAvatar url={avatarUrl} name={actorName} isUnread={isUnread} className="mt-0.5" />
         

@@ -67,7 +67,6 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
       notification={notificationWithSentenceTitle}
       onAction={handleViewSafety}
       onDismiss={onDismiss}
-      className={!notification.is_read ? "border-l-red-500" : ""}
     >
       {/* Removed the safety type badge that was previously displayed here */}
     </NotificationCard>
