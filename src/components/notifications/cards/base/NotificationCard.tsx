@@ -40,7 +40,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   className,
   showActions = true,
   showTimestamp = true,
-  showTypeLabel = true,
+  showTypeLabel = false, // Changed default to false to hide type label
   children,
 }) => {
   // Extract common notification properties
@@ -72,6 +72,20 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // Handle click on the notification card
   const handleCardClick = () => {
     if (onAction) onAction();
+  };
+
+  // Get the appropriate border color based on notification type
+  // We'll now use this color for both read and unread notifications
+  const getBorderColor = () => {
+    switch(notification_type) {
+      case "event": return "border-l-blue-500";
+      case "safety": return "border-l-red-500";
+      case "skills": return "border-l-green-500";
+      case "neighbors": return "border-l-purple-500";
+      case "goods": return "border-l-amber-500";
+      case "support": return "border-l-indigo-500";
+      default: return "border-l-blue-500";
+    }
   };
 
   // Parse the title that might contain highlighted content within [[ ]] markers
@@ -114,36 +128,31 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-200 overflow-hidden mb-2 group relative", // Added relative positioning
+        "transition-all duration-200 overflow-hidden mb-2 group relative", 
+        "border-l-4", // Always show left border
+        getBorderColor(), // Apply the border color based on notification type
         isUnread 
-          ? "bg-white border-l-4 border-l-blue-500 shadow" 
-          : "bg-gray-50 border-gray-100",
+          ? "bg-white shadow" // Only background changes for unread
+          : "bg-gray-50 border-gray-100", // Light background for read
         className
       )}
     >
-      {/* Type badge and timestamp now positioned absolutely in the top right corner */}
-      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
-        {showTimestamp && (
+      {/* Only timestamp in the top right corner now, no type badge */}
+      {showTimestamp && (
+        <div className="absolute top-2 right-2 z-10">
           <NotificationTimeStamp
             date={created_at}
             isUnread={isUnread}
           />
-        )}
-        
-        {showTypeLabel && (
-          <Badge 
-            variant={isUnread ? "default" : "outline"} 
-            className="text-[10px] h-5"
-          >
-            {typeName}
-          </Badge>
-        )}
-      </div>
+        </div>
+      )}
       
       <div 
         className={cn(
           "flex items-start p-3 gap-3 cursor-pointer",
-          isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100"
+          isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
+          // Add right padding to prevent content from overlapping with timestamp
+          showTimestamp && "pr-16" // Extra right padding when timestamp is shown
         )}
         onClick={handleCardClick}
       >
