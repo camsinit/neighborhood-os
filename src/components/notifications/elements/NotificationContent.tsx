@@ -27,10 +27,10 @@ export const NotificationContent: React.FC<NotificationContentProps> = ({
   formattedTitle // New prop for formatted title with highlights
 }) => {
   return (
-    <div className={cn("flex-1 min-w-0", className)}>
+    <div className={cn("flex-1 min-w-0 overflow-hidden", className)}>
       <h4 
         className={cn(
-          "text-base leading-tight mb-1", // Updated from text-sm to text-base to match body text
+          "text-base leading-tight mb-1 break-words", // Added break-words to prevent overflow
           isUnread ? "font-medium text-gray-900" : "font-normal text-gray-700"
         )}
       >

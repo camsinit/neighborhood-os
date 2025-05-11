@@ -10,7 +10,7 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
 import { AlertTriangle } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
-import { cn } from "@/lib/utils";  // Add the missing import
+import { cn } from "@/lib/utils";  // Import for utility functions
 
 interface SafetyNotificationCardProps {
   notification: BaseNotification;
@@ -62,6 +62,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
     if (onDismiss) onDismiss();
   };
 
+  // We're no longer passing any className prop that could override the border styling
   return (
     <NotificationCard
       notification={notificationWithSentenceTitle}

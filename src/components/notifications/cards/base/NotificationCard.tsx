@@ -73,7 +73,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       case "event":
         return "border-l-blue-500";
       case "safety":
-        return "border-l-red-500";
+        return "border-l-red-500 !border-l-4"; // Added !border-l-4 for higher specificity
       case "skills":
         return "border-l-green-500";
       case "neighbors":
@@ -116,23 +116,29 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       return <span key={index} className="text-base">{part}</span>;
     });
   };
-  return <Card className={cn("transition-all duration-200 overflow-hidden mb-2 group relative", 
-                            "border-l-4",  // Always show left border
-                            getBorderColor(),  // Apply the border color based on notification type
-                            isUnread ? "bg-white shadow" // Only background changes for unread
-                                     : "bg-gray-50 border-gray-100",  // Light background for read
-                            className)}>
+  
+  // Added CSS classes with higher specificity for the border
+  return <Card 
+    className={cn(
+      "transition-all duration-200 overflow-hidden mb-2 group relative", 
+      "border-l-4 !border-l-4",  // Always show left border with !important flag
+      getBorderColor(),  // Apply the border color based on notification type
+      isUnread ? "bg-white shadow" : "bg-gray-50", 
+      className
+    )}
+  >
       {/* Only timestamp in the top right corner now, no type badge */}
       {showTimestamp && <div className="absolute top-2 right-2 z-10">
           <NotificationTimeStamp date={created_at} isUnread={isUnread} />
         </div>}
       
-      <div className={cn("flex items-start p-3 gap-3 cursor-pointer", 
-                        isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
-                        // Add right padding to prevent content from overlapping with timestamp
-                        showTimestamp && "pr-16" // Extra right padding when timestamp is shown
-                        )} 
-           onClick={handleCardClick}>
+      <div className={cn(
+          "flex items-start p-3 gap-3 cursor-pointer", 
+          isUnread ? "hover:bg-blue-50" : "hover:bg-gray-100",
+          // Add right padding to prevent content from overlapping with timestamp
+          showTimestamp && "pr-16" // Extra right padding when timestamp is shown
+        )} 
+        onClick={handleCardClick}>
         {/* Avatar section using our reusable component */}
         <NotificationAvatar url={avatarUrl} name={actorName} isUnread={isUnread} className="mt-0.5" />
         

@@ -17,6 +17,7 @@ export interface NotificationBadgeProps {
 
 /**
  * Renders a badge for notification type or status with appropriate styling
+ * This component is used for badge display and should not affect card border styling
  */
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   label,
