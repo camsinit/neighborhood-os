@@ -12,6 +12,7 @@ import GoodsNotificationCard from "./GoodsNotificationCard";
 import SafetyNotificationCard from "./SafetyNotificationCard";
 import SkillRequestNotificationCard from "./SkillRequestNotificationCard";
 import SkillSessionNotificationCard from "./SkillSessionNotificationCard";
+import { NotificationCard } from "./base/NotificationCard"; // Fixed import
 
 // Props for the NotificationCardFactory component
 interface NotificationCardFactoryProps {
