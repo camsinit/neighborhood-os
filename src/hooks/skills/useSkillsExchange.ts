@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { refreshEvents } from "@/utils/refreshEvents"; // Import for activity refresh
 
 interface SkillsExchangeProps {
   onSuccess: () => void;
@@ -12,6 +13,8 @@ interface SkillsExchangeProps {
 
 /**
  * Custom hook for submitting skills exchange requests and offers
+ * 
+ * Fixed: removed reference to non-existent event_id field
  */
 export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   // Get current user, query client, and neighborhood context
@@ -39,6 +42,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
     try {
       // Format the data according to the database schema requirements
+      // FIXED: Removed any reference to event_id which doesn't exist in the table
       const formattedData = {
         title: formData.title, // Required field
         description: formData.description || null,
@@ -96,6 +100,10 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Update UI and show success message
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      
+      // Dispatch refresh event for activities feed
+      refreshEvents.skills();
+      
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       onSuccess();
       
@@ -171,6 +179,10 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       }
 
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      
+      // Dispatch refresh event for activities feed
+      refreshEvents.skills();
+      
       toast.success('Skill exchange updated successfully!');
       onSuccess();
       

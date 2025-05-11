@@ -39,6 +39,8 @@ export const fetchSkills = async (category?: SkillCategory) => {
 
 /**
  * Create a new skill
+ * 
+ * FIXED: Removed any reference to event_id which doesn't exist in the table
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
