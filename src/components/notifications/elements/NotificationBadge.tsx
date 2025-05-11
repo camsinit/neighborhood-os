@@ -1,4 +1,3 @@
-
 /**
  * NotificationBadge.tsx
  * 
@@ -7,7 +6,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
 export interface NotificationBadgeProps {
   label: string;
   variant?: "default" | "outline" | "secondary" | "destructive" | "success" | "warning" | "info";
@@ -28,20 +26,6 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
 }) => {
   // Determine size class based on size prop
   const sizeClass = size === "sm" ? "text-[10px] h-5" : "";
-  
-  return (
-    <Badge 
-      variant={isHighlighted ? "default" : variant} 
-      className={cn(
-        sizeClass,
-        // Add font-normal if not highlighted
-        !isHighlighted && variant === "outline" && "font-normal",
-        className
-      )}
-    >
-      {label}
-    </Badge>
-  );
+  return;
 };
-
 export default NotificationBadge;
