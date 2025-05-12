@@ -86,7 +86,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        // We need to use a string type for notification_type to work with any value
+        // Convert notification_type to string to ensure type compatibility
         await markAsRead(String(notification_type), id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
@@ -96,9 +96,10 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Navigate to the content if content type is valid
     if (content_type && content_id) {
       try {
-        // Use a type assertion to safely handle any string value
-        // This allows us to work with dynamic content types from the database
-        highlightItem(content_type as HighlightableItemType, content_id);
+        // Use type conversion to make TypeScript happy
+        // This allows us to work with the dynamic notification types
+        const contentTypeAsHighlightable = content_type as HighlightableItemType;
+        highlightItem(contentTypeAsHighlightable, content_id);
       } catch (error) {
         console.error("Error navigating to content:", error);
         // Fallback navigation if highlighting fails

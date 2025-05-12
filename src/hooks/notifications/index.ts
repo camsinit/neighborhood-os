@@ -10,7 +10,6 @@ import {
 
 import {
   archiveNotification,
-  archiveNotificationWithType,
   markAsRead,
   getTableName
 } from "./notificationActions";
@@ -18,7 +17,6 @@ import {
 export {
   useNotifications,
   archiveNotification,
-  archiveNotificationWithType,
   markAsRead,
   getTableName
 };

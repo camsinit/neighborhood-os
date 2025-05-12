@@ -52,8 +52,9 @@ export const markAsRead = async (type: string, id: string): Promise<boolean> => 
     const table = getTableName(type);
     
     // Update the notification as read
+    // Use type assertion to satisfy TypeScript with dynamic table names
     const { error } = await supabase
-      .from(table)
+      .from(table as any) // Type assertion to handle dynamic table names
       .update({ is_read: true })
       .eq('id', id);
     
