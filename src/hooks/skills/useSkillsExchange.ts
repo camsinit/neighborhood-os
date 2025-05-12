@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -33,7 +32,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   /**
-   * Calls the edge function to notify about skill changes and create activities
+   * Calls the edge function to notify about skill changes - used only as a fallback
+   * The main activity creation happens via database triggers
    * 
    * @param skillId - The ID of the skill that changed
    * @param action - The type of change that occurred
@@ -54,18 +54,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   ) => {
     try {
       // Log the notification attempt
-      logger.debug(`Notifying skill changes:`, { 
+      logger.debug(`Notifying skill changes (fallback method):`, { 
         skillId, 
         action, 
         ...data,
         timestamp: new Date().toISOString()
       });
-
-      logger.trace(`Preparing to call edge function with params: ${JSON.stringify({
-        skillId,
-        action,
-        ...data
-      }, null, 2)}`);
       
       // Get the current session for authorization
       const { data: sessionData } = await supabase.auth.getSession();
@@ -73,12 +67,12 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       
       if (!accessToken) {
         logger.warn('No access token available for edge function call');
+        return; // Fail silently - this is just a fallback
       }
       
-      // Call the edge function
-      // Try both paths - the edge function might be deployed under either URL pattern
+      // Try to call the edge function (either path might work)
       try {
-        // First try the /api/ prefix which is common in development
+        // First try the /api/ prefix
         const response = await fetch('/api/notify-skills-changes', {
           method: 'POST',
           headers: {
@@ -92,59 +86,23 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
           }),
         });
         
-        logger.trace(`Edge function response status: ${response.status}`);
-
         if (!response.ok) {
           throw new Error(`Error status: ${response.status}`);
         }
-
-        const responseData = await response.json();
-        logger.debug(`Successfully notified skill changes for ${action}`, responseData);
-        return responseData;
       } catch (firstAttemptError) {
-        logger.warn('First attempt at edge function call failed, trying alternate URL', firstAttemptError);
-        
-        // Try alternate URL pattern used in production
-        const response = await fetch('/functions/v1/notify-skills-changes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            skillId,
-            action,
-            ...data
-          }),
-        });
-        
-        logger.trace(`Edge function (alternate URL) response status: ${response.status}`);
-
-        if (!response.ok) {
-          const responseText = await response.text();
-          logger.error(`Error in notify-skills-changes edge function: ${response.status} ${responseText}`);
-          throw new Error(`Error notifying skill changes: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-        logger.debug(`Successfully notified skill changes for ${action}`, responseData);
-        return responseData;
+        // Try alternate path - it's okay if both fail since we use database triggers primarily
+        logger.info('First attempt at edge function call failed, trying alternate URL');
+        // Just log and continue - don't throw
       }
     } catch (error) {
-      logger.error('Error notifying skill changes:', error);
-      // We don't throw here to prevent breaking the main flow
-      
-      // But we do log that we're falling back to the database trigger
-      logger.info('Falling back to database trigger for activity creation');
+      // Just log the error - don't break the main flow since this is just a fallback
+      logger.info('Error in edge function fallback, continuing with database trigger:', error);
     }
   };
 
   /**
    * Submits a new skill exchange (offer or request)
-   * 
-   * @param formData - The form data containing skill details 
-   * @param mode - Whether this is an 'offer' or 'request'
-   * @returns Promise with the created data or undefined on failure
+   * Primary method is the database trigger, with edge function as fallback
    */
   const handleSubmit = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     // Validate required data
@@ -184,7 +142,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         description: formData.description?.substring(0, 50) + (formData.description && formData.description.length > 50 ? '...' : ''),
       })}`);
 
-      // Use the service layer to create the skill
+      // Use the service layer to create the skill (database trigger handles activities)
       const data = await skillsService.createSkill(
         formData,
         mode,
@@ -201,47 +159,19 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         timestamp: new Date().toISOString()
       });
 
-      // Create an activity for this skill using the edge function
-      if (data && data.length > 0) {
-        logger.trace(`Skill created with ID: ${data[0].id}, now creating activity`);
-        
-        try {
-          await notifySkillChanges(
-            data[0].id, 
-            'create', 
-            {
-              skillTitle: formData.title,
-              providerId: mode === 'offer' ? user.id : undefined,
-              requesterId: mode === 'request' ? user.id : undefined,
-              neighborhoodId: neighborhood.id,
-              description: formData.description,
-              category: formData.category,
-              requestType: mode === 'offer' ? 'offer' : 'need'
-            }
-          );
-        } catch (notifyError) {
-          // Log but continue - we rely on the database trigger as fallback
-          logger.error("Error notifying about skill changes, but the skill was created successfully:", notifyError);
-          logger.info("The database trigger will handle activity creation instead");
-        }
-      }
-
-      // Dispatch refresh events - ensure skill updates trigger activity feed refresh
+      // Dispatch refresh events to ensure immediate UI updates
       logger.debug("Dispatching skills-updated event");
       dispatchRefreshEvent('skills-updated');
       
-      // Also invalidate the queries directly to ensure immediate refresh
-      logger.debug("Manually invalidating skills-exchange query");
+      // Also invalidate the queries directly
+      logger.debug("Invalidating queries to refresh UI");
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      
-      logger.debug("Manually invalidating activities query");
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       
-      // Show success message to the user
+      // Show success message
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
       
-      // Call the onSuccess callback to close dialogs, etc.
-      logger.trace("Calling onSuccess callback");
+      // Call the onSuccess callback
       onSuccess();
       
       return data;

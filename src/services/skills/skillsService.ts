@@ -121,7 +121,7 @@ export const createSkill = async (
     try {
       logger.info('Calling edge function to create activity...');
       
-      // The edge function might not be deployed yet, we rely on the database trigger as fallback
+      // This is just a fallback - it's okay if it fails since we're primarily using the database trigger
       const response = await fetch('/api/notify-skills-changes', {
         method: 'POST',
         headers: {
