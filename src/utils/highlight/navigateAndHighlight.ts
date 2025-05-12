@@ -1,54 +1,53 @@
 
 /**
- * Navigation utility that combines routing and element highlighting
+ * Navigation utility for highlight feature
  * 
- * This file contains a function to navigate to the right page and then
- * highlight the specified item after navigation is complete
+ * This file contains a utility function that combines navigation
+ * and highlighting in one operation
  */
+import { highlightItem } from './highlightItem';
 import { HighlightableItemType } from './types';
 import { routeMap } from './constants';
-import { highlightItem } from './highlightItem';
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this utility
+const logger = createLogger('navigateAndHighlight');
 
 /**
- * Navigate to a specific page and highlight an item
+ * Navigate to a specific route and highlight an item
  * 
- * @param type The type of item to navigate to and highlight
- * @param id The ID of the item to highlight
- * @param navigate The navigate function from react-router-dom
+ * @param itemType The type of item to highlight
+ * @param itemId The ID of the item to highlight
+ * @param navigate The navigate function from react-router
  * @param showToast Whether to show a toast notification
  * @returns Promise that resolves when navigation and highlighting are complete
  */
 export const navigateAndHighlight = (
-  type: HighlightableItemType,
-  id: string,
+  itemType: HighlightableItemType,
+  itemId: string,
   navigate: (path: string) => void,
-  showToast: boolean = true
-): Promise<boolean> => {
-  // Log the navigation attempt for debugging
-  console.log(`[navigateAndHighlight] Navigating to ${type} page and highlighting item ${id}`);
-  
-  // Get the correct route from our routeMap
-  const route = routeMap[type];
-  
-  if (!route) {
-    console.error(`[navigateAndHighlight] No route found for type: ${type}`);
-    return Promise.resolve(false);
-  }
-  
-  // First navigate to the correct page
-  navigate(route);
-  
-  // Then wait a short delay for the navigation to complete
-  // and the new page to render before highlighting
-  return new Promise((resolve) => {
+  showToast: boolean = false
+): void => {
+  try {
+    // Get the route for this item type
+    const route = routeMap[itemType];
+    
+    if (!route) {
+      logger.error(`No route defined for item type: ${itemType}`);
+      return;
+    }
+    
+    logger.debug(`Navigating to ${route} for ${itemType} item ${itemId}`);
+    
+    // Navigate to the correct route
+    navigate(route);
+    
+    // After navigation, highlight the item with a slight delay
+    // to allow the page to render
     setTimeout(() => {
-      // Now highlight the item on the new page
-      highlightItem(type, id, showToast)
-        .then(result => resolve(result))
-        .catch(error => {
-          console.error(`[navigateAndHighlight] Error highlighting item after navigation:`, error);
-          resolve(false);
-        });
-    }, 500); // Wait 500ms for navigation to complete before highlighting
-  });
+      highlightItem(itemType, itemId, showToast);
+    }, 300);
+  } catch (error) {
+    logger.error(`Error in navigateAndHighlight:`, error);
+  }
 };

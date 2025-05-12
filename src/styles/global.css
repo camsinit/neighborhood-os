@@ -1,0 +1,31 @@
+
+/* Import Inter font for consistent typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styling to match chat aesthetic */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom highlight animations */
+@keyframes rainbow-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+.rainbow-highlight {
+  animation: rainbow-pulse 2s infinite;
+}
+
+.highlight-pulse {
+  animation: rainbow-pulse 2s 1;
+}
+
+/* Other global styles can go here */

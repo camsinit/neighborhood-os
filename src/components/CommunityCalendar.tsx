@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   addWeeks, 
@@ -47,8 +46,7 @@ const CommunityCalendar = () => {
   // This will listen for multiple events that should trigger a calendar refresh
   useAutoRefresh(
     ['events'], 
-    ['event-submitted', 'event-deleted', 'event-updated'],
-    100 // Refresh with minimal delay for better user experience
+    ['event-submitted', 'event-deleted', 'event-updated']
   );
 
   // Handle event navigation (e.g. from notifications)

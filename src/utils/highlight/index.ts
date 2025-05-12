@@ -28,7 +28,7 @@ export {
   createHighlightListener 
 } from './createHighlightListener';
 
-// Export our new navigation utility
+// Export our navigation utility
 export {
   navigateAndHighlight
 } from './navigateAndHighlight';

@@ -5,7 +5,7 @@ import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import { highlightItem } from "@/utils/highlight"; // Updated import path
+import { highlightItem } from "@/utils/highlight"; // Updated import from the index file
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
