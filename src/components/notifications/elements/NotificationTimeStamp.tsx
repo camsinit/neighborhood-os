@@ -24,7 +24,9 @@ export interface NotificationTimeStampProps {
  * Creates a concise time representation like "5m" or "2h"
  */
 const getShortRelativeTime = (date: Date): string => {
+  // Get the full relative time string from date-fns
   const fullRelative = formatDistanceToNow(date, { addSuffix: false });
+  // Extract the number and unit using regex
   const match = fullRelative.match(/^(\d+)\s+(\w+)/);
   if (!match) return fullRelative;
   
@@ -41,6 +43,7 @@ const getShortRelativeTime = (date: Date): string => {
     unit.startsWith('year') ? 'y' :
     unit.charAt(0);
   
+  // Return the condensed format (e.g., "5m", "2h", "3d")
   return `${num}${shortUnit}`;
 };
 
@@ -52,13 +55,13 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
   date,
   isUnread = false,
   className,
-  format = "short",
+  format = "short", // Default to short format now
   position = "corner",
   notificationType
 }) => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   
-  // Format based on preference
+  // Format based on preference - now using our condensed format by default
   const timeText = format === "short"
     ? getShortRelativeTime(dateObj)
     : formatDistanceToNow(dateObj, { addSuffix: true });

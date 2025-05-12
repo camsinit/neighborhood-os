@@ -83,22 +83,25 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     }, 500);
   };
 
-  // Simple button styling to match the reference image
+  // Updated button styling with vertical separator
   return (
-    <div className={cn("flex items-center justify-center gap-16 py-3 border-t border-gray-100", className)}>
-      {/* View button with simplified design */}
+    <div className={cn("flex border-t border-gray-100", className)}>
+      {/* View button with centered text */}
       <button
         onClick={handleView}
-        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        className="flex-1 flex items-center justify-center py-3 text-gray-600 hover:text-gray-800 transition-colors"
       >
         <Eye className="h-5 w-5 mr-2" />
         <span className="text-sm">View</span>
       </button>
       
-      {/* Archive button with simplified design */}
+      {/* Vertical separator line */}
+      <div className="w-px bg-gray-100 self-stretch my-2"></div>
+      
+      {/* Archive button with centered text */}
       <button
         onClick={handleArchive}
-        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        className="flex-1 flex items-center justify-center py-3 text-gray-600 hover:text-gray-800 transition-colors"
       >
         <Archive className="h-5 w-5 mr-2" />
         <span className="text-sm">Archive</span>
