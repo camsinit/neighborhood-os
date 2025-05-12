@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/notifications";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
@@ -93,6 +93,20 @@ export function NotificationsSection({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isMarkingRead, setIsMarkingRead] = useState(false);
+
+  // Clear cache and refetch on component mount to ensure we have the latest formatting
+  useEffect(() => {
+    // Invalidate the notifications query cache to force a fresh fetch
+    queryClient.invalidateQueries({
+      queryKey: ["notifications"]
+    });
+    
+    // Refetch after invalidating
+    refetch();
+    
+    // Log for debugging purposes
+    console.log("[NotificationsSection] Invalidated cache and refetched notifications");
+  }, [queryClient, refetch]);
 
   // Sort notifications by date (newer first)
   const sortedNotifications = notifications?.sort((a, b) => {

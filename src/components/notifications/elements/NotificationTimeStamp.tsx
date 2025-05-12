@@ -5,7 +5,7 @@
  * A minimal timestamp component for notifications
  * showing time elapsed since creation
  */
-import React from "react";
+import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Clock } from "lucide-react";
@@ -30,10 +30,16 @@ const getShortRelativeTime = (date: Date): string => {
   // Get the full relative time string from date-fns
   const fullRelative = formatDistanceToNow(date, { addSuffix: false });
   
+  // For debugging
+  console.log("[getShortRelativeTime] Input:", date, "Full time:", fullRelative);
+  
   // Extract the number and unit using regex
   // This matches patterns like "5 minutes", "2 hours", etc.
   const match = fullRelative.match(/^(\d+)\s+(\w+)/);
-  if (!match) return fullRelative;
+  if (!match) {
+    console.warn("[getShortRelativeTime] No match found for:", fullRelative);
+    return fullRelative;
+  }
   
   const [_, num, unit] = match;
   
@@ -48,8 +54,13 @@ const getShortRelativeTime = (date: Date): string => {
     unit.startsWith('year') ? 'y' :
     unit.charAt(0);
   
+  const result = `${num}${shortUnit}`;
+  
+  // Log the result for debugging
+  console.log("[getShortRelativeTime] Converted:", fullRelative, "to:", result);
+  
   // Return the condensed format (e.g., "5m", "2h", "3d", "1mo")
-  return `${num}${shortUnit}`;
+  return result;
 };
 
 /**
@@ -66,10 +77,15 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
 }) => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   
-  // Format based on preference - now using our condensed format by default
-  const timeText = format === "short"
-    ? getShortRelativeTime(dateObj)
-    : formatDistanceToNow(dateObj, { addSuffix: true });
+  // Use useMemo to prevent unnecessary recalculations on renders
+  const timeText = useMemo(() => {
+    // Format based on preference - now using our condensed format by default
+    if (format === "short") {
+      return getShortRelativeTime(dateObj);
+    } else {
+      return formatDistanceToNow(dateObj, { addSuffix: true });
+    }
+  }, [dateObj, format]);
   
   // Get highlight color if unread and has notification type
   const highlightColor = isUnread && notificationType 
