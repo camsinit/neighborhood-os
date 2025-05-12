@@ -9,17 +9,13 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { User } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Eye, Archive } from "lucide-react";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom";
 import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
-import { highlightTitleContent } from "@/utils/highlight/titleHighlighting";
+import NotificationHeader from "./NotificationHeader";
+import NotificationFooter from "./NotificationFooter";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -171,64 +167,32 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
         </div>
       )}
       
-      <div 
-        className="flex items-start p-3 cursor-pointer gap-3" 
+      {/* Header section with avatar and title */}
+      <NotificationHeader
+        title={title}
+        contentType={content_type}
+        avatarUrl={avatarUrl}
+        actorName={actorName}
+        isUnread={isUnread}
+        showTypeLabel={showTypeLabel}
+        notificationType={notification_type}
         onClick={handleCardClick}
-      >
-        {/* Avatar section */}
-        <Avatar className="h-8 w-8 shrink-0">
-          <AvatarImage src={avatarUrl || ''} alt={actorName} />
-          <AvatarFallback>
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-        
-        {/* Content section */}
-        <div className="flex-1 space-y-1 pr-6">
-          {/* Title with optional type label */}
-          <div className="flex items-center gap-2">
-            {showTypeLabel && (
-              <Badge variant="outline" className="text-xs px-1 py-0 h-5">
-                {notification_type}
-              </Badge>
-            )}
-            
-            <p className={cn(
-              "text-sm",
-              isUnread ? "font-semibold" : "font-medium"
-            )}>
-              {/* Use the highlight function for the title */}
-              {highlightTitleContent(title, content_type)}
-            </p>
-          </div>
-          
-          {/* Child content */}
+      />
+      
+      {/* Child content */}
+      {children && (
+        <div className="px-3 pb-3 -mt-1">
           {children}
         </div>
-      </div>
+      )}
       
-      {/* Action buttons */}
-      {showActions && !is_archived && (
-        <div className="flex border-t border-gray-100">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleView}
-            className="flex-1 h-8 rounded-none text-xs text-gray-600 hover:bg-gray-50"
-          >
-            <Eye className="h-3.5 w-3.5 mr-1" />
-            View
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleArchive}
-            className="flex-1 h-8 rounded-none text-xs text-gray-600 hover:bg-gray-50"
-          >
-            <Archive className="h-3.5 w-3.5 mr-1" />
-            Archive
-          </Button>
-        </div>
+      {/* Footer with action buttons */}
+      {showActions && (
+        <NotificationFooter
+          isArchived={is_archived}
+          onView={handleView}
+          onArchive={handleArchive}
+        />
       )}
     </Card>
   );

@@ -66,12 +66,16 @@ export const highlightTitleContent = (
     const titleParts = title.split(contentPart);
     
     // Return JSX with the content part highlighted
-    return (
-      <>
-        {titleParts[0]}
-        <span style={{ color: color }}>{contentPart}</span>
-        {titleParts[1] || ""}
-      </>
+    return React.createElement(
+      React.Fragment,
+      null,
+      titleParts[0],
+      React.createElement(
+        "span",
+        { style: { color: color } },
+        contentPart
+      ),
+      titleParts[1] || ""
     );
   }
   
