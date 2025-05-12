@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from '@/components/support/types/formTypes';
@@ -166,19 +167,26 @@ export const submitGoodsForm = async (
   mode: 'create' | 'update' | 'delete' = 'create',
   goodsItemId?: string
 ) => {
-  // Initialize loadingToastId with explicit string type and use toString() for toast.loading return value
-  let loadingToastId: string = toast.loading(
-    mode === 'delete' 
-      ? "Removing your item..." 
-      : mode === 'update' 
-        ? "Updating your item..." 
-        : "Submitting your item..."
-  ).toString();
-
+  // Initialize a variable to hold our toast ID
+  let loadingToastId: string | number | undefined;
+  
   try {
+    // Create the loading toast and store its ID
+    loadingToastId = toast.loading(
+      mode === 'delete' 
+        ? "Removing your item..." 
+        : mode === 'update' 
+          ? "Updating your item..." 
+          : "Submitting your item..."
+    );
+
     if (!neighborhoodId) {
       console.error("Missing neighborhood_id in submission");
       toast.error("There was a problem: Missing neighborhood information");
+      // Dismiss the loading toast
+      if (loadingToastId !== undefined) {
+        toast.dismiss(loadingToastId);
+      }
       return null;
     }
     
@@ -258,9 +266,8 @@ export const submitGoodsForm = async (
     }
     
     // Dismiss loading toast and show success
-    if (loadingToastId) {
+    if (loadingToastId !== undefined) {
       toast.dismiss(loadingToastId);
-      loadingToastId = undefined;
     }
     
     toast.success(
@@ -280,16 +287,18 @@ export const submitGoodsForm = async (
     
   } catch (error) {
     console.error("Error in goods form submission:", error);
-    // Ensure we're dismissing the toast with the correct type
-    if (loadingToastId) {
+    
+    // Always dismiss the loading toast, even on error
+    if (loadingToastId !== undefined) {
       toast.dismiss(loadingToastId);
     }
+    
     toast.error("There was a problem with your request. Please try again.");
     throw error;
     
   } finally {
-    // Ensure loading toast is dismissed in all cases
-    if (loadingToastId) {
+    // Extra safety: ensure loading toast is dismissed in all cases
+    if (loadingToastId !== undefined) {
       toast.dismiss(loadingToastId);
     }
   }
