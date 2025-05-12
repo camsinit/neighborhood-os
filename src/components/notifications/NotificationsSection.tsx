@@ -199,9 +199,33 @@ export function NotificationsSection({
     );
   }
   
+  // Add a button to mark all as read if there are unread notifications
+  const renderMarkAllAsReadButton = () => {
+    if (unreadCount > 0 && !showArchived) {
+      return (
+        <div className="px-4 py-2 border-b">
+          <Button
+            variant="ghost" 
+            size="sm"
+            className="w-full text-sm font-medium text-gray-600 hover:text-gray-900"
+            onClick={markAllAsRead}
+            disabled={isMarkingRead}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            Mark all as read
+          </Button>
+        </div>
+      );
+    }
+    return null;
+  };
+  
   // Main content with notifications grouped by date
   return (
     <div className="space-y-4">
+      {/* Mark all as read button */}
+      {renderMarkAllAsReadButton()}
+      
       {/* Render each date group */}
       {groupedNotifications.map(group => (
         <div key={group.title} className="space-y-2">
@@ -211,7 +235,7 @@ export function NotificationsSection({
               <NotificationCardFactory 
                 key={notification.id} 
                 notification={notification} 
-                onDismiss={() => refetch()} 
+                onDismiss={onClose} 
               />
             ))}
           </div>

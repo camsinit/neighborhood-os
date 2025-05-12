@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
 import { type HighlightableItemType } from "@/utils/highlight";
-import { getNotificationTextColor } from "../utils/notificationColorUtils";
+import { getNotificationTextColor, getNotificationHoverBgColor } from "../utils/notificationColorUtils";
 
 export interface NotificationActionsProps {
   id: string;
@@ -27,6 +27,7 @@ export interface NotificationActionsProps {
 
 /**
  * Component for rendering minimalist notification action buttons
+ * with module-specific hover effects
  */
 const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
@@ -86,7 +87,7 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
 
   // Get highlight color for buttons
   const highlightColor = getNotificationTextColor(contentType);
-  const buttonHoverClass = highlightColor.replace('text-', 'hover:bg-').replace('-700', '-50');
+  const buttonHoverClass = getNotificationHoverBgColor(contentType);
 
   return (
     <div className={cn("flex justify-end gap-2 mt-2", className)}>
@@ -94,9 +95,9 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
         variant="ghost"
         size="sm"
         onClick={handleView}
-        className={cn("h-8 text-xs text-gray-600 hover:bg-gray-50 px-3", buttonHoverClass)}
+        className={cn("h-8 text-xs text-gray-600 px-3", buttonHoverClass)}
       >
-        <Eye className="h-3.5 w-3.5 mr-1" />
+        <Eye className={cn("h-3.5 w-3.5 mr-1", isRead ? "" : highlightColor)} />
         View
       </Button>
       <Button

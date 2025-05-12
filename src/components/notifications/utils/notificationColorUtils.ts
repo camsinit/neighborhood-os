@@ -40,7 +40,7 @@ export const getNotificationBorderColor = (notificationType: string | undefined)
 
 /**
  * Get the text color class for a notification type
- * Useful for highlighting specific content in notifications
+ * Used for highlighting important content within notifications
  * 
  * @param notificationType The type of notification
  * @returns Tailwind CSS class for text color
@@ -105,5 +105,40 @@ export const getNotificationBgColor = (notificationType: string | undefined): st
       return "bg-indigo-50";
     default:
       return "bg-gray-100";
+  }
+};
+
+/**
+ * Get hover background color class for a notification type
+ * Used for interactive elements like buttons
+ * 
+ * @param notificationType The type of notification
+ * @returns Tailwind CSS class for hover background color
+ */
+export const getNotificationHoverBgColor = (notificationType: string | undefined): string => {
+  // Handle undefined or null notification types with a default
+  if (!notificationType) {
+    return "hover:bg-gray-100";
+  }
+  
+  // Convert notification_type to a string and lowercase for consistent matching
+  const type = String(notificationType).toLowerCase();
+  
+  // Match known types to their hover background colors
+  switch (type) {
+    case "event":
+      return "hover:bg-blue-50";
+    case "safety":
+      return "hover:bg-red-50";
+    case "skills":
+      return "hover:bg-green-50";
+    case "neighbors":
+      return "hover:bg-purple-50";
+    case "goods":
+      return "hover:bg-amber-50";
+    case "support":
+      return "hover:bg-indigo-50";
+    default:
+      return "hover:bg-gray-100";
   }
 };

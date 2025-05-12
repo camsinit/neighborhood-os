@@ -4,6 +4,7 @@
  * 
  * Enhanced notification drawer with modern design and specialized notification cards
  * - Now with improved scrolling for better user experience
+ * - Fully integrated with our new minimalist notification components
  */
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";

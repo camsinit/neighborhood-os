@@ -22,6 +22,7 @@ interface NotificationItemProps {
 
 /**
  * A minimalist notification item component
+ * Renders a notification with avatar, content, timestamp, and actions
  */
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
@@ -86,10 +87,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               url={notification.profiles?.avatar_url} 
               name={displayName}
               isUnread={!notification.is_read}
+              notificationType={notification.notification_type}
               size="md"
             />
             
-            {/* Content with plain-English format */}
+            {/* Content with plain-English format and direct highlighting */}
             <div className="flex flex-col flex-1">
               <NotificationContent 
                 title={notification.title}

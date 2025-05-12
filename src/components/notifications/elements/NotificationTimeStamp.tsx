@@ -9,6 +9,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { Clock } from "lucide-react";
+import { getNotificationTextColor } from "../utils/notificationColorUtils";
 
 export interface NotificationTimeStampProps {
   date: string | Date;
@@ -16,6 +17,7 @@ export interface NotificationTimeStampProps {
   className?: string;
   format?: "short" | "verbose";
   position?: "inline" | "corner";
+  notificationType?: string;
 }
 
 /**
@@ -44,13 +46,15 @@ const getShortRelativeTime = (date: Date): string => {
 
 /**
  * Renders a minimal timestamp for notification items
+ * with optional type-specific coloring
  */
 const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
   date,
   isUnread = false,
   className,
   format = "short",
-  position = "corner"
+  position = "corner",
+  notificationType
 }) => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   
@@ -58,6 +62,11 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
   const timeText = format === "short"
     ? getShortRelativeTime(dateObj)
     : formatDistanceToNow(dateObj, { addSuffix: true });
+  
+  // Get highlight color if unread and has notification type
+  const highlightColor = isUnread && notificationType 
+    ? getNotificationTextColor(notificationType)
+    : "";
   
   return (
     <div 
@@ -68,7 +77,7 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
         className
       )}
     >
-      <Clock className="h-3 w-3" />
+      <Clock className={cn("h-3 w-3", isUnread && highlightColor)} />
       <span>{timeText}</span>
     </div>
   );

@@ -1,4 +1,3 @@
-
 /**
  * NotificationContent.tsx
  * 
@@ -20,6 +19,7 @@ interface NotificationContentProps {
 
 /**
  * Component for rendering the main content of a notification with plain English formatting
+ * Now with direct text highlighting instead of bracket notation
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -37,60 +37,77 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   // Get text color for highlighted content based on notification type
   const highlightColor = getNotificationTextColor(contentType);
 
-  // Create a nicely formatted notification content with highlighted terms
-  const renderHighlightedContent = (text: string) => {
-    // Check for brackets in the text that indicate content to highlight
-    const bracketRegex = /\[\[(.*?)\]\]/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    // Find all bracketed terms and replace them with highlighted spans
-    while ((match = bracketRegex.exec(text)) !== null) {
-      // Add the text before the bracketed term
-      if (match.index > lastIndex) {
-        parts.push(
-          <span key={`text-${lastIndex}`}>
-            {text.substring(lastIndex, match.index)}
+  // Parse and highlight content based on notification type and patterns
+  const renderHighlightedContent = (text: string, type?: string) => {
+    // Define patterns for different notification types to identify key content to highlight
+    const patterns = {
+      event: /(shared|updated|created|cancelled|is attending) (.+?)(?:\s|$|\.)/i,
+      goods: /(posted|is offering|is looking for|claimed|removed listing for) (.+?)(?:\s|$|\.)/i,
+      skills: /(requested|confirmed|completed|scheduled|cancelled) (.+?)(?:\s|$|\.)/i,
+      safety: /(reported|posted|shared) (.+?)(?:\s|$|\.)/i,
+      neighbors: /^(.+?) (joined|updated)/i
+    };
+    
+    // Default pattern if type doesn't match or is undefined
+    const defaultPattern = /(shared|updated|created|posted|requested|reported) (.+?)(?:\s|$|\.)/i;
+    
+    // Select the appropriate pattern based on the notification type
+    const pattern = type && patterns[type.toLowerCase() as keyof typeof patterns] 
+      ? patterns[type.toLowerCase() as keyof typeof patterns] 
+      : defaultPattern;
+    
+    // Check if the text matches our pattern
+    const match = text.match(pattern);
+    
+    if (match && match[2]) {
+      // We found content to highlight
+      const beforeText = text.substring(0, match.index);
+      const actionText = match[1]; // The action verb (e.g., "shared", "posted")
+      const highlightText = match[2]; // The content to highlight
+      const afterText = text.substring(match.index! + match[0].length);
+      
+      // Return the formatted content with the key part highlighted
+      return (
+        <>
+          {beforeText}
+          {actionText}{' '}
+          <span className={cn("font-medium", highlightColor)}>
+            {highlightText}
           </span>
+          {afterText}
+        </>
+      );
+    }
+    
+    // For neighbors pattern which highlights the actor name
+    if (type === 'neighbors') {
+      const neighborsMatch = text.match(/^(.+?) (joined|updated)/i);
+      if (neighborsMatch) {
+        return (
+          <>
+            <span className={cn("font-medium", highlightColor)}>
+              {neighborsMatch[1]}
+            </span>
+            {' '}{neighborsMatch[2]}{text.substring(neighborsMatch[0].length)}
+          </>
         );
       }
-      
-      // Add the highlighted term (without brackets)
-      parts.push(
-        <span 
-          key={`highlight-${match.index}`} 
-          className={cn("font-medium", highlightColor)}
-        >
-          {match[1]}
-        </span>
-      );
-      
-      lastIndex = match.index + match[0].length;
     }
-
-    // Add any remaining text after the last bracketed term
-    if (lastIndex < text.length) {
-      parts.push(
-        <span key={`text-${lastIndex}`}>
-          {text.substring(lastIndex)}
-        </span>
-      );
-    }
-
-    return parts.length > 0 ? parts : text;
+    
+    // If no pattern matches, return the text unchanged
+    return text;
   };
 
   return (
     <div className={cn("flex flex-col flex-1 min-w-0", className)}>
-      {/* Main notification text */}
+      {/* Main notification text with smart highlighting */}
       <p 
         className={cn(
           "text-sm leading-tight", 
           isUnread ? "font-medium text-gray-900" : "font-normal text-gray-800"
         )}
       >
-        {renderHighlightedContent(formattedTitle)}
+        {renderHighlightedContent(formattedTitle, contentType)}
       </p>
       
       {/* Optional description or other content */}
