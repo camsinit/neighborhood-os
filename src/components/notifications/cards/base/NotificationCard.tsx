@@ -85,8 +85,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        // Convert notification_type to the correct type for markAsRead function
-        // This safely handles any notification_type value from the database
+        // Use type assertion to handle any string value
         await markAsRead(notification_type as any, id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
@@ -95,9 +94,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     
     // Navigate to the content if content type is valid
     if (content_type && content_id) {
-      // Convert content_type to the correct type for highlightItem function
-      // This safely handles any content_type value from the database
-      highlightItem(content_type as HighlightableItemType, content_id);
+      try {
+        // Use the highlight utility to navigate to the content
+        // Use type assertion to handle string input
+        highlightItem(content_type as HighlightableItemType, content_id);
+      } catch (error) {
+        console.error("Error navigating to content:", error);
+        // Fallback navigation if highlighting fails
+        navigate(`/${content_type}/${content_id}`);
+      }
     }
     
     if (onDismiss) onDismiss();
@@ -123,9 +128,10 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   // Get the appropriate border color based on notification type
   const getBorderColor = () => {
-    // Convert any notification_type to a known type or default
+    // Convert notification_type to a string to ensure it works with any value
     const notificationType = String(notification_type).toLowerCase();
     
+    // Match known types or default to gray
     switch (notificationType) {
       case "event":
         return "border-l-blue-500";

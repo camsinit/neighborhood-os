@@ -122,16 +122,19 @@ export function NotificationsSection({
         return;
       }
 
-      // Use an array of table names instead of dynamic strings
-      const tables = [
-        "safety_updates",
-        "events", 
-        "support_requests", 
-        "goods_exchange"
+      // Define type-safe table names
+      // Using explicit type assertion to ensure compatibility
+      type NotificationTable = 'safety_updates' | 'events' | 'support_requests' | 'goods_exchange';
+      const tables: NotificationTable[] = [
+        'safety_updates',
+        'events', 
+        'support_requests', 
+        'goods_exchange'
       ];
       
       // Update each table in parallel
       await Promise.all(tables.map(async (table) => {
+        // Now supabase.from() will accept this as a valid table name
         const { error } = await supabase
           .from(table)
           .update({ is_read: true })
