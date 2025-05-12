@@ -60,7 +60,6 @@ export const markAsRead = async (
 export const archiveNotification = async (itemId: string) => {
   // When the type is not specified, we can use a generic approach
   // This function should try to archive the notification in all possible tables
-  // This is temporary until we have a more robust notification system
   
   console.log("[archiveNotification] Archiving notification:", itemId);
   

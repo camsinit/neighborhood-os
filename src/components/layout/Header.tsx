@@ -35,20 +35,14 @@ const Header = ({
   // Get the navigation function from react-router
   const navigate = useNavigate();
   // Get the toast function for showing notifications
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Query the profile data for the current user
-  const {
-    data: profile
-  } = useQuery({
+  const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const {
-        data
-      } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', user.id).single();
+      const { data } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', user.id).single();
       return data;
     },
     enabled: !!user?.id // Only run the query when user is available

@@ -9,13 +9,19 @@ import { Button } from "@/components/ui/button";
 import { BellRing, Check, Clock, CircleDot } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/notifications";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
+
+/**
+ * Props for the NotificationsSection component
+ * - onClose: Optional callback for when notification actions close the drawer
+ * - showArchived: Whether to show archived notifications
+ */
 interface NotificationsSectionProps {
   onClose?: () => void;
   showArchived?: boolean;
@@ -23,25 +29,33 @@ interface NotificationsSectionProps {
 
 /**
  * Groups notifications by time period (Today, Yesterday, This Week, Earlier)
+ * 
+ * @param notifications - The array of notifications to group
+ * @returns An array of groups with title and notifications
  */
 const groupNotificationsByDate = (notifications: BaseNotification[]) => {
   // Create groups
   const groups: {
     title: string;
     notifications: BaseNotification[];
-  }[] = [{
-    title: "Today",
-    notifications: []
-  }, {
-    title: "Yesterday",
-    notifications: []
-  }, {
-    title: "This Week",
-    notifications: []
-  }, {
-    title: "Earlier",
-    notifications: []
-  }];
+  }[] = [
+    {
+      title: "Today",
+      notifications: []
+    }, 
+    {
+      title: "Yesterday",
+      notifications: []
+    }, 
+    {
+      title: "This Week",
+      notifications: []
+    }, 
+    {
+      title: "Earlier",
+      notifications: []
+    }
+  ];
 
   // Sort notifications into groups
   notifications.forEach(notification => {
@@ -60,40 +74,45 @@ const groupNotificationsByDate = (notifications: BaseNotification[]) => {
   // Filter out empty groups
   return groups.filter(group => group.notifications.length > 0);
 };
+
+/**
+ * Main component for displaying notifications, organized by time
+ */
 export function NotificationsSection({
   onClose,
   showArchived = false
 }: NotificationsSectionProps) {
+  // Fetch notifications with our custom hook
   const {
     data: notifications,
     isLoading,
     refetch
   } = useNotifications(showArchived);
+  
+  // For mark all as read functionality
   const queryClient = useQueryClient();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [isMarkingRead, setIsMarkingRead] = useState(false);
 
-  // Sort notifications by relevance score (higher first), then by date (newer first)
+  // Sort notifications by date (newer first)
   const sortedNotifications = notifications?.sort((a, b) => {
-    // First sort by relevance score (higher first)
-    const relevanceDiff = (b.relevance_score || 0) - (a.relevance_score || 0);
-    if (relevanceDiff !== 0) return relevanceDiff;
-
-    // Then by date (newer first)
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   // Group notifications by date
-  const groupedNotifications = sortedNotifications ? groupNotificationsByDate(sortedNotifications) : [];
+  const groupedNotifications = sortedNotifications 
+    ? groupNotificationsByDate(sortedNotifications) 
+    : [];
 
-  // Function to mark all notifications as read
+  /**
+   * Function to mark all notifications as read
+   */
   const markAllAsRead = async () => {
     try {
       setIsMarkingRead(true);
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
+      
       if (!userId) {
         toast({
           title: "Error",
@@ -103,51 +122,29 @@ export function NotificationsSection({
         return;
       }
 
-      // Update safety_updates table
-      const {
-        error: safetyError
-      } = await supabase.from("safety_updates" as const).update({
-        is_read: true
-      }).eq("author_id", userId).eq("is_archived", showArchived);
-      if (safetyError) {
-        console.error("Error updating safety notifications:", safetyError);
-      }
-
-      // Update events table
-      const {
-        error: eventsError
-      } = await supabase.from("events" as const).update({
-        is_read: true
-      }).eq("host_id", userId).eq("is_archived", showArchived);
-      if (eventsError) {
-        console.error("Error updating event notifications:", eventsError);
-      }
-
-      // Update support_requests table
-      const {
-        error: supportError
-      } = await supabase.from("support_requests" as const).update({
-        is_read: true
-      }).eq("user_id", userId).eq("is_archived", showArchived);
-      if (supportError) {
-        console.error("Error updating support notifications:", supportError);
-      }
-
-      // Update goods_exchange table
-      const {
-        error: goodsError
-      } = await supabase.from("goods_exchange" as const).update({
-        is_read: true
-      }).eq("user_id", userId).eq("is_archived", showArchived);
-      if (goodsError) {
-        console.error("Error updating goods notifications:", goodsError);
-      }
+      // Update all notification tables
+      const tables = ["safety_updates", "events", "support_requests", "goods_exchange"];
+      
+      // Update each table in parallel
+      await Promise.all(tables.map(async (table) => {
+        const { error } = await supabase
+          .from(table)
+          .update({ is_read: true })
+          .eq("user_id", userId)
+          .eq("is_archived", showArchived);
+          
+        if (error) {
+          console.error(`Error updating ${table} notifications:`, error);
+        }
+      }));
 
       // Invalidate and refetch notifications
       queryClient.invalidateQueries({
         queryKey: ["notifications"]
       });
+      
       refetch();
+      
       toast({
         title: "Success",
         description: "All notifications marked as read"
@@ -167,15 +164,20 @@ export function NotificationsSection({
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
   
+  // Loading state
   if (isLoading) {
-    return <div className="p-8 text-center">
+    return (
+      <div className="p-8 text-center">
         <Clock className="mx-auto h-8 w-8 animate-spin text-gray-400" />
         <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
-      </div>;
+      </div>
+    );
   }
   
+  // No notifications state
   if (!notifications?.length) {
-    return <div className="p-8 text-center">
+    return (
+      <div className="p-8 text-center">
         <BellRing className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-semibold text-gray-900">No notifications</h3>
         <p className="mt-1 text-sm text-gray-500">
@@ -186,15 +188,28 @@ export function NotificationsSection({
         <p className="mt-1 text-sm text-gray-500">
           {!showArchived && "For general neighborhood updates, check the activity feed"}
         </p>
-      </div>;
+      </div>
+    );
   }
   
-  return <div className="space-y-4">
-      {groupedNotifications.map(group => <div key={group.title} className="space-y-2">
+  // Main content with notifications grouped by date
+  return (
+    <div className="space-y-4">
+      {/* Render each date group */}
+      {groupedNotifications.map(group => (
+        <div key={group.title} className="space-y-2">
           <h4 className="text-sm font-medium text-gray-500 px-4">{group.title}</h4>
           <div className="space-y-3 px-4">
-            {group.notifications.map(notification => <NotificationCardFactory key={notification.id} notification={notification} onDismiss={() => refetch()} />)}
+            {group.notifications.map(notification => (
+              <NotificationCardFactory 
+                key={notification.id} 
+                notification={notification} 
+                onDismiss={() => refetch()} 
+              />
+            ))}
           </div>
-        </div>)}
-    </div>;
+        </div>
+      ))}
+    </div>
+  );
 }

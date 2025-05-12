@@ -16,13 +16,8 @@ export interface BaseNotification {
   created_at: string;
   updated_at: string;
   context?: {
-    contextType?: string;
-    neighborName?: string;
-    avatarUrl?: string;
     [key: string]: any;
   };
-  relevance_score?: number;
-  notification_type_display?: string; // Optional display name
   // Add profiles property for user data
   profiles?: {
     display_name?: string;

@@ -1,95 +1,126 @@
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Follow Deno's ESM imports pattern
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
-// Define CORS headers to allow cross-origin requests
+// Define CORS headers for cross-origin requests
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define the expected request structure
-interface UpdateRequest {
+// Type for request body
+interface GoodsChangeNotificationPayload {
   goodsItemId: string;
-  action: 'update' | 'delete' | 'create';
+  action: 'create' | 'update' | 'delete';
   goodsItemTitle: string;
   userId: string;
-  requestType: 'offer' | 'request';
+  requestType: 'offer' | 'need';
   neighborhoodId: string;
-  urgency?: string;
   category?: string;
+  urgency?: string;
 }
 
-/**
- * Main handler function for the edge function
- * This processes goods exchange events and updates the activity feed accordingly
- */
-const handler = async (req: Request): Promise<Response> => {
+serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-
+  
   try {
-    // Create a Supabase client with admin privileges using environment variables
+    // Create a Supabase client for the function
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
-    // Extract data from the request body
+    // Parse the JSON request body
+    const body: GoodsChangeNotificationPayload = await req.json();
+    
+    // Log the received payload for debugging
+    console.log("Received notification payload:", {
+      goodsItemId: body.goodsItemId,
+      action: body.action,
+      title: body.goodsItemTitle,
+      requestType: body.requestType,
+      category: body.category,
+      urgency: body.urgency
+    });
+    
+    // Extract parameters
     const { 
       goodsItemId, 
       action, 
       goodsItemTitle, 
-      userId,
-      requestType,
-      neighborhoodId,
-      urgency,
-      category
-    } = await req.json() as UpdateRequest;
+      userId, 
+      requestType, 
+      neighborhoodId, 
+      category, 
+      urgency 
+    } = body;
+    
+    // Validate required parameters
+    if (!goodsItemId || !action || !userId || !neighborhoodId) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
-    // Only create activities for new items or significant updates
+    // Define what activity type to create based on request type
+    const activityType = requestType === 'offer' ? 'good_shared' : 'good_requested';
+    
+    // Create activity entry for this goods item
     if (action === 'create') {
-      const activityType = requestType === 'offer' ? 'good_shared' : 'good_requested';
-      
-      // Now using goods_item_id for activity creation for better consistency
-      const { error: createError } = await supabaseClient
+      const { error: activityError } = await supabaseClient
         .from('activities')
         .insert({
-          title: goodsItemTitle,
+          actor_id: userId,
           activity_type: activityType,
           content_id: goodsItemId,
           content_type: 'goods_exchange',
-          actor_id: userId,
-          is_public: true,
+          title: goodsItemTitle,
           neighborhood_id: neighborhoodId,
-          metadata: { 
-            urgency, 
-            category
+          metadata: {
+            category,
+            request_type: requestType,
+            urgency
           }
         });
-
-      if (createError) {
-        console.error('Error creating activity:', createError);
-        throw createError;
+      
+      if (activityError) {
+        console.error("Error creating activity:", activityError);
+        throw activityError;
       }
+      
+      console.log(`Successfully created activity for goods item: ${goodsItemId}`);
     }
-
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: `Goods exchange activities processed successfully`
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    
+    // Return a success response
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: `Successfully processed ${action} for ${requestType}` 
+      }),
+      { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      }
+    );
+    
   } catch (error) {
-    console.error('Error in notify-goods-changes:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    // Log and return any errors
+    console.error("Error processing goods change:", error.message);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      }
+    );
   }
-};
-
-serve(handler);
+});
