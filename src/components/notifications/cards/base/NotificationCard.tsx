@@ -2,37 +2,35 @@
 /**
  * NotificationCard.tsx
  * 
- * This is the base notification card component that all specialized notification
- * cards will extend. It provides the core layout and styling.
+ * Base notification card with minimalist design principles
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
-import { format } from "date-fns";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom";
 import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
-import NotificationHeader from "./NotificationHeader";
-import NotificationFooter from "./NotificationFooter";
-import { getNotificationBorderColor } from "@/components/notifications/utils/notificationColorUtils";
+import { Button } from "@/components/ui/button";
+import { Archive, Eye } from "lucide-react";
+import NotificationAvatar from "../../elements/NotificationAvatar";
+import NotificationContent from "../../elements/NotificationContent";
+import NotificationTimeStamp from "../../elements/NotificationTimeStamp";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
   notification: BaseNotification;
-  onAction?: () => void; // Callback for when primary action is triggered
-  onDismiss?: () => void; // Callback for when card is dismissed
+  onAction?: () => void;
+  onDismiss?: () => void;
   className?: string;
-  showActions?: boolean; // Whether to show action buttons
-  showTimestamp?: boolean; // Whether to show timestamp
-  showTypeLabel?: boolean; // Whether to show notification type label
-  children?: React.ReactNode; // Children for the specialized content
+  showActions?: boolean;
+  showTimestamp?: boolean;
+  children?: React.ReactNode;
 }
 
 /**
- * The base notification card component that handles common functionality
- * like display of actors, timestamps, and action buttons
+ * The base notification card with minimalist design
  */
 export const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
@@ -41,7 +39,6 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   className,
   showActions = true,
   showTimestamp = true,
-  showTypeLabel = false,
   children
 }) => {
   // Add state for animation
@@ -50,29 +47,21 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // For navigation to content
   const navigate = useNavigate();
   
-  // Extract common notification properties
+  // Extract properties
   const {
     id,
     title,
     created_at,
     is_read,
-    is_archived,
-    notification_type,
     content_id,
     content_type
   } = notification;
 
-  // Actor info - could be from context or from profiles
+  // Actor info
   const actorName = notification.profiles?.display_name || "A neighbor";
   const avatarUrl = notification.profiles?.avatar_url;
 
-  // Format timestamp for display
-  const timestamp = format(new Date(created_at), 'MMM d, h:mm a');
-
-  // Determine variant based on read status
-  const isUnread = !is_read;
-
-  // Handle click on the notification card
+  // Handle card click
   const handleCardClick = () => {
     if (onAction) onAction();
   };
@@ -84,23 +73,19 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        // Convert notification_type to string to ensure type compatibility
-        await markAsRead(String(notification_type), id);
+        await markAsRead(String(notification.notification_type), id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
     }
     
-    // Navigate to the content if content type is valid
+    // Navigate to content
     if (content_type && content_id) {
       try {
-        // Use type conversion to make TypeScript happy
-        // This allows us to work with the dynamic notification types
         const contentTypeAsHighlightable = content_type as HighlightableItemType;
         highlightItem(contentTypeAsHighlightable, content_id);
       } catch (error) {
         console.error("Error navigating to content:", error);
-        // Fallback navigation if highlighting fails
         navigate(`/${content_type}/${content_id}`);
       }
     }
@@ -115,7 +100,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Trigger animation
     setIsAnimating(true);
     
-    // Wait for animation to complete before performing action
+    // Archive after animation
     setTimeout(async () => {
       try {
         await archiveNotification(id);
@@ -125,55 +110,71 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       }
     }, 300);
   };
-
-  // Get border color from utility function
-  const borderColorClass = getNotificationBorderColor(notification_type);
   
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-2", 
-        "border-l-4", 
-        borderColorClass, 
-        isUnread ? "bg-blue-50" : "bg-white",
+        "transition-all duration-300 overflow-hidden mb-3 relative", 
         isAnimating && "transform translate-x-full opacity-0",
         className
       )}
     >
-      {/* Timestamp in the top right corner */}
+      {/* Timestamp in top right */}
       {showTimestamp && (
-        <div className="absolute top-2 right-2 text-xs text-gray-500">
-          {timestamp}
-        </div>
-      )}
-      
-      {/* Header section with avatar and title */}
-      <NotificationHeader
-        title={title}
-        contentType={content_type}
-        avatarUrl={avatarUrl}
-        actorName={actorName}
-        isUnread={isUnread}
-        showTypeLabel={showTypeLabel}
-        notificationType={notification_type}
-        onClick={handleCardClick}
-      />
-      
-      {/* Child content */}
-      {children && (
-        <div className="px-3 pb-3 -mt-1">
-          {children}
-        </div>
-      )}
-      
-      {/* Footer with action buttons */}
-      {showActions && (
-        <NotificationFooter
-          isArchived={is_archived}
-          onView={handleView}
-          onArchive={handleArchive}
+        <NotificationTimeStamp 
+          date={created_at} 
+          isUnread={!is_read} 
+          position="corner"
         />
       )}
+      
+      {/* Content area */}
+      <div className="p-4" onClick={handleCardClick}>
+        <div className="flex gap-3 items-start">
+          {/* Avatar */}
+          <NotificationAvatar
+            url={avatarUrl}
+            name={actorName}
+            isUnread={!is_read}
+          />
+          
+          {/* Content area */}
+          <div className="flex-1 min-w-0">
+            <NotificationContent 
+              title={title}
+              actorName={actorName}
+              contentType={content_type}
+              isUnread={!is_read}
+            >
+              {children}
+            </NotificationContent>
+            
+            {/* Action buttons */}
+            {showActions && (
+              <div className="flex justify-end gap-2 mt-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleView}
+                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1" />
+                  View
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleArchive}
+                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                >
+                  <Archive className="h-3.5 w-3.5 mr-1" />
+                  Archive
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </Card>
   );
 };

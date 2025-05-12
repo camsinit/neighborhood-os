@@ -2,50 +2,47 @@
 /**
  * NotificationActions.tsx
  * 
- * A reusable component for notification action buttons
- * like viewing details and archiving.
+ * A minimalist component for notification action buttons
+ * with subtle styling and clear intent
  */
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Archive, Eye } from "lucide-react"; 
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { cn } from "@/lib/utils";  
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
-import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
-import { type HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
+import { useNavigate } from "react-router-dom";
+import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
+import { type HighlightableItemType } from "@/utils/highlight";
 
 export interface NotificationActionsProps {
   id: string;
-  contentId?: string; // Add contentId prop for highlighting
-  contentType?: HighlightableItemType; // Add content type prop
+  contentId?: string;
+  contentType?: HighlightableItemType;
   isRead: boolean;
   onDismiss?: () => void;
   className?: string;
-  // Add new prop for parent ref to apply animation
   triggerSwipeAnimation?: () => void;
 }
 
 /**
- * Component for rendering notification action buttons in a consistent style
+ * Component for rendering minimalist notification action buttons
  */
 const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
-  contentId, // New prop for content ID to highlight
-  contentType, // New prop for content type
+  contentId,
+  contentType,
   isRead,
   onDismiss,
   className,
-  // New prop with default noop function
   triggerSwipeAnimation = () => {}
 }) => {
-  // Get navigate function from react-router
   const navigate = useNavigate();
   
-  // Handle viewing details (still marks as read in the background)
+  // Handle viewing details (marks as read and navigates)
   const handleView = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // Still mark as read when viewing
+    // Mark as read when viewing
     if (!isRead) {
       try {
         await markAsRead("event", id);
@@ -54,32 +51,28 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
       }
     }
     
-    // If we have content type and ID, navigate to it and highlight it
+    // Navigate to content if we have content type and ID
     if (contentId && contentType) {
-      // Get navigate function from react-router
-      const navigate = useNavigate();
-      
-      // Navigate and highlight the item
+      // Navigate and highlight the relevant item
       navigateAndHighlight(contentType, contentId, navigate, true);
       
-      // We call onDismiss after a short delay to ensure navigation happens
+      // Dismiss after navigation is triggered
       setTimeout(() => {
         if (onDismiss) onDismiss();
       }, 100);
     } else {
-      // If we don't have content info, just dismiss
       if (onDismiss) onDismiss();
     }
   };
 
-  // Handle archiving
+  // Handle archiving with animation
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // First trigger the animation
+    // Trigger animation first
     triggerSwipeAnimation();
     
-    // Wait for animation to finish before actual archiving
+    // Archive after animation
     setTimeout(async () => {
       try {
         await archiveNotification(id);
@@ -87,16 +80,16 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
       } catch (error) {
         console.error("Error archiving notification:", error);
       }
-    }, 500); // Match this timing with the CSS animation duration
+    }, 500);
   };
 
   return (
-    <div className={cn("flex border-t border-gray-100", className)}>
+    <div className={cn("flex justify-end gap-2 mt-2", className)}>
       <Button
         variant="ghost"
         size="sm"
         onClick={handleView}
-        className="flex-1 h-8 rounded-none text-xs text-gray-600 hover:bg-gray-50"
+        className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
       >
         <Eye className="h-3.5 w-3.5 mr-1" />
         View
@@ -105,7 +98,7 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
         variant="ghost"
         size="sm"
         onClick={handleArchive}
-        className="flex-1 h-8 rounded-none text-xs text-gray-600 hover:bg-gray-50"
+        className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
       >
         <Archive className="h-3.5 w-3.5 mr-1" />
         Archive

@@ -7,7 +7,7 @@ import { HighlightableItemType } from "@/utils/highlight";
 import { BaseNotification } from "@/hooks/notifications/types";
 import DefaultNotificationItem from "./items/DefaultNotificationItem";
 import { SkillNotificationItem } from "./items/SkillNotificationItem";
-import NotificationItem from "./items/NotificationItem"; // Import as default, not named
+import NotificationItem from "./items/NotificationItem"; // Import the new minimalist notification item
 
 interface NotificationItemProps {
   notification: BaseNotification;
@@ -16,11 +16,10 @@ interface NotificationItemProps {
 
 /**
  * Router component that renders the appropriate notification item
- * based on the notification type and context
+ * using our new minimalist design
  */
 const NotificationItemRouter = ({ notification, onSelect }: NotificationItemProps) => {
-  // For backward compatibility, let's use our existing specialized components 
-  // for certain notification types
+  // For backward compatibility with specialized components
   if (notification.notification_type === 'skills' && notification.context?.contextType === 'skill_request') {
     return (
       <SkillNotificationItem 
@@ -32,16 +31,13 @@ const NotificationItemRouter = ({ notification, onSelect }: NotificationItemProp
         onClose={onSelect || (() => {})}
         onArchive={(e) => {
           e.preventDefault();
-          // Archiving functionality would go here
         }}
-        onItemClick={(type, id) => {
-          // Use the highlightItem utility from the enhanced component
-        }}
+        onItemClick={() => {}}
       />
     );
   }
 
-  // For all other notifications, use our enhanced notification item component
+  // For all other notifications, use our enhanced notification item component with new design
   return (
     <NotificationItem
       notification={notification}

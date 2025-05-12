@@ -3,7 +3,7 @@
  * NotificationContent.tsx
  * 
  * A reusable component for rendering the content of notification items
- * including title and optional children like description
+ * with minimalist design principles
  */
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -11,40 +11,47 @@ import { highlightTitleContent } from "@/utils/highlight/titleHighlighting";
 
 interface NotificationContentProps {
   title: string;
-  contentType?: string;  // Added content type for highlighting
+  actorName?: string;  // Added actor name for better human-readable format
+  contentType?: string;  
   isUnread?: boolean;
   className?: string;
   children?: React.ReactNode;
 }
 
 /**
- * Component for rendering the main content (title & description) of a notification
+ * Component for rendering the main content of a notification with plain English formatting
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
-  contentType, // Used for title highlighting
+  actorName,
+  contentType,
   isUnread = false,
   className,
   children
 }) => {
+  // Format the title to be more human-readable if we have an actor name
+  const formattedTitle = actorName 
+    ? `${actorName} ${title.toLowerCase()}` 
+    : title;
+  
   // Use our title highlighting utility to highlight content parts
-  const highlightedTitle = highlightTitleContent(title, contentType);
+  const highlightedTitle = highlightTitleContent(formattedTitle, contentType);
 
   return (
     <div className={cn("flex flex-col flex-1 min-w-0", className)}>
-      <h4 
+      {/* Main notification text */}
+      <p 
         className={cn(
-          "text-sm font-medium leading-tight", 
-          isUnread ? "font-semibold" : ""
+          "text-sm leading-tight", 
+          isUnread ? "font-medium text-gray-900" : "font-normal text-gray-800"
         )}
       >
-        {/* Use our highlighted title */}
         {highlightedTitle}
-      </h4>
+      </p>
       
       {/* Optional description or other content */}
       {children && (
-        <div className="mt-0.5">
+        <div className="mt-1">
           {children}
         </div>
       )}

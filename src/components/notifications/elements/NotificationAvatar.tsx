@@ -2,12 +2,12 @@
 /**
  * NotificationAvatar.tsx
  * 
- * A reusable component for displaying user avatars in notifications
- * with appropriate styling based on read status.
+ * A minimalist avatar component for notifications
  */
 import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { User } from "lucide-react";
 
 export interface NotificationAvatarProps {
   url?: string | null;
@@ -18,14 +18,7 @@ export interface NotificationAvatarProps {
 }
 
 /**
- * Renders an avatar for notification items with fallback to initials
- * and styling based on notification read status
- * 
- * @param url - Optional URL to the avatar image
- * @param name - Name of the user for the avatar (used for alt text and fallback)
- * @param isUnread - Whether the notification is unread (affects styling)
- * @param className - Additional CSS classes to apply
- * @param size - Size of the avatar (sm, md, lg)
+ * Renders a clean avatar for notification items
  */
 export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   url,
@@ -34,7 +27,7 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   className,
   size = "md"
 }) => {
-  // Determine size class based on size prop
+  // Determine size class
   const sizeClass = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
@@ -50,11 +43,12 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
       )}
     >
       {url ? (
-        <AvatarImage src={url} alt={name} />
+        <AvatarImage src={url} alt={name} className="object-cover" />
       ) : (
         <AvatarFallback 
           className={cn(
-            isUnread ? "bg-blue-100 text-blue-600" : "bg-gray-200"
+            "bg-gray-100 text-gray-700",
+            isUnread && "bg-blue-50 text-blue-600"
           )}
         >
           {name.charAt(0).toUpperCase()}

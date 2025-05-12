@@ -1,16 +1,18 @@
 
 /**
- * Enhanced NotificationItem component that handles
- * advanced notification display and interactions
+ * Minimalist NotificationItem component
+ * 
+ * This component presents notifications with a clean, user-focused design
+ * that prioritizes the person, action, and timeframe
  */
 import React, { useState, useRef } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { getNotificationStyle } from "../utils/notificationStyles";
 import NotificationAvatar from "../elements/NotificationAvatar";
 import NotificationContent from "../elements/NotificationContent";
 import NotificationActions from "../elements/NotificationActions";
+import NotificationTimeStamp from "../elements/NotificationTimeStamp";
 import { motion } from "framer-motion";
-import { type HighlightableItemType } from "@/utils/highlight"; // Updated import
+import { type HighlightableItemType } from "@/utils/highlight";
 
 interface NotificationItemProps {
   notification: BaseNotification;
@@ -18,30 +20,23 @@ interface NotificationItemProps {
 }
 
 /**
- * Main notification item component that handles layout and animations
+ * A minimalist notification item component
  */
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onSelect,
 }) => {
-  // State to track if this notification is currently being animated (for swipe out)
+  // State for animation
   const [isSliding, setIsSliding] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   
-  // Get styling based on notification type
-  const style = getNotificationStyle(notification.notification_type || "default");
-  
-  // Animation handler for swipe out when archiving
+  // Animation handler for swipe out
   const handleSwipeOut = () => {
-    // Set sliding state to true to trigger animation
     setIsSliding(true);
-    // Animation will last 500ms, matching our setTimeout in NotificationActions
   };
 
-  // Determine content type and ID for navigation
-  // This maps the notification type to a highlightable item type
+  // Get content type for navigation
   const getContentType = (): HighlightableItemType | undefined => {
-    // Convert notification_type to a highlightable item type if possible
     const type = notification.notification_type;
     if (
       type === "event" || 
@@ -55,10 +50,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     return undefined;
   };
 
-  // Get content ID for highlighting - this is usually the content_id
+  // Get content ID
   const getContentId = (): string => {
     return notification.content_id || notification.id;
   };
+
+  // Get the user's name 
+  const displayName = notification.profiles?.display_name || "A neighbor";
 
   return (
     <motion.div
@@ -69,43 +67,48 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       className="mb-3"
     >
       <div 
-        className={`notification-item rounded-lg overflow-hidden border border-gray-100 shadow-sm 
-          ${notification.is_read ? '' : 'bg-blue-50'}`} 
+        className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm ${notification.is_read ? 'bg-white' : 'bg-white'}`} 
       >
-        <div 
-          className={`flex flex-col p-3 ${style.backgroundColor}`}
-        >
-          {/* Avatar and content section */}
-          <div className="flex items-start gap-3 mb-2">
-            {/* Avatar based on notification type */}
+        <div className="relative p-4">
+          {/* Timestamp in top right */}
+          <NotificationTimeStamp 
+            date={notification.created_at} 
+            isUnread={!notification.is_read}
+          />
+          
+          <div className="flex gap-3">
+            {/* Avatar with appropriate size */}
             <NotificationAvatar 
               url={notification.profiles?.avatar_url} 
-              name={notification.profiles?.display_name || "Neighbor"} 
+              name={displayName}
               isUnread={!notification.is_read}
+              size="md"
             />
             
-            {/* Title and description area */}
-            <NotificationContent 
-              title={notification.title}
-              contentType={notification.content_type} // Pass content_type for highlighting
-              isUnread={!notification.is_read}
-            >
-              {/* Add description as children if it exists */}
-              {notification.description && (
-                <p className="text-sm text-gray-600 mt-1">{notification.description}</p>
-              )}
-            </NotificationContent>
+            {/* Content with plain-English format */}
+            <div className="flex flex-col flex-1">
+              <NotificationContent 
+                title={notification.title}
+                actorName={displayName}
+                contentType={notification.content_type}
+                isUnread={!notification.is_read}
+              >
+                {notification.description && (
+                  <p className="text-xs text-gray-600">{notification.description}</p>
+                )}
+              </NotificationContent>
+              
+              {/* Minimal action buttons */}
+              <NotificationActions
+                id={notification.id}
+                contentType={getContentType()}
+                contentId={getContentId()}
+                isRead={notification.is_read}
+                onDismiss={onSelect}
+                triggerSwipeAnimation={handleSwipeOut}
+              />
+            </div>
           </div>
-          
-          {/* Actions (View and Archive buttons) */}
-          <NotificationActions
-            id={notification.id}
-            contentType={getContentType()} // Pass the content type
-            contentId={getContentId()} // Pass the content ID
-            isRead={notification.is_read}
-            onDismiss={onSelect}
-            triggerSwipeAnimation={handleSwipeOut}
-          />
         </div>
       </div>
     </motion.div>
