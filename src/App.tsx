@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'; // Added Outlet import
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
@@ -115,26 +115,25 @@ function App() {
               {/* Route for determining navigation based on auth state */}
               <Route path="/index" element={<Index />} />
               
-              {/* Protected routes - all using main layout with sidebar */}
-              <Route element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    {/* This empty element is what causes the children prop error */}
-                    {/* We'll fix this by rearranging the routes */}
-                  </MainLayout>
-                </ProtectedRoute>
-              }>
-                {/* Home route */}
+              {/* Protected routes with MainLayout - this is the key fix */}
+              {/* We create a parent route that renders the MainLayout with the Outlet for child routes */}
+              <Route 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      {/* The Outlet component will render the matching child route */}
+                      <Outlet />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              >
+                {/* All these routes will be rendered inside the MainLayout via the Outlet */}
                 <Route path="/home" element={<HomePage />} />
-                
-                {/* Feature routes */}
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
-                {/* Removed Care page route */}
-                
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
