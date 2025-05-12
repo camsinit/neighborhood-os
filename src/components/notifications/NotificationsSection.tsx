@@ -3,19 +3,15 @@
  * NotificationsSection.tsx
  * 
  * Redesigned component that displays notifications in a clear, organized way.
- * Now using our new reusable components.
+ * Now refactored into smaller, more maintainable components.
  */
-import { Button } from "@/components/ui/button";
-import { BellRing, Check, Clock, CircleDot } from "lucide-react";
+import React, { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { BaseNotification } from "@/hooks/notifications/types";
-import { format, isToday, isYesterday, isThisWeek } from "date-fns";
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/notifications";
-import NotificationCardFactory from "./cards/NotificationCardFactory";
+import { NotificationsLoadingState, NotificationsEmptyState } from "./states/NotificationStates";
+import NotificationGroup from "./sections/NotificationGroup";
+import MarkAllAsReadButton from "./actions/MarkAllAsReadButton";
+import { groupNotificationsByDate, sortNotificationsByDate } from "./utils/notificationGroupingUtils";
 
 /**
  * Props for the NotificationsSection component
@@ -26,54 +22,6 @@ interface NotificationsSectionProps {
   onClose?: () => void;
   showArchived?: boolean;
 }
-
-/**
- * Groups notifications by time period (Today, Yesterday, This Week, Earlier)
- * 
- * @param notifications - The array of notifications to group
- * @returns An array of groups with title and notifications
- */
-const groupNotificationsByDate = (notifications: BaseNotification[]) => {
-  // Create groups
-  const groups: {
-    title: string;
-    notifications: BaseNotification[];
-  }[] = [
-    {
-      title: "Today",
-      notifications: []
-    }, 
-    {
-      title: "Yesterday",
-      notifications: []
-    }, 
-    {
-      title: "This Week",
-      notifications: []
-    }, 
-    {
-      title: "Earlier",
-      notifications: []
-    }
-  ];
-
-  // Sort notifications into groups
-  notifications.forEach(notification => {
-    const date = new Date(notification.created_at);
-    if (isToday(date)) {
-      groups[0].notifications.push(notification);
-    } else if (isYesterday(date)) {
-      groups[1].notifications.push(notification);
-    } else if (isThisWeek(date)) {
-      groups[2].notifications.push(notification);
-    } else {
-      groups[3].notifications.push(notification);
-    }
-  });
-
-  // Filter out empty groups
-  return groups.filter(group => group.notifications.length > 0);
-};
 
 /**
  * Main component for displaying notifications, organized by time
@@ -89,10 +37,8 @@ export function NotificationsSection({
     refetch
   } = useNotifications(showArchived);
   
-  // For mark all as read functionality
+  // For invalidating cache
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const [isMarkingRead, setIsMarkingRead] = useState(false);
 
   // Clear cache and refetch on component mount to ensure we have the latest formatting
   useEffect(() => {
@@ -109,151 +55,42 @@ export function NotificationsSection({
   }, [queryClient, refetch]);
 
   // Sort notifications by date (newer first)
-  const sortedNotifications = notifications?.sort((a, b) => {
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const sortedNotifications = sortNotificationsByDate(notifications);
 
   // Group notifications by date
-  const groupedNotifications = sortedNotifications 
-    ? groupNotificationsByDate(sortedNotifications) 
-    : [];
-
-  /**
-   * Function to mark all notifications as read
-   */
-  const markAllAsRead = async () => {
-    try {
-      setIsMarkingRead(true);
-      const user = await supabase.auth.getUser();
-      const userId = user.data.user?.id;
-      
-      if (!userId) {
-        toast({
-          title: "Error",
-          description: "User not authenticated",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Using fixed literal strings instead of dynamic type variables
-      // This avoids the excessive type instantiation error
-      // TypeScript will verify these at compile time
-      const tableNames = [
-        'safety_updates',
-        'events', 
-        'support_requests', 
-        'goods_exchange'
-      ];
-      
-      // Update each table in parallel with safe type casting
-      await Promise.all(tableNames.map(async (tableName) => {
-        const { error } = await supabase
-          .from(tableName as any)  // Type assertion to work around strict typing
-          .update({ is_read: true })
-          .eq("user_id", userId)
-          .eq("is_archived", showArchived);
-          
-        if (error) {
-          console.error(`Error updating ${tableName} notifications:`, error);
-        }
-      }));
-
-      // Invalidate and refetch notifications
-      queryClient.invalidateQueries({
-        queryKey: ["notifications"]
-      });
-      
-      refetch();
-      
-      toast({
-        title: "Success",
-        description: "All notifications marked as read"
-      });
-    } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark notifications as read",
-        variant: "destructive"
-      });
-    } finally {
-      setIsMarkingRead(false);
-    }
-  };
+  const groupedNotifications = groupNotificationsByDate(sortedNotifications);
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
   
   // Loading state
   if (isLoading) {
-    return (
-      <div className="p-8 text-center">
-        <Clock className="mx-auto h-8 w-8 animate-spin text-gray-400" />
-        <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
-      </div>
-    );
+    return <NotificationsLoadingState />;
   }
   
   // No notifications state
   if (!notifications?.length) {
-    return (
-      <div className="p-8 text-center">
-        <BellRing className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-sm font-semibold text-gray-900">No notifications</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          {showArchived 
-            ? "No archived notifications to show" 
-            : "You'll receive notifications for activities that directly involve you"}
-        </p>
-        <p className="mt-1 text-sm text-gray-500">
-          {!showArchived && "For general neighborhood updates, check the activity feed"}
-        </p>
-      </div>
-    );
+    return <NotificationsEmptyState showArchived={showArchived} />;
   }
-  
-  // Add a button to mark all as read if there are unread notifications
-  const renderMarkAllAsReadButton = () => {
-    if (unreadCount > 0 && !showArchived) {
-      return (
-        <div className="px-4 py-2 border-b">
-          <Button
-            variant="ghost" 
-            size="sm"
-            className="w-full text-sm font-medium text-gray-600 hover:text-gray-900"
-            onClick={markAllAsRead}
-            disabled={isMarkingRead}
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Mark all as read
-          </Button>
-        </div>
-      );
-    }
-    return null;
-  };
   
   // Main content with notifications grouped by date
   return (
     <div className="space-y-4">
       {/* Mark all as read button */}
-      {renderMarkAllAsReadButton()}
+      <MarkAllAsReadButton 
+        unreadCount={unreadCount} 
+        showArchived={showArchived}
+        onComplete={refetch}
+      />
       
       {/* Render each date group */}
       {groupedNotifications.map(group => (
-        <div key={group.title} className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-500 px-4">{group.title}</h4>
-          <div className="space-y-3 px-4">
-            {group.notifications.map(notification => (
-              <NotificationCardFactory 
-                key={notification.id} 
-                notification={notification} 
-                onDismiss={onClose} 
-              />
-            ))}
-          </div>
-        </div>
+        <NotificationGroup
+          key={group.title}
+          title={group.title}
+          notifications={group.notifications}
+          onClose={onClose}
+        />
       ))}
     </div>
   );
