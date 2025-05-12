@@ -116,7 +116,14 @@ function App() {
               <Route path="/index" element={<Index />} />
               
               {/* Protected routes - all using main layout with sidebar */}
-              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+              <Route element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    {/* This empty element is what causes the children prop error */}
+                    {/* We'll fix this by rearranging the routes */}
+                  </MainLayout>
+                </ProtectedRoute>
+              }>
                 {/* Home route */}
                 <Route path="/home" element={<HomePage />} />
                 

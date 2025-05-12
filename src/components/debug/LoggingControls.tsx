@@ -4,7 +4,7 @@ import { LogLevel, setLogLevel, enableModules } from '@/utils/logger';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BugAntIcon } from '@heroicons/react/24/outline';
+import { Bug } from 'lucide-react'; // Changed from BugAntIcon to Bug from lucide-react
 
 /**
  * Enhanced debug component that allows controlling log levels at runtime

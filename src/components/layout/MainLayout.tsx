@@ -1,13 +1,40 @@
-import Sidebar from "./Sidebar";
+
+import Sidebar from "./sidebar";
 import Header from "./Header";
 import LoggingControls from "@/components/debug/LoggingControls";
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+/**
+ * MainLayout component props
+ */
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+/**
+ * MainLayout component
+ * 
+ * Provides the primary layout structure for the application with:
+ * - Sidebar navigation on the left
+ * - Main content area with header on the right
+ * - Debug logging controls for development
+ * 
+ * @param children - Content to render in the main area
+ */
+const MainLayout = ({ children }: MainLayoutProps) => {
+  /**
+   * Handler for settings button click
+   * This is passed to the Header component
+   */
+  const handleOpenSettings = () => {
+    // In the future, this will trigger the settings dialog
+    console.log("Settings button clicked");
+  };
+
   return (
     <div className="h-screen flex">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <Header />
+        <Header onOpenSettings={handleOpenSettings} />
         <main className="p-4 sm:p-8">
           {children}
         </main>
