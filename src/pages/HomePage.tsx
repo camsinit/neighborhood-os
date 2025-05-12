@@ -1,14 +1,14 @@
 
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
-import ActivitySection from "@/components/activity/ActivitySection";
-import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import ActivityFeed from "@/components/activity/ActivityFeed";
 
 /**
  * Main homepage/dashboard of the neighborhood app
  * Reorganized layout with quick actions at top, activity feed below
- * Note: The Quick Actions title has been moved to the Header component
+ * Note: The Quick Actions title is now in the Header component
+ * The Header with user profile and notifications is rendered by MainLayout
+ * only for this route
  */
 const HomePage = () => {
   return (

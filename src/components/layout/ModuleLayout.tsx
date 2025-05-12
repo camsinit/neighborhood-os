@@ -9,8 +9,8 @@ import { ModuleLayoutProps } from '@/types/module';
 /**
  * ModuleLayout Component
  * 
- * This is the foundational layout component for all pages and future modules.
- * It provides consistent structure and styling across the application.
+ * This is the foundational layout component for all module pages.
+ * It provides consistent structure and styling while avoiding duplicate headers.
  * 
  * @param children - The main content to be displayed in the module
  * @param title - The title of the module/page

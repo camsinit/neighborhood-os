@@ -1,4 +1,5 @@
 
+import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
 import LoggingControls from "@/components/debug/LoggingControls";
@@ -15,12 +16,16 @@ interface MainLayoutProps {
  * 
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
- * - Main content area with header on the right
+ * - Main content area with conditional header (only on homepage) on the right
  * - Debug logging controls for development
  * 
  * @param children - Content to render in the main area
  */
 const MainLayout = ({ children }: MainLayoutProps) => {
+  // Get the current location to determine if we're on the homepage
+  const location = useLocation();
+  const isHomePage = location.pathname === '/home';
+
   /**
    * Handler for settings button click
    * This is passed to the Header component
@@ -34,7 +39,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <div className="h-screen flex">
       <Sidebar />
       <div className="flex-1 overflow-auto">
-        <Header onOpenSettings={handleOpenSettings} />
+        {/* Only render the header on the homepage */}
+        {isHomePage && (
+          <Header onOpenSettings={handleOpenSettings} />
+        )}
         <main className="p-4 sm:p-8">
           {children}
         </main>
