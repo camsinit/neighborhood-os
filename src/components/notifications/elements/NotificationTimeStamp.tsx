@@ -1,3 +1,4 @@
+
 /**
  * NotificationTimeStamp.tsx
  * 
@@ -35,7 +36,8 @@ const getShortRelativeTime = (date: Date): string => {
   
   // Extract the number and unit using regex
   // This matches patterns like "5 minutes", "2 hours", etc.
-  const match = fullRelative.match(/^(\d+)\s+(\w+)/);
+  // Updated regex to better handle "about" and other prefixes
+  const match = fullRelative.match(/^(?:about\s+)?(\d+)\s+(\w+)/i);
   if (!match) {
     console.warn("[getShortRelativeTime] No match found for:", fullRelative);
     return fullRelative;
@@ -96,7 +98,7 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
   return (
     <div 
       className={cn(
-        "flex items-center gap-1 text-xs",
+        "flex items-center gap-1 text-xs whitespace-nowrap",
         isUnread ? "text-gray-700 font-medium" : "text-gray-500",
         position === "corner" && "absolute top-3 right-3",
         className

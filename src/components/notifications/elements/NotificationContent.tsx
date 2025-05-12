@@ -1,3 +1,4 @@
+
 /**
  * NotificationContent.tsx
  * 
@@ -115,7 +116,9 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     // If no pattern matches, just return the text as is
     return text;
   };
-  return <div className={cn("flex flex-col flex-1 min-w-0", className)}>
+  
+  // Updated to use flex-row for horizontal alignment
+  return <div className={cn("flex flex-row items-center gap-2 min-w-0", className)}>
       {/* Main notification text with smart sentence highlighting */}
       <p className={cn("text-sm leading-tight", isUnread ? "font-medium text-gray-900" : "font-normal text-gray-800")}>
         {renderHighlightedSentence(formattedTitle, contentType)}
