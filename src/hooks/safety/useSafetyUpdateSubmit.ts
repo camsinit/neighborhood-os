@@ -73,7 +73,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       toast.success("Safety update created successfully");
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
-      // Use refreshEvents to signal update
+      // Use refreshEvents to signal update - this will trigger appropriate UI refreshes
       refreshEvents.safety();
       
       // Call onSuccess if provided
@@ -84,7 +84,6 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       // Now use safety_update_id for activity feed and notifications
       if (data && data[0]) {
         console.log("[useSafetyUpdateSubmit] Successfully created safety update with ID:", data[0].id);
-        console.log("[useSafetyUpdateSubmit] safety_update_id:", data[0].safety_update_id);
       }
       
       return data;

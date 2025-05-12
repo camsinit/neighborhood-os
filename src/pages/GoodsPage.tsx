@@ -1,3 +1,4 @@
+
 import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
 import { useEffect } from "react";
 import { createHighlightListener } from "@/utils/highlight"; // Updated import path

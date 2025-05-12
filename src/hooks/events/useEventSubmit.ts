@@ -114,9 +114,6 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // This prevents multiple refresh events from being triggered
       dispatchRefreshEvent('event-submitted');
       
-      // REMOVED: No need to call individual query invalidations and refetches
-      // as the event listener in ActivityFeed will handle this
-      
       onSuccess();
       
       return data;

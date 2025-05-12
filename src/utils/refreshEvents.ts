@@ -9,9 +9,12 @@ import { createLogger } from '@/utils/logger';
 const logger = createLogger('refreshEvents');
 
 // Create a custom event system for refreshes
-type EventType = 'activities-updated' | 'event-rsvp-updated' | 'event-submitted' | 
-                'safety-updated' | 'goods-updated' | 'skills-updated' | 
-                'event-deleted'; // Added event-deleted type
+// Define all possible event types in one place for consistency
+type EventType = 'activities-updated' | 
+                'event-rsvp-updated' | 'event-submitted' | 'event-deleted' |
+                'safety-updated' | 
+                'goods-updated' | 
+                'skills-updated';
 
 // Create a simple event emitter for our refresh events
 const eventEmitter = {
@@ -82,32 +85,35 @@ export const refreshEvents = {
   // General activity feed updates
   activities: () => {
     logger.debug('Refreshing activities via shorthand method');
-    eventEmitter.emit('activities-updated');
+    dispatchRefreshEvent('activities-updated');
   },
   
   // Module-specific refreshes
   events: () => {
     logger.debug('Refreshing events via shorthand method');
-    eventEmitter.emit('event-submitted');
+    dispatchRefreshEvent('event-submitted');
   },
   eventsDelete: () => {
     logger.debug('Refreshing events deletion via shorthand method');
-    eventEmitter.emit('event-deleted');
+    dispatchRefreshEvent('event-deleted');
   },
   safety: () => {
     logger.debug('Refreshing safety via shorthand method');
-    eventEmitter.emit('safety-updated');
+    dispatchRefreshEvent('safety-updated');
   },
   goods: () => {
     logger.debug('Refreshing goods via shorthand method');
-    eventEmitter.emit('goods-updated');
+    dispatchRefreshEvent('goods-updated');
   },
   skills: () => {
     logger.debug('Refreshing skills via shorthand method');
-    eventEmitter.emit('skills-updated');
+    dispatchRefreshEvent('skills-updated');
   },
   
   // Add the core emitters for custom events
   on: eventEmitter.on.bind(eventEmitter),
   emit: eventEmitter.emit.bind(eventEmitter),
 };
+
+// Export the refreshEvents as default
+export default refreshEvents;

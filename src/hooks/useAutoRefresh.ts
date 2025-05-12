@@ -1,83 +1,64 @@
 
+/**
+ * Hook to automatically refresh query data when specific events occur
+ * This is a centralized way to handle data refreshing across the app
+ */
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { refreshEvents } from '@/utils/refreshEvents';
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useAutoRefresh');
 
 /**
- * Custom hook to automatically refresh queries when specified events occur
- * Allows components to stay in sync with data changes across the app
+ * Hook that listens for specified events and invalidates the related queries
  * 
  * @param queryKeys - Array of query keys to invalidate when events occur
- * @param events - Array of event names to listen for
- * @param debounceMs - Optional debounce time in milliseconds
+ * @param eventTypes - Array of event types to listen for
  */
 export const useAutoRefresh = (
-  queryKeys: string[],
-  events: string[],
-  debounceMs = 100 // Reduced from 300ms to 100ms for quicker updates
+  queryKeys: string[], 
+  eventTypes: string[]
 ) => {
   const queryClient = useQueryClient();
-
+  
   useEffect(() => {
-    // We'll use this to track our timeout ID for debouncing
-    let debounceTimeout: NodeJS.Timeout | null = null;
+    logger.debug(`Setting up auto-refresh for queries: ${queryKeys.join(', ')} on events: ${eventTypes.join(', ')}`);
     
-    // Store unsubscribe functions to clean up later
-    const unsubscribers: (() => void)[] = [];
+    // Create event handlers for each event type
+    const handlers: { [key: string]: EventListener } = {};
     
-    // Log which events we're listening to for debugging
-    logger.info(`Setting up listeners for events:`, events, 
-      `to refresh queries:`, queryKeys);
-    
-    // Create a debounced refresh function to prevent excessive query invalidation
-    const debouncedRefresh = () => {
-      // Clear any pending timeout
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-      }
-      
-      // Set a new timeout
-      debounceTimeout = setTimeout(() => {
-        logger.info(`Refreshing queries:`, queryKeys);
+    eventTypes.forEach(eventType => {
+      // Create a handler for this specific event type
+      const handler = () => {
+        logger.debug(`Received ${eventType} event, invalidating queries: ${queryKeys.join(', ')}`);
         
-        // Add trace logs for each query invalidation
-        queryKeys.forEach(key => {
-          logger.trace(`Invalidating query key: [${key}]`);
-          queryClient.invalidateQueries({ queryKey: [key] });
-          logger.trace(`Query invalidation complete for: [${key}]`);
+        // Invalidate all the specified queries
+        queryKeys.forEach(queryKey => {
+          queryClient.invalidateQueries({ queryKey: [queryKey] });
         });
-      }, debounceMs);
-    };
-    
-    // Subscribe to each event
-    events.forEach(event => {
-      logger.trace(`Setting up listener for event: ${event}`);
+      };
       
-      const unsubscribe = refreshEvents.on(event, () => {
-        logger.debug(`Event triggered: ${event}, refreshing queries:`, queryKeys);
-        logger.trace(`Event payload received for: ${event}`);
-        debouncedRefresh();
-      });
+      // Store the handler so we can remove it later
+      handlers[eventType] = handler as EventListener;
       
-      unsubscribers.push(unsubscribe);
-      logger.trace(`Listener for ${event} successfully registered`);
+      // Add event listener
+      window.addEventListener(eventType, handler as EventListener);
+      logger.trace(`Added listener for ${eventType}`);
     });
     
-    // Clean up event listeners and any pending timeout when component unmounts
+    // Clean up event listeners on unmount
     return () => {
-      logger.info(`Cleaning up listeners for:`, events);
-      unsubscribers.forEach((unsubscribe, index) => {
-        logger.trace(`Unsubscribing from event: ${events[index] || 'unknown'}`);
-        unsubscribe();
+      eventTypes.forEach(eventType => {
+        if (handlers[eventType]) {
+          window.removeEventListener(eventType, handlers[eventType]);
+          logger.trace(`Removed listener for ${eventType}`);
+        }
       });
-      if (debounceTimeout) {
-        logger.trace(`Clearing debounce timeout`);
-        clearTimeout(debounceTimeout);
-      }
+      logger.debug('Cleaned up all auto-refresh event listeners');
     };
-  }, [queryClient, JSON.stringify(queryKeys), JSON.stringify(events), debounceMs]);
+  }, [queryClient, ...queryKeys, ...eventTypes]);
 };
+
+// Export the hook as default
+export default useAutoRefresh;

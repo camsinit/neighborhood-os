@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import SafetyUpdates from "@/components/SafetyUpdates";
 import { useToast } from "@/components/ui/use-toast";

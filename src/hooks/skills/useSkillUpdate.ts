@@ -1,15 +1,13 @@
 
 /**
  * Hook to handle updating a skill and ensuring activities are updated too
- * 
- * This hook has been refactored to use the skills service layer.
  */
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@supabase/auth-helpers-react";
 import * as skillsService from "@/services/skills/skillsService";
 import { toast } from "sonner";
-import { refreshEvents } from "@/utils/refreshEvents"; // Add import for activity refresh
+import { refreshEvents } from "@/utils/refreshEvents";
 
 // Define the options interface for configuration
 interface SkillUpdateOptions {
@@ -57,7 +55,7 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       // Dispatch custom event for any component that's listening
       window.dispatchEvent(new Event('skill-update-submitted'));
       
-      // Add refresh event for activities feed
+      // Add refresh event for activities feed using our central system
       refreshEvents.skills();
 
       // Call onSuccess if provided
@@ -104,7 +102,7 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
         detail: { id: skillId }
       }));
       
-      // Add refresh event for activities feed
+      // Add refresh event for activities feed using our central system
       refreshEvents.skills();
 
       // Call onSuccess if provided

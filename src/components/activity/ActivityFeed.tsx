@@ -16,7 +16,7 @@ const logger = createLogger('ActivityFeed');
 /**
  * Component to display the feed of neighborhood activities
  * Now with load more button and initial limit of 4 items
- * Also listens for events to auto-refresh the feed when new skills, events, or other content is added
+ * Also listens for events to auto-refresh the feed when new content is added
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
@@ -56,7 +56,7 @@ const ActivityFeed = () => {
       'event-deleted',
       'safety-updated',
       'goods-updated',
-      'skills-updated' // Explicitly listen for skill updates
+      'skills-updated'
     ]
   );
 

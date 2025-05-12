@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents"; 
-import * as skillsService from "@/services/skills/skillsService"; 
+import { refreshEvents } from "@/utils/refreshEvents";
+import * as skillsService from "@/services/skills/skillsService";
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this hook
@@ -87,7 +87,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Dispatch refresh events to ensure immediate UI updates
       logger.debug("Dispatching skills-updated event");
-      dispatchRefreshEvent('skills-updated');
+      refreshEvents.skills();
       
       // Also invalidate the queries directly
       logger.debug("Invalidating queries to refresh UI");
@@ -128,11 +128,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
   /**
    * Updates an existing skill exchange
-   * 
-   * @param skillId - ID of the skill to update
-   * @param formData - The updated form data
-   * @param mode - Whether this is an 'offer' or 'request'
-   * @returns Promise resolving when update completes
    */
   const handleUpdate = async (skillId: string, formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     if (!user) {
@@ -154,9 +149,9 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       // Use service layer to update the skill
       await skillsService.updateSkill(skillId, formData, user.id);
 
-      // Dispatch refresh events using the single dispatch function
+      // Use the refreshEvents system to notify listeners
       logger.debug("Dispatching skills-updated event after update");
-      dispatchRefreshEvent('skills-updated');
+      refreshEvents.skills();
       
       // Also invalidate the queries directly to ensure immediate refresh
       logger.debug("Manually invalidating queries after update");
