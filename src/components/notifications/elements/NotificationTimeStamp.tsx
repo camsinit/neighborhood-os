@@ -22,28 +22,33 @@ export interface NotificationTimeStampProps {
 
 /**
  * Creates a concise time representation like "5m" or "2h"
+ * 
+ * This function takes a date and returns a condensed time string format
+ * like "5m" for minutes, "2h" for hours, "3d" for days, etc.
  */
 const getShortRelativeTime = (date: Date): string => {
   // Get the full relative time string from date-fns
   const fullRelative = formatDistanceToNow(date, { addSuffix: false });
+  
   // Extract the number and unit using regex
+  // This matches patterns like "5 minutes", "2 hours", etc.
   const match = fullRelative.match(/^(\d+)\s+(\w+)/);
   if (!match) return fullRelative;
   
   const [_, num, unit] = match;
   
-  // Map to abbreviated units
+  // Map to abbreviated units with special case for months ("mo" instead of "m")
   const shortUnit = 
     unit.startsWith('second') ? 's' :
     unit.startsWith('minute') ? 'm' :
     unit.startsWith('hour') ? 'h' :
     unit.startsWith('day') ? 'd' :
     unit.startsWith('week') ? 'w' :
-    unit.startsWith('month') ? 'mo' :
+    unit.startsWith('month') ? 'mo' : // Using "mo" for month to differentiate from minutes
     unit.startsWith('year') ? 'y' :
     unit.charAt(0);
   
-  // Return the condensed format (e.g., "5m", "2h", "3d")
+  // Return the condensed format (e.g., "5m", "2h", "3d", "1mo")
   return `${num}${shortUnit}`;
 };
 
