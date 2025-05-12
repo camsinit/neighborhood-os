@@ -20,8 +20,10 @@ interface HeaderProps {
 /**
  * Header component
  * 
- * Displays the top navigation bar with user profile dropdown
- * - Now includes the enhanced notification button
+ * Displays the top navigation bar with:
+ * - Quick Actions title (now moved from HomePage)
+ * - Notifications button
+ * - User profile dropdown
  */
 const Header = ({
   onOpenSettings
@@ -71,47 +73,53 @@ const Header = ({
   };
 
   return (
-    <header className="h-16 px-4 border-b flex items-center justify-end gap-2">
-      {/* Add the enhanced notification button */}
-      <NotificationDrawer />
+    <header className="h-16 px-4 border-b flex items-center justify-between">
+      {/* Left side - Quick Actions title */}
+      <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
       
-      {/* User profile dropdown menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-md p-1 transition-colors">
-            {/* User avatar */}
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={profile?.avatar_url || ''} alt={profile?.display_name || 'User'} />
-              <AvatarFallback>
-                {profile?.display_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            
-            {/* Display name (only show on larger screens) */}
-            <span className="text-sm font-medium hidden md:inline-block">
-              {profile?.display_name || user?.email?.split('@')[0] || 'User'}
-            </span>
-          </button>
-        </DropdownMenuTrigger>
+      {/* Right side - notifications and profile */}
+      <div className="flex items-center gap-2">
+        {/* Add the enhanced notification button */}
+        <NotificationDrawer />
         
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        {/* User profile dropdown menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-md p-1 transition-colors">
+              {/* User avatar */}
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.display_name || 'User'} />
+                <AvatarFallback>
+                  {profile?.display_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              
+              {/* Display name (only show on larger screens) */}
+              <span className="text-sm font-medium hidden md:inline-block">
+                {profile?.display_name || user?.email?.split('@')[0] || 'User'}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
           
-          {/* Settings option */}
-          <DropdownMenuItem onClick={onOpenSettings} className="cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          {/* Sign out option */}
-          <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-            Sign out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            {/* Settings option */}
+            <DropdownMenuItem onClick={onOpenSettings} className="cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Sign out option */}
+            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 };
