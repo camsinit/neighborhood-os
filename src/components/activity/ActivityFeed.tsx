@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -34,14 +34,6 @@ const ActivityFeed = () => {
     // Log if we have data
     if (activities) {
       logger.info(`Activities loaded: ${activities.length}`);
-      logger.trace(`Activity data received: ${JSON.stringify(activities.map(a => ({
-        id: a.id,
-        type: a.activity_type,
-        title: a.title,
-        content_id: a.content_id,
-        content_type: a.content_type,
-        timestamp: a.created_at
-      })), null, 2)}`);
     }
     
     // Set up periodic refetching every 30 seconds
@@ -94,14 +86,6 @@ const ActivityFeed = () => {
     }
     return !isDeleted;
   }) || [];
-
-  logger.trace(`Filtered activities: ${filteredActivities.length} of ${activities?.length || 0}`);
-
-  // Handler for load more button
-  const handleLoadMore = () => {
-    logger.debug(`Loading more activities: ${displayCount} -> ${displayCount + 4}`);
-    setDisplayCount(prev => prev + 4);
-  };
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
@@ -162,23 +146,20 @@ const ActivityFeed = () => {
       
       <div className="py-2 space-y-4">
         {/* Only render the number of items we want to display */}
-        {filteredActivities.slice(0, displayCount).map((activity) => {
-          logger.trace(`Rendering activity item: ${activity.id}, type: ${activity.activity_type}, content_id: ${activity.content_id}`);
-          return (
-            <ActivityItem 
-              key={activity.id} 
-              activity={activity} 
-              onAction={handleActivityAction}
-            />
-          );
-        })}
+        {filteredActivities.slice(0, displayCount).map((activity) => (
+          <ActivityItem 
+            key={activity.id} 
+            activity={activity} 
+            onAction={handleActivityAction}
+          />
+        ))}
         
         {/* Load more button */}
         {displayCount < filteredActivities.length && (
           <div className="flex justify-center pt-4">
             <Button
               variant="outline"
-              onClick={handleLoadMore}
+              onClick={() => setDisplayCount(prev => prev + 4)}
               className="w-full max-w-[200px]"
             >
               <ChevronDown className="h-4 w-4 mr-2" />

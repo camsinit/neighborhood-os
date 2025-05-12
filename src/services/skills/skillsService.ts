@@ -47,7 +47,7 @@ export const fetchSkills = async (category?: SkillCategory) => {
  * This function:
  * 1. Validates essential data
  * 2. Inserts the skill into the database
- * 3. Relies on database triggers to create the activity (with edge function as fallback)
+ * 3. Database trigger will create the activity automatically
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
@@ -84,11 +84,9 @@ export const createSkill = async (
     time_preferences: formData.timePreference || null
   };
 
-  // Log the exact SQL payload for debugging
-  logger.info('Insert payload:', JSON.stringify(insertData, null, 2));
-
   try {
     // Insert the skill into the database
+    // The database trigger will handle creating the activity
     const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
 
     if (error) {
@@ -115,42 +113,6 @@ export const createSkill = async (
       userId,
       timestamp: new Date().toISOString()
     });
-
-    // Call edge function to register the activity as a fallback
-    // The database trigger should handle this, but we call the edge function as a backup
-    try {
-      logger.info('Calling edge function to create activity...');
-      
-      // This is just a fallback - it's okay if it fails since we're primarily using the database trigger
-      const response = await fetch('/api/notify-skills-changes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.getSession() && (await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({
-          skillId: data?.[0]?.id,
-          action: 'create',
-          skillTitle: formData.title,
-          providerId: mode === 'offer' ? userId : undefined,
-          requesterId: mode === 'request' ? userId : undefined,
-          neighborhoodId: neighborhoodId,
-          description: formData.description,
-          category: formData.category,
-          requestType: mode === 'offer' ? 'offer' : 'need'
-        }),
-      });
-      
-      if (!response.ok) {
-        logger.error('Edge function error:', await response.text());
-      } else {
-        logger.info('Activity created via edge function');
-      }
-    } catch (edgeError) {
-      // Log but don't fail if edge function fails - fallback to database trigger
-      logger.error('Failed to call edge function, falling back to database trigger:', edgeError);
-      logger.info('The database trigger will handle activity creation');
-    }
 
     return data;
   } catch (error) {

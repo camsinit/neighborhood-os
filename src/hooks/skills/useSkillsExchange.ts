@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -32,77 +33,8 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   /**
-   * Calls the edge function to notify about skill changes - used only as a fallback
-   * The main activity creation happens via database triggers
-   * 
-   * @param skillId - The ID of the skill that changed
-   * @param action - The type of change that occurred
-   * @param data - Additional data about the skill
-   */
-  const notifySkillChanges = async (
-    skillId: string, 
-    action: 'create' | 'update' | 'delete' | 'request',
-    data: {
-      skillTitle: string;
-      providerId?: string;
-      requesterId?: string;
-      neighborhoodId?: string;
-      description?: string;
-      category?: string;
-      requestType?: string;
-    }
-  ) => {
-    try {
-      // Log the notification attempt
-      logger.debug(`Notifying skill changes (fallback method):`, { 
-        skillId, 
-        action, 
-        ...data,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Get the current session for authorization
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData?.session?.access_token;
-      
-      if (!accessToken) {
-        logger.warn('No access token available for edge function call');
-        return; // Fail silently - this is just a fallback
-      }
-      
-      // Try to call the edge function (either path might work)
-      try {
-        // First try the /api/ prefix
-        const response = await fetch('/api/notify-skills-changes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: JSON.stringify({
-            skillId,
-            action,
-            ...data
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Error status: ${response.status}`);
-        }
-      } catch (firstAttemptError) {
-        // Try alternate path - it's okay if both fail since we use database triggers primarily
-        logger.info('First attempt at edge function call failed, trying alternate URL');
-        // Just log and continue - don't throw
-      }
-    } catch (error) {
-      // Just log the error - don't break the main flow since this is just a fallback
-      logger.info('Error in edge function fallback, continuing with database trigger:', error);
-    }
-  };
-
-  /**
    * Submits a new skill exchange (offer or request)
-   * Primary method is the database trigger, with edge function as fallback
+   * The database trigger handles activity creation
    */
   const handleSubmit = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
     // Validate required data
@@ -135,12 +67,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         },
         timestamp: new Date().toISOString()
       });
-
-      logger.trace(`About to call skillsService.createSkill with form data: ${JSON.stringify({
-        title: formData.title,
-        category: formData.category,
-        description: formData.description?.substring(0, 50) + (formData.description && formData.description.length > 50 ? '...' : ''),
-      })}`);
 
       // Use the service layer to create the skill (database trigger handles activities)
       const data = await skillsService.createSkill(
@@ -227,16 +153,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       
       // Use service layer to update the skill
       await skillsService.updateSkill(skillId, formData, user.id);
-      
-      // Notify about skill update to update related activities
-      try {
-        await notifySkillChanges(skillId, 'update', {
-          skillTitle: formData.title
-        });
-      } catch (notifyError) {
-        // Log but continue - we rely on the database trigger as fallback
-        logger.error("Error notifying about skill update:", notifyError);
-      }
 
       // Dispatch refresh events using the single dispatch function
       logger.debug("Dispatching skills-updated event after update");

@@ -1,3 +1,4 @@
+
 /**
  * This file contains the core service function to fetch activities
  */
@@ -5,6 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "./types";
 import { fetchContentTitles } from "./contentUtils";
 import { isContentDeleted, normalizeMetadata } from "./metadataUtils";
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this service
+const logger = createLogger('activityService');
 
 /**
  * Fetches recent activities from the database
@@ -13,6 +18,8 @@ import { isContentDeleted, normalizeMetadata } from "./metadataUtils";
  * and properly handle deleted content references
  */
 export const fetchActivities = async (): Promise<Activity[]> => {
+  logger.debug('Fetching activities');
+  
   // Fetch activities with profile information
   const { data: activitiesData, error } = await supabase
     .from('activities')
@@ -25,6 +32,7 @@ export const fetchActivities = async (): Promise<Activity[]> => {
       title,
       created_at,
       metadata,
+      neighborhood_id,
       profiles:actor_id (
         display_name,
         avatar_url
@@ -34,9 +42,11 @@ export const fetchActivities = async (): Promise<Activity[]> => {
     .limit(20);
 
   if (error) {
-    console.error('Error fetching activities:', error);
+    logger.error('Error fetching activities:', error);
     throw error;
   }
+
+  logger.debug(`Fetched ${activitiesData.length} activities`);
 
   // Group content IDs by their content type for efficient batch fetching
   // Skip any items that are already marked as deleted in metadata
@@ -56,6 +66,8 @@ export const fetchActivities = async (): Promise<Activity[]> => {
   // Fetch current titles for all content that hasn't been deleted
   const updatedTitlesMap = await fetchContentTitles(contentIdsByType);
   
+  logger.debug(`Fetched ${updatedTitlesMap.size} current content titles`);
+  
   // Process activities and use updated titles where available
   const activities = activitiesData.map(activity => {
     // Ensure metadata is an object we can work with
@@ -71,6 +83,8 @@ export const fetchActivities = async (): Promise<Activity[]> => {
     } else if (!isContentDeleted(metadata) && !updatedTitlesMap.has(activity.content_id)) {
       // If we didn't get a title AND the content wasn't explicitly marked as deleted,
       // it probably means the content was deleted without proper cleanup
+      logger.info(`Content not found for activity ${activity.id}, marking as implicitly deleted`);
+      
       // Mark it as implicitly deleted
       return {
         ...activity,
