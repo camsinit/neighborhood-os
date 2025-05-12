@@ -16,6 +16,7 @@ import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
 import NotificationHeader from "./NotificationHeader";
 import NotificationFooter from "./NotificationFooter";
+import { getNotificationBorderColor } from "@/components/notifications/utils/notificationColorUtils";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -125,36 +126,15 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     }, 300);
   };
 
-  // Get the appropriate border color based on notification type
-  const getBorderColor = () => {
-    // Convert notification_type to a string to ensure it works with any value
-    const notificationType = String(notification_type).toLowerCase();
-    
-    // Match known types or default to gray
-    switch (notificationType) {
-      case "event":
-        return "border-l-blue-500";
-      case "safety":
-        return "border-l-red-500";
-      case "skills":
-        return "border-l-green-500";
-      case "neighbors":
-        return "border-l-purple-500";
-      case "goods":
-        return "border-l-amber-500";
-      case "support":
-        return "border-l-indigo-500";
-      default:
-        return "border-l-gray-500";
-    }
-  };
+  // Get border color from utility function
+  const borderColorClass = getNotificationBorderColor(notification_type);
   
   return (
     <Card 
       className={cn(
         "transition-all duration-300 overflow-hidden mb-2", 
         "border-l-4", 
-        getBorderColor(), 
+        borderColorClass, 
         isUnread ? "bg-blue-50" : "bg-white",
         isAnimating && "transform translate-x-full opacity-0",
         className

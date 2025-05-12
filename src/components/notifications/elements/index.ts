@@ -11,11 +11,6 @@ export { default as NotificationContent } from './NotificationContent';
 export { default as NotificationActions } from './NotificationActions';
 export { default as NotificationDescription } from './NotificationDescription';
 
-// Also export types for components that need them
-export type { NotificationContentProps } from './NotificationContent';
-export type { NotificationAvatarProps } from './NotificationAvatar';
-export type { NotificationBadgeProps } from './NotificationBadge';
-export type { NotificationIconProps } from './NotificationIcon';
-export type { NotificationTimeStampProps } from './NotificationTimeStamp';
-export type { NotificationActionsProps } from './NotificationActions';
-export type { NotificationDescriptionProps } from './NotificationDescription';
+// Export types from their respective files
+// Note: We're removing these direct type exports to fix the build error
+// These types should be imported directly from their source files when needed
