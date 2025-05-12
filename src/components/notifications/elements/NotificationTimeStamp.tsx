@@ -1,4 +1,3 @@
-
 /**
  * NotificationTimeStamp.tsx
  * 
@@ -28,6 +27,7 @@ export interface NotificationTimeStampProps {
  */
 const getShortRelativeTime = (date: Date): string => {
   // Get the full relative time string from date-fns
+  // Important: Using {addSuffix: false} to remove "about" and "ago" text
   const fullRelative = formatDistanceToNow(date, { addSuffix: false });
   
   // For debugging
@@ -83,6 +83,7 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
     if (format === "short") {
       return getShortRelativeTime(dateObj);
     } else {
+      // For verbose format, we keep the full "ago" text
       return formatDistanceToNow(dateObj, { addSuffix: true });
     }
   }, [dateObj, format]);

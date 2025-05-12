@@ -6,7 +6,7 @@
 // Main components
 export { NotificationsSection } from './NotificationsSection';
 export { default as NotificationDrawer } from './NotificationDrawer';
-export { NotificationsPopover, default as NotificationPopover } from './NotificationsPopover'; 
+export { NotificationPopover, default as NotificationsPopover } from './NotificationsPopover'; 
 
 // Section components
 export { default as NotificationGroup } from './sections/NotificationGroup';
