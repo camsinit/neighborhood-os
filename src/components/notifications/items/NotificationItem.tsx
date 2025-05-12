@@ -87,6 +87,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             {/* Title and description area */}
             <NotificationContent 
               title={notification.title}
+              contentType={notification.content_type} // Pass content_type for highlighting
               isUnread={!notification.is_read}
             >
               {/* Add description as children if it exists */}

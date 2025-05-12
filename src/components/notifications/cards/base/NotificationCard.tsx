@@ -19,6 +19,7 @@ import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom";
 import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
+import { highlightTitleContent } from "@/utils/highlight/titleHighlighting";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -196,7 +197,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               "text-sm",
               isUnread ? "font-semibold" : "font-medium"
             )}>
-              {title}
+              {/* Use the highlight function for the title */}
+              {highlightTitleContent(title, content_type)}
             </p>
           </div>
           
