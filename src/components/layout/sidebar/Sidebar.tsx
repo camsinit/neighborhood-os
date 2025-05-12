@@ -8,6 +8,7 @@ import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
+// LoggingControls import is already handled inside DiagnosticsPanel
 
 /**
  * Props for the Sidebar component
@@ -62,6 +63,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
           user={user}
           currentNeighborhood={currentNeighborhood}
         />
+        
+        {/* The LoggingControls have been moved into the DiagnosticsPanel component */}
       </nav>
     </div>
   );

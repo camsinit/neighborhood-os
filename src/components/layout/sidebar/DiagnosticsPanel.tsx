@@ -4,6 +4,7 @@
  * 
  * A diagnostic panel shown at the bottom of the sidebar with basic information
  * for debugging purposes. Core contributor mode has been removed.
+ * Now includes embedded LoggingControls component for easier access to logging settings.
  */
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood';
@@ -18,7 +19,7 @@ interface DiagnosticsPanelProps {
 /**
  * DiagnosticsPanel displays basic debugging information in the sidebar
  * This simplified version has removed the core contributor functionality
- * Now includes the LoggingControls component
+ * Now includes the LoggingControls component embedded directly in the panel
  */
 const DiagnosticsPanel = ({ 
   user,
@@ -43,7 +44,7 @@ const DiagnosticsPanel = ({
       </div>
       
       {/* Neighborhood information */}
-      <div>
+      <div className="mb-2">
         {currentNeighborhood ? (
           <span>🏘️ {currentNeighborhood.name}</span>
         ) : (
@@ -51,8 +52,11 @@ const DiagnosticsPanel = ({
         )}
       </div>
       
-      {/* Integrated LoggingControls component */}
-      <LoggingControls />
+      {/* Integrated LoggingControls section */}
+      <div className="mt-3 pt-2 border-t border-gray-200">
+        <h6 className="font-medium mb-1">Logging Controls</h6>
+        <LoggingControls embedded={true} />
+      </div>
     </div>
   );
 };
