@@ -28,7 +28,7 @@ export interface BaseNotification {
   relevance_score?: number;
 }
 
-// Make HighlightableItemType more flexible to include string values from database
+// Make HighlightableItemType more flexible with an index signature
 export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors" | string;
 
 // Add ProfileData type to fix imports

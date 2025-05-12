@@ -85,8 +85,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        // Use type assertion to handle any string value
-        await markAsRead(notification_type as any, id);
+        // Handle any notification type value safely
+        await markAsRead(notification_type, id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
@@ -95,9 +95,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Navigate to the content if content type is valid
     if (content_type && content_id) {
       try {
-        // Use the highlight utility to navigate to the content
-        // Use type assertion to handle string input
-        highlightItem(content_type as HighlightableItemType, content_id);
+        // Safe type handling for any content type
+        // We know the highlightItem function accepts string values per our updated type
+        highlightItem(content_type, content_id);
       } catch (error) {
         console.error("Error navigating to content:", error);
         // Fallback navigation if highlighting fails
