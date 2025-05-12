@@ -1,107 +1,99 @@
 
 /**
- * This file contains functions for performing actions on notifications,
- * such as marking them as read or archiving them
+ * Notification action functions
+ * 
+ * This file contains functions for performing actions on notifications
+ * such as marking as read or archiving them.
  */
 import { supabase } from "@/integrations/supabase/client";
-
-// Updated to include new tables for the new notification types
-export type TableName = "safety_updates" | "events" | "support_requests" | "skill_sessions" | "goods_exchange" | "neighborhood_members";
+import { toast } from "sonner";
+import { HighlightableItemType } from "@/utils/highlight/types";
 
 /**
- * Gets the appropriate database table name for a notification type
+ * Helper function to determine the table name for a notification type
+ * This is needed because some notifications are stored in specific tables
+ * while others use the generic notifications table
  * 
  * @param type The notification type
  * @returns The corresponding database table name
  */
-export const getTableName = (
-  type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors"
-): TableName => {
-  switch (type) {
-    case "safety":
-      return "safety_updates";
-    case "event":
-      return "events";
-    case "support":
-      return "support_requests";
-    case "skills":
-      return "skill_sessions";
-    case "goods":
-      return "goods_exchange";
-    case "neighbors":
-      return "neighborhood_members";
+export const getTableName = (type: string): string => {
+  // Map notification types to their respective tables
+  // If no mapping exists, default to the 'notifications' table
+  switch (type.toLowerCase()) {
+    case 'safety':
+      return 'safety_updates';
+    case 'event':
+      return 'events';
+    case 'skills':
+      return 'skills_exchange';
+    case 'goods':
+      return 'goods_exchange';
+    case 'support':
+      return 'support_requests';
+    case 'neighbors':
+      return 'neighborhood_members';
+    default:
+      // For any other notification types, use the generic notifications table
+      return 'notifications';
   }
 };
 
 /**
- * Marks a notification as read in the database
+ * Mark a notification as read
  * 
  * @param type The notification type
- * @param itemId The ID of the notification item
- * @returns A promise that resolves when the operation is complete
+ * @param id The notification ID
+ * @returns Promise resolving to success or failure
  */
-export const markAsRead = async (
-  type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", 
-  itemId: string
-) => {
-  const table = getTableName(type);
-  await supabase
-    .from(table)
-    .update({ is_read: true })
-    .eq('id', itemId);
-};
-
-/**
- * Archives a notification in the database
- * 
- * @param itemId The ID of the notification item
- * @returns A promise that resolves when the operation is complete
- */
-export const archiveNotification = async (itemId: string) => {
-  // When the type is not specified, we can use a generic approach
-  // This function should try to archive the notification in all possible tables
-  
-  console.log("[archiveNotification] Archiving notification:", itemId);
-  
+export const markAsRead = async (type: string, id: string): Promise<boolean> => {
   try {
-    // Try to update the notification in all possible tables
-    const tables: TableName[] = [
-      "safety_updates", 
-      "events", 
-      "support_requests", 
-      "skill_sessions",
-      "goods_exchange", 
-      "neighborhood_members"
-    ];
+    // Get the table name for this notification type
+    const table = getTableName(type);
     
-    // Run updates in parallel for efficiency
-    await Promise.all(tables.map(async (table) => {
-      try {
-        await supabase
-          .from(table)
-          .update({ is_archived: true })
-          .eq('id', itemId);
-      } catch (error) {
-        // Silently fail for tables where the ID doesn't exist
-        console.debug(`[archiveNotification] ID not found in table ${table}:`, error);
-      }
-    }));
+    // Update the notification as read
+    const { error } = await supabase
+      .from(table)
+      .update({ is_read: true })
+      .eq('id', id);
     
-    console.log("[archiveNotification] Successfully archived notification");
+    if (error) {
+      console.error("Error marking notification as read:", error);
+      return false;
+    }
+    
+    return true;
   } catch (error) {
-    console.error("[archiveNotification] Error archiving notification:", error);
-    throw error;
+    console.error("Unexpected error marking notification as read:", error);
+    return false;
   }
 };
 
-// Also export a typed version for backward compatibility
-export const archiveNotificationWithType = async (
-  type: "safety" | "event" | "support" | "skills" | "goods" | "neighbors", 
-  itemId: string
-) => {
-  const table = getTableName(type);
-  await supabase
-    .from(table)
-    .update({ is_archived: true })
-    .eq('id', itemId);
+/**
+ * Archive a notification
+ * 
+ * @param id The notification ID
+ * @returns Promise resolving to success or failure
+ */
+export const archiveNotification = async (id: string): Promise<boolean> => {
+  try {
+    // Update the notification as archived
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_archived: true })
+      .eq('id', id);
+    
+    if (error) {
+      console.error("Error archiving notification:", error);
+      toast.error("Failed to archive notification");
+      return false;
+    }
+    
+    toast.success("Notification archived");
+    return true;
+  } catch (error) {
+    console.error("Unexpected error archiving notification:", error);
+    toast.error("Failed to archive notification");
+    return false;
+  }
 };

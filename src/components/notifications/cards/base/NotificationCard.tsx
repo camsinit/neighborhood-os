@@ -7,7 +7,7 @@
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { BaseNotification, HighlightableItemType } from "@/hooks/notifications/types";
+import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
@@ -18,6 +18,7 @@ import { Eye, Archive } from "lucide-react";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom";
 import { highlightItem } from "@/utils/highlight";
+import { HighlightableItemType } from "@/utils/highlight/types";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -85,8 +86,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        // We need to use a more flexible approach for notification_type
-        await markAsRead(notification_type, id);
+        // We need to use a string type for notification_type to work with any value
+        await markAsRead(String(notification_type), id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
