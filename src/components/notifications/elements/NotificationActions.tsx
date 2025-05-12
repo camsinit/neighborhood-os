@@ -6,14 +6,12 @@
  * with subtle styling and clear intent
  */
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Archive, Eye } from "lucide-react"; 
+import { cn } from "@/lib/utils";
+import { Eye, Archive } from "lucide-react"; 
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
-import { cn } from "@/lib/utils";  
 import { useNavigate } from "react-router-dom";
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
 import { type HighlightableItemType } from "@/utils/highlight";
-import { getNotificationTextColor, getNotificationHoverBgColor } from "../utils/notificationColorUtils";
 
 export interface NotificationActionsProps {
   id: string;
@@ -27,7 +25,7 @@ export interface NotificationActionsProps {
 
 /**
  * Component for rendering minimalist notification action buttons
- * with module-specific hover effects
+ * with a clean, subtle design matching the reference image
  */
 const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
@@ -85,30 +83,26 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     }, 500);
   };
 
-  // Get highlight color for buttons
-  const highlightColor = getNotificationTextColor(contentType);
-  const buttonHoverClass = getNotificationHoverBgColor(contentType);
-
+  // Simple button styling to match the reference image
   return (
-    <div className={cn("flex justify-end gap-2 mt-2", className)}>
-      <Button
-        variant="ghost"
-        size="sm"
+    <div className={cn("flex items-center justify-center gap-16 py-3 border-t border-gray-100", className)}>
+      {/* View button with simplified design */}
+      <button
         onClick={handleView}
-        className={cn("h-8 text-xs text-gray-600 px-3", buttonHoverClass)}
+        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
       >
-        <Eye className={cn("h-3.5 w-3.5 mr-1", isRead ? "" : highlightColor)} />
-        View
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
+        <Eye className="h-5 w-5 mr-2" />
+        <span className="text-sm">View</span>
+      </button>
+      
+      {/* Archive button with simplified design */}
+      <button
         onClick={handleArchive}
-        className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
       >
-        <Archive className="h-3.5 w-3.5 mr-1" />
-        Archive
-      </Button>
+        <Archive className="h-5 w-5 mr-2" />
+        <span className="text-sm">Archive</span>
+      </button>
     </div>
   );
 };

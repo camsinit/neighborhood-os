@@ -74,7 +74,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       <div 
         className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`} 
       >
-        <div className="relative p-4">
+        <div className="relative p-4 pb-2">
           {/* Timestamp in top right */}
           <NotificationTimeStamp 
             date={notification.created_at} 
@@ -91,7 +91,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               size="md"
             />
             
-            {/* Content with plain-English format and direct highlighting */}
+            {/* Content with sentence format and direct highlighting */}
             <div className="flex flex-col flex-1">
               <NotificationContent 
                 title={notification.title}
@@ -103,19 +103,19 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                   <p className="text-xs text-gray-600">{notification.description}</p>
                 )}
               </NotificationContent>
-              
-              {/* Minimal action buttons */}
-              <NotificationActions
-                id={notification.id}
-                contentType={getContentType()}
-                contentId={getContentId()}
-                isRead={notification.is_read}
-                onDismiss={onSelect}
-                triggerSwipeAnimation={handleSwipeOut}
-              />
             </div>
           </div>
         </div>
+        
+        {/* Updated action buttons with simplified styling */}
+        <NotificationActions
+          id={notification.id}
+          contentType={getContentType()}
+          contentId={getContentId()}
+          isRead={notification.is_read}
+          onDismiss={onSelect}
+          triggerSwipeAnimation={handleSwipeOut}
+        />
       </div>
     </motion.div>
   );

@@ -1,144 +1,137 @@
 
 /**
- * Utility functions for determining notification styling 
- * based on notification types
+ * Utility functions for notification color schemes
+ * Provides consistent color values across notification components
  */
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 /**
- * Get the appropriate border color class based on notification type
+ * Returns the appropriate text color class for a notification type
  * 
- * @param notificationType The type of notification
- * @returns Tailwind CSS class for the left border color
+ * @param notificationType The type of notification (event, skills, etc)
+ * @returns Tailwind class for text color
  */
-export const getNotificationBorderColor = (notificationType: string | undefined): string => {
-  // Handle undefined or null notification types with a default
-  if (!notificationType) {
-    return "border-l-gray-500";
+export const getNotificationTextColor = (notificationType?: string): string => {
+  if (!notificationType) return "text-indigo-500";
+  
+  const type = notificationType.toLowerCase();
+  
+  // Map notification types to color classes
+  if (type.includes('event') || type.includes('calendar')) {
+    return "text-blue-600"; // Calendar blue
+  }
+  if (type.includes('skill')) {
+    return "text-indigo-500"; // Skills purple
+  }
+  if (type.includes('good')) {
+    return "text-emerald-600"; // Goods green
+  }
+  if (type.includes('safety')) {
+    return "text-amber-600"; // Safety amber
+  }
+  if (type.includes('neighbor')) {
+    return "text-violet-600"; // Neighbors violet
   }
   
-  // Convert notification_type to a string and lowercase for consistent matching
-  const type = String(notificationType).toLowerCase();
-  
-  // Match known types or default to gray
-  switch (type) {
-    case "event":
-      return "border-l-blue-500";
-    case "safety":
-      return "border-l-red-500";
-    case "skills":
-      return "border-l-green-500";
-    case "neighbors":
-      return "border-l-purple-500";
-    case "goods":
-      return "border-l-amber-500";
-    case "support":
-      return "border-l-indigo-500";
-    default:
-      return "border-l-gray-500";
-  }
+  // Default color
+  return "text-indigo-500";
 };
 
 /**
- * Get the text color class for a notification type
- * Used for highlighting important content within notifications
+ * Returns the appropriate background color class for a notification type
+ * (for avatars, badges, etc.)
  * 
  * @param notificationType The type of notification
- * @returns Tailwind CSS class for text color
+ * @returns Tailwind class for background color
  */
-export const getNotificationTextColor = (notificationType: string | undefined): string => {
-  // Handle undefined or null notification types with a default
-  if (!notificationType) {
-    return "text-gray-700";
+export const getNotificationBgColor = (notificationType?: string): string => {
+  if (!notificationType) return "bg-indigo-500";
+  
+  const type = notificationType.toLowerCase();
+  
+  // Map notification types to color classes
+  if (type.includes('event') || type.includes('calendar')) {
+    return "bg-blue-500"; // Calendar blue
+  }
+  if (type.includes('skill')) {
+    return "bg-indigo-500"; // Skills purple
+  }
+  if (type.includes('good')) {
+    return "bg-emerald-500"; // Goods green
+  }
+  if (type.includes('safety')) {
+    return "bg-amber-500"; // Safety amber
+  }
+  if (type.includes('neighbor')) {
+    return "bg-violet-500"; // Neighbors violet
   }
   
-  // Convert notification_type to a string and lowercase for consistent matching
-  const type = String(notificationType).toLowerCase();
-  
-  // Match known types to their text colors
-  switch (type) {
-    case "event":
-      return "text-blue-700";
-    case "safety":
-      return "text-red-700";
-    case "skills":
-      return "text-green-700";
-    case "neighbors":
-      return "text-purple-700";
-    case "goods":
-      return "text-amber-700";
-    case "support":
-      return "text-indigo-700";
-    default:
-      return "text-gray-700";
-  }
+  // Default color
+  return "bg-indigo-500";
 };
 
 /**
- * Get background color class for a notification type
- * Useful for badges, indicators, or highlights
+ * Returns the appropriate hover background color class for a notification type
+ * (for buttons and interactive elements)
  * 
  * @param notificationType The type of notification
- * @returns Tailwind CSS class for background color
+ * @returns Tailwind class for hover background
  */
-export const getNotificationBgColor = (notificationType: string | undefined): string => {
-  // Handle undefined or null notification types with a default
-  if (!notificationType) {
-    return "bg-gray-100";
+export const getNotificationHoverBgColor = (notificationType?: string): string => {
+  if (!notificationType) return "hover:bg-indigo-50";
+  
+  const type = notificationType.toLowerCase();
+  
+  // Map notification types to hover color classes
+  if (type.includes('event') || type.includes('calendar')) {
+    return "hover:bg-blue-50"; // Calendar blue
+  }
+  if (type.includes('skill')) {
+    return "hover:bg-indigo-50"; // Skills purple
+  }
+  if (type.includes('good')) {
+    return "hover:bg-emerald-50"; // Goods green
+  }
+  if (type.includes('safety')) {
+    return "hover:bg-amber-50"; // Safety amber
+  }
+  if (type.includes('neighbor')) {
+    return "hover:bg-violet-50"; // Neighbors violet
   }
   
-  // Convert notification_type to a string and lowercase for consistent matching
-  const type = String(notificationType).toLowerCase();
-  
-  // Match known types to their background colors (lighter shade)
-  switch (type) {
-    case "event":
-      return "bg-blue-50";
-    case "safety":
-      return "bg-red-50";
-    case "skills":
-      return "bg-green-50";
-    case "neighbors":
-      return "bg-purple-50";
-    case "goods":
-      return "bg-amber-50";
-    case "support":
-      return "bg-indigo-50";
-    default:
-      return "bg-gray-100";
-  }
+  // Default color
+  return "hover:bg-indigo-50";
 };
 
 /**
- * Get hover background color class for a notification type
- * Used for interactive elements like buttons
+ * Returns the appropriate border color class for a notification
+ * (for the left border accent)
  * 
  * @param notificationType The type of notification
- * @returns Tailwind CSS class for hover background color
+ * @returns Tailwind class for border color
  */
-export const getNotificationHoverBgColor = (notificationType: string | undefined): string => {
-  // Handle undefined or null notification types with a default
-  if (!notificationType) {
-    return "hover:bg-gray-100";
+export const getNotificationBorderColor = (notificationType?: string): string => {
+  if (!notificationType) return "border-l-indigo-500";
+  
+  const type = notificationType.toLowerCase();
+  
+  // Map notification types to border color classes
+  if (type.includes('event') || type.includes('calendar')) {
+    return "border-l-blue-500"; // Calendar blue
+  }
+  if (type.includes('skill')) {
+    return "border-l-indigo-500"; // Skills purple
+  }
+  if (type.includes('good')) {
+    return "border-l-emerald-500"; // Goods green
+  }
+  if (type.includes('safety')) {
+    return "border-l-amber-500"; // Safety amber
+  }
+  if (type.includes('neighbor')) {
+    return "border-l-violet-500"; // Neighbors violet
   }
   
-  // Convert notification_type to a string and lowercase for consistent matching
-  const type = String(notificationType).toLowerCase();
-  
-  // Match known types to their hover background colors
-  switch (type) {
-    case "event":
-      return "hover:bg-blue-50";
-    case "safety":
-      return "hover:bg-red-50";
-    case "skills":
-      return "hover:bg-green-50";
-    case "neighbors":
-      return "hover:bg-purple-50";
-    case "goods":
-      return "hover:bg-amber-50";
-    case "support":
-      return "hover:bg-indigo-50";
-    default:
-      return "hover:bg-gray-100";
-  }
+  // Default color
+  return "border-l-indigo-500";
 };
