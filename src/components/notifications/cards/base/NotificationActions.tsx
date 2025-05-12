@@ -11,7 +11,7 @@ import { Archive, Eye } from "lucide-react";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
-import { HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
+import { type HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
 
 interface NotificationActionsProps {
   id: string;

@@ -1,4 +1,3 @@
-
 /**
  * BaseNotificationItem.tsx
  * 
@@ -10,9 +9,8 @@ import { Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { getNotificationStyle } from "../utils/notificationStyles";
-import { HighlightableItemType } from "@/utils/highlight"; 
+import { type HighlightableItemType, highlightItem } from "@/utils/highlight"; 
 import { Card } from "@/components/ui/card";
-import { highlightItem } from "@/utils/highlight";
 
 interface BaseNotificationItemProps {
   title: string;

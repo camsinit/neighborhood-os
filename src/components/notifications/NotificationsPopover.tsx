@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
-import { highlightItem, HighlightableItemType } from "@/utils/highlight";
+import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

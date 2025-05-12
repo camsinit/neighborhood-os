@@ -5,7 +5,7 @@ import { Archive } from "lucide-react";
 import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { HighlightableItemType } from "@/utils/highlight"; // Updated import path
+import { type HighlightableItemType } from "@/utils/highlight"; // Updated import path
 // Using named import
 import { NotificationPopover } from "../NotificationsPopover"; 
 import { getNotificationStyle } from "../utils/notificationStyles";

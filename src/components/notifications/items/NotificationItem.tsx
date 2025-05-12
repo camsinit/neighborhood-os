@@ -10,7 +10,7 @@ import NotificationAvatar from "../elements/NotificationAvatar";
 import NotificationContent from "../elements/NotificationContent";
 import NotificationActions from "../elements/NotificationActions";
 import { motion } from "framer-motion";
-import { HighlightableItemType } from "@/utils/highlight"; // Updated import
+import { type HighlightableItemType } from "@/utils/highlight"; // Updated import
 
 interface NotificationItemProps {
   notification: BaseNotification;

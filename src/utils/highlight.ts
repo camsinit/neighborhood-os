@@ -8,14 +8,20 @@ import { createLogger } from '@/utils/logger';
 import { 
   highlightItem,
   createHighlightListener,
-  navigateAndHighlight
+  navigateAndHighlight,
+  // Also export the types
+  type HighlightableItemType,
+  type HighlightItemDetail
 } from './highlight/index';
 
 // Re-export for backwards compatibility
 export {
   highlightItem,
   createHighlightListener,
-  navigateAndHighlight
+  navigateAndHighlight,
+  // Explicitly re-export the types
+  type HighlightableItemType,
+  type HighlightItemDetail
 };
 
 // Export default for backward compatibility

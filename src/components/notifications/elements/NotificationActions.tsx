@@ -1,4 +1,3 @@
-
 /**
  * NotificationActions.tsx
  * 
@@ -12,7 +11,7 @@ import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { cn } from "@/lib/utils";  
 import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
-import { HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
+import { type HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
 
 export interface NotificationActionsProps {
   id: string;
@@ -56,6 +55,9 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     
     // If we have content type and ID, navigate to it and highlight it
     if (contentId && contentType) {
+      // Get navigate function from react-router
+      const navigate = useNavigate();
+      
       // Navigate and highlight the item
       navigateAndHighlight(contentType, contentId, navigate, true);
       
