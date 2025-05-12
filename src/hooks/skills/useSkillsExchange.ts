@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents"; // Using the correct import
-import * as skillsService from "@/services/skills/skillsService"; // Added import for the skills service
+import { dispatchRefreshEvent } from "@/utils/refreshEvents"; 
+import * as skillsService from "@/services/skills/skillsService"; 
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this hook
@@ -61,39 +61,81 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
         timestamp: new Date().toISOString()
       });
 
-      logger.trace(`Preparing to call notify-skills-changes edge function with params: ${JSON.stringify({
+      logger.trace(`Preparing to call edge function with params: ${JSON.stringify({
         skillId,
         action,
         ...data
       }, null, 2)}`);
       
-      // Call the edge function
-      const response = await fetch('/functions/v1/notify-skills-changes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          skillId,
-          action,
-          ...data
-        }),
-      });
+      // Get the current session for authorization
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
       
-      logger.trace(`Edge function response status: ${response.status}`);
-
-      if (!response.ok) {
-        const responseText = await response.text();
-        logger.error(`Error in notify-skills-changes edge function: ${response.status} ${responseText}`);
-        throw new Error(`Error notifying skill changes: ${response.status}`);
+      if (!accessToken) {
+        logger.warn('No access token available for edge function call');
       }
+      
+      // Call the edge function
+      // Try both paths - the edge function might be deployed under either URL pattern
+      try {
+        // First try the /api/ prefix which is common in development
+        const response = await fetch('/api/notify-skills-changes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            skillId,
+            action,
+            ...data
+          }),
+        });
+        
+        logger.trace(`Edge function response status: ${response.status}`);
 
-      const responseData = await response.json();
-      logger.debug(`Successfully notified skill changes for ${action}`, responseData);
-      return responseData;
+        if (!response.ok) {
+          throw new Error(`Error status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        logger.debug(`Successfully notified skill changes for ${action}`, responseData);
+        return responseData;
+      } catch (firstAttemptError) {
+        logger.warn('First attempt at edge function call failed, trying alternate URL', firstAttemptError);
+        
+        // Try alternate URL pattern used in production
+        const response = await fetch('/functions/v1/notify-skills-changes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            skillId,
+            action,
+            ...data
+          }),
+        });
+        
+        logger.trace(`Edge function (alternate URL) response status: ${response.status}`);
+
+        if (!response.ok) {
+          const responseText = await response.text();
+          logger.error(`Error in notify-skills-changes edge function: ${response.status} ${responseText}`);
+          throw new Error(`Error notifying skill changes: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        logger.debug(`Successfully notified skill changes for ${action}`, responseData);
+        return responseData;
+      }
     } catch (error) {
       logger.error('Error notifying skill changes:', error);
       // We don't throw here to prevent breaking the main flow
+      
+      // But we do log that we're falling back to the database trigger
+      logger.info('Falling back to database trigger for activity creation');
     }
   };
 
@@ -161,21 +203,27 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Create an activity for this skill using the edge function
       if (data && data.length > 0) {
-        logger.trace(`Skill created with ID: ${data[0].id}, now creating activity via edge function`);
+        logger.trace(`Skill created with ID: ${data[0].id}, now creating activity`);
         
-        await notifySkillChanges(
-          data[0].id, 
-          'create', 
-          {
-            skillTitle: formData.title,
-            providerId: mode === 'offer' ? user.id : undefined,
-            requesterId: mode === 'request' ? user.id : undefined,
-            neighborhoodId: neighborhood.id,
-            description: formData.description,
-            category: formData.category,
-            requestType: mode === 'offer' ? 'offer' : 'need'
-          }
-        );
+        try {
+          await notifySkillChanges(
+            data[0].id, 
+            'create', 
+            {
+              skillTitle: formData.title,
+              providerId: mode === 'offer' ? user.id : undefined,
+              requesterId: mode === 'request' ? user.id : undefined,
+              neighborhoodId: neighborhood.id,
+              description: formData.description,
+              category: formData.category,
+              requestType: mode === 'offer' ? 'offer' : 'need'
+            }
+          );
+        } catch (notifyError) {
+          // Log but continue - we rely on the database trigger as fallback
+          logger.error("Error notifying about skill changes, but the skill was created successfully:", notifyError);
+          logger.info("The database trigger will handle activity creation instead");
+        }
       }
 
       // Dispatch refresh events - ensure skill updates trigger activity feed refresh
@@ -251,9 +299,14 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       await skillsService.updateSkill(skillId, formData, user.id);
       
       // Notify about skill update to update related activities
-      await notifySkillChanges(skillId, 'update', {
-        skillTitle: formData.title
-      });
+      try {
+        await notifySkillChanges(skillId, 'update', {
+          skillTitle: formData.title
+        });
+      } catch (notifyError) {
+        // Log but continue - we rely on the database trigger as fallback
+        logger.error("Error notifying about skill update:", notifyError);
+      }
 
       // Dispatch refresh events using the single dispatch function
       logger.debug("Dispatching skills-updated event after update");

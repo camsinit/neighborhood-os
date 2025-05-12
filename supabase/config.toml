@@ -1,1 +1,11 @@
-project_id = "nnwzfliblfuldwxpuata"
+
+# This is the main Supabase configuration file for serverless edge functions
+project_id = "neighborhood-dashboard"
+
+[global.env_variables]
+# Leave this empty, secrets will be managed through Supabase dashboard
+
+[functions]
+[functions.notify-skills-changes]
+verify_jwt = true
+

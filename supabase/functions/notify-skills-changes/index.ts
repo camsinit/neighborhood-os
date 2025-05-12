@@ -119,7 +119,6 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // When a skill is modified, update any related activities to keep them in sync
-    // Now using the skill_id field for more reliable joins
     if (action === 'update' && skillId) {
       console.log(`[TRACE] Processing update action for skill ${skillId}`);
       

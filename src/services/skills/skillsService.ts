@@ -1,6 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { SkillCategory, SkillWithProfile } from '@/components/skills/types/skillTypes';
 import { SkillFormData } from '@/components/skills/types/skillFormTypes';
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this service
+const logger = createLogger('skillsService');
 
 /**
  * Fetch skills from the database
@@ -29,7 +34,7 @@ export const fetchSkills = async (category?: SkillCategory) => {
   const { data, error } = await query;
   
   if (error) {
-    console.error('Error fetching skills:', error);
+    logger.error('Error fetching skills:', error);
     throw error;
   }
 
@@ -38,6 +43,11 @@ export const fetchSkills = async (category?: SkillCategory) => {
 
 /**
  * Create a new skill
+ * 
+ * This function:
+ * 1. Validates essential data
+ * 2. Inserts the skill into the database
+ * 3. Attempts to create an activity via the edge function (with fallback behavior)
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
@@ -51,7 +61,7 @@ export const createSkill = async (
   }
 
   // Log the skill data we're about to insert for debugging
-  console.log('[skillsService.createSkill] Attempting to insert skill with data:', {
+  logger.info('Attempting to insert skill with data:', {
     title: formData.title,
     description: formData.description?.substring(0, 30) + '...',
     mode,
@@ -75,14 +85,15 @@ export const createSkill = async (
   };
 
   // Log the exact SQL payload for debugging
-  console.log('[skillsService.createSkill] Insert payload:', JSON.stringify(insertData, null, 2));
+  logger.info('Insert payload:', JSON.stringify(insertData, null, 2));
 
   try {
+    // Insert the skill into the database
     const { error, data } = await supabase.from('skills_exchange').insert(insertData).select();
 
     if (error) {
       // Detailed error logging
-      console.error('[skillsService.createSkill] Error creating skill:', {
+      logger.error('Error creating skill:', {
         error: {
           message: error.message,
           details: error.details,
@@ -98,7 +109,7 @@ export const createSkill = async (
     }
 
     // Log success data
-    console.log('[skillsService.createSkill] Skill created successfully:', {
+    logger.info('Skill created successfully:', {
       skillId: data?.[0]?.id,
       title: formData.title,
       userId,
@@ -107,11 +118,14 @@ export const createSkill = async (
 
     // Call edge function to register the activity
     try {
-      console.log('[skillsService.createSkill] Calling edge function to create activity...');
-      const response = await fetch('/functions/v1/notify-skills-changes', {
+      logger.info('Calling edge function to create activity...');
+      
+      // The edge function might not be deployed yet, we rely on the database trigger as fallback
+      const response = await fetch('/api/notify-skills-changes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.getSession() && (await supabase.auth.getSession()).data.session?.access_token}`
         },
         body: JSON.stringify({
           skillId: data?.[0]?.id,
@@ -127,18 +141,19 @@ export const createSkill = async (
       });
       
       if (!response.ok) {
-        console.error('[skillsService.createSkill] Edge function error:', await response.text());
+        logger.error('Edge function error:', await response.text());
       } else {
-        console.log('[skillsService.createSkill] Activity created via edge function');
+        logger.info('Activity created via edge function');
       }
     } catch (edgeError) {
-      // Log but don't fail if edge function fails
-      console.error('[skillsService.createSkill] Failed to call edge function:', edgeError);
+      // Log but don't fail if edge function fails - fallback to database trigger
+      logger.error('Failed to call edge function, falling back to database trigger:', edgeError);
+      logger.info('The database trigger will handle activity creation');
     }
 
     return data;
   } catch (error) {
-    console.error('[skillsService.createSkill] Unexpected error:', error);
+    logger.error('Unexpected error:', error);
     throw error;
   }
 };
@@ -161,7 +176,7 @@ export const updateSkill = async (
   if (formData.timePreference !== undefined) updateData.time_preferences = formData.timePreference || null;
   
   // Log update attempt
-  console.log('[skillsService.updateSkill] Attempting to update skill:', {
+  logger.info('Attempting to update skill:', {
     skillId,
     userId,
     updateFields: Object.keys(updateData),
@@ -176,7 +191,7 @@ export const updateSkill = async (
     .eq('user_id', userId);
   
   if (error) {
-    console.error('[skillsService.updateSkill] Error updating skill:', {
+    logger.error('Error updating skill:', {
       error: {
         message: error.message,
         details: error.details,
@@ -191,7 +206,7 @@ export const updateSkill = async (
     throw error;
   }
 
-  console.log('[skillsService.updateSkill] Skill updated successfully:', {
+  logger.info('Skill updated successfully:', {
     skillId,
     userId,
     timestamp: new Date().toISOString()
@@ -207,7 +222,7 @@ export const deleteSkill = async (
   userId: string
 ) => {
   // Log deletion attempt
-  console.log('[skillsService.deleteSkill] Attempting to delete skill:', {
+  logger.info('Attempting to delete skill:', {
     skillId,
     skillTitle, 
     userId,
@@ -222,7 +237,7 @@ export const deleteSkill = async (
     .eq('user_id', userId);
 
   if (error) {
-    console.error('[skillsService.deleteSkill] Error deleting skill:', {
+    logger.error('Error deleting skill:', {
       error: {
         message: error.message,
         details: error.details,
@@ -236,7 +251,7 @@ export const deleteSkill = async (
     throw error;
   }
 
-  console.log('[skillsService.deleteSkill] Skill deleted successfully:', {
+  logger.info('Skill deleted successfully:', {
     skillId,
     userId,
     timestamp: new Date().toISOString()
@@ -260,7 +275,7 @@ export const checkForDuplicates = async (
     .ilike('title', `%${title}%`);
 
   if (error) {
-    console.error('Error checking for duplicates:', error);
+    logger.error('Error checking for duplicates:', error);
     throw error;
   }
 
