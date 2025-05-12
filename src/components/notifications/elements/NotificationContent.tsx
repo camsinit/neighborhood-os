@@ -1,9 +1,9 @@
 
 /**
- * NotificationContent component
+ * NotificationContent.tsx
  * 
- * This component handles the main content display of notification cards
- * including title highlighting and any children content.
+ * A reusable component for rendering the content of notification items
+ * including title and optional children like description
  */
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -11,37 +11,43 @@ import { highlightTitleContent } from "@/utils/highlight/titleHighlighting";
 
 interface NotificationContentProps {
   title: string;
-  contentType?: string; // Add content type for highlighting
+  contentType?: string;  // Added content type for highlighting
   isUnread?: boolean;
-  children?: React.ReactNode;
   className?: string;
+  children?: React.ReactNode;
 }
 
 /**
- * Component for rendering notification content including highlighted title
+ * Component for rendering the main content (title & description) of a notification
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
-  contentType,
+  contentType, // Used for title highlighting
   isUnread = false,
-  children,
-  className
+  className,
+  children
 }) => {
-  // Determine if we should use highlighting based on content type
-  const shouldHighlight = !!contentType;
-  
+  // Use our title highlighting utility to highlight content parts
+  const highlightedTitle = highlightTitleContent(title, contentType);
+
   return (
-    <div className={cn("flex-1 min-w-0", className)}>
-      <p className={cn(
-        "text-sm break-words", 
-        isUnread ? "font-semibold" : "font-medium"
-      )}>
-        {/* Use highlighting if we have content type, otherwise plain text */}
-        {shouldHighlight ? highlightTitleContent(title, contentType) : title}
-      </p>
+    <div className={cn("flex flex-col flex-1 min-w-0", className)}>
+      <h4 
+        className={cn(
+          "text-sm font-medium leading-tight", 
+          isUnread ? "font-semibold" : ""
+        )}
+      >
+        {/* Use our highlighted title */}
+        {highlightedTitle}
+      </h4>
       
-      {/* Render any children content */}
-      {children}
+      {/* Optional description or other content */}
+      {children && (
+        <div className="mt-0.5">
+          {children}
+        </div>
+      )}
     </div>
   );
 };
