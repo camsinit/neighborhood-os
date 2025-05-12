@@ -21,5 +21,9 @@ export const useActivities = () => {
   return useQuery({
     queryKey: ["activities"],
     queryFn: fetchActivities,
+    // Use a shorter stale time to refresh more frequently
+    staleTime: 30000, // 30 seconds
+    // Add a refetch interval for automatic updates
+    refetchInterval: 60000, // 1 minute
   });
 };

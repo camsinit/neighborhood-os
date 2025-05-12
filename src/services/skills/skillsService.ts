@@ -47,7 +47,7 @@ export const fetchSkills = async (category?: SkillCategory) => {
  * This function:
  * 1. Validates essential data
  * 2. Inserts the skill into the database
- * 3. Attempts to create an activity via the edge function (with fallback behavior)
+ * 3. Relies on database triggers to create the activity (with edge function as fallback)
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
@@ -116,7 +116,8 @@ export const createSkill = async (
       timestamp: new Date().toISOString()
     });
 
-    // Call edge function to register the activity
+    // Call edge function to register the activity as a fallback
+    // The database trigger should handle this, but we call the edge function as a backup
     try {
       logger.info('Calling edge function to create activity...');
       
