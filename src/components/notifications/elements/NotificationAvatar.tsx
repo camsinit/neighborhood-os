@@ -8,6 +8,7 @@ import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
+import { getNotificationTextColor } from "../utils/notificationColorUtils";
 
 export interface NotificationAvatarProps {
   url?: string | null;
@@ -15,6 +16,7 @@ export interface NotificationAvatarProps {
   isUnread?: boolean;
   className?: string;
   size?: "sm" | "md" | "lg";
+  notificationType?: string;
 }
 
 /**
@@ -25,7 +27,8 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   name,
   isUnread = false,
   className,
-  size = "md"
+  size = "md",
+  notificationType
 }) => {
   // Determine size class
   const sizeClass = {
@@ -33,6 +36,9 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
     md: "h-10 w-10",
     lg: "h-12 w-12"
   }[size];
+  
+  // Get text color based on notification type
+  const textColorClass = getNotificationTextColor(notificationType);
   
   return (
     <Avatar 
@@ -47,8 +53,8 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
       ) : (
         <AvatarFallback 
           className={cn(
-            "bg-gray-100 text-gray-700",
-            isUnread && "bg-blue-50 text-blue-600"
+            "bg-gray-100",
+            isUnread ? `${textColorClass.replace('text-', 'bg-').replace('-700', '-50')} ${textColorClass}` : "text-gray-600"
           )}
         >
           {name.charAt(0).toUpperCase()}

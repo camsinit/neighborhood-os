@@ -13,6 +13,7 @@ import NotificationActions from "../elements/NotificationActions";
 import NotificationTimeStamp from "../elements/NotificationTimeStamp";
 import { motion } from "framer-motion";
 import { type HighlightableItemType } from "@/utils/highlight";
+import { getNotificationBorderColor } from "../utils/notificationColorUtils";
 
 interface NotificationItemProps {
   notification: BaseNotification;
@@ -57,6 +58,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   // Get the user's name 
   const displayName = notification.profiles?.display_name || "A neighbor";
+  
+  // Get notification border color based on its type
+  const borderColorClass = getNotificationBorderColor(notification.notification_type);
 
   return (
     <motion.div
@@ -67,7 +71,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       className="mb-3"
     >
       <div 
-        className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm ${notification.is_read ? 'bg-white' : 'bg-white'}`} 
+        className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`} 
       >
         <div className="relative p-4">
           {/* Timestamp in top right */}
@@ -90,7 +94,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               <NotificationContent 
                 title={notification.title}
                 actorName={displayName}
-                contentType={notification.content_type}
+                contentType={notification.notification_type}
                 isUnread={!notification.is_read}
               >
                 {notification.description && (

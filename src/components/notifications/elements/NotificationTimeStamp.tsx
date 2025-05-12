@@ -8,6 +8,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { Clock } from "lucide-react";
 
 export interface NotificationTimeStampProps {
   date: string | Date;
@@ -59,16 +60,17 @@ const NotificationTimeStamp: React.FC<NotificationTimeStampProps> = ({
     : formatDistanceToNow(dateObj, { addSuffix: true });
   
   return (
-    <span 
+    <div 
       className={cn(
-        "text-xs text-gray-500",
+        "flex items-center gap-1 text-xs",
+        isUnread ? "text-gray-700 font-medium" : "text-gray-500",
         position === "corner" && "absolute top-3 right-3",
-        isUnread && "font-medium",
         className
       )}
     >
-      {timeText}
-    </span>
+      <Clock className="h-3 w-3" />
+      <span>{timeText}</span>
+    </div>
   );
 };
 

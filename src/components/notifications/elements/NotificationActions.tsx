@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
 import { type HighlightableItemType } from "@/utils/highlight";
+import { getNotificationTextColor } from "../utils/notificationColorUtils";
 
 export interface NotificationActionsProps {
   id: string;
@@ -83,13 +84,17 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     }, 500);
   };
 
+  // Get highlight color for buttons
+  const highlightColor = getNotificationTextColor(contentType);
+  const buttonHoverClass = highlightColor.replace('text-', 'hover:bg-').replace('-700', '-50');
+
   return (
     <div className={cn("flex justify-end gap-2 mt-2", className)}>
       <Button
         variant="ghost"
         size="sm"
         onClick={handleView}
-        className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+        className={cn("h-8 text-xs text-gray-600 hover:bg-gray-50 px-3", buttonHoverClass)}
       >
         <Eye className="h-3.5 w-3.5 mr-1" />
         View

@@ -72,3 +72,38 @@ export const getNotificationTextColor = (notificationType: string | undefined): 
       return "text-gray-700";
   }
 };
+
+/**
+ * Get background color class for a notification type
+ * Useful for badges, indicators, or highlights
+ * 
+ * @param notificationType The type of notification
+ * @returns Tailwind CSS class for background color
+ */
+export const getNotificationBgColor = (notificationType: string | undefined): string => {
+  // Handle undefined or null notification types with a default
+  if (!notificationType) {
+    return "bg-gray-100";
+  }
+  
+  // Convert notification_type to a string and lowercase for consistent matching
+  const type = String(notificationType).toLowerCase();
+  
+  // Match known types to their background colors (lighter shade)
+  switch (type) {
+    case "event":
+      return "bg-blue-50";
+    case "safety":
+      return "bg-red-50";
+    case "skills":
+      return "bg-green-50";
+    case "neighbors":
+      return "bg-purple-50";
+    case "goods":
+      return "bg-amber-50";
+    case "support":
+      return "bg-indigo-50";
+    default:
+      return "bg-gray-100";
+  }
+};
