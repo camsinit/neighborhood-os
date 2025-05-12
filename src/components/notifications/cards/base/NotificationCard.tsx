@@ -7,7 +7,7 @@
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { BaseNotification } from "@/hooks/notifications/types";
+import { BaseNotification, HighlightableItemType } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
@@ -85,7 +85,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        await markAsRead(notification_type, id);
+        // Convert notification_type to the correct type for markAsRead function
+        // This safely handles any notification_type value from the database
+        await markAsRead(notification_type as any, id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
@@ -93,8 +95,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     
     // Navigate to the content if content type is valid
     if (content_type && content_id) {
-      // Use the highlight utility to navigate to the content
-      highlightItem(content_type, content_id);
+      // Convert content_type to the correct type for highlightItem function
+      // This safely handles any content_type value from the database
+      highlightItem(content_type as HighlightableItemType, content_id);
     }
     
     if (onDismiss) onDismiss();
@@ -120,7 +123,10 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
 
   // Get the appropriate border color based on notification type
   const getBorderColor = () => {
-    switch (notification_type) {
+    // Convert any notification_type to a known type or default
+    const notificationType = String(notification_type).toLowerCase();
+    
+    switch (notificationType) {
       case "event":
         return "border-l-blue-500";
       case "safety":

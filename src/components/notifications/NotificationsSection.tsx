@@ -122,8 +122,13 @@ export function NotificationsSection({
         return;
       }
 
-      // Update all notification tables
-      const tables = ["safety_updates", "events", "support_requests", "goods_exchange"];
+      // Use an array of table names instead of dynamic strings
+      const tables = [
+        "safety_updates",
+        "events", 
+        "support_requests", 
+        "goods_exchange"
+      ];
       
       // Update each table in parallel
       await Promise.all(tables.map(async (table) => {

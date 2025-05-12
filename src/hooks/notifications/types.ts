@@ -24,9 +24,12 @@ export interface BaseNotification {
     avatar_url?: string;
     [key: string]: any;
   };
+  // Add relevance_score property
+  relevance_score?: number;
 }
 
-export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors";
+// Make HighlightableItemType more flexible to include string values from database
+export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors" | string;
 
 // Add ProfileData type to fix imports
 export interface ProfileData {
