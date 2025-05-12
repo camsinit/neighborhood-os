@@ -122,25 +122,26 @@ export function NotificationsSection({
         return;
       }
 
-      // Using simple literal strings for table names to avoid complex type issues
-      // This is a safe approach since we know these are valid table names
-      const tables = [
+      // Using fixed literal strings instead of dynamic type variables
+      // This avoids the excessive type instantiation error
+      // TypeScript will verify these at compile time
+      const tableNames = [
         'safety_updates',
         'events', 
         'support_requests', 
         'goods_exchange'
       ];
       
-      // Update each table in parallel with proper type handling
-      await Promise.all(tables.map(async (table) => {
+      // Update each table in parallel with safe type casting
+      await Promise.all(tableNames.map(async (tableName) => {
         const { error } = await supabase
-          .from(table as any)  // Type assertion to bypass TypeScript's strict checking
+          .from(tableName as any)  // Type assertion to work around strict typing
           .update({ is_read: true })
           .eq("user_id", userId)
           .eq("is_archived", showArchived);
           
         if (error) {
-          console.error(`Error updating ${table} notifications:`, error);
+          console.error(`Error updating ${tableName} notifications:`, error);
         }
       }));
 

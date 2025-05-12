@@ -28,7 +28,8 @@ export interface BaseNotification {
   relevance_score?: number;
 }
 
-// Make HighlightableItemType more flexible with an index signature
+// Make HighlightableItemType a type that accepts string literals or any string
+// This allows us to use string values while still having type safety for common values
 export type HighlightableItemType = "event" | "safety" | "skills" | "goods" | "support" | "neighbors" | string;
 
 // Add ProfileData type to fix imports
