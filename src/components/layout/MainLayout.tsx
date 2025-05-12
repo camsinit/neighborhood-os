@@ -43,7 +43,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         {isHomePage && (
           <Header onOpenSettings={handleOpenSettings} />
         )}
-        <main className="p-4 sm:p-8">
+        {/* Removed padding from main element to allow gradients to touch edges */}
+        <main className="h-full">
           {children}
         </main>
         

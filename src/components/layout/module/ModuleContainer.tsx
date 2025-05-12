@@ -22,7 +22,8 @@ const ModuleContainer = ({
   const gradientClass = `page-gradient ${themeColor}-gradient`;
   
   return (
-    <div className={cn(gradientClass, className)}>
+    // Added h-full w-full to ensure gradient takes up the entire space
+    <div className={cn(gradientClass, "h-full w-full", className)}>
       <div className="relative z-10 min-h-full w-full">
         {children}
       </div>
