@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Fixed import for navigation
+import { useNavigate } from 'react-router-dom'; // Using useNavigate instead of useRouter
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { NotificationsPopover } from '../NotificationsPopover'; // Correct import
@@ -62,6 +62,7 @@ const SkillNotificationItem: React.FC<SkillNotificationItemProps> = ({
       onAction={handleViewSkill}
       itemId={id}
       type="skill"
+      title={title} // Add title prop here which was missing
       actionLabel="View Skill"
       contentId={skillId}
       contentType="skill"

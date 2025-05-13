@@ -113,7 +113,8 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
     isError,
     error,
     refreshNotifications,
-    // Access error handling properties directly from the returned object
+    lastRefreshed,
+    // Access error handling properties from the hook
     hasError,
     errorCount
   } = useNotificationsPopoverData(showArchived);
@@ -168,12 +169,12 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
               )}
               
               {/* Handle error state */}
-              {isError && (
+              {(isError || hasError) && (
                 <NotificationsErrorState onRetry={handleRetry} />
               )}
               
               {/* Show notifications if available */}
-              {notifications?.length && !showArchived && !isError ? (
+              {notifications?.length && !showArchived && !isError && !hasError ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
@@ -184,7 +185,7 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
                 ))
               ) : (
                 // Show empty state if no notifications or archived view is empty
-                !isLoading && !isError && (
+                !isLoading && !isError && !hasError && (
                   <NotificationsEmptyState showArchived={showArchived} />
                 )
               )}
@@ -199,12 +200,12 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
               )}
               
               {/* Handle error state */}
-              {isError && (
+              {(isError || hasError) && (
                 <NotificationsErrorState onRetry={handleRetry} />
               )}
               
               {/* Show archived notifications if available */}
-              {notifications?.length && showArchived && !isError ? (
+              {notifications?.length && showArchived && !isError && !hasError ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
@@ -215,7 +216,7 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
                 ))
               ) : (
                 // Show empty state if no archived notifications
-                !isLoading && !isError && (
+                !isLoading && !isError && !hasError && (
                   <NotificationsEmptyState showArchived={showArchived} />
                 )
               )}
