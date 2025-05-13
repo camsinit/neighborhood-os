@@ -66,7 +66,7 @@
   transition: opacity 300ms, transform 300ms;
 }
 
-/* Swipe animation for archiving notifications */
+/* Updated swipe animation for archiving notifications - now to the RIGHT */
 @keyframes swipe-out-right {
   from { 
     transform: translateX(0);

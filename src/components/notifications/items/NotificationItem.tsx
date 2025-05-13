@@ -1,3 +1,4 @@
+
 /**
  * Minimalist NotificationItem component
  * 
@@ -54,11 +55,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   // Get notification border color based on its type
   const borderColorClass = getNotificationBorderColor(notification.notification_type);
+  
+  // Updated animation to slide RIGHT instead of LEFT when archiving
   return <motion.div ref={notificationRef} initial={{
     x: 0,
     opacity: 1
   }} animate={isSliding ? {
-    x: "-100%",
+    x: "100%", // Changed from "-100%" to "100%" to swipe right instead of left
     opacity: 0
   } : {
     x: 0,

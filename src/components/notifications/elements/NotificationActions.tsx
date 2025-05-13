@@ -72,11 +72,12 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     // Trigger animation first
     triggerSwipeAnimation();
     
-    // Archive after animation
+    // Archive after animation completes
     setTimeout(async () => {
       try {
         await archiveNotification(id);
-        if (onDismiss) onDismiss();
+        // Removed the onDismiss() call to prevent the notification drawer from closing
+        // This is the key change - we archive but don't dismiss the panel
       } catch (error) {
         console.error("Error archiving notification:", error);
       }
