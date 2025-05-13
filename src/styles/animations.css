@@ -82,6 +82,25 @@
   animation: swipe-out-right 0.5s ease-in-out forwards;
 }
 
+/* New animation for collapsing notification height */
+@keyframes collapse-height {
+  from { 
+    max-height: var(--notification-height);
+    margin-bottom: 0.75rem;
+    opacity: 1;
+  }
+  to { 
+    max-height: 0;
+    margin-bottom: 0;
+    opacity: 0;
+  }
+}
+
+.collapse-height {
+  animation: collapse-height 0.3s ease-in-out forwards;
+  overflow: hidden;
+}
+
 /* Pulse animation for notification badge */
 @keyframes pulse-badge {
   0% {
@@ -102,4 +121,9 @@
 
 .pulse-badge {
   animation: pulse-badge 2s infinite;
+}
+
+/* New layout shift animation for list items */
+.layout-animate {
+  transition: all 0.5s ease-in-out;
 }

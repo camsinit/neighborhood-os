@@ -12,6 +12,7 @@ import { NotificationsLoadingState, NotificationsEmptyState } from "./states/Not
 import NotificationGroup from "./sections/NotificationGroup";
 import MarkAllAsReadButton from "./actions/MarkAllAsReadButton";
 import { groupNotificationsByDate, sortNotificationsByDate } from "./utils/notificationGroupingUtils";
+import { motion, AnimateSharedLayout } from "framer-motion"; // Import for smooth layout animations
 
 /**
  * Props for the NotificationsSection component
@@ -74,8 +75,15 @@ export function NotificationsSection({
   }
   
   // Main content with notifications grouped by date
+  // We wrap everything in motion.div to enable smooth transitions when items are removed
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      layout // This enables automatic layout adjustment
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
       {/* Mark all as read button */}
       <MarkAllAsReadButton 
         unreadCount={unreadCount} 
@@ -92,6 +100,6 @@ export function NotificationsSection({
           onClose={onClose}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }

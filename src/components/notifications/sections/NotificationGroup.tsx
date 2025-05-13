@@ -7,6 +7,7 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import NotificationCardFactory from "../cards/NotificationCardFactory";
+import { motion } from "framer-motion"; // Import for animation support
 
 // Props for NotificationGroup component
 interface NotificationGroupProps {
@@ -28,12 +29,19 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
   onClose
 }) => {
   return (
-    <div className="space-y-2">
+    <motion.div 
+      className="space-y-2"
+      layout // This enables automatic layout adjustment
+      transition={{ type: "spring", damping: 30, stiffness: 200 }} // Add spring physics for smoother motion
+    >
       {/* Group title */}
       <h4 className="text-sm font-medium text-gray-500 px-4">{title}</h4>
       
       {/* Notifications list */}
-      <div className="space-y-3 px-4">
+      <motion.div 
+        className="space-y-3 px-4"
+        layout
+      >
         {notifications.map(notification => (
           <NotificationCardFactory 
             key={notification.id} 
@@ -41,8 +49,8 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
             onDismiss={onClose} 
           />
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
