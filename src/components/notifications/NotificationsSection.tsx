@@ -12,7 +12,7 @@ import { BaseNotification } from "@/hooks/notifications";
 import NotificationItem from "./items/NotificationItem";
 import NotificationGroup from "./sections/NotificationGroup";
 import { createLogger } from "@/utils/logger";
-import { groupNotificationsByDate } from "./utils/notificationGroupingUtils";
+import { groupNotificationsByDate, NotificationGroup as NotificationGroupType } from "./utils/notificationGroupingUtils";
 
 // Create a logger for this component
 const logger = createLogger('NotificationsSection');
@@ -102,11 +102,12 @@ export function NotificationsSection({ onClose, showArchived }: NotificationsSec
   // Show notifications grouped by date
   return (
     <div className="py-2 space-y-6">
-      {Object.entries(groupedNotifications).map(([date, notifs]) => (
+      {/* Use the groupedNotifications array of NotificationGroupType objects */}
+      {groupedNotifications.map((group) => (
         <NotificationGroup 
-          key={date} 
-          title={date} 
-          notifications={notifs} 
+          key={group.title} 
+          title={group.title} 
+          notifications={group.notifications} 
           onClose={onClose}
         />
       ))}

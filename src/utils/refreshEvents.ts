@@ -18,13 +18,16 @@ export type EventType = 'activities-updated' |
                 'skills-updated' | 
                 'notification-created';
 
+// Define the callback type for events
+type EventCallback = () => void;
+
 // Create a simple event emitter for our refresh events with enhanced logging
 const eventEmitter = {
-  events: {} as Record<string, Array<() => void>>,
+  events: {} as Record<string, Array<EventCallback>>,
   eventIds: {} as Record<string, number>,
   
   // Subscribe to an event
-  on(event: string, callback: () => void) {
+  on(event: string, callback: EventCallback) {
     if (!this.events[event]) {
       this.events[event] = [];
       this.eventIds[event] = 0;
@@ -47,7 +50,7 @@ const eventEmitter = {
   },
   
   // Emit an event
-  emit(event: string, data?: any) {
+  emit(event: string, data?: any): number {
     logger.debug(`Attempting to emit event: ${event}`);
     
     if (this.events[event]) {
