@@ -1,9 +1,12 @@
-
 /**
  * Main function to fetch all notifications from various sources
  */
 import { BaseNotification } from "./types";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchDirectNotifications } from "./fetchDirectNotifications";
+import { createLogger } from "@/utils/logger";
+
+const logger = createLogger('fetchNotifications');
 
 /**
  * Fetches safety notifications from the database
@@ -261,21 +264,26 @@ export const createProfilesMap = (profiles: any[]): Map<string, any> => {
 
 /**
  * Main function to fetch all notifications from various sources
+ * Now enhanced to include direct notifications from the notifications table
  */
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
+  logger.debug('Fetching all notifications, showArchived:', showArchived);
+  
   // Fetch everything concurrently for better performance
   const [
     safetyUpdatesResult, 
     eventsResult, 
     supportRequestsResult, 
     skillRequestsResult, 
-    goodsItemsResult
+    goodsItemsResult,
+    directNotifications  // Add direct notifications from the notifications table
   ] = await Promise.all([
     fetchSafetyNotifications(showArchived),
     fetchEventNotifications(showArchived),
     fetchSupportNotifications(showArchived),
     fetchSkillNotifications(),
-    fetchGoodsNotifications(showArchived)
+    fetchGoodsNotifications(showArchived),
+    fetchDirectNotifications(showArchived)  // New function to fetch from notifications table
   ]);
   
   // Extract data (or empty arrays if there was an error)
@@ -304,12 +312,15 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   
   // Combine all notifications
   const allNotifications: BaseNotification[] = [
+    ...directNotifications,  // Add direct notifications to the list
     ...safetyNotifications,
     ...eventNotifications,
     ...supportNotifications,
     ...skillNotifications,
     ...goodsNotifications
   ];
+  
+  logger.debug(`Combined notifications count: ${allNotifications.length} (including ${directNotifications.length} direct notifications)`);
   
   // Sort by creation date, newest first
   return allNotifications.sort((a, b) => 
