@@ -16,9 +16,11 @@ const logger = createLogger('fetchDirectNotifications');
  * @returns Formatted array of notifications
  */
 export const fetchDirectNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
+  // Get the current user - we need their ID to fetch their notifications
   const user = await supabase.auth.getUser();
   const userId = user.data.user?.id;
   
+  // If no user is authenticated, return empty array
   if (!userId) {
     logger.debug('No user ID found, returning empty notifications');
     return [];
@@ -30,7 +32,8 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
     showArchived
   });
   
-  // Query the notifications table directly
+  // Query the notifications table directly with a join to get actor profiles
+  // This gives us the display name and avatar of the person who triggered the notification
   const { data: notifications, error } = await supabase
     .from('notifications')
     .select(`
@@ -66,6 +69,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
     const actorProfile = notification.profiles || {};
     
     // Build a standardized context object from metadata
+    // This helps with rendering consistent notification messages
     const notificationContext = {
       contextType: notification.notification_type || 'general',
       neighborName: actorProfile.display_name || null,
@@ -73,7 +77,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       ...(notification.metadata || {})
     };
     
-    // Generate a summary based on available information
+    // Generate a user-friendly summary based on available information
     const summary = generateNotificationSummary(notification, actorProfile);
     
     // Include summary in context
@@ -88,9 +92,9 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       user_id: notification.user_id,
       title: notification.title,
       actor_id: notification.actor_id,
-      content_type: standardizeContentType(notification.content_type),
+      content_type: standardizeContentType(notification.content_type), // Standardize content_type
       content_id: notification.content_id,
-      notification_type: standardizeNotificationType(notification.notification_type),
+      notification_type: standardizeNotificationType(notification.notification_type), // Standardize notification_type
       action_type: notification.action_type || 'view',
       action_label: notification.action_label || 'View',
       is_read: notification.is_read || false,
@@ -98,7 +102,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       created_at: notification.created_at,
       updated_at: notification.updated_at || notification.created_at,
       context,
-      // Include additional fields for consistency
+      // Include additional fields for consistency with other notification types
       description: notification.description || null,
       profiles: notification.profiles || null
     };
@@ -107,6 +111,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
 
 /**
  * Generate a human-readable summary of the notification
+ * This helps create consistent notification messages across different types
  * 
  * @param notification - The notification object
  * @param actorProfile - The actor's profile data
@@ -124,12 +129,23 @@ const generateNotificationSummary = (notification: any, actorProfile: any): stri
       return `${actorName} mentioned an event: ${notification.title}`;
       
     case 'safety':
+      if (notification.content_type === 'safety_comment') {
+        return `${actorName} commented on your update: ${notification.title}`;
+      }
       return `${actorName} posted a safety update: ${notification.title}`;
       
     case 'skills':
+      if (notification.action_type === 'schedule') {
+        return `${actorName} requested to schedule: ${notification.title}`;
+      } else if (notification.action_type === 'confirm') {
+        return `${actorName} confirmed a skill session: ${notification.title}`;
+      }
       return `${actorName} shared or requested a skill: ${notification.title}`;
       
     case 'goods':
+      if (notification.action_type === 'claim') {
+        return `${actorName} wants your item: ${notification.title}`;
+      }
       return `${actorName} shared or requested an item: ${notification.title}`;
       
     default:
@@ -147,6 +163,7 @@ const generateNotificationSummary = (notification: any, actorProfile: any): stri
  */
 export const standardizeContentType = (contentType: string): string => {
   // Map of original content types to standardized versions
+  // This ensures all code uses the same content type strings
   const contentTypeMap: Record<string, string> = {
     'event': 'events',
     'safety': 'safety_updates',
