@@ -1,91 +1,92 @@
 
-/**
- * SkillNotificationItem.tsx
- * 
- * A specialized component for showing skill-related notifications
- */
-import React, { useState } from "react";
-import { HeartHandshake } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BaseNotification } from "@/hooks/notifications";
-// Fix: Import NotificationsPopover correctly
-import NotificationsPopover from "../NotificationsPopover"; 
-// Fix: Use useNavigate instead of useRouter
-import { useNavigate } from "react-router-dom";
-import { highlightItem } from "@/utils/highlight";
+import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Fixed import for navigation
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { NotificationsPopover } from '../NotificationsPopover'; // Correct import
+import { highlightItem } from '@/utils/highlight';
+import { HighlightableItemType } from '@/utils/highlight/types';
 
+// Interface for the skill notification props
 interface SkillNotificationItemProps {
-  notification: BaseNotification;
-  onDismiss?: () => void;
+  id: string;
+  title: string;
+  userName: string;
+  userAvatar?: string;
+  userInitials?: string;
+  timestamp: string;
+  skillId: string;
+  isRead?: boolean;
+  onAction?: () => void;
 }
 
 /**
- * Card specifically for skill exchange notifications
+ * Component to display a skill notification item
+ * Now with improved error handling and better type safety
  */
 const SkillNotificationItem: React.FC<SkillNotificationItemProps> = ({
-  notification,
-  onDismiss
+  id,
+  title,
+  userName,
+  userAvatar,
+  userInitials = '?',
+  timestamp,
+  skillId,
+  isRead = false,
+  onAction
 }) => {
-  // State for tracking popover
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  
-  // Router for navigation
+  // Use navigate instead of useRouter
   const navigate = useNavigate();
-
-  // Navigate to the skill details
+  
+  // Handle view skill action with error prevention
   const handleViewSkill = () => {
-    setIsPopoverOpen(false);
-    
-    // Navigate to skills page
-    navigate("/skills");
-    
-    // Highlight the skill after a short delay to allow page to load
-    setTimeout(() => {
-      if (notification.content_id) {
-        highlightItem("skills", notification.content_id);
-      }
-    }, 100);
-    
-    // Call dismiss callback if provided
-    if (onDismiss) {
-      onDismiss();
+    try {
+      // Navigate to the skill details and highlight it
+      navigate(`/skills?highlight=${skillId}`);
+      
+      // Optional: Highlight the skill item when user navigates there
+      highlightItem({
+        id: skillId,
+        type: 'skill' as HighlightableItemType
+      });
+      
+      // Call the parent's action handler if provided
+      if (onAction) onAction();
+    } catch (error) {
+      console.error('Error navigating to skill:', error);
     }
   };
-
-  // Create a popover wrapper component that matches the expected props
-  const PopoverWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div onClick={handleViewSkill} className="cursor-pointer">
-      {children}
-    </div>
-  );
-
+  
   return (
-    <div className="cursor-pointer flex items-start p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors" onClick={handleViewSkill}>
-      {/* Icon for skill notifications */}
-      <div className="flex-shrink-0 mr-3">
-        <div className="bg-purple-100 p-2 rounded-full">
-          <HeartHandshake className="h-5 w-5 text-purple-700" />
-        </div>
-      </div>
-      
-      {/* Content */}
-      <div className="flex-grow">
-        <h4 className="font-medium">{notification.title}</h4>
-        <p className="text-sm text-gray-500">
-          {notification.description || "Someone wants to exchange skills with you"}
-        </p>
-        
-        {/* Action button */}
-        <div className="mt-2">
-          <Button size="sm" variant="outline" onClick={(e) => {
-            e.stopPropagation();
-            handleViewSkill();
-          }}>
-            View Details
+    <NotificationsPopover 
+      onAction={handleViewSkill}
+      itemId={id}
+      type="skill"
+      actionLabel="View Skill"
+      contentId={skillId}
+      contentType="skill"
+    >
+      <div className={`p-3 rounded-lg border mb-2 cursor-pointer hover:bg-gray-50 transition-colors ${!isRead ? 'border-blue-200 bg-blue-50' : ''}`}>
+        <div className="flex items-start gap-3">
+          {/* Avatar section */}
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={userAvatar} />
+            <AvatarFallback>{userInitials}</AvatarFallback>
+          </Avatar>
+          
+          {/* Content section */}
+          <div className="flex-1">
+            <p className="text-sm font-medium">{title}</p>
+            <p className="text-xs text-gray-500">{userName} • {timestamp}</p>
+          </div>
+          
+          {/* Action button */}
+          <Button size="sm" variant="ghost" onClick={handleViewSkill} className="text-xs h-7">
+            View
           </Button>
         </div>
       </div>
-    </div>
+    </NotificationsPopover>
   );
 };
 

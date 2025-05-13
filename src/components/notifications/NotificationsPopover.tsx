@@ -110,9 +110,12 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
   const { 
     data: notifications, 
     isLoading,
-    isError, // Use standard ReactQuery properties instead
+    isError,
     error,
-    refreshNotifications 
+    refreshNotifications,
+    // Access error handling properties directly from the returned object
+    hasError,
+    errorCount
   } = useNotificationsPopoverData(showArchived);
 
   // Calculate unread count - protect against undefined

@@ -46,30 +46,7 @@ export const useNotificationsPopoverData = (
   const [hasError, setHasError] = useState(false);
   
   // Leverage our main notifications hook with error handling
-  const notificationsQuery = useNotifications(showArchived, {
-    // Add onError handler to prevent infinite retries
-    meta: {
-      onError: (error: any) => {
-        logger.error('Error in notifications query:', error);
-        setConsecutiveErrorCount(prev => prev + 1);
-        setHasError(true);
-        
-        // Show toast after threshold is reached
-        if (consecutiveErrorCount >= MAX_CONSECUTIVE_ERRORS - 1) {
-          toast({
-            title: "Notification load failed",
-            description: "There was a problem loading your notifications",
-            variant: "destructive"
-          });
-        }
-      }
-    },
-    // Only retry a limited number of times
-    retry: (failureCount, error) => {
-      // Stop retrying after a few attempts
-      return failureCount < 2;
-    }
-  });
+  const notificationsQuery = useNotifications(showArchived); // Fix here: removed the second argument
   
   // Use our polling hook with proper error tracking and circuit breaker
   const polling = useNotificationPolling({
