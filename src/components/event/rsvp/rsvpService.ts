@@ -1,132 +1,120 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { createLogger } from "@/utils/logger";
 import { dispatchRefreshEvent } from "@/utils/refreshEvents";
 import { toast } from "sonner";
 
-/**
- * Adds a user's RSVP to an event and notifies the host
- * 
- * @param userId - The user ID of the person RSVPing
- * @param eventId - The event ID being RSVP'd to
- * @param neighborhoodId - The neighborhood ID for the event
- * @param eventDetails - Optional event details for notification
- * @returns Promise with the RSVP data
- */
-export const addRsvp = async (
-  userId: string, 
-  eventId: string, 
-  neighborhoodId: string,
-  eventDetails?: { title: string; hostId: string }
-) => {
-  // Log the operation for debugging
-  console.log('[rsvpService] Adding RSVP:', { userId, eventId, neighborhoodId });
-  
-  // Insert RSVP record into database
-  const { data, error } = await supabase
-    .from('event_rsvps')
-    .insert({
-      user_id: userId,
-      event_id: eventId,
-      neighborhood_id: neighborhoodId
-    })
-    .select();
-    
-  if (error) {
-    console.error('[rsvpService] Error adding RSVP:', error);
-    toast.error('Failed to RSVP to event');
-    throw error;
-  }
-  
-  // Notify host about new RSVP if event details are provided
-  if (eventDetails?.hostId && eventDetails?.title) {
-    try {
-      // Call our notify-event-changes edge function to create a notification
-      const response = await supabase.functions.invoke('notify-event-changes', {
-        body: {
-          eventId,
-          action: 'rsvp',
-          eventTitle: eventDetails.title,
-          userId,
-          hostId: eventDetails.hostId
-        }
-      });
-      
-      if (response.error) {
-        console.error('[rsvpService] Error sending RSVP notification:', response.error);
-      } else {
-        console.log('[rsvpService] RSVP notification sent successfully');
-      }
-    } catch (notifyError) {
-      console.error('[rsvpService] Error invoking notification function:', notifyError);
-    }
-  }
-  
-  // Trigger refresh events to update UI
-  dispatchRefreshEvent('event-rsvp');
-  dispatchRefreshEvent('events');
-  
-  // Also dispatch a DOM event for components that use event listeners
-  window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
-  
-  return data;
-};
+// Setup logger for RSVP service
+const logger = createLogger('rsvpService');
 
 /**
- * Removes a user's RSVP from an event
+ * Service for handling RSVP operations
  * 
- * @param userId - The user ID of the person un-RSVPing
- * @param eventId - The event ID being un-RSVP'd from
- * @returns Promise with the result
+ * Provides functions to add or remove RSVPs for events
  */
-export const removeRsvp = async (userId: string, eventId: string) => {
-  // Log the operation for debugging
-  console.log('[rsvpService] Removing RSVP:', { userId, eventId });
-  
-  // Remove RSVP record from database
-  const { data, error } = await supabase
-    .from('event_rsvps')
-    .delete()
-    .match({
-      user_id: userId,
-      event_id: eventId
+export const rsvpService = {
+  /**
+   * Add an RSVP for an event
+   * 
+   * @param eventId - The event ID to RSVP to
+   * @param userId - The user ID who is RSVPing
+   * @param neighborhoodId - The neighborhood ID of the event
+   * @param transactionId - Optional tracking ID for logs
+   * @returns Success status and response data
+   */
+  async addRSVP(eventId: string, userId: string, neighborhoodId: string | null, transactionId: string) {
+    logger.debug(`[${transactionId}] Adding RSVP for event=${eventId} user=${userId}`);
+    
+    // Prepare minimal data object for inserting RSVP
+    const rsvpData: any = {
+      event_id: eventId,
+      user_id: userId
+    };
+    
+    // Only add neighborhood_id if it exists
+    if (neighborhoodId) {
+      rsvpData.neighborhood_id = neighborhoodId;
+    }
+    
+    // Log the exact data structure
+    logger.debug(`[${transactionId}] Adding RSVP with data:`, {
+      payload: rsvpData
     });
     
-  if (error) {
-    console.error('[rsvpService] Error removing RSVP:', error);
-    toast.error('Failed to remove RSVP');
-    throw error;
-  }
-  
-  // Trigger refresh events to update UI
-  dispatchRefreshEvent('event-rsvp');
-  dispatchRefreshEvent('events');
-  
-  // Also dispatch a DOM event for components that use event listeners
-  window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
-  
-  return data;
-};
+    // Insert RSVP
+    const { data, error } = await supabase
+      .from('event_rsvps')
+      .insert(rsvpData)
+      .select();
 
-/**
- * Checks if a user has RSVP'd to an event
- * 
- * @param userId - The user ID to check
- * @param eventId - The event ID to check
- * @returns Promise with boolean result
- */
-export const hasUserRsvpd = async (userId: string, eventId: string): Promise<boolean> => {
-  const { data, error } = await supabase
-    .from('event_rsvps')
-    .select('id')
-    .match({
-      user_id: userId,
-      event_id: eventId
-    })
-    .single();
+    if (error) {
+      logger.error(`[${transactionId}] Error adding RSVP:`, {
+        error: {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        },
+        requestPayload: rsvpData
+      });
+      throw error;
+    }
+
+    logger.debug(`[${transactionId}] Successfully added RSVP:`, {
+      responseData: data,
+      recordCreated: !!data?.length
+    });
     
-  if (error && error.code !== 'PGRST116') { // Not found is expected in some cases
-    console.error('[rsvpService] Error checking RSVP status:', error);
-  }
+    // Dispatch refresh events - this will now trigger notification refresh
+    dispatchRefreshEvent('event-rsvp-updated');
+    
+    // Also dispatch a custom event specifically for notifications
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    return { success: true, data };
+  },
   
-  return !!data;
+  /**
+   * Remove an RSVP for an event
+   * 
+   * @param eventId - The event ID to remove RSVP from
+   * @param userId - The user ID who is removing their RSVP
+   * @param transactionId - Optional tracking ID for logs
+   * @returns Success status
+   */
+  async removeRSVP(eventId: string, userId: string, transactionId: string) {
+    logger.debug(`[${transactionId}] Removing RSVP with query:`, {
+      table: 'event_rsvps',
+      action: 'delete',
+      filters: { event_id: eventId, user_id: userId }
+    });
+    
+    const { error } = await supabase
+      .from('event_rsvps')
+      .delete()
+      .eq('event_id', eventId)
+      .eq('user_id', userId);
+
+    if (error) {
+      logger.error(`[${transactionId}] Error removing RSVP:`, {
+        error: {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        }
+      });
+      throw error;
+    }
+
+    logger.debug(`[${transactionId}] Successfully removed RSVP`);
+    
+    // Dispatch refresh events
+    dispatchRefreshEvent('event-rsvp-updated');
+    
+    // Also dispatch a custom event specifically for notifications
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    return { success: true };
+  }
 };
