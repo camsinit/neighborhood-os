@@ -33,42 +33,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   /**
-   * Helper function to trigger notifications for skill requests
-   * This ensures skill requests are properly notified to providers
-   */
-  const notifySkillRequest = async (skillId: string, skillTitle: string, providerId: string, requesterId: string) => {
-    try {
-      logger.debug('Triggering notification for skill request:', {
-        skillId,
-        skillTitle,
-        providerId,
-        requesterId
-      });
-      
-      // Call the Edge Function to create the notification
-      const { error } = await supabase.functions.invoke('notify-skills-changes', {
-        body: {
-          action: 'request',
-          skillId,
-          skillTitle,
-          providerId,
-          requesterId
-        }
-      });
-      
-      if (error) {
-        logger.error('Error notifying skill request:', error);
-      } else {
-        logger.debug('Successfully sent skill request notification');
-      }
-    } catch (err) {
-      logger.error('Exception in notifySkillRequest:', err);
-      // Don't throw from here - we don't want to break the main flow
-      // if notifications fail
-    }
-  };
-
-  /**
    * Submits a new skill exchange (offer or request)
    * The database trigger handles activity creation
    */
@@ -125,14 +89,10 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       logger.debug("Dispatching skills-updated event");
       refreshEvents.skills();
       
-      // Also invalidate the queries directly to ensure fresh data
+      // Also invalidate the queries directly
       logger.debug("Invalidating queries to refresh UI");
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
-      
-      // Also invalidate notifications to show any new notifications
-      logger.debug("Invalidating notifications queries");
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       // Show success message
       toast.success(mode === 'offer' ? 'Skill offered successfully!' : 'Skill request submitted successfully!');
@@ -197,7 +157,6 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
       logger.debug("Manually invalidating queries after update");
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       toast.success('Skill exchange updated successfully!');
       onSuccess();
@@ -208,5 +167,5 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
     }
   };
 
-  return { handleSubmit, handleUpdate, notifySkillRequest };
+  return { handleSubmit, handleUpdate };
 };
