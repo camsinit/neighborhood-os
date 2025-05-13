@@ -105,6 +105,7 @@ export const SkillNotificationItem = ({
           open={isSkillRequestDialogOpen}
           onOpenChange={setIsSkillRequestDialogOpen}
           notification={context.skillRequestData}
+          onClose={onClose}  // Pass the onClose prop to the popover
         />
       )}
     </div>

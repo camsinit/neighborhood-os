@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,23 +8,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillRequestNotification } from "../types/skillTypes";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 interface SkillRequestPopoverProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   notification: SkillRequestNotification;
+  onClose?: () => void; // New optional onClose callback
 }
 
 const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
   open,
   onOpenChange,
-  notification
+  notification,
+  onClose
 }) => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -49,6 +47,12 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
       
+      // Trigger refresh events
+      refreshEvents.skills();
+      refreshEvents.notifications();
+      
+      // Call onClose if provided
+      if (onClose) onClose();
       onOpenChange(false);
     } catch (error) {
       console.error("Error scheduling session:", error);
@@ -84,6 +88,12 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       
+      // Trigger refresh events
+      refreshEvents.skills();
+      refreshEvents.notifications();
+      
+      // Call onClose if provided
+      if (onClose) onClose();
       onOpenChange(false);
     } catch (error) {
       console.error("Error deleting skill request:", error);

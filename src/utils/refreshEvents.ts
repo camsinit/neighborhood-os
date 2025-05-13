@@ -2,6 +2,8 @@
 /**
  * This event utility helps components across the app stay in sync
  * without needing to directly import or depend on each other
+ * 
+ * Simplified version to support the streamlined notifications system
  */
 import { createLogger } from '@/utils/logger';
 
@@ -16,45 +18,47 @@ type EventType = 'activities-updated' |
                 'skills-updated' | 
                 'notification-created';
 
-// Create a simple event emitter for our refresh events
+/**
+ * Simple event emitter for our refresh events
+ */
 const eventEmitter = {
   events: {} as Record<string, Array<() => void>>,
   
-  // Subscribe to an event
+  /**
+   * Subscribe to an event
+   * 
+   * @param event - The event to subscribe to
+   * @param callback - The callback function to call when the event is emitted
+   * @returns An unsubscribe function
+   */
   on(event: string, callback: () => void) {
     if (!this.events[event]) {
       this.events[event] = [];
-      logger.trace(`Created new event bucket for: ${event}`);
     }
     
     this.events[event].push(callback);
-    logger.trace(`Added listener to ${event}, total listeners: ${this.events[event].length}`);
     
     // Return unsubscribe function
     return () => {
-      logger.trace(`Unsubscribe called for event: ${event}`);
       this.events[event] = this.events[event].filter(cb => cb !== callback);
-      logger.trace(`After unsubscribe, ${event} has ${this.events[event].length} listeners remaining`);
     };
   },
   
-  // Emit an event
+  /**
+   * Emit an event
+   * 
+   * @param event - The event to emit
+   */
   emit(event: string) {
-    logger.trace(`Attempting to emit event: ${event}`);
-    
     if (this.events[event]) {
       logger.debug(`Emitting event: ${event} to ${this.events[event].length} listeners`);
-      this.events[event].forEach((callback, index) => {
-        logger.trace(`Calling listener #${index + 1} for event: ${event}`);
+      this.events[event].forEach((callback) => {
         try {
           callback();
         } catch (error) {
-          logger.error(`Error in listener #${index + 1} for event ${event}:`, error);
+          logger.error(`Error in event listener for ${event}:`, error);
         }
       });
-      logger.trace(`Finished emitting event: ${event}`);
-    } else {
-      logger.trace(`No listeners registered for event: ${event}`);
     }
   }
 };
@@ -73,54 +77,51 @@ export const dispatchRefreshEvent = (eventType: EventType) => {
   
   // Also dispatch a DOM event for components using useEffect listeners
   window.dispatchEvent(new CustomEvent(eventType));
-  
-  // Then, also emit the general activities update event to refresh the activity feed
-  if (eventType !== 'activities-updated') {
-    logger.trace(`Auto-dispatching activities-updated because ${eventType} was triggered`);
-    eventEmitter.emit('activities-updated');
-  }
-  
-  logger.info(`Completed dispatch for event: ${eventType}`);
 };
 
-// Shorthand methods for common module refreshes
+/**
+ * Simplified refresh events helper
+ * This provides shorthand methods for common refresh events
+ */
 export const refreshEvents = {
-  // General activity feed updates
-  activities: () => {
-    logger.debug('Refreshing activities via shorthand method');
-    dispatchRefreshEvent('activities-updated');
-  },
+  /**
+   * Refresh the activities feed
+   */
+  activities: () => dispatchRefreshEvent('activities-updated'),
   
-  // Module-specific refreshes
-  events: () => {
-    logger.debug('Refreshing events via shorthand method');
-    dispatchRefreshEvent('event-submitted');
-  },
-  eventsDelete: () => {
-    logger.debug('Refreshing events deletion via shorthand method');
-    dispatchRefreshEvent('event-deleted');
-  },
-  safety: () => {
-    logger.debug('Refreshing safety via shorthand method');
-    dispatchRefreshEvent('safety-updated');
-  },
-  goods: () => {
-    logger.debug('Refreshing goods via shorthand method');
-    dispatchRefreshEvent('goods-updated');
-  },
-  skills: () => {
-    logger.debug('Refreshing skills via shorthand method');
-    dispatchRefreshEvent('skills-updated');
-  },
-  notifications: () => {
-    logger.debug('Refreshing notifications via shorthand method');
-    dispatchRefreshEvent('notification-created');
-  },
+  /**
+   * Refresh events after an event action
+   */
+  events: () => dispatchRefreshEvent('event-submitted'),
+  
+  /**
+   * Refresh events after an event is deleted
+   */
+  eventsDelete: () => dispatchRefreshEvent('event-deleted'),
+  
+  /**
+   * Refresh safety updates
+   */
+  safety: () => dispatchRefreshEvent('safety-updated'),
+  
+  /**
+   * Refresh goods items
+   */
+  goods: () => dispatchRefreshEvent('goods-updated'),
+  
+  /**
+   * Refresh skills items
+   */
+  skills: () => dispatchRefreshEvent('skills-updated'),
+  
+  /**
+   * Refresh notifications
+   */
+  notifications: () => dispatchRefreshEvent('notification-created'),
   
   // Add the core emitters for custom events
   on: eventEmitter.on.bind(eventEmitter),
   emit: eventEmitter.emit.bind(eventEmitter),
 };
 
-// Export the refreshEvents as default
 export default refreshEvents;

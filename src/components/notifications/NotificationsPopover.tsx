@@ -83,10 +83,22 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
-  const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
+  // Use our simplified hook that leverages React Query's built-in polling
+  const { 
+    data: notifications, 
+    isLoading, 
+    isError, 
+    error, 
+    refetch 
+  } = useNotificationsPopoverData(showArchived);
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
+
+  // Show error message if there's an error
+  if (isError) {
+    console.error("Error fetching notifications:", error);
+  }
 
   return (
     <Popover>
@@ -120,7 +132,14 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
           
           <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {notifications?.length && !showArchived ? (
+              {isLoading ? (
+                <div className="p-4 text-center">
+                  <div className="animate-pulse flex justify-center">
+                    <div className="h-6 w-6 rounded-full bg-gray-200"></div>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
+                </div>
+              ) : notifications?.length && !showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
@@ -139,7 +158,14 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
           
           <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {notifications?.length && showArchived ? (
+              {isLoading ? (
+                <div className="p-4 text-center">
+                  <div className="animate-pulse flex justify-center">
+                    <div className="h-6 w-6 rounded-full bg-gray-200"></div>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
+                </div>
+              ) : notifications?.length && showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
