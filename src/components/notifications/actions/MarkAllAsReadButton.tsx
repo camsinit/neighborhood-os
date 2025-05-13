@@ -1,4 +1,3 @@
-
 /**
  * MarkAllAsReadButton.tsx
  * 
@@ -32,7 +31,9 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
 }) => {
   const [isMarkingRead, setIsMarkingRead] = useState(false);
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // Don't show the button if there are no unread notifications or we're viewing archived notifications
   if (unreadCount === 0 || showArchived) {
@@ -47,7 +48,6 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       setIsMarkingRead(true);
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
-      
       if (!userId) {
         toast({
           title: "Error",
@@ -60,21 +60,16 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       // Using fixed literal strings instead of dynamic type variables
       // This avoids the excessive type instantiation error
       // TypeScript will verify these at compile time
-      const tableNames = [
-        'safety_updates',
-        'events', 
-        'support_requests', 
-        'goods_exchange'
-      ];
-      
+      const tableNames = ['safety_updates', 'events', 'support_requests', 'goods_exchange'];
+
       // Update each table in parallel with safe type casting
-      await Promise.all(tableNames.map(async (tableName) => {
-        const { error } = await supabase
-          .from(tableName as any)  // Type assertion to work around strict typing
-          .update({ is_read: true })
-          .eq("user_id", userId)
-          .eq("is_archived", showArchived);
-          
+      await Promise.all(tableNames.map(async tableName => {
+        const {
+          error
+        } = await supabase.from(tableName as any) // Type assertion to work around strict typing
+        .update({
+          is_read: true
+        }).eq("user_id", userId).eq("is_archived", showArchived);
         if (error) {
           console.error(`Error updating ${tableName} notifications:`, error);
         }
@@ -84,11 +79,9 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       queryClient.invalidateQueries({
         queryKey: ["notifications"]
       });
-      
       if (onComplete) {
         onComplete();
       }
-      
       toast({
         title: "Success",
         description: "All notifications marked as read"
@@ -104,21 +97,6 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       setIsMarkingRead(false);
     }
   };
-
-  return (
-    <div className="px-4 py-2 border-b">
-      <Button
-        variant="ghost" 
-        size="sm"
-        className="w-full text-sm font-medium text-gray-600 hover:text-gray-900"
-        onClick={markAllAsRead}
-        disabled={isMarkingRead}
-      >
-        <Check className="h-4 w-4 mr-2" />
-        Mark all as read
-      </Button>
-    </div>
-  );
+  return;
 };
-
 export default MarkAllAsReadButton;
