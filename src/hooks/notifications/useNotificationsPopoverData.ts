@@ -12,6 +12,7 @@ import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
 import { useNotificationPolling } from "./useNotificationPolling";
 import { useEventNotifications } from "./useEventNotifications";
+import { toast } from "@/components/ui/use-toast";
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useNotificationsPopoverData');
@@ -37,22 +38,53 @@ export const useNotificationsPopoverData = (
   // Setup reliable notification handling through our specialized hook
   const { refreshNotifications: refreshEventNotifications } = useEventNotifications();
   
-  // Leverage our main notifications hook
+  // Track consecutive error count to prevent infinite error loops
+  const [consecutiveErrorCount, setConsecutiveErrorCount] = useState(0);
+  const MAX_CONSECUTIVE_ERRORS = 3;
+  
+  // Leverage our main notifications hook with error handling
   const notificationsQuery = useNotifications(showArchived);
   
-  // Use our new polling hook for reliable background refreshing
+  // Use our polling hook with proper error tracking
   const polling = useNotificationPolling({
-    enabled: true,
+    // Disable polling if we've hit the error threshold
+    enabled: consecutiveErrorCount < MAX_CONSECUTIVE_ERRORS,
     interval: refreshInterval,
     queryKeys: ["notifications"],
     onSuccess: () => {
+      // Reset error count on success
+      if (consecutiveErrorCount > 0) {
+        setConsecutiveErrorCount(0);
+      }
       setLastRefreshed(new Date());
       logger.debug("Background polling refreshed notifications");
+    },
+    onError: (error) => {
+      // Increment error count
+      setConsecutiveErrorCount(prev => prev + 1);
+      
+      // Log the error
+      logger.error("Polling error:", error);
+      
+      // If we've hit the threshold, show a toast to the user
+      if (consecutiveErrorCount >= MAX_CONSECUTIVE_ERRORS - 1) {
+        toast({
+          title: "Notification sync issue",
+          description: "We're having trouble loading your notifications. Please try again later.",
+          variant: "destructive"
+        });
+      }
     }
   });
   
-  // Create a refresh function that invalidates the cache and refetches
+  // Create a refresh function that invalidates the cache and refetches with error handling
   const refreshNotifications = useCallback(() => {
+    // Only attempt refresh if we haven't hit the error threshold
+    if (consecutiveErrorCount >= MAX_CONSECUTIVE_ERRORS) {
+      logger.warn("Skipping manual refresh due to consecutive errors");
+      return;
+    }
+    
     // Log the refresh attempt
     logger.info("Manually refreshing notifications");
     
@@ -65,17 +97,33 @@ export const useNotificationsPopoverData = (
       // Force a refetch
       notificationsQuery.refetch()
         .then(() => {
+          // Reset error count on success
+          setConsecutiveErrorCount(0);
+          
           // Update last refreshed timestamp
           setLastRefreshed(new Date());
           logger.debug("Notifications refreshed successfully");
         })
         .catch(error => {
+          // Increment error count
+          setConsecutiveErrorCount(prev => prev + 1);
+          
           logger.error("Error refreshing notifications:", error);
+          
+          // If we've hit the threshold, show a toast to the user
+          if (consecutiveErrorCount >= MAX_CONSECUTIVE_ERRORS - 1) {
+            toast({
+              title: "Notification refresh failed",
+              description: "We couldn't load your notifications. Please try again later.",
+              variant: "destructive"
+            });
+          }
         });
     } catch (error) {
       logger.error("Failed to refresh notifications:", error);
+      setConsecutiveErrorCount(prev => prev + 1);
     }
-  }, [queryClient, notificationsQuery]);
+  }, [queryClient, notificationsQuery, consecutiveErrorCount]);
   
   // Subscribe to refresh events from the refreshEvents utility
   useEffect(() => {
@@ -84,7 +132,11 @@ export const useNotificationsPopoverData = (
     // Set up subscription with refreshEvents utility
     const unsubscribeFromNotifications = refreshEvents.on('notification-created', () => {
       logger.info("Received notification-created event from refreshEvents");
-      refreshNotifications();
+      
+      // Only attempt refresh if we haven't hit the error threshold
+      if (consecutiveErrorCount < MAX_CONSECUTIVE_ERRORS) {
+        refreshNotifications();
+      }
     });
     
     // Log diagnostics on page load
@@ -95,15 +147,17 @@ export const useNotificationsPopoverData = (
       if (unsubscribeFromNotifications) unsubscribeFromNotifications();
       logger.debug("Removed refreshEvents subscription");
     };
-  }, [refreshNotifications]);
+  }, [refreshNotifications, consecutiveErrorCount]);
   
   // Return everything needed for notification handling
   return {
     ...notificationsQuery,
     refreshNotifications,
     lastRefreshed,
+    hasErrors: consecutiveErrorCount > 0,
+    errorCount: consecutiveErrorCount,
     pollingStatus: {
-      isPolling: polling.isPolling,
+      isPolling: polling.isPolling && consecutiveErrorCount < MAX_CONSECUTIVE_ERRORS,
       lastPolled: polling.lastPolled
     }
   };
