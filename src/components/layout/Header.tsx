@@ -67,7 +67,8 @@ const Header = ({
   };
 
   return (
-    <header className="h-16 px-4 border-b flex items-center justify-between">
+    // Removed the 'border-b' class from the header to remove the bottom border stroke
+    <header className="h-16 px-4 flex items-center justify-between">
       {/* Left side - Quick Actions title */}
       <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
       
