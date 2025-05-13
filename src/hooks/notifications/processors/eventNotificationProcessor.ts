@@ -17,6 +17,7 @@ export const processEventNotifications = (events: any[]): BaseNotification[] => 
   return events.map(event => ({
     id: event.id,
     user_id: event.host_id || "unknown",
+    title: event.title, // Adding back the title property that was removed
     content_type: "events",
     content_id: event.id,
     notification_type: "event", // This matches the HighlightableItemType
