@@ -65,18 +65,10 @@ export const rsvpService = {
       recordCreated: !!data?.length
     });
     
-    // Dispatch refresh events in multiple ways to ensure it's captured
-    
-    // 1. Use the dedicated refresh event utility
-    logger.info(`[${transactionId}] Dispatching refresh events via refreshEvents utility`);
+    // Dispatch refresh events - this will now trigger notification refresh
     dispatchRefreshEvent('event-rsvp-updated');
-    dispatchRefreshEvent('notification-created');
     
-    // 2. Directly dispatch window events for backup
-    logger.info(`[${transactionId}] Dispatching direct window events`);
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated', { 
-      detail: { action: 'added', eventId, userId }
-    }));
+    // Also dispatch a custom event specifically for notifications
     window.dispatchEvent(new CustomEvent('notification-created'));
     
     return { success: true, data };
@@ -117,18 +109,10 @@ export const rsvpService = {
 
     logger.debug(`[${transactionId}] Successfully removed RSVP`);
     
-    // Dispatch refresh events in multiple ways to ensure it's captured
-    
-    // 1. Use the dedicated refresh event utility
-    logger.info(`[${transactionId}] Dispatching refresh events via refreshEvents utility`);
+    // Dispatch refresh events
     dispatchRefreshEvent('event-rsvp-updated');
-    dispatchRefreshEvent('notification-created');
     
-    // 2. Directly dispatch window events for backup
-    logger.info(`[${transactionId}] Dispatching direct window events`);
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated', { 
-      detail: { action: 'removed', eventId, userId }
-    }));
+    // Also dispatch a custom event specifically for notifications
     window.dispatchEvent(new CustomEvent('notification-created'));
     
     return { success: true };

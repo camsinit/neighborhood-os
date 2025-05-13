@@ -4,7 +4,6 @@ import QuickActions from "@/components/QuickActions";
 import ActivitySection from "@/components/activity/ActivitySection";
 import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 import ActivityFeed from "@/components/activity/ActivityFeed";
-import { NotificationDebugPanel } from "@/components/notifications/debug";
 
 /**
  * Main homepage/dashboard of the neighborhood app
@@ -30,9 +29,6 @@ const HomePage = () => {
           </section>
         </div>
       </div>
-      
-      {/* Debug panel - only rendered in development */}
-      {process.env.NODE_ENV !== 'production' && <NotificationDebugPanel />}
     </div>
   );
 };
