@@ -12,7 +12,7 @@ import { NotificationsLoadingState, NotificationsEmptyState } from "./states/Not
 import NotificationGroup from "./sections/NotificationGroup";
 import MarkAllAsReadButton from "./actions/MarkAllAsReadButton";
 import { groupNotificationsByDate, sortNotificationsByDate } from "./utils/notificationGroupingUtils";
-import { motion, AnimateSharedLayout } from "framer-motion"; // Import for smooth layout animations
+import { motion } from "framer-motion"; // Import for smooth layout animations
 
 /**
  * Props for the NotificationsSection component
