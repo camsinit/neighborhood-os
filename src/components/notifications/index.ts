@@ -5,7 +5,7 @@
 
 // Main notifier  
 export { default as NotificationsPopover } from './NotificationsPopover';
-export { NotificationPopover } from './NotificationsPopover';
+export { NotificationsPopover as NotificationPopover } from './NotificationsPopover';
 
 // Sections
 export { default as NotificationsSection } from './NotificationsSection';
@@ -15,4 +15,3 @@ export * from './utils/notificationActions';
 
 // Additional exports
 export * from './utils/notificationGroupingUtils';
-

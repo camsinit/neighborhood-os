@@ -6,7 +6,8 @@
 import { HighlightableItemType } from "@/utils/highlight";
 import { BaseNotification } from "@/hooks/notifications/types";
 import DefaultNotificationItem from "./items/DefaultNotificationItem";
-import { SkillNotificationItem } from "./items/SkillNotificationItem";
+// Fix: Import as default export instead of named export
+import SkillNotificationItem from "./items/SkillNotificationItem";
 // Import the minimalist notification item as a default import
 import NotificationItem from "./items/NotificationItem";
 
@@ -24,16 +25,8 @@ const NotificationItemRouter = ({ notification, onSelect }: NotificationItemProp
   if (notification.notification_type === 'skills' && notification.context?.contextType === 'skill_request') {
     return (
       <SkillNotificationItem 
-        title={notification.title}
-        itemId={notification.content_id}
-        context={notification.context}
-        isRead={notification.is_read}
-        isArchived={notification.is_archived}
-        onClose={onSelect || (() => {})}
-        onArchive={(e) => {
-          e.preventDefault();
-        }}
-        onItemClick={() => {}}
+        notification={notification}
+        onDismiss={onSelect}
       />
     );
   }

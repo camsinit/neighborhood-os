@@ -39,9 +39,8 @@ interface NotificationPopoverProps {
 
 /**
  * Individual notification popover component - for use in skill notification items
- * This is exported as a named export for use in other files
  */
-export const NotificationPopover = ({ 
+export const NotificationsPopover = ({ 
   children, 
   title, 
   type, 
@@ -74,14 +73,6 @@ export const NotificationPopover = ({
 };
 
 /**
- * The main notifications popover. Now it's smart about querying the broadcast notification list,
- * but has no DB/data logic; that all lives in the custom hook!
- */
-interface NotificationsPopoverMainProps {
-  children?: ReactNode;
-}
-
-/**
  * Error state that appears when notifications fail to load
  */
 const NotificationsErrorState = ({ onRetry }: { onRetry: () => void }) => {
@@ -111,16 +102,16 @@ const NotificationsErrorState = ({ onRetry }: { onRetry: () => void }) => {
 /**
  * Main notifications popover component
  */
-export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
+const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
   // Use our enhanced hook with error handling
   const { 
     data: notifications, 
-    isLoading, 
-    hasError, 
-    errorCount,
+    isLoading,
+    isError, // Use standard ReactQuery properties instead
+    error,
     refreshNotifications 
   } = useNotificationsPopoverData(showArchived);
 
@@ -174,12 +165,12 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
               )}
               
               {/* Handle error state */}
-              {hasError && (
+              {isError && (
                 <NotificationsErrorState onRetry={handleRetry} />
               )}
               
               {/* Show notifications if available */}
-              {notifications?.length && !showArchived && !hasError ? (
+              {notifications?.length && !showArchived && !isError ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
@@ -190,7 +181,7 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
                 ))
               ) : (
                 // Show empty state if no notifications or archived view is empty
-                !isLoading && !hasError && (
+                !isLoading && !isError && (
                   <NotificationsEmptyState showArchived={showArchived} />
                 )
               )}
@@ -205,12 +196,12 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
               )}
               
               {/* Handle error state */}
-              {hasError && (
+              {isError && (
                 <NotificationsErrorState onRetry={handleRetry} />
               )}
               
               {/* Show archived notifications if available */}
-              {notifications?.length && showArchived && !hasError ? (
+              {notifications?.length && showArchived && !isError ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
@@ -221,7 +212,7 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
                 ))
               ) : (
                 // Show empty state if no archived notifications
-                !isLoading && !hasError && (
+                !isLoading && !isError && (
                   <NotificationsEmptyState showArchived={showArchived} />
                 )
               )}
@@ -233,5 +224,5 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
   );
 };
 
-// Add default export to fix the import error
-export default NotificationsPopover;
+// Export both components
+export default NotificationsPopoverComponent;
