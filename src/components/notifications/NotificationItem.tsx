@@ -7,7 +7,8 @@ import { HighlightableItemType } from "@/utils/highlight";
 import { BaseNotification } from "@/hooks/notifications/types";
 import DefaultNotificationItem from "./items/DefaultNotificationItem";
 import { SkillNotificationItem } from "./items/SkillNotificationItem";
-import NotificationItem from "./items/NotificationItem"; // Import the minimalist notification item
+// Import the minimalist notification item as a default import
+import NotificationItem from "./items/NotificationItem";
 
 interface NotificationItemProps {
   notification: BaseNotification;

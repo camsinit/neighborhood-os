@@ -6,7 +6,7 @@ import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { type HighlightableItemType } from "@/utils/highlight"; // Updated import path
-// Using named import
+// Using the named import from NotificationsPopover
 import { NotificationPopover } from "../NotificationsPopover"; 
 import { getNotificationStyle } from "../utils/notificationStyles";
 import { Badge } from "@/components/ui/badge";
