@@ -4,16 +4,20 @@
  * 
  * Enhanced notification drawer with modern design and specialized notification cards
  * - Now with improved scrolling for better user experience
- * - Fully integrated with our new minimalist notification components
+ * - Fully integrated with our new robust notification handling system
  */
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { BellRing } from "lucide-react"; // Changed from Bell to BellRing for better visibility
+import { BellRing, RefreshCw } from "lucide-react"; 
 import { NotificationsSection } from "./NotificationsSection";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNotifications } from "@/hooks/notifications";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea import
+import { useNotificationsPopoverData } from "@/hooks/notifications/useNotificationsPopoverData";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this component
+const logger = createLogger('NotificationDrawer');
 
 /**
  * A full drawer component for displaying notifications with tabs for filtering
@@ -23,9 +27,17 @@ export default function NotificationDrawer() {
   // State for tracking whether the drawer is open
   const [open, setOpen] = useState(false);
   
-  // Get unread notification count for badge
-  const { data: activeNotifications } = useNotifications(false);
+  // Get notification data with our enhanced hook
+  const { data: activeNotifications, refreshNotifications, isLoading } = useNotificationsPopoverData(false);
+  
+  // Count unread notifications for the badge
   const unreadCount = activeNotifications?.filter(n => !n.is_read).length || 0;
+  
+  // Handle manual refresh
+  const handleRefresh = () => {
+    logger.info("Manual refresh requested by user");
+    refreshNotifications();
+  };
   
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -46,8 +58,18 @@ export default function NotificationDrawer() {
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-hidden flex flex-col p-0">
-        <SheetHeader className="p-4 border-b">
+        <SheetHeader className="p-4 border-b flex flex-row items-center justify-between">
           <SheetTitle>Notifications</SheetTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefresh} 
+            disabled={isLoading}
+            className="h-8 w-8 p-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="sr-only">Refresh</span>
+          </Button>
         </SheetHeader>
         
         <Tabs defaultValue="active" className="flex-1 flex flex-col">

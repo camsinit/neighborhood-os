@@ -2,13 +2,16 @@
 /**
  * useNotificationsPopoverData.ts
  * 
- * Custom hook to fetch notification data for the notifications popover
- * Enhanced with automatic refresh capabilities and better error handling
+ * Enhanced custom hook to fetch notification data for the notifications popover
+ * Now with reliable event handling AND polling for maximum reliability
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNotifications } from "@/hooks/notifications";
 import { useEffect, useCallback, useState } from "react";
 import { createLogger } from "@/utils/logger";
+import { refreshEvents } from "@/utils/refreshEvents";
+import { useNotificationPolling } from "./useNotificationPolling";
+import { useEventNotifications } from "./useEventNotifications";
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useNotificationsPopoverData');
@@ -31,13 +34,27 @@ export const useNotificationsPopoverData = (
   // Track when the last refresh happened 
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   
-  // Leverage our main notifications hook with automatic polling enabled
+  // Setup reliable notification handling through our specialized hook
+  const { refreshNotifications: refreshEventNotifications } = useEventNotifications();
+  
+  // Leverage our main notifications hook
   const notificationsQuery = useNotifications(showArchived);
+  
+  // Use our new polling hook for reliable background refreshing
+  const polling = useNotificationPolling({
+    enabled: true,
+    interval: refreshInterval,
+    queryKeys: ["notifications"],
+    onSuccess: () => {
+      setLastRefreshed(new Date());
+      logger.debug("Background polling refreshed notifications");
+    }
+  });
   
   // Create a refresh function that invalidates the cache and refetches
   const refreshNotifications = useCallback(() => {
     // Log the refresh attempt
-    logger.debug("Manually refreshing notifications");
+    logger.info("Manually refreshing notifications");
     
     try {
       // Invalidate the notifications query cache
@@ -60,54 +77,36 @@ export const useNotificationsPopoverData = (
     }
   }, [queryClient, notificationsQuery]);
   
-  // Set up automatic polling for notifications
+  // Subscribe to refresh events from the refreshEvents utility
   useEffect(() => {
-    // Skip if no refresh interval is specified
-    if (!refreshInterval) return;
+    logger.debug("Setting up refreshEvents subscription");
     
-    logger.debug(`Setting up automatic refresh every ${refreshInterval}ms`);
-    
-    // Create an interval to refresh notifications
-    const intervalId = setInterval(() => {
-      logger.trace("Auto-refresh triggered");
+    // Set up subscription with refreshEvents utility
+    const unsubscribeFromNotifications = refreshEvents.on('notification-created', () => {
+      logger.info("Received notification-created event from refreshEvents");
       refreshNotifications();
-    }, refreshInterval);
+    });
     
-    // Clean up on unmount
+    // Log diagnostics on page load
+    logger.info("Notification listeners initialized at", new Date().toISOString());
+    
+    // Clean up subscription on unmount
     return () => {
-      logger.debug("Cleaning up notification refresh interval");
-      clearInterval(intervalId);
-    };
-  }, [refreshInterval, refreshNotifications]);
-  
-  // Add listener for 'event-rsvp-updated' events to refresh notifications
-  useEffect(() => {
-    // Import here to avoid circular dependencies
-    const refreshEvents = window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
-    
-    // Listen for specific events that should trigger a notification refresh
-    const handleRefreshEvent = () => {
-      logger.debug("Refresh event detected, updating notifications");
-      refreshNotifications();
-    };
-    
-    // Add event listeners for specific events that should trigger a refresh
-    window.addEventListener('event-rsvp-updated', handleRefreshEvent);
-    window.addEventListener('skills-updated', handleRefreshEvent);
-    window.addEventListener('notification-created', handleRefreshEvent);
-    
-    // Clean up event listeners on unmount
-    return () => {
-      window.removeEventListener('event-rsvp-updated', handleRefreshEvent);
-      window.removeEventListener('skills-updated', handleRefreshEvent);
-      window.removeEventListener('notification-created', handleRefreshEvent);
+      if (unsubscribeFromNotifications) unsubscribeFromNotifications();
+      logger.debug("Removed refreshEvents subscription");
     };
   }, [refreshNotifications]);
   
-  // Return the query result along with the refresh function and last refreshed timestamp
+  // Return everything needed for notification handling
   return {
     ...notificationsQuery,
     refreshNotifications,
-    lastRefreshed
+    lastRefreshed,
+    pollingStatus: {
+      isPolling: polling.isPolling,
+      lastPolled: polling.lastPolled
+    }
   };
 };
+
+export default useNotificationsPopoverData;

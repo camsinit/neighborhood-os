@@ -2,96 +2,121 @@
 /**
  * NotificationsSection.tsx
  * 
- * Redesigned component that displays notifications in a clear, organized way.
- * Now refactored into smaller, more maintainable components.
+ * Enhanced notifications section with better loading and error states
  */
-import React, { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useNotifications } from "@/hooks/notifications";
-import { NotificationsLoadingState, NotificationsEmptyState } from "./states/NotificationStates";
+import { useNotificationsPopoverData } from "@/hooks/notifications/useNotificationsPopoverData";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RefreshCw } from "lucide-react";
+import { BaseNotification } from "@/hooks/notifications";
+import NotificationItem from "./items/NotificationItem";
 import NotificationGroup from "./sections/NotificationGroup";
-import MarkAllAsReadButton from "./actions/MarkAllAsReadButton";
-import { groupNotificationsByDate, sortNotificationsByDate } from "./utils/notificationGroupingUtils";
+import { createLogger } from "@/utils/logger";
+import { groupNotificationsByDate } from "./utils/notificationGroupingUtils";
 
-/**
- * Props for the NotificationsSection component
- * - onClose: Optional callback for when notification actions close the drawer
- * - showArchived: Whether to show archived notifications
- */
+// Create a logger for this component
+const logger = createLogger('NotificationsSection');
+
+// Props for the NotificationsSection component
 interface NotificationsSectionProps {
   onClose?: () => void;
-  showArchived?: boolean;
+  showArchived: boolean;
 }
 
 /**
- * Main component for displaying notifications, organized by time
+ * Component that displays notifications grouped by date
  */
-export function NotificationsSection({
-  onClose,
-  showArchived = false
-}: NotificationsSectionProps) {
-  // Fetch notifications with our custom hook
-  const {
-    data: notifications,
-    isLoading,
-    refetch
-  } = useNotifications(showArchived);
+export function NotificationsSection({ onClose, showArchived }: NotificationsSectionProps) {
+  // Use our enhanced hook for notifications with polling and event handling
+  const { 
+    data: notifications, 
+    isLoading, 
+    error, 
+    refreshNotifications,
+    lastRefreshed
+  } = useNotificationsPopoverData(showArchived, 15000); // Poll every 15 seconds
   
-  // For invalidating cache
-  const queryClient = useQueryClient();
-
-  // Clear cache and refetch on component mount to ensure we have the latest formatting
-  useEffect(() => {
-    // Invalidate the notifications query cache to force a fresh fetch
-    queryClient.invalidateQueries({
-      queryKey: ["notifications"]
-    });
-    
-    // Refetch after invalidating
-    refetch();
-    
-    // Log for debugging purposes
-    console.log("[NotificationsSection] Invalidated cache and refetched notifications");
-  }, [queryClient, refetch]);
-
-  // Sort notifications by date (newer first)
-  const sortedNotifications = sortNotificationsByDate(notifications);
-
   // Group notifications by date
-  const groupedNotifications = groupNotificationsByDate(sortedNotifications);
-
-  // Calculate unread count
-  const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
+  const groupedNotifications = groupNotificationsByDate(notifications || []);
   
-  // Loading state
-  if (isLoading) {
-    return <NotificationsLoadingState />;
+  // Log component render for debugging
+  logger.debug(`Rendering NotificationsSection: ${notifications?.length || 0} notifications, isLoading=${isLoading}, showArchived=${showArchived}`);
+  
+  // Show loading state while fetching
+  if (isLoading && !notifications) {
+    return (
+      <div className="p-4 space-y-4">
+        <div className="text-sm text-gray-500 flex items-center justify-between">
+          <span>Loading notifications...</span>
+          <Skeleton className="h-4 w-16" />
+        </div>
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-24" />
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 border rounded-lg">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-4/5" />
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 border rounded-lg">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-3/5" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
   
-  // No notifications state
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="p-6 text-center space-y-4">
+        <p className="text-red-500">Failed to load notifications</p>
+        <Button onClick={refreshNotifications} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+  
+  // Show empty state if there are no notifications
   if (!notifications?.length) {
-    return <NotificationsEmptyState showArchived={showArchived} />;
+    return (
+      <div className="p-6 text-center">
+        <p className="text-gray-500">
+          {showArchived ? 'No archived notifications' : 'No new notifications'}
+        </p>
+      </div>
+    );
   }
   
-  // Main content with notifications grouped by date
+  // Show notifications grouped by date
   return (
-    <div className="space-y-4">
-      {/* Mark all as read button */}
-      <MarkAllAsReadButton 
-        unreadCount={unreadCount} 
-        showArchived={showArchived}
-        onComplete={refetch}
-      />
-      
-      {/* Render each date group */}
-      {groupedNotifications.map(group => (
-        <NotificationGroup
-          key={group.title}
-          title={group.title}
-          notifications={group.notifications}
+    <div className="py-2 space-y-6">
+      {Object.entries(groupedNotifications).map(([date, notifs]) => (
+        <NotificationGroup 
+          key={date} 
+          title={date} 
+          notifications={notifs} 
           onClose={onClose}
         />
       ))}
+      
+      {/* Show refreshed timestamp at the bottom */}
+      <div className="px-4 py-2 text-xs text-gray-400 text-center border-t">
+        Last updated: {lastRefreshed.toLocaleTimeString()}
+      </div>
     </div>
   );
 }
+
+export default NotificationsSection;

@@ -75,11 +75,24 @@ const RSVPButton = ({
         await rsvpService.removeRSVP(eventId, user.id, opTxnId);
         toast.success("You've removed your RSVP");
         setHasRSVPed(false);
+        
+        // Explicitly dispatch event for notification system
+        logger.info(`${COMPONENT_ID}: [${opTxnId}] Dispatching rsvp-removed event`);
+        window.dispatchEvent(new CustomEvent('event-rsvp-updated', { 
+          detail: { action: 'removed', eventId, userId: user.id }
+        }));
       } else {
         // Add RSVP
         await rsvpService.addRSVP(eventId, user.id, eventNeighborhoodId, opTxnId);
         toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
+        
+        // Explicitly dispatch events for notification system - with detailed payload
+        logger.info(`${COMPONENT_ID}: [${opTxnId}] Dispatching rsvp-added event`);
+        window.dispatchEvent(new CustomEvent('event-rsvp-updated', { 
+          detail: { action: 'added', eventId, userId: user.id }
+        }));
+        window.dispatchEvent(new CustomEvent('notification-created'));
       }
     } catch (error: any) {
       // Enhanced error logging with context

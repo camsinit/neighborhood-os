@@ -2,6 +2,8 @@
 /**
  * This event utility helps components across the app stay in sync
  * without needing to directly import or depend on each other
+ * 
+ * Enhanced with better debugging and reliability
  */
 import { createLogger } from '@/utils/logger';
 
@@ -9,53 +11,73 @@ import { createLogger } from '@/utils/logger';
 const logger = createLogger('refreshEvents');
 
 // Define all possible event types in one place for consistency
-type EventType = 'activities-updated' | 
+export type EventType = 'activities-updated' | 
                 'event-rsvp-updated' | 'event-submitted' | 'event-deleted' |
                 'safety-updated' | 
                 'goods-updated' | 
                 'skills-updated' | 
                 'notification-created';
 
-// Create a simple event emitter for our refresh events
+// Create a simple event emitter for our refresh events with enhanced logging
 const eventEmitter = {
   events: {} as Record<string, Array<() => void>>,
+  eventIds: {} as Record<string, number>,
   
   // Subscribe to an event
   on(event: string, callback: () => void) {
     if (!this.events[event]) {
       this.events[event] = [];
-      logger.trace(`Created new event bucket for: ${event}`);
+      this.eventIds[event] = 0;
+      logger.debug(`Created new event bucket for: ${event}`);
     }
     
+    // Increment counter to assign a unique ID to this listener
+    this.eventIds[event]++;
+    const listenerId = this.eventIds[event];
+    
     this.events[event].push(callback);
-    logger.trace(`Added listener to ${event}, total listeners: ${this.events[event].length}`);
+    logger.debug(`Added listener #${listenerId} to ${event}, total listeners: ${this.events[event].length}`);
     
     // Return unsubscribe function
     return () => {
-      logger.trace(`Unsubscribe called for event: ${event}`);
+      logger.debug(`Unsubscribe called for event: ${event}, listener #${listenerId}`);
       this.events[event] = this.events[event].filter(cb => cb !== callback);
-      logger.trace(`After unsubscribe, ${event} has ${this.events[event].length} listeners remaining`);
+      logger.debug(`After unsubscribe, ${event} has ${this.events[event].length} listeners remaining`);
     };
   },
   
   // Emit an event
-  emit(event: string) {
-    logger.trace(`Attempting to emit event: ${event}`);
+  emit(event: string, data?: any) {
+    logger.debug(`Attempting to emit event: ${event}`);
     
     if (this.events[event]) {
-      logger.debug(`Emitting event: ${event} to ${this.events[event].length} listeners`);
+      const listenerCount = this.events[event].length;
+      logger.info(`Emitting event: ${event} to ${listenerCount} listeners`);
+      
       this.events[event].forEach((callback, index) => {
-        logger.trace(`Calling listener #${index + 1} for event: ${event}`);
+        logger.debug(`Calling listener #${index + 1} for event: ${event}`);
         try {
           callback();
         } catch (error) {
           logger.error(`Error in listener #${index + 1} for event ${event}:`, error);
         }
       });
-      logger.trace(`Finished emitting event: ${event}`);
+      logger.debug(`Finished emitting event: ${event}`);
+      
+      return listenerCount; // Return number of listeners notified
     } else {
-      logger.trace(`No listeners registered for event: ${event}`);
+      logger.debug(`No listeners registered for event: ${event}`);
+      return 0;
     }
+  },
+  
+  // List all registered events and their listener counts
+  getRegisteredEvents() {
+    const events: Record<string, number> = {};
+    for (const [eventName, listeners] of Object.entries(this.events)) {
+      events[eventName] = listeners.length;
+    }
+    return events;
   }
 };
 
@@ -64,20 +86,36 @@ const eventEmitter = {
  * This provides a consistent interface for triggering events across the app
  * 
  * @param eventType - The type of event to dispatch
+ * @param data - Optional data to include with the event
  */
-export const dispatchRefreshEvent = (eventType: EventType) => {
-  logger.debug(`Dispatching event: ${eventType}`);
+export const dispatchRefreshEvent = (eventType: EventType, data?: any) => {
+  logger.info(`Dispatching event: ${eventType}`);
   
-  // First, emit the specific event
-  eventEmitter.emit(eventType);
+  // First, emit the specific event using our utility
+  const listenersNotified = eventEmitter.emit(eventType, data);
+  logger.debug(`Notified ${listenersNotified} listeners via eventEmitter`);
   
   // Also dispatch a DOM event for components using useEffect listeners
-  window.dispatchEvent(new CustomEvent(eventType));
+  const customEvent = data 
+    ? new CustomEvent(eventType, { detail: data })
+    : new CustomEvent(eventType);
+    
+  window.dispatchEvent(customEvent);
+  logger.debug(`Dispatched ${eventType} as DOM event`);
+  
+  // Automatic cascade events
   
   // Then, also emit the general activities update event to refresh the activity feed
   if (eventType !== 'activities-updated') {
-    logger.trace(`Auto-dispatching activities-updated because ${eventType} was triggered`);
+    logger.debug(`Auto-dispatching activities-updated because ${eventType} was triggered`);
     eventEmitter.emit('activities-updated');
+  }
+  
+  // For events that should update notifications
+  if (['event-rsvp-updated', 'event-submitted', 'skills-updated'].includes(eventType) &&
+      eventType !== 'notification-created') {
+    logger.debug(`Auto-dispatching notification-created because ${eventType} was triggered`);
+    eventEmitter.emit('notification-created');
   }
   
   logger.info(`Completed dispatch for event: ${eventType}`);
@@ -115,6 +153,13 @@ export const refreshEvents = {
   notifications: () => {
     logger.debug('Refreshing notifications via shorthand method');
     dispatchRefreshEvent('notification-created');
+  },
+  
+  // Debug helper to get all registered events
+  debug: () => {
+    const events = eventEmitter.getRegisteredEvents();
+    logger.info('Currently registered events:', events);
+    return events;
   },
   
   // Add the core emitters for custom events
