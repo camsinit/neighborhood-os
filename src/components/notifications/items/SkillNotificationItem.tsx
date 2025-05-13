@@ -1,94 +1,112 @@
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Using useNavigate instead of useRouter
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { NotificationsPopover } from '../NotificationsPopover'; // Correct import
-import { highlightItem } from '@/utils/highlight';
-import { HighlightableItemType } from '@/utils/highlight/types';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Archive } from "lucide-react";
+import { useState } from "react";
+import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
+import { BaseNotification } from "@/hooks/notifications/types";
+import { type HighlightableItemType } from "@/utils/highlight"; // Updated import path
+// Using named import
+import { NotificationPopover } from "../NotificationsPopover"; 
+import { getNotificationStyle } from "../utils/notificationStyles";
+import { Badge } from "@/components/ui/badge";
 
-// Interface for the skill notification props
+// Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {
-  id: string;
   title: string;
-  userName: string;
-  userAvatar?: string;
-  userInitials?: string;
-  timestamp: string;
-  skillId: string;
+  itemId: string;
+  context?: BaseNotification['context']; // Make context optional
   isRead?: boolean;
-  onAction?: () => void;
+  isArchived?: boolean;
+  onClose: () => void;
+  onArchive: (e: React.MouseEvent) => void;
+  onItemClick?: (type: HighlightableItemType, id: string) => void; // Updated to use proper type
 }
 
-/**
- * Component to display a skill notification item
- * Now with improved error handling and better type safety
- */
-const SkillNotificationItem: React.FC<SkillNotificationItemProps> = ({
-  id,
+export const SkillNotificationItem = ({
   title,
-  userName,
-  userAvatar,
-  userInitials = '?',
-  timestamp,
-  skillId,
+  itemId,
+  context,
   isRead = false,
-  onAction
-}) => {
-  // Use navigate instead of useRouter
-  const navigate = useNavigate();
-  
-  // Handle view skill action with error prevention
-  const handleViewSkill = () => {
-    try {
-      // Navigate to the skill details and highlight it
-      navigate(`/skills?highlight=${skillId}`);
-      
-      // Optional: Highlight the skill item when user navigates there
-      highlightItem({
-        id: skillId,
-        type: 'skill' as HighlightableItemType
-      });
-      
-      // Call the parent's action handler if provided
-      if (onAction) onAction();
-    } catch (error) {
-      console.error('Error navigating to skill:', error);
-    }
-  };
-  
+  isArchived = false,
+  onClose,
+  onArchive,
+  onItemClick
+}: SkillNotificationItemProps) => {
+  const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
+  const style = getNotificationStyle('skills');
+
+  // Only render if we have the correct context type
+  // Add a fallback check to avoid null/undefined issues
+  if (!context || context.contextType !== 'skill_request') {
+    return null;
+  }
+
   return (
-    <NotificationsPopover 
-      onAction={handleViewSkill}
-      itemId={id}
-      type="skill"
-      title={title} // Add title prop here which was missing
-      actionLabel="View Skill"
-      contentId={skillId}
-      contentType="skill"
-    >
-      <div className={`p-3 rounded-lg border mb-2 cursor-pointer hover:bg-gray-50 transition-colors ${!isRead ? 'border-blue-200 bg-blue-50' : ''}`}>
-        <div className="flex items-start gap-3">
-          {/* Avatar section */}
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={userAvatar} />
-            <AvatarFallback>{userInitials}</AvatarFallback>
-          </Avatar>
-          
-          {/* Content section */}
-          <div className="flex-1">
-            <p className="text-sm font-medium">{title}</p>
-            <p className="text-xs text-gray-500">{userName} • {timestamp}</p>
+    <div className="mb-2">
+      {context && context.neighborName && (
+        <p className="text-gray-500 italic mb-0.5 text-xs">
+          {context.neighborName} is requesting your skill:
+        </p>
+      )}
+      
+      <NotificationPopover
+        title={title}
+        type="skills"
+        itemId={itemId}
+        onAction={() => setIsSkillRequestDialogOpen(true)}
+        actionLabel="Respond"
+        isArchived={isArchived}
+        // Pass content ID and type for navigation
+        contentId={context.skillRequestData?.skill?.id || itemId}
+        contentType="skills"
+      >
+        <div className={`notification-item h-[64px] flex items-center justify-between py-2 group cursor-pointer 
+            ${style.backgroundColor} ${style.hoverColor} pr-6 pl-4 rounded-lg transition-all duration-300 overflow-hidden 
+            border-l-4 ${isRead ? 'border-gray-200' : style.borderColor}`}>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {context?.avatarUrl ? (
+              <Avatar className="h-8 w-8 flex-shrink-0">
+                <AvatarImage src={context.avatarUrl} alt={context.neighborName || ''} />
+                <AvatarFallback>{context.neighborName?.charAt(0) || '?'}</AvatarFallback>
+              </Avatar>
+            ) : null}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className={`text-base font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
+                  {title}
+                </h3>
+                {!isRead && (
+                  <Badge variant="success" className="text-[10px] px-1.5 py-0">Action needed</Badge>
+                )}
+              </div>
+              {context?.skillRequestData?.skill?.description && (
+                <p className="text-xs text-gray-500 truncate">
+                  {context.skillRequestData.skill.description}
+                </p>
+              )}
+            </div>
           </div>
-          
-          {/* Action button */}
-          <Button size="sm" variant="ghost" onClick={handleViewSkill} className="text-xs h-7">
-            View
-          </Button>
+          {!isArchived && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 hidden group-hover:inline-flex" 
+              onClick={onArchive}
+            >
+              <Archive className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-      </div>
-    </NotificationsPopover>
+      </NotificationPopover>
+
+      {context?.skillRequestData && (
+        <SkillRequestPopover
+          open={isSkillRequestDialogOpen}
+          onOpenChange={setIsSkillRequestDialogOpen}
+          notification={context.skillRequestData}
+        />
+      )}
+    </div>
   );
 };
-
-export default SkillNotificationItem;

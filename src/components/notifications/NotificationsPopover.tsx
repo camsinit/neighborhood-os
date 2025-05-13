@@ -4,7 +4,7 @@
  * 
  * Enhanced notifications popover with modern design and specialized notification cards
  */
-import { Archive, Bell, RefreshCw } from "lucide-react";
+import { Archive, Bell } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -19,7 +19,6 @@ import { archiveNotification } from "@/hooks/notifications";
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NotificationsEmptyState, NotificationsLoadingState } from "./states/NotificationStates";
 
 /**
  * Props for the popover component that shows notification content
@@ -40,7 +39,7 @@ interface NotificationPopoverProps {
 /**
  * Individual notification popover component - for use in skill notification items
  */
-export const NotificationsPopover = ({ 
+export const NotificationPopover = ({ 
   children, 
   title, 
   type, 
@@ -73,63 +72,21 @@ export const NotificationsPopover = ({
 };
 
 /**
- * Error state that appears when notifications fail to load
+ * The main notifications popover. Now it's smart about querying the broadcast notification list,
+ * but has no DB/data logic; that all lives in the custom hook!
  */
-const NotificationsErrorState = ({ onRetry }: { onRetry: () => void }) => {
-  return (
-    <div className="p-8 text-center">
-      <div className="text-red-500 mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-          className="mx-auto mb-2">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-      </div>
-      <h3 className="text-sm font-semibold text-gray-900">Unable to load notifications</h3>
-      <p className="mt-1 text-xs text-gray-500 mb-4">
-        There was a problem loading your notifications
-      </p>
-      <Button onClick={onRetry} size="sm" variant="outline" className="mx-auto">
-        <RefreshCw className="h-4 w-4 mr-2" />
-        Retry
-      </Button>
-    </div>
-  );
-};
+interface NotificationsPopoverMainProps {
+  children?: ReactNode;
+}
 
-/**
- * Main notifications popover component
- */
-const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) => {
+const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
-  // Use our enhanced hook with error handling
-  const { 
-    data: notifications, 
-    isLoading,
-    isError,
-    error,
-    refreshNotifications,
-    lastRefreshed,
-    // Access error handling properties from the hook
-    hasError,
-    errorCount
-  } = useNotificationsPopoverData(showArchived);
+  const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
 
-  // Calculate unread count - protect against undefined
+  // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
-
-  // Handle retry logic
-  const handleRetry = () => {
-    refreshNotifications();
-    toast({ 
-      title: "Retrying", 
-      description: "Attempting to load notifications again..." 
-    });
-  };
 
   return (
     <Popover>
@@ -163,62 +120,38 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
           
           <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {/* Handle loading state */}
-              {isLoading && !notifications && (
-                <NotificationsLoadingState />
-              )}
-              
-              {/* Handle error state */}
-              {(isError || hasError) && (
-                <NotificationsErrorState onRetry={handleRetry} />
-              )}
-              
-              {/* Show notifications if available */}
-              {notifications?.length && !showArchived && !isError && !hasError ? (
+              {notifications?.length && !showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
                       notification={notification}
-                      onDismiss={refreshNotifications}
+                      onDismiss={() => refetch()}
                     />
                   </div>
                 ))
               ) : (
-                // Show empty state if no notifications or archived view is empty
-                !isLoading && !isError && !hasError && (
-                  <NotificationsEmptyState showArchived={showArchived} />
-                )
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No new notifications
+                </div>
               )}
             </ScrollArea>
           </TabsContent>
           
           <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {/* Handle loading state */}
-              {isLoading && !notifications && (
-                <NotificationsLoadingState />
-              )}
-              
-              {/* Handle error state */}
-              {(isError || hasError) && (
-                <NotificationsErrorState onRetry={handleRetry} />
-              )}
-              
-              {/* Show archived notifications if available */}
-              {notifications?.length && showArchived && !isError && !hasError ? (
+              {notifications?.length && showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
                       notification={notification}
-                      onDismiss={refreshNotifications}
+                      onDismiss={() => refetch()}
                     />
                   </div>
                 ))
               ) : (
-                // Show empty state if no archived notifications
-                !isLoading && !isError && !hasError && (
-                  <NotificationsEmptyState showArchived={showArchived} />
-                )
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No archived notifications
+                </div>
               )}
             </ScrollArea>
           </TabsContent>
@@ -228,5 +161,4 @@ const NotificationsPopoverComponent = ({ children }: { children?: ReactNode }) =
   );
 };
 
-// Export both components
-export default NotificationsPopoverComponent;
+export default NotificationsPopover;

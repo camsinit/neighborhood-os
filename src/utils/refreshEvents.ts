@@ -18,17 +18,13 @@ export type EventType = 'activities-updated' |
                 'skills-updated' | 
                 'notification-created';
 
-// Define the callback type for events
-type EventCallback = () => void;
-
 // Create a simple event emitter for our refresh events with enhanced logging
 const eventEmitter = {
-  // Explicitly type the events object to fix TypeScript errors
-  events: {} as Record<string, Array<EventCallback>>,
+  events: {} as Record<string, Array<() => void>>,
   eventIds: {} as Record<string, number>,
   
   // Subscribe to an event
-  on(event: string, callback: EventCallback) {
+  on(event: string, callback: () => void) {
     if (!this.events[event]) {
       this.events[event] = [];
       this.eventIds[event] = 0;
@@ -50,18 +46,15 @@ const eventEmitter = {
     };
   },
   
-  // Emit an event - properly typed to return the number of listeners notified
-  emit(event: string, data?: any): number {
+  // Emit an event
+  emit(event: string, data?: any) {
     logger.debug(`Attempting to emit event: ${event}`);
     
     if (this.events[event]) {
-      // TypeScript fix: Explicitly cast to array and store in a variable
-      const listeners: EventCallback[] = this.events[event];
-      const listenerCount = listeners.length;
-      
+      const listenerCount = this.events[event].length;
       logger.info(`Emitting event: ${event} to ${listenerCount} listeners`);
       
-      listeners.forEach((callback, index) => {
+      this.events[event].forEach((callback, index) => {
         logger.debug(`Calling listener #${index + 1} for event: ${event}`);
         try {
           callback();
@@ -79,12 +72,9 @@ const eventEmitter = {
   },
   
   // List all registered events and their listener counts
-  getRegisteredEvents(): Record<string, number> {
+  getRegisteredEvents() {
     const events: Record<string, number> = {};
-    // Fix TypeScript error by ensuring we access the listeners array length properly
-    for (const eventName in this.events) {
-      // Explicitly type the listeners array to ensure TypeScript recognizes the length property
-      const listeners: EventCallback[] = this.events[eventName];
+    for (const [eventName, listeners] of Object.entries(this.events)) {
       events[eventName] = listeners.length;
     }
     return events;

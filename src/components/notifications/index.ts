@@ -1,17 +1,22 @@
 
 /**
- * Export notification components from this directory
+ * Main exports for the notifications module
  */
 
-// Main notifier  
-export { default as NotificationsPopover } from './NotificationsPopover';
-export { NotificationsPopover as NotificationPopover } from './NotificationsPopover';
+// Main components
+export { NotificationsSection } from './NotificationsSection';
+export { default as NotificationDrawer } from './NotificationDrawer';
+export { NotificationPopover } from './NotificationsPopover'; 
+export { default as NotificationsPopover } from './NotificationsPopover'; 
 
-// Sections
-export { default as NotificationsSection } from './NotificationsSection';
+// Section components
+export { default as NotificationGroup } from './sections/NotificationGroup';
 
-// Actions
-export * from './utils/notificationActions';
+// State components
+export { NotificationsLoadingState, NotificationsEmptyState } from './states/NotificationStates';
 
-// Additional exports
+// Action components
+export { default as MarkAllAsReadButton } from './actions/MarkAllAsReadButton';
+
+// Utility functions
 export * from './utils/notificationGroupingUtils';
