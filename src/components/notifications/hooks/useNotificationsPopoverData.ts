@@ -50,7 +50,16 @@ const fetchNotifications = async (showArchived: boolean): Promise<BaseNotificati
   }
   
   logger.debug(`Retrieved ${data?.length || 0} notifications`);
-  return data || [];
+  
+  // Transform the data to ensure it matches the BaseNotification type
+  // Specifically, ensure every item has an updated_at property
+  return (data || []).map(notification => {
+    return {
+      ...notification,
+      // Ensure updated_at is present - use created_at as fallback if needed
+      updated_at: notification.updated_at || notification.created_at
+    } as BaseNotification;
+  });
 };
 
 /**
