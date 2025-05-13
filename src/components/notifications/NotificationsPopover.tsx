@@ -3,8 +3,10 @@
  * NotificationsPopover.tsx
  * 
  * Enhanced notifications popover with modern design and specialized notification cards
+ * Now with automatic refresh functionality
  */
-import { Archive, Bell } from "lucide-react";
+import { useEffect, useState, ReactNode } from "react";
+import { Bell } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -12,13 +14,14 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/components/ui/use-toast";
-import { useState, ReactNode } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
-import { archiveNotification } from "@/hooks/notifications"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createLogger } from "@/utils/logger";
+
+// Create a dedicated logger for this component
+const logger = createLogger('NotificationsPopover');
 
 /**
  * Props for the popover component that shows notification content
@@ -31,7 +34,7 @@ interface NotificationPopoverProps {
   onAction?: () => void;
   actionLabel?: string;
   isArchived?: boolean;
-  // New props for navigation and highlighting
+  // Navigation and highlighting props
   contentId?: string;
   contentType?: HighlightableItemType;
 }
@@ -47,7 +50,6 @@ export const NotificationPopover = ({
   onAction, 
   actionLabel = "View",
   isArchived = false,
-  // New props with default values
   contentId,
   contentType 
 }: NotificationPopoverProps) => {
@@ -72,18 +74,48 @@ export const NotificationPopover = ({
 };
 
 /**
- * The main notifications popover. Now it's smart about querying the broadcast notification list,
- * but has no DB/data logic; that all lives in the custom hook!
+ * The main notifications popover
  */
 interface NotificationsPopoverMainProps {
   children?: ReactNode;
 }
 
-const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
-  const { toast } = useToast();
+/**
+ * Main notifications popover component
+ */
+export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   const [showArchived, setShowArchived] = useState(false);
 
-  const { data: notifications, refetch } = useNotificationsPopoverData(showArchived);
+  // Use our enhanced hook to fetch notifications
+  const { data: notifications, isLoading, error, refreshNotifications } = useNotificationsPopoverData(showArchived);
+
+  // Log any errors for debugging
+  useEffect(() => {
+    if (error) {
+      logger.error("Error fetching notifications:", error);
+    }
+  }, [error]);
+
+  // Set up automatic refresh interval (every 30 seconds)
+  useEffect(() => {
+    logger.debug("Setting up notifications refresh interval");
+    
+    const intervalId = setInterval(() => {
+      logger.debug("Automatically refreshing notifications");
+      refreshNotifications();
+    }, 30000); // 30 seconds
+    
+    return () => {
+      logger.debug("Clearing notifications refresh interval");
+      clearInterval(intervalId);
+    };
+  }, [refreshNotifications]);
+
+  // Also refresh when the component mounts
+  useEffect(() => {
+    logger.debug("Component mounted, refreshing notifications");
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
@@ -120,12 +152,16 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
           
           <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {notifications?.length && !showArchived ? (
+              {isLoading ? (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  Loading notifications...
+                </div>
+              ) : notifications?.length && !showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
                       notification={notification}
-                      onDismiss={() => refetch()}
+                      onDismiss={() => refreshNotifications()}
                     />
                   </div>
                 ))
@@ -139,12 +175,16 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
           
           <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <ScrollArea className="h-[350px] px-2">
-              {notifications?.length && showArchived ? (
+              {isLoading ? (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  Loading archived notifications...
+                </div>
+              ) : notifications?.length && showArchived ? (
                 notifications.map((notification) => (
                   <div key={notification.id} className="py-2">
                     <NotificationCardFactory
                       notification={notification}
-                      onDismiss={() => refetch()}
+                      onDismiss={() => refreshNotifications()}
                     />
                   </div>
                 ))
@@ -161,4 +201,5 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   );
 };
 
+// Add default export to fix the import error
 export default NotificationsPopover;

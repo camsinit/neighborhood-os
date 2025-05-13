@@ -22,15 +22,23 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    );
+    // Initialize Supabase client with enhanced logging
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing required environment variables: SUPABASE_URL or SUPABASE_ANON_KEY');
+      throw new Error('Server configuration error');
+    }
+    
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Extract data from the request
-    const { action, skillId, skillTitle, providerId, requesterId } = await req.json() as SkillRequest;
+    // Extract data from the request with explicit type casting for safety
+    const requestBody = await req.json();
+    const { action, skillId, skillTitle, providerId, requesterId } = requestBody as SkillRequest;
 
     console.log(`Processing ${action} notification for skill: ${skillTitle}`);
+    console.log(`Provider ID: ${providerId}, Requester ID: ${requesterId}`);
 
     // Different actions require different notifications
     if (action === 'request') {
@@ -106,6 +114,17 @@ const handler = async (req: Request): Promise<Response> => {
       } else {
         console.log(`Successfully created confirmation notifications for skill: ${skillTitle}`);
       }
+    }
+    else if (action === 'delete') {
+      console.log(`Processing delete notification for ${skillTitle}`);
+      // Handle skill deletion notifications if needed
+    }
+    else if (action === 'update') {
+      console.log(`Processing update notification for ${skillTitle}`);
+      // Handle skill update notifications if needed
+    }
+    else {
+      console.warn(`Unknown action type: ${action}`);
     }
 
     return new Response(JSON.stringify({ 
