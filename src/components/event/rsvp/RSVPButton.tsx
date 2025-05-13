@@ -1,126 +1,114 @@
+import React, { useState } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Button } from "@/components/ui/button"
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { useEventRSVPs } from "@/utils/queries/useEventRSVPs";
+import { CalendarCheck, UserPlus, UserMinus, Loader2 } from 'lucide-react';
+import { addRsvp, removeRsvp } from './rsvpService'; // Import the RSVP service
 
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Check, Loader2 } from "lucide-react";
-import { RSVPButtonProps } from "./types";
-import { useRSVPState } from "./useRSVPState";
-import { useEventNeighborhood } from "./useEventNeighborhood";
-import { rsvpService } from "./rsvpService";
-import { useUser } from "@supabase/auth-helpers-react";
-import { createLogger } from "@/utils/logger";
+interface RSVPButtonProps {
+  eventId: string;
+  eventTitle: string;
+  host: {
+    id: string;
+  };
+}
 
-// Setup logger for this component
-const logger = createLogger('RSVPButton');
-
-/**
- * RSVPButton component allows users to RSVP to events
- * 
- * This component handles both adding and removing RSVPs for events,
- * and visually indicates the current RSVP status.
- * 
- * @param eventId - The ID of the event to RSVP to
- * @param neighborhoodId - The ID of the neighborhood the event belongs to
- * @param initialRSVPState - Whether the user has already RSVPed
- * @param className - Additional CSS classes for styling
- */
+// Main component that handles RSVPs for an event
 const RSVPButton = ({ 
   eventId, 
-  neighborhoodId, 
-  initialRSVPState = false, 
-  className 
+  eventTitle,
+  host
 }: RSVPButtonProps) => {
-  // For tracking operations
-  const COMPONENT_ID = "RSVPButton-" + eventId.substring(0, 8);
-  
-  // Get current user
   const user = useUser();
-  
-  // Get neighborhood ID (fetches from API if not provided)
-  const eventNeighborhoodId = useEventNeighborhood(eventId, neighborhoodId);
-  
-  // Use custom hook for managing RSVP state
-  const { 
-    hasRSVPed, 
-    setHasRSVPed, 
-    isLoading, 
-    setIsLoading,
-    generateTransactionId,
-    setTransactionId
-  } = useRSVPState(eventId, initialRSVPState);
+  const queryClient = useQueryClient();
+  const neighborhood = useCurrentNeighborhood();
+  const { data: rsvps } = useEventRSVPs(eventId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  /**
-   * Handle the RSVP button click
-   * Toggles between adding and removing an RSVP
-   */
-  const toggleRSVP = async () => {
-    if (!user) {
-      toast.error("Please log in to RSVP for this event");
-      return;
-    }
+  const userId = user?.id;
+  const hasRsvpd = rsvps?.some(rsvp => rsvp.user_id === userId);
 
-    const opTxnId = generateTransactionId();
-    setTransactionId(opTxnId);
-    setIsLoading(true);
+  if (!userId) {
+    return (
+      <Button disabled>
+        <UserPlus className="mr-2 h-4 w-4" />
+        RSVP
+      </Button>
+    );
+  }
 
-    logger.debug(`${COMPONENT_ID}: [${opTxnId}] Starting toggleRSVP operation - current state:`, {
-      hasRSVPed,
-      eventId,
-      userId: user.id,
-      neighborhoodId: eventNeighborhoodId
-    });
+  if (!neighborhood?.id) {
+    return (
+      <Button disabled>
+        <UserPlus className="mr-2 h-4 w-4" />
+        RSVP
+      </Button>
+    );
+  }
+
+  const handleRSVP = async () => {
+    if (isSubmitting) return;
 
     try {
-      if (hasRSVPed) {
-        // Remove RSVP
-        await rsvpService.removeRSVP(eventId, user.id, opTxnId);
-        toast.success("You've removed your RSVP");
-        setHasRSVPed(false);
-      } else {
-        // Add RSVP
-        await rsvpService.addRSVP(eventId, user.id, eventNeighborhoodId, opTxnId);
-        toast.success("You've successfully RSVP'd to this event");
-        setHasRSVPed(true);
-      }
-    } catch (error: any) {
-      // Enhanced error logging with context
-      logger.error(`${COMPONENT_ID}: [${opTxnId}] Error in toggleRSVP operation:`, {
-        error: error.message,
-        stack: error.stack,
-        context: {
-          user: user?.id,
-          event: eventId,
-          operation: hasRSVPed ? 'remove' : 'add',
-        }
-      });
+      setIsSubmitting(true);
       
-      toast.error(`Failed to update RSVP: ${error.message}`);
+      if (!hasRsvpd) {
+        // Add the RSVP using the rsvpService
+        await addRsvp(userId, eventId, neighborhood.id, { title: eventTitle, hostId: host.id });
+        toast.success('You have successfully RSVP\'d to this event!');
+      } else {
+        // Remove the RSVP using the rsvpService
+        await removeRsvp(userId, eventId);
+        toast.success('You have successfully un-RSVP\'d from this event!');
+      }
+      
+      // Invalidate queries to update the UI
+      await queryClient.invalidateQueries(['event-rsvps', eventId]);
+      await queryClient.invalidateQueries(['events']);
+      
+      // Dispatch custom event to trigger notification refresh
+      window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+      
+      // Track RSVP action in analytics
+      if (window.plausible) {
+        window.plausible(
+          hasRsvpd ? "Un-RSVP Event" : "RSVP Event",
+          {
+            props: {
+              eventId: eventId,
+              eventTitle: eventTitle
+            }
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error during RSVP:", err);
+      toast.error("Failed to RSVP, please try again.");
     } finally {
-      logger.debug(`${COMPONENT_ID}: [${opTxnId}] Completed toggleRSVP operation, isLoading -> false`);
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
-
-  // Updated button styling using blue background by default
+  
   return (
-    <Button
-      onClick={toggleRSVP}
-      disabled={isLoading}
-      variant={hasRSVPed ? "default" : "outline"}
-      className={`bg-blue-500 hover:bg-blue-600 text-white transition-colors ${className}`}
-      data-testid="rsvp-button"
-    >
-      {isLoading ? (
+    <Button onClick={handleRSVP} disabled={isSubmitting}>
+      {isSubmitting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading...
+          Submitting...
         </>
-      ) : hasRSVPed ? (
+      ) : hasRsvpd ? (
         <>
-          <Check className="mr-2 h-4 w-4" />
-          Going
+          <UserMinus className="mr-2 h-4 w-4" />
+          Un-RSVP
         </>
       ) : (
-        "RSVP"
+        <>
+          <UserPlus className="mr-2 h-4 w-4" />
+          RSVP
+        </>
       )}
     </Button>
   );

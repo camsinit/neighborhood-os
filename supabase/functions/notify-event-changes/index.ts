@@ -10,9 +10,11 @@ const corsHeaders = {
 
 interface EmailRequest {
   eventId: string;
-  action: 'update' | 'delete';
+  action: 'update' | 'delete' | 'rsvp';  // Added 'rsvp' action type
   eventTitle: string;
   changes?: string;
+  userId?: string;  // Added userId for RSVP actions
+  hostId?: string;  // Added hostId for RSVP notifications
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -26,37 +28,121 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
-    const { eventId, action, eventTitle, changes } = await req.json() as EmailRequest;
+    const { eventId, action, eventTitle, changes, userId, hostId } = await req.json() as EmailRequest;
 
     console.log(`Processing ${action} notification for event: ${eventTitle}`);
 
-    // Get all RSVPs for this event along with user profiles
-    // Use explicit table aliases to avoid ambiguous column references
-    const { data: rsvps, error: rsvpError } = await supabaseClient
-      .from('event_rsvps as er')  // Add table alias
-      .select(`
-        er.user_id,
-        profiles:er.user_id (  // Use table alias in the join
-          id,
-          username,
-          notification_preferences
-        )
-      `)
-      .eq('er.event_id', eventId);  // Use table alias for the column reference
-
-    if (rsvpError) {
-      console.error('Error fetching RSVPs:', rsvpError);
-      throw rsvpError;
+    // For RSVP actions, create a notification for the host
+    if (action === 'rsvp' && eventId && hostId && userId) {
+      console.log(`Creating RSVP notification: User ${userId} RSVP'd to ${eventTitle} hosted by ${hostId}`);
+      
+      // Only notify if the RSVP user is not the host
+      if (userId !== hostId) {
+        try {
+          // Insert direct notification to the host about the new RSVP
+          const { data: notifData, error: notifError } = await supabaseClient
+            .from('notifications')
+            .insert({
+              user_id: hostId,                    // Notification recipient (host)
+              actor_id: userId,                   // Person who performed the action (RSVP user)
+              title: `New RSVP for ${eventTitle}`,
+              content_type: 'events',
+              content_id: eventId,
+              notification_type: 'event',
+              action_type: 'view',
+              action_label: 'View Event',
+              relevance_score: 3,                 // High relevance: direct involvement
+              metadata: { 
+                type: 'rsvp', 
+                event_id: eventId,
+                event_title: eventTitle
+              }
+            });
+            
+          if (notifError) {
+            console.error('Error creating RSVP notification:', notifError);
+            throw notifError;
+          }
+          
+          console.log('Successfully created RSVP notification:', notifData);
+        } catch (error) {
+          console.error('Failed to create RSVP notification:', error);
+        }
+      } else {
+        console.log('Skipping notification - user RSVP\'d to their own event');
+      }
     }
 
-    console.log(`Found ${rsvps?.length || 0} RSVPs to notify`);
+    // Get the current user ID
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id;
+    
+    if (!userId) {
+      console.warn("[fetchEventNotifications] No authenticated user found");
+      return { data: [], error: null };
+    }
 
-    // Filter users who have email notifications enabled
-    const usersToNotify = rsvps?.filter(rsvp => 
-      rsvp.profiles?.notification_preferences?.email === true
-    ) || [];
+    // Log the fetch attempt for debugging
+    console.log(`[fetchEventNotifications] Fetching events for user ${userId}, showArchived=${showArchived}`);
+    
+    // First, fetch events the user created (as host)
+    const hostEventsPromise = supabaseClient.from("events").select(`
+      id, 
+      title, 
+      created_at, 
+      is_read, 
+      is_archived,
+      profiles:host_id (
+        display_name,
+        avatar_url
+      )
+    `)
+    .eq('host_id', userId)
+    .eq('is_archived', showArchived)
+    .order("created_at", { ascending: false });
+    
+    // Second, fetch events the user has RSVP'd to
+    const rsvpEventsPromise = supabaseClient.from("event_rsvps")
+      .select(`
+        event_id,
+        events!inner (
+          id, 
+          title, 
+          created_at, 
+          is_read, 
+          is_archived,
+          profiles:host_id (
+            display_name,
+            avatar_url
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('events.is_archived', showArchived)
+      .order("created_at", { ascending: false });
 
-    console.log(`${usersToNotify.length} users have email notifications enabled`);
+    // Execute both queries concurrently
+    const [hostEventsResult, rsvpEventsResult] = await Promise.all([
+      hostEventsPromise,
+      rsvpEventsPromise
+    ]);
+    
+    // Extract just the events from the RSVP result
+    const rsvpEvents = rsvpEventsResult.data?.map(item => item.events) || [];
+    
+    // Combine both sets of events
+    const allEvents = [
+      ...(hostEventsResult.data || []),
+      ...rsvpEvents
+    ];
+    
+    // Remove duplicates (in case user both hosts and RSVPs to same event)
+    const uniqueEvents = Array.from(
+      new Map(allEvents.map(event => [event.id, event])).values()
+    );
+    
+    // Log the result for debugging
+    console.log(`[fetchEventNotifications] Found ${uniqueEvents.length} relevant events`);
 
     // When an event is updated or deleted, also update any related activities to keep them in sync
     // Using event_id for more reliable activity updates
@@ -95,20 +181,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    if (usersToNotify.length === 0) {
-      return new Response(JSON.stringify({ success: true, message: "No users to notify" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // For now, we'll skip actual email sending since we don't have email addresses
-    // but log the attempt for debugging
-    console.log(`Would send emails to users:`, usersToNotify.map(rsvp => rsvp.profiles?.username));
-
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Notification processed for ${usersToNotify.length} users`
+      message: `Notification processed for event: ${eventTitle}`
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
