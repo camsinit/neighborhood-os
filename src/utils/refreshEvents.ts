@@ -23,6 +23,7 @@ type EventCallback = () => void;
 
 // Create a simple event emitter for our refresh events with enhanced logging
 const eventEmitter = {
+  // Explicitly type the events object to fix TypeScript errors
   events: {} as Record<string, Array<EventCallback>>,
   eventIds: {} as Record<string, number>,
   
@@ -49,13 +50,13 @@ const eventEmitter = {
     };
   },
   
-  // Emit an event
+  // Emit an event - properly typed to return the number of listeners notified
   emit(event: string, data?: any): number {
     logger.debug(`Attempting to emit event: ${event}`);
     
     if (this.events[event]) {
-      // TypeScript fix: Explicitly cast to array or check for existence first
-      const listeners = this.events[event];
+      // TypeScript fix: Explicitly cast to array and store in a variable
+      const listeners: EventCallback[] = this.events[event];
       const listenerCount = listeners.length;
       
       logger.info(`Emitting event: ${event} to ${listenerCount} listeners`);
@@ -78,7 +79,7 @@ const eventEmitter = {
   },
   
   // List all registered events and their listener counts
-  getRegisteredEvents() {
+  getRegisteredEvents(): Record<string, number> {
     const events: Record<string, number> = {};
     for (const [eventName, listeners] of Object.entries(this.events)) {
       events[eventName] = listeners.length;
