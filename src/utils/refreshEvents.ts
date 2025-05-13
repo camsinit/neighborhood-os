@@ -54,10 +54,13 @@ const eventEmitter = {
     logger.debug(`Attempting to emit event: ${event}`);
     
     if (this.events[event]) {
-      const listenerCount = this.events[event].length;
+      // TypeScript fix: Explicitly cast to array or check for existence first
+      const listeners = this.events[event];
+      const listenerCount = listeners.length;
+      
       logger.info(`Emitting event: ${event} to ${listenerCount} listeners`);
       
-      this.events[event].forEach((callback, index) => {
+      listeners.forEach((callback, index) => {
         logger.debug(`Calling listener #${index + 1} for event: ${event}`);
         try {
           callback();
