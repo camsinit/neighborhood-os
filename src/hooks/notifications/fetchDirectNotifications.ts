@@ -32,8 +32,8 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
     showArchived
   });
   
-  // Query the notifications table directly with a join to get actor profiles
-  // This gives us the display name and avatar of the person who triggered the notification
+  // Query the notifications table directly with a left join to get actor profiles
+  // Using LEFT JOIN ensures we get notifications even if profile lookup fails
   const { data: notifications, error } = await supabase
     .from('notifications')
     .select(`
@@ -65,130 +65,36 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
  */
 export const processDirectNotifications = (notifications: any[]): BaseNotification[] => {
   return notifications.map(notification => {
-    // Extract profile data if available
+    // Extract profile data if available, provide fallbacks if not
     const actorProfile = notification.profiles || {};
     
     // Build a standardized context object from metadata
-    // This helps with rendering consistent notification messages
     const notificationContext = {
       contextType: notification.notification_type || 'general',
-      neighborName: actorProfile.display_name || null,
+      neighborName: actorProfile.display_name || "A neighbor",
       avatarUrl: actorProfile.avatar_url || null,
       ...(notification.metadata || {})
-    };
-    
-    // Generate a user-friendly summary based on available information
-    const summary = generateNotificationSummary(notification, actorProfile);
-    
-    // Include summary in context
-    const context = {
-      ...notificationContext,
-      summary
     };
     
     // Return a properly formatted BaseNotification
     return {
       id: notification.id,
       user_id: notification.user_id,
-      title: notification.title,
+      title: notification.title || "New notification",
       actor_id: notification.actor_id,
-      content_type: standardizeContentType(notification.content_type), // Standardize content_type
+      content_type: notification.content_type || "general",
       content_id: notification.content_id,
-      notification_type: standardizeNotificationType(notification.notification_type), // Standardize notification_type
+      notification_type: notification.notification_type || "general",
       action_type: notification.action_type || 'view',
       action_label: notification.action_label || 'View',
       is_read: notification.is_read || false,
       is_archived: notification.is_archived || false,
       created_at: notification.created_at,
       updated_at: notification.updated_at || notification.created_at,
-      context,
+      context: notificationContext,
       // Include additional fields for consistency with other notification types
       description: notification.description || null,
       profiles: notification.profiles || null
     };
   });
-};
-
-/**
- * Generate a human-readable summary of the notification
- * This helps create consistent notification messages across different types
- * 
- * @param notification - The notification object
- * @param actorProfile - The actor's profile data
- * @returns A formatted summary string
- */
-const generateNotificationSummary = (notification: any, actorProfile: any): string => {
-  const actorName = actorProfile?.display_name || "Someone";
-  
-  // Check notification type to create appropriate summary
-  switch (notification.notification_type) {
-    case 'event':
-      if (notification.action_type === 'rsvp') {
-        return `${actorName} RSVPed to your event: ${notification.title}`;
-      }
-      return `${actorName} mentioned an event: ${notification.title}`;
-      
-    case 'safety':
-      if (notification.content_type === 'safety_comment') {
-        return `${actorName} commented on your update: ${notification.title}`;
-      }
-      return `${actorName} posted a safety update: ${notification.title}`;
-      
-    case 'skills':
-      if (notification.action_type === 'schedule') {
-        return `${actorName} requested to schedule: ${notification.title}`;
-      } else if (notification.action_type === 'confirm') {
-        return `${actorName} confirmed a skill session: ${notification.title}`;
-      }
-      return `${actorName} shared or requested a skill: ${notification.title}`;
-      
-    case 'goods':
-      if (notification.action_type === 'claim') {
-        return `${actorName} wants your item: ${notification.title}`;
-      }
-      return `${actorName} shared or requested an item: ${notification.title}`;
-      
-    default:
-      // Default to the notification title if we can't generate a better summary
-      return notification.title || `New notification from ${actorName}`;
-  }
-};
-
-/**
- * Standardize content type strings to ensure consistency
- * This helps with the issue of some notifications using 'event' vs 'events'
- * 
- * @param contentType - The original content type string
- * @returns A standardized content type string
- */
-export const standardizeContentType = (contentType: string): string => {
-  // Map of original content types to standardized versions
-  // This ensures all code uses the same content type strings
-  const contentTypeMap: Record<string, string> = {
-    'event': 'events',
-    'safety': 'safety_updates',
-    'skill': 'skills_exchange',
-    'good': 'goods_exchange',
-    'support': 'support_requests'
-  };
-  
-  return contentTypeMap[contentType] || contentType;
-};
-
-/**
- * Standardize notification type strings
- * 
- * @param notificationType - The original notification type
- * @returns A standardized notification type string
- */
-export const standardizeNotificationType = (notificationType: string): string => {
-  // Map singular to plural forms for consistency
-  const notificationTypeMap: Record<string, string> = {
-    'event': 'event',
-    'safety_update': 'safety',
-    'skill': 'skills',
-    'good': 'goods'
-  };
-  
-  return notificationTypeMap[notificationType] || notificationType;
 };

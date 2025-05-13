@@ -79,7 +79,11 @@ interface NotificationsPopoverMainProps {
   children?: ReactNode;
 }
 
-const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
+/**
+ * Main notifications popover component
+ * Now exported as both a named export AND the default export
+ */
+export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
 
@@ -187,4 +191,5 @@ const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
   );
 };
 
+// Add default export to fix the import error
 export default NotificationsPopover;

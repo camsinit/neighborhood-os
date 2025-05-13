@@ -57,9 +57,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     content_type
   } = notification;
 
-  // Actor info
-  const actorName = notification.profiles?.display_name || "A neighbor";
-  const avatarUrl = notification.profiles?.avatar_url;
+  // Actor info with fallbacks for missing data
+  const actorName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
+  const avatarUrl = notification.profiles?.avatar_url || notification.context?.avatarUrl;
 
   // Handle card click
   const handleCardClick = () => {
@@ -136,6 +136,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             url={avatarUrl}
             name={actorName}
             isUnread={!is_read}
+            notificationType={notification.notification_type}
           />
           
           {/* Content area */}

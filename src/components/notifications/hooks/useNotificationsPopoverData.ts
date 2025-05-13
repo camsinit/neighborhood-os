@@ -11,54 +11,10 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
 import { useEffect } from "react";
+import { fetchDirectNotifications } from "@/hooks/notifications/fetchDirectNotifications";
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useNotificationsPopoverData');
-
-/**
- * Simple function to fetch notifications directly from the database
- * Without any complex transformations or processing
- */
-const fetchNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
-  logger.debug(`Fetching notifications, showArchived=${showArchived}`);
-  
-  // Get the current user ID
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    logger.warn('No authenticated user found, returning empty notifications array');
-    return [];
-  }
-  
-  // Direct query to the notifications table with proper join for actor info
-  const { data, error } = await supabase
-    .from('notifications')
-    .select(`
-      *,
-      profiles:actor_id (
-        display_name,
-        avatar_url
-      )
-    `)
-    .eq('user_id', user.id)
-    .eq('is_archived', showArchived)
-    .order('created_at', { ascending: false });
-    
-  if (error) {
-    logger.error('Error fetching notifications:', error);
-    throw error;
-  }
-  
-  logger.debug(`Retrieved ${data?.length || 0} notifications`);
-  
-  // Transform the data to ensure it matches the BaseNotification type
-  // Specifically, ensure every item has an updated_at property
-  return (data || []).map(notification => ({
-    ...notification,
-    // Ensure updated_at is present - use created_at as fallback if needed
-    updated_at: notification.created_at
-  })) as BaseNotification[];
-};
 
 /**
  * Custom hook that provides notification data for the popover
@@ -71,7 +27,7 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
   // Use React Query with polling enabled
   const query = useQuery({
     queryKey: ["notifications", showArchived],
-    queryFn: () => fetchNotifications(showArchived),
+    queryFn: () => fetchDirectNotifications(showArchived),
     // Set up automatic polling
     refetchInterval: 30000, // 30 seconds
     refetchIntervalInBackground: false,
