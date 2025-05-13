@@ -14,7 +14,8 @@ type EventType = 'activities-updated' |
                 'event-rsvp-updated' | 'event-submitted' | 'event-deleted' |
                 'safety-updated' | 
                 'goods-updated' | 
-                'skills-updated';
+                'skills-updated' | 
+                'notification-created';
 
 // Create a simple event emitter for our refresh events
 const eventEmitter = {
@@ -71,6 +72,9 @@ export const dispatchRefreshEvent = (eventType: EventType) => {
   // First, emit the specific event
   eventEmitter.emit(eventType);
   
+  // Also dispatch a DOM event for components using useEffect listeners
+  window.dispatchEvent(new CustomEvent(eventType));
+  
   // Then, also emit the general activities update event to refresh the activity feed
   if (eventType !== 'activities-updated') {
     logger.trace(`Auto-dispatching activities-updated because ${eventType} was triggered`);
@@ -108,6 +112,10 @@ export const refreshEvents = {
   skills: () => {
     logger.debug('Refreshing skills via shorthand method');
     dispatchRefreshEvent('skills-updated');
+  },
+  notifications: () => {
+    logger.debug('Refreshing notifications via shorthand method');
+    dispatchRefreshEvent('notification-created');
   },
   
   // Add the core emitters for custom events

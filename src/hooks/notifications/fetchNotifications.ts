@@ -269,21 +269,35 @@ export const createProfilesMap = (profiles: any[]): Map<string, any> => {
 export const fetchAllNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
   logger.debug('Fetching all notifications, showArchived:', showArchived);
   
+  // IMPORTANT: First, fetch direct notifications as the primary source of truth
+  const directNotifications = await fetchDirectNotifications(showArchived);
+  
+  // Log the count of direct notifications
+  logger.debug(`Found ${directNotifications.length} direct notifications`);
+  
+  // If we have direct notifications from the database triggers, just return those
+  // This is a major simplification that prioritizes the notifications table
+  if (directNotifications.length > 0) {
+    logger.debug('Using direct notifications from notifications table');
+    return directNotifications;
+  }
+  
+  // As a fallback, if there are no direct notifications, fetch from other sources
+  logger.debug('No direct notifications found, falling back to legacy sources');
+  
   // Fetch everything concurrently for better performance
   const [
     safetyUpdatesResult, 
     eventsResult, 
     supportRequestsResult, 
     skillRequestsResult, 
-    goodsItemsResult,
-    directNotifications  // Add direct notifications from the notifications table
+    goodsItemsResult
   ] = await Promise.all([
     fetchSafetyNotifications(showArchived),
     fetchEventNotifications(showArchived),
     fetchSupportNotifications(showArchived),
     fetchSkillNotifications(),
-    fetchGoodsNotifications(showArchived),
-    fetchDirectNotifications(showArchived)  // New function to fetch from notifications table
+    fetchGoodsNotifications(showArchived)
   ]);
   
   // Extract data (or empty arrays if there was an error)
@@ -312,7 +326,6 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
   
   // Combine all notifications
   const allNotifications: BaseNotification[] = [
-    ...directNotifications,  // Add direct notifications to the list
     ...safetyNotifications,
     ...eventNotifications,
     ...supportNotifications,
@@ -320,7 +333,7 @@ export const fetchAllNotifications = async (showArchived: boolean): Promise<Base
     ...goodsNotifications
   ];
   
-  logger.debug(`Combined notifications count: ${allNotifications.length} (including ${directNotifications.length} direct notifications)`);
+  logger.debug(`Combined legacy notifications count: ${allNotifications.length}`);
   
   // Sort by creation date, newest first
   return allNotifications.sort((a, b) => 

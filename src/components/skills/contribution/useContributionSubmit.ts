@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -5,6 +6,8 @@ import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from '@/utils/timeslotUtils';
 import { createSkillSessionWithTimeSlots } from './services/contributionService';
+import refreshEvents from '@/utils/refreshEvents';
+import { useQueryClient } from '@tanstack/react-query';
 
 /**
  * Hook for handling skill contribution submission
@@ -22,6 +25,7 @@ export const useContributionSubmit = (
   // State and hooks
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   /**
    * Submit a skill contribution offer
@@ -78,6 +82,18 @@ export const useContributionSubmit = (
         console.log("Adding skill to user profile");
         // Implementation would go here
       }
+
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      
+      // Trigger notification refresh events
+      refreshEvents.notifications();
+      refreshEvents.skills();
+      
+      // Dispatch DOM events for listeners
+      window.dispatchEvent(new CustomEvent('notification-created'));
+      window.dispatchEvent(new CustomEvent('skills-updated'));
 
       // Show success message
       toast({

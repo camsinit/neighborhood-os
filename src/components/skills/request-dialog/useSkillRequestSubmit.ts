@@ -11,6 +11,7 @@ import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareTimeSlots } from "@/utils/timeslotUtils";
 import { Json } from "@/integrations/supabase/types"; // Import the Json type from Supabase types
+import refreshEvents from "@/utils/refreshEvents";
 
 /**
  * Form data structure for skill requests
@@ -106,38 +107,20 @@ export const useSkillRequestSubmit = (
       
       console.log("[submitSkillRequest] Success! Result:", result);
       
-      // Call our notification edge function to notify the provider
-      try {
-        // First, get the skill title
-        const { data: skillData } = await supabase
-          .from('skills_exchange')
-          .select('title')
-          .eq('id', skillId)
-          .single();
-
-        if (skillData) {
-          // Call the edge function to notify the provider
-          const notifyResponse = await supabase.functions.invoke('notify-skills-changes', {
-            body: {
-              action: 'request',
-              skillId,
-              skillTitle: skillData.title,
-              providerId,
-              requesterId: user.id
-            }
-          });
-          
-          console.log("[submitSkillRequest] Notification function response:", notifyResponse);
-        }
-      } catch (notifyError) {
-        console.error("[submitSkillRequest] Error notifying provider:", notifyError);
-        // We don't throw here as the session was already created successfully
-      }
-      
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Also invalidate notifications
+      
+      // Trigger notification refresh
+      refreshEvents.notifications();
+      // Also trigger skills refresh
+      refreshEvents.skills();
+      
+      // Dispatch DOM events for notifications
+      window.dispatchEvent(new CustomEvent('notification-created'));
+      window.dispatchEvent(new CustomEvent('skills-updated'));
+      
       onClose();
     } catch (error: any) {
       console.error('[submitSkillRequest] Error submitting skill request:', error);

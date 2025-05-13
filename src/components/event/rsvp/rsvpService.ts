@@ -65,8 +65,11 @@ export const rsvpService = {
       recordCreated: !!data?.length
     });
     
-    // Dispatch refresh events
+    // Dispatch refresh events - this will now trigger notification refresh
     dispatchRefreshEvent('event-rsvp-updated');
+    
+    // Also dispatch a custom event specifically for notifications
+    window.dispatchEvent(new CustomEvent('notification-created'));
     
     return { success: true, data };
   },
@@ -108,6 +111,9 @@ export const rsvpService = {
     
     // Dispatch refresh events
     dispatchRefreshEvent('event-rsvp-updated');
+    
+    // Also dispatch a custom event specifically for notifications
+    window.dispatchEvent(new CustomEvent('notification-created'));
     
     return { success: true };
   }
