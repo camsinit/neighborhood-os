@@ -81,7 +81,10 @@ const eventEmitter = {
   // List all registered events and their listener counts
   getRegisteredEvents(): Record<string, number> {
     const events: Record<string, number> = {};
-    for (const [eventName, listeners] of Object.entries(this.events)) {
+    // Fix TypeScript error by ensuring we access the listeners array length properly
+    for (const eventName in this.events) {
+      // Explicitly type the listeners array to ensure TypeScript recognizes the length property
+      const listeners: EventCallback[] = this.events[eventName];
       events[eventName] = listeners.length;
     }
     return events;
