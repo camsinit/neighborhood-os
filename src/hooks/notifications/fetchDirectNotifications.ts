@@ -33,13 +33,14 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // Query the notifications table directly with a left join to get actor profiles
-    // Using left join ensures we get notifications even if the actor profile is missing
+    // Using a LEFT JOIN instead of the foreign key reference to avoid foreign key errors
+    // This provides better error handling if profile data is not available
     const { data: notifications, error } = await supabase
       .from('notifications')
       .select(`
         *,
         profiles:actor_id (
+          id,
           display_name,
           avatar_url
         )
@@ -48,6 +49,7 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
       .eq('is_archived', showArchived);
       
     if (error) {
+      // Log the error but don't throw - let's recover gracefully
       logger.error('Error fetching direct notifications:', error);
       return [];
     }
@@ -98,20 +100,20 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       return {
         id: notification.id,
         user_id: notification.user_id,
-        title: notification.title,
+        title: notification.title || 'Notification',
         actor_id: notification.actor_id,
-        content_type: standardizeContentType(notification.content_type), // Standardize content_type
-        content_id: notification.content_id,
-        notification_type: standardizeNotificationType(notification.notification_type), // Standardize notification_type
+        content_type: standardizeContentType(notification.content_type || 'general'), 
+        content_id: notification.content_id || '',
+        notification_type: standardizeNotificationType(notification.notification_type || 'general'), 
         action_type: notification.action_type || 'view',
         action_label: notification.action_label || 'View',
         is_read: notification.is_read || false,
         is_archived: notification.is_archived || false,
-        created_at: notification.created_at,
-        updated_at: notification.updated_at || notification.created_at,
+        created_at: notification.created_at || new Date().toISOString(),
+        updated_at: notification.updated_at || notification.created_at || new Date().toISOString(),
         context,
         // Include additional fields for consistency with other notification types
-        description: notification.description || null,
+        description: notification.description || '',
         profiles: notification.profiles || null
       };
     } catch (error) {
@@ -155,29 +157,29 @@ const generateNotificationSummary = (notification: any, actorProfile: any): stri
   switch (notification.notification_type) {
     case 'event':
       if (notification.action_type === 'rsvp') {
-        return `${actorName} RSVPed to your event: ${notification.title}`;
+        return `${actorName} RSVPed to your event: ${notification.title || 'an event'}`;
       }
-      return `${actorName} mentioned an event: ${notification.title}`;
+      return `${actorName} mentioned an event: ${notification.title || 'an event'}`;
       
     case 'safety':
       if (notification.content_type === 'safety_comment') {
-        return `${actorName} commented on your update: ${notification.title}`;
+        return `${actorName} commented on your update: ${notification.title || 'a safety update'}`;
       }
-      return `${actorName} posted a safety update: ${notification.title}`;
+      return `${actorName} posted a safety update: ${notification.title || 'a safety update'}`;
       
     case 'skills':
       if (notification.action_type === 'schedule') {
-        return `${actorName} requested to schedule: ${notification.title}`;
+        return `${actorName} requested to schedule: ${notification.title || 'a skill session'}`;
       } else if (notification.action_type === 'confirm') {
-        return `${actorName} confirmed a skill session: ${notification.title}`;
+        return `${actorName} confirmed a skill session: ${notification.title || 'a skill session'}`;
       }
-      return `${actorName} shared or requested a skill: ${notification.title}`;
+      return `${actorName} shared or requested a skill: ${notification.title || 'a skill'}`;
       
     case 'goods':
       if (notification.action_type === 'claim') {
-        return `${actorName} wants your item: ${notification.title}`;
+        return `${actorName} wants your item: ${notification.title || 'an item'}`;
       }
-      return `${actorName} shared or requested an item: ${notification.title}`;
+      return `${actorName} shared or requested an item: ${notification.title || 'an item'}`;
       
     default:
       // Default to the notification title if we can't generate a better summary

@@ -1,3 +1,4 @@
+
 /**
  * Minimalist NotificationItem component
  * 
@@ -13,6 +14,7 @@ import NotificationTimeStamp from "../elements/NotificationTimeStamp";
 import { motion } from "framer-motion";
 import { type HighlightableItemType } from "@/utils/highlight";
 import { getNotificationBorderColor } from "../utils/notificationColorUtils";
+
 interface NotificationItemProps {
   notification: BaseNotification;
   onSelect?: () => void;
@@ -54,31 +56,53 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   // Get notification border color based on its type
   const borderColorClass = getNotificationBorderColor(notification.notification_type);
-  return <motion.div ref={notificationRef} initial={{
-    x: 0,
-    opacity: 1
-  }} animate={isSliding ? {
-    x: "-100%",
-    opacity: 0
-  } : {
-    x: 0,
-    opacity: 1
-  }} transition={{
-    duration: 0.5,
-    ease: "easeInOut"
-  }} className="mb-3">
+
+  return (
+    <motion.div 
+      ref={notificationRef} 
+      initial={{
+        x: 0,
+        opacity: 1
+      }} 
+      animate={isSliding ? {
+        x: "-100%",
+        opacity: 0
+      } : {
+        x: 0,
+        opacity: 1
+      }} 
+      transition={{
+        duration: 0.5,
+        ease: "easeInOut"
+      }}
+      className="mb-3"
+    >
       <div className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`}>
         <div className="relative p-4 pb-2">
           {/* Timestamp in top right */}
-          <NotificationTimeStamp date={notification.created_at} isUnread={!notification.is_read} />
+          <NotificationTimeStamp 
+            date={notification.created_at} 
+            isUnread={!notification.is_read} 
+          />
           
           <div className="flex gap-3">
             {/* Avatar with appropriate size */}
-            <NotificationAvatar url={notification.profiles?.avatar_url} name={displayName} isUnread={!notification.is_read} notificationType={notification.notification_type} size="md" />
+            <NotificationAvatar 
+              url={notification.profiles?.avatar_url} 
+              name={displayName} 
+              isUnread={!notification.is_read} 
+              notificationType={notification.notification_type} 
+              size="md" 
+            />
             
             {/* Content with sentence format and direct highlighting */}
             <div className="flex flex-col flex-1">
-              <NotificationContent title={notification.title} actorName={displayName} contentType={notification.notification_type} isUnread={!notification.is_read}>
+              <NotificationContent 
+                title={notification.title} 
+                actorName={displayName} 
+                contentType={notification.notification_type} 
+                isUnread={!notification.is_read}
+              >
                 {notification.description}
               </NotificationContent>
             </div>
@@ -86,8 +110,17 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         </div>
         
         {/* Updated action buttons with simplified styling */}
-        <NotificationActions id={notification.id} contentType={getContentType()} contentId={getContentId()} isRead={notification.is_read} onDismiss={onSelect} triggerSwipeAnimation={handleSwipeOut} />
+        <NotificationActions 
+          id={notification.id} 
+          contentType={getContentType()} 
+          contentId={getContentId()} 
+          isRead={notification.is_read} 
+          onDismiss={onSelect} 
+          triggerSwipeAnimation={handleSwipeOut} 
+        />
       </div>
-    </motion.div>;
+    </motion.div>
+  );
 };
+
 export default NotificationItem;
