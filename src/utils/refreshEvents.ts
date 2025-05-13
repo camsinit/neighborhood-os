@@ -8,7 +8,6 @@ import { createLogger } from '@/utils/logger';
 // Create a dedicated logger for refresh events
 const logger = createLogger('refreshEvents');
 
-// Create a custom event system for refreshes
 // Define all possible event types in one place for consistency
 type EventType = 'activities-updated' | 
                 'event-rsvp-updated' | 'event-submitted' | 'event-deleted' |
