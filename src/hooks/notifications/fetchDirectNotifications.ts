@@ -80,14 +80,20 @@ export const fetchDirectNotifications = async (showArchived: boolean = false): P
       action_type: notification.action_type,
       action_label: notification.action_label,
       created_at: notification.created_at,
-      updated_at: notification.updated_at,
+      // Use created_at as fallback if updated_at isn't available
+      updated_at: notification.updated_at || notification.created_at,
       is_read: notification.is_read || false,
       is_archived: notification.is_archived || false,
       relevance_score: notification.relevance_score,
-      profiles: notification.profiles,
-      // Add context object for templating
+      // Make sure profiles is properly handled as an optional object
+      profiles: notification.profiles || null,
+      // Add context object for templating with safe property access
       context: {
-        contextType: notification.metadata?.type || "general",
+        contextType: notification.metadata ? 
+                     (typeof notification.metadata === 'string' ? 
+                      'general' : // If it's a string, use a default
+                      (notification.metadata as Record<string, any>)?.type || 'general') :
+                     'general',
         neighborName: notification.profiles?.display_name || null,
         avatarUrl: notification.profiles?.avatar_url || null
       }
