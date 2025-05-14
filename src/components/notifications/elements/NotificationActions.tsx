@@ -44,6 +44,8 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     try {
       // Mark as read if not already
       if (!isRead) {
+        // FIX: Pass the notification ID directly, not the content type
+        // The markAsRead function expects id as its parameter
         await markAsRead(id);
       }
       

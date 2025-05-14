@@ -86,7 +86,8 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
           // Attach profiles to notifications
           for (const notification of notifications) {
             if (notification.actor_id && profilesMap.has(notification.actor_id)) {
-              notification.profiles = profilesMap.get(notification.actor_id);
+              // FIX: TypeScript doesn't know about our profiles field, so we need to add it properly
+              (notification as any).profiles = profilesMap.get(notification.actor_id);
             }
           }
           
@@ -124,7 +125,8 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
 
   return notifications.map(notification => {
     // Extract profile data if available, provide fallbacks if not
-    const actorProfile = notification.profiles || {};
+    // FIX: Use optional chaining to safely access profiles
+    const actorProfile = (notification as any).profiles || {};
     
     // Build a standardized context object from metadata
     const notificationContext = {
@@ -138,7 +140,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
     logger.debug(`Processing notification ${notification.id}:`, {
       title: notification.title,
       actor: notification.actor_id,
-      hasProfile: !!notification.profiles,
+      hasProfile: !!(notification as any).profiles,
       contentType: notification.content_type,
       context: notificationContext
     });
@@ -161,7 +163,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       context: notificationContext,
       // Include additional fields for consistency with other notification types
       description: notification.description || null,
-      profiles: notification.profiles || null
+      profiles: (notification as any).profiles || null
     };
   });
 };
