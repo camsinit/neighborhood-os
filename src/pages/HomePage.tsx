@@ -12,7 +12,9 @@ import { NotificationsDebug } from "@/components/notifications/debug/Notificatio
 const HomePage = () => {
   // Check if we're in development mode to show debug tools
   const isDev = import.meta.env.DEV;
-  return <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+  
+  return (
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
           {/* Debug tools in development - more prominently positioned */}
@@ -32,6 +34,8 @@ const HomePage = () => {
           </section>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HomePage;

@@ -1,3 +1,4 @@
+
 /**
  * Component for debugging notifications during development
  */
@@ -13,6 +14,7 @@ import NotificationsDebugControls from './NotificationsDebugControls';
  * Only displays in development mode
  */
 export const NotificationsDebug = () => {
+  // Get notification data from the hook
   const {
     data: notifications,
     refetch,
@@ -24,5 +26,19 @@ export const NotificationsDebug = () => {
     console.log("Current notifications:", notifications);
     toast.success("Notifications logged to console");
   };
-  return;
+  
+  // Return the debug interface UI
+  return (
+    <Card className="mb-4 bg-slate-50">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-slate-700">
+          Notification Debug Panel
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Include the debug controls component */}
+        <NotificationsDebugControls />
+      </CardContent>
+    </Card>
+  );
 };
