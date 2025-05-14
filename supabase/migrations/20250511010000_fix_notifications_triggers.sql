@@ -17,7 +17,6 @@ DECLARE
   target_user_id UUID;
   event_title TEXT;
   log_id TEXT;
-  existing_notification_count INT;
 BEGIN
   -- Generate a transaction ID for logging
   log_id := 'RSVP_NOTIFY_' || substr(md5(random()::text), 1, 8);
@@ -38,22 +37,6 @@ BEGIN
   -- Skip if user is RSVPing to their own event
   IF NEW.user_id = target_user_id THEN
     RAISE LOG '[create_rsvp_notification] [%] User RSVPing to own event, skipping notification', log_id;
-    RETURN NEW;
-  END IF;
-
-  -- Check for existing notification to prevent duplicates
-  SELECT COUNT(*) INTO existing_notification_count
-  FROM notifications
-  WHERE user_id = target_user_id 
-  AND content_id = NEW.event_id
-  AND actor_id = NEW.user_id
-  AND notification_type = 'event'
-  AND metadata->>'type' = 'rsvp'
-  AND created_at > (now() - interval '5 minutes');
-  
-  -- If notification already exists within last 5 minutes, don't create another one
-  IF existing_notification_count > 0 THEN
-    RAISE LOG '[create_rsvp_notification] [%] Duplicate notification detected, skipping', log_id;
     RETURN NEW;
   END IF;
 

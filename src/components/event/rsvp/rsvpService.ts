@@ -66,12 +66,19 @@ export const rsvpService = {
       recordCreated: !!data?.length
     });
     
-    // Only dispatch notification events once to prevent duplicates
+    // Dispatch notification events in multiple ways to ensure delivery
     logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Use just one method to dispatch the event - we don't need multiple
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+    // Method 1: Using refreshEvents utility (observers pattern)
+    refreshEvents.notifications();
     
+    // Method 2: Using direct event dispatch
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    // Method 3: Dispatch RSVP-specific event
+    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+
+    // Log successful event dispatch  
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
     
     return { success: true, data };
@@ -112,12 +119,19 @@ export const rsvpService = {
 
     logger.debug(`[${transactionId}] Successfully removed RSVP`);
     
-    // Only dispatch notification events once to prevent duplicates
+    // Dispatch notification events in multiple ways to ensure delivery
     logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Use just one method to dispatch the event - we don't need multiple
+    // Method 1: Using refreshEvents utility (observers pattern)
+    refreshEvents.notifications();
+    
+    // Method 2: Using direct event dispatch
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    // Method 3: Dispatch RSVP-specific event
     window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
     
+    // Log successful event dispatch
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
     
     return { success: true };

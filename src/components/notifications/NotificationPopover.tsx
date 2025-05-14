@@ -18,6 +18,7 @@ import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData
 import { archiveNotification } from "@/hooks/notifications"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 /**
  * Props for the popover component that shows notification content
@@ -91,37 +92,6 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
 
-  // Function to archive all notifications
-  const handleArchiveAll = async () => {
-    if (!notifications?.length) {
-      toast({
-        description: "No notifications to archive",
-      });
-      return;
-    }
-
-    // Archive all notifications
-    try {
-      const promises = notifications
-        .filter(n => !n.is_archived)
-        .map(n => archiveNotification(n.id));
-        
-      await Promise.all(promises);
-      
-      toast({
-        description: `Archived ${promises.length} notifications`,
-      });
-      
-      refetch();
-    } catch (error) {
-      console.error("Failed to archive notifications:", error);
-      toast({
-        variant: "destructive",
-        description: "Failed to archive notifications",
-      });
-    }
-  };
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -141,49 +111,55 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
         )}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold">
-            Notifications
-          </h4>
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowArchived(!showArchived)}
-              className="text-xs"
-            >
-              {showArchived ? "Active" : "Read"}
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleArchiveAll}
-              className="text-xs flex items-center gap-1"
-              disabled={!notifications?.length}
-            >
-              <Archive className="h-3 w-3" />
-              Archive All
-            </Button>
+        <Tabs defaultValue="active">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h4 className="font-semibold">
+              Notifications
+            </h4>
+            <TabsList className="h-8">
+              <TabsTrigger value="active" className="text-xs h-8">Active</TabsTrigger>
+              <TabsTrigger value="archived" className="text-xs h-8">Archived</TabsTrigger>
+            </TabsList>
           </div>
-        </div>
-        
-        <ScrollArea className="h-[350px] px-2">
-          {notifications?.length ? (
-            notifications.map((notification) => (
-              <div key={notification.id} className="py-2">
-                <NotificationCardFactory
-                  notification={notification}
-                  onDismiss={() => refetch()}
-                />
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-center text-sm text-gray-500">
-              {showArchived ? "No archived notifications" : "No new notifications"}
-            </div>
-          )}
-        </ScrollArea>
+          
+          <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ScrollArea className="h-[350px] px-2">
+              {notifications?.length && !showArchived ? (
+                notifications.map((notification) => (
+                  <div key={notification.id} className="py-2">
+                    <NotificationCardFactory
+                      notification={notification}
+                      onDismiss={() => refetch()}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No new notifications
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <ScrollArea className="h-[350px] px-2">
+              {notifications?.length && showArchived ? (
+                notifications.map((notification) => (
+                  <div key={notification.id} className="py-2">
+                    <NotificationCardFactory
+                      notification={notification}
+                      onDismiss={() => refetch()}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500">
+                  No archived notifications
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </PopoverContent>
     </Popover>
   );

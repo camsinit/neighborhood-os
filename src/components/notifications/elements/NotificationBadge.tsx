@@ -1,55 +1,42 @@
+
 /**
  * NotificationBadge.tsx
  * 
- * A reusable badge component for notifications with various styling options
+ * A reusable component for displaying notification type badges and status indicators
  */
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-// Define the props interface for the badge component
 export interface NotificationBadgeProps {
-  // The text to display in the badge or a count number
-  label?: string;
-  // For count badge usage
-  count?: number;
-  // Optional variant to control the badge style
-  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info";
-  // Optional additional class names
+  label: string;
+  variant?: "default" | "outline" | "secondary" | "destructive" | "success" | "warning" | "info";
+  isHighlighted?: boolean;
   className?: string;
-  // Optional click handler
-  onClick?: () => void;
+  size?: "sm" | "default";
 }
 
 /**
- * A customizable badge component for notifications
- * Can be used for displaying labels or a count
+ * Renders a badge for notification type or status with appropriate styling
+ * This component is used for badge display and should not affect card border styling
  */
-const NotificationBadge: React.FC<NotificationBadgeProps> = ({ 
-  label, 
-  count,
-  variant = "default", 
+export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
+  label,
+  variant = "default",
+  isHighlighted = false,
   className,
-  onClick
+  size = "default"
 }) => {
-  // If count is provided and we're rendering a notification count badge
-  if (count !== undefined) {
-    // Only show if there are unread notifications
-    if (count <= 0) return null;
-    
-    return (
-      <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
-        {count > 9 ? '9+' : count}
-      </span>
-    );
-  }
+  // Determine size class based on size prop
+  const sizeClass = size === "sm" ? "text-[10px] h-5" : "";
   
-  // Otherwise render a standard badge with label
   return (
     <Badge 
       variant={variant} 
-      className={cn("font-normal truncate", className)}
-      onClick={onClick}
+      className={cn(
+        sizeClass,
+        isHighlighted && "animate-pulse",
+        className
+      )}
     >
       {label}
     </Badge>

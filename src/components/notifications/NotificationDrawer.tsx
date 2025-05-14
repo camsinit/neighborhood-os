@@ -8,53 +8,24 @@
  */
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { BellRing, Archive } from "lucide-react"; // Added Archive icon import
+import { BellRing } from "lucide-react"; // Changed from Bell to BellRing for better visibility
 import { NotificationsSection } from "./NotificationsSection";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/hooks/notifications";
-import { ScrollArea } from "@/components/ui/scroll-area"; 
-import { archiveNotification } from "@/hooks/notifications/notificationActions"; // Import archive function
+import { ScrollArea } from "@/components/ui/scroll-area"; // Added ScrollArea import
 
 /**
- * A full drawer component for displaying notifications with buttons for 
- * viewing archived notifications and archiving all notifications
+ * A full drawer component for displaying notifications with tabs for filtering
+ * between active and archived notifications
  */
 export default function NotificationDrawer() {
   // State for tracking whether the drawer is open
   const [open, setOpen] = useState(false);
   
-  // State for showing archived notifications
-  const [showArchived, setShowArchived] = useState(false);
-  
   // Get unread notification count for badge
-  const { data: activeNotifications, refetch } = useNotifications(false);
+  const { data: activeNotifications } = useNotifications(false);
   const unreadCount = activeNotifications?.filter(n => !n.is_read).length || 0;
-  
-  /**
-   * Function to archive all notifications
-   * This provides user feedback and refreshes the list afterward
-   */
-  const handleArchiveAll = async () => {
-    // Safety check - if no notifications, don't do anything
-    if (!activeNotifications || activeNotifications.length === 0) {
-      return;
-    }
-    
-    try {
-      // Archive each notification one by one
-      const promises = activeNotifications.map(notification => 
-        archiveNotification(notification.id)
-      );
-      
-      // Wait for all archive operations to complete
-      await Promise.all(promises);
-      
-      // Refresh the notifications list
-      refetch();
-    } catch (error) {
-      console.error("Error archiving all notifications:", error);
-    }
-  };
   
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -75,43 +46,43 @@ export default function NotificationDrawer() {
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md overflow-hidden flex flex-col p-0">
-        {/* Modified header with action buttons */}
         <SheetHeader className="p-4 border-b">
-          <div className="flex justify-between items-center">
-            <SheetTitle>Notifications</SheetTitle>
-            <div className="flex space-x-2">
-              {/* Toggle button to switch between active and archived */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setShowArchived(!showArchived)}
-                className="text-xs"
-              >
-                {showArchived ? "Active" : "Read"}
-              </Button>
-              
-              {/* Archive All button */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleArchiveAll}
-                className="text-xs flex items-center gap-1"
-                disabled={!activeNotifications || activeNotifications.length === 0}
-              >
-                <Archive className="h-3 w-3" />
-                Archive All
-              </Button>
-            </div>
-          </div>
+          <SheetTitle>Notifications</SheetTitle>
         </SheetHeader>
         
-        {/* Content with ScrollArea for smooth scrolling experience */}
-        <ScrollArea className="h-[calc(100vh-150px)] flex-1">
-          <NotificationsSection 
-            onClose={() => setOpen(false)} 
-            showArchived={showArchived}
-          />
-        </ScrollArea>
+        <Tabs defaultValue="active" className="flex-1 flex flex-col">
+          <TabsList className="grid grid-cols-2 mx-4 mt-2">
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+          
+          {/* Wrap content in ScrollArea for smooth scrolling experience */}
+          <TabsContent 
+            value="active" 
+            className="flex-1 mt-2 px-0"
+            tabIndex={-1}
+          >
+            <ScrollArea className="h-[calc(100vh-150px)]">
+              <NotificationsSection 
+                onClose={() => setOpen(false)} 
+                showArchived={false}
+              />
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent 
+            value="archived" 
+            className="flex-1 mt-2 px-0"
+            tabIndex={-1}
+          >
+            <ScrollArea className="h-[calc(100vh-150px)]">
+              <NotificationsSection 
+                onClose={() => setOpen(false)} 
+                showArchived={true}
+              />
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
       </SheetContent>
     </Sheet>
   );
