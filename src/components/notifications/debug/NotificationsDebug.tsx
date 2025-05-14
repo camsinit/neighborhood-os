@@ -1,205 +1,137 @@
 
 /**
- * Debug component for notifications
- * Provides tools to check notification system functionality
+ * NotificationsDebug.tsx
+ * 
+ * A debugging component for notifications that shows raw notification data
+ * Only appears in development mode
  */
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { 
-  checkRsvpNotificationsForHost, 
-  listAllNotificationsForUser,
-  verifyRsvpRecord,
-  createTestNotification
-} from '@/hooks/notifications/debugNotifications';
-import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@supabase/auth-helpers-react';
+import { createLogger } from '@/utils/logger';
+import { refreshEvents } from '@/utils/refreshEvents';
 
-/**
- * NotificationsDebug component for testing notification functionality
- * This is a development tool, not intended for production use
- */
-export function NotificationsDebug() {
-  const [hostId, setHostId] = useState('74bf3085-8275-4eb2-a721-8c8e91b3d3d8'); // Default to the specified host ID
-  const [userId, setUserId] = useState('');
-  const [eventId, setEventId] = useState('');
-  const [results, setResults] = useState<any>(null);
-  
-  const { toast } = useToast();
-  const user = useUser();
+const logger = createLogger('NotificationsDebug');
 
-  // Set current user ID as default when component loads
-  useState(() => {
-    if (user?.id) {
-      setUserId(user.id);
-    }
-  });
+interface DebugNotification {
+  id: string;
+  title: string;
+  notification_type: string;
+  content_type: string;
+  created_at: string;
+  is_read: boolean;
+  user_id: string;
+  actor_id: string;
+}
 
-  const handleHostCheck = async () => {
-    try {
-      const result = await checkRsvpNotificationsForHost(hostId);
-      setResults(result);
-      toast({
-        title: `Found ${result.data?.length || 0} notifications`,
-        description: 'Check the console for details'
-      });
-    } catch (error) {
-      console.error('Error checking host notifications:', error);
-      toast({
-        title: 'Error checking notifications',
-        description: 'See console for details',
-        variant: 'destructive'
-      });
-    }
-  };
+export const NotificationsDebug: React.FC = () => {
+  const [notifications, setNotifications] = useState<DebugNotification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   
-  const handleUserCheck = async () => {
-    try {
-      const result = await listAllNotificationsForUser(userId);
-      setResults(result);
-      toast({
-        title: `Found ${result.data?.length || 0} notifications`,
-        description: 'Check the console for details'
-      });
-    } catch (error) {
-      console.error('Error listing notifications:', error);
-      toast({
-        title: 'Error listing notifications',
-        description: 'See console for details',
-        variant: 'destructive'
-      });
-    }
-  };
+  // Fetch the current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUserId(data.user.id);
+      }
+    };
+    
+    getUser();
+  }, []);
   
-  const handleRsvpCheck = async () => {
+  // Function to fetch raw notifications
+  const fetchRawNotifications = async () => {
+    if (!userId) return;
+    
+    setLoading(true);
+    logger.debug('Fetching raw notifications for debugging');
+    
     try {
-      const result = await verifyRsvpRecord(eventId, userId);
-      setResults(result);
-      toast({
-        title: result.found ? 'RSVP found!' : 'No RSVP record found',
-        description: 'Check the console for details'
-      });
-    } catch (error) {
-      console.error('Error verifying RSVP:', error);
-      toast({
-        title: 'Error verifying RSVP',
-        description: 'See console for details',
-        variant: 'destructive'
-      });
-    }
-  };
-  
-  const handleTestNotification = async () => {
-    try {
-      if (!userId || !hostId) {
-        toast({
-          title: 'Missing information',
-          description: 'Please provide both user ID and actor ID',
-          variant: 'destructive'
-        });
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        logger.error('Error fetching debug notifications:', error);
         return;
       }
       
-      const result = await createTestNotification(userId, hostId);
-      setResults(result);
-      toast({
-        title: result.success ? 'Test notification created!' : 'Failed to create test notification',
-        description: 'Check the console for details'
-      });
-    } catch (error) {
-      console.error('Error creating test notification:', error);
-      toast({
-        title: 'Error creating test notification',
-        description: 'See console for details',
-        variant: 'destructive'
-      });
+      logger.debug(`Found ${data?.length || 0} raw notifications`);
+      setNotifications(data as DebugNotification[] || []);
+    } catch (err) {
+      logger.error('Exception in fetchRawNotifications:', err);
+    } finally {
+      setLoading(false);
     }
   };
-
+  
+  // Force a notification refresh
+  const forceRefresh = () => {
+    logger.debug('Manually triggering notification refresh');
+    refreshEvents.notifications();
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    setTimeout(fetchRawNotifications, 1000);
+  };
+  
+  if (!userId) {
+    return null;
+  }
+  
   return (
-    <Card className="p-4">
-      <h2 className="text-lg font-bold mb-4">Notification System Debug</h2>
-      
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h3 className="text-md font-medium">Check Host Notifications</h3>
-          <div className="flex gap-2">
-            <Input 
-              placeholder="Host ID" 
-              value={hostId} 
-              onChange={e => setHostId(e.target.value)} 
-              className="flex-1"
-            />
-            <Button onClick={handleHostCheck}>Check Host</Button>
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-2">
-          <h3 className="text-md font-medium">List User Notifications</h3>
-          <div className="flex gap-2">
-            <Input 
-              placeholder="User ID" 
-              value={userId} 
-              onChange={e => setUserId(e.target.value)} 
-              className="flex-1"
-            />
-            <Button onClick={handleUserCheck}>Check User</Button>
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-2">
-          <h3 className="text-md font-medium">Verify RSVP Record</h3>
-          <div className="flex gap-2 mb-2">
-            <Input 
-              placeholder="Event ID" 
-              value={eventId} 
-              onChange={e => setEventId(e.target.value)} 
-              className="flex-1"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Input 
-              placeholder="User ID" 
-              value={userId} 
-              onChange={e => setUserId(e.target.value)} 
-              className="flex-1"
-            />
-            <Button onClick={handleRsvpCheck}>Verify RSVP</Button>
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div className="space-y-2">
-          <h3 className="text-md font-medium">Create Test Notification</h3>
-          <div className="flex gap-2">
-            <Button onClick={handleTestNotification} className="w-full">
-              Create Test Notification (User to Host)
-            </Button>
-          </div>
-        </div>
-        
-        {results && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <h3 className="text-md font-medium">Results</h3>
-              <ScrollArea className="h-[200px] rounded-md border p-4">
-                <pre className="text-xs whitespace-pre-wrap">
-                  {JSON.stringify(results, null, 2)}
-                </pre>
-              </ScrollArea>
-            </div>
-          </>
-        )}
+    <div className="p-4 border rounded-lg bg-gray-50">
+      <h2 className="text-lg font-semibold mb-2">Notification Debugging</h2>
+      <div className="flex gap-2 mb-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={fetchRawNotifications}
+          disabled={loading}
+        >
+          {loading ? 'Loading...' : 'Show Raw Notifications'}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={forceRefresh} 
+        >
+          Force Refresh
+        </Button>
       </div>
-    </Card>
+      
+      {notifications.length > 0 ? (
+        <div className="overflow-auto max-h-96">
+          <table className="min-w-full text-xs">
+            <thead>
+              <tr className="border-b">
+                <th className="p-1 text-left">ID</th>
+                <th className="p-1 text-left">Title</th>
+                <th className="p-1 text-left">Type</th>
+                <th className="p-1 text-left">Content Type</th>
+                <th className="p-1 text-left">Created</th>
+                <th className="p-1 text-left">Read</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notifications.map((notification) => (
+                <tr key={notification.id} className="border-b hover:bg-gray-100">
+                  <td className="p-1">{notification.id.substring(0, 8)}</td>
+                  <td className="p-1">{notification.title}</td>
+                  <td className="p-1">{notification.notification_type}</td>
+                  <td className="p-1">{notification.content_type}</td>
+                  <td className="p-1">{new Date(notification.created_at).toLocaleString()}</td>
+                  <td className="p-1">{notification.is_read ? 'Yes' : 'No'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-gray-500">No notifications found</div>
+      )}
+    </div>
   );
-}
+};

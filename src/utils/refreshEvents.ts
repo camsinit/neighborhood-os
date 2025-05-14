@@ -1,9 +1,9 @@
 
 /**
- * This event utility helps components across the app stay in sync
+ * Enhanced event utility helps components across the app stay in sync
  * without needing to directly import or depend on each other
  * 
- * Simplified version to support the streamlined notifications system
+ * Now with improved logging and event handling
  */
 import { createLogger } from '@/utils/logger';
 
@@ -37,10 +37,12 @@ const eventEmitter = {
     }
     
     this.events[event].push(callback);
+    logger.debug(`Added listener for event: ${event}, total listeners: ${this.events[event].length}`);
     
     // Return unsubscribe function
     return () => {
       this.events[event] = this.events[event].filter(cb => cb !== callback);
+      logger.debug(`Removed listener for event: ${event}, remaining listeners: ${this.events[event]?.length || 0}`);
     };
   },
   
@@ -59,6 +61,8 @@ const eventEmitter = {
           logger.error(`Error in event listener for ${event}:`, error);
         }
       });
+    } else {
+      logger.warn(`Attempted to emit event: ${event} but no listeners are registered`);
     }
   }
 };
@@ -70,54 +74,87 @@ const eventEmitter = {
  * @param eventType - The type of event to dispatch
  */
 export const dispatchRefreshEvent = (eventType: EventType) => {
-  logger.debug(`Dispatching event: ${eventType}`);
+  const timestamp = new Date().toISOString();
+  logger.debug(`Dispatching event: ${eventType} at ${timestamp}`);
   
-  // First, emit the specific event
+  // First, emit the specific event through eventEmitter
   eventEmitter.emit(eventType);
   
   // Also dispatch a DOM event for components using useEffect listeners
-  window.dispatchEvent(new CustomEvent(eventType));
+  const event = new CustomEvent(eventType, { 
+    detail: { timestamp }
+  });
+  window.dispatchEvent(event);
+  
+  logger.debug(`Finished dispatching ${eventType}`);
 };
 
 /**
- * Simplified refresh events helper
+ * Enhanced refresh events helper with better logging
  * This provides shorthand methods for common refresh events
  */
 export const refreshEvents = {
   /**
    * Refresh the activities feed
    */
-  activities: () => dispatchRefreshEvent('activities-updated'),
+  activities: () => {
+    logger.debug('Triggering activities refresh');
+    dispatchRefreshEvent('activities-updated');
+  },
   
   /**
    * Refresh events after an event action
    */
-  events: () => dispatchRefreshEvent('event-submitted'),
+  events: () => {
+    logger.debug('Triggering events refresh');
+    dispatchRefreshEvent('event-submitted');
+  },
   
   /**
    * Refresh events after an event is deleted
    */
-  eventsDelete: () => dispatchRefreshEvent('event-deleted'),
+  eventsDelete: () => {
+    logger.debug('Triggering events delete refresh');
+    dispatchRefreshEvent('event-deleted');
+  },
   
   /**
    * Refresh safety updates
    */
-  safety: () => dispatchRefreshEvent('safety-updated'),
+  safety: () => {
+    logger.debug('Triggering safety refresh');
+    dispatchRefreshEvent('safety-updated');
+  },
   
   /**
    * Refresh goods items
    */
-  goods: () => dispatchRefreshEvent('goods-updated'),
+  goods: () => {
+    logger.debug('Triggering goods refresh');
+    dispatchRefreshEvent('goods-updated');
+  },
   
   /**
    * Refresh skills items
    */
-  skills: () => dispatchRefreshEvent('skills-updated'),
+  skills: () => {
+    logger.debug('Triggering skills refresh');
+    dispatchRefreshEvent('skills-updated');
+  },
   
   /**
    * Refresh notifications
+   * This is a critical event for notification visibility
    */
-  notifications: () => dispatchRefreshEvent('notification-created'),
+  notifications: () => {
+    logger.debug('Triggering notifications refresh');
+    // Dispatch the notification event
+    dispatchRefreshEvent('notification-created');
+    
+    // Also manually invalidate React Query cache for notifications
+    // This needs to be handled by components listening to this event
+    logger.debug('Notifications refresh event dispatched');
+  },
   
   // Add the core emitters for custom events
   on: eventEmitter.on.bind(eventEmitter),

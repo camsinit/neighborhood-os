@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+import { refreshEvents } from "@/utils/refreshEvents";
 import { toast } from "sonner";
 
 // Setup logger for RSVP service
@@ -11,6 +11,7 @@ const logger = createLogger('rsvpService');
  * Service for handling RSVP operations
  * 
  * Provides functions to add or remove RSVPs for events
+ * Ensures proper event dispatch for notification updates
  */
 export const rsvpService = {
   /**
@@ -65,11 +66,20 @@ export const rsvpService = {
       recordCreated: !!data?.length
     });
     
-    // Dispatch refresh events - this will now trigger notification refresh
-    dispatchRefreshEvent('event-rsvp-updated');
+    // Dispatch notification events in multiple ways to ensure delivery
+    logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Also dispatch a custom event specifically for notifications
+    // Method 1: Using refreshEvents utility (observers pattern)
+    refreshEvents.notifications();
+    
+    // Method 2: Using direct event dispatch
     window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    // Method 3: Dispatch RSVP-specific event
+    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+
+    // Log successful event dispatch  
+    logger.debug(`[${transactionId}] Successfully dispatched notification events`);
     
     return { success: true, data };
   },
@@ -109,11 +119,20 @@ export const rsvpService = {
 
     logger.debug(`[${transactionId}] Successfully removed RSVP`);
     
-    // Dispatch refresh events
-    dispatchRefreshEvent('event-rsvp-updated');
+    // Dispatch notification events in multiple ways to ensure delivery
+    logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Also dispatch a custom event specifically for notifications
+    // Method 1: Using refreshEvents utility (observers pattern)
+    refreshEvents.notifications();
+    
+    // Method 2: Using direct event dispatch
     window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    // Method 3: Dispatch RSVP-specific event
+    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+    
+    // Log successful event dispatch
+    logger.debug(`[${transactionId}] Successfully dispatched notification events`);
     
     return { success: true };
   }

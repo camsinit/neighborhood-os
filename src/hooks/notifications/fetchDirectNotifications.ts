@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
 import { createLogger } from "@/utils/logger";
 
+// Create a dedicated logger for this module
 const logger = createLogger('fetchDirectNotifications');
 
 /**
@@ -29,10 +30,11 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   // Log the query parameters for debugging
   logger.debug('Fetching direct notifications with params:', {
     userId,
-    showArchived
+    showArchived,
+    timestamp: new Date().toISOString()
   });
   
-  // Query the notifications table directly with a left join to get actor profiles
+  // Query the notifications table directly with a more explicit query
   // Using LEFT JOIN ensures we get notifications even if profile lookup fails
   const { data: notifications, error } = await supabase
     .from('notifications')
@@ -44,14 +46,24 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
       )
     `)
     .eq('user_id', userId)
-    .eq('is_archived', showArchived);
+    .eq('is_archived', showArchived)
+    .order('created_at', { ascending: false });
     
   if (error) {
     logger.error('Error fetching direct notifications:', error);
     return [];
   }
   
-  logger.debug(`Found ${notifications?.length || 0} direct notifications`);
+  logger.debug(`Found ${notifications?.length || 0} direct notifications:`, 
+    notifications?.map(n => ({
+      id: n.id,
+      title: n.title,
+      type: n.notification_type,
+      content_type: n.content_type,
+      created_at: n.created_at,
+      is_read: n.is_read
+    }))
+  );
   
   // Process the notifications to match the BaseNotification format
   return processDirectNotifications(notifications || []);
@@ -64,6 +76,12 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
  * @returns Processed notifications adhering to BaseNotification interface
  */
 export const processDirectNotifications = (notifications: any[]): BaseNotification[] => {
+  // Log the raw notification data we're processing
+  logger.debug('Processing notifications:', {
+    count: notifications.length,
+    types: notifications.map(n => n.notification_type)
+  });
+
   return notifications.map(notification => {
     // Extract profile data if available, provide fallbacks if not
     const actorProfile = notification.profiles || {};
@@ -75,6 +93,15 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       avatarUrl: actorProfile.avatar_url || null,
       ...(notification.metadata || {})
     };
+    
+    // Log individual notification processing for debugging
+    logger.trace(`Processing notification ${notification.id}:`, {
+      title: notification.title,
+      actor: notification.actor_id,
+      hasProfile: !!notification.profiles,
+      contentType: notification.content_type,
+      context: notificationContext
+    });
     
     // Return a properly formatted BaseNotification
     return {

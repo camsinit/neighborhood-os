@@ -3,7 +3,7 @@
  * NotificationsSection.tsx
  * 
  * Redesigned component that displays notifications in a clear, organized way.
- * Now refactored into smaller, more maintainable components.
+ * Now with enhanced debugging and layout animations.
  */
 import React, { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,7 +12,11 @@ import { NotificationsLoadingState, NotificationsEmptyState } from "./states/Not
 import NotificationGroup from "./sections/NotificationGroup";
 import MarkAllAsReadButton from "./actions/MarkAllAsReadButton";
 import { groupNotificationsByDate, sortNotificationsByDate } from "./utils/notificationGroupingUtils";
-import { motion } from "framer-motion"; // Import for smooth layout animations
+import { motion, AnimatePresence } from "framer-motion"; // Import for smooth layout animations
+import { createLogger } from "@/utils/logger";
+
+// Initialize logger for this component
+const logger = createLogger('NotificationsSection');
 
 /**
  * Props for the NotificationsSection component
@@ -35,7 +39,8 @@ export function NotificationsSection({
   const {
     data: notifications,
     isLoading,
-    refetch
+    refetch,
+    error
   } = useNotifications(showArchived);
   
   // For invalidating cache
@@ -43,6 +48,12 @@ export function NotificationsSection({
 
   // Clear cache and refetch on component mount to ensure we have the latest formatting
   useEffect(() => {
+    // Log component mount
+    logger.debug('NotificationsSection mounted', {
+      showArchived,
+      forceRefresh: true
+    });
+    
     // Invalidate the notifications query cache to force a fresh fetch
     queryClient.invalidateQueries({
       queryKey: ["notifications"]
@@ -52,8 +63,23 @@ export function NotificationsSection({
     refetch();
     
     // Log for debugging purposes
-    console.log("[NotificationsSection] Invalidated cache and refetched notifications");
-  }, [queryClient, refetch]);
+    logger.debug("Cache invalidated and refetch triggered");
+  }, [queryClient, refetch, showArchived]);
+
+  // Log when notifications data updates
+  useEffect(() => {
+    if (notifications) {
+      logger.debug('Notifications data updated:', {
+        count: notifications.length,
+        unread: notifications.filter(n => !n.is_read).length,
+        types: notifications.map(n => n.notification_type)
+      });
+    }
+    
+    if (error) {
+      logger.error('Error fetching notifications:', error);
+    }
+  }, [notifications, error]);
 
   // Sort notifications by date (newer first)
   const sortedNotifications = sortNotificationsByDate(notifications);
@@ -63,6 +89,14 @@ export function NotificationsSection({
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
+  
+  // Log the final state before render
+  logger.debug('Rendering NotificationsSection', {
+    isLoading,
+    notificationsCount: notifications?.length || 0,
+    groupedCount: groupedNotifications.length,
+    unreadCount
+  });
   
   // Loading state
   if (isLoading) {
@@ -75,31 +109,33 @@ export function NotificationsSection({
   }
   
   // Main content with notifications grouped by date
-  // We wrap everything in motion.div to enable smooth transitions when items are removed
+  // We wrap everything in AnimatePresence and motion.div to enable smooth transitions
   return (
-    <motion.div 
-      className="space-y-4"
-      layout // This enables automatic layout adjustment
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
-    >
-      {/* Mark all as read button */}
-      <MarkAllAsReadButton 
-        unreadCount={unreadCount} 
-        showArchived={showArchived}
-        onComplete={refetch}
-      />
-      
-      {/* Render each date group */}
-      {groupedNotifications.map(group => (
-        <NotificationGroup
-          key={group.title}
-          title={group.title}
-          notifications={group.notifications}
-          onClose={onClose}
+    <AnimatePresence>
+      <motion.div 
+        className="space-y-4"
+        layout // This enables automatic layout adjustment
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Mark all as read button */}
+        <MarkAllAsReadButton 
+          unreadCount={unreadCount} 
+          showArchived={showArchived}
+          onComplete={refetch}
         />
-      ))}
-    </motion.div>
+        
+        {/* Render each date group */}
+        {groupedNotifications.map(group => (
+          <NotificationGroup
+            key={group.title}
+            title={group.title}
+            notifications={group.notifications}
+            onClose={onClose}
+          />
+        ))}
+      </motion.div>
+    </AnimatePresence>
   );
 }
