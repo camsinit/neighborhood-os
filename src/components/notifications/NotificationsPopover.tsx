@@ -108,8 +108,9 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
       return;
     }
 
-    // Show loading toast and store its ID
-    const { id: toastId } = toast({
+    // Show loading toast (in shadcn/ui we can't update toasts by ID like in sonner)
+    // So we show a loading toast first
+    toast({
       title: "Archiving notifications",
       description: "Please wait...",
     });
@@ -122,9 +123,8 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
         
       await Promise.all(promises);
       
-      // Dismiss loading toast
+      // Show success toast (we can't update the previous toast, so we create a new one)
       toast({
-        id: toastId,
         title: "Success",
         description: `Archived ${promises.length} notifications`,
       });
@@ -136,7 +136,6 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
       
       // Show error toast
       toast({
-        id: toastId, // Replace the loading toast
         variant: "destructive",
         title: "Error",
         description: "Failed to archive notifications",
