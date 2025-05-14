@@ -99,21 +99,11 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
 
-  // Function to archive all notifications with proper toast management
+  // Function to archive all notifications with no toast messages
   const handleArchiveAll = async () => {
     if (!notifications?.length) {
-      toast({
-        description: "No notifications to archive",
-      });
       return;
     }
-
-    // Show loading toast (in shadcn/ui we can't update toasts by ID like in sonner)
-    // So we show a loading toast first
-    toast({
-      title: "Archiving notifications",
-      description: "Please wait...",
-    });
 
     try {
       // Archive all notifications
@@ -123,23 +113,10 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
         
       await Promise.all(promises);
       
-      // Show success toast (we can't update the previous toast, so we create a new one)
-      toast({
-        title: "Success",
-        description: `Archived ${promises.length} notifications`,
-      });
-      
       // Refresh the notifications list
       refetch();
     } catch (error) {
       console.error("Failed to archive notifications:", error);
-      
-      // Show error toast
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to archive notifications",
-      });
     }
   };
 

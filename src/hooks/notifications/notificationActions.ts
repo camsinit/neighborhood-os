@@ -6,7 +6,6 @@
  * such as marking as read or archiving them.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { HighlightableItemType } from "@/utils/highlight/types";
 import { createLogger } from "@/utils/logger";
 

@@ -14,7 +14,6 @@ import { useState } from "react";
 import { useNotifications } from "@/hooks/notifications";
 import { ScrollArea } from "@/components/ui/scroll-area"; 
 import { archiveNotification } from "@/hooks/notifications/notificationActions"; // Import archive function
-import { toast } from "sonner"; // Import toast for feedback
 
 /**
  * A full drawer component for displaying notifications with buttons for 
@@ -38,12 +37,8 @@ export default function NotificationDrawer() {
   const handleArchiveAll = async () => {
     // Safety check - if no notifications, don't do anything
     if (!activeNotifications || activeNotifications.length === 0) {
-      toast.info("No notifications to archive");
       return;
     }
-    
-    // Show processing toast - IMPORTANT: Store the toast ID to dismiss it later
-    const toastId = toast.loading("Archiving all notifications...");
     
     try {
       // Archive each notification one by one
@@ -54,21 +49,10 @@ export default function NotificationDrawer() {
       // Wait for all archive operations to complete
       await Promise.all(promises);
       
-      // Dismiss the loading toast
-      toast.dismiss(toastId);
-      
-      // Show success message
-      toast.success(`Archived ${activeNotifications.length} notifications`);
-      
       // Refresh the notifications list
       refetch();
     } catch (error) {
-      // Dismiss the loading toast
-      toast.dismiss(toastId);
-      
-      // Show error message if something went wrong
       console.error("Error archiving all notifications:", error);
-      toast.error("Failed to archive all notifications");
     }
   };
   
