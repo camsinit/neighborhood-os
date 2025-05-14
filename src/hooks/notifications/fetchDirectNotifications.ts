@@ -34,39 +34,79 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
     timestamp: new Date().toISOString()
   });
   
-  // Query the notifications table directly with a more explicit query
-  // Using LEFT JOIN ensures we get notifications even if profile lookup fails
-  const { data: notifications, error } = await supabase
-    .from('notifications')
-    .select(`
-      *,
-      profiles:actor_id (
-        display_name,
-        avatar_url
-      )
-    `)
-    .eq('user_id', userId)
-    .eq('is_archived', showArchived)
-    .order('created_at', { ascending: false });
+  try {
+    // FIXED: Using a more reliable query without problematic joins that might fail
+    // This query fetches notifications first, then separately fetches profiles
+    const { data: notifications, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_archived', showArchived)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      logger.error('Error fetching notifications:', error);
+      return [];
+    }
     
-  if (error) {
-    logger.error('Error fetching direct notifications:', error);
+    // Log the raw notifications count
+    logger.debug(`Found ${notifications?.length || 0} direct notifications`);
+    
+    // If we have notifications, fetch actor profiles separately
+    // This prevents join errors when profiles are missing
+    if (notifications && notifications.length > 0) {
+      // Collect unique actor IDs for profile lookup
+      const actorIds = notifications
+        .map(n => n.actor_id)
+        .filter((id): id is string => !!id); // Filter out undefined/null
+      
+      // Only fetch profiles if we have actor IDs
+      if (actorIds.length > 0) {
+        const uniqueActorIds = [...new Set(actorIds)]; // Remove duplicates
+        
+        logger.debug(`Fetching profiles for ${uniqueActorIds.length} actors`);
+        
+        // Fetch profiles separately
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', uniqueActorIds);
+          
+        if (profileError) {
+          logger.error('Error fetching actor profiles:', profileError);
+        } else {
+          // Create a map for quick profile lookup
+          const profilesMap = new Map();
+          profiles?.forEach(profile => {
+            if (profile && profile.id) {
+              profilesMap.set(profile.id, profile);
+            }
+          });
+          
+          // Attach profiles to notifications
+          for (const notification of notifications) {
+            if (notification.actor_id && profilesMap.has(notification.actor_id)) {
+              notification.profiles = profilesMap.get(notification.actor_id);
+            }
+          }
+          
+          logger.debug(`Successfully attached profiles to notifications`);
+        }
+      }
+    }
+    
+    // Process and return the notifications with profiles attached
+    return processDirectNotifications(notifications || []);
+    
+  } catch (error: any) {
+    // Improved error handling with detailed logging
+    logger.error('Unexpected error in fetchDirectNotifications:', {
+      error: error.message,
+      stack: error.stack,
+      userId
+    });
     return [];
   }
-  
-  logger.debug(`Found ${notifications?.length || 0} direct notifications:`, 
-    notifications?.map(n => ({
-      id: n.id,
-      title: n.title,
-      type: n.notification_type,
-      content_type: n.content_type,
-      created_at: n.created_at,
-      is_read: n.is_read
-    }))
-  );
-  
-  // Process the notifications to match the BaseNotification format
-  return processDirectNotifications(notifications || []);
 };
 
 /**
@@ -95,7 +135,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
     };
     
     // Log individual notification processing for debugging
-    logger.trace(`Processing notification ${notification.id}:`, {
+    logger.debug(`Processing notification ${notification.id}:`, {
       title: notification.title,
       actor: notification.actor_id,
       hasProfile: !!notification.profiles,

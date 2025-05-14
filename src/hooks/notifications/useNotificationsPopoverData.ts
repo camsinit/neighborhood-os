@@ -27,12 +27,21 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
   // Track refresh triggers for debugging
   const [refreshTriggers, setRefreshTriggers] = useState<string[]>([]);
 
+  // Force a refresh when the component mounts
+  useEffect(() => {
+    // Add initial mount trigger
+    setRefreshTriggers(prev => [...prev, `initial-mount-${Date.now()}`]);
+  }, []);
+
   // Use React Query with more aggressive refresh settings
   const query = useQuery({
     queryKey: ["notifications", showArchived, refreshTriggers], // Include refreshTriggers to force refetch
-    queryFn: () => fetchDirectNotifications(showArchived),
+    queryFn: () => {
+      logger.debug('Fetching notifications with triggers:', refreshTriggers);
+      return fetchDirectNotifications(showArchived);
+    },
     // Set up automatic polling with shorter interval for better responsiveness
-    refetchInterval: 15000, // 15 seconds (reduced from 30)
+    refetchInterval: 5000, // 5 seconds - more frequent polling for notifications
     refetchIntervalInBackground: false,
     // Enable automatic refetching when window regains focus
     refetchOnWindowFocus: true,
@@ -40,7 +49,7 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     // Make stale faster for quicker refreshes
-    staleTime: 10000, // 10 seconds
+    staleTime: 3000, // 3 seconds
   });
 
   // Create a more robust refresh handler that logs the trigger source
@@ -74,6 +83,11 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
     // Set up subscription with refreshEvents utility
     const unsubscribe = refreshEvents.on('notification-created', createRefreshHandler('refreshEvents:notification-created'));
     
+    // Create a periodic refresh handler - extra safety to ensure we never miss notifications
+    const periodicRefreshInterval = setInterval(() => {
+      createRefreshHandler('periodic-refresh')();
+    }, 10000); // Every 10 seconds
+    
     // Clean up event listeners on unmount
     return () => {
       logger.debug("Cleaning up notification refresh listeners");
@@ -83,6 +97,9 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
       
       // Unsubscribe from the refreshEvents utility
       if (unsubscribe) unsubscribe();
+      
+      // Clear interval
+      clearInterval(periodicRefreshInterval);
     };
   }, [query]);
   

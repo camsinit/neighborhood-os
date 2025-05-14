@@ -14,6 +14,10 @@ import NotificationTimeStamp from "../elements/NotificationTimeStamp";
 import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence for smoother transitions
 import { type HighlightableItemType } from "@/utils/highlight";
 import { getNotificationBorderColor } from "../utils/notificationColorUtils";
+import { createLogger } from "@/utils/logger";
+
+// Create logger for this component
+const logger = createLogger('NotificationItem');
 
 interface NotificationItemProps {
   notification: BaseNotification;
@@ -32,6 +36,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   const [isSliding, setIsSliding] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false); // New state to track if item should be removed from DOM
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Log notification details for debugging - helps identify RSVP notifications
+  useEffect(() => {
+    logger.debug(`Rendering notification: ${notification.id}`, {
+      type: notification.notification_type,
+      title: notification.title,
+      contentType: notification.content_type,
+      metadata: notification.context
+    });
+  }, [notification]);
 
   // Animation handler for swipe out
   const handleSwipeOut = () => {
@@ -54,11 +68,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   // Get content ID
   const getContentId = (): string => {
+    // For RSVP notifications, use the event_id from metadata if available
+    if (notification.notification_type === 'event' && notification.context?.event_id) {
+      return notification.context.event_id;
+    }
     return notification.content_id || notification.id;
   };
 
   // Get the user's name 
-  const displayName = notification.profiles?.display_name || "A neighbor";
+  const displayName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
 
   // Get notification border color based on its type
   const borderColorClass = getNotificationBorderColor(notification.notification_type);
@@ -105,7 +123,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           </div>
           
           {/* Updated action buttons with simplified styling */}
-          <NotificationActions id={notification.id} contentType={getContentType()} contentId={getContentId()} isRead={notification.is_read} onDismiss={onSelect} triggerSwipeAnimation={handleSwipeOut} />
+          <NotificationActions 
+            id={notification.id} 
+            contentType={getContentType()} 
+            contentId={getContentId()} 
+            isRead={notification.is_read} 
+            onDismiss={onSelect} 
+            triggerSwipeAnimation={handleSwipeOut} 
+            notificationType={notification.notification_type} // Pass notification type for special handling
+          />
         </div>
       </motion.div>
     </AnimatePresence>

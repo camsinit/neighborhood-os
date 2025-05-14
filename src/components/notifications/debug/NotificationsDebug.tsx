@@ -1,137 +1,66 @@
 
 /**
- * NotificationsDebug.tsx
- * 
- * A debugging component for notifications that shows raw notification data
- * Only appears in development mode
+ * Component for debugging notifications during development
  */
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { createLogger } from '@/utils/logger';
-import { refreshEvents } from '@/utils/refreshEvents';
+import { useNotifications } from '@/hooks/notifications';
+import { toast } from 'sonner';
+import NotificationsDebugControls from './NotificationsDebugControls';
 
-const logger = createLogger('NotificationsDebug');
-
-interface DebugNotification {
-  id: string;
-  title: string;
-  notification_type: string;
-  content_type: string;
-  created_at: string;
-  is_read: boolean;
-  user_id: string;
-  actor_id: string;
-}
-
-export const NotificationsDebug: React.FC = () => {
-  const [notifications, setNotifications] = useState<DebugNotification[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+/**
+ * Debug component for notifications
+ * Only displays in development mode
+ */
+export const NotificationsDebug = () => {
+  const { data: notifications, refetch, isLoading } = useNotifications(false);
   
-  // Fetch the current user
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        setUserId(data.user.id);
-      }
-    };
-    
-    getUser();
-  }, []);
-  
-  // Function to fetch raw notifications
-  const fetchRawNotifications = async () => {
-    if (!userId) return;
-    
-    setLoading(true);
-    logger.debug('Fetching raw notifications for debugging');
-    
-    try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        logger.error('Error fetching debug notifications:', error);
-        return;
-      }
-      
-      logger.debug(`Found ${data?.length || 0} raw notifications`);
-      setNotifications(data as DebugNotification[] || []);
-    } catch (err) {
-      logger.error('Exception in fetchRawNotifications:', err);
-    } finally {
-      setLoading(false);
-    }
+  // Log notification data to console
+  const logNotifications = () => {
+    console.log("Current notifications:", notifications);
+    toast.success("Notifications logged to console");
   };
-  
-  // Force a notification refresh
-  const forceRefresh = () => {
-    logger.debug('Manually triggering notification refresh');
-    refreshEvents.notifications();
-    window.dispatchEvent(new CustomEvent('notification-created'));
-    setTimeout(fetchRawNotifications, 1000);
-  };
-  
-  if (!userId) {
-    return null;
-  }
-  
+
   return (
-    <div className="p-4 border rounded-lg bg-gray-50">
-      <h2 className="text-lg font-semibold mb-2">Notification Debugging</h2>
-      <div className="flex gap-2 mb-4">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={fetchRawNotifications}
-          disabled={loading}
-        >
-          {loading ? 'Loading...' : 'Show Raw Notifications'}
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={forceRefresh} 
-        >
-          Force Refresh
-        </Button>
-      </div>
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Notifications Debug Tools</h3>
       
-      {notifications.length > 0 ? (
-        <div className="overflow-auto max-h-96">
-          <table className="min-w-full text-xs">
-            <thead>
-              <tr className="border-b">
-                <th className="p-1 text-left">ID</th>
-                <th className="p-1 text-left">Title</th>
-                <th className="p-1 text-left">Type</th>
-                <th className="p-1 text-left">Content Type</th>
-                <th className="p-1 text-left">Created</th>
-                <th className="p-1 text-left">Read</th>
-              </tr>
-            </thead>
-            <tbody>
-              {notifications.map((notification) => (
-                <tr key={notification.id} className="border-b hover:bg-gray-100">
-                  <td className="p-1">{notification.id.substring(0, 8)}</td>
-                  <td className="p-1">{notification.title}</td>
-                  <td className="p-1">{notification.notification_type}</td>
-                  <td className="p-1">{notification.content_type}</td>
-                  <td className="p-1">{new Date(notification.created_at).toLocaleString()}</td>
-                  <td className="p-1">{notification.is_read ? 'Yes' : 'No'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="text-gray-500">No notifications found</div>
-      )}
+      {/* Debug controls */}
+      <NotificationsDebugControls />
+      
+      {/* Notification counts and data */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Notification Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm">
+            <p>Total notifications: {notifications?.length || 0}</p>
+            <p>Unread: {notifications?.filter(n => !n.is_read).length || 0}</p>
+            <p>Types: {Array.from(new Set(notifications?.map(n => n.notification_type) || [])).join(', ')}</p>
+          </div>
+          
+          <div className="flex gap-2 mt-4">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={logNotifications}
+            >
+              Log to Console
+            </Button>
+            
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => refetch()}
+              disabled={isLoading}
+            >
+              Refresh Data
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
