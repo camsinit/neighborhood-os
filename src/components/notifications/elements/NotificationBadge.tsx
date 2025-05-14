@@ -2,44 +2,25 @@
 /**
  * NotificationBadge.tsx
  * 
- * A reusable component for displaying notification type badges and status indicators
+ * A simple badge component that shows the number of unread notifications
  */
 import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-export interface NotificationBadgeProps {
-  label: string;
-  variant?: "default" | "outline" | "secondary" | "destructive" | "success" | "warning" | "info";
-  isHighlighted?: boolean;
-  className?: string;
-  size?: "sm" | "default";
+
+interface NotificationBadgeProps {
+  count: number;
 }
 
 /**
- * Renders a badge for notification type or status with appropriate styling
- * This component is used for badge display and should not affect card border styling
+ * Badge showing notification count
  */
-export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
-  label,
-  variant = "default",
-  isHighlighted = false,
-  className,
-  size = "default"
-}) => {
-  // Determine size class based on size prop
-  const sizeClass = size === "sm" ? "text-[10px] h-5" : "";
+const NotificationBadge: React.FC<NotificationBadgeProps> = ({ count }) => {
+  // Only show if there are unread notifications
+  if (count <= 0) return null;
   
   return (
-    <Badge 
-      variant={variant} 
-      className={cn(
-        sizeClass,
-        isHighlighted && "animate-pulse",
-        className
-      )}
-    >
-      {label}
-    </Badge>
+    <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
+      {count > 9 ? '9+' : count}
+    </span>
   );
 };
 
