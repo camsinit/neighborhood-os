@@ -14,7 +14,25 @@ import { BaseNotification } from "../types";
 export const processEventNotifications = (events: any[]): BaseNotification[] => {
   console.log("[processEventNotifications] Processing event notifications:", events.length);
   
-  return events.map(event => ({
+  // Create a map to track events we've already processed to prevent duplicates
+  const processedEventMap = new Map<string, boolean>();
+  
+  // Filter out duplicate events based on content_id and notification_type
+  const uniqueEvents = events.filter(event => {
+    // Create a unique key for this event
+    const eventKey = `${event.id}-${event.host_id || "unknown"}`;
+    
+    // If we've already processed this event, skip it
+    if (processedEventMap.has(eventKey)) {
+      return false;
+    }
+    
+    // Mark this event as processed
+    processedEventMap.set(eventKey, true);
+    return true;
+  });
+  
+  return uniqueEvents.map(event => ({
     id: event.id,
     user_id: event.host_id || "unknown",
     title: event.title, // Adding back the title property that was removed
