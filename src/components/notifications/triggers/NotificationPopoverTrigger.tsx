@@ -7,7 +7,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
-import NotificationBadge from "../elements/NotificationBadge";
+import { NotificationBadge } from "../elements"; // Updated import
 
 interface NotificationPopoverTriggerProps {
   unreadCount: number;

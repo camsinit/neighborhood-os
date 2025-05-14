@@ -1,3 +1,4 @@
+
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
@@ -15,7 +16,7 @@ const HomePage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
           {/* Debug tools in development - more prominently positioned */}
-          {isDev}
+          {isDev && <NotificationsDebug />}
 
           {/* Quick Actions Section with no heading (moved to Header) */}
           <section>

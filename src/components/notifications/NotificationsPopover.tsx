@@ -1,3 +1,4 @@
+
 /**
  * NotificationsPopover.tsx
  * 
@@ -9,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button"; // Added missing Button import
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";

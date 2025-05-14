@@ -30,7 +30,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
     logger.debug("Setting up notification refresh listeners");
     
     // Define all the events that should trigger a refresh
-    const refreshEvents = [
+    const refreshEventTypes = [
       'event-rsvp-updated',
       'skills-updated',
       'notification-created',
@@ -46,11 +46,11 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
     };
     
     // Add event listeners for each event
-    refreshEvents.forEach(eventName => {
+    refreshEventTypes.forEach(eventName => {
       window.addEventListener(eventName, handleRefreshEvent);
     });
     
-    // Set up subscription with the refreshEvents utility
+    // Set up subscription with the refreshEvents utility (using its method properly)
     const unsubscribe = refreshEvents.on('notification-created', handleRefreshEvent);
     
     // Clean up event listeners on unmount
@@ -58,7 +58,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
       logger.debug("Cleaning up notification refresh listeners");
       
       // Remove all event listeners
-      refreshEvents.forEach(eventName => {
+      refreshEventTypes.forEach(eventName => {
         window.removeEventListener(eventName, handleRefreshEvent);
       });
       
