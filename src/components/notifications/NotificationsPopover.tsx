@@ -99,6 +99,51 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
 
+  // Function to archive all notifications with proper toast management
+  const handleArchiveAll = async () => {
+    if (!notifications?.length) {
+      toast({
+        description: "No notifications to archive",
+      });
+      return;
+    }
+
+    // Show loading toast and store its ID
+    const { id: toastId } = toast({
+      title: "Archiving notifications",
+      description: "Please wait...",
+    });
+
+    try {
+      // Archive all notifications
+      const promises = notifications
+        .filter(n => !n.is_archived)
+        .map(n => archiveNotification(n.id));
+        
+      await Promise.all(promises);
+      
+      // Dismiss loading toast
+      toast({
+        id: toastId,
+        title: "Success",
+        description: `Archived ${promises.length} notifications`,
+      });
+      
+      // Refresh the notifications list
+      refetch();
+    } catch (error) {
+      console.error("Failed to archive notifications:", error);
+      
+      // Show error toast
+      toast({
+        id: toastId, // Replace the loading toast
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to archive notifications",
+      });
+    }
+  };
+
   // Show error message if there's an error
   if (isError) {
     console.error("Error fetching notifications:", error);
@@ -128,10 +173,27 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
             <h4 className="font-semibold">
               Notifications
             </h4>
-            <TabsList className="h-8">
-              <TabsTrigger value="active" className="text-xs h-8">Active</TabsTrigger>
-              <TabsTrigger value="archived" className="text-xs h-8">Archived</TabsTrigger>
-            </TabsList>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowArchived(!showArchived)}
+                className="text-xs"
+              >
+                {showArchived ? "Active" : "Read"}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleArchiveAll}
+                className="text-xs flex items-center gap-1"
+                disabled={!notifications?.length}
+              >
+                <Archive className="h-3 w-3" />
+                Archive All
+              </Button>
+            </div>
           </div>
           
           <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">

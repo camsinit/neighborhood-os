@@ -42,8 +42,8 @@ export default function NotificationDrawer() {
       return;
     }
     
-    // Show processing toast
-    toast.loading("Archiving all notifications...");
+    // Show processing toast - IMPORTANT: Store the toast ID to dismiss it later
+    const toastId = toast.loading("Archiving all notifications...");
     
     try {
       // Archive each notification one by one
@@ -54,12 +54,18 @@ export default function NotificationDrawer() {
       // Wait for all archive operations to complete
       await Promise.all(promises);
       
+      // Dismiss the loading toast
+      toast.dismiss(toastId);
+      
       // Show success message
       toast.success(`Archived ${activeNotifications.length} notifications`);
       
       // Refresh the notifications list
       refetch();
     } catch (error) {
+      // Dismiss the loading toast
+      toast.dismiss(toastId);
+      
       // Show error message if something went wrong
       console.error("Error archiving all notifications:", error);
       toast.error("Failed to archive all notifications");
