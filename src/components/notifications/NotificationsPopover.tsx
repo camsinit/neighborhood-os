@@ -4,21 +4,19 @@
  * 
  * Enhanced notifications popover with modern design and specialized notification cards
  */
-import { Archive, Bell } from "lucide-react";
+import React, { ReactNode, useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/components/ui/use-toast";
-import { useState, ReactNode } from "react";
+import { Button } from "@/components/ui/button"; // Added missing Button import
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
-import NotificationCardFactory from "./cards/NotificationCardFactory";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import NotificationPopoverTrigger from "./triggers/NotificationPopoverTrigger";
+import NotificationsHeader from "./sections/NotificationsHeader";
+import NotificationsList from "./sections/NotificationsList";
 
 /**
  * Props for the popover component that shows notification content
@@ -31,7 +29,7 @@ interface NotificationPopoverProps {
   onAction?: () => void;
   actionLabel?: string;
   isArchived?: boolean;
-  // New props for navigation and highlighting
+  // Navigation and highlighting props
   contentId?: string;
   contentType?: HighlightableItemType;
 }
@@ -47,7 +45,6 @@ export const NotificationPopover = ({
   onAction, 
   actionLabel = "View",
   isArchived = false,
-  // New props with default values
   contentId,
   contentType 
 }: NotificationPopoverProps) => {
@@ -72,8 +69,7 @@ export const NotificationPopover = ({
 };
 
 /**
- * The main notifications popover. Now it's smart about querying the broadcast notification list,
- * but has no DB/data logic; that all lives in the custom hook!
+ * Props for the main notifications popover
  */
 interface NotificationsPopoverMainProps {
   children?: ReactNode;
@@ -81,115 +77,70 @@ interface NotificationsPopoverMainProps {
 
 /**
  * Main notifications popover component
- * Now exported as both a named export AND the default export
  */
 export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps) => {
-  const { toast } = useToast();
+  // State for showing archived notifications
   const [showArchived, setShowArchived] = useState(false);
 
   // Use our simplified hook that leverages React Query's built-in polling
   const { 
     data: notifications, 
     isLoading, 
-    isError, 
-    error, 
     refetch 
   } = useNotificationsPopoverData(showArchived);
 
   // Calculate unread count
   const unreadCount = notifications?.filter(n => !n.is_read && !n.is_archived).length || 0;
 
-  // Show error message if there's an error
-  if (isError) {
-    console.error("Error fetching notifications:", error);
-  }
+  // Toggle between showing active and archived notifications
+  const handleToggleArchived = () => {
+    setShowArchived(!showArchived);
+  };
+
+  // Function to archive all notifications without toast messages
+  const handleArchiveAll = async () => {
+    if (!notifications?.length) {
+      return;
+    }
+
+    try {
+      // Archive all notifications
+      const promises = notifications
+        .filter(n => !n.is_archived)
+        .map(n => archiveNotification(n.id));
+        
+      await Promise.all(promises);
+      
+      // Refresh the notifications list
+      refetch();
+    } catch (error) {
+      console.error("Failed to archive notifications:", error);
+    }
+  };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {children || (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative hover:bg-gray-100"
-          >
-            <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </Button>
-        )}
+        {children || <NotificationPopoverTrigger unreadCount={unreadCount} />}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
-        <Tabs defaultValue="active">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h4 className="font-semibold">
-              Notifications
-            </h4>
-            <TabsList className="h-8">
-              <TabsTrigger value="active" className="text-xs h-8">Active</TabsTrigger>
-              <TabsTrigger value="archived" className="text-xs h-8">Archived</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="active" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <ScrollArea className="h-[350px] px-2">
-              {isLoading ? (
-                <div className="p-4 text-center">
-                  <div className="animate-pulse flex justify-center">
-                    <div className="h-6 w-6 rounded-full bg-gray-200"></div>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
-                </div>
-              ) : notifications?.length && !showArchived ? (
-                notifications.map((notification) => (
-                  <div key={notification.id} className="py-2">
-                    <NotificationCardFactory
-                      notification={notification}
-                      onDismiss={() => refetch()}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-sm text-gray-500">
-                  No new notifications
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-          
-          <TabsContent value="archived" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <ScrollArea className="h-[350px] px-2">
-              {isLoading ? (
-                <div className="p-4 text-center">
-                  <div className="animate-pulse flex justify-center">
-                    <div className="h-6 w-6 rounded-full bg-gray-200"></div>
-                  </div>
-                  <p className="mt-2 text-sm text-gray-500">Loading notifications...</p>
-                </div>
-              ) : notifications?.length && showArchived ? (
-                notifications.map((notification) => (
-                  <div key={notification.id} className="py-2">
-                    <NotificationCardFactory
-                      notification={notification}
-                      onDismiss={() => refetch()}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-sm text-gray-500">
-                  No archived notifications
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
+        <NotificationsHeader 
+          showArchived={showArchived}
+          onToggleArchived={handleToggleArchived}
+          onArchiveAll={handleArchiveAll}
+          hasNotifications={!!notifications?.length}
+        />
+        
+        <NotificationsList 
+          notifications={notifications}
+          isLoading={isLoading}
+          showArchived={showArchived}
+          onDismiss={() => refetch()}
+        />
       </PopoverContent>
     </Popover>
   );
 };
 
-// Add default export to fix the import error
+// Default export to fix the import error
 export default NotificationsPopover;

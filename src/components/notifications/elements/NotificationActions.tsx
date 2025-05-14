@@ -12,7 +12,6 @@ import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
 import { type HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
-import { toast } from "sonner";
 import { createLogger } from "@/utils/logger";
 
 // Create logger for this component
@@ -56,7 +55,6 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
         await markAsRead(notificationType || "event", id);
       } catch (error) {
         logger.error("Error marking notification as read:", error);
-        toast.error("Could not mark notification as read");
       }
     }
     
@@ -89,7 +87,6 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
         if (onDismiss) onDismiss();
       } catch (error) {
         logger.error("Error archiving notification:", error);
-        toast.error("Failed to archive notification");
       }
     }, 500); // Match timing with animation duration
   };

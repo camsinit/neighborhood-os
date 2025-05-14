@@ -6,7 +6,6 @@
  * such as marking as read or archiving them.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { HighlightableItemType } from "@/utils/highlight/types";
 import { createLogger } from "@/utils/logger";
 
@@ -103,6 +102,8 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
  */
 export const archiveNotification = async (id: string): Promise<boolean> => {
   try {
+    logger.debug(`Archiving notification ${id}`);
+    
     // Update the notification as archived
     const { error } = await supabase
       .from('notifications')
@@ -111,15 +112,13 @@ export const archiveNotification = async (id: string): Promise<boolean> => {
     
     if (error) {
       logger.error("Error archiving notification:", error);
-      toast.error("Failed to archive notification");
       return false;
     }
     
-    toast.success("Notification archived");
+    logger.debug(`Successfully archived notification ${id}`);
     return true;
   } catch (error) {
     logger.error("Unexpected error archiving notification:", error);
-    toast.error("Failed to archive notification");
     return false;
   }
 };

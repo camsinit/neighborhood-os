@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Pencil, Trash2 } from "lucide-react"; // Updated imports
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SkillRequestNotification } from "../types/skillTypes";
@@ -27,8 +26,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
-  const { toast } = useToast();
-  
   const queryClient = useQueryClient();
   
   const handleScheduleSession = async () => {
@@ -37,11 +34,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       
       // Simulate scheduling logic
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Session scheduled successfully!",
-        description: "The requester has been notified."
-      });
       
       // Invalidate queries to update UI
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -56,11 +48,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       onOpenChange(false);
     } catch (error) {
       console.error("Error scheduling session:", error);
-      toast({
-        title: "Failed to schedule session",
-        description: "There was an issue scheduling this skill session. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsConfirming(false);
     }
@@ -79,11 +66,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
 
       if (error) throw error;
       
-      toast({
-        title: "Skill request deleted",
-        description: "The skill request has been removed."
-      });
-      
       // Invalidate queries to update UI
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -97,11 +79,6 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
       onOpenChange(false);
     } catch (error) {
       console.error("Error deleting skill request:", error);
-      toast({
-        title: "Failed to delete request",
-        description: "There was an issue deleting this skill request. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsDeleting(false);
     }
