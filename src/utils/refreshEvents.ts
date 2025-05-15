@@ -27,7 +27,10 @@ export type EventType =
   'skills-updated' |
   'safety-updated' |
   'goods-updated' |
-  'activities-updated';
+  'activities-updated' |
+  // Specific content update events
+  'safety-update-submitted' |
+  'profile-updated';
 
 // Observer map - stores callbacks for each event type
 const observers: { [key in string]?: (() => void)[] } = {};
