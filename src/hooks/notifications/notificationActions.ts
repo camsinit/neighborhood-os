@@ -1,91 +1,91 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+/**
+ * Notification action functions
+ * 
+ * This file contains functions for performing actions on notifications
+ * such as marking as read or archiving them.
+ * 
+ * UPDATED: Now uses the unified notification service
+ */
+import notificationService from "@/utils/notifications/notificationService";
+import { HighlightableItemType } from "@/utils/highlight/types";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this module
+const logger = createLogger('notificationActions');
 
 /**
- * Mark a notification as read
+ * Helper function to determine the table name for a notification type
+ * This is needed because some notifications are stored in specific tables
+ * while others use the generic notifications table
  * 
- * @param id The notification ID to mark as read
- * @param showToast Whether to show a confirmation toast
- * @returns Success status
+ * @param type The notification type
+ * @returns The corresponding database table name
  */
-export const markNotificationAsRead = async (
-  id: string,
-  showToast: boolean = false
-): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', id);
-      
-    if (error) {
-      console.error('Error marking notification as read:', error);
-      
-      if (showToast) {
-        toast.error('Failed to mark notification as read');
-      }
-      
-      return false;
-    }
-    
-    // Dispatch a refresh event for notifications
-    dispatchRefreshEvent('notifications-read');
-    
-    if (showToast) {
-      toast.success('Notification marked as read');
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error marking notification as read:', error);
-    
-    if (showToast) {
-      toast.error('Failed to mark notification as read');
-    }
-    
-    return false;
+export const getTableName = (type: string): string => {
+  // Map notification types to their respective tables
+  // If no mapping exists, default to the 'notifications' table
+  switch (type.toLowerCase()) {
+    case 'safety':
+      return 'safety_updates';
+    case 'event':
+      return 'events';
+    case 'skills':
+      return 'skills_exchange';
+    case 'goods':
+      return 'goods_exchange';
+    case 'support':
+      return 'support_requests';
+    case 'neighbors':
+      return 'neighborhood_members';
+    default:
+      // For any other notification types, use the generic notifications table
+      return 'notifications';
   }
 };
 
 /**
- * Mark all notifications as read
+ * Mark a notification as read
  * 
- * @param showArchived Whether to include archived notifications
- * @returns Success status
+ * @param type The notification type or notification ID
+ * @param id The notification ID (optional when type is actually an ID)
+ * @returns Promise resolving to success or failure
  */
-export const markAllNotificationsAsRead = async (
-  showArchived: boolean = false
-): Promise<boolean> => {
+export const markAsRead = async (type: string, id?: string): Promise<boolean> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
-    
-    if (!userData?.user?.id) {
-      return false;
+    // If only one parameter is provided, assume it's the notification ID
+    // and use the notifications table
+    if (!id) {
+      logger.debug(`Marking notification ${type} as read (direct ID mode)`);
+      return notificationService.markAsRead(type);
     }
     
-    // Update notifications for current user
+    // Get the table name for this notification type
+    const table = getTableName(type);
+    
+    logger.debug(`Marking notification ${id} as read in ${table} table`);
+    
+    // For now, only handle the main notifications table
+    // Future: expand to handle other tables via RPC calls
+    if (table === 'notifications') {
+      return notificationService.markAsRead(id);
+    }
+    
+    // For other tables, use the legacy direct update approach
+    logger.debug(`Using legacy approach for table ${table}`);
     const { error } = await supabase
-      .from('notifications')
+      .from(table as any) // Type assertion to handle dynamic table names
       .update({ is_read: true })
-      .eq('user_id', userData.user.id)
-      .eq('is_archived', showArchived);
-      
+      .eq('id', id);
+    
     if (error) {
-      console.error('Error marking all notifications as read:', error);
-      toast.error('Failed to mark all notifications as read');
+      logger.error(`Error marking notification as read in ${table}:`, error);
       return false;
     }
     
-    // Dispatch a refresh event for notifications
-    dispatchRefreshEvent('notifications-read');
-    
-    toast.success('All notifications marked as read');
     return true;
   } catch (error) {
-    console.error('Error marking all notifications as read:', error);
-    toast.error('Failed to mark all notifications as read');
+    logger.error("Unexpected error marking notification as read:", error);
     return false;
   }
 };
@@ -93,45 +93,12 @@ export const markAllNotificationsAsRead = async (
 /**
  * Archive a notification
  * 
- * @param id The notification ID to archive
- * @param showToast Whether to show a confirmation toast
- * @returns Success status
+ * @param id The notification ID
+ * @returns Promise resolving to success or failure
  */
-export const archiveNotification = async (
-  id: string, 
-  showToast: boolean = false
-): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_archived: true })
-      .eq('id', id);
-      
-    if (error) {
-      console.error('Error archiving notification:', error);
-      
-      if (showToast) {
-        toast.error('Failed to archive notification');
-      }
-      
-      return false;
-    }
-    
-    // Dispatch a refresh event for notifications
-    dispatchRefreshEvent('notifications-read');
-    
-    if (showToast) {
-      toast.success('Notification archived');
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error archiving notification:', error);
-    
-    if (showToast) {
-      toast.error('Failed to archive notification');
-    }
-    
-    return false;
-  }
+export const archiveNotification = async (id: string): Promise<boolean> => {
+  return notificationService.archiveNotification(id);
 };
+
+// Re-export from the service for convenience
+export { getUnreadCount } from "@/utils/notifications/notificationService";

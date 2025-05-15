@@ -3,11 +3,12 @@
  * useActivitiesDirect.ts
  * 
  * Simplified hook for fetching neighborhood activities using React Query
+ * Directly queries the database without complex transformations
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
-import refreshEvents from "@/utils/refreshEvents";
+import { refreshEvents } from "@/utils/refreshEvents";
 import { useEffect } from "react";
 
 // Create a dedicated logger for this hook

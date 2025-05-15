@@ -1,19 +1,9 @@
-
 import { useState, useEffect } from 'react';
-import { setLogLevel, createLogger } from '@/utils/logger';
+import { LogLevel, setLogLevel, enableModules } from '@/utils/logger';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Bug } from 'lucide-react';
-
-// Define log levels as an enum
-enum LogLevel {
-  ERROR = 0,
-  WARN = 1,
-  INFO = 2,
-  DEBUG = 3,
-  TRACE = 4
-}
+import { Bug } from 'lucide-react'; // Changed from BugAntIcon to Bug from lucide-react
 
 /**
  * Props for the LoggingControls component
@@ -35,7 +25,6 @@ const LoggingControls = ({
   // State to track the current log level
   const [currentLevel, setCurrentLevel] = useState<string>(String(LogLevel.INFO));
   const [isVisible, setIsVisible] = useState(true); // Always visible for debugging
-  const logger = createLogger('LoggingControls');
 
   // Initialize from localStorage if available
   useEffect(() => {
@@ -56,13 +45,12 @@ const LoggingControls = ({
   // Handler for when log level changes
   const handleLevelChange = (value: string) => {
     setCurrentLevel(value);
-    setLogLevel(Number(value) as unknown as LogLevel);
+    setLogLevel(Number(value) as LogLevel);
   };
 
   // Set log level to TRACE for intensive debugging
   const setTraceMode = () => {
-    const traceLevel = LogLevel.TRACE;
-    setLogLevel(traceLevel as unknown as LogLevel);
+    setLogLevel(LogLevel.TRACE);
     setCurrentLevel(String(LogLevel.TRACE));
     console.log("🔍 TRACE logging enabled - You will now see detailed app behavior");
   };
@@ -112,6 +100,6 @@ const LoggingControls = ({
   }
 
   // Render the original floating version when not embedded
-  return null;
+  return;
 };
 export default LoggingControls;

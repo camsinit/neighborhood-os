@@ -21,107 +21,69 @@ export type RefreshEventType =
   | 'support' 
   | 'neighbors';
 
-// Define DOM event names that can be used
-export type EventActionType =
-  | 'notifications-read'
-  | 'notifications-created'
-  | 'events-updated'
-  | 'skills-updated'
-  | 'goods-updated'
-  | 'safety-updated'
-  | 'activities-updated'
-  | 'event-deleted'
-  | 'event-submitted';
-
 /**
  * Dispatch a generic refresh event
  * Components can listen for these events to refresh their data
  * 
  * @param type The type of event to refresh
- * @param data Optional data to pass with the event
  */
-export function dispatchRefreshEvent(type: RefreshEventType | EventActionType, data?: any): void {
+export function dispatchRefreshEvent(type: RefreshEventType | string): void {
   logger.debug(`Dispatching refresh event: ${type}`);
-  window.dispatchEvent(new CustomEvent(type, { detail: data }));
-}
-
-// Event handlers registry
-const eventHandlers: Record<string, Array<(data?: any) => void>> = {};
-
-/**
- * Register an event handler
- * 
- * @param event The event to listen for
- * @param handler The handler function to call
- * @returns A function to unsubscribe the handler
- */
-function on(event: RefreshEventType | EventActionType, handler: (data?: any) => void): () => void {
-  if (!eventHandlers[event]) {
-    eventHandlers[event] = [];
-  }
-  
-  eventHandlers[event].push(handler);
-  
-  return () => {
-    const index = eventHandlers[event].indexOf(handler);
-    if (index !== -1) {
-      eventHandlers[event].splice(index, 1);
-    }
-  };
+  window.dispatchEvent(new CustomEvent(type));
 }
 
 /**
  * Refresh notifications data
  * Triggers UI components to refetch notification data
  */
-function refreshNotifications(data?: any): void {
+function refreshNotifications(): void {
   logger.debug('Refreshing notifications');
-  dispatchRefreshEvent('notifications', data);
+  dispatchRefreshEvent('notifications');
 }
 
 /**
  * Refresh activity feed data
  * Triggers UI components to refetch activity data
  */
-function refreshActivities(data?: any): void {
+function refreshActivities(): void {
   logger.debug('Refreshing activities');
-  dispatchRefreshEvent('activities', data);
+  dispatchRefreshEvent('activities');
 }
 
 /**
  * Refresh events data
  * Triggers UI components to refetch event data
  */
-function refreshEvents(data?: any): void {
+function refreshEvents(): void {
   logger.debug('Refreshing events');
-  dispatchRefreshEvent('events', data);
+  dispatchRefreshEvent('events');
 }
 
 /**
  * Refresh skills data
  * Triggers UI components to refetch skills data
  */
-function refreshSkills(data?: any): void {
+function refreshSkills(): void {
   logger.debug('Refreshing skills');
-  dispatchRefreshEvent('skills', data);
+  dispatchRefreshEvent('skills');
 }
 
 /**
  * Refresh goods exchange data
  * Triggers UI components to refetch goods exchange data
  */
-function refreshGoods(data?: any): void {
+function refreshGoods(): void {
   logger.debug('Refreshing goods exchange');
-  dispatchRefreshEvent('goods', data);
+  dispatchRefreshEvent('goods');
 }
 
 /**
  * Refresh safety updates data
  * Triggers UI components to refetch safety updates
  */
-function refreshSafety(data?: any): void {
+function refreshSafety(): void {
   logger.debug('Refreshing safety updates');
-  dispatchRefreshEvent('safety', data);
+  dispatchRefreshEvent('safety');
 }
 
 // Export all refresh functions
@@ -131,8 +93,7 @@ const refreshEvents = {
   events: refreshEvents,
   skills: refreshSkills,
   goods: refreshGoods,
-  safety: refreshSafety,
-  on // Add the on method to subscribe to events
+  safety: refreshSafety
 };
 
 export default refreshEvents;
