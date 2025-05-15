@@ -8,7 +8,7 @@ import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { User } from "lucide-react";
-import { getNotificationTextColor, getNotificationBgColor } from "../utils/notificationColorUtils";
+import { getNotificationTextColor, getNotificationBorderColor } from "../utils/notificationColorUtils";
 
 export interface NotificationAvatarProps {
   url?: string | null;
@@ -40,7 +40,7 @@ export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   
   // Get text color and background color based on notification type
   const textColorClass = getNotificationTextColor(notificationType);
-  const bgColorClass = getNotificationBgColor(notificationType);
+  const bgColorClass = getNotificationBorderColor(notificationType); // Fixed: using the correct function
   
   return (
     <Avatar 
