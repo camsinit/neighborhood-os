@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -40,7 +41,6 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
   const user = useUser();
   const supabaseClient = useSupabaseClient();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [initialValues, setInitialValues] = useState<ProfileFormValues | null>(null);
@@ -88,14 +88,9 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
     try {
       await supabaseClient.auth.signOut();
       navigate("/login");
-      toast({
-        title: "Signed out successfully",
-      });
+      toast("Signed out successfully");
     } catch (error) {
-      toast({
-        title: "Error signing out",
-        variant: "destructive",
-      });
+      toast.error("Error signing out");
     }
   };
 
@@ -118,10 +113,8 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
         .single();
 
       if (error) {
-        toast({
-          title: "Error loading profile",
-          description: error.message,
-          variant: "destructive",
+        toast.error("Error loading profile", {
+          description: error.message
         });
         return;
       }
@@ -189,14 +182,10 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       if (error) throw error;
 
       setInitialValues(values);
-      toast({
-        title: "Settings saved",
-      });
+      toast("Settings saved");
     } catch (error: any) {
-      toast({
-        title: "Error saving settings",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error saving settings", {
+        description: error.message
       });
     } finally {
       setLoading(false);

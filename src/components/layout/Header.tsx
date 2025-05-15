@@ -2,7 +2,7 @@
 import { Settings } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -34,8 +34,6 @@ const Header = ({
   const user = useUser();
   // Get the navigation function from react-router
   const navigate = useNavigate();
-  // Get the toast function for showing notifications
-  const { toast } = useToast();
 
   // Query the profile data for the current user
   const { data: profile } = useQuery({
@@ -55,14 +53,9 @@ const Header = ({
     try {
       await supabaseClient.auth.signOut();
       navigate("/login");
-      toast({
-        title: "Signed out successfully"
-      });
+      toast("Signed out successfully");
     } catch (error) {
-      toast({
-        title: "Error signing out",
-        variant: "destructive"
-      });
+      toast.error("Error signing out");
     }
   };
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,6 @@ const ActivityFeed = () => {
     refetch,
     isRefetching
   } = useActivities();
-  const {
-    toast
-  } = useToast();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -60,9 +57,7 @@ const ActivityFeed = () => {
     logger.debug("Manual refresh triggered");
     refetch();
     setLastRefresh(new Date());
-    toast({
-      description: `Feed refreshed. Last updated: ${new Date().toLocaleTimeString()}`
-    });
+    toast(`Feed refreshed. Last updated: ${new Date().toLocaleTimeString()}`);
   };
 
   // Handler for when activities need special handling (like deleted items)

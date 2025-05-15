@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, RefreshCw } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useState, useEffect } from "react"; 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +36,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const [loadingTooLong, setLoadingTooLong] = useState(false);
   
   // Get required hooks
-  const { toast } = useToast();
   const user = useUser();
   const { 
     currentNeighborhood, 
@@ -95,10 +95,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       
       // Show error message if no neighborhood
       if (!currentNeighborhood) {
-        toast({
-          title: "No neighborhood available",
-          description: "You need to be part of a neighborhood to invite others.",
-          variant: "destructive"
+        toast.error("No neighborhood available", {
+          description: "You need to be part of a neighborhood to invite others."
         });
       }
       return;
@@ -129,17 +127,14 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       await navigator.clipboard.writeText(inviteUrl);
       
       // Show success message
-      toast({
-        title: "Invite link copied!",
-        description: "You can now share this link with your neighbor.",
+      toast.success("Invite link copied!", {
+        description: "You can now share this link with your neighbor."
       });
     } catch (error: any) {
       // Log and handle any errors
       console.error("[InviteDialog] Error generating invite:", error);
-      toast({
-        title: "Error generating invite link",
-        description: error.message,
-        variant: "destructive",
+      toast.error("Error generating invite link", {
+        description: error.message
       });
     } finally {
       // End the generation process
@@ -153,28 +148,23 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const sendEmailInvite = async () => {
     // Validate email input is not empty
     if (!email.trim()) {
-      toast({
-        title: "Email required",
-        description: "Please enter an email address.",
-        variant: "destructive"
+      toast.error("Email required", {
+        description: "Please enter an email address."
       });
       return;
     }
     
     // Validate neighborhood exists
     if (!currentNeighborhood) {
-      toast({
-        title: "No neighborhood available",
-        description: "You need to be part of a neighborhood to invite others.",
-        variant: "destructive"
+      toast.error("No neighborhood available", {
+        description: "You need to be part of a neighborhood to invite others."
       });
       return;
     }
     
     // Show a message that this feature is coming soon
-    toast({
-      title: "Coming soon!",
-      description: "Email invitations will be implemented with Resend.",
+    toast.success("Coming soon!", {
+      description: "Email invitations will be implemented with Resend."
     });
     setEmail("");
   };
@@ -187,9 +177,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     refreshNeighborhoodData();
     setLoadingTooLong(false); // Reset our loading timeout detection
     
-    toast({
-      title: "Refreshing neighborhood data",
-      description: "Please wait while we reconnect to your neighborhood...",
+    toast("Refreshing neighborhood data", {
+      description: "Please wait while we reconnect to your neighborhood..."
     });
   };
 
@@ -199,10 +188,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const runNeighborhoodDiagnostics = async () => {
     if (!user) {
       console.log("[Diagnostics] No user found");
-      toast({
-        title: "No user found",
-        description: "Please login again to resolve this issue.",
-        variant: "destructive"
+      toast.error("No user found", {
+        description: "Please login again to resolve this issue."
       });
       return;
     }
@@ -227,26 +214,21 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       console.log("[Diagnostics] Results:", diagnosticInfo);
       
       // Show diagnostic info to user
-      toast({
-        title: "Diagnostic Information",
-        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods and ${Array.isArray(allNeighborhoods) ? allNeighborhoods.length : 0} total neighborhoods.`,
+      toast("Diagnostic Information", {
+        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods and ${Array.isArray(allNeighborhoods) ? allNeighborhoods.length : 0} total neighborhoods.`
       });
       
       // If no neighborhoods found, show a more detailed message
       if ((!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) && 
           (!allNeighborhoods || allNeighborhoods.length === 0)) {
-        toast({
-          title: "No neighborhood association found",
-          description: "You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood.",
-          variant: "destructive"
+        toast.error("No neighborhood association found", {
+          description: "You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood."
         });
       }
     } catch (error: any) {
       console.error("[Diagnostics] Error:", error);
-      toast({
-        title: "Diagnostic error",
-        description: error.message,
-        variant: "destructive"
+      toast.error("Diagnostic error", {
+        description: error.message
       });
     }
   };
