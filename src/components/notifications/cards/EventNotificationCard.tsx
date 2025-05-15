@@ -1,4 +1,3 @@
-
 /**
  * EventNotificationCard.tsx
  * 
@@ -65,7 +64,7 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
   // Handle viewing event details
   const handleViewEvent = async () => {
     // Navigate to the event details
-    highlightItem('event', notification.content_id, true);
+    highlightItem('event', notification.content_id);
     
     if (onDismiss) onDismiss();
   };

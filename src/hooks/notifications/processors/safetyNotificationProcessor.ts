@@ -38,14 +38,15 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
       title: update.title,
       content_type: "safety_updates",
       content_id: update.id,
-      notification_type: "safety", // This matches the HighlightableItemType
-      action_type: "create", // Default action type for descriptive text
+      notification_type: "safety",
+      action_type: "create",
+      action_label: "View Safety Update", // Added required field
       created_at: update.created_at,
-      updated_at: update.created_at || update.created_at, // Ensure updated_at is present
+      updated_at: update.created_at || update.created_at,
       is_read: update.is_read || false,
       is_archived: update.is_archived || false,
-      context, // Add our rich context object
-      profiles: update.profiles || null // Add profile data if available
+      context,
+      profiles: update.profiles || null
     };
   });
 };
@@ -81,6 +82,7 @@ export const processSafetyCommentNotifications = (comments: any[]): BaseNotifica
       content_id: comment.safety_update_id,
       notification_type: "safety",
       action_type: "view",
+      action_label: "View Comment", // Added required field
       created_at: comment.created_at,
       updated_at: comment.created_at,
       is_read: comment.is_read || false,

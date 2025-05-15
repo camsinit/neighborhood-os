@@ -1,4 +1,3 @@
-
 /**
  * SafetyNotificationCard.tsx
  * 
@@ -57,7 +56,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   // Handle viewing safety details
   const handleViewSafety = async () => {
     // Navigate to the safety details
-    highlightItem('safety', notification.content_id, true);
+    highlightItem('safety', notification.content_id);
     
     if (onDismiss) onDismiss();
   };

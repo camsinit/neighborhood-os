@@ -1,55 +1,42 @@
 
-/**
- * NotificationsHeader.tsx
- * 
- * Header section for the notifications popover
- */
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Archive } from "lucide-react";
+// Add this file to fix the NotificationsHeader component props
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Check } from 'lucide-react';
 
-interface NotificationsHeaderProps {
-  showArchived: boolean;
-  onToggleArchived: () => void;
-  onArchiveAll: () => void;
-  hasNotifications: boolean;
+export interface NotificationsHeaderProps {
+  title: string;
+  unreadCount: number;
+  onMarkAllRead: () => void;
 }
 
-/**
- * Header component for the notifications popover
- */
 const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({
-  showArchived,
-  onToggleArchived,
-  onArchiveAll,
-  hasNotifications
+  title,
+  unreadCount,
+  onMarkAllRead
 }) => {
   return (
-    <div className="flex items-center justify-between p-4 border-b">
-      <h4 className="font-semibold">
-        Notifications
-      </h4>
-      <div className="flex space-x-2">
+    <div className="flex justify-between items-center w-full">
+      <div>
+        <h3 className="font-medium">{title}</h3>
+        <p className="text-xs text-gray-500">
+          {unreadCount > 0 
+            ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` 
+            : 'No new notifications'}
+        </p>
+      </div>
+      
+      {unreadCount > 0 && (
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm" 
-          onClick={onToggleArchived}
+          onClick={onMarkAllRead}
           className="text-xs"
         >
-          {showArchived ? "Active" : "Read"}
+          <Check className="h-3.5 w-3.5 mr-1" />
+          Mark all read
         </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onArchiveAll}
-          className="text-xs flex items-center gap-1"
-          disabled={!hasNotifications}
-        >
-          <Archive className="h-3 w-3" />
-          Archive All
-        </Button>
-      </div>
+      )}
     </div>
   );
 };

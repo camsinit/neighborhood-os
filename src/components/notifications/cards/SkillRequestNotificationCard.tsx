@@ -1,4 +1,3 @@
-
 /**
  * SkillRequestNotificationCard.tsx
  * 
@@ -62,7 +61,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     }
     
     // Navigate to the skill details
-    highlightItem('skills', skillId, true);
+    highlightItem('skills', skillId);
     
     if (onDismiss) onDismiss();
   };
@@ -188,6 +187,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
           notification={notification.context.skillRequestData}
+          onClose={onDismiss}
         />
       )}
     </>

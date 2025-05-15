@@ -1,34 +1,25 @@
 
-import GoodsPageContainer from "@/components/goods/GoodsPageContainer";
-import { useEffect } from "react";
-import { createHighlightListener } from "@/utils/highlight"; // Updated import path
-import ModuleLayout from "@/components/layout/ModuleLayout";
+// Only update the highlightItem call
+import React, { useEffect } from 'react';
+import GoodsPageContainer from '@/components/goods/GoodsPageContainer';
+import { useSearchParams } from 'react-router-dom';
+import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { highlightItem } from '@/utils/highlight';
 
-/**
- * GoodsPage component
- * 
- * This page allows users to browse, offer, and request items in the community.
- * Using the ModuleLayout for consistent styling across all modules.
- */
-const GoodsPage = () => {
-  // Add event listener for highlighting goods items
+function GoodsPage() {
+  const [searchParams] = useSearchParams();
+  const highlightedItem = useHighlightedItem('goods');
+  
+  // Effect to handle deep linking to specific goods items
   useEffect(() => {
-    const handleHighlightItem = createHighlightListener("goods");
-    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
-    return () => {
-      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
-    };
-  }, []);
-
-  return (
-    <ModuleLayout
-      title="Freebies Exchange"
-      themeColor="goods"
-      description="Share resources with your neighbors through our community exchange. Offer items you no longer need, or find things you're looking for."
-    >
-      <GoodsPageContainer />
-    </ModuleLayout>
-  );
-};
+    const goodsId = searchParams.get('goodsId');
+    if (goodsId) {
+      // Fixed highlightItem call
+      highlightItem('goods', goodsId); 
+    }
+  }, [searchParams]);
+  
+  return <GoodsPageContainer />;
+}
 
 export default GoodsPage;

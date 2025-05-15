@@ -16,7 +16,7 @@ interface SkillNotification {
   title?: string;
   content_type: string;
   content_id: string;
-  action_type?: string; // Add this property to fix the TypeScript error
+  action_type?: string;
   created_at: string;
   updated_at?: string;
   is_read?: boolean;
@@ -60,7 +60,8 @@ export const processSkillNotifications = (
           content_type: "skill_sessions",
           content_id: skillSession.id,
           notification_type: "skills",
-          action_type: "request", // Add action type for descriptive text
+          action_type: "request",
+          action_label: "View Request", // Added required field
           created_at: skillSession.created_at,
           updated_at: skillSession.created_at,
           is_read: false,
@@ -76,21 +77,18 @@ export const processSkillNotifications = (
             neighborName: requesterProfile?.display_name || "Someone",
             avatarUrl: requesterProfile?.avatar_url || null,
             skillRequestData: skillSession,
-            // Add additional context for improved UI
             actionRequired: true,
             actionLabel: "Respond to request",
-            // Add descriptive summary
             summary: `${requesterProfile?.display_name || "Someone"} has requested your skill: ${skillSession.skill.title}`
           },
-          // High relevance for requests requiring action
-          relevance_score: 3
+          relevance_score: 3 // This is now allowed by our updated BaseNotification type
         });
       }
     }
     
     // Handle skill notifications
     else if (isNotification(item)) {
-      const notification = item as SkillNotification; // Ensure type safety with our interface
+      const notification = item as SkillNotification;
       const actorProfile = notification.actor_id ? profilesMap[notification.actor_id] : null;
       
       result.push({
@@ -101,7 +99,8 @@ export const processSkillNotifications = (
         content_type: notification.content_type,
         content_id: notification.content_id,
         notification_type: "skills",
-        action_type: notification.action_type || "request", // Now this property exists in our interface
+        action_type: notification.action_type || "request",
+        action_label: "View Skill", // Added required field
         created_at: notification.created_at,
         updated_at: notification.updated_at || notification.created_at,
         is_read: notification.is_read,
@@ -111,11 +110,9 @@ export const processSkillNotifications = (
           neighborName: actorProfile?.display_name || notification.actor?.display_name || "A neighbor",
           avatarUrl: actorProfile?.avatar_url || notification.actor?.avatar_url || null,
           metadata: notification.metadata,
-          // Add derived context for UI
           summary: `${actorProfile?.display_name || "Someone"} is interested in your skill`
         },
-        // Medium relevance for general skill notifications
-        relevance_score: 2
+        relevance_score: 2 // This is now allowed by our updated BaseNotification type
       });
     }
   }

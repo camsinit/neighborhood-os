@@ -21,6 +21,8 @@ export const processSupportNotifications = (supportRequests: any[]): BaseNotific
     content_type: "support_requests",
     content_id: request.id,
     notification_type: "support", // This matches the HighlightableItemType
+    action_type: "view", // Added required field
+    action_label: "View Request", // Added required field
     created_at: request.created_at,
     updated_at: request.created_at || request.created_at, // Ensure updated_at is present
     is_read: request.is_read || false,

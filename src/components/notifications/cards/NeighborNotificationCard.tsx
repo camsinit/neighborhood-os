@@ -1,4 +1,3 @@
-
 /**
  * NeighborNotificationCard.tsx
  * 
@@ -21,10 +20,10 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   notification,
   onDismiss,
 }) => {
-  // Handle viewing neighbor profile
+  // Handle viewing neighbor profile - fixed highlightItem call
   const handleViewNeighbor = async () => {
     // Navigate to the neighbors section and highlight this neighbor
-    highlightItem('neighbors', notification.content_id, true);
+    highlightItem('neighbors', notification.content_id);
     
     if (onDismiss) onDismiss();
   };

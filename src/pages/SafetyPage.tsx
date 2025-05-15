@@ -1,52 +1,45 @@
+import React, { useEffect } from 'react';
+import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import SafetyUpdates from '@/components/SafetyUpdates';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
+import AddSafetyUpdateDialog from '@/components/safety/AddSafetyUpdateDialogNew';
+import { useSearchParams } from 'react-router-dom'; 
+import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { highlightItem } from '@/utils/highlight';
 
-import { useEffect } from "react";
-import SafetyUpdates from "@/components/SafetyUpdates";
-import { useToast } from "@/components/ui/use-toast";
-import { createHighlightListener } from "@/utils/highlight"; // Updated import path
-import ModuleLayout from "@/components/layout/ModuleLayout";
-import { refreshEvents } from "@/utils/refreshEvents";
-
-/**
- * SafetyPage - Main page for viewing and creating updates
- * 
- * This page displays community updates and allows users to:
- * - View all updates
- * - Create new updates via the button next to the search box
- * - View detailed information about each update
- */
-const SafetyPage = () => {
-  const { toast } = useToast();
-
-  // Handle highlighting of safety items when navigated to directly
+function SafetyPage() {
+  const [searchParams] = useSearchParams();
+  const highlightedUpdate = useHighlightedItem('safety');
+  
+  // Effect to handle deep linking to specific safety updates
   useEffect(() => {
-    // Use our utility to create a consistent highlight listener for safety items
-    // This will handle finding elements by data-safety-id and applying animations
-    const handleHighlightItem = createHighlightListener("safety");
-    
-    // Add event listener when component mounts
-    window.addEventListener('highlightItem', handleHighlightItem as EventListener);
-    
-    // Set up listener for safety events from the improved event system
-    const unsubscribe = refreshEvents.on('safety-updated', () => {
-      console.log("SafetyPage received safety-updated event, refreshing");
-    });
-    
-    // Remove event listeners when component unmounts
-    return () => {
-      window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
-      unsubscribe();
-    };
-  }, []);
-
+    const updateId = searchParams.get('updateId');
+    if (updateId) {
+      // Fixed highlightItem call
+      highlightItem('safety', updateId);
+    }
+  }, [searchParams]);
+  
   return (
-    <ModuleLayout
-      title="Updates"
-      themeColor="safety"
-      description="Stay informed about important updates in your community. Share information, receive alerts, and work together to maintain a secure neighborhood environment."
-    >
-      <SafetyUpdates />
-    </ModuleLayout>
+    <ModuleContainer>
+      <ModuleHeader 
+        title="Safety Updates" 
+        description="Stay informed about safety in your community"
+        actions={
+          <AddSafetyUpdateDialog>
+            <Button className="whitespace-nowrap flex items-center gap-1.5">
+              <PlusCircle className="h-4 w-4" />
+              <span>Post Update</span>
+            </Button>
+          </AddSafetyUpdateDialog>
+        }
+      />
+      <ModuleContent>
+        <SafetyUpdates />
+      </ModuleContent>
+    </ModuleContainer>
   );
-};
+}
 
 export default SafetyPage;

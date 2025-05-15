@@ -1,4 +1,3 @@
-
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User, AlertCircle } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -129,7 +128,8 @@ const ActivityItem = ({
     
     // After navigation, highlight the specific item
     setTimeout(() => {
-      highlightItem(itemType, activity.content_id, true);
+      // Fixed highlightItem call to use correct parameter count
+      highlightItem(itemType, activity.content_id);
     }, 100);
   };
 

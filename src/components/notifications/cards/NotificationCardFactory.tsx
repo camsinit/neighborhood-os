@@ -12,35 +12,37 @@ import SkillNotificationCard from './SkillNotificationCard';
 import NeighborNotificationCard from './NeighborNotificationCard';
 import NotificationCard from './base/NotificationCard';
 
+interface NotificationCardFactoryProps {
+  notification: BaseNotification;
+  onDismiss?: () => void;
+}
+
 // Component for creating the appropriate notification card based on type
 export const NotificationCardFactory = ({ 
-  notification 
-}: { 
-  notification: BaseNotification 
-}) => {
+  notification,
+  onDismiss
+}: NotificationCardFactoryProps) => {
   // Choose the appropriate card component based on notification type
   switch (notification.notification_type) {
     case 'event':
-      return <EventNotificationCard notification={notification} />;
+      return <EventNotificationCard notification={notification} onDismiss={onDismiss} />;
     case 'safety':
-      return <SafetyNotificationCard notification={notification} />;
+      return <SafetyNotificationCard notification={notification} onDismiss={onDismiss} />;
     case 'goods':
-      return <GoodsNotificationCard notification={notification} />;
+      return <GoodsNotificationCard notification={notification} onDismiss={onDismiss} />;
     case 'skills':
-      return <SkillNotificationCard notification={notification} />;
+      return <SkillNotificationCard notification={notification} onDismiss={onDismiss} />;
     case 'neighbor_welcome':
-      return <NeighborNotificationCard notification={notification} />;
+      return <NeighborNotificationCard notification={notification} onDismiss={onDismiss} />;
     default:
       // Fallback to generic notification card
       return (
         <NotificationCard
-          title={notification.title}
-          description={notification.description || ""}
-          timestamp={notification.created_at}
-          isRead={notification.is_read}
-          actionLabel={notification.action_label}
-          id={notification.id}
+          notification={notification}
+          onDismiss={onDismiss}
         />
       );
   }
 };
+
+export default NotificationCardFactory;

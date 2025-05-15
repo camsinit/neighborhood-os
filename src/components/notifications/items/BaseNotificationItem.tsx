@@ -1,124 +1,122 @@
-/**
- * BaseNotificationItem.tsx
- * 
- * Legacy compatibility component that maintains the old API while using
- * the new notification card system underneath.
- */
-import React, { useState } from "react";
-import { Archive } from "lucide-react";
+// Only update the highlightItem call
+import React from "react";
+import { BaseNotification } from "@/hooks/notifications/types";
+import { highlightItem } from "@/utils/highlight";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { getNotificationStyle } from "../utils/notificationStyles";
-import { type HighlightableItemType, highlightItem } from "@/utils/highlight"; 
-import { Card } from "@/components/ui/card";
+import { Eye, Trash } from "lucide-react";
+import { markAsRead, archiveNotification } from "@/hooks/notifications";
+import { HighlightableItemType } from "@/utils/highlight/types";
 
 interface BaseNotificationItemProps {
-  title: string;
-  type: HighlightableItemType;
-  itemId: string;
-  isRead?: boolean;
-  isArchived?: boolean;
-  onClose: () => void;
-  onItemClick: (type: HighlightableItemType, id: string) => void;
-  context?: {
-    neighborName?: string;
-    avatarUrl?: string;
-  };
-  children?: React.ReactNode;
+  notification: BaseNotification;
+  onDismiss: () => void;
+  className?: string;
+  renderActions?: () => React.ReactNode;
 }
 
-/**
- * Base component for notification items that handles common layout and styling
- * This component is maintained for backward compatibility - new code should use
- * the specialized notification cards directly.
- */
 const BaseNotificationItem = ({
-  title,
-  type,
-  itemId,
-  isRead = false,
-  isArchived = false,
-  onClose,
-  onItemClick,
-  context,
-  children
+  notification,
+  onDismiss,
+  className,
 }: BaseNotificationItemProps) => {
-  // State for tracking removal animation
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [height, setHeight] = useState<number | undefined>();
+  const navigate = useNavigate();
   
-  // Get style information for this notification type
-  const style = getNotificationStyle(type);
-  const Icon = style.icon;
-
-  // Handle archiving a notification
-  const handleArchive = async (e: React.MouseEvent) => {
+  const {
+    id,
+    title,
+    description,
+    is_read,
+    is_archived,
+    content_type,
+    content_id,
+    notification_type
+  } = notification;
+  
+  const isDeleted = is_archived;
+  
+  const handleClick = () => {
+    // Navigate to content if not archived
+    if (!isDeleted && content_type && content_id) {
+      const contentType = content_type as HighlightableItemType;
+      highlightItem(contentType, content_id);
+      navigate(`/${content_type}/${content_id}`);
+      onDismiss();
+    }
+  };
+  
+  // Handle view action - fixed highlightItem call
+  const handleViewAction = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Store the current height for smooth animation
-    const element = e.currentTarget.closest('.notification-item');
-    if (element) {
-      setHeight(element.getBoundingClientRect().height);
+    
+    // Mark as read
+    if (!notification.is_read) {
+      try {
+        await markAsRead(notification.notification_type, notification.id);
+      } catch (error) {
+        console.error("Error marking as read:", error);
+      }
     }
     
-    // Trigger the swipe-out animation
-    setIsRemoving(true);
+    // Navigate to the content
+    if (notification.content_type && notification.content_id) {
+      const contentType = notification.content_type as HighlightableItemType;
+      highlightItem(contentType, notification.content_id);
+    }
     
-    // Allow animation to finish before removing from DOM
-    setTimeout(() => {
-      onClose();
-    }, 500); // Match timing with CSS animation duration
+    if (onDismiss) onDismiss();
   };
-
-  // Handle click to navigate to the item
-  const handleClick = () => {
-    // Use the highlight utility directly
-    highlightItem(type, itemId, true);
+  
+  const handleArchiveAction = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     
-    // For backwards compatibility, also call the onItemClick function
-    onItemClick(type, itemId);
+    try {
+      await archiveNotification(id);
+      onDismiss();
+    } catch (error) {
+      console.error("Error archiving notification:", error);
+    }
   };
 
   return (
-    <Card 
-      className={`notification-item flex items-center justify-between py-3 group cursor-pointer
-        ${isRead ? 'bg-gray-50' : style.backgroundColor} hover:bg-gray-100 pr-6 pl-4 rounded-lg 
-        transition-all duration-300 overflow-hidden border-l-4 ${isRead ? 'border-gray-200' : style.borderColor}
-        ${isRemoving ? 'swipe-out-right' : 'opacity-100'}
-      `}
-      style={{
-        height: isRemoving ? height : undefined
-      }}
+    <div
+      className={cn(
+        "flex py-3 px-4 border-b last:border-b-0 relative",
+        isDeleted && "opacity-50",
+        className
+      )}
       onClick={handleClick}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {context?.avatarUrl ? (
-          <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarImage src={context.avatarUrl} alt={context.neighborName || ''} />
-            <AvatarFallback>{context.neighborName?.charAt(0)}</AvatarFallback>
-          </Avatar>
-        ) : (
-          <div className={`rounded-full p-1 ${isRead ? 'bg-gray-100' : style.backgroundColor}`}>
-            <Icon className={`h-4 w-4 flex-shrink-0 ${isRead ? 'text-gray-600' : style.textColor}`} />
-          </div>
+      <div className="flex-1">
+        <h4 className="text-sm font-medium">{title}</h4>
+        {description && (
+          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+            {description}
+          </p>
         )}
-        <div className="min-w-0 flex-1">
-          <h3 className={`text-base ${isRead ? 'font-normal' : 'font-medium'} truncate ${isRead ? 'text-gray-600' : style.textColor}`}>
-            {title}
-          </h3>
-          {children}
+        <div className="mt-2 flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleViewAction}
+            className="h-7 text-xs"
+          >
+            <Eye className="h-3.5 w-3.5 mr-1" />
+            View
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleArchiveAction}
+            className="h-7 text-xs"
+          >
+            <Trash className="h-3.5 w-3.5 mr-1" />
+            Archive
+          </Button>
         </div>
       </div>
-      {!isArchived && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 hidden group-hover:inline-flex" 
-          onClick={handleArchive}
-        >
-          <Archive className="h-4 w-4" />
-        </Button>
-      )}
-    </Card>
+    </div>
   );
 };
 

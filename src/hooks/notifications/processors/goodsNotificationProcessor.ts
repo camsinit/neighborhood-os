@@ -28,10 +28,11 @@ export const processGoodsNotifications = (
       title: item.title,
       content_type: "goods_exchange",
       content_id: item.id,
-      notification_type: "goods", // This matches the HighlightableItemType
-      action_type: contextType === "goods_offer" ? "offer" : "request", // Action type for descriptive text
+      notification_type: "goods",
+      action_type: contextType === "goods_offer" ? "offer" : "request",
+      action_label: contextType === "goods_offer" ? "View Offer" : "View Request", // Added required field
       created_at: item.created_at,
-      updated_at: item.created_at || item.created_at, // Ensure updated_at is present
+      updated_at: item.created_at || item.created_at,
       is_read: item.is_read || false,
       is_archived: item.is_archived || false,
       context: {
@@ -40,7 +41,6 @@ export const processGoodsNotifications = (
         avatarUrl: profile?.avatar_url || null,
         goodsCategory: item.category,
         condition: item.condition,
-        // Add descriptive summary
         summary: contextType === "goods_offer" 
           ? `${profile?.display_name || "Someone"} is offering: ${item.title}`
           : `${profile?.display_name || "Someone"} is looking for: ${item.title}`

@@ -17,21 +17,20 @@ export const processEventNotifications = (events: any[]): BaseNotification[] => 
   return events.map(event => ({
     id: event.id,
     user_id: event.host_id || "unknown",
-    title: event.title, // Adding back the title property that was removed
+    title: event.title, 
     content_type: "events",
     content_id: event.id,
-    notification_type: "event", // This matches the HighlightableItemType
+    notification_type: "event", 
     created_at: event.created_at,
-    updated_at: event.created_at || event.created_at, // Ensure updated_at is present
+    updated_at: event.created_at || event.created_at,
     is_read: event.is_read || false,
     is_archived: event.is_archived || false,
-    // Add action_type to improve descriptive text
     action_type: "create", // Default to create
+    action_label: "View Event", // Added required field
     context: {
       contextType: "event_invite",
       neighborName: event.profiles?.display_name || null,
       avatarUrl: event.profiles?.avatar_url || null,
-      // Add event details for UI display
       eventTime: event.start_time || null,
       location: event.location || null,
       summary: `${event.profiles?.display_name || "Someone"} created an event: ${event.title}`

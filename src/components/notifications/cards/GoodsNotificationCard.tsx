@@ -1,4 +1,3 @@
-
 /**
  * GoodsNotificationCard.tsx
  * 
@@ -61,8 +60,8 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
   
   // Handle viewing goods details
   const handleViewGoods = async () => {
-    // Navigate to the goods details
-    highlightItem('goods', notification.content_id, true);
+    // Navigate to the goods details - fixed highlightItem call
+    highlightItem('goods', notification.content_id);
     
     if (onDismiss) onDismiss();
   };
@@ -75,17 +74,17 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
     >
       {/* Category and condition badges */}
       <div className="mt-1 flex gap-1 flex-wrap">
-        {itemCategory && (
+        {notification.context?.goodsCategory && (
           <NotificationBadge 
-            label={itemCategory}
+            label={notification.context.goodsCategory}
             variant="outline"
             className="font-normal text-xs"
           />
         )}
         
-        {itemCondition && (
+        {notification.context?.condition && (
           <NotificationBadge 
-            label={itemCondition}
+            label={notification.context.condition}
             variant="outline"
             className="font-normal text-xs"
           />
