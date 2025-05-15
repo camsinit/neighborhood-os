@@ -17,7 +17,7 @@ import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications/notificationActions"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
-import NotificationCardFactory from "./cards/NotificationCardFactory";
+import { NotificationCardFactory } from "./cards/NotificationCardFactory"; // Changed from default to named import
 
 /**
  * Props for the popover component that shows notification content

@@ -6,7 +6,7 @@
  */
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NotificationCardFactory from "../cards/NotificationCardFactory";
+import { NotificationCardFactory } from "../cards/NotificationCardFactory"; // Changed from default to named import
 import { BaseNotification } from "@/hooks/notifications/types";
 
 interface NotificationsListProps {

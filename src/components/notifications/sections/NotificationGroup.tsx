@@ -1,4 +1,3 @@
-
 /**
  * NotificationGroup.tsx
  * 
@@ -6,7 +5,7 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import NotificationCardFactory from "../cards/NotificationCardFactory";
+import { NotificationCardFactory } from "../cards/NotificationCardFactory"; // Changed from default to named import
 import { motion } from "framer-motion"; // Import for animation support
 
 // Props for NotificationGroup component
