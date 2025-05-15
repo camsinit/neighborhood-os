@@ -2,8 +2,8 @@
 /**
  * Notification Actions
  * 
- * This file contains utility functions to perform actions on notifications
- * like marking them as read or archiving them.
+ * This file contains utility functions for performing actions on notifications,
+ * such as marking them as read or archiving them.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { refreshEvents } from "@/utils/refreshEvents";
@@ -13,27 +13,9 @@ import { createLogger } from "@/utils/logger";
 const logger = createLogger('notificationActions');
 
 /**
- * Get the database table name for a notification type
- * 
- * @param contentType The content type of the notification
- * @returns The table name for the content type
- */
-export const getTableName = (contentType: string): string => {
-  const tableMap: Record<string, string> = {
-    'events': 'events',
-    'safety': 'safety_updates',
-    'skills': 'skills_exchange',
-    'goods': 'goods_exchange',
-    'care': 'care_requests'
-  };
-
-  return tableMap[contentType] || 'notifications';
-};
-
-/**
  * Mark a notification as read
  * 
- * @param notificationType The type of notification
+ * @param notificationType The type of notification (for logging purposes)
  * @param notificationId The ID of the notification to mark as read
  * @returns Promise resolving to a boolean indicating success
  */
@@ -49,20 +31,6 @@ export const markAsRead = async (notificationType: string, notificationId: strin
     if (error) {
       logger.error('Error marking notification as read:', error);
       return false;
-    }
-
-    // Also update the content item if relevant
-    const tableName = getTableName(notificationType);
-    if (tableName !== 'notifications') {
-      // Use the .from method with a type assertion to handle dynamic table names
-      const { error: contentError } = await supabase
-        .from(tableName as any)
-        .update({ is_read: true })
-        .eq('id', notificationId);
-        
-      if (contentError) {
-        logger.error(`Error marking ${notificationType} content as read:`, contentError);
-      }
     }
 
     // Notify subscribers that notifications have been updated
@@ -103,4 +71,47 @@ export const archiveNotification = async (notificationId: string): Promise<boole
     logger.error('Error in archiveNotification:', error);
     return false;
   }
+};
+
+/**
+ * Mark all notifications as read for the current user
+ * 
+ * @returns Promise resolving to boolean indicating success
+ */
+export const markAllAsRead = async (): Promise<boolean> => {
+  try {
+    logger.debug('Marking all notifications as read');
+
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user?.id) {
+      logger.error('No authenticated user found');
+      return false;
+    }
+
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('user_id', user.user.id)
+      .eq('is_read', false);
+
+    if (error) {
+      logger.error('Error marking all notifications as read:', error);
+      return false;
+    }
+    
+    // Notify subscribers that notifications have been updated
+    refreshEvents.emit('notifications');
+    
+    return true;
+  } catch (error) {
+    logger.error('Error marking all as read:', error);
+    return false;
+  }
+};
+
+// Export all functions
+export default {
+  markAsRead,
+  archiveNotification,
+  markAllAsRead
 };

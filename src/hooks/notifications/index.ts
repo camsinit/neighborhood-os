@@ -10,16 +10,16 @@ export { useNotificationsData } from "./useNotificationsData";
 export { useNotificationsRefresh } from "./useNotificationsRefresh";
 export { useNotificationsPopoverData } from "./useNotificationsPopoverData";
 
-// Export the actions
-export { 
-  archiveNotification,
+// Export the actions (consolidated utilities)
+export {
   markAsRead,
-  getTableName
+  archiveNotification,
+  markAllAsRead
 } from "./notificationActions";
 
 // Export types
 export type { BaseNotification, SkillRequestNotification } from "./types";
 
-// Export utilities
+// Export utility functions
 export { fetchAllNotifications } from "./fetchNotifications";
 export { fetchDirectNotifications } from "./fetchDirectNotifications";

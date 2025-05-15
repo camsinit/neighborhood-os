@@ -8,10 +8,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Archive, Eye } from "lucide-react"; 
-import { markAsRead, archiveNotification } from "@/hooks/notifications";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
-import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight"; // Import our new utility
-import { type HighlightableItemType } from "@/utils/highlight"; // Import type for typechecking
+import { markAsRead, archiveNotification } from "@/hooks/notifications"; // Updated import path
+import { useNavigate } from "react-router-dom";
+import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
+import { type HighlightableItemType } from "@/utils/highlight";
 import { createLogger } from "@/utils/logger";
 
 // Create logger for this component
@@ -19,12 +19,12 @@ const logger = createLogger('NotificationActions');
 
 interface NotificationActionsProps {
   id: string;
-  contentId?: string; // Add contentId prop for highlighting
-  contentType?: HighlightableItemType; // Add content type prop
+  contentId?: string;
+  contentType?: HighlightableItemType;
   isRead: boolean;
   onDismiss?: () => void;
-  triggerSwipeAnimation?: () => void; // Animation trigger
-  notificationType?: string; // Added to handle type-specific actions
+  triggerSwipeAnimation?: () => void;
+  notificationType?: string;
 }
 
 /**
@@ -32,12 +32,12 @@ interface NotificationActionsProps {
  */
 const NotificationActions: React.FC<NotificationActionsProps> = ({
   id,
-  contentId, // New prop for content ID to highlight
-  contentType, // New prop for content type
+  contentId,
+  contentType,
   isRead,
   onDismiss,
-  triggerSwipeAnimation = () => {}, // Default to noop function
-  notificationType // Type of notification
+  triggerSwipeAnimation = () => {},
+  notificationType
 }) => {
   // Get navigate function from react-router
   const navigate = useNavigate();
