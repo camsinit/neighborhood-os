@@ -87,4 +87,5 @@ export interface ModuleHeaderProps {
   title: string;
   description?: string;
   themeColor: ModuleThemeColor;
+  actions?: ReactNode; // Add actions prop to support button/action components
 }

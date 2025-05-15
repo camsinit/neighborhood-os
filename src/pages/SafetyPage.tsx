@@ -4,7 +4,7 @@ import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layou
 import SafetyUpdates from '@/components/SafetyUpdates';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import AddSafetyUpdateDialog from '@/components/safety/AddSafetyUpdateDialogNew';
+import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
 import { useSearchParams } from 'react-router-dom'; 
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
@@ -12,6 +12,7 @@ import { highlightItem } from '@/utils/highlight';
 function SafetyPage() {
   const [searchParams] = useSearchParams();
   const highlightedUpdate = useHighlightedItem('safety');
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   
   // Effect to handle deep linking to specific safety updates
   useEffect(() => {
@@ -22,27 +23,30 @@ function SafetyPage() {
   }, [searchParams]);
   
   return (
-    <ModuleContainer>
+    <ModuleContainer themeColor="safety">
       <ModuleHeader 
         title="Safety Updates" 
         description="Stay informed about safety in your community"
+        themeColor="safety"
         actions={
-          // Properly render the AddSafetyUpdateDialog with required props
-          <AddSafetyUpdateDialog 
-            open={false}
-            onOpenChange={() => {}}
-            trigger={
-              <Button className="whitespace-nowrap flex items-center gap-1.5">
-                <PlusCircle className="h-4 w-4" />
-                <span>Post Update</span>
-              </Button>
-            }
-          />
+          <Button 
+            className="whitespace-nowrap flex items-center gap-1.5"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Post Update</span>
+          </Button>
         }
       />
       <ModuleContent>
         <SafetyUpdates />
       </ModuleContent>
+
+      {/* Properly render the AddSafetyUpdateDialogNew component */}
+      <AddSafetyUpdateDialogNew 
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </ModuleContainer>
   );
 }

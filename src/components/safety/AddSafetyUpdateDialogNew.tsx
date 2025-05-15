@@ -1,4 +1,4 @@
-// Replace DialogWrapper with UniversalDialog
+
 import UniversalDialog from "@/components/ui/universal-dialog";
 import SafetyUpdateFormNew from "./SafetyUpdateFormNew";
 
@@ -20,7 +20,6 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
   };
 
   return (
-    // Replace DialogWrapper with UniversalDialog
     <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}

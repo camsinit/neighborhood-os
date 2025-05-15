@@ -23,10 +23,11 @@ function CalendarPage() {
   }, [searchParams]);
 
   return (
-    <ModuleContainer>
+    <ModuleContainer themeColor="calendar">
       <ModuleHeader 
         title="Community Calendar"
         description="Upcoming events in your neighborhood"
+        themeColor="calendar"
         actions={
           <Button className="whitespace-nowrap flex items-center gap-1.5">
             <PlusCircle className="h-4 w-4" />

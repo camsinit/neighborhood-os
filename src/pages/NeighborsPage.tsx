@@ -23,12 +23,12 @@ function NeighborsPage() {
   }, [searchParams]);
   
   return (
-    <ModuleContainer>
+    <ModuleContainer themeColor="neighbors">
       <ModuleHeader 
         title="Neighbors" 
         description="Get to know the people in your community"
+        themeColor="neighbors"
         actions={
-          // Fixed trigger prop for InviteNeighborPopover
           <Button variant="default" className="flex items-center gap-1.5" onClick={() => {}}>
             <Plus className="h-4 w-4" />
             Invite Neighbor

@@ -12,6 +12,7 @@ import { useSkillsStore } from '@/stores/skillsStore';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
+import { SkillCategory } from '@/components/skills/types/skillTypes';
 
 const logger = createLogger('SkillsPage');
 
@@ -51,12 +52,18 @@ function SkillsPage() {
     setSearchParams(newParams);
   };
   
+  // Convert string category to SkillCategory type or undefined
+  const getTypedCategory = (categoryString: string | null): SkillCategory | undefined => {
+    if (!categoryString) return undefined;
+    return categoryString as SkillCategory;
+  };
+  
   return (
-    
-    <ModuleContainer>
+    <ModuleContainer themeColor="skills">
       <ModuleHeader 
         title="Skills Exchange"
         description="Share skills and knowledge with your neighbors"
+        themeColor="skills"
         actions={
           <Button className="whitespace-nowrap flex items-center gap-1.5">
             <PlusCircle className="h-4 w-4" />
@@ -93,13 +100,13 @@ function SkillsPage() {
           </div>
           
           <TabsContent value="offers" className="mt-0">
-            <SkillsList showRequests={false} selectedCategory={category} />
+            <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} />
           </TabsContent>
           <TabsContent value="requests" className="mt-0">
-            <SkillsList showRequests={true} selectedCategory={category} />
+            <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} />
           </TabsContent>
           <TabsContent value="mine" className="mt-0">
-            <SkillsList showMine={true} selectedCategory={category} />
+            <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} />
           </TabsContent>
         </Tabs>
       </ModuleContent>
