@@ -1,0 +1,6 @@
+
+# This edge function is deprecated as of May 2025
+# Event notifications are now handled by database triggers:
+# - event_notification_trigger
+# - event_rsvp_notification_trigger
+project_id = "nnwzfliblfuldwxpuata"

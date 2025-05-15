@@ -14,26 +14,60 @@ import { BaseNotification } from "../types";
 export const processEventNotifications = (events: any[]): BaseNotification[] => {
   console.log("[processEventNotifications] Processing event notifications:", events.length);
   
-  return events.map(event => ({
-    id: event.id,
-    user_id: event.host_id || "unknown",
-    title: event.title, 
-    content_type: "events",
-    content_id: event.id,
-    notification_type: "event", 
-    created_at: event.created_at,
-    updated_at: event.created_at || event.created_at,
-    is_read: event.is_read || false,
-    is_archived: event.is_archived || false,
-    action_type: "create", // Default to create
-    action_label: "View Event", // Added required field
-    context: {
-      contextType: "event_invite",
-      neighborName: event.profiles?.display_name || null,
-      avatarUrl: event.profiles?.avatar_url || null,
-      eventTime: event.start_time || null,
-      location: event.location || null,
-      summary: `${event.profiles?.display_name || "Someone"} created an event: ${event.title}`
-    }
-  }));
+  return events.map(event => {
+    // Parse notification metadata for context
+    const metadata = event.metadata || {};
+    
+    // Get action type from metadata or default to "create"
+    const actionType = metadata.contextType === 'event_update' ? 'update' :
+                      metadata.type === 'rsvp' ? 'rsvp' :
+                      'create';
+    
+    // Build the notification object
+    return {
+      id: event.id,
+      user_id: event.user_id || "unknown",
+      title: event.title, 
+      content_type: "events",
+      content_id: event.content_id,
+      notification_type: "event", 
+      created_at: event.created_at,
+      updated_at: event.updated_at || event.created_at,
+      is_read: event.is_read || false,
+      is_archived: event.is_archived || false,
+      action_type: actionType,
+      action_label: event.action_label || "View Event", 
+      context: {
+        contextType: metadata.contextType || "event_invite",
+        neighborName: event.actor_display_name || event.profiles?.display_name || null,
+        avatarUrl: event.actor_avatar_url || event.profiles?.avatar_url || null,
+        eventTime: metadata.eventTime || null,
+        location: metadata.location || null,
+        changes: metadata.changes || null,
+        summary: buildEventSummary(event, actionType, metadata)
+      }
+    };
+  });
 };
+
+/**
+ * Builds a descriptive summary for the event notification
+ */
+function buildEventSummary(event: any, actionType: string, metadata: any): string {
+  const actorName = event.actor_display_name || event.profiles?.display_name || "Someone";
+  
+  switch(actionType) {
+    case 'update':
+      if (metadata.changes) {
+        return `${actorName} updated the ${metadata.changes} of an event`;
+      }
+      return `${actorName} updated event details`;
+      
+    case 'rsvp':
+      return `${actorName} is attending an event`;
+      
+    case 'create':
+    default:
+      return `${actorName} created an event`;
+  }
+}

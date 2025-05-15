@@ -1,145 +1,103 @@
-
-/**
- * Event services for database operations
- * 
- * Handles the actual database operations for events, abstracting the Supabase calls
- */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this file
+const logger = createLogger('eventServices');
 
 /**
- * Create a new event in the database
+ * Creates a new event in the database
  * 
  * @param eventData - The event data to insert
- * @param userId - Current user's ID
- * @param formTitle - The form title (no longer needed but kept for backward compatibility)
- * @returns The created event data or throws an error
+ * @param userId - The ID of the user creating the event
+ * @param eventTitle - The title of the event
+ * @returns A Promise that resolves to the created event data
  */
-export const createEvent = async (eventData: any, userId: string, formTitle: string) => {
-  // Log the actual data being sent to the database for debugging
-  console.log("[eventServices] Sending to database:", eventData);
-
-  try {
-    // Simple insert with select now that we have the event_id field
-    // The event_id field is automatically generated as a copy of the id field
-    const { data, error } = await supabase
-      .from('events')
-      .insert({
-        title: eventData.title,
-        description: eventData.description,
-        location: eventData.location,
-        time: eventData.time,
-        host_id: userId,
-        neighborhood_id: eventData.neighborhood_id,
-        is_recurring: eventData.is_recurring || false,
-        recurrence_pattern: eventData.recurrence_pattern,
-        recurrence_end_date: eventData.recurrence_end_date
-      })
-      .select('*'); // We can now safely use select
-
-    if (error) {
-      // Log detailed error information
-      console.error("[eventServices] Error inserting event:", {
-        error: {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        timestamp: new Date().toISOString()
-      });
-      throw error;
-    }
-
-    // Log success information
-    console.log("[eventServices] Event created successfully:", {
-      eventId: data?.[0]?.id,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Show success toast
-    toast.success("Event created successfully");
-    
-    return data;
-  } catch (error) {
-    console.error("[eventServices] Caught exception creating event:", error);
-    throw error;
-  }
-};
-
-/**
- * Update an existing event in the database
- * 
- * @param eventId - ID of the event to update
- * @param eventData - The event data to update
- * @param userId - Current user's ID
- * @param formTitle - The new title from the form
- * @returns The updated event data or throws an error
- */
-export const updateEvent = async (
-  eventId: string, 
+export const createEvent = async (
   eventData: any, 
   userId: string,
-  formTitle: string
-) => {
-  // Log the actual data being sent to the database for debugging
-  console.log("[eventServices] Sending update to database:", {
-    eventId,
-    ...eventData
-  });
+  eventTitle: string
+): Promise<any> => {
+  // Log event creation attempt
+  console.log("[eventServices] Creating event:", eventData);
 
-  // Update the event data
-  const { error, data } = await supabase
+  // Insert the event into the database
+  const { data, error } = await supabase
     .from('events')
-    .update(eventData)
-    .eq('id', eventId)
-    .eq('host_id', userId)
-    .select('*'); 
+    .insert(eventData)
+    .select();
 
+  // Handle any database errors
   if (error) {
-    // Log detailed error information
-    console.error("[eventServices] Error updating event:", {
-      error: {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      },
-      eventId,
-      timestamp: new Date().toISOString()
-    });
+    console.error("[eventServices] Error creating event:", error);
     throw error;
   }
 
-  // Log success information
-  console.log("[eventServices] Event updated successfully:", {
-    eventId,
-    timestamp: new Date().toISOString()
-  });
-
-  // After successful update, also update any activities related to this event
-  // This ensures that the activity feed shows the updated event title
-  await updateEventActivities(eventId, formTitle);
+  console.log("[eventServices] Event created successfully:", data);
+  
+  // No need to call edge function - database trigger will create notifications
   
   return data;
 };
 
 /**
- * Update activities related to an event
+ * Updates an existing event in the database
  * 
- * @param eventId - The ID of the event
- * @param title - The new title to update in activities
+ * @param eventId - The ID of the event to update
+ * @param eventData - The updated event data
+ * @param userId - The ID of the user updating the event
+ * @param eventTitle - The title of the event
+ * @returns A Promise that resolves to the updated event data
  */
-export const updateEventActivities = async (eventId: string, title: string) => {
-  const { error: activityError } = await supabase
-    .from('activities')
-    .update({ title })
-    .eq('content_type', 'events')
-    .eq('content_id', eventId);
-    
-  if (activityError) {
-    console.error("[eventServices] Error updating related activities:", activityError);
-  } else {
-    console.log("[eventServices] Successfully updated related activities");
+export const updateEvent = async (
+  eventId: string, 
+  eventData: any,
+  userId: string,
+  eventTitle: string
+): Promise<any> => {
+  // Log event update attempt
+  console.log("[eventServices] Updating event:", eventId, eventData);
+
+  // Update the event in the database
+  const { data, error } = await supabase
+    .from('events')
+    .update(eventData)
+    .eq('id', eventId)
+    .select();
+
+  // Handle any database errors
+  if (error) {
+    console.error("[eventServices] Error updating event:", error);
+    throw error;
   }
+
+  console.log("[eventServices] Event updated successfully:", data);
+  
+  // No need to call edge function - database trigger will create notifications
+  
+  return data;
+};
+
+/**
+ * Deletes an event from the database
+ * 
+ * @param eventId - The ID of the event to delete
+ * @returns A Promise that resolves when the event is deleted
+ */
+export const deleteEvent = async (eventId: string): Promise<void> => {
+  // Log event deletion attempt
+  console.log("[eventServices] Deleting event:", eventId);
+
+  // Delete the event from the database
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', eventId);
+
+  // Handle any database errors
+  if (error) {
+    console.error("[eventServices] Error deleting event:", error);
+    throw error;
+  }
+
+  console.log("[eventServices] Event deleted successfully");
 };
