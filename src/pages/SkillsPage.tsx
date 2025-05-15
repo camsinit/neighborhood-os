@@ -100,13 +100,13 @@ function SkillsPage() {
           </div>
           
           <TabsContent value="offers" className="mt-0">
-            <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} />
+            <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
           </TabsContent>
           <TabsContent value="requests" className="mt-0">
-            <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} />
+            <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
           </TabsContent>
           <TabsContent value="mine" className="mt-0">
-            <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} />
+            <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
           </TabsContent>
         </Tabs>
       </ModuleContent>

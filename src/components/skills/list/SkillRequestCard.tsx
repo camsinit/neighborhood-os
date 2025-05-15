@@ -31,7 +31,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   };
 
   // Get the category colors from our map, fallback to technology if not found
-  const categoryStyle = categoryColors[skill.skill_category] || categoryColors.technology;
+  const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
 
   return (
     <div 

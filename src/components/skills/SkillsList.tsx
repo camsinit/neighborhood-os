@@ -8,16 +8,21 @@ import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
+/**
+ * Props for the SkillsList component
+ */
 interface SkillsListProps {
-  selectedCategory: SkillCategory | null;
+  selectedCategory: SkillCategory | undefined;
   searchQuery?: string;
   showRequests?: boolean; // Prop to toggle between offers and requests view
+  showMine?: boolean; // New prop to show only the user's skills
 }
 
 const SkillsList = ({
   selectedCategory,
   searchQuery = '',
-  showRequests = false
+  showRequests = false,
+  showMine = false
 }: SkillsListProps) => {
   const user = useUser();
   
@@ -29,12 +34,13 @@ const SkillsList = ({
     isLoading,
     refetch
   } = useQuery({
-    queryKey: ['skills-exchange', selectedCategory, searchQuery, showRequests],
+    queryKey: ['skills-exchange', selectedCategory, searchQuery, showRequests, showMine],
     queryFn: async () => {
       console.log('[SkillsList] Fetching skills with params:', {
         category: selectedCategory,
         searchQuery,
         showRequests,
+        showMine,
         timestamp: new Date().toISOString()
       });
       
@@ -42,6 +48,7 @@ const SkillsList = ({
       let query = supabase.from('skills_exchange').select(`
         *,
         profiles:user_id (
+          id,
           avatar_url,
           display_name
         )
@@ -56,6 +63,11 @@ const SkillsList = ({
 
       // Filter by request type
       query = query.eq('request_type', showRequests ? 'need' : 'offer');
+      
+      // Filter by user ID if showing only mine
+      if (showMine && user) {
+        query = query.eq('user_id', user.id);
+      }
 
       // Add search filter if provided
       if (searchQuery) {
@@ -77,11 +89,11 @@ const SkillsList = ({
       // Ensure data conforms to SkillWithProfile type
       return (data || []).map(item => ({
         ...item,
-        // Ensure request_type is typed correctly as SkillRequestType
-        request_type: item.request_type as 'offer' | 'need',
+        // Ensure profiles is properly formatted
         profiles: {
-          avatar_url: item.profiles?.avatar_url || null,
-          display_name: item.profiles?.display_name || null
+          id: item.profiles?.id || null,
+          display_name: item.profiles?.display_name || null,
+          avatar_url: item.profiles?.avatar_url || null
         }
       })) as SkillWithProfile[];
     },
@@ -111,27 +123,42 @@ const SkillsList = ({
     />;
   }
 
+  // Show appropriate empty state based on the view
+  if (filteredSkills.length === 0) {
+    let title, description, actionLabel;
+    
+    if (showMine) {
+      title = "You haven't shared any skills yet";
+      description = "Share your skills and knowledge with your neighbors";
+      actionLabel = "Share a Skill";
+    } else if (showRequests) {
+      title = "No Skill Requests Available";
+      description = "Be the first to request a skill from your neighbors";
+      actionLabel = "Request a Skill";
+    } else {
+      title = `No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`;
+      description = `Be the first to share your ${selectedCategory || ''} skills with the community`;
+      actionLabel = `Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`;
+    }
+    
+    return <EmptyState 
+      icon={Sparkles} 
+      title={title}
+      description={description}
+      actionLabel={actionLabel}
+      onAction={() => window.location.href = '/skills?action=create'}
+    />;
+  }
+
   return (
     <div className="space-y-4">
-      {filteredSkills.length > 0 ? (
-        <div className="space-y-4">
-          {filteredSkills.map(skill => (
-            <SkillCard 
-              key={skill.id} 
-              skill={skill} 
-              type={showRequests ? 'request' : 'offer'}
-            />
-          ))}
-        </div>
-      ) : (
-        <EmptyState 
-          icon={Sparkles} 
-          title={`No ${showRequests ? 'Skill Requests' : `${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills`} Available`}
-          description={`Be the first to ${showRequests ? 'request a skill' : `share your ${selectedCategory || ''} skills with the community`}`}
-          actionLabel={`${showRequests ? 'Request a Skill' : `Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`}`}
-          onAction={() => window.location.href = '/skills?action=create'}
+      {filteredSkills.map(skill => (
+        <SkillCard 
+          key={skill.id} 
+          skill={skill} 
+          type={showRequests ? 'request' : 'offer'}
         />
-      )}
+      ))}
     </div>
   );
 };
