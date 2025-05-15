@@ -61,6 +61,7 @@ export interface ModuleLayoutProps {
   description?: string;
   themeColor: ModuleThemeColor;
   className?: string;
+  actions?: ReactNode; // Add actions prop to support button/action components
 }
 
 /**
@@ -87,5 +88,5 @@ export interface ModuleHeaderProps {
   title: string;
   description?: string;
   themeColor: ModuleThemeColor;
-  actions?: ReactNode; // Add actions prop to support button/action components
+  actions?: ReactNode; // Ensure the header also accepts actions
 }

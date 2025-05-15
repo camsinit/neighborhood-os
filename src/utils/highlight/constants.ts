@@ -24,3 +24,21 @@ export const highlightConfig = {
 
 // Delay before scrolling to an element
 export const scrollDelay = 200;  // milliseconds
+
+// Map item types to their respective data attributes
+export const dataAttributeMap: Record<HighlightableItemType, string> = {
+  event: 'event-id',
+  safety: 'update-id',
+  skills: 'skill-id',
+  goods: 'goods-id',
+  neighbors: 'neighbor-id'
+};
+
+// Readable names for item types (for notifications)
+export const readableTypeNames: Record<HighlightableItemType, string> = {
+  event: 'Event',
+  safety: 'Safety Update',
+  skills: 'Skill',
+  goods: 'Goods Item',
+  neighbors: 'Neighbor'
+};
