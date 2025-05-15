@@ -49,9 +49,7 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     // Still mark as read when viewing
     if (!isRead) {
       try {
-        // FIX: Pass both parameters to markAsRead
-        // First parameter is notification type (or id for the new version), 
-        // second is the ID (required by the old version)
+        // Pass correct parameters to markAsRead
         await markAsRead(notificationType || "event", id);
       } catch (error) {
         logger.error("Error marking notification as read:", error);

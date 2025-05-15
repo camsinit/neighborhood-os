@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button"; // Added missing Button import
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
-import { archiveNotification } from "@/hooks/notifications"; 
+import { archiveNotification } from "@/hooks/notifications/notificationActions"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationPopoverTrigger from "./triggers/NotificationPopoverTrigger";
 import NotificationsHeader from "./sections/NotificationsHeader";

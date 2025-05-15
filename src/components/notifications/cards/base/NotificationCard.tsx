@@ -54,7 +54,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     created_at,
     is_read,
     content_id,
-    content_type
+    content_type,
+    notification_type
   } = notification;
 
   // Actor info with fallbacks for missing data
@@ -73,7 +74,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Mark as read if not already
     if (!is_read) {
       try {
-        await markAsRead(String(notification.notification_type), id);
+        await markAsRead(String(notification_type), id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }

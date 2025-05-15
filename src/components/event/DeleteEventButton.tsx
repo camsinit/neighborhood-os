@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner"; // Updated import for toast
 import { useUser } from "@supabase/auth-helpers-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { refreshEvents, dispatchRefreshEvent } from "@/utils/refreshEvents";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 /**
  * DeleteEventButton component
@@ -105,7 +105,7 @@ const DeleteEventButton = ({
       queryClient.invalidateQueries({ queryKey: ['events'] });
       
       // Dispatch a custom event to trigger data refresh in components listening for this event
-      dispatchRefreshEvent('event-deleted');
+      refreshEvents.emit('event-deleted');
       
       // Call onDelete callback if provided (after sheet has closed)
       if (onDelete) onDelete();

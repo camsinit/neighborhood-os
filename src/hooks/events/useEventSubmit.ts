@@ -7,7 +7,7 @@ import { transformEventFormData, transformEventUpdateData } from "./utils/eventD
 import { createEvent, updateEvent } from "./utils/eventServices";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -111,8 +111,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       });
       
       // FIXED: Using a single method to refresh events and activities
-      // This prevents multiple refresh events from being triggered
-      dispatchRefreshEvent('event-submitted');
+      refreshEvents.emit('event-submitted');
       
       onSuccess();
       
@@ -159,8 +158,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       toast.success("Event updated successfully");
       
       // FIXED: Using a single method to refresh events and activities
-      // This prevents multiple refresh events from being triggered
-      dispatchRefreshEvent('event-submitted');
+      refreshEvents.emit('event-submitted');
       
       onSuccess();
       

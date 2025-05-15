@@ -33,21 +33,18 @@ export const getTableName = (contentType: string): string => {
 /**
  * Mark a notification as read
  * 
- * @param notification The notification to mark as read
+ * @param notificationType The type of notification
+ * @param notificationId The ID of the notification to mark as read
  * @returns Promise resolving to a boolean indicating success
  */
-export const markAsRead = async (notification: { 
-  id: string, 
-  content_type?: string, 
-  content_id?: string 
-}): Promise<boolean> => {
+export const markAsRead = async (notificationType: string, notificationId: string): Promise<boolean> => {
   try {
-    logger.debug(`Marking notification ${notification.id} as read`);
+    logger.debug(`Marking notification ${notificationId} as read`);
 
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
-      .eq('id', notification.id);
+      .eq('id', notificationId);
 
     if (error) {
       logger.error('Error marking notification as read:', error);
@@ -55,18 +52,16 @@ export const markAsRead = async (notification: {
     }
 
     // Also update the content item if relevant
-    if (notification.content_type && notification.content_id) {
-      const tableName = getTableName(notification.content_type);
-      
-      if (tableName !== 'notifications') {
-        const { error: contentError } = await supabase
-          .from(tableName)
-          .update({ is_read: true })
-          .eq('id', notification.content_id);
-          
-        if (contentError) {
-          logger.error(`Error marking ${notification.content_type} content as read:`, contentError);
-        }
+    const tableName = getTableName(notificationType);
+    if (tableName !== 'notifications') {
+      // Use the .from method with a type assertion to handle dynamic table names
+      const { error: contentError } = await supabase
+        .from(tableName as any)
+        .update({ is_read: true })
+        .eq('id', notificationId);
+        
+      if (contentError) {
+        logger.error(`Error marking ${notificationType} content as read:`, contentError);
       }
     }
 
@@ -83,19 +78,17 @@ export const markAsRead = async (notification: {
 /**
  * Archive a notification
  * 
- * @param notification The notification to archive
+ * @param notificationId The ID of the notification to archive
  * @returns Promise resolving to a boolean indicating success
  */
-export const archiveNotification = async (notification: { 
-  id: string 
-}): Promise<boolean> => {
+export const archiveNotification = async (notificationId: string): Promise<boolean> => {
   try {
-    logger.debug(`Archiving notification ${notification.id}`);
+    logger.debug(`Archiving notification ${notificationId}`);
     
     const { error } = await supabase
       .from('notifications')
       .update({ is_archived: true })
-      .eq('id', notification.id);
+      .eq('id', notificationId);
 
     if (error) {
       logger.error('Error archiving notification:', error);

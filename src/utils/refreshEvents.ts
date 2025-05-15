@@ -82,6 +82,9 @@ const emit = (eventType: EventType, data?: any): void => {
   window.dispatchEvent(new CustomEvent(eventType, { detail: data }));
 };
 
+// Export the dispatchRefreshEvent for backward compatibility
+export const dispatchRefreshEvent = emit;
+
 // Export individual trigger functions for each core event type
 export const refreshEvents = {
   on,

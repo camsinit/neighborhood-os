@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
-import { archiveNotification } from "@/hooks/notifications"; 
+import { archiveNotification } from "@/hooks/notifications/notificationActions"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
 import NotificationCardFactory from "./cards/NotificationCardFactory";
 
