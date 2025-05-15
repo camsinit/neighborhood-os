@@ -1,101 +1,113 @@
 
 /**
- * Notification action functions
+ * Notification Actions
  * 
- * This file contains functions for performing actions on notifications
- * such as marking as read or archiving them.
- * 
- * UPDATED: Now uses the unified notification service exclusively
+ * This file contains utility functions to perform actions on notifications
+ * like marking them as read or archiving them.
  */
-import notificationService from "@/utils/notifications/notificationService";
+import { supabase } from "@/integrations/supabase/client";
+import { refreshEvents } from "@/utils/refreshEvents";
 import { createLogger } from "@/utils/logger";
 
 // Create a logger for this module
 const logger = createLogger('notificationActions');
 
 /**
- * Helper function to determine the table name for a notification type
- * This is kept for backward compatibility but is no longer needed with the unified system
+ * Get the database table name for a notification type
  * 
- * @param type The notification type
- * @returns The corresponding database table name
+ * @param contentType The content type of the notification
+ * @returns The table name for the content type
  */
-export const getTableName = (type: string): string => {
-  // Map notification types to their respective tables
-  switch (type.toLowerCase()) {
-    case 'safety':
-      return 'safety_updates';
-    case 'event':
-      return 'events';
-    case 'skills':
-      return 'skills_exchange';
-    case 'goods':
-      return 'goods_exchange';
-    case 'support':
-      return 'support_requests';
-    case 'neighbors':
-      return 'neighborhood_members';
-    default:
-      // For any other notification types, use the generic notifications table
-      return 'notifications';
-  }
+export const getTableName = (contentType: string): string => {
+  const tableMap: Record<string, string> = {
+    'events': 'events',
+    'safety': 'safety_updates',
+    'skills': 'skills_exchange',
+    'goods': 'goods_exchange',
+    'care': 'care_requests'
+  };
+
+  return tableMap[contentType] || 'notifications';
 };
 
 /**
  * Mark a notification as read
- * Using the unified notification service
  * 
- * @param type The notification type or notification ID
- * @param id The notification ID (optional when type is actually an ID)
- * @returns Promise resolving to success or failure
+ * @param notification The notification to mark as read
+ * @returns Promise resolving to a boolean indicating success
  */
-export const markAsRead = async (type: string, id?: string): Promise<boolean> => {
+export const markAsRead = async (notification: { 
+  id: string, 
+  content_type?: string, 
+  content_id?: string 
+}): Promise<boolean> => {
   try {
-    // If only one parameter is provided, assume it's the notification ID
-    if (!id) {
-      logger.debug(`Marking notification ${type} as read (direct ID mode)`);
-      return notificationService.markAsRead(type);
-    }
-    
-    // Get the table name for this notification type
-    const table = getTableName(type);
-    
-    logger.debug(`Marking notification ${id} as read in ${table} table`);
-    
-    // For now, only handle the main notifications table
-    if (table === 'notifications') {
-      return notificationService.markAsRead(id);
-    }
-    
-    // Legacy direct update for non-unified notifications
-    logger.debug(`Using legacy approach for table ${table}`);
+    logger.debug(`Marking notification ${notification.id} as read`);
+
     const { error } = await supabase
-      .from(table as any)
+      .from('notifications')
       .update({ is_read: true })
-      .eq('id', id);
-    
+      .eq('id', notification.id);
+
     if (error) {
-      logger.error(`Error marking notification as read in ${table}:`, error);
+      logger.error('Error marking notification as read:', error);
       return false;
     }
+
+    // Also update the content item if relevant
+    if (notification.content_type && notification.content_id) {
+      const tableName = getTableName(notification.content_type);
+      
+      if (tableName !== 'notifications') {
+        const { error: contentError } = await supabase
+          .from(tableName)
+          .update({ is_read: true })
+          .eq('id', notification.content_id);
+          
+        if (contentError) {
+          logger.error(`Error marking ${notification.content_type} content as read:`, contentError);
+        }
+      }
+    }
+
+    // Notify subscribers that notifications have been updated
+    refreshEvents.emit('notifications');
     
     return true;
   } catch (error) {
-    logger.error("Unexpected error marking notification as read:", error);
+    logger.error('Error in markAsRead:', error);
     return false;
   }
 };
 
 /**
  * Archive a notification
- * Using the unified notification service
  * 
- * @param id The notification ID
- * @returns Promise resolving to success or failure
+ * @param notification The notification to archive
+ * @returns Promise resolving to a boolean indicating success
  */
-export const archiveNotification = async (id: string): Promise<boolean> => {
-  return notificationService.archiveNotification(id);
-};
+export const archiveNotification = async (notification: { 
+  id: string 
+}): Promise<boolean> => {
+  try {
+    logger.debug(`Archiving notification ${notification.id}`);
+    
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_archived: true })
+      .eq('id', notification.id);
 
-// Re-export from the service for convenience
-export { getUnreadCount } from "@/utils/notifications/notificationService";
+    if (error) {
+      logger.error('Error archiving notification:', error);
+      return false;
+    }
+
+    // Notify subscribers that notifications have been updated
+    refreshEvents.emit('notifications');
+    
+    return true;
+  } catch (error) {
+    logger.error('Error in archiveNotification:', error);
+    return false;
+  }
+};

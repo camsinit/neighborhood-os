@@ -8,7 +8,7 @@
 import { useNotificationsData } from "./useNotificationsData";
 import { useNotificationsRefresh } from "./useNotificationsRefresh";
 import { UseQueryResult } from "@tanstack/react-query";
-import { BaseNotification } from "@/hooks/notifications/types";
+import { BaseNotification } from "./types";
 
 /**
  * Custom hook that provides notification data for the popover

@@ -6,12 +6,10 @@
  * Uses React Query's built-in polling capabilities for automatic refreshes
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { BaseNotification } from "@/hooks/notifications/types";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
 import { useEffect } from "react";
 import { fetchDirectNotifications } from "@/hooks/notifications/fetchDirectNotifications";
+import { refreshEvents, EventType } from "@/utils/refreshEvents";
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useNotificationsPopoverData');
@@ -40,31 +38,33 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
 
   // Set up listeners for specific events that should trigger a notification refresh
   useEffect(() => {
-    // Create a handler for events that should trigger a refresh
+    logger.debug("Setting up notification refresh listeners");
+    
+    // Define events that should trigger a refresh
+    const refreshEventTypes: EventType[] = [
+      'notification-created',
+      'event-rsvp-updated',
+      'skills-updated'
+    ];
+    
+    // Create a handler for the refresh events
     const handleRefreshEvent = () => {
       logger.debug("Refresh event detected, updating notifications");
       query.refetch();
     };
     
-    // Listen for specific events that should trigger a refresh
-    window.addEventListener('event-rsvp-updated', handleRefreshEvent);
-    window.addEventListener('skills-updated', handleRefreshEvent);
-    window.addEventListener('notification-created', handleRefreshEvent);
+    // Subscribe to all relevant events
+    const unsubscribers = refreshEventTypes.map(eventType =>
+      refreshEvents.on(eventType, handleRefreshEvent)
+    );
     
-    // Set up subscription with refreshEvents utility
-    const unsubscribe = refreshEvents.on('notification-created', handleRefreshEvent);
-    
-    // Clean up event listeners on unmount
+    // Clean up subscriptions on unmount
     return () => {
-      window.removeEventListener('event-rsvp-updated', handleRefreshEvent);
-      window.removeEventListener('skills-updated', handleRefreshEvent);
-      window.removeEventListener('notification-created', handleRefreshEvent);
-      
-      // Unsubscribe from the refreshEvents utility
-      if (unsubscribe) unsubscribe();
+      logger.debug("Cleaning up notification refresh listeners");
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
   }, [query]);
   
-  // Return the simplified query result
+  // Return the query result
   return query;
 };

@@ -7,7 +7,7 @@
  */
 import { useEffect } from "react";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { refreshEvents, EventType } from "@/utils/refreshEvents";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { BaseNotification } from "@/hooks/notifications/types";
 
@@ -30,11 +30,10 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
     logger.debug("Setting up notification refresh listeners");
     
     // Define all the events that should trigger a refresh
-    const refreshEventTypes = [
+    const refreshEventTypes: EventType[] = [
+      'notification-created',
       'event-rsvp-updated',
       'skills-updated',
-      'notification-created',
-      'event-submitted',
       'safety-updated',
       'goods-updated'
     ];
@@ -45,25 +44,15 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
       refetch();
     };
     
-    // Add event listeners for each event
-    refreshEventTypes.forEach(eventName => {
-      window.addEventListener(eventName, handleRefreshEvent);
-    });
-    
-    // Set up subscription with the refreshEvents utility (using its method properly)
-    const unsubscribe = refreshEvents.on('notification-created', handleRefreshEvent);
+    // Set up subscriptions for all relevant event types
+    const unsubscribers = refreshEventTypes.map(eventType => 
+      refreshEvents.on(eventType, handleRefreshEvent)
+    );
     
     // Clean up event listeners on unmount
     return () => {
       logger.debug("Cleaning up notification refresh listeners");
-      
-      // Remove all event listeners
-      refreshEventTypes.forEach(eventName => {
-        window.removeEventListener(eventName, handleRefreshEvent);
-      });
-      
-      // Unsubscribe from the refreshEvents utility
-      if (unsubscribe) unsubscribe();
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
   }, [refetch]);
 };

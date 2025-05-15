@@ -1,20 +1,36 @@
+
 /**
  * Refresh Events Utility
  * 
  * This utility provides a centralized way to trigger UI refreshes
- * after data changes. It uses both a simple observer pattern and
- * DOM events for maximum compatibility.
+ * after data changes. It uses the observer pattern for maximum compatibility.
  */
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this utility
 const logger = createLogger('refreshEvents');
 
-// Define event types
-type EventType = 'events' | 'safety' | 'goods' | 'skills' | 'notifications' | 'activities';
+// Define supported event types
+export type EventType = 
+  'events' | 
+  'safety' | 
+  'goods' | 
+  'skills' | 
+  'notifications' | 
+  'activities' | 
+  // Custom events
+  'notification-created' |
+  'event-rsvp-updated' | 
+  'event-submitted' | 
+  'event-updated' |
+  'event-deleted' |
+  'skills-updated' |
+  'safety-updated' |
+  'goods-updated' |
+  'activities-updated';
 
-// Observer list for each event type
-const observers: { [key in EventType]?: (() => void)[] } = {};
+// Observer map - stores callbacks for each event type
+const observers: { [key in string]?: (() => void)[] } = {};
 
 /**
  * Subscribe to a refresh event
@@ -24,54 +40,60 @@ const observers: { [key in EventType]?: (() => void)[] } = {};
  * @returns A function to unsubscribe
  */
 const on = (eventType: EventType, callback: () => void): (() => void) => {
+  logger.debug(`Subscribing to event: ${eventType}`);
+  
   if (!observers[eventType]) {
     observers[eventType] = [];
   }
+  
   observers[eventType]?.push(callback);
 
-  return () => {
-    observers[eventType] = observers[eventType]?.filter(observer => observer !== callback);
-  };
+  return () => off(eventType, callback);
 };
 
 /**
- * Trigger a refresh event
+ * Unsubscribe from a refresh event
  * 
- * @param eventType The type of event to trigger
+ * @param eventType The type of event to unsubscribe from
+ * @param callback The callback to remove
  */
-const trigger = (eventType: EventType) => {
-  logger.debug(`Triggering refresh event: ${eventType}`);
+const off = (eventType: EventType, callback: () => void): void => {
+  logger.debug(`Unsubscribing from event: ${eventType}`);
+  
+  if (!observers[eventType]) return;
+  
+  observers[eventType] = observers[eventType]?.filter(cb => cb !== callback);
+};
+
+/**
+ * Emit a refresh event
+ * 
+ * @param eventType The type of event to emit
+ * @param data Optional data to pass with the event
+ */
+const emit = (eventType: EventType, data?: any): void => {
+  logger.debug(`Emitting event: ${eventType}`, data ? data : '');
+  
+  // Notify all observers for this event type
   observers[eventType]?.forEach(callback => callback());
+  
+  // For backwards compatibility, also dispatch a DOM event
+  // This will be deprecated in future versions
+  window.dispatchEvent(new CustomEvent(eventType, { detail: data }));
 };
 
-/**
- * Dispatches a refresh event of a specific type 
- * This is used to centralize event emission for refreshes
- * 
- * @param eventName The name of the event to dispatch
- */
-export const dispatchRefreshEvent = (eventName: string) => {
-  // Dispatch a DOM event that components can listen for
-  window.dispatchEvent(new CustomEvent(eventName));
-  
-  // Also use the observer pattern if an event handler exists
-  const eventType = eventName.split('-')[0]; // Extract base type (e.g., 'notification' from 'notification-created')
-  
-  if (eventType && refreshEvents[eventType as keyof typeof refreshEvents]) {
-    // Call the appropriate refresh function
-    (refreshEvents[eventType as keyof typeof refreshEvents] as Function)();
-  }
-};
-
-// Export individual trigger functions for each event type
+// Export individual trigger functions for each core event type
 export const refreshEvents = {
   on,
-  events: () => trigger('events'),
-  safety: () => trigger('safety'),
-  goods: () => trigger('goods'),
-  skills: () => trigger('skills'),
-  notifications: () => trigger('notifications'),
-  activities: () => trigger('activities')
+  off,
+  emit,
+  // Legacy methods - these are kept for backwards compatibility
+  events: () => emit('events'),
+  safety: () => emit('safety'),
+  goods: () => emit('goods'),
+  skills: () => emit('skills'),
+  notifications: () => emit('notifications'),
+  activities: () => emit('activities')
 };
 
 export default refreshEvents;

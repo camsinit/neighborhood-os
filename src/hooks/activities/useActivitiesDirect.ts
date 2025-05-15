@@ -8,7 +8,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { refreshEvents, EventType } from "@/utils/refreshEvents";
 import { useEffect } from "react";
 
 // Create a dedicated logger for this hook
@@ -111,36 +111,34 @@ export const useActivitiesDirect = (limit: number = 20) => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
   
-  // Set up listeners for activity refresh events
+  // Set up listeners for activity refresh events using the improved event system
   useEffect(() => {
-    // Create a handler for events that should trigger a refresh
+    logger.debug("Setting up activity refresh listeners");
+    
+    // Define all events that should trigger an activities refresh
+    const activityEventTypes: EventType[] = [
+      'activities-updated',
+      'event-submitted',
+      'safety-updated',
+      'goods-updated',
+      'skills-updated'
+    ];
+    
+    // Create a handler for refresh events
     const handleRefreshEvent = () => {
       logger.debug("Activity refresh event detected");
       query.refetch();
     };
     
-    // Listen for the activities-updated event
-    window.addEventListener('activities-updated', handleRefreshEvent);
+    // Set up subscriptions for all relevant events
+    const unsubscribers = activityEventTypes.map(eventType => 
+      refreshEvents.on(eventType, handleRefreshEvent)
+    );
     
-    // Set up subscription with refreshEvents utility
-    const unsubscribe = refreshEvents.on('activities-updated', handleRefreshEvent);
-    
-    // Also listen to content-specific events that should trigger activity updates
-    window.addEventListener('event-submitted', handleRefreshEvent);
-    window.addEventListener('safety-updated', handleRefreshEvent);
-    window.addEventListener('goods-updated', handleRefreshEvent);
-    window.addEventListener('skills-updated', handleRefreshEvent);
-    
-    // Clean up event listeners on unmount
+    // Clean up subscriptions on unmount
     return () => {
-      window.removeEventListener('activities-updated', handleRefreshEvent);
-      window.removeEventListener('event-submitted', handleRefreshEvent);
-      window.removeEventListener('safety-updated', handleRefreshEvent);
-      window.removeEventListener('goods-updated', handleRefreshEvent);
-      window.removeEventListener('skills-updated', handleRefreshEvent);
-      
-      // Unsubscribe from the refreshEvents utility
-      if (unsubscribe) unsubscribe();
+      logger.debug("Cleaning up activity refresh listeners");
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
   }, [query]);
   

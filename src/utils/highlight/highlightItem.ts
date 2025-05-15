@@ -1,91 +1,52 @@
+import { toast } from 'sonner';
 
 /**
- * Main highlight item functionality
+ * Highlights an element by applying visual effects
  * 
- * This file contains functions for highlighting specific items in the UI
+ * @param element The DOM element to highlight
+ * @param options Optional configurations for the highlight effect
  */
-import { toast } from "@/hooks/use-toast";
-import { highlightElement } from "@/utils/highlightAnimation";
-import { HighlightableItemType } from './types';
-import { readableTypeNames, dataAttributeMap } from './constants';
+export function highlightElement(
+  element: HTMLElement | null,
+  options: {
+    scrollIntoView?: boolean;
+    showToast?: boolean;
+    title?: string;
+    message?: string;
+  } = {}
+) {
+  if (!element) return;
+  
+  const {
+    scrollIntoView = true,
+    showToast = true,
+    title = 'Item Found',
+    message = 'The requested item has been found and highlighted'
+  } = options;
 
-/**
- * Dispatch a highlight event to highlight a specific item
- * 
- * @param type The type of item to highlight
- * @param id The ID of the item to highlight
- * @param showToast Whether to show a toast notification when highlighting occurs
- * @returns Promise that resolves when highlighting is complete (or fails)
- */
-export const highlightItem = (
-  type: HighlightableItemType, 
-  id: string,
-  showToast: boolean = false
-): Promise<boolean> => {
-  // Create a promise that resolves when highlighting is complete or fails
-  return new Promise((resolve) => {
-    try {
-      // Validate inputs
-      if (!type || !id) {
-        console.error("[highlightItem] Missing required parameters:", { type, id });
-        
-        if (showToast) {
-          toast({
-            title: "Error highlighting item",
-            description: "Invalid item information provided.",
-            variant: "destructive",
-          });
-        }
-        
-        resolve(false);
-        return;
-      }
-      
-      console.log(`[highlightItem] Attempting to highlight ${type} with id ${id}`);
-      
-      // Create and dispatch a custom event
-      const event = new CustomEvent('highlightItem', {
-        detail: {
-          type,
-          id
-        }
+  // Add highlight class
+  element.classList.add('highlight-item');
+  
+  // Remove the class after animation completes
+  setTimeout(() => {
+    element.classList.remove('highlight-item');
+  }, 2000);
+  
+  // Scroll into view if requested
+  if (scrollIntoView) {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }
+  
+  // Show toast notification if requested
+  if (showToast) {
+    // Using Sonner toast with correct description property
+    import('sonner').then(({ toast }) => {
+      toast(title, {
+        description: message
       });
-      
-      // Dispatch the event
-      window.dispatchEvent(event);
-      
-      // Show a toast notification if requested
-      if (showToast) {
-        toast({
-          title: `Locating ${readableTypeNames[type]}`,
-          description: "Navigating to the requested item",
-          duration: 3000,
-        });
-      }
-      
-      // After a short delay, attempt to find and highlight the element directly
-      setTimeout(() => {
-        // Get the appropriate selector
-        const selector = `[${dataAttributeMap[type]}="${id}"]`;
-        
-        // Attempt to find and highlight the element
-        const result = highlightElement(selector, showToast);
-        
-        // Resolve with the result
-        resolve(result);
-      }, 300);
-    } catch (error) {
-      console.error("[highlightItem] Error during highlighting:", error);
-      
-      if (showToast) {
-        toast({
-          title: "Error highlighting item",
-          description: "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-      
-      resolve(false);
-    }
-  });
-};
+    });
+  }
+}

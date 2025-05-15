@@ -1,3 +1,4 @@
+
 /**
  * Unified Notification Service
  * 
@@ -9,19 +10,22 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { createLogger } from "@/utils/logger";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 // Create a dedicated logger for the notification service
 const logger = createLogger('notificationService');
 
 /**
  * Notification types supported by the system
+ * NOTE: Must match the database enum values
  */
-export type NotificationType = 'event' | 'skills' | 'goods' | 'safety' | 'care' | 'neighbors' | 'community';
+export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome' | 'community';
 
 /**
  * Action types for notifications
+ * NOTE: Must match the database enum values
  */
-export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 'learn' | 'complete';
+export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 'learn' | 'rsvp' | 'comment' | 'share';
 
 /**
  * Interface for notification creation parameters
@@ -73,8 +77,8 @@ export async function createNotification(params: NotificationParams): Promise<st
     // The database function returns the notification ID directly
     logger.debug('Notification created successfully via unified system:', data);
     
-    // Dispatch event for real-time updates
-    window.dispatchEvent(new CustomEvent('notification-created'));
+    // Emit event using the improved event system
+    refreshEvents.emit('notification-created');
     
     return data;
   } catch (error) {

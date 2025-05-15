@@ -1,25 +1,17 @@
 
-import { Separator } from "@/components/ui/separator";
-import QuickActions from "@/components/QuickActions";
-import ActivityFeed from "@/components/activity/ActivityFeed";
-import { NotificationsDebug } from "@/components/notifications/debug/NotificationsDebug"; // Import the debug component
-
 /**
  * Main homepage/dashboard of the neighborhood app
  * Reorganized layout with quick actions at top, activity feed below
- * Now with more visible debug tools in development mode
  */
+import { Separator } from "@/components/ui/separator";
+import QuickActions from "@/components/QuickActions";
+import ActivityFeed from "@/components/activity/ActivityFeed";
+
 const HomePage = () => {
-  // Check if we're in development mode to show debug tools
-  const isDev = import.meta.env.DEV;
-  
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          {/* Debug tools in development - more prominently positioned */}
-          {isDev && <NotificationsDebug />}
-
           {/* Quick Actions Section with no heading (moved to Header) */}
           <section>
             <QuickActions />

@@ -36,9 +36,9 @@ export const emitDatabaseEvent = (
   // Get the corresponding event emitter function
   const eventEmitter = eventMap[contentType];
   
-  if (eventEmitter && refreshEvents[eventEmitter]) {
-    // Call the corresponding event emitter
-    refreshEvents[eventEmitter]();
+  if (eventEmitter) {
+    // Emit the event using the new emit method
+    refreshEvents.emit(eventEmitter as any);
   } else {
     logger.warn(`No event emitter found for content type: ${contentType}`);
   }
@@ -50,7 +50,7 @@ export const emitDatabaseEvent = (
  */
 export const refreshNotifications = () => {
   logger.debug('Refreshing notifications');
-  refreshEvents.notifications();
+  refreshEvents.emit('notifications');
 };
 
 /**
@@ -59,7 +59,7 @@ export const refreshNotifications = () => {
  */
 export const refreshActivities = () => {
   logger.debug('Refreshing activities');
-  refreshEvents.activities();
+  refreshEvents.emit('activities');
 };
 
 export default {
