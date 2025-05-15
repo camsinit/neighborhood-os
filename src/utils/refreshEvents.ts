@@ -105,7 +105,7 @@ function on(type: RefreshEventType | string, callback: EventListener): () => voi
 }
 
 // Export the refreshEvents object with all methods
-const refreshEvents = {
+export const refreshEvents = {
   notifications: refreshNotifications,
   activities: refreshActivities,
   events: refreshEvents,
@@ -115,5 +115,4 @@ const refreshEvents = {
   on // Add the 'on' method
 };
 
-export { refreshEvents };
 export default refreshEvents;
