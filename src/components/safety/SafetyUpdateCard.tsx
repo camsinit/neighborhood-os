@@ -5,7 +5,8 @@
  * Card component for displaying safety updates
  */
 import React from "react";
-import { ModuleItemCard } from "@/components/ui/card";
+// Import directly from the source file to avoid circular dependencies
+import ModuleItemCard from "@/components/ui/card/ModuleItemCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AlertTriangle, Construction, Eye, User } from "lucide-react";
 import { format } from "date-fns";

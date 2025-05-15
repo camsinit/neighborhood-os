@@ -10,5 +10,7 @@ export * from "../card";
 
 // Export our custom card components
 export { default as BaseCard, type BaseCardProps } from "./BaseCard";
-// Export the ModuleItemCard component correctly
-export { default as ModuleItemCard, type ModuleItemCardProps } from "./ModuleItemCard";
+// Export ModuleItemCard explicitly as both a named and default export to ensure it's available
+export { default as ModuleItemCard } from "./ModuleItemCard";
+export type { ModuleItemCardProps } from "./ModuleItemCard";
+
