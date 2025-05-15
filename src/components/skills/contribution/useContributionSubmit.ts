@@ -8,7 +8,6 @@ import { validateTimeSlots } from '@/utils/timeslotUtils';
 import { createSkillSessionWithTimeSlots } from './services/contributionService';
 import refreshEvents from '@/utils/refreshEvents';
 import { useQueryClient } from '@tanstack/react-query';
-import { sendSkillConfirmationNotifications } from '@/utils/notifications/skillNotifications';
 
 /**
  * Hook for handling skill contribution submission
@@ -17,7 +16,7 @@ import { sendSkillConfirmationNotifications } from '@/utils/notifications/skillN
  * 1. Use separate validation and service functions
  * 2. Improve error handling and logging
  * 3. Separate concerns for better maintainability
- * 4. Use our new Edge Function for notifications
+ * 4. Rely on database triggers for notifications
  */
 export const useContributionSubmit = (
   skillRequestId: string,
@@ -75,28 +74,11 @@ export const useContributionSubmit = (
       );
 
       // Extract the session ID from the result
-      // Fix: Use id property instead of sessionId
       const sessionId = result?.id;
       
-      // Get skill title for the notification
-      const { data: skillData } = await supabase
-        .from('skills_exchange')
-        .select('title')
-        .eq('id', skillRequestId)
-        .single();
+      // Notifications are now handled by database triggers
+      // No need to manually call notification functions
       
-      const skillTitle = skillData?.title || "skill session";
-      
-      // ✨ New: Send notifications via Edge Function
-      await sendSkillConfirmationNotifications(
-        skillRequestId,
-        skillTitle,
-        providerId,
-        requesterId,
-        sessionId,
-        new Date().toISOString() // Use current time as session time for now
-      );
-
       // Optionally add skill to user profile
       if (addToProfile) {
         console.log("Adding skill to user profile");

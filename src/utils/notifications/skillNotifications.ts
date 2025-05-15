@@ -3,7 +3,7 @@
  * skillNotifications.ts
  * 
  * Helper utility for triggering UI refreshes after skill-related database events
- * Replaces the old edge function implementation
+ * No direct notification creation - all notifications are created by database triggers
  */
 import { refreshEvents } from "@/utils/refreshEvents";
 import { createLogger } from "@/utils/logger";
@@ -13,13 +13,11 @@ const logger = createLogger('skillNotifications');
 
 /**
  * Signal that a skill has been requested
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillId - ID of the skill being requested
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillRequestNotification = async (
-  skillId: string,
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill request for ${skillTitle} - DB trigger will handle notification`);
@@ -29,9 +27,9 @@ export const sendSkillRequestNotification = async (
 
 /**
  * Signal that a skill session has been confirmed
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillConfirmationNotifications = async (
   skillTitle: string
@@ -43,9 +41,9 @@ export const sendSkillConfirmationNotifications = async (
 
 /**
  * Signal that a skill session has been cancelled
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillCancellationNotification = async (
   skillTitle: string
@@ -57,9 +55,9 @@ export const sendSkillCancellationNotification = async (
 
 /**
  * Signal that a skill session has been rescheduled
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillRescheduleNotification = async (
   skillTitle: string
@@ -71,9 +69,9 @@ export const sendSkillRescheduleNotification = async (
 
 /**
  * Signal that a skill session has been completed
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillCompletionNotification = async (
   skillTitle: string
@@ -85,9 +83,9 @@ export const sendSkillCompletionNotification = async (
 
 /**
  * Signal that a skill listing has been updated
- * Notification is created automatically by database triggers
+ * Refreshes UI components after database triggers create notifications
  * 
- * @param skillTitle - Title of the skill
+ * @param skillTitle - Title of the skill (for logging only)
  */
 export const sendSkillUpdateNotification = async (
   skillTitle: string

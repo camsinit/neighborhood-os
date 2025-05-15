@@ -8,8 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { TimeSlot } from '../TimeSlotSelector';
 import { LocationPreference } from '../LocationSelector';
 import { createTimeSlotObjects } from '@/utils/timeslotUtils';
-import notificationService from '@/utils/notifications/notificationService';
 import { createLogger } from '@/utils/logger';
+import { refreshEvents } from '@/utils/refreshEvents';
 
 // Create a logger for this service
 const logger = createLogger('contributionService');
@@ -101,18 +101,13 @@ export const createSkillSessionWithTimeSlots = async (
       throw timeSlotError;
     }
 
-    // Create notification for the requester about new time slots
-    try {
-      await notificationService.createTimeSlotNotification(
-        session.id,
-        requesterId,
-        skillTitle
-      );
-      logger.debug('Time slot notification sent to requester');
-    } catch (notifError) {
-      // Log but don't fail if notification creation fails
-      logger.error('Error creating time slot notification:', notifError);
-    }
+    // Notifications are now handled by database triggers
+    // No need to manually create notifications here
+    logger.debug('Session created successfully, database triggers will create notifications');
+    
+    // Trigger UI refresh events
+    refreshEvents.emit('skills-updated');
+    refreshEvents.emit('notification-created');
 
     // Return the complete session data
     return session;
