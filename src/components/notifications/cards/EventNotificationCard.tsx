@@ -2,18 +2,18 @@
 /**
  * EventNotificationCard.tsx
  * 
- * Specialized notification card for event-related notifications.
- * Includes event details and RSVP functionality.
+ * Specialized notification card for event-related updates.
+ * Uses sentence-style formatting with natural language.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./base/NotificationCard";
+import NotificationCard from "./base/NotificationCard";
 import { Calendar } from "lucide-react";
-import { format } from "date-fns";
 import { highlightItem } from "@/utils/highlight";
-import { 
-  NotificationBadge 
-} from "../elements";
+import { createLogger } from "@/utils/logger";
+
+// Initialize logger for this component
+const logger = createLogger('EventNotificationCard');
 
 interface EventNotificationCardProps {
   notification: BaseNotification;
@@ -24,32 +24,30 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
   notification,
   onDismiss,
 }) => {
-  // Extract event info from notification metadata if available
-  const eventTime = notification.context?.eventTime ? 
-    new Date(notification.context.eventTime) : null;
-  const eventLocation = notification.context?.location;
+  // Get event type from context or fallback to generic
+  const eventType = notification.context?.eventType || 'event';
   
   // Get actor name for descriptive text
   const actorName = notification.context?.neighborName || 
-    notification.profiles?.display_name || "Someone";
+    notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with subject-verb-object structure
+  // Create sentence-style title with proper subject-verb-object structure
   const createSentenceTitle = () => {
-    const eventName = notification.title || "an event";
-    const actionType = notification.action_type || "share";
-    
-    // Different sentence formats based on action type
-    switch(actionType) {
-      case "create":
-        return `${actorName} is hosting ${eventName}`;
-      case "update":
-        return `${actorName} updated ${eventName}`;
-      case "rsvp":
-        return `${actorName} is attending ${eventName}`;
-      case "cancel":
-        return `${actorName} cancelled ${eventName}`;
-      default:
-        return `${actorName} shared ${eventName}`;
+    const eventTitle = notification.context?.eventTitle || 
+      notification.title || "an event";
+      
+    // Different messages based on event action
+    if (notification.action_type === 'rsvp') {
+      return `${actorName} RSVPed to ${eventTitle}`;
+    } else if (notification.action_type === 'cancel') {
+      return `${actorName} cancelled ${eventTitle}`;
+    } else if (notification.action_type === 'update') {
+      return `${actorName} updated ${eventTitle}`;
+    } else if (notification.action_type === 'create') {
+      return `${actorName} created ${eventTitle}`;
+    } else {
+      // Fallback format
+      return `${actorName} interacted with ${eventTitle}`;
     }
   };
   
@@ -62,12 +60,19 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
     title: sentenceTitle
   };
   
-  // Handle viewing event details
-  const handleViewEvent = async () => {
-    // Navigate to the event details
-    highlightItem('event', notification.content_id);
-    
-    if (onDismiss) onDismiss();
+  // Handle viewing the event details
+  const handleViewEvent = () => {
+    try {
+      // Navigate to the event details using the highlightItem utility
+      if (notification.content_id) {
+        highlightItem('event', notification.content_id);
+      }
+      
+      // Dismiss the notification if callback provided
+      if (onDismiss) onDismiss();
+    } catch (error) {
+      logger.error("Error navigating to event:", error);
+    }
   };
 
   return (
@@ -76,22 +81,10 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
       onAction={handleViewEvent}
       onDismiss={onDismiss}
     >
-      {/* Show event specific details as secondary information */}
-      {eventTime && (
-        <div className="mt-1 flex items-center gap-1 text-xs text-gray-600">
-          <Calendar className="h-3 w-3" />
-          <span>{format(eventTime, 'PPp')}</span>
-        </div>
-      )}
-      
-      {/* Location badge */}
-      {eventLocation && (
-        <div className="mt-1">
-          <NotificationBadge 
-            label={eventLocation}
-            variant="outline"
-            className="font-normal text-xs"
-          />
+      {notification.context?.eventDate && (
+        <div className="mt-1 text-xs text-gray-500 flex items-center">
+          <Calendar className="h-3 w-3 mr-1 inline" />
+          <span>{notification.context.eventDate}</span>
         </div>
       )}
     </NotificationCard>

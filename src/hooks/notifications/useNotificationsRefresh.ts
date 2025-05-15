@@ -35,12 +35,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
       'event-rsvp-updated',
       'skills-updated',
       'safety-updated',
-      'goods-updated',
-      'skill-request-created', 
-      'skill-session-confirmed',
-      'skill-session-cancelled',
-      'skill-session-rescheduled',
-      'skill-completed'
+      'goods-updated'
     ];
     
     // Create a handler for the refresh events
