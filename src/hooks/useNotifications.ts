@@ -8,8 +8,18 @@ import {
   BaseNotification,
 } from "./notifications";
 
+// Import the necessary functions from notificationActions
+import {
+  archiveNotification,
+  markAsRead,
+  getTableName
+} from "./notifications/notificationActions";
+
 export {
   useNotifications,
+  archiveNotification,
+  markAsRead,
+  getTableName
 };
 
 export type {

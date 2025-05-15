@@ -1170,21 +1170,6 @@ export type Database = {
         }
         Returns: Json
       }
-      create_unified_system_notification: {
-        Args: {
-          p_user_id: string
-          p_actor_id: string
-          p_title: string
-          p_content_type: string
-          p_content_id: string
-          p_notification_type: Database["public"]["Enums"]["notification_type"]
-          p_action_type?: Database["public"]["Enums"]["notification_action_type"]
-          p_action_label?: string
-          p_relevance_score?: number
-          p_metadata?: Json
-        }
-        Returns: string
-      }
       get_activities_safe: {
         Args: { user_uuid: string; limit_count?: number }
         Returns: {

@@ -4,14 +4,12 @@
  * It imports the core functionality from our new hooks directory
  */
 import { 
-  getTableName,
-  markAsRead,
-  archiveNotification 
+  getTableName as getNotificationTableName, 
+  markAsRead as markNotificationAsRead,
+  archiveNotification as archiveNotificationItem
 } from "@/hooks/notifications/notificationActions";
 
 // Re-export the functions for backward compatibility
-export {
-  getTableName,
-  markAsRead,
-  archiveNotification
-};
+export const getTableName = getNotificationTableName;
+export const markAsRead = markNotificationAsRead;
+export const archiveNotification = archiveNotificationItem;

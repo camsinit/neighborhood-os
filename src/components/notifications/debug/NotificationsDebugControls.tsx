@@ -18,7 +18,7 @@ const logger = createLogger('NotificationsDebug');
 /**
  * Debug controls for testing notifications functionality
  */
-const NotificationsDebugControls: React.FC = () => {
+export const NotificationsDebugControls: React.FC = () => {
   const [userId, setUserId] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   

@@ -6,7 +6,7 @@
  * When database changes occur, it emits events that components can listen for
  */
 import { createLogger } from '@/utils/logger';
-import { refreshEvents, RefreshEventType } from './refreshEvents';
+import { refreshEvents } from './refreshEvents';
 
 // Create a dedicated logger
 const logger = createLogger('databaseEventEmitter');

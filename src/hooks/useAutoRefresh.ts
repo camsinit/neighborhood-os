@@ -44,7 +44,7 @@ export const useAutoRefresh = (
       
       // Add event listener
       window.addEventListener(eventType, handler as EventListener);
-      logger.debug(`Added listener for ${eventType}`);
+      logger.trace(`Added listener for ${eventType}`);
     });
     
     // Clean up event listeners on unmount
@@ -52,7 +52,7 @@ export const useAutoRefresh = (
       eventTypes.forEach(eventType => {
         if (handlers[eventType]) {
           window.removeEventListener(eventType, handlers[eventType]);
-          logger.debug(`Removed listener for ${eventType}`);
+          logger.trace(`Removed listener for ${eventType}`);
         }
       });
       logger.debug('Cleaned up all auto-refresh event listeners');

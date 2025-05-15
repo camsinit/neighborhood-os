@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,13 +60,14 @@ const ActivityFeed = () => {
     refetch();
     setLastRefresh(new Date());
     toast({
-      description: `Feed refreshed. Last updated: ${new Date().toLocaleTimeString()}`
+      title: "Feed refreshed",
+      description: `Last updated: ${new Date().toLocaleTimeString()}`
     });
   };
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
-    logger.debug(`Activity action triggered for ${activity.id}`);
+    logger.trace(`Activity action triggered for ${activity.id}`);
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
@@ -76,7 +76,7 @@ const ActivityFeed = () => {
   const filteredActivities = activities?.filter(activity => {
     const isDeleted = !!activity.metadata?.deleted;
     if (isDeleted) {
-      logger.debug(`Filtered out deleted activity: ${activity.id}`);
+      logger.trace(`Filtered out deleted activity: ${activity.id}`);
     }
     return !isDeleted;
   }) || [];
@@ -107,7 +107,7 @@ const ActivityFeed = () => {
         </div>
       </div>;
   }
-  logger.debug("Rendering activity feed with data");
+  logger.trace("Rendering activity feed with data");
 
   // Display the activities with load more button
   return <>

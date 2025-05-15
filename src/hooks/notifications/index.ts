@@ -8,9 +8,17 @@ import {
   BaseNotification,
 } from "./useNotifications";
 
-// Just re-export the types and hooks
+import {
+  archiveNotification,
+  markAsRead,
+  getTableName
+} from "./notificationActions";
+
 export {
   useNotifications,
+  archiveNotification,
+  markAsRead,
+  getTableName
 };
 
 export type {

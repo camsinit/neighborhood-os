@@ -11,7 +11,7 @@ import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareTimeSlots } from "@/utils/timeslotUtils";
 import { Json } from "@/integrations/supabase/types"; // Import the Json type from Supabase types
-import { refreshEvents } from "@/utils/refreshEvents";
+import refreshEvents from "@/utils/refreshEvents";
 
 /**
  * Form data structure for skill requests

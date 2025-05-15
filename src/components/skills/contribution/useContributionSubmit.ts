@@ -6,7 +6,7 @@ import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from '@/utils/timeslotUtils';
 import { createSkillSessionWithTimeSlots } from './services/contributionService';
-import { refreshEvents } from '@/utils/refreshEvents';
+import refreshEvents from '@/utils/refreshEvents';
 import { useQueryClient } from '@tanstack/react-query';
 
 /**

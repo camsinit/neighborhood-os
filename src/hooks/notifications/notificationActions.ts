@@ -4,8 +4,11 @@
  * 
  * This file contains functions for performing actions on notifications
  * such as marking as read or archiving them.
+ * 
+ * UPDATED: Now uses the unified notification service
  */
-import { supabase } from "@/integrations/supabase/client";
+import notificationService from "@/utils/notifications/notificationService";
+import { HighlightableItemType } from "@/utils/highlight/types";
 import { createLogger } from "@/utils/logger";
 
 // Create a logger for this module
@@ -54,18 +57,7 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
     // and use the notifications table
     if (!id) {
       logger.debug(`Marking notification ${type} as read (direct ID mode)`);
-      
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', type);
-        
-      if (error) {
-        logger.error(`Error marking notification as read:`, error);
-        return false;
-      }
-      
-      return true;
+      return notificationService.markAsRead(type);
     }
     
     // Get the table name for this notification type
@@ -73,9 +65,16 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
     
     logger.debug(`Marking notification ${id} as read in ${table} table`);
     
-    // Update the notification in the appropriate table
+    // For now, only handle the main notifications table
+    // Future: expand to handle other tables via RPC calls
+    if (table === 'notifications') {
+      return notificationService.markAsRead(id);
+    }
+    
+    // For other tables, use the legacy direct update approach
+    logger.debug(`Using legacy approach for table ${table}`);
     const { error } = await supabase
-      .from(table)
+      .from(table as any) // Type assertion to handle dynamic table names
       .update({ is_read: true })
       .eq('id', id);
     
@@ -98,45 +97,8 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
  * @returns Promise resolving to success or failure
  */
 export const archiveNotification = async (id: string): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_archived: true })
-      .eq('id', id);
-      
-    if (error) {
-      logger.error(`Error archiving notification:`, error);
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    logger.error("Unexpected error archiving notification:", error);
-    return false;
-  }
+  return notificationService.archiveNotification(id);
 };
 
-/**
- * Get unread notifications count
- * 
- * @returns Promise resolving to the count of unread notifications
- */
-export const getUnreadCount = async (): Promise<number> => {
-  try {
-    const { count, error } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_read', false)
-      .eq('is_archived', false);
-      
-    if (error) {
-      logger.error(`Error getting unread count:`, error);
-      return 0;
-    }
-    
-    return count || 0;
-  } catch (error) {
-    logger.error("Unexpected error getting unread count:", error);
-    return 0;
-  }
-};
+// Re-export from the service for convenience
+export { getUnreadCount } from "@/utils/notifications/notificationService";
