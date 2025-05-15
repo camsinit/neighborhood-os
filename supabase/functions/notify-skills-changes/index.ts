@@ -1,12 +1,15 @@
-
 // Edge Function for Skills Notifications
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Create a logger for this function
+const logger = createLogger('notify-skills-changes');
 
 interface SkillRequest {
   action: 'request' | 'confirm' | 'cancel' | 'reschedule' | 'complete' | 'update';
@@ -27,9 +30,8 @@ interface SkillRequest {
  */
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Initialize Supabase client using environment variables
@@ -51,8 +53,8 @@ const handler = async (req: Request): Promise<Response> => {
       eventId
     } = await req.json() as SkillRequest;
 
-    console.log(`[notify-skills-changes] Processing ${action} notification for skill: ${skillTitle}`);
-    console.log(`[notify-skills-changes] Provider: ${providerId}, Requester: ${requesterId}`);
+    logger.info(`Processing ${action} notification for skill: ${skillTitle}`);
+    logger.info(`Provider: ${providerId}, Requester: ${requesterId}`);
 
     // Get requester profile information for richer notifications
     let requesterProfile = null;
@@ -161,23 +163,17 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       
       default:
-        console.log(`[notify-skills-changes] Unsupported action: ${action}`);
+        logger.warn(`Unsupported action: ${action}`);
         throw new Error(`Unsupported action: ${action}`);
     }
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: `Skill notification processed successfully for action: ${action}` 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return successResponse(
+      { action, skillId },
+      `Skill notification processed successfully for action: ${action}`
+    );
   } catch (error) {
-    console.error('[notify-skills-changes] Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    logger.error('Error:', error);
+    return errorResponse(error);
   }
 };
 
@@ -194,7 +190,7 @@ async function createSkillRequestNotification(
   sessionId?: string,
   requestData?: any
 ) {
-  console.log(`[notify-skills-changes] Creating skill request notification for provider: ${providerId}`);
+  logger.info(`Creating skill request notification for provider: ${providerId}`);
   
   const { error } = await supabaseClient
     .from('notifications')
@@ -222,11 +218,11 @@ async function createSkillRequestNotification(
     });
 
   if (error) {
-    console.error('[notify-skills-changes] Error creating skill request notification:', error);
+    logger.error('Error creating skill request notification:', error);
     throw error;
   }
   
-  console.log(`[notify-skills-changes] Successfully created skill request notification for: ${skillTitle}`);
+  logger.info(`Successfully created skill request notification for: ${skillTitle}`);
 }
 
 /**
@@ -244,7 +240,7 @@ async function createSkillConfirmationNotifications(
   sessionTime?: string,
   eventId?: string
 ) {
-  console.log(`[notify-skills-changes] Creating skill confirmation notifications`);
+  logger.info(`Creating skill confirmation notifications`);
   
   // Create notifications for both provider and requester
   const notifications = [
@@ -297,11 +293,11 @@ async function createSkillConfirmationNotifications(
     .insert(notifications);
 
   if (error) {
-    console.error('[notify-skills-changes] Error creating confirmation notifications:', error);
+    logger.error('[notify-skills-changes] Error creating confirmation notifications:', error);
     throw error;
   }
   
-  console.log(`[notify-skills-changes] Successfully created confirmation notifications for: ${skillTitle}`);
+  logger.info(`Successfully created confirmation notifications for: ${skillTitle}`);
 }
 
 /**
@@ -317,7 +313,7 @@ async function createSkillCancellationNotification(
   sessionId?: string,
   sessionTime?: string
 ) {
-  console.log(`[notify-skills-changes] Creating skill cancellation notification`);
+  logger.info(`Creating skill cancellation notification`);
 
   // Notify the other party about the cancellation (assuming requester cancelled)
   const { error } = await supabaseClient
@@ -344,11 +340,11 @@ async function createSkillCancellationNotification(
     });
 
   if (error) {
-    console.error('[notify-skills-changes] Error creating cancellation notification:', error);
+    logger.error('[notify-skills-changes] Error creating cancellation notification:', error);
     throw error;
   }
   
-  console.log(`[notify-skills-changes] Successfully created cancellation notification for: ${skillTitle}`);
+  logger.info(`Successfully created cancellation notification for: ${skillTitle}`);
 }
 
 /**
@@ -365,7 +361,7 @@ async function createSkillRescheduleNotification(
   sessionId?: string,
   sessionTime?: string
 ) {
-  console.log(`[notify-skills-changes] Creating skill reschedule notification`);
+  logger.info(`Creating skill reschedule notification`);
 
   // Assuming requester rescheduled, notify provider
   const { error } = await supabaseClient
@@ -392,11 +388,11 @@ async function createSkillRescheduleNotification(
     });
 
   if (error) {
-    console.error('[notify-skills-changes] Error creating reschedule notification:', error);
+    logger.error('[notify-skills-changes] Error creating reschedule notification:', error);
     throw error;
   }
   
-  console.log(`[notify-skills-changes] Successfully created reschedule notification for: ${skillTitle}`);
+  logger.info(`Successfully created reschedule notification for: ${skillTitle}`);
 }
 
 /**
@@ -411,7 +407,7 @@ async function createSkillCompletionNotification(
   requesterProfile: any,
   sessionId?: string
 ) {
-  console.log(`[notify-skills-changes] Creating skill completion notification`);
+  logger.info(`Creating skill completion notification`);
 
   // Notify both parties that the session was completed
   const { error } = await supabaseClient
@@ -437,11 +433,11 @@ async function createSkillCompletionNotification(
     });
 
   if (error) {
-    console.error('[notify-skills-changes] Error creating completion notification:', error);
+    logger.error('[notify-skills-changes] Error creating completion notification:', error);
     throw error;
   }
   
-  console.log(`[notify-skills-changes] Successfully created completion notification for: ${skillTitle}`);
+  logger.info(`Successfully created completion notification for: ${skillTitle}`);
 }
 
 /**
@@ -453,7 +449,7 @@ async function createSkillUpdateNotification(
   skillId: string,
   skillTitle: string
 ) {
-  console.log(`[notify-skills-changes] Processing skill update notification`);
+  logger.info(`Processing skill update notification`);
   
   // Find interested users (those who've interacted with this skill)
   const { data: sessions, error: sessionsError } = await supabaseClient
@@ -463,7 +459,7 @@ async function createSkillUpdateNotification(
     .neq('requester_id', providerId);
   
   if (sessionsError) {
-    console.error('[notify-skills-changes] Error fetching related sessions:', sessionsError);
+    logger.error('[notify-skills-changes] Error fetching related sessions:', sessionsError);
     throw sessionsError;
   }
   
@@ -494,13 +490,13 @@ async function createSkillUpdateNotification(
       .insert(notifications);
 
     if (error) {
-      console.error('[notify-skills-changes] Error creating update notifications:', error);
+      logger.error('[notify-skills-changes] Error creating update notifications:', error);
       throw error;
     }
     
-    console.log(`[notify-skills-changes] Created update notifications for ${notifications.length} user(s)`);
+    logger.info(`Created update notifications for ${notifications.length} user(s)`);
   } else {
-    console.log('[notify-skills-changes] No interested users found for update notification');
+    logger.info('[notify-skills-changes] No interested users found for update notification');
   }
 }
 

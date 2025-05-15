@@ -3,13 +3,15 @@
 // It creates activities and notifications for neighbor profile updates and joins
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.23.0";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
-// Define CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Create a logger for this function
+const logger = createLogger('notify-neighbor-changes');
 
 // Create a Supabase client with the auth context of the function
 const supabaseAdmin = createClient(
@@ -19,65 +21,49 @@ const supabaseAdmin = createClient(
 
 // Main serve function for the edge function
 serve(async (req) => {
-  // Handle CORS preflight request
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: corsHeaders,
-      status: 204,
-    });
-  }
+  // Handle CORS preflight requests
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body
     const { action, data } = await req.json();
-    console.log(`Processing neighbor notification: ${action}`, data);
-
-    // Generate a unique transaction ID for tracing
-    const transactionId = crypto.randomUUID().substring(0, 8);
+    logger.info(`Processing neighbor notification: ${action}`, data);
     
     switch (action) {
       case "join_neighborhood":
         // Handle a new neighbor joining
-        await handleNewNeighborJoin(data, transactionId);
+        await handleNewNeighborJoin(data);
         break;
       case "profile_update":
         // Handle a neighbor updating their profile
-        await handleProfileUpdate(data, transactionId);
+        await handleProfileUpdate(data);
         break;
       default:
         throw new Error(`Unknown action: ${action}`);
     }
 
     // Return success response
-    return new Response(
-      JSON.stringify({ success: true, message: "Notification processed" }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
+    return successResponse(
+      { action }, 
+      "Notification processed"
     );
   } catch (error) {
     // Log the error for debugging
-    console.error("Error processing notification:", error.message);
+    logger.error("Error processing notification:", error);
     
     // Return error response
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return errorResponse(error);
   }
 });
 
 /**
  * Handle new neighbor joining the neighborhood
  */
-async function handleNewNeighborJoin(data, transactionId) {
+async function handleNewNeighborJoin(data) {
   const { neighborhoodId, userId, neighborName } = data;
   
-  console.log(`[${transactionId}] Processing new neighbor join: ${neighborName}`);
+  logger.info(`Processing new neighbor join: ${neighborName}`);
 
   // Get neighborhood members to notify
   const { data: members, error } = await supabaseAdmin.rpc(
@@ -86,11 +72,11 @@ async function handleNewNeighborJoin(data, transactionId) {
   );
   
   if (error) {
-    console.error(`[${transactionId}] Error getting neighborhood members:`, error);
+    logger.error(`Error getting neighborhood members:`, error);
     throw error;
   }
   
-  console.log(`[${transactionId}] Found ${members?.length || 0} members to notify`);
+  logger.info(`Found ${members?.length || 0} members to notify`);
   
   // Create activity for the neighborhood feed
   const { data: activity, error: activityError } = await supabaseAdmin
@@ -111,11 +97,11 @@ async function handleNewNeighborJoin(data, transactionId) {
     .single();
     
   if (activityError) {
-    console.error(`[${transactionId}] Error creating activity:`, activityError);
+    logger.error(`Error creating activity:`, activityError);
     throw activityError;
   }
   
-  console.log(`[${transactionId}] Created activity: ${activity?.id}`);
+  logger.info(`Created activity: ${activity?.id}`);
   
   // Create notifications for each member (except the new neighbor)
   if (members && members.length > 0) {
@@ -144,11 +130,11 @@ async function handleNewNeighborJoin(data, transactionId) {
         .insert(notifications);
         
       if (notifyError) {
-        console.error(`[${transactionId}] Error creating notifications:`, notifyError);
+        logger.error(`Error creating notifications:`, notifyError);
         throw notifyError;
       }
       
-      console.log(`[${transactionId}] Created ${notifications.length} notifications`);
+      logger.info(`Created ${notifications.length} notifications`);
     }
   }
 }
@@ -156,17 +142,17 @@ async function handleNewNeighborJoin(data, transactionId) {
 /**
  * Handle a neighbor updating their profile
  */
-async function handleProfileUpdate(data, transactionId) {
+async function handleProfileUpdate(data) {
   const { userId, neighborhoodId, neighborName, updatedFields } = data;
   
-  console.log(`[${transactionId}] Processing profile update for ${neighborName}`);
+  logger.info(`Processing profile update for ${neighborName}`);
 
   // Only create notifications for significant profile updates
   const significantFields = ['avatar_url', 'display_name', 'bio', 'skills'];
   const hasSignificantUpdates = significantFields.some(field => updatedFields.includes(field));
   
   if (!hasSignificantUpdates) {
-    console.log(`[${transactionId}] No significant updates, skipping notifications`);
+    logger.info(`No significant updates, skipping notifications`);
     return;
   }
   
@@ -190,11 +176,11 @@ async function handleProfileUpdate(data, transactionId) {
     .single();
     
   if (activityError) {
-    console.error(`[${transactionId}] Error creating activity:`, activityError);
+    logger.error(`Error creating activity:`, activityError);
     throw activityError;
   }
   
-  console.log(`[${transactionId}] Created activity: ${activity?.id}`);
+  logger.info(`Created activity: ${activity?.id}`);
   
   // For profile updates, we don't need to notify everyone in the neighborhood
   // Only create notifications for close connections (future enhancement)

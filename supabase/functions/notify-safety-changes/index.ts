@@ -1,10 +1,15 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Create a logger for this function
+const logger = createLogger('notify-safety-changes');
 
 interface SafetyRequest {
   safetyUpdateId: string;
@@ -16,9 +21,8 @@ interface SafetyRequest {
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     const supabaseClient = createClient(
@@ -35,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
       commentContent
     } = await req.json() as SafetyRequest;
 
-    console.log(`Processing ${action} notification for safety update: ${safetyUpdateTitle}`);
+    logger.info(`Processing ${action} notification for safety update: ${safetyUpdateTitle}`);
 
     // Get safety update details
     const { data: safetyUpdate, error: safetyError } = await supabaseClient
@@ -45,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (safetyError) {
-      console.error('Error fetching safety update:', safetyError);
+      logger.error('Error fetching safety update:', safetyError);
       throw safetyError;
     }
 
@@ -76,6 +80,8 @@ const handler = async (req: Request): Promise<Response> => {
               contextType: 'safety_comment'
             }
           });
+          
+          logger.info(`Created notification for safety comment: ${commentId}`);
         }
       }
     } else if (action === 'update' && safetyUpdateId) {
@@ -87,26 +93,20 @@ const handler = async (req: Request): Promise<Response> => {
         .eq('content_id', safetyUpdateId);
 
       if (activityError) {
-        console.error('Error updating activities:', activityError);
+        logger.error('Error updating activities:', activityError);
         throw activityError;
       } else {
-        console.log(`Successfully updated related activities for safety update: ${safetyUpdateTitle}`);
+        logger.info(`Successfully updated related activities for safety update: ${safetyUpdateTitle}`);
       }
     }
 
-    return new Response(JSON.stringify({ 
-      success: true,
-      message: `Safety update notification processed successfully`
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return successResponse(
+      { action, safetyUpdateId },
+      `Safety update notification processed successfully`
+    );
   } catch (error) {
-    console.error('Error in notify-safety-changes:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    logger.error('Error in notify-safety-changes:', error);
+    return errorResponse(error);
   }
 };
 

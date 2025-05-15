@@ -2,12 +2,15 @@
 // Follow Deno's ESM imports pattern
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
-// Define CORS headers for cross-origin requests
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Create a logger for this function
+const logger = createLogger('notify-goods-changes');
 
 // Type for request body
 interface GoodsChangeNotificationPayload {
@@ -23,9 +26,8 @@ interface GoodsChangeNotificationPayload {
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
   
   try {
     // Create a Supabase client for the function
@@ -39,7 +41,7 @@ serve(async (req) => {
     const body: GoodsChangeNotificationPayload = await req.json();
     
     // Log the received payload for debugging
-    console.log("Received notification payload:", {
+    logger.info("Received notification payload:", {
       goodsItemId: body.goodsItemId,
       action: body.action,
       title: body.goodsItemTitle,
@@ -62,13 +64,8 @@ serve(async (req) => {
     
     // Validate required parameters
     if (!goodsItemId || !action || !userId || !neighborhoodId) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
-        { 
-          status: 400, 
-          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
-        }
-      );
+      logger.error("Missing required parameters", { body });
+      return errorResponse('Missing required parameters', 400);
     }
 
     // Define what activity type to create based on request type
@@ -93,34 +90,22 @@ serve(async (req) => {
         });
       
       if (activityError) {
-        console.error("Error creating activity:", activityError);
+        logger.error("Error creating activity:", activityError);
         throw activityError;
       }
       
-      console.log(`Successfully created activity for goods item: ${goodsItemId}`);
+      logger.info(`Successfully created activity for goods item: ${goodsItemId}`);
     }
     
     // Return a success response
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: `Successfully processed ${action} for ${requestType}` 
-      }),
-      { 
-        status: 200, 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
-      }
+    return successResponse(
+      { action, requestType }, 
+      `Successfully processed ${action} for ${requestType}`
     );
     
   } catch (error) {
     // Log and return any errors
-    console.error("Error processing goods change:", error.message);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
-      }
-    );
+    logger.error("Error processing goods change:", error);
+    return errorResponse(error);
   }
 });
