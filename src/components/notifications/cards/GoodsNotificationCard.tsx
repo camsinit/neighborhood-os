@@ -1,3 +1,4 @@
+
 /**
  * GoodsNotificationCard.tsx
  * 
@@ -10,7 +11,6 @@ import { highlightItem } from "@/utils/highlight";
 import { 
   NotificationBadge
 } from "../elements";
-import { cn } from "@/lib/utils";
 
 interface GoodsNotificationCardProps {
   notification: BaseNotification;
@@ -59,8 +59,8 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
   };
   
   // Handle viewing goods details
-  const handleViewGoods = async () => {
-    // Navigate to the goods details - fixed highlightItem call
+  const handleViewGoods = () => {
+    // Navigate to the goods details
     highlightItem('goods', notification.content_id);
     
     if (onDismiss) onDismiss();

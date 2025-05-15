@@ -29,8 +29,8 @@ export const processGoodsNotifications = (
       content_type: "goods_exchange",
       content_id: item.id,
       notification_type: "goods",
-      action_type: contextType === "goods_offer" ? "offer" : "request",
-      action_label: contextType === "goods_offer" ? "View Offer" : "View Request", // Added required field
+      action_type: contextType === "goods_offer" ? "view" : "help",
+      action_label: contextType === "goods_offer" ? "View Offer" : "Help Out",
       created_at: item.created_at,
       updated_at: item.created_at || item.created_at,
       is_read: item.is_read || false,
@@ -39,8 +39,9 @@ export const processGoodsNotifications = (
         contextType: contextType,
         neighborName: profile?.display_name || null,
         avatarUrl: profile?.avatar_url || null,
-        goodsCategory: item.category,
+        goodsCategory: item.goods_category || item.category,
         condition: item.condition,
+        urgency: item.urgency,
         summary: contextType === "goods_offer" 
           ? `${profile?.display_name || "Someone"} is offering: ${item.title}`
           : `${profile?.display_name || "Someone"} is looking for: ${item.title}`

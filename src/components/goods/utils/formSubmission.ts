@@ -87,18 +87,8 @@ export const formatRequestSubmission = async (
   };
 };
 
-/**
- * Notify the goods changes edge function about item creation, updates, or deletion
- *
- * @param goodsItemId - ID of the goods item
- * @param action - The action being performed (create, update, delete)
- * @param goodsItemTitle - Title of the goods item
- * @param userId - ID of the current user
- * @param requestType - Whether this is an offer or need
- * @param neighborhoodId - ID of the current neighborhood
- * @param category - Category of the goods item
- * @param urgency - Urgency of the request (if applicable)
- */
+// NOTE: This function is kept for backwards compatibility but is no longer needed
+// as notifications are now handled by database triggers
 export const notifyGoodsChanges = async (
   goodsItemId: string,
   action: 'create' | 'update' | 'delete',
@@ -109,34 +99,9 @@ export const notifyGoodsChanges = async (
   category?: string,
   urgency?: string,
 ) => {
-  try {
-    // Call the edge function with goods_item_id instead of id
-    const { error } = await supabase.functions.invoke(
-      'notify-goods-changes',
-      {
-        body: {
-          goodsItemId, // Using goods_item_id now
-          action,
-          goodsItemTitle,
-          userId,
-          requestType,
-          neighborhoodId,
-          category,
-          urgency
-        }
-      }
-    );
-
-    if (error) {
-      console.error("[notifyGoodsChanges] Error calling edge function:", error);
-      // We don't throw here to avoid interrupting the main operation
-    } else {
-      console.log(`[notifyGoodsChanges] Successfully notified about ${action} action for goods item ID: ${goodsItemId}`);
-    }
-  } catch (error) {
-    console.error("[notifyGoodsChanges] Exception in edge function call:", error);
-    // Again, don't throw to avoid interrupting main flow
-  }
+  console.log("[notifyGoodsChanges] No-op: Notifications now handled by database triggers");
+  // This function is now a no-op since notifications are handled by database triggers
+  return { error: null };
 };
 
 /**
@@ -146,7 +111,6 @@ export const notifyGoodsChanges = async (
  * - Showing loading and success/error toasts
  * - Formatting the data
  * - Submitting to Supabase
- * - Notifying the edge function
  * - Triggering a refresh of the goods list
  * 
  * @param isOfferForm - Whether this is an offer (true) or request (false) submission
@@ -224,11 +188,6 @@ export const submitGoodsForm = async (
       if (error) throw error;
       data = updatedData;
       
-      // When updating or deleting items, we want to access the redundant ID field
-      if (data && data[0]) {
-        console.log("Updated goods item with goods_item_id:", data[0].goods_item_id);
-      }
-      
     } else {
       formattedData = isOfferForm
         ? { ...await formatOfferSubmission(itemFormData, userId), neighborhood_id: neighborhoodId }
@@ -244,25 +203,8 @@ export const submitGoodsForm = async (
       if (error) throw error;
       data = insertedData;
       
-      // For new items, we want to capture the new goods_item_id
-      if (data && data[0]) {
-        console.log("Created goods item with goods_item_id:", data[0].goods_item_id);
-        
-        // Use the goods_item_id for notifications/activities
-        if (data[0].goods_item_id && data[0].title) {
-          // Notify when a new item is created
-          await notifyGoodsChanges(
-            data[0].goods_item_id, // Use the redundant ID
-            'create',
-            data[0].title,
-            userId,
-            isOfferForm ? 'offer' : 'need',
-            neighborhoodId,
-            data[0].goods_category || data[0].category,
-            data[0].urgency
-          );
-        }
-      }
+      // Notifications are now handled by database triggers automatically
+      console.log("Item created successfully - notifications handled by DB triggers");
     }
     
     // Dismiss loading toast and show success
