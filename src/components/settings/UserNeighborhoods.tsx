@@ -1,3 +1,4 @@
+
 /**
  * UserNeighborhoods component
  * 
@@ -11,6 +12,7 @@ import ErrorState from "./neighborhoods/ErrorState";
 import EmptyState from "./neighborhoods/EmptyState";
 import NeighborhoodList from "./neighborhoods/NeighborhoodList";
 import TerrificTerraceAdder from "./neighborhoods/TerrificTerraceAdder";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 /**
  * This component orchestrates the fetching and display of a user's neighborhoods.
@@ -26,14 +28,23 @@ export const UserNeighborhoods: React.FC = () => {
     neighborhoods, 
     isLoading, 
     error, 
-    addUserToNeighborhood 
+    addUserToNeighborhood,
+    refreshNeighborhoods
   } = useUserNeighborhoods();
+
+  // Function to add a neighbor that triggers refresh events
+  const handleAddNeighbor = async (userId: string, neighborhoodName: string) => {
+    await addUserToNeighborhood(userId, neighborhoodName);
+    // Trigger refresh events to update UI
+    refreshEvents.emit('notifications');
+    refreshEvents.emit('activities-updated');
+  };
 
   // Add the test user to Terrific Terrace (hidden component)
   return (
     <>
       {/* Hidden utility component for adding test user to neighborhood */}
-      <TerrificTerraceAdder addUserToNeighborhood={addUserToNeighborhood} />
+      <TerrificTerraceAdder addUserToNeighborhood={handleAddNeighbor} />
       
       {/* Show appropriate UI based on data state */}
       {isLoading ? (
@@ -48,3 +59,5 @@ export const UserNeighborhoods: React.FC = () => {
     </>
   );
 };
+
+export default UserNeighborhoods;

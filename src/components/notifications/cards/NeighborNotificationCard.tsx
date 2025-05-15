@@ -3,6 +3,7 @@
  * NeighborNotificationCard.tsx
  * 
  * Specialized notification card for new neighbor announcements.
+ * Now using the database-generated notifications.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -10,6 +11,10 @@ import NotificationCard from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
+import { createLogger } from "@/utils/logger";
+
+// Initialize logger
+const logger = createLogger('NeighborNotificationCard');
 
 interface NeighborNotificationCardProps {
   notification: BaseNotification;
@@ -20,10 +25,14 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   notification,
   onDismiss,
 }) => {
-  // Handle viewing neighbor profile - fixed highlightItem call
-  const handleViewNeighbor = async () => {
+  // Handle viewing neighbor profile
+  const handleViewNeighbor = () => {
+    logger.debug("Viewing neighbor profile", { 
+      contentId: notification.content_id,
+      notificationType: notification.notification_type 
+    });
+    
     // Navigate to the neighbors section and highlight this neighbor
-    // Fixed highlightItem call to use proper API
     highlightItem('neighbors', notification.content_id);
     
     if (onDismiss) onDismiss();
@@ -36,7 +45,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   // Create sentence-style title with highlighted neighbor name
   const createSentenceTitle = () => {
     // For join notifications, highlight the neighbor name
-    if (notification.action_type === "join") {
+    if (notification.action_type === "join" || notification.context?.action === "join") {
       return `[[${actorName}]] joined your neighborhood`;
     } 
     // For profile updates

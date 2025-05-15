@@ -1,64 +1,40 @@
 
 /**
- * Hook to automatically refresh query data when specific events occur
- * This is a centralized way to handle data refreshing across the app
+ * Custom hook that manages automatic refreshing for data
+ * 
+ * This hook listens for specific events and triggers a refetch of the data
+ * when those events occur. It's simplified to use only direct database changes.
  */
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { createLogger } from '@/utils/logger';
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { refreshEvents, EventType } from "@/utils/refreshEvents";
+import { createLogger } from "@/utils/logger";
 
-// Create a dedicated logger for this hook
+// Create a logger for this hook
 const logger = createLogger('useAutoRefresh');
 
-/**
- * Hook that listens for specified events and invalidates the related queries
- * 
- * @param queryKeys - Array of query keys to invalidate when events occur
- * @param eventTypes - Array of event types to listen for
- */
-export const useAutoRefresh = (
-  queryKeys: string[], 
-  eventTypes: string[]
-) => {
+export function useAutoRefresh(queryKeys: string[], eventTypes: EventType[]) {
   const queryClient = useQueryClient();
   
   useEffect(() => {
-    logger.debug(`Setting up auto-refresh for queries: ${queryKeys.join(', ')} on events: ${eventTypes.join(', ')}`);
+    logger.debug('Setting up auto-refresh listeners', { queryKeys, eventTypes });
     
-    // Create event handlers for each event type
-    const handlers: { [key: string]: EventListener } = {};
-    
-    eventTypes.forEach(eventType => {
-      // Create a handler for this specific event type
-      const handler = () => {
-        logger.debug(`Received ${eventType} event, invalidating queries: ${queryKeys.join(', ')}`);
+    // For each event type, add a listener that will invalidate the specified query keys
+    const unsubscribers = eventTypes.map(eventType => 
+      refreshEvents.on(eventType, () => {
+        logger.debug(`Event triggered: ${eventType}, refreshing:`, queryKeys);
         
-        // Invalidate all the specified queries
-        queryKeys.forEach(queryKey => {
-          queryClient.invalidateQueries({ queryKey: [queryKey] });
+        // Invalidate all affected query keys
+        queryKeys.forEach(key => {
+          queryClient.invalidateQueries({ queryKey: [key] });
         });
-      };
-      
-      // Store the handler so we can remove it later
-      handlers[eventType] = handler as EventListener;
-      
-      // Add event listener
-      window.addEventListener(eventType, handler as EventListener);
-      logger.trace(`Added listener for ${eventType}`);
-    });
+      })
+    );
     
-    // Clean up event listeners on unmount
+    // Cleanup function to remove all event listeners when component unmounts
     return () => {
-      eventTypes.forEach(eventType => {
-        if (handlers[eventType]) {
-          window.removeEventListener(eventType, handlers[eventType]);
-          logger.trace(`Removed listener for ${eventType}`);
-        }
-      });
-      logger.debug('Cleaned up all auto-refresh event listeners');
+      logger.debug('Cleaning up auto-refresh listeners');
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
-  }, [queryClient, ...queryKeys, ...eventTypes]);
-};
-
-// Export the hook as default
-export default useAutoRefresh;
+  }, [queryClient, queryKeys, eventTypes]);
+}
