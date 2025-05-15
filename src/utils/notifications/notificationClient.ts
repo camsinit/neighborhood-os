@@ -109,10 +109,8 @@ export const notificationClient = {
         
       if (error) {
         logger.error('Error archiving notification:', error);
-        // Fix toast call - remove title property
-        toast("Couldn't archive notification. Please try again later.", {
-          variant: "destructive",
-        });
+        // Fix: use the correct toast API format - Sonner expects message as first parameter
+        toast.error("Couldn't archive notification. Please try again later.");
         return false;
       }
       
@@ -122,10 +120,8 @@ export const notificationClient = {
       return true;
     } catch (error) {
       logger.error('Exception in archiveNotification:', error);
-      // Fix toast call
-      toast("Couldn't archive notification. An unexpected error occurred.", {
-        variant: "destructive",
-      });
+      // Fix: use the correct toast API format - Sonner expects message as first parameter
+      toast.error("Couldn't archive notification. An unexpected error occurred.");
       return false;
     }
   },
@@ -155,10 +151,8 @@ export const notificationClient = {
         
       if (error) {
         logger.error('Error marking all as read:', error);
-        // Fix toast call
-        toast("Couldn't update notifications. Please try again later.", {
-          variant: "destructive", 
-        });
+        // Fix: use the correct toast API format - Sonner expects message as first parameter
+        toast.error("Couldn't update notifications. Please try again later.");
         return false;
       }
       
@@ -168,10 +162,8 @@ export const notificationClient = {
       return true;
     } catch (error) {
       logger.error('Exception in markAllAsRead:', error);
-      // Fix toast call
-      toast("Couldn't update notifications. An unexpected error occurred.", {
-        variant: "destructive",
-      });
+      // Fix: use the correct toast API format - Sonner expects message as first parameter
+      toast.error("Couldn't update notifications. An unexpected error occurred.");
       return false;
     }
   },
