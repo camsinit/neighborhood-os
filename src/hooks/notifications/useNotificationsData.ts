@@ -7,7 +7,7 @@
  */
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { fetchDirectNotifications } from "@/hooks/notifications/fetchDirectNotifications";
+import { notificationClient } from "@/utils/notifications/notificationClient"; 
 import { createLogger } from "@/utils/logger";
 
 // Create a dedicated logger for this hook
@@ -25,10 +25,10 @@ export const useNotificationsData = (showArchived: boolean): UseQueryResult<Base
     queryKey: ["notifications", showArchived],
     queryFn: () => {
       logger.debug('Fetching notifications, showArchived:', showArchived);
-      return fetchDirectNotifications(showArchived);
+      return notificationClient.fetchNotifications(showArchived);
     },
     // Set up automatic polling with short interval for better responsiveness
-    refetchInterval: 10000, // 10 seconds polling
+    refetchInterval: 15000, // 15 seconds polling
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     retry: 3
