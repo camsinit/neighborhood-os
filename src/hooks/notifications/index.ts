@@ -1,26 +1,25 @@
 
 /**
- * IMPORTANT: This file has been refactored into smaller components
- * Now it just re-exports functionality from the new location
+ * Central export point for notifications functionality
+ * This file exports everything needed for working with notifications
  */
-import {
-  useNotifications,
-  BaseNotification,
-} from "./useNotifications";
 
-import {
+// Export the hooks
+export { useNotifications } from "./useNotifications";
+export { useNotificationsData } from "./useNotificationsData";
+export { useNotificationsRefresh } from "./useNotificationsRefresh";
+export { useNotificationsPopoverData } from "./useNotificationsPopoverData";
+
+// Export the actions
+export { 
   archiveNotification,
   markAsRead,
   getTableName
 } from "./notificationActions";
 
-export {
-  useNotifications,
-  archiveNotification,
-  markAsRead,
-  getTableName
-};
+// Export types
+export type { BaseNotification, SkillRequestNotification } from "./types";
 
-export type {
-  BaseNotification,
-};
+// Export utilities
+export { fetchAllNotifications } from "./fetchNotifications";
+export { fetchDirectNotifications } from "./fetchDirectNotifications";

@@ -1,55 +1,32 @@
-/**
- * NotificationGroup.tsx
- * 
- * Component for rendering a group of notifications with a title
- */
-import React from "react";
-import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCardFactory } from "../cards/NotificationCardFactory"; // Changed from default to named import
-import { motion } from "framer-motion"; // Import for animation support
 
-// Props for NotificationGroup component
+import React from 'react';
+import { BaseNotification } from '@/hooks/notifications/types';
+import { NotificationCardFactory } from '../cards/NotificationCardFactory';
+import { sortNotificationsByDate } from '../utils/notificationGroupingUtils';
+
 interface NotificationGroupProps {
   title: string;
   notifications: BaseNotification[];
-  onClose?: () => void;
 }
 
 /**
- * Renders a group of notifications with a common title (Today, Yesterday, etc.)
- * 
- * @param title - The group title (e.g., "Today", "Yesterday")
- * @param notifications - Array of notifications to display in this group
- * @param onClose - Optional callback for when notifications are dismissed
+ * Component that displays a group of notifications under a common header
  */
-const NotificationGroup: React.FC<NotificationGroupProps> = ({
-  title,
-  notifications,
-  onClose
-}) => {
+const NotificationGroup: React.FC<NotificationGroupProps> = ({ title, notifications }) => {
+  // Sort notifications by date before rendering
+  const sortedNotifications = sortNotificationsByDate(notifications);
+  
   return (
-    <motion.div 
-      className="space-y-2"
-      layout // This enables automatic layout adjustment
-      transition={{ type: "spring", damping: 30, stiffness: 200 }} // Add spring physics for smoother motion
-    >
-      {/* Group title */}
-      <h4 className="text-sm font-medium text-gray-500 px-4">{title}</h4>
-      
-      {/* Notifications list */}
-      <motion.div 
-        className="space-y-3 px-4"
-        layout
-      >
-        {notifications.map(notification => (
-          <NotificationCardFactory 
-            key={notification.id} 
-            notification={notification} 
-            onDismiss={onClose} 
-          />
+    <div className="space-y-2">
+      <div className="px-4 py-2 text-sm font-medium text-gray-500 bg-gray-50">
+        {title}
+      </div>
+      <div className="divide-y">
+        {sortedNotifications.map((notification) => (
+          <NotificationCardFactory key={notification.id} notification={notification} />
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

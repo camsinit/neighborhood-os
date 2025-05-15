@@ -26,18 +26,20 @@ const SkillRequestNotificationItem: React.FC<SkillRequestNotificationItemProps> 
       className={`p-3 border-b hover:bg-gray-50 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={handleClick}
     >
-      {/* Avatar section shows the requester's profile image */}
-      <Avatar className="h-9 w-9">
-        <AvatarImage src={request.profiles?.avatar_url || undefined} />
-        <AvatarFallback>{request.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-      </Avatar>
-      
-      {/* Request details section with title and requester name */}
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{request.title}</p>
-        <p className="text-xs text-gray-500 truncate">
-          From: {request.profiles?.display_name || 'Anonymous'}
-        </p>
+      <div className="flex items-center gap-3">
+        {/* Avatar section shows the requester's profile image */}
+        <Avatar className="h-9 w-9">
+          <AvatarImage src={request.profiles?.avatar_url || undefined} />
+          <AvatarFallback>{request.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+        </Avatar>
+        
+        {/* Request details section with title and requester name */}
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-sm truncate">{request.title}</p>
+          <p className="text-xs text-gray-500 truncate">
+            From: {request.profiles?.display_name || 'Anonymous'}
+          </p>
+        </div>
       </div>
     </div>
   );

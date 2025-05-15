@@ -1,35 +1,46 @@
-import React from "react";
-import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard, NotificationCardProps } from "./base/NotificationCard";
-import { EventNotificationCard } from "./EventNotificationCard";
-import { SafetyNotificationCard } from "./SafetyNotificationCard";
-import { SkillNotificationCard } from "./SkillNotificationCard";
-import { GoodsNotificationCard } from "./GoodsNotificationCard";
-import { NeighborNotificationCard } from "./NeighborNotificationCard";
 
-interface NotificationCardFactoryProps extends NotificationCardProps {
-  notification: BaseNotification;
-  onDismiss?: () => void;
-}
+/**
+ * A factory component that renders the appropriate notification card 
+ * based on the notification type
+ */
+import React from 'react';
+import { BaseNotification } from '@/hooks/notifications/types';
+import EventNotificationCard from './EventNotificationCard';
+import SafetyNotificationCard from './SafetyNotificationCard';
+import GoodsNotificationCard from './GoodsNotificationCard';
+import SkillNotificationCard from './SkillNotificationCard';
+import NeighborNotificationCard from './NeighborNotificationCard';
+import NotificationCard from './base/NotificationCard';
 
-export const NotificationCardFactory: React.FC<NotificationCardFactoryProps> = (props) => {
-  const { notification } = props;
-
-  // Based on notification type, return the appropriate card
+// Component for creating the appropriate notification card based on type
+export const NotificationCardFactory = ({ 
+  notification 
+}: { 
+  notification: BaseNotification 
+}) => {
+  // Choose the appropriate card component based on notification type
   switch (notification.notification_type) {
-    case "event":
-      return <EventNotificationCard {...props} />;
-    case "safety":
-      return <SafetyNotificationCard {...props} />;
-    case "skills":
-      return <SkillNotificationCard {...props} />;
-    case "goods":
-      return <GoodsNotificationCard {...props} />;
-    case "neighbor_welcome":
-    case "neighbors":
-      return <NeighborNotificationCard {...props} />;
+    case 'event':
+      return <EventNotificationCard notification={notification} />;
+    case 'safety':
+      return <SafetyNotificationCard notification={notification} />;
+    case 'goods':
+      return <GoodsNotificationCard notification={notification} />;
+    case 'skills':
+      return <SkillNotificationCard notification={notification} />;
+    case 'neighbor_welcome':
+      return <NeighborNotificationCard notification={notification} />;
     default:
-      // Default to the base card
-      return <NotificationCard {...props} />;
+      // Fallback to generic notification card
+      return (
+        <NotificationCard
+          title={notification.title}
+          description={notification.description || ""}
+          timestamp={notification.created_at}
+          isRead={notification.is_read}
+          actionLabel={notification.action_label}
+          id={notification.id}
+        />
+      );
   }
 };
