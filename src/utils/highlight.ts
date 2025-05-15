@@ -5,13 +5,11 @@
  * for backwards compatibility
  */
 import { createLogger } from '@/utils/logger';
+
+// Import only what we need from the new structure
 import {
   highlightItem,
-  createHighlightListener,
-  navigateAndHighlight,
-  // Import types explicitly
-  type HighlightableItemType,
-  type HighlightItemDetail
+  navigateAndHighlight
 } from './highlight/index';
 
 // Create a logger for this module
@@ -23,16 +21,11 @@ logger.warn('This highlight.ts file is deprecated. Import directly from @/utils/
 // Re-export for backwards compatibility
 export {
   highlightItem,
-  createHighlightListener,
-  navigateAndHighlight,
-  // Explicitly re-export the types
-  type HighlightableItemType,
-  type HighlightItemDetail
+  navigateAndHighlight
 };
 
 // Export default for backward compatibility
 export default {
-  highlightItem,
-  createHighlightListener,
+  highlightItem, 
   navigateAndHighlight
 };

@@ -6,7 +6,7 @@ import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import { highlightItem } from "@/utils/highlight";
+import { navigateAndHighlight } from "@/utils/highlight";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
@@ -93,9 +93,9 @@ const ActivityItem = ({
   const isDeleted = activity.metadata?.deleted === true;
 
   /**
-   * Determine the activity type and corresponding item type for highlighting
+   * Map activity type to highlightable item type
    */
-  const getActivityItemType = () => {
+  const getHighlightableItemType = (): any => {
     // Extract the base type from activity_type (e.g., skill_offered → skills)
     const baseType = activity.activity_type.split('_')[0];
     
@@ -119,22 +119,17 @@ const ActivityItem = ({
       return;
     }
     
-    // Get the item type and navigate to the appropriate page
-    const itemType = getActivityItemType();
-    const route = itemType === 'event' ? '/calendar' : `/${itemType}`;
-    
-    // Navigate to the page and highlight the item
-    navigate(route);
-    
-    // After navigation, highlight the specific item
-    setTimeout(() => {
-      // Fixed highlightItem call to use proper API
-      highlightItem(itemType, activity.content_id);
-    }, 100);
+    // Navigate to the item and highlight it
+    navigateAndHighlight(
+      getHighlightableItemType(),
+      activity.content_id,
+      navigate,
+      true
+    );
   };
 
   // Get the activity type for the badge
-  const activityType = getActivityItemType();
+  const activityType = getHighlightableItemType();
   const activityLabel = activityType.charAt(0).toUpperCase() + activityType.slice(1);
   
   // If the activity is deleted, don't render it at all
