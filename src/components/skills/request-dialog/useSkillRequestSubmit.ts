@@ -1,7 +1,7 @@
 
 /**
  * Hook for handling skill request submission
- * This hook has been refactored to use the new database function for creating sessions
+ * This hook has been refactored to use our skill notification Edge Function
  */
 import { useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { prepareTimeSlots } from "@/utils/timeslotUtils";
 import { Json } from "@/integrations/supabase/types"; // Import the Json type from Supabase types
 import refreshEvents from "@/utils/refreshEvents";
+import { sendSkillRequestNotification } from "@/utils/notifications/skillNotifications";
 
 /**
  * Form data structure for skill requests
@@ -106,6 +107,40 @@ export const useSkillRequestSubmit = (
       }
       
       console.log("[submitSkillRequest] Success! Result:", result);
+      
+      // Get the skill session ID from the result
+      const sessionId = result?.session_id;
+      
+      // Fetch the skill title for the notification
+      const { data: skillData } = await supabase
+        .from('skills_exchange')
+        .select('title')
+        .eq('id', skillId)
+        .single();
+      
+      const skillTitle = skillData?.title || "a skill";
+      
+      // ✨ New: Send notification via Edge Function
+      await sendSkillRequestNotification(
+        skillId,
+        skillTitle,
+        providerId,
+        user.id,
+        sessionId,
+        { 
+          skill: { 
+            id: skillId, 
+            title: skillTitle,
+            // Include other useful skill data
+            description: skillData?.description,
+            availability: data.availability,
+            time_preferences: data.timePreference
+          },
+          requester_id: user.id,
+          provider_id: providerId,
+          id: sessionId
+        }
+      );
       
       // Show success message and update UI
       toast.success('Skill request submitted successfully');

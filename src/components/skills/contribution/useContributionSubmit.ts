@@ -8,6 +8,7 @@ import { validateTimeSlots } from '@/utils/timeslotUtils';
 import { createSkillSessionWithTimeSlots } from './services/contributionService';
 import refreshEvents from '@/utils/refreshEvents';
 import { useQueryClient } from '@tanstack/react-query';
+import { sendSkillConfirmationNotifications } from '@/utils/notifications/skillNotifications';
 
 /**
  * Hook for handling skill contribution submission
@@ -16,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
  * 1. Use separate validation and service functions
  * 2. Improve error handling and logging
  * 3. Separate concerns for better maintainability
+ * 4. Use our new Edge Function for notifications
  */
 export const useContributionSubmit = (
   skillRequestId: string,
@@ -63,13 +65,35 @@ export const useContributionSubmit = (
       });
       
       // Create the skill session with time slots in a single transaction
-      await createSkillSessionWithTimeSlots(
+      const result = await createSkillSessionWithTimeSlots(
         skillRequestId,
         requesterId,
         providerId,
         location,
         locationDetails,
         selectedTimeSlots
+      );
+
+      // Extract the session ID from the result
+      const sessionId = result?.sessionId;
+      
+      // Get skill title for the notification
+      const { data: skillData } = await supabase
+        .from('skills_exchange')
+        .select('title')
+        .eq('id', skillRequestId)
+        .single();
+      
+      const skillTitle = skillData?.title || "skill session";
+      
+      // ✨ New: Send notifications via Edge Function
+      await sendSkillConfirmationNotifications(
+        skillRequestId,
+        skillTitle,
+        providerId,
+        requesterId,
+        sessionId,
+        new Date().toISOString() // Use current time as session time for now
       );
 
       // Optionally add skill to user profile

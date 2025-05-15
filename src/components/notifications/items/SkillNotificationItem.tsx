@@ -1,28 +1,36 @@
 
+/**
+ * SkillNotificationItem.tsx
+ * 
+ * Component for displaying skill-related notifications with rich context
+ */
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Archive } from "lucide-react";
 import { useState } from "react";
 import SkillRequestPopover from "@/components/skills/notifications/SkillRequestPopover";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { type HighlightableItemType } from "@/utils/highlight"; // Updated import path
-// Using named import
+import { highlightItem, type HighlightableItemType } from "@/utils/highlight"; 
 import { NotificationPopover } from "../NotificationsPopover"; 
 import { getNotificationStyle } from "../utils/notificationStyles";
 import { Badge } from "@/components/ui/badge";
 
-// Update the interface to make context optional with a default value
 interface SkillNotificationItemProps {
   title: string;
   itemId: string;
-  context?: BaseNotification['context']; // Make context optional
+  context?: BaseNotification['context']; // Context is optional with a default value
   isRead?: boolean;
   isArchived?: boolean;
   onClose: () => void;
   onArchive: (e: React.MouseEvent) => void;
-  onItemClick?: (type: HighlightableItemType, id: string) => void; // Updated to use proper type
+  onItemClick?: (type: HighlightableItemType, id: string) => void; 
 }
 
+/**
+ * Component for displaying skill-related notifications
+ * 
+ * This component renders different layouts based on the notification context
+ */
 export const SkillNotificationItem = ({
   title,
   itemId,
@@ -36,17 +44,51 @@ export const SkillNotificationItem = ({
   const [isSkillRequestDialogOpen, setIsSkillRequestDialogOpen] = useState(false);
   const style = getNotificationStyle('skills');
 
-  // Only render if we have the correct context type
-  // Add a fallback check to avoid null/undefined issues
-  if (!context || context.contextType !== 'skill_request') {
-    return null;
-  }
+  // Early return if missing context or not a skill notification
+  if (!context) return null;
+
+  // Handle clicking on the notification
+  const handleNotificationClick = () => {
+    // Determine what to highlight based on the context
+    const targetId = context.skillId || context.skillRequestData?.skill?.id || itemId;
+    const targetType: HighlightableItemType = 'skills';
+    
+    // If there's an event ID, highlight that instead
+    if (context.event_id) {
+      highlightItem('event', context.event_id, true);
+    } else {
+      highlightItem(targetType, targetId, true);
+    }
+    
+    // Call the onItemClick handler if provided
+    if (onItemClick) {
+      onItemClick(targetType, targetId);
+    }
+    
+    // Close the notification after clicking
+    onClose();
+  };
+  
+  // Determine if this notification requires action
+  const requiresAction = context.actionRequired === true || 
+                         context.contextType === 'skill_request';
+  
+  // Determine if this is a session notification
+  const isSessionNotification = context.contextType === 'skill_session';
+  
+  // Determine action button label
+  const actionLabel = requiresAction ? 'Respond' : 
+                      isSessionNotification ? 'View Session' : 'View Details';
 
   return (
     <div className="mb-2">
       {context && context.neighborName && (
         <p className="text-gray-500 italic mb-0.5 text-xs">
-          {context.neighborName} is requesting your skill:
+          {context.contextType === 'skill_request' 
+            ? `${context.neighborName} is requesting your skill:` 
+            : context.contextType === 'skill_session' 
+              ? `Session with ${context.neighborName}:` 
+              : `${context.neighborName} ${isSessionNotification ? 'confirmed' : 'shared'}:`}
         </p>
       )}
       
@@ -54,11 +96,10 @@ export const SkillNotificationItem = ({
         title={title}
         type="skills"
         itemId={itemId}
-        onAction={() => setIsSkillRequestDialogOpen(true)}
-        actionLabel="Respond"
+        onAction={requiresAction ? () => setIsSkillRequestDialogOpen(true) : handleNotificationClick}
+        actionLabel={actionLabel}
         isArchived={isArchived}
-        // Pass content ID and type for navigation
-        contentId={context.skillRequestData?.skill?.id || itemId}
+        contentId={context.skillId || context.skillRequestData?.skill?.id || itemId}
         contentType="skills"
       >
         <div className={`notification-item h-[64px] flex items-center justify-between py-2 group cursor-pointer 
@@ -76,13 +117,13 @@ export const SkillNotificationItem = ({
                 <h3 className={`text-base font-medium truncate ${isRead ? 'text-gray-500' : style.textColor}`}>
                   {title}
                 </h3>
-                {!isRead && (
+                {requiresAction && !isRead && (
                   <Badge variant="success" className="text-[10px] px-1.5 py-0">Action needed</Badge>
                 )}
               </div>
-              {context?.skillRequestData?.skill?.description && (
+              {(context?.skillRequestData?.skill?.description || context?.skillDescription) && (
                 <p className="text-xs text-gray-500 truncate">
-                  {context.skillRequestData.skill.description}
+                  {context?.skillRequestData?.skill?.description || context?.skillDescription || ""}
                 </p>
               )}
             </div>
@@ -111,3 +152,5 @@ export const SkillNotificationItem = ({
     </div>
   );
 };
+
+export default SkillNotificationItem;
