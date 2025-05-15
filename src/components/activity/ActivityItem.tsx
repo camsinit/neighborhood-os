@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { navigateAndHighlight } from "@/utils/highlight";
 import { getActivityColor } from "./utils/activityHelpers";
 import { getCompactTimeAgo } from "./utils/timeFormatters";
-import { getHighlightableItemType } from "./utils/activityLabels";
+// Fix import to use the correct function name from activityLabels.ts
+import { getActivityHighlightType } from "./utils/activityLabels";
 import ActivityAvatar from "./ActivityAvatar";
 import ActivityBadge from "./ActivityBadge";
 import ActivityTitle from "./ActivityTitle";
@@ -44,7 +45,7 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
     
     // Navigate to the item and highlight it
     navigateAndHighlight(
-      getHighlightableItemType(activity.activity_type),
+      getActivityHighlightType(activity.activity_type),
       activity.content_id,
       navigate,
       true
