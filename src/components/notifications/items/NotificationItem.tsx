@@ -5,14 +5,15 @@
  * This component presents notifications with a clean, user-focused design
  * that prioritizes the person, action, and timeframe
  */
-import React, { useState, useRef, useEffect } from "react"; // Added useEffect for animation handling
+import React, { useState, useRef } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import NotificationAvatar from "../elements/NotificationAvatar";
 import NotificationContent from "../elements/NotificationContent";
 import NotificationActions from "../elements/NotificationActions";
 import NotificationTimeStamp from "../elements/NotificationTimeStamp";
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence for smoother transitions
-import { type HighlightableItemType } from "@/utils/highlight";
+import { motion, AnimatePresence } from "framer-motion";
+// Fix import to use the correct path for HighlightableItemType
+import { type HighlightableItemType } from '@/utils/highlight/types';
 import { getNotificationBorderColor } from "../utils/notificationColorUtils";
 import { createLogger } from "@/utils/logger";
 
@@ -34,24 +35,22 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }) => {
   // State for animation
   const [isSliding, setIsSliding] = useState(false);
-  const [isRemoved, setIsRemoved] = useState(false); // New state to track if item should be removed from DOM
+  const [isRemoved, setIsRemoved] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
-  // Log notification details for debugging - helps identify RSVP notifications
-  useEffect(() => {
-    logger.debug(`Rendering notification: ${notification.id}`, {
-      type: notification.notification_type,
-      title: notification.title,
-      contentType: notification.content_type,
-      metadata: notification.context
-    });
-  }, [notification]);
+  // Log notification details for debugging
+  logger.debug(`Rendering notification: ${notification.id}`, {
+    type: notification.notification_type,
+    title: notification.title,
+    contentType: notification.content_type,
+    metadata: notification.context
+  });
 
   // Animation handler for swipe out
   const handleSwipeOut = () => {
     setIsSliding(true);
     
-    // After animation completes, mark as removed so parent can adjust layout
+    // After animation completes, mark as removed
     setTimeout(() => {
       setIsRemoved(true);
     }, 500); // Match this with animation duration
@@ -81,12 +80,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   // Get notification border color based on its type
   const borderColorClass = getNotificationBorderColor(notification.notification_type);
   
-  // If removed, don't render anything but maintain space temporarily then collapse
+  // If removed, don't render anything
   if (isRemoved) {
-    return null; // This will remove the component from the DOM, allowing others to animate up
+    return null;
   }
   
-  // Updated animation to slide RIGHT and handle height animation properly
   return (
     <AnimatePresence>
       <motion.div 
@@ -102,7 +100,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           ease: "easeInOut"
         }}
         className="mb-3"
-        layout // This is the key prop that makes other items adjust their position
+        layout
       >
         <div className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`}>
           <div className="relative p-4 pb-2">
@@ -111,18 +109,29 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             
             <div className="flex gap-3">
               {/* Avatar with appropriate size */}
-              <NotificationAvatar url={notification.profiles?.avatar_url} name={displayName} isUnread={!notification.is_read} notificationType={notification.notification_type} size="md" />
+              <NotificationAvatar 
+                url={notification.profiles?.avatar_url} 
+                name={displayName} 
+                isUnread={!notification.is_read} 
+                notificationType={notification.notification_type} 
+                size="md" 
+              />
               
-              {/* Content with sentence format and direct highlighting */}
+              {/* Content with sentence format */}
               <div className="flex flex-col flex-1">
-                <NotificationContent title={notification.title} actorName={displayName} contentType={notification.notification_type} isUnread={!notification.is_read}>
+                <NotificationContent 
+                  title={notification.title} 
+                  actorName={displayName} 
+                  contentType={notification.notification_type} 
+                  isUnread={!notification.is_read}
+                >
                   {notification.description}
                 </NotificationContent>
               </div>
             </div>
           </div>
           
-          {/* Updated action buttons with simplified styling */}
+          {/* Action buttons */}
           <NotificationActions 
             id={notification.id} 
             contentType={getContentType()} 
@@ -130,7 +139,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             isRead={notification.is_read} 
             onDismiss={onSelect} 
             triggerSwipeAnimation={handleSwipeOut} 
-            notificationType={notification.notification_type} // Pass notification type for special handling
+            notificationType={notification.notification_type}
           />
         </div>
       </motion.div>

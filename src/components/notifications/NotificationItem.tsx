@@ -3,11 +3,12 @@
  * Main NotificationItem component that delegates to the appropriate
  * specialized notification item component based on type
  */
-import { HighlightableItemType } from "@/utils/highlight";
+// Fix import to use the correct path for HighlightableItemType
+import { type HighlightableItemType } from '@/utils/highlight/types';
 import { BaseNotification } from "@/hooks/notifications/types";
 import DefaultNotificationItem from "./items/DefaultNotificationItem";
-import SkillNotificationItem from "./items/SkillNotificationItem"; // Fixed import
-import NotificationItem from "./items/NotificationItem"; // Import the minimalist notification item
+import SkillNotificationItem from "./items/SkillNotificationItem";
+import NotificationItem from "./items/NotificationItem"; 
 
 interface NotificationItemProps {
   notification: BaseNotification;

@@ -12,6 +12,14 @@ import {
   navigateAndHighlight
 } from './highlight/index';
 
+// Re-export types that are used in other files
+import { 
+  HighlightableItemType,
+  HighlightItemDetail
+} from './highlight/types';
+
+import { createHighlightListener } from './highlight/createHighlightListener';
+
 // Create a logger for this module
 const logger = createLogger('highlight-legacy');
 
@@ -21,11 +29,15 @@ logger.warn('This highlight.ts file is deprecated. Import directly from @/utils/
 // Re-export for backwards compatibility
 export {
   highlightItem,
-  navigateAndHighlight
+  navigateAndHighlight,
+  createHighlightListener,
+  type HighlightableItemType,
+  type HighlightItemDetail
 };
 
 // Export default for backward compatibility
 export default {
   highlightItem, 
-  navigateAndHighlight
+  navigateAndHighlight,
+  createHighlightListener
 };

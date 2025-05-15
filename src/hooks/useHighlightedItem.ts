@@ -7,8 +7,9 @@
  * specific items in lists or views.
  */
 import { useEffect, useState } from 'react';
-import { createHighlightListener, HighlightableItemType } from '@/utils/highlight';
-import { UseHighlightedItemResult } from '@/utils/highlight/types';
+// Fix imports to use the correct paths
+import { createHighlightListener } from '@/utils/highlight/createHighlightListener';
+import { HighlightableItemType, UseHighlightedItemResult } from '@/utils/highlight/types';
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this hook

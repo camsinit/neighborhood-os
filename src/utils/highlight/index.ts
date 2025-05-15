@@ -8,7 +8,7 @@ import { createLogger } from '@/utils/logger';
 import { HighlightableItemType, HighlightItemDetail } from './types';
 import { highlightItem } from './highlightItem';
 import { navigateAndHighlight } from './navigateAndHighlight';
-import createHighlightListener from './createHighlightListener';
+import { createHighlightListener } from './createHighlightListener';
 
 // Create a logger for this module
 const logger = createLogger('highlight');
