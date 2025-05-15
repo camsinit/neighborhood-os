@@ -30,6 +30,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
     logger.debug("Setting up notification refresh listeners");
     
     // Define all the events that should trigger a refresh
+    // These are now all properly defined in the EventType
     const refreshEventTypes: EventType[] = [
       'notification-created',
       'notification-read',

@@ -20,6 +20,9 @@ export type EventType =
   'activities' | 
   // Custom events
   'notification-created' |
+  'notification-read' |     // Added this event type
+  'notification-archived' | // Added this event type
+  'notifications-all-read' | // Added this event type
   'event-rsvp-updated' | 
   'event-submitted' | 
   'event-updated' |

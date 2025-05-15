@@ -1,4 +1,3 @@
-
 /**
  * notificationClient.ts
  * 
@@ -110,9 +109,8 @@ export const notificationClient = {
         
       if (error) {
         logger.error('Error archiving notification:', error);
-        toast({
-          title: "Couldn't archive notification",
-          description: "Please try again later",
+        // Fix toast call - remove title property
+        toast("Couldn't archive notification. Please try again later.", {
           variant: "destructive",
         });
         return false;
@@ -124,9 +122,8 @@ export const notificationClient = {
       return true;
     } catch (error) {
       logger.error('Exception in archiveNotification:', error);
-      toast({
-        title: "Couldn't archive notification",
-        description: "An unexpected error occurred",
+      // Fix toast call
+      toast("Couldn't archive notification. An unexpected error occurred.", {
         variant: "destructive",
       });
       return false;
@@ -158,10 +155,9 @@ export const notificationClient = {
         
       if (error) {
         logger.error('Error marking all as read:', error);
-        toast({
-          title: "Couldn't update notifications",
-          description: "Please try again later",
-          variant: "destructive",
+        // Fix toast call
+        toast("Couldn't update notifications. Please try again later.", {
+          variant: "destructive", 
         });
         return false;
       }
@@ -172,9 +168,8 @@ export const notificationClient = {
       return true;
     } catch (error) {
       logger.error('Exception in markAllAsRead:', error);
-      toast({
-        title: "Couldn't update notifications",
-        description: "An unexpected error occurred",
+      // Fix toast call
+      toast("Couldn't update notifications. An unexpected error occurred.", {
         variant: "destructive",
       });
       return false;
