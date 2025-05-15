@@ -82,18 +82,38 @@ function refreshGoods(): void {
  * Triggers UI components to refetch safety updates
  */
 function refreshSafety(): void {
-  logger.debug('Refreshing safety updates');
+  logger.debug('Refreshing safety');
   dispatchRefreshEvent('safety');
 }
 
-// Export all refresh functions
+/**
+ * Subscribe to a refresh event
+ * 
+ * @param type The event type to listen for
+ * @param callback The function to call when the event occurs
+ * @returns A function to unsubscribe from the event
+ */
+function on(type: RefreshEventType | string, callback: EventListener): () => void {
+  logger.debug(`Adding listener for ${type}`);
+  window.addEventListener(type, callback);
+  
+  // Return unsubscribe function
+  return () => {
+    logger.debug(`Removing listener for ${type}`);
+    window.removeEventListener(type, callback);
+  };
+}
+
+// Export the refreshEvents object with all methods
 const refreshEvents = {
   notifications: refreshNotifications,
   activities: refreshActivities,
   events: refreshEvents,
   skills: refreshSkills,
   goods: refreshGoods,
-  safety: refreshSafety
+  safety: refreshSafety,
+  on // Add the 'on' method
 };
 
+export { refreshEvents };
 export default refreshEvents;

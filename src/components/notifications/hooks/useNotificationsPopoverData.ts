@@ -11,10 +11,41 @@ import { BaseNotification } from "@/hooks/notifications/types";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
 import { useEffect } from "react";
-import { fetchDirectNotifications } from "@/hooks/notifications/fetchDirectNotifications";
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useNotificationsPopoverData');
+
+// Function to fetch notifications directly
+const fetchDirectNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
+  // Get the current user
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    logger.warn('No authenticated user found, returning empty notifications array');
+    return [];
+  }
+  
+  // Query notifications joined with profiles
+  const { data, error } = await supabase
+    .from('notifications')
+    .select(`
+      *,
+      profiles:actor_id (
+        display_name,
+        avatar_url
+      )
+    `)
+    .eq('user_id', user.id)
+    .eq('is_archived', showArchived)
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    logger.error('Error fetching notifications:', error);
+    throw error;
+  }
+  
+  return data || [];
+};
 
 /**
  * Custom hook that provides notification data for the popover

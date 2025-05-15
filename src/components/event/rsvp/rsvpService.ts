@@ -1,4 +1,10 @@
 
+/**
+ * Service for handling RSVP operations
+ * 
+ * Provides functions to add or remove RSVPs for events
+ * Ensures proper event dispatch for notification updates
+ */
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
