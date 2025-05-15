@@ -3,12 +3,9 @@
  * Unified Notification Service
  * 
  * This service provides a centralized API for working with notifications.
- * It handles creating, updating, and managing notifications consistently across the application.
- * 
- * UPDATED: Now uses the database function create_unified_system_notification as single source of truth
+ * It exclusively uses database functions and triggers for notification creation.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
 
@@ -44,17 +41,16 @@ export interface NotificationParams {
 }
 
 /**
- * Creates a new notification using the database function as single source of truth
+ * Creates a new notification using the database function
  * 
  * @param params Notification parameters
  * @returns Promise resolving to created notification ID if successful
  */
 export async function createNotification(params: NotificationParams): Promise<string | null> {
   try {
-    logger.debug('Creating notification via unified system:', params);
+    logger.debug('Creating notification via database function:', params);
 
-    // Use the database function instead of direct insert
-    // This provides consistent handling, duplicate prevention, etc.
+    // Use the database function for consistent handling
     const { data, error } = await supabase
       .rpc('create_unified_system_notification', {
         p_user_id: params.userId,
@@ -74,10 +70,10 @@ export async function createNotification(params: NotificationParams): Promise<st
       return null;
     }
 
-    // The database function returns the notification ID directly
-    logger.debug('Notification created successfully via unified system:', data);
+    // The database function returns the notification ID
+    logger.debug('Notification created successfully:', data);
     
-    // Emit event using the improved event system
+    // Emit event using the refresh system
     refreshEvents.emit('notification-created');
     
     return data;
@@ -209,198 +205,10 @@ export async function getUnreadCount(): Promise<number> {
   }
 }
 
-/**
- * Create an event RSVP notification for the event host
- * 
- * @param eventId ID of the event
- * @param hostId ID of the event host
- * @param eventTitle Title of the event
- * @returns Promise resolving to the notification ID if successful
- */
-export async function createRsvpNotification(
-  eventId: string,
-  hostId: string,
-  eventTitle: string
-): Promise<string | null> {
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user?.id) {
-      logger.error('No authenticated user found for RSVP notification');
-      return null;
-    }
-
-    // Don't notify for self-RSVPs
-    if (user.user.id === hostId) {
-      logger.debug('Skipping self-RSVP notification');
-      return null;
-    }
-
-    return createNotification({
-      userId: hostId,
-      actorId: user.user.id,
-      title: `New RSVP for ${eventTitle}`,
-      contentType: 'events',
-      contentId: eventId,
-      notificationType: 'event',
-      actionType: 'view',
-      actionLabel: 'View Event',
-      relevanceScore: 3, // High importance
-      metadata: {
-        event_id: eventId,
-        type: 'rsvp'
-      }
-    });
-  } catch (error) {
-    logger.error('Exception creating RSVP notification:', error);
-    return null;
-  }
-}
-
-/**
- * Create a notification for a new skill session request
- * 
- * @param sessionId ID of the skill session
- * @param providerId ID of the skill provider
- * @param skillId ID of the requested skill
- * @param skillTitle Title of the skill
- * @returns Promise resolving to the notification ID if successful
- */
-export async function createSkillRequestNotification(
-  sessionId: string,
-  providerId: string,
-  skillId: string,
-  skillTitle: string
-): Promise<string | null> {
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user?.id) {
-      logger.error('No authenticated user found for skill request notification');
-      return null;
-    }
-
-    return createNotification({
-      userId: providerId,
-      actorId: user.user.id,
-      title: `New request for your skill: ${skillTitle}`,
-      contentType: 'skill_request',
-      contentId: sessionId,
-      notificationType: 'skills',
-      actionType: 'respond',
-      actionLabel: 'Respond',
-      relevanceScore: 3, // High importance
-      metadata: {
-        skill_id: skillId,
-        session_id: sessionId,
-        skill_title: skillTitle
-      }
-    });
-  } catch (error) {
-    logger.error('Exception creating skill request notification:', error);
-    return null;
-  }
-}
-
-/**
- * Create a notification for new time slots added to a skill session
- * 
- * @param sessionId ID of the skill session
- * @param requesterId ID of the skill requester
- * @param skillTitle Title of the skill
- * @returns Promise resolving to the notification ID if successful
- */
-export async function createTimeSlotNotification(
-  sessionId: string,
-  requesterId: string,
-  skillTitle: string
-): Promise<string | null> {
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user?.id) {
-      logger.error('No authenticated user found for time slot notification');
-      return null;
-    }
-
-    return createNotification({
-      userId: requesterId,
-      actorId: user.user.id,
-      title: `New time slots available for ${skillTitle}`,
-      contentType: 'skill_session',
-      contentId: sessionId,
-      notificationType: 'skills',
-      actionType: 'schedule',
-      actionLabel: 'Choose Time',
-      relevanceScore: 3, // High importance
-      metadata: {
-        session_id: sessionId,
-        status: 'pending_requester_confirmation'
-      }
-    });
-  } catch (error) {
-    logger.error('Exception creating time slot notification:', error);
-    return null;
-  }
-}
-
-/**
- * Create a notification for a safety update comment
- * 
- * @param commentId ID of the comment
- * @param safetyUpdateId ID of the safety update
- * @param authorId ID of the safety update author
- * @param safetyTitle Title of the safety update
- * @param commentPreview Preview of the comment content
- * @returns Promise resolving to the notification ID if successful
- */
-export async function createSafetyCommentNotification(
-  commentId: string,
-  safetyUpdateId: string,
-  authorId: string,
-  safetyTitle: string,
-  commentPreview: string
-): Promise<string | null> {
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user?.id) {
-      logger.error('No authenticated user found for safety comment notification');
-      return null;
-    }
-
-    // Don't notify if commenter is the author
-    if (user.user.id === authorId) {
-      logger.debug('Skipping self-comment notification');
-      return null;
-    }
-
-    return createNotification({
-      userId: authorId,
-      actorId: user.user.id,
-      title: `New comment on your safety update: ${safetyTitle}`,
-      contentType: 'safety_comment',
-      contentId: commentId,
-      notificationType: 'safety',
-      actionType: 'view',
-      actionLabel: 'View Comment',
-      relevanceScore: 3, // High importance
-      metadata: {
-        safety_update_id: safetyUpdateId,
-        comment_id: commentId,
-        comment_preview: commentPreview.substring(0, 50)
-      }
-    });
-  } catch (error) {
-    logger.error('Exception creating safety comment notification:', error);
-    return null;
-  }
-}
-
 export default {
   createNotification,
   markAsRead,
   archiveNotification,
   markAllAsRead,
-  getUnreadCount,
-  createRsvpNotification,
-  createSkillRequestNotification,
-  createTimeSlotNotification,
-  createSafetyCommentNotification
+  getUnreadCount
 };

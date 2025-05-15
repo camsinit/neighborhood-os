@@ -3,7 +3,7 @@
  * Hook for safety update notifications
  * 
  * This hook provides utility functions for safety update notifications
- * Now uses the database triggers directly (no edge function calls)
+ * Now exclusively uses the database triggers system
  */
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
@@ -12,25 +12,19 @@ import { refreshEvents } from "@/utils/refreshEvents";
 const logger = createLogger('useSafetyNotifications');
 
 /**
- * Legacy compatibility function for safety comment notifications
- * Now the notification is created by a database trigger automatically
+ * Signal that a safety comment has been added
+ * Notification is created automatically by database triggers
  * 
  * @param commentId - ID of the new comment
  * @param safetyUpdateId - ID of the safety update that was commented on
- * @param authorId - ID of the safety update author (recipient)
- * @param safetyTitle - Title of the safety update
- * @param commentPreview - Preview text of the comment (first 50 chars)
  */
 export async function notifySafetyComment(
   commentId: string,
-  safetyUpdateId: string,
-  authorId: string,
-  safetyTitle: string,
-  commentPreview: string
+  safetyUpdateId: string
 ): Promise<boolean> {
   try {
     // Log that we're using the database trigger system
-    logger.info('Safety comment notification is now handled by database triggers', {
+    logger.info('Safety comment notification is handled by database triggers', {
       commentId, safetyUpdateId
     });
     
@@ -46,22 +40,20 @@ export async function notifySafetyComment(
 }
 
 /**
- * Legacy compatibility function for safety update notifications
- * Now the notification is created by a database trigger automatically
+ * Signal that a safety update has been created or changed
+ * Notification is created automatically by database triggers
  * 
  * @param safetyUpdateId - ID of the safety update
- * @param action - The action performed (create/update)
- * @param safetyUpdateTitle - Title of the safety update
+ * @param action - The action performed (create/update/delete)
  */
 export async function notifySafetyChange(
   safetyUpdateId: string,
-  action: 'create' | 'update' | 'delete',
-  safetyUpdateTitle: string
+  action: 'create' | 'update' | 'delete'
 ): Promise<boolean> {
   try {
     // Log that we're using the database trigger system
-    logger.info('Safety change notification is now handled by database triggers', {
-      safetyUpdateId, action, safetyUpdateTitle
+    logger.debug('Safety change notification is handled by database triggers', {
+      safetyUpdateId, action
     });
     
     // Signal that notifications might have changed

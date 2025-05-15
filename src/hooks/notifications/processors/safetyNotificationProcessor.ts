@@ -2,10 +2,6 @@
 /**
  * This file handles the processing of safety notifications
  * It contains utility functions for transforming safety notification data
- * 
- * Note: Most safety notifications are now created by database triggers,
- * but these processors are still useful for handling notifications from 
- * legacy systems and for a consistent notification display.
  */
 import { BaseNotification } from "../types";
 
@@ -44,7 +40,7 @@ export const processSafetyNotifications = (safetyUpdates: any[]): BaseNotificati
       content_id: update.id,
       notification_type: "safety",
       action_type: "create",
-      action_label: "View Safety Update", // Added required field
+      action_label: "View Safety Update",
       created_at: update.created_at,
       updated_at: update.created_at || update.created_at,
       is_read: update.is_read || false,
@@ -86,7 +82,7 @@ export const processSafetyCommentNotifications = (comments: any[]): BaseNotifica
       content_id: comment.safety_update_id,
       notification_type: "safety",
       action_type: "view",
-      action_label: "View Comment", // Added required field
+      action_label: "View Comment",
       created_at: comment.created_at,
       updated_at: comment.created_at,
       is_read: comment.is_read || false,

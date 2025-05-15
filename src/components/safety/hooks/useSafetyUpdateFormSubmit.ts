@@ -13,7 +13,7 @@ const logger = createLogger('useSafetyUpdateFormSubmit');
 
 /**
  * Custom hook for handling safety update form submissions
- * Now uses database triggers for notifications
+ * Uses database triggers exclusively for notifications
  */
 export const useSafetyUpdateFormSubmit = (
   user: User | null,
@@ -62,7 +62,6 @@ export const useSafetyUpdateFormSubmit = (
         });
         
         // Update existing safety update
-        // Database trigger will handle notification and activity updates
         response = await supabase
           .from('safety_updates')
           .update({
@@ -78,7 +77,6 @@ export const useSafetyUpdateFormSubmit = (
         });
         
         // Create new safety update
-        // Database trigger will handle notification and activity creation
         response = await supabase
           .from('safety_updates')
           .insert(updateData);
