@@ -92,7 +92,7 @@ export const useContributionSubmit = (
       refreshEvents.skills();
       
       // Dispatch DOM events for listeners
-      window.dispatchEvent(new CustomEvent('notification-created'));
+      window.dispatchEvent(new CustomEvent('notifications-created'));
       window.dispatchEvent(new CustomEvent('skills-updated'));
 
       // Show success message
