@@ -73,15 +73,15 @@ const SafetyUpdateCard = ({
     <ModuleItemCard
       itemType="safety"
       itemId={update.id}
-      className="p-4"
+      className="p-4 rounded-lg"
       accentColor={typeStyles.accentColor}
       onClick={onClick}
     >
       <div className="flex items-start gap-4">
         {/* User avatar with fallback */}
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={update.profiles?.avatar_url} alt={update.profiles?.display_name || 'User'} />
-          <AvatarFallback>
+        <Avatar className="h-10 w-10 rounded-full">
+          <AvatarImage src={update.profiles?.avatar_url} alt={update.profiles?.display_name || 'User'} className="rounded-full" />
+          <AvatarFallback className="rounded-full">
             <User className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>

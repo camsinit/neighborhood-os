@@ -4,6 +4,10 @@
  */
 
 @layer base {
+  :root {
+    --radius: 0.75rem;
+  }
+  
   html {
     scroll-behavior: smooth;
   }
@@ -20,5 +24,18 @@
   /* Visual indicator for keyboard navigation */
   .focus-indicator:focus-visible {
     @apply ring-2 ring-offset-2 ring-primary;
+  }
+  
+  /* Ensure all UI elements have rounded corners by default */
+  button, 
+  .btn, 
+  input, 
+  select, 
+  textarea, 
+  .card, 
+  .modal, 
+  .popover, 
+  .dropdown {
+    @apply rounded-md;
   }
 }

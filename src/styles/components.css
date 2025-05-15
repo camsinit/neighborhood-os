@@ -64,4 +64,27 @@
       box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
     }
   }
+
+  /* Ensure all UI elements have rounded corners */
+  button, 
+  .button,
+  input,
+  select,
+  textarea,
+  .card,
+  .dialog,
+  .popover,
+  .dropdown-menu,
+  .alert,
+  .toast,
+  .badge {
+    @apply rounded-md !important;
+  }
+  
+  /* Ensure avatars have full rounded appearance */
+  .avatar, 
+  .avatar-image, 
+  .avatar-fallback {
+    @apply rounded-full !important;
+  }
 }
