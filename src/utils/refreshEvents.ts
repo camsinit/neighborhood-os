@@ -1,106 +1,99 @@
 
 /**
- * RefreshEvents - Utility for refreshing data across components
+ * Unified Event Refresh Utility
  * 
- * This utility helps components communicate when data needs to be refreshed
- * without tight coupling, using a custom events system.
+ * This utility provides standardized methods to refresh various parts of the UI
+ * after data changes, particularly for notifications and activity feeds.
  */
+import { createLogger } from './logger';
 
-// Define refresh event types
+// Create a dedicated logger
+const logger = createLogger('refreshEvents');
+
+// Define the event types that can be refreshed
 export type RefreshEventType = 
-  | 'events'
-  | 'safety'
-  | 'goods'
-  | 'skills'
-  | 'notifications'
-  | 'activities';
-
-// Specific event action types
-export type EventActionType = 
-  | 'event-submitted'
-  | 'event-deleted'
-  | 'event-updated'
-  | 'event-rsvp-updated'
-  | 'safety-updated'
-  | 'goods-updated'
-  | 'skills-updated'
-  | 'notifications-read'
-  | 'activities-updated';
+  | 'notifications' 
+  | 'activities' 
+  | 'events' 
+  | 'skills' 
+  | 'goods' 
+  | 'safety' 
+  | 'support' 
+  | 'neighbors';
 
 /**
- * Dispatch a custom event to notify components that data needs to be refreshed
+ * Dispatch a generic refresh event
+ * Components can listen for these events to refresh their data
  * 
- * @param eventType The type of refresh event
- * @param data Optional data to include with the event
+ * @param type The type of event to refresh
  */
-export const dispatchRefreshEvent = (eventType: EventActionType, data?: any): void => {
-  const event = new CustomEvent(eventType, { detail: data });
-  window.dispatchEvent(event);
-};
+export function dispatchRefreshEvent(type: RefreshEventType | string): void {
+  logger.debug(`Dispatching refresh event: ${type}`);
+  window.dispatchEvent(new CustomEvent(type));
+}
 
 /**
- * Subscribe to a refresh event
- * 
- * @param eventType The type of refresh event to listen for
- * @param callback The function to call when the event is fired
- * @returns A function to unsubscribe from the event
+ * Refresh notifications data
+ * Triggers UI components to refetch notification data
  */
-export const subscribeToRefreshEvent = (eventType: EventActionType, callback: (data?: any) => void): () => void => {
-  // Create an event listener that calls the callback with the event detail
-  const eventListener = (event: Event) => {
-    const customEvent = event as CustomEvent;
-    callback(customEvent.detail);
-  };
-  
-  // Add the event listener to the window object
-  window.addEventListener(eventType, eventListener);
-  
-  // Return a function that removes the event listener
-  return () => {
-    window.removeEventListener(eventType, eventListener);
-  };
-};
+function refreshNotifications(): void {
+  logger.debug('Refreshing notifications');
+  dispatchRefreshEvent('notifications');
+}
 
 /**
- * Individual refresh functions per data type
- * These simplify calling the generic dispatchRefreshEvent with the correct event type
+ * Refresh activity feed data
+ * Triggers UI components to refetch activity data
  */
-export const refreshEvents = {
-  // Event refreshes
-  events: (data?: any) => {
-    dispatchRefreshEvent('event-submitted', data);
-  },
+function refreshActivities(): void {
+  logger.debug('Refreshing activities');
+  dispatchRefreshEvent('activities');
+}
 
-  // Safety updates refreshes
-  safety: (data?: any) => {
-    dispatchRefreshEvent('safety-updated', data);
-  },
+/**
+ * Refresh events data
+ * Triggers UI components to refetch event data
+ */
+function refreshEvents(): void {
+  logger.debug('Refreshing events');
+  dispatchRefreshEvent('events');
+}
 
-  // Goods updates refreshes
-  goods: (data?: any) => {
-    dispatchRefreshEvent('goods-updated', data);
-  },
+/**
+ * Refresh skills data
+ * Triggers UI components to refetch skills data
+ */
+function refreshSkills(): void {
+  logger.debug('Refreshing skills');
+  dispatchRefreshEvent('skills');
+}
 
-  // Skills updates refreshes
-  skills: (data?: any) => {
-    dispatchRefreshEvent('skills-updated', data);
-  },
+/**
+ * Refresh goods exchange data
+ * Triggers UI components to refetch goods exchange data
+ */
+function refreshGoods(): void {
+  logger.debug('Refreshing goods exchange');
+  dispatchRefreshEvent('goods');
+}
 
-  // Notifications updates refreshes
-  notifications: (data?: any) => {
-    dispatchRefreshEvent('notifications-read', data);
-  },
+/**
+ * Refresh safety updates data
+ * Triggers UI components to refetch safety updates
+ */
+function refreshSafety(): void {
+  logger.debug('Refreshing safety updates');
+  dispatchRefreshEvent('safety');
+}
 
-  // Activities updates refreshes
-  activities: (data?: any) => {
-    dispatchRefreshEvent('activities-updated', data);
-  },
-
-  // Add an 'on' method to subscribe to refresh events
-  on: (eventType: EventActionType, callback: (data?: any) => void): () => void => {
-    return subscribeToRefreshEvent(eventType, callback);
-  }
+// Export all refresh functions
+const refreshEvents = {
+  notifications: refreshNotifications,
+  activities: refreshActivities,
+  events: refreshEvents,
+  skills: refreshSkills,
+  goods: refreshGoods,
+  safety: refreshSafety
 };
 
-// Default export for simpler imports
 export default refreshEvents;

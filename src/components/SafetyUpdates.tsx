@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
@@ -20,7 +19,7 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * SafetyUpdates component displays a list of safety updates for the neighborhood
@@ -62,6 +61,7 @@ const SafetyUpdates = () => {
   }, [safetyUpdates]); // Use the array directly
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   return (
     <>
@@ -149,12 +149,15 @@ const SafetyUpdates = () => {
                         .eq('author_id', user.id)
                         .then(({ error }) => {
                           if (error) {
-                            toast.error("Error", {
-                              description: "Failed to delete safety update"
+                            toast({
+                              title: "Error",
+                              description: "Failed to delete safety update",
+                              variant: "destructive"
                             });
                             return;
                           }
-                          toast.success("Success", {
+                          toast({
+                            title: "Success",
                             description: "Safety update deleted successfully"
                           });
                           setSelectedUpdate(null);

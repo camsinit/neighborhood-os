@@ -1,19 +1,9 @@
-
 import { useState, useEffect } from 'react';
-import { setLogLevel } from '@/utils/logger';
+import { LogLevel, setLogLevel, enableModules } from '@/utils/logger';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Bug } from 'lucide-react'; // Changed from BugAntIcon to Bug from lucide-react
-
-// Define enum in the component since we can't use the imported type as a value
-enum LogLevelValues {
-  ERROR = 3,
-  WARN = 2,
-  INFO = 1,
-  DEBUG = 0,
-  TRACE = -1
-}
 
 /**
  * Props for the LoggingControls component
@@ -33,7 +23,7 @@ const LoggingControls = ({
   embedded = false
 }: LoggingControlsProps) => {
   // State to track the current log level
-  const [currentLevel, setCurrentLevel] = useState<string>(String(LogLevelValues.INFO));
+  const [currentLevel, setCurrentLevel] = useState<string>(String(LogLevel.INFO));
   const [isVisible, setIsVisible] = useState(true); // Always visible for debugging
 
   // Initialize from localStorage if available
@@ -55,13 +45,13 @@ const LoggingControls = ({
   // Handler for when log level changes
   const handleLevelChange = (value: string) => {
     setCurrentLevel(value);
-    setLogLevel(value as any); // Pass the log level as any to avoid type errors
+    setLogLevel(Number(value) as LogLevel);
   };
 
   // Set log level to TRACE for intensive debugging
   const setTraceMode = () => {
-    setLogLevel(LogLevelValues.TRACE as any);
-    setCurrentLevel(String(LogLevelValues.TRACE));
+    setLogLevel(LogLevel.TRACE);
+    setCurrentLevel(String(LogLevel.TRACE));
     console.log("🔍 TRACE logging enabled - You will now see detailed app behavior");
   };
 
@@ -82,11 +72,11 @@ const LoggingControls = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={String(LogLevelValues.ERROR)}>ERROR</SelectItem>
-              <SelectItem value={String(LogLevelValues.WARN)}>WARN</SelectItem>
-              <SelectItem value={String(LogLevelValues.INFO)}>INFO</SelectItem>
-              <SelectItem value={String(LogLevelValues.DEBUG)}>DEBUG</SelectItem>
-              <SelectItem value={String(LogLevelValues.TRACE)}>TRACE</SelectItem>
+              <SelectItem value={String(LogLevel.ERROR)}>ERROR</SelectItem>
+              <SelectItem value={String(LogLevel.WARN)}>WARN</SelectItem>
+              <SelectItem value={String(LogLevel.INFO)}>INFO</SelectItem>
+              <SelectItem value={String(LogLevel.DEBUG)}>DEBUG</SelectItem>
+              <SelectItem value={String(LogLevel.TRACE)}>TRACE</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -101,7 +91,7 @@ const LoggingControls = ({
           </Button>
         </div>
         
-        {currentLevel === String(LogLevelValues.TRACE) && <Alert className="bg-amber-50 text-amber-800 border-amber-200 p-2 text-xs">
+        {currentLevel === String(LogLevel.TRACE) && <Alert className="bg-amber-50 text-amber-800 border-amber-200 p-2 text-xs">
             <AlertDescription className="text-[10px]">
               TRACE logging active — Check console (F12)
             </AlertDescription>
@@ -110,6 +100,6 @@ const LoggingControls = ({
   }
 
   // Render the original floating version when not embedded
-  return null;
+  return;
 };
 export default LoggingControls;

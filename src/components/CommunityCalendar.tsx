@@ -19,7 +19,7 @@ import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
 import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
@@ -41,6 +41,7 @@ const CommunityCalendar = () => {
   
   // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();
+  const { toast } = useToast();
   
   // Set up auto-refresh for calendar events
   // This will listen for multiple events that should trigger a calendar refresh
@@ -81,7 +82,8 @@ const CommunityCalendar = () => {
         }, 100);
 
         // Show toast
-        toast("Event Located", {
+        toast({
+          title: "Event Located",
           description: `Navigated to "${event.title}"`,
           duration: 3000,
         });
@@ -92,7 +94,7 @@ const CommunityCalendar = () => {
     return () => {
       window.removeEventListener('navigateToEvent', handleNavigateToEvent as EventListener);
     };
-  }, [events, currentDate]);
+  }, [events, currentDate, toast]);
 
   // Calculate date ranges based on current view
   const weekStart = startOfWeek(currentDate);

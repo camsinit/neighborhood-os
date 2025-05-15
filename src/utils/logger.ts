@@ -4,13 +4,7 @@
  */
 
 // Log levels
-export enum LogLevel {
-  TRACE = -1,
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3
-}
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 // Logger configuration
 interface LoggerConfig {
@@ -20,8 +14,16 @@ interface LoggerConfig {
 
 // Default configuration
 const config: LoggerConfig = {
-  minLevel: LogLevel.INFO,
+  minLevel: 'info',
   debugMode: process.env.NODE_ENV === 'development'
+};
+
+// Log level priority
+const LOG_LEVEL_PRIORITY = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3
 };
 
 /**
@@ -32,8 +34,8 @@ const config: LoggerConfig = {
  */
 export function createLogger(moduleName: string) {
   const shouldLog = (level: LogLevel): boolean => {
-    if (!config.debugMode && level === LogLevel.DEBUG) return false;
-    return level >= config.minLevel;
+    if (!config.debugMode && level === 'debug') return false;
+    return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[config.minLevel];
   };
 
   const formatMessage = (message: string): string => {
@@ -42,19 +44,10 @@ export function createLogger(moduleName: string) {
 
   return {
     /**
-     * Log a trace message (only in development)
-     */
-    trace: (message: string, ...args: any[]): void => {
-      if (shouldLog(LogLevel.TRACE)) {
-        console.debug(`TRACE ${formatMessage(message)}`, ...args);
-      }
-    },
-
-    /**
      * Log a debug message (only in development)
      */
     debug: (message: string, ...args: any[]): void => {
-      if (shouldLog(LogLevel.DEBUG)) {
+      if (shouldLog('debug')) {
         console.debug(formatMessage(message), ...args);
       }
     },
@@ -63,7 +56,7 @@ export function createLogger(moduleName: string) {
      * Log an info message
      */
     info: (message: string, ...args: any[]): void => {
-      if (shouldLog(LogLevel.INFO)) {
+      if (shouldLog('info')) {
         console.info(formatMessage(message), ...args);
       }
     },
@@ -72,7 +65,7 @@ export function createLogger(moduleName: string) {
      * Log a warning message
      */
     warn: (message: string, ...args: any[]): void => {
-      if (shouldLog(LogLevel.WARN)) {
+      if (shouldLog('warn')) {
         console.warn(formatMessage(message), ...args);
       }
     },
@@ -81,7 +74,7 @@ export function createLogger(moduleName: string) {
      * Log an error message
      */
     error: (message: string, ...args: any[]): void => {
-      if (shouldLog(LogLevel.ERROR)) {
+      if (shouldLog('error')) {
         console.error(formatMessage(message), ...args);
       }
     }

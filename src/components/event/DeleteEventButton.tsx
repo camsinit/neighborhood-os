@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { dispatchRefreshEvent } from "@/utils/refreshEvents";
+import { refreshEvents, dispatchRefreshEvent } from "@/utils/refreshEvents";
 
 /**
  * DeleteEventButton component
