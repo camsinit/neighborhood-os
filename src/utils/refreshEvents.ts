@@ -29,7 +29,9 @@ export type EventActionType =
   | 'skills-updated'
   | 'goods-updated'
   | 'safety-updated'
-  | 'activities-updated';
+  | 'activities-updated'
+  | 'event-deleted'
+  | 'event-submitted';
 
 /**
  * Dispatch a generic refresh event

@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import refreshEvents, { dispatchRefreshEvent } from "@/utils/refreshEvents";
 import { toast } from "sonner";
 
 // Setup logger for RSVP service
@@ -73,10 +73,10 @@ export const rsvpService = {
     refreshEvents.notifications();
     
     // Method 2: Using direct event dispatch
-    window.dispatchEvent(new CustomEvent('notification-created'));
+    dispatchRefreshEvent('notifications-created');
     
     // Method 3: Dispatch RSVP-specific event
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+    dispatchRefreshEvent('events-updated');
 
     // Log successful event dispatch  
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
@@ -126,10 +126,10 @@ export const rsvpService = {
     refreshEvents.notifications();
     
     // Method 2: Using direct event dispatch
-    window.dispatchEvent(new CustomEvent('notification-created'));
+    dispatchRefreshEvent('notifications-created');
     
     // Method 3: Dispatch RSVP-specific event
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+    dispatchRefreshEvent('events-updated');
     
     // Log successful event dispatch
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
