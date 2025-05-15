@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,7 +35,6 @@ function SkillsPage() {
   useEffect(() => {
     const skillId = searchParams.get('skillId');
     if (skillId) {
-      // Fixed highlightItem call
       highlightItem('skills', skillId);
     }
   }, [searchParams]);
@@ -93,13 +93,13 @@ function SkillsPage() {
           </div>
           
           <TabsContent value="offers" className="mt-0">
-            <SkillsList showRequests={false} />
+            <SkillsList showRequests={false} selectedCategory={category} />
           </TabsContent>
           <TabsContent value="requests" className="mt-0">
-            <SkillsList showRequests={true} />
+            <SkillsList showRequests={true} selectedCategory={category} />
           </TabsContent>
           <TabsContent value="mine" className="mt-0">
-            <SkillsList showMine={true} />
+            <SkillsList showMine={true} selectedCategory={category} />
           </TabsContent>
         </Tabs>
       </ModuleContent>

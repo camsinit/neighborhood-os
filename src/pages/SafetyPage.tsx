@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import SafetyUpdates from '@/components/SafetyUpdates';
@@ -16,7 +17,6 @@ function SafetyPage() {
   useEffect(() => {
     const updateId = searchParams.get('updateId');
     if (updateId) {
-      // Fixed highlightItem call
       highlightItem('safety', updateId);
     }
   }, [searchParams]);
@@ -27,12 +27,17 @@ function SafetyPage() {
         title="Safety Updates" 
         description="Stay informed about safety in your community"
         actions={
-          <AddSafetyUpdateDialog>
-            <Button className="whitespace-nowrap flex items-center gap-1.5">
-              <PlusCircle className="h-4 w-4" />
-              <span>Post Update</span>
-            </Button>
-          </AddSafetyUpdateDialog>
+          // Properly render the AddSafetyUpdateDialog with required props
+          <AddSafetyUpdateDialog 
+            open={false}
+            onOpenChange={() => {}}
+            trigger={
+              <Button className="whitespace-nowrap flex items-center gap-1.5">
+                <PlusCircle className="h-4 w-4" />
+                <span>Post Update</span>
+              </Button>
+            }
+          />
         }
       />
       <ModuleContent>

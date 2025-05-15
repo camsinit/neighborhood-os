@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,7 +18,6 @@ function CalendarPage() {
   useEffect(() => {
     const eventId = searchParams.get('eventId');
     if (eventId) {
-      // Fixed highlightItem call
       highlightItem('event', eventId);
     }
   }, [searchParams]);

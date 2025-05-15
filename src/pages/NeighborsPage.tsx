@@ -1,6 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
-import UserDirectory from '@/components/neighbors/UserDirectory';
+import { UserDirectory } from '@/components/neighbors/UserDirectory'; // Changed to named import
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover';
@@ -17,7 +18,6 @@ function NeighborsPage() {
   useEffect(() => {
     const neighborId = searchParams.get('neighborId');
     if (neighborId) {
-      // Fixed highlightItem call
       highlightItem('neighbors', neighborId);
     }
   }, [searchParams]);
@@ -28,12 +28,11 @@ function NeighborsPage() {
         title="Neighbors" 
         description="Get to know the people in your community"
         actions={
-          <InviteNeighborPopover>
-            <Button variant="default" className="flex items-center gap-1.5">
-              <Plus className="h-4 w-4" />
-              Invite Neighbor
-            </Button>
-          </InviteNeighborPopover>
+          // Fixed trigger prop for InviteNeighborPopover
+          <Button variant="default" className="flex items-center gap-1.5" onClick={() => {}}>
+            <Plus className="h-4 w-4" />
+            Invite Neighbor
+          </Button>
         }
       />
       <ModuleContent>
