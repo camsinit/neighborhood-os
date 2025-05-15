@@ -1,41 +1,26 @@
 
 /**
- * Constants for highlight navigation
+ * Constants for the highlight system
  * 
- * This file contains mapping objects used to associate item types 
- * with their respective routing and DOM attributes
+ * This file contains route mappings and configuration for the highlight system.
  */
 import { HighlightableItemType } from './types';
 
-/**
- * Maps item types to their respective routes in the application
- */
+// Map item types to their respective routes
 export const routeMap: Record<HighlightableItemType, string> = {
-  safety: "/safety",
-  event: "/calendar", 
-  skills: "/skills",
-  goods: "/goods",
-  neighbors: "/neighbors"
+  event: '/calendar',
+  safety: '/safety',
+  skills: '/skills',
+  goods: '/goods',
+  neighbors: '/neighbors'
 };
 
-/**
- * Maps item types to their data attributes for DOM selection
- */
-export const dataAttributeMap: Record<HighlightableItemType, string> = {
-  safety: "data-safety-id",
-  event: "data-event-id", 
-  skills: "data-skill-id", 
-  goods: "data-goods-id",
-  neighbors: "data-neighbor-id"
+// Animation configuration for highlighted items
+export const highlightConfig = {
+  duration: 2000,       // Duration of highlight in milliseconds
+  color: '#FBBF24',     // Amber color for highlight
+  fadeDuration: 500     // Fade out duration in milliseconds
 };
 
-/**
- * Maps item types to readable names for error messages
- */
-export const readableTypeNames: Record<HighlightableItemType, string> = {
-  safety: "Safety Update",
-  event: "Event", 
-  skills: "Skill",
-  goods: "Goods Item",
-  neighbors: "Neighbor Profile"
-};
+// Delay before scrolling to an element
+export const scrollDelay = 200;  // milliseconds

@@ -7,7 +7,7 @@ import { ModuleContentProps } from '@/types/module';
  * ModuleContent Component
  * 
  * This component provides consistent content area sizing and positioning
- * for all modules without additional header elements.
+ * for all modules with proper scroll handling.
  * 
  * @param children - The content to be displayed
  * @param className - Optional additional classes
@@ -17,12 +17,10 @@ const ModuleContent = ({
   className
 }: ModuleContentProps) => {
   return (
-    <div className="min-h-full w-full">
+    <div className="min-h-full w-full overflow-y-auto">
       {/* Content container with consistent padding */}
-      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)}>
-        <div className="py-8">
-          {children}
-        </div>
+      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", className)}>
+        {children}
       </div>
     </div>
   );

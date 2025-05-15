@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import { ModuleLayout } from '@/components/layout';
 import { UserDirectory } from '@/components/neighbors/UserDirectory'; 
 import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover';
 import { useSearchParams } from 'react-router-dom';
@@ -27,18 +27,15 @@ function NeighborsPage() {
   }, [searchParams]);
   
   return (
-    <ModuleContainer themeColor="neighbors">
-      <ModuleHeader 
-        title="Neighbors" 
-        description="Get to know the people in your community"
-        themeColor="neighbors"
-        actions={<InviteNeighborPopover />}
-      />
-      <ModuleContent>
-        <GodModeSelector />
-        <UserDirectory />
-      </ModuleContent>
-    </ModuleContainer>
+    <ModuleLayout
+      title="Neighbors" 
+      description="Get to know the people in your community"
+      themeColor="neighbors"
+      actions={<InviteNeighborPopover />}
+    >
+      <GodModeSelector />
+      <UserDirectory />
+    </ModuleLayout>
   );
 }
 

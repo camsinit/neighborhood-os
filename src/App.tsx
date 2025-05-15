@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'; // Added Outlet import
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
@@ -22,7 +22,6 @@ import SkillsPage from './pages/SkillsPage';
 import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
-// Removed CarePage import
 import WaitlistAdmin from './pages/WaitlistAdmin';
 
 // Import components
@@ -103,37 +102,28 @@ function App() {
           <Router>
             <Routes>
               {/* Public routes */}
-              {/* Root route displays landing page */}
               <Route path="/" element={<LandingPage />} />
-              
-              {/* Authentication route - single instance */}
               <Route path="/login" element={<Login />} />
-              
-              {/* Join routes - single instance with optional parameter */}
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
-              
-              {/* Route for determining navigation based on auth state */}
               <Route path="/index" element={<Index />} />
               
-              {/* Protected routes with MainLayout - this is the key fix */}
-              {/* We create a parent route that renders the MainLayout with the Outlet for child routes */}
+              {/* Protected routes with MainLayout */}
               <Route 
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      {/* The Outlet component will render the matching child route */}
                       <Outlet />
                     </MainLayout>
                   </ProtectedRoute>
                 }
               >
-                {/* All these routes will be rendered inside the MainLayout via the Outlet */}
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
+                
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>

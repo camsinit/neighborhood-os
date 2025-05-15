@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import { ModuleLayout } from '@/components/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'react-router-dom'; 
 import CalendarEvents from '@/components/calendar/CalendarEvents';
@@ -23,42 +23,39 @@ function CalendarPage() {
   }, [searchParams]);
 
   return (
-    <ModuleContainer themeColor="calendar">
-      <ModuleHeader 
-        title="Community Calendar"
-        description="Upcoming events in your neighborhood"
-        themeColor="calendar"
-        actions={
-          <Button className="whitespace-nowrap flex items-center gap-1.5">
-            <PlusCircle className="h-4 w-4" />
-            <span>Add Event</span>
-          </Button>
-        }
-      />
-      <ModuleContent>
-        <Tabs defaultValue={view} className="w-full">
-          <div className="flex justify-between items-center mb-6">
-            <TabsList>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="agenda">Agenda</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="month" className="mt-0">
-            <CalendarEvents view="month" />
-          </TabsContent>
-          
-          <TabsContent value="week" className="mt-0">
-            <CalendarEvents view="week" />
-          </TabsContent>
-          
-          <TabsContent value="agenda" className="mt-0">
-            <CalendarEvents view="agenda" />
-          </TabsContent>
-        </Tabs>
-      </ModuleContent>
-    </ModuleContainer>
+    <ModuleLayout
+      title="Community Calendar"
+      description="Upcoming events in your neighborhood"
+      themeColor="calendar"
+      actions={
+        <Button className="whitespace-nowrap flex items-center gap-1.5">
+          <PlusCircle className="h-4 w-4" />
+          <span>Add Event</span>
+        </Button>
+      }
+    >
+      <Tabs defaultValue={view} className="w-full">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="month">Month</TabsTrigger>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="agenda">Agenda</TabsTrigger>
+          </TabsList>
+        </div>
+        
+        <TabsContent value="month" className="mt-0">
+          <CalendarEvents view="month" />
+        </TabsContent>
+        
+        <TabsContent value="week" className="mt-0">
+          <CalendarEvents view="week" />
+        </TabsContent>
+        
+        <TabsContent value="agenda" className="mt-0">
+          <CalendarEvents view="agenda" />
+        </TabsContent>
+      </Tabs>
+    </ModuleLayout>
   );
 }
 

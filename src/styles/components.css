@@ -36,4 +36,32 @@
   .module-card-sm {
     @apply bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm;
   }
+  
+  /* Highlight animations */
+  .highlight-item {
+    @apply relative;
+  }
+  
+  .highlight-item::after {
+    @apply absolute inset-0 rounded-md ring-2 ring-amber-300 opacity-0 transition-opacity duration-500;
+    content: '';
+    pointer-events: none;
+  }
+  
+  .highlight-item.active::after {
+    @apply opacity-100;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+    }
+  }
 }
