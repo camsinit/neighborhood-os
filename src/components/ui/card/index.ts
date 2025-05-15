@@ -5,8 +5,8 @@
  * This file exports all card components, both from shadcn/ui and our custom implementations
  */
 
-// Re-export the shadcn/ui Card components
-export * from "@/components/ui/card";
+// Re-export the shadcn/ui Card components - using relative path to avoid circular dependency
+export * from "../card";
 
 // Export our custom card components
 export { default as BaseCard, type BaseCardProps } from "./BaseCard";
