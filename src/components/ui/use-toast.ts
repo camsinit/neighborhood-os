@@ -5,15 +5,7 @@
  * This maintains the existing API used in the codebase
  * while allowing us to switch toast libraries if needed
  */
-import { toast } from 'sonner';
+import { toast, useToast } from '@/hooks/use-toast';
 
-// For backwards compatibility
-export function useToast() {
-  return {
-    toast,
-    toasts: [], // for compatibility
-  };
-}
-
-// Export toast function directly
-export { toast };
+// Export toast function and hook directly
+export { toast, useToast };

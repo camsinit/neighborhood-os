@@ -1,3 +1,4 @@
+
 /**
  * MarkAllAsReadButton.tsx
  * 
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"; // Updated to use Sonner directly
 
 // Props for MarkAllAsReadButton component
 interface MarkAllAsReadButtonProps {
@@ -31,9 +32,6 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
 }) => {
   const [isMarkingRead, setIsMarkingRead] = useState(false);
   const queryClient = useQueryClient();
-  const {
-    toast
-  } = useToast();
 
   // Don't show the button if there are no unread notifications or we're viewing archived notifications
   if (unreadCount === 0 || showArchived) {
@@ -49,11 +47,7 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       const user = await supabase.auth.getUser();
       const userId = user.data.user?.id;
       if (!userId) {
-        toast({
-          title: "Error",
-          description: "User not authenticated",
-          variant: "destructive"
-        });
+        toast.error("User not authenticated");
         return;
       }
 
@@ -82,21 +76,27 @@ const MarkAllAsReadButton: React.FC<MarkAllAsReadButtonProps> = ({
       if (onComplete) {
         onComplete();
       }
-      toast({
-        title: "Success",
-        description: "All notifications marked as read"
-      });
+      toast.success("All notifications marked as read");
     } catch (error) {
       console.error('Error marking notifications as read:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark notifications as read",
-        variant: "destructive"
-      });
+      toast.error("Failed to mark notifications as read");
     } finally {
       setIsMarkingRead(false);
     }
   };
-  return;
+  
+  // Render the button
+  return (
+    <Button 
+      variant="ghost" 
+      size="sm" 
+      onClick={markAllAsRead} 
+      disabled={isMarkingRead}
+      className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900"
+    >
+      <Check className="h-3 w-3" />
+      {isMarkingRead ? "Marking..." : "Mark all as read"}
+    </Button>
+  );
 };
 export default MarkAllAsReadButton;

@@ -1,26 +1,52 @@
 
 /**
- * Toast utility hook using Sonner
+ * This is a compatibility layer for Sonner toast
  * 
- * This file provides a centralized way to access toast functionality
- * throughout the application by re-exporting from Sonner.
+ * It provides a unified API that works with both the older toast system
+ * and the newer Sonner toast implementation.
  */
-import { toast } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
 
-// Re-export Sonner's toast directly
-export { toast };
+// Custom toast type that handles both the old API (title/description) and new API (description only)
+export type Toast = {
+  title?: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success';
+};
 
-/**
- * Legacy hook for backward compatibility with older components
- * This maintains the same API signature that older components expect
- */
+// Adapter function that converts our app's toast format to Sonner's format
+const adaptToastToSonner = (props: Toast) => {
+  // If using the old API with title, combine title and description
+  if (props.title) {
+    const message = props.description 
+      ? `${props.title}: ${props.description}`
+      : props.title;
+    
+    // Map variant to Sonner's variants
+    if (props.variant === 'destructive') {
+      return sonnerToast.error(message);
+    } else if (props.variant === 'success') {
+      return sonnerToast.success(message);
+    } else {
+      return sonnerToast(message);
+    }
+  } 
+  // If using the new API with just description
+  else {
+    return sonnerToast(props.description || '');
+  }
+};
+
+// Compatibility function that mimics the old toast API but uses Sonner
+export const toast = (props: Toast) => {
+  return adaptToastToSonner(props);
+};
+
+// For backwards compatibility with components using useToast hook
 export function useToast() {
   return {
-    toast, // Provide the toast function directly
-    // Additional compatibility methods that some components might expect
-    dismiss: toast.dismiss,
-    update: toast.update,
-    // Placeholder for components that expect toasts array
-    toasts: [] as any[]
+    toast: adaptToastToSonner,
+    // For compatibility with components expecting toasts array
+    toasts: [] 
   };
 }

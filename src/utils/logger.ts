@@ -4,7 +4,7 @@
  */
 
 // Log levels
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 
 // Logger configuration
 interface LoggerConfig {
@@ -20,21 +20,22 @@ const config: LoggerConfig = {
 
 // Log level priority
 const LOG_LEVEL_PRIORITY = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3
+  trace: 0,  // Added trace as the lowest level
+  debug: 1,
+  info: 2,
+  warn: 3,
+  error: 4
 };
 
 /**
  * Create a logger instance with a specific module name
  * 
  * @param moduleName Name of the module for context
- * @returns Logger instance with debug, info, warn, and error methods
+ * @returns Logger instance with trace, debug, info, warn, and error methods
  */
 export function createLogger(moduleName: string) {
   const shouldLog = (level: LogLevel): boolean => {
-    if (!config.debugMode && level === 'debug') return false;
+    if (!config.debugMode && (level === 'debug' || level === 'trace')) return false;
     return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[config.minLevel];
   };
 
@@ -43,6 +44,16 @@ export function createLogger(moduleName: string) {
   };
 
   return {
+    /**
+     * Log a trace message (lowest level, most detailed debugging)
+     * Only shown in development when trace level is enabled
+     */
+    trace: (message: string, ...args: any[]): void => {
+      if (shouldLog('trace')) {
+        console.debug(`TRACE: ${formatMessage(message)}`, ...args);
+      }
+    },
+
     /**
      * Log a debug message (only in development)
      */

@@ -4,11 +4,11 @@
  * 
  * A diagnostic panel shown at the bottom of the sidebar with basic information
  * for debugging purposes. Core contributor mode has been removed.
- * Now includes embedded LoggingControls component for easier access to logging settings.
+ * Logging controls have been temporarily disabled.
  */
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood';
-import LoggingControls from '@/components/debug/LoggingControls';
+// Removed LoggingControls import since it's temporarily disabled
 
 // Define the component props interface
 interface DiagnosticsPanelProps {
@@ -19,7 +19,7 @@ interface DiagnosticsPanelProps {
 /**
  * DiagnosticsPanel displays basic debugging information in the sidebar
  * This simplified version has removed the core contributor functionality
- * Now includes the LoggingControls component embedded directly in the panel
+ * Logging controls are temporarily disabled
  */
 const DiagnosticsPanel = ({ 
   user,
@@ -52,10 +52,12 @@ const DiagnosticsPanel = ({
         )}
       </div>
       
-      {/* Integrated LoggingControls section */}
+      {/* Logging Controls temporarily removed */}
       <div className="mt-3 pt-2 border-t border-gray-200">
         <h6 className="font-medium mb-1">Logging Controls</h6>
-        <LoggingControls embedded={true} />
+        <p className="text-amber-600 text-[10px]">
+          Temporarily disabled - Coming soon in Phase 2
+        </p>
       </div>
     </div>
   );

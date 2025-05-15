@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner"; // Updated import to use Sonner directly
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
@@ -26,9 +27,7 @@ const ActivityFeed = () => {
     refetch,
     isRefetching
   } = useActivities();
-  const {
-    toast
-  } = useToast();
+  
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -59,15 +58,12 @@ const ActivityFeed = () => {
     logger.debug("Manual refresh triggered");
     refetch();
     setLastRefresh(new Date());
-    toast({
-      title: "Feed refreshed",
-      description: `Last updated: ${new Date().toLocaleTimeString()}`
-    });
+    toast(`Feed refreshed - Last updated: ${new Date().toLocaleTimeString()}`);
   };
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
-    logger.trace(`Activity action triggered for ${activity.id}`);
+    logger.debug(`Activity action triggered for ${activity.id}`);
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
@@ -76,7 +72,7 @@ const ActivityFeed = () => {
   const filteredActivities = activities?.filter(activity => {
     const isDeleted = !!activity.metadata?.deleted;
     if (isDeleted) {
-      logger.trace(`Filtered out deleted activity: ${activity.id}`);
+      logger.debug(`Filtered out deleted activity: ${activity.id}`);
     }
     return !isDeleted;
   }) || [];
@@ -107,12 +103,10 @@ const ActivityFeed = () => {
         </div>
       </div>;
   }
-  logger.trace("Rendering activity feed with data");
+  logger.debug("Rendering activity feed with data");
 
   // Display the activities with load more button
   return <>
-      
-      
       <div className="py-2 space-y-4">
         {/* Only render the number of items we want to display */}
         {filteredActivities.slice(0, displayCount).map(activity => <ActivityItem key={activity.id} activity={activity} onAction={handleActivityAction} />)}
