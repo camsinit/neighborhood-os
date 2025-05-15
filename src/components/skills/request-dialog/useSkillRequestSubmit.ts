@@ -108,17 +108,23 @@ export const useSkillRequestSubmit = (
       
       console.log("[submitSkillRequest] Success! Result:", result);
       
-      // Get the skill session ID from the result
-      const sessionId = result?.session_id;
+      // Fix: Use the correct property access pattern for the RPC result
+      // The result is a JSON object with a session_id property
+      // We need to extract it safely
+      let sessionId: string | undefined;
+      if (result && typeof result === 'object' && 'session_id' in result) {
+        sessionId = result.session_id as string;
+      }
       
       // Fetch the skill title for the notification
       const { data: skillData } = await supabase
         .from('skills_exchange')
-        .select('title')
+        .select('title, description')
         .eq('id', skillId)
         .single();
       
       const skillTitle = skillData?.title || "a skill";
+      const skillDescription = skillData?.description || "";
       
       // ✨ New: Send notification via Edge Function
       await sendSkillRequestNotification(
@@ -132,7 +138,7 @@ export const useSkillRequestSubmit = (
             id: skillId, 
             title: skillTitle,
             // Include other useful skill data
-            description: skillData?.description,
+            description: skillDescription,
             availability: data.availability,
             time_preferences: data.timePreference
           },

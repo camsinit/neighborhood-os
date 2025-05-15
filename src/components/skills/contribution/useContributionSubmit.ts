@@ -75,7 +75,8 @@ export const useContributionSubmit = (
       );
 
       // Extract the session ID from the result
-      const sessionId = result?.sessionId;
+      // Fix: Use id property instead of sessionId
+      const sessionId = result?.id;
       
       // Get skill title for the notification
       const { data: skillData } = await supabase
