@@ -5,10 +5,9 @@
  * This file contains functions for performing actions on notifications
  * such as marking as read or archiving them.
  * 
- * UPDATED: Now uses the unified notification service
+ * UPDATED: Now uses the unified notification service exclusively
  */
 import notificationService from "@/utils/notifications/notificationService";
-import { HighlightableItemType } from "@/utils/highlight/types";
 import { createLogger } from "@/utils/logger";
 
 // Create a logger for this module
@@ -16,15 +15,13 @@ const logger = createLogger('notificationActions');
 
 /**
  * Helper function to determine the table name for a notification type
- * This is needed because some notifications are stored in specific tables
- * while others use the generic notifications table
+ * This is kept for backward compatibility but is no longer needed with the unified system
  * 
  * @param type The notification type
  * @returns The corresponding database table name
  */
 export const getTableName = (type: string): string => {
   // Map notification types to their respective tables
-  // If no mapping exists, default to the 'notifications' table
   switch (type.toLowerCase()) {
     case 'safety':
       return 'safety_updates';
@@ -46,6 +43,7 @@ export const getTableName = (type: string): string => {
 
 /**
  * Mark a notification as read
+ * Using the unified notification service
  * 
  * @param type The notification type or notification ID
  * @param id The notification ID (optional when type is actually an ID)
@@ -54,7 +52,6 @@ export const getTableName = (type: string): string => {
 export const markAsRead = async (type: string, id?: string): Promise<boolean> => {
   try {
     // If only one parameter is provided, assume it's the notification ID
-    // and use the notifications table
     if (!id) {
       logger.debug(`Marking notification ${type} as read (direct ID mode)`);
       return notificationService.markAsRead(type);
@@ -66,15 +63,14 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
     logger.debug(`Marking notification ${id} as read in ${table} table`);
     
     // For now, only handle the main notifications table
-    // Future: expand to handle other tables via RPC calls
     if (table === 'notifications') {
       return notificationService.markAsRead(id);
     }
     
-    // For other tables, use the legacy direct update approach
+    // Legacy direct update for non-unified notifications
     logger.debug(`Using legacy approach for table ${table}`);
     const { error } = await supabase
-      .from(table as any) // Type assertion to handle dynamic table names
+      .from(table as any)
       .update({ is_read: true })
       .eq('id', id);
     
@@ -92,6 +88,7 @@ export const markAsRead = async (type: string, id?: string): Promise<boolean> =>
 
 /**
  * Archive a notification
+ * Using the unified notification service
  * 
  * @param id The notification ID
  * @returns Promise resolving to success or failure

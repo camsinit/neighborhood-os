@@ -1,9 +1,10 @@
-
 /**
  * Unified Notification Service
  * 
  * This service provides a centralized API for working with notifications.
  * It handles creating, updating, and managing notifications consistently across the application.
+ * 
+ * UPDATED: Now uses the database function create_unified_system_notification as single source of truth
  */
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,46 +40,43 @@ export interface NotificationParams {
 }
 
 /**
- * Creates a new notification using the standardized structure
+ * Creates a new notification using the database function as single source of truth
  * 
  * @param params Notification parameters
  * @returns Promise resolving to created notification ID if successful
  */
 export async function createNotification(params: NotificationParams): Promise<string | null> {
   try {
-    logger.debug('Creating notification:', params);
+    logger.debug('Creating notification via unified system:', params);
 
-    // Set default values for optional parameters
-    const actionType = params.actionType || 'view';
-    const actionLabel = params.actionLabel || 'View';
-    const relevanceScore = params.relevanceScore || 1;
-    const metadata = params.metadata || {};
-
-    // Insert notification directly
+    // Use the database function instead of direct insert
+    // This provides consistent handling, duplicate prevention, etc.
     const { data, error } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: params.userId,
-        actor_id: params.actorId || null,
-        title: params.title,
-        content_type: params.contentType,
-        content_id: params.contentId,
-        notification_type: params.notificationType,
-        action_type: actionType,
-        action_label: actionLabel,
-        relevance_score: relevanceScore,
-        metadata: metadata
-      })
-      .select('id')
-      .single();
+      .rpc('create_unified_system_notification', {
+        p_user_id: params.userId,
+        p_actor_id: params.actorId || null,
+        p_title: params.title,
+        p_content_type: params.contentType,
+        p_content_id: params.contentId,
+        p_notification_type: params.notificationType,
+        p_action_type: params.actionType || 'view',
+        p_action_label: params.actionLabel || 'View',
+        p_relevance_score: params.relevanceScore || 1,
+        p_metadata: params.metadata || {}
+      });
 
     if (error) {
       logger.error('Error creating notification:', error);
       return null;
     }
 
-    logger.debug('Notification created successfully:', data.id);
-    return data.id;
+    // The database function returns the notification ID directly
+    logger.debug('Notification created successfully via unified system:', data);
+    
+    // Dispatch event for real-time updates
+    window.dispatchEvent(new CustomEvent('notification-created'));
+    
+    return data;
   } catch (error) {
     logger.error('Exception creating notification:', error);
     return null;
