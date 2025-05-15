@@ -1,4 +1,3 @@
-
 /**
  * Unified Notification Service
  * 
@@ -19,7 +18,7 @@ const logger = createLogger('notificationService');
  * Notification types supported by the system
  * NOTE: Must match the database enum values
  */
-export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome' | 'community';
+export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome';
 
 /**
  * Action types for notifications
