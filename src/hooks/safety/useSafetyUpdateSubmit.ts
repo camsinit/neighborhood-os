@@ -7,7 +7,6 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useState } from "react"; 
 import { SafetyUpdateFormData } from "@/components/safety/schema/safetyUpdateSchema";
 import { refreshEvents } from "@/utils/refreshEvents";
-import { notifySafetyChange } from "./useSafetyNotifications";
 import { createLogger } from "@/utils/logger";
 
 // Create a dedicated logger
@@ -23,6 +22,7 @@ interface SafetyUpdateSubmitProps {
  * 
  * This hook provides methods to create and update safety updates
  * with consistent error handling and state management
+ * Now using database triggers for notifications
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -58,6 +58,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       });
 
       // Insert the safety update
+      // Database trigger will handle notifications and activities
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -81,18 +82,14 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       
       // Use refreshEvents to signal update
       refreshEvents.emit('safety-updated');
+      refreshEvents.emit('notification-created');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      // Trigger notifications for interested parties
-      // (Database trigger will create the notification)
-      if (data && data[0]) {
-        logger.debug("Successfully created safety update with ID:", data[0].id);
-        await notifySafetyChange(data[0].id, 'create', data[0].title);
-      }
+      logger.debug("Successfully created safety update - database trigger handled notifications");
       
       return data;
     } catch (err) {
@@ -126,6 +123,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       });
 
       // Update the safety update
+      // Database trigger will handle notifications and activity updates
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -149,17 +147,14 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       
       // Use refreshEvents to signal update
       refreshEvents.emit('safety-updated');
+      refreshEvents.emit('notification-created');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      // Notify about the update
-      // (Database trigger will create notification)
-      if (data && data[0]) {
-        await notifySafetyChange(data[0].id, 'update', data[0].title);
-      }
+      logger.debug("Successfully updated safety update - database trigger handled notifications");
       
       return data;
     } catch (err) {

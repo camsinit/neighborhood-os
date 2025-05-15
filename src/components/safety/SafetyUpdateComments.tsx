@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { notifySafetyComment } from '@/hooks/safety/useSafetyNotifications';
+import { refreshEvents } from '@/utils/refreshEvents';
 import { createLogger } from '@/utils/logger';
 
 // Create a logger for this component
@@ -85,19 +85,7 @@ export function SafetyUpdateComments({ updateId }: SafetyUpdateCommentsProps) {
     try {
       setIsSending(true);
 
-      // First get the safety update info needed for notifications
-      const { data: safetyData, error: safetyError } = await supabase
-        .from('safety_updates')
-        .select('author_id, title')
-        .eq('id', updateId)
-        .single();
-
-      if (safetyError) {
-        logger.error('Error fetching safety update:', safetyError);
-        throw safetyError;
-      }
-
-      // Insert the comment
+      // Insert the comment - the database trigger will handle notification
       const { data, error } = await supabase
         .from('safety_update_comments')
         .insert({
@@ -120,20 +108,9 @@ export function SafetyUpdateComments({ updateId }: SafetyUpdateCommentsProps) {
         setComments([...comments, data[0]]);
         setNewComment('');
         
-        // Notify the safety update author about the new comment
-        // Only if commenter is not the author
-        if (user.id !== safetyData.author_id) {
-          await notifySafetyComment(
-            data[0].id,
-            updateId,
-            safetyData.author_id,
-            safetyData.title,
-            newComment.substring(0, 50) + (newComment.length > 50 ? '...' : '')
-          );
-          logger.debug('Comment notification sent');
-        } else {
-          logger.debug('Skipping self-comment notification');
-        }
+        // Trigger a refresh of notifications
+        refreshEvents.emit('notification-created');
+        logger.debug('Comment added successfully, database trigger will handle notification');
       }
     } catch (error) {
       console.error('Error posting comment:', error);

@@ -6,11 +6,14 @@ import { toast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood/types';
 import { refreshEvents } from '@/utils/refreshEvents';
+import { createLogger } from '@/utils/logger';
+
+// Create a logger instance
+const logger = createLogger('useSafetyUpdateFormSubmit');
 
 /**
  * Custom hook for handling safety update form submissions
- * 
- * This hook encapsulates the logic for creating and updating safety updates
+ * Now uses database triggers for notifications
  */
 export const useSafetyUpdateFormSubmit = (
   user: User | null,
@@ -40,77 +43,49 @@ export const useSafetyUpdateFormSubmit = (
     setIsSubmitting(true);
 
     try {
-      // Prepare the safety update data object - using author_id instead of user_id
+      // Prepare the safety update data object
       const updateData = {
         title: data.title,
         description: data.description,
         type: data.type,
-        author_id: user.id, // Changed from user_id to author_id to match the table schema
+        author_id: user.id,
         neighborhood_id: neighborhoodData.id,
       };
 
       let response;
-      let action = 'create';
 
       // Update existing or create new based on mode
       if (mode === 'edit' && updateId) {
-        action = 'update';
+        logger.debug('Updating safety update - DB trigger will handle notification', { 
+          updateId,
+          title: data.title
+        });
+        
         // Update existing safety update
+        // Database trigger will handle notification and activity updates
         response = await supabase
           .from('safety_updates')
-          .update(updateData)
+          .update({
+            title: data.title,
+            description: data.description,
+            type: data.type
+          })
           .eq('id', updateId);
       } else {
+        logger.debug('Creating safety update - DB trigger will handle notification', { 
+          title: data.title,
+          neighborhoodId: neighborhoodData.id
+        });
+        
         // Create new safety update
+        // Database trigger will handle notification and activity creation
         response = await supabase
           .from('safety_updates')
-          .insert(updateData)
-          .select();
+          .insert(updateData);
       }
 
       if (response.error) {
         throw response.error;
-      }
-
-      // Call the edge function to update activities
-      // Now using safety_update_id for consistency
-      let safetyUpdateId: string;
-      
-      if (mode === 'edit' && updateId) {
-        // For updates, we need to fetch the safety_update_id
-        const { data: fetchedUpdate, error: fetchError } = await supabase
-          .from('safety_updates')
-          .select('safety_update_id')
-          .eq('id', updateId)
-          .single();
-          
-        if (fetchError) {
-          console.error("Error fetching safety_update_id:", fetchError);
-          safetyUpdateId = updateId; // Fallback to primary key
-        } else {
-          safetyUpdateId = fetchedUpdate.safety_update_id;
-        }
-      } else {
-        // For new items, get the safety_update_id from the response
-        safetyUpdateId = response.data?.[0]?.safety_update_id || response.data?.[0]?.id;
-      }
-      
-      if (safetyUpdateId) {
-        // Call our edge function to handle activity feed updates
-        const { error: edgeFunctionError } = await supabase.functions.invoke(
-          'notify-safety-changes', {
-          body: {
-            safetyUpdateId: safetyUpdateId,
-            action: action,
-            safetyUpdateTitle: data.title,
-            userId: user.id,
-            neighborhoodId: neighborhoodData.id,
-          }
-        });
-
-        if (edgeFunctionError) {
-          console.error("Error calling edge function:", edgeFunctionError);
-        }
       }
 
       // Show success message
@@ -120,15 +95,17 @@ export const useSafetyUpdateFormSubmit = (
           : "Safety update created successfully"
       );
 
-      // Trigger the refresh of activities
-      refreshEvents.safety();
+      // Trigger UI refreshes
+      refreshEvents.emit('safety-updated');
+      refreshEvents.emit('notification-created');
+      refreshEvents.emit('activities');
 
       // Close the form
       onClose();
       
       return true;
     } catch (error) {
-      console.error("Error submitting safety update:", error);
+      logger.error("Error submitting safety update:", error);
       toast.error("Failed to save safety update");
       return false;
     } finally {

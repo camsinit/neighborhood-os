@@ -20,11 +20,17 @@ import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner"; // Updated import for toast
+import { toast } from "sonner";
+import { refreshEvents } from "@/utils/refreshEvents";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this component
+const logger = createLogger('SafetyUpdates');
 
 /**
  * SafetyUpdates component displays a list of safety updates for the neighborhood
  * and provides functionality to create, view, and edit updates
+ * Now uses database triggers for notifications
  */
 const SafetyUpdates = () => {
   // State to control dialog visibility
@@ -42,7 +48,7 @@ const SafetyUpdates = () => {
 
   // Set up auto-refresh for safety updates data
   // This will listen for the safety-update-submitted event and refresh the data
-  useAutoRefresh(['safety-updates'], ['safety-update-submitted']);
+  useAutoRefresh(['safety-updates'], ['safety-update-submitted', 'safety-updated']);
 
   // Handle custom events for opening safety dialogs
   useEffect(() => {
@@ -62,6 +68,40 @@ const SafetyUpdates = () => {
   }, [safetyUpdates]); // Use the array directly
 
   const queryClient = useQueryClient();
+
+  // Handler for deleting safety updates
+  const handleDeleteSafetyUpdate = async (updateId: string) => {
+    if (!user) return;
+
+    if (window.confirm("Are you sure you want to delete this safety update?")) {
+      try {
+        // Delete the update - database trigger will handle cleanup
+        const { error } = await supabase
+          .from('safety_updates')
+          .delete()
+          .eq('id', updateId)
+          .eq('author_id', user.id);
+
+        if (error) {
+          logger.error("Error deleting safety update:", error);
+          toast.error("Failed to delete safety update");
+          return;
+        }
+
+        toast.success("Safety update deleted successfully");
+        setSelectedUpdate(null);
+        queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+        
+        // Signal refresh events
+        refreshEvents.emit('safety-updated');
+        refreshEvents.emit('notification-created');
+        refreshEvents.emit('activities');
+      } catch (err) {
+        logger.error("Error in delete operation:", err);
+        toast.error("An error occurred while deleting");
+      }
+    }
+  };
   
   return (
     <>
@@ -140,24 +180,7 @@ const SafetyUpdates = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to delete this safety update?")) {
-                      supabase
-                        .from('safety_updates')
-                        .delete()
-                        .eq('id', selectedUpdate.id)
-                        .eq('author_id', user.id)
-                        .then(({ error }) => {
-                          if (error) {
-                            toast.error("Failed to delete safety update");
-                            return;
-                          }
-                          toast.success("Safety update deleted successfully");
-                          setSelectedUpdate(null);
-                          queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
-                        });
-                    }
-                  }}
+                  onClick={() => handleDeleteSafetyUpdate(selectedUpdate.id)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />

@@ -2,6 +2,10 @@
 /**
  * This file handles the processing of safety notifications
  * It contains utility functions for transforming safety notification data
+ * 
+ * Note: Most safety notifications are now created by database triggers,
+ * but these processors are still useful for handling notifications from 
+ * legacy systems and for a consistent notification display.
  */
 import { BaseNotification } from "../types";
 

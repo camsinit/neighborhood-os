@@ -2,19 +2,18 @@
 /**
  * Hook for safety update notifications
  * 
- * This hook provides utility functions for sending notifications
- * when safety updates are created, updated, or commented on
+ * This hook provides utility functions for safety update notifications
+ * Now uses the database triggers directly (no edge function calls)
  */
 import { createLogger } from "@/utils/logger";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner"; 
 import { refreshEvents } from "@/utils/refreshEvents";
 
 // Create a dedicated logger for safety notifications
 const logger = createLogger('useSafetyNotifications');
 
 /**
- * Sends a notification when a safety comment is created
+ * Legacy compatibility function for safety comment notifications
+ * Now the notification is created by a database trigger automatically
  * 
  * @param commentId - ID of the new comment
  * @param safetyUpdateId - ID of the safety update that was commented on
@@ -30,26 +29,10 @@ export async function notifySafetyComment(
   commentPreview: string
 ): Promise<boolean> {
   try {
-    // Log the operation for debugging
-    logger.debug('Sending safety comment notification:', {
-      commentId, safetyUpdateId, authorId, safetyTitle
+    // Log that we're using the database trigger system
+    logger.info('Safety comment notification is now handled by database triggers', {
+      commentId, safetyUpdateId
     });
-    
-    // Call the Supabase edge function to notify the safety update author
-    const { error } = await supabase.functions.invoke('notify-safety-changes', {
-      body: {
-        action: 'comment',
-        safetyUpdateId,
-        commentId,
-        safetyUpdateTitle: safetyTitle,
-        commentContent: commentPreview
-      }
-    });
-    
-    if (error) {
-      logger.error('Error sending safety comment notification:', error);
-      return false;
-    }
     
     // Signal that notifications might have changed
     refreshEvents.emit('notification-created');
@@ -63,7 +46,8 @@ export async function notifySafetyComment(
 }
 
 /**
- * Sends a notification when a safety update is created or modified
+ * Legacy compatibility function for safety update notifications
+ * Now the notification is created by a database trigger automatically
  * 
  * @param safetyUpdateId - ID of the safety update
  * @param action - The action performed (create/update)
@@ -75,24 +59,10 @@ export async function notifySafetyChange(
   safetyUpdateTitle: string
 ): Promise<boolean> {
   try {
-    // Log the operation for debugging
-    logger.debug('Sending safety change notification:', {
+    // Log that we're using the database trigger system
+    logger.info('Safety change notification is now handled by database triggers', {
       safetyUpdateId, action, safetyUpdateTitle
     });
-    
-    // Call the Supabase edge function to notify relevant users
-    const { error } = await supabase.functions.invoke('notify-safety-changes', {
-      body: {
-        safetyUpdateId,
-        action,
-        safetyUpdateTitle
-      }
-    });
-    
-    if (error) {
-      logger.error('Error sending safety change notification:', error);
-      return false;
-    }
     
     // Signal that notifications might have changed
     refreshEvents.emit('notification-created');

@@ -4,6 +4,9 @@
  * This version filters to only show notifications relevant to the current user:
  * - Safety updates created by the user
  * - Safety updates that mention/tag the user
+ * 
+ * Note: Most safety notifications are now created by database triggers,
+ * but this fetcher is still useful for retrieving user-created safety content.
  */
 import { supabase } from "@/integrations/supabase/client";
 
