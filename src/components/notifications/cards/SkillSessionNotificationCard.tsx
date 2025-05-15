@@ -1,3 +1,4 @@
+
 /**
  * SkillSessionNotificationCard.tsx
  * 
@@ -7,11 +8,10 @@
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { highlightItem } from "@/utils/highlight";
-import { cn } from "@/lib/utils";
 
 interface SkillSessionNotificationCardProps {
   notification: BaseNotification;
@@ -33,22 +33,22 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with highlighted skill name
+  // Create sentence-style title with proper subject-verb-object structure
   const createSentenceTitle = () => {
     // Different sentence formats based on notification action
     switch(notification.action_type) {
       case "request":
-        return `${actorName} requested [[${skillTitle}]]`;
+        return `${actorName} requested ${skillTitle}`;
       case "confirm":
-        return `${actorName} confirmed [[${skillTitle}]] session`;
+        return `${actorName} confirmed ${skillTitle} session`;
       case "cancel":
-        return `${actorName} cancelled [[${skillTitle}]] session`;
+        return `${actorName} cancelled ${skillTitle} session`;
       case "reschedule":
-        return `${actorName} rescheduled [[${skillTitle}]] session`;
+        return `${actorName} rescheduled ${skillTitle} session`;
       case "complete":
-        return `${actorName} completed [[${skillTitle}]] session`;
+        return `${actorName} completed ${skillTitle} session`;
       default:
-        return `${actorName} scheduled [[${skillTitle}]]`;
+        return `${actorName} scheduled ${skillTitle}`;
     }
   };
   

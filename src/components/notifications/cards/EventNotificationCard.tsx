@@ -1,3 +1,4 @@
+
 /**
  * EventNotificationCard.tsx
  * 
@@ -32,7 +33,7 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "Someone";
   
-  // Create sentence-style title with highlighted event name
+  // Create sentence-style title with subject-verb-object structure
   const createSentenceTitle = () => {
     const eventName = notification.title || "an event";
     const actionType = notification.action_type || "share";
@@ -40,15 +41,15 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
     // Different sentence formats based on action type
     switch(actionType) {
       case "create":
-        return `${actorName} is hosting [[${eventName}]]`;
+        return `${actorName} is hosting ${eventName}`;
       case "update":
-        return `${actorName} updated [[${eventName}]]`;
+        return `${actorName} updated ${eventName}`;
       case "rsvp":
-        return `${actorName} is attending [[${eventName}]]`;
+        return `${actorName} is attending ${eventName}`;
       case "cancel":
-        return `${actorName} cancelled [[${eventName}]]`;
+        return `${actorName} cancelled ${eventName}`;
       default:
-        return `${actorName} shared [[${eventName}]]`;
+        return `${actorName} shared ${eventName}`;
     }
   };
   

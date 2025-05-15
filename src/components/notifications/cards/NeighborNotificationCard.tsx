@@ -3,7 +3,7 @@
  * NeighborNotificationCard.tsx
  * 
  * Specialized notification card for new neighbor announcements.
- * Now using the database-generated notifications.
+ * Now using proper sentence formatting without brackets.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -42,14 +42,14 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with highlighted neighbor name
+  // Create sentence-style title with proper subject-verb-object structure
   const createSentenceTitle = () => {
-    // For join notifications, highlight the neighbor name
+    // For join notifications, put focus on the neighbor name
     if (notification.action_type === "join" || notification.context?.action === "join") {
-      return `[[${actorName}]] joined your neighborhood`;
+      return `${actorName} joined your neighborhood`;
     } 
     // For profile updates
-    return `[[${actorName}]] updated their profile`;
+    return `${actorName} updated their profile`;
   };
   
   // Create the sentence-style title
