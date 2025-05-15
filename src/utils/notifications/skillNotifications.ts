@@ -21,6 +21,7 @@ export const sendSkillRequestNotification = async (
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill request for ${skillTitle} - DB trigger will handle notification`);
+  refreshEvents.emit('skill-request-created');
   refreshEvents.emit('skills-updated');
   refreshEvents.emit('notification-created');
 };
@@ -35,6 +36,7 @@ export const sendSkillConfirmationNotifications = async (
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill confirmation for ${skillTitle} - DB trigger will handle notification`);
+  refreshEvents.emit('skill-session-confirmed');
   refreshEvents.emit('skills-updated');
   refreshEvents.emit('notification-created');
 };
@@ -49,6 +51,7 @@ export const sendSkillCancellationNotification = async (
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill cancellation for ${skillTitle} - DB trigger will handle notification`);
+  refreshEvents.emit('skill-session-cancelled');
   refreshEvents.emit('skills-updated');
   refreshEvents.emit('notification-created');
 };
@@ -63,6 +66,7 @@ export const sendSkillRescheduleNotification = async (
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill reschedule for ${skillTitle} - DB trigger will handle notification`);
+  refreshEvents.emit('skill-session-rescheduled');
   refreshEvents.emit('skills-updated');
   refreshEvents.emit('notification-created');
 };
@@ -77,6 +81,7 @@ export const sendSkillCompletionNotification = async (
   skillTitle: string
 ): Promise<void> => {
   logger.debug(`Skill completion for ${skillTitle} - DB trigger will handle notification`);
+  refreshEvents.emit('skill-completed');
   refreshEvents.emit('skills-updated');
   refreshEvents.emit('notification-created');
 };

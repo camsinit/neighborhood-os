@@ -42,7 +42,7 @@ export const createSkillSessionWithTimeSlots = async (
       timeSlotCount: selectedTimeSlots.length
     });
 
-    // First, get the skill title for notifications
+    // First, get the skill title for logs
     const { data: skillData, error: skillError } = await supabase
       .from('skills_exchange')
       .select('title')
@@ -101,14 +101,9 @@ export const createSkillSessionWithTimeSlots = async (
       throw timeSlotError;
     }
 
-    // Notifications are now handled by database triggers
-    // No need to manually create notifications here
+    // No need to call edge function anymore - database triggers will create notifications
     logger.debug('Session created successfully, database triggers will create notifications');
     
-    // Trigger UI refresh events
-    refreshEvents.emit('skills-updated');
-    refreshEvents.emit('notification-created');
-
     // Return the complete session data
     return session;
   } catch (error) {

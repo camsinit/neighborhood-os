@@ -1,2 +1,5 @@
 
+# This edge function has been deprecated - all notifications are now created by database triggers
+# To be removed after testing confirms DB triggers work as expected
+
 project_id = "nnwzfliblfuldwxpuata"

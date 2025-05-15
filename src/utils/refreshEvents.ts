@@ -30,7 +30,13 @@ export type EventType =
   'activities-updated' |
   // Specific content update events
   'safety-update-submitted' |
-  'profile-updated';
+  'profile-updated' |
+  // Skill notification events
+  'skill-request-created' |
+  'skill-session-confirmed' |
+  'skill-session-cancelled' |
+  'skill-session-rescheduled' |
+  'skill-completed';
 
 // Observer map - stores callbacks for each event type
 const observers: { [key in string]?: (() => void)[] } = {};
