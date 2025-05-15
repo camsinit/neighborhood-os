@@ -6,7 +6,7 @@ import { NotificationCardFactory } from '../cards/NotificationCardFactory';
 export interface NotificationGroupProps {
   title: string;
   notifications: BaseNotification[];
-  onClose?: () => void; // Added onClose prop as optional
+  onClose?: () => void;
 }
 
 const NotificationGroup: React.FC<NotificationGroupProps> = ({ 

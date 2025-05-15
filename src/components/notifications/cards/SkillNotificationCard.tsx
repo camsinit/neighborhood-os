@@ -7,7 +7,6 @@
 import React from 'react';
 import { BaseNotification } from '@/hooks/notifications/types';
 import NotificationCard from './base/NotificationCard';
-import { Lightbulb } from 'lucide-react';
 import { highlightItem } from '@/utils/highlight';
 
 interface SkillNotificationCardProps {
@@ -27,6 +26,7 @@ const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notificat
   // Handle viewing the skill details
   const handleViewSkill = () => {
     if (notification.content_id) {
+      // Fixed highlightItem call to use proper API
       highlightItem('skills', notification.content_id);
     }
     

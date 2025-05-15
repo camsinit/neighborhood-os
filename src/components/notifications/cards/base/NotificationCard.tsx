@@ -83,7 +83,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     // Navigate to content
     if (content_type && content_id) {
       try {
-        // Fixed highlightItem call to use correct parameter count
+        // Fixed highlightItem call to use proper API
         const contentTypeAsHighlightable = content_type as HighlightableItemType;
         highlightItem(contentTypeAsHighlightable, content_id);
       } catch (error) {

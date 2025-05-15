@@ -1,4 +1,5 @@
-// Only update the highlightItem call
+
+// Only updating the highlightItem call to match our new API
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { highlightItem } from "@/utils/highlight";
@@ -9,17 +10,26 @@ import { Eye, Trash } from "lucide-react";
 import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { HighlightableItemType } from "@/utils/highlight/types";
 
-interface BaseNotificationItemProps {
+/**
+ * Props for the BaseNotificationItem component
+ */
+export interface BaseNotificationItemProps {
   notification: BaseNotification;
   onDismiss: () => void;
   className?: string;
   renderActions?: () => React.ReactNode;
+  children?: React.ReactNode;
 }
 
+/**
+ * Base notification item component that handles common functionality
+ */
 const BaseNotificationItem = ({
   notification,
   onDismiss,
   className,
+  renderActions,
+  children
 }: BaseNotificationItemProps) => {
   const navigate = useNavigate();
   
@@ -40,6 +50,7 @@ const BaseNotificationItem = ({
     // Navigate to content if not archived
     if (!isDeleted && content_type && content_id) {
       const contentType = content_type as HighlightableItemType;
+      // Fixed highlightItem call to use the proper API
       highlightItem(contentType, content_id);
       navigate(`/${content_type}/${content_id}`);
       onDismiss();
@@ -62,6 +73,7 @@ const BaseNotificationItem = ({
     // Navigate to the content
     if (notification.content_type && notification.content_id) {
       const contentType = notification.content_type as HighlightableItemType;
+      // Fixed highlightItem call to use the proper API
       highlightItem(contentType, notification.content_id);
     }
     
@@ -95,26 +107,31 @@ const BaseNotificationItem = ({
             {description}
           </p>
         )}
-        <div className="mt-2 flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleViewAction}
-            className="h-7 text-xs"
-          >
-            <Eye className="h-3.5 w-3.5 mr-1" />
-            View
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleArchiveAction}
-            className="h-7 text-xs"
-          >
-            <Trash className="h-3.5 w-3.5 mr-1" />
-            Archive
-          </Button>
-        </div>
+        {children}
+        {renderActions ? (
+          renderActions()
+        ) : (
+          <div className="mt-2 flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewAction}
+              className="h-7 text-xs"
+            >
+              <Eye className="h-3.5 w-3.5 mr-1" />
+              View
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleArchiveAction}
+              className="h-7 text-xs"
+            >
+              <Trash className="h-3.5 w-3.5 mr-1" />
+              Archive
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

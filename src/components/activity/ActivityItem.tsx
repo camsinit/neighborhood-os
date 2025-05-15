@@ -1,13 +1,13 @@
+import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
-import { User, AlertCircle } from "lucide-react";
+import { User } from "lucide-react";
 import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getActivityIcon, getActivityColor, getActivityContext } from "./utils/activityHelpers";
+import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import { highlightItem } from "@/utils/highlight"; // Updated import from the index file
+import { highlightItem } from "@/utils/highlight";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 /**
  * Props for the ActivityItem component
@@ -74,7 +74,6 @@ const getActivityBadgeLabel = (activityType: string): string => {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now redesigned to be larger with more prominent text
  */
 const ActivityItem = ({
   activity,
@@ -128,7 +127,7 @@ const ActivityItem = ({
     
     // After navigation, highlight the specific item
     setTimeout(() => {
-      // Fixed highlightItem call to use correct parameter count
+      // Fixed highlightItem call to use proper API
       highlightItem(itemType, activity.content_id);
     }, 100);
   };
@@ -188,7 +187,7 @@ const ActivityItem = ({
           </p>
         </div>
 
-        {/* Activity action badge - using our new getActivityBadgeLabel function */}
+        {/* Activity action badge */}
         <Badge 
           variant="outline" 
           className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium" 

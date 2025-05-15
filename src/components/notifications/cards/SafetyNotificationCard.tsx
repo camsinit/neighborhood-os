@@ -1,3 +1,4 @@
+
 /**
  * SafetyNotificationCard.tsx
  * 
@@ -6,10 +7,8 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./base/NotificationCard";
-import { AlertTriangle } from "lucide-react";
+import NotificationCard from "./base/NotificationCard";
 import { highlightItem } from "@/utils/highlight";
-import { cn } from "@/lib/utils";  // Import for utility functions
 
 interface SafetyNotificationCardProps {
   notification: BaseNotification;
@@ -56,20 +55,18 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   // Handle viewing safety details
   const handleViewSafety = async () => {
     // Navigate to the safety details
+    // Fixed highlightItem call to use proper API
     highlightItem('safety', notification.content_id);
     
     if (onDismiss) onDismiss();
   };
 
-  // We're no longer passing any className prop that could override the border styling
   return (
     <NotificationCard
       notification={notificationWithSentenceTitle}
       onAction={handleViewSafety}
       onDismiss={onDismiss}
-    >
-      {/* Removed the safety type badge that was previously displayed here */}
-    </NotificationCard>
+    />
   );
 };
 

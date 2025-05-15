@@ -1,3 +1,4 @@
+
 /**
  * NeighborNotificationCard.tsx
  * 
@@ -5,11 +6,10 @@
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import { NotificationCard } from "./base/NotificationCard";
+import NotificationCard from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
-import { cn } from "@/lib/utils";
 
 interface NeighborNotificationCardProps {
   notification: BaseNotification;
@@ -23,6 +23,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   // Handle viewing neighbor profile - fixed highlightItem call
   const handleViewNeighbor = async () => {
     // Navigate to the neighbors section and highlight this neighbor
+    // Fixed highlightItem call to use proper API
     highlightItem('neighbors', notification.content_id);
     
     if (onDismiss) onDismiss();
