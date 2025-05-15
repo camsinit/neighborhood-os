@@ -1,112 +1,199 @@
-import { useState } from "react";
-import { useUser } from "@supabase/auth-helpers-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SafetyUpdateComment } from "./SafetyUpdateComment";
+import { notifySafetyComment } from '@/hooks/safety/useSafetyNotifications';
+import { createLogger } from '@/utils/logger';
 
-interface Comment {
+// Create a logger for this component
+const logger = createLogger('SafetyUpdateComments');
+
+export interface Comment {
   id: string;
   content: string;
-  created_at: string;
   user_id: string;
-  profiles: {
+  created_at: string;
+  profiles?: {
     display_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
-export const SafetyUpdateComments = ({ updateId }: { updateId: string }) => {
-  const user = useUser();
-  const [comment, setComment] = useState("");
-  const queryClient = useQueryClient();
+interface SafetyUpdateCommentsProps {
+  updateId: string;
+}
 
-  const { data: comments, isLoading } = useQuery({
-    queryKey: ["safety-update-comments", updateId],
-    queryFn: async () => {
+export function SafetyUpdateComments({ updateId }: SafetyUpdateCommentsProps) {
+  const user = useUser();
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+
+  // Fetch comments for this update
+  useEffect(() => {
+    async function fetchComments() {
+      try {
+        setIsLoading(true);
+        
+        const { data, error } = await supabase
+          .from('safety_update_comments')
+          .select(`
+            *,
+            profiles:user_id (
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('safety_update_id', updateId)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        
+        setComments(data || []);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        toast.error('Failed to load comments');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (updateId) {
+      fetchComments();
+    }
+  }, [updateId]);
+
+  // Submit a new comment
+  const handleSubmitComment = async () => {
+    if (!user) {
+      toast.error('You must be logged in to comment');
+      return;
+    }
+
+    if (!newComment.trim()) {
+      toast.error('Comment cannot be empty');
+      return;
+    }
+
+    try {
+      setIsSending(true);
+
+      // First get the safety update info needed for notifications
+      const { data: safetyData, error: safetyError } = await supabase
+        .from('safety_updates')
+        .select('author_id, title')
+        .eq('id', updateId)
+        .single();
+
+      if (safetyError) {
+        logger.error('Error fetching safety update:', safetyError);
+        throw safetyError;
+      }
+
+      // Insert the comment
       const { data, error } = await supabase
-        .from("safety_update_comments")
+        .from('safety_update_comments')
+        .insert({
+          content: newComment,
+          safety_update_id: updateId,
+          user_id: user.id
+        })
         .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles (
+          *,
+          profiles:user_id (
             display_name,
             avatar_url
           )
-        `)
-        .eq("safety_update_id", updateId)
-        .order("created_at", { ascending: true });
+        `);
 
       if (error) throw error;
-      return data as Comment[];
-    },
-  });
 
-  const addCommentMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from("safety_update_comments")
-        .insert({
-          safety_update_id: updateId,
-          user_id: user?.id,
-          content: comment,
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      setComment("");
-      queryClient.invalidateQueries({ queryKey: ["safety-update-comments", updateId] });
-      toast.success("Comment added successfully");
-    },
-    onError: () => {
-      toast.error("Failed to add comment");
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-    addCommentMutation.mutate();
+      // Add the new comment to state
+      if (data && data[0]) {
+        setComments([...comments, data[0]]);
+        setNewComment('');
+        
+        // Notify the safety update author about the new comment
+        // Only if commenter is not the author
+        if (user.id !== safetyData.author_id) {
+          await notifySafetyComment(
+            data[0].id,
+            updateId,
+            safetyData.author_id,
+            safetyData.title,
+            newComment.substring(0, 50) + (newComment.length > 50 ? '...' : '')
+          );
+          logger.debug('Comment notification sent');
+        } else {
+          logger.debug('Skipping self-comment notification');
+        }
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      toast.error('Failed to post comment');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="border-t pt-6">
-        <h3 className="font-semibold mb-4">Comments</h3>
+    <div className="space-y-4 mt-4">
+      <h3 className="font-semibold">Comments</h3>
+      
+      {isLoading ? (
+        <div className="text-center py-4">Loading comments...</div>
+      ) : comments.length === 0 ? (
+        <div className="text-center py-4 text-gray-500">No comments yet</div>
+      ) : (
         <div className="space-y-4">
-          {comments?.map((comment) => (
-            <SafetyUpdateComment 
-              key={comment.id} 
-              comment={comment}
-              updateId={updateId}
-            />
+          {comments.map((comment) => (
+            <div key={comment.id} className="flex gap-3 pb-4 border-b border-gray-100">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={comment.profiles?.avatar_url || ''} />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <div className="flex justify-between">
+                  <p className="font-medium">{comment.profiles?.display_name || 'Anonymous'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(comment.created_at), 'MMM d, yyyy • h:mm a')}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm">{comment.content}</p>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
+      )}
+
       {user && (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Textarea
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="min-h-[80px]"
+        <div className="pt-4">
+          <Textarea 
+            placeholder="Write a comment..." 
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className="min-h-[100px]"
           />
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-2">
             <Button 
-              type="submit"
-              disabled={!comment.trim() || addCommentMutation.isPending}
-              className="hover:bg-gray-100"
+              onClick={handleSubmitComment} 
+              disabled={isSending || !newComment.trim()}
+              className="bg-amber-500 hover:bg-amber-600"
             >
-              {addCommentMutation.isPending ? "Posting..." : "Post Comment"}
+              {isSending ? 'Posting...' : 'Post Comment'}
             </Button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   );
-};
+}

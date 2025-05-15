@@ -4,6 +4,7 @@ import SafetyUpdates from "@/components/SafetyUpdates";
 import { useToast } from "@/components/ui/use-toast";
 import { createHighlightListener } from "@/utils/highlight"; // Updated import path
 import ModuleLayout from "@/components/layout/ModuleLayout";
+import { refreshEvents } from "@/utils/refreshEvents";
 
 /**
  * SafetyPage - Main page for viewing and creating updates
@@ -25,9 +26,15 @@ const SafetyPage = () => {
     // Add event listener when component mounts
     window.addEventListener('highlightItem', handleHighlightItem as EventListener);
     
-    // Remove event listener when component unmounts
+    // Set up listener for safety events from the improved event system
+    const unsubscribe = refreshEvents.on('safety-updated', () => {
+      console.log("SafetyPage received safety-updated event, refreshing");
+    });
+    
+    // Remove event listeners when component unmounts
     return () => {
       window.removeEventListener('highlightItem', handleHighlightItem as EventListener);
+      unsubscribe();
     };
   }, []);
 

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
@@ -6,6 +7,11 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useState } from "react"; 
 import { SafetyUpdateFormData } from "@/components/safety/schema/safetyUpdateSchema";
 import { refreshEvents } from "@/utils/refreshEvents";
+import { notifySafetyChange } from "./useSafetyNotifications";
+import { createLogger } from "@/utils/logger";
+
+// Create a dedicated logger
+const logger = createLogger('useSafetyUpdateSubmit');
 
 // Interface for the hook properties
 interface SafetyUpdateSubmitProps {
@@ -45,26 +51,26 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      console.log("[useSafetyUpdateSubmit] Creating safety update:", {
+      logger.debug("Creating safety update:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
-      // Insert the safety update with author_id (not user_id)
+      // Insert the safety update
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
           title: formData.title,
           description: formData.description,
           type: formData.type,
-          author_id: user.id, // Use author_id to match table schema
-          neighborhood_id: neighborhood.id // Use neighborhood.id (not the whole object)
+          author_id: user.id,
+          neighborhood_id: neighborhood.id
         })
         .select();
 
       if (error) {
-        console.error("[useSafetyUpdateSubmit] Error:", error);
+        logger.error("Error:", error);
         setError(error);
         throw error;
       }
@@ -73,22 +79,24 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       toast.success("Safety update created successfully");
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
-      // Use refreshEvents to signal update - this will trigger appropriate UI refreshes
-      refreshEvents.safety();
+      // Use refreshEvents to signal update
+      refreshEvents.emit('safety-updated');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      // Now use safety_update_id for activity feed and notifications
+      // Trigger notifications for interested parties
+      // (Database trigger will create the notification)
       if (data && data[0]) {
-        console.log("[useSafetyUpdateSubmit] Successfully created safety update with ID:", data[0].id);
+        logger.debug("Successfully created safety update with ID:", data[0].id);
+        await notifySafetyChange(data[0].id, 'create', data[0].title);
       }
       
       return data;
     } catch (err) {
-      console.error('Error creating safety update:', err);
+      logger.error('Error creating safety update:', err);
       toast.error("Failed to create safety update. Please try again.");
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
@@ -111,14 +119,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      console.log("[useSafetyUpdateSubmit] Updating safety update:", {
+      logger.debug("Updating safety update:", {
         updateId,
         userId: user.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
       // Update the safety update
-      // The safety_update_id remains the same as it's automatically set to id
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -131,7 +138,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         .select();
 
       if (error) {
-        console.error("[useSafetyUpdateSubmit] Error:", error);
+        logger.error("Error:", error);
         setError(error);
         throw error;
       }
@@ -141,16 +148,22 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
       // Use refreshEvents to signal update
-      refreshEvents.safety();
+      refreshEvents.emit('safety-updated');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
+      // Notify about the update
+      // (Database trigger will create notification)
+      if (data && data[0]) {
+        await notifySafetyChange(data[0].id, 'update', data[0].title);
+      }
+      
       return data;
     } catch (err) {
-      console.error('Error updating safety update:', err);
+      logger.error('Error updating safety update:', err);
       toast.error("Failed to update safety update. Please try again.");
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
