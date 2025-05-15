@@ -1,0 +1,18 @@
+
+/**
+ * Main style imports
+ */
+
+/* Base styles */
+@import 'tailwindcss/base';
+@import './base.css';
+
+/* Component styles */
+@import 'tailwindcss/components';
+@import './components.css';
+@import './layout.css';
+@import './highlight.css';
+
+/* Utility styles */
+@import 'tailwindcss/utilities';
+@import './utilities.css';

@@ -1,20 +1,16 @@
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+/**
+ * Main entry point for the application
+ */
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
-// Import our refactored CSS files in the correct order
-// First base styles with Tailwind base directive
-import "./styles/base.css";
-// Then component styles with Tailwind components directive
-import "./styles/components.css";
-// Then the rest of our styles
-import "./styles/animations.css";
-import "./styles/layout.css";
-import "./styles/gradients.css";
+// Import all styles
+import './styles/index.css';
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

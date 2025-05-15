@@ -2,43 +2,34 @@
 /**
  * NotificationDescription.tsx
  * 
- * A reusable component for displaying descriptive text about a notification
- * with appropriate styling and icon
+ * A reusable component for rendering descriptive text in notifications
  */
 import React from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
-import NotificationIcon from "./NotificationIcon";
 
-export interface NotificationDescriptionProps {
+interface NotificationDescriptionProps {
   text: string;
-  type: string;
   icon?: LucideIcon;
-  className?: string;
   iconColor?: string;
+  type?: string;
+  className?: string;
 }
 
 /**
- * Renders a descriptive text line with optional icon for notifications
+ * Component for rendering notification descriptions with optional icon
  */
-export const NotificationDescription: React.FC<NotificationDescriptionProps> = ({
+const NotificationDescription: React.FC<NotificationDescriptionProps> = ({
   text,
+  icon: Icon,
+  iconColor = "blue-500",
   type,
-  icon,
-  className,
-  iconColor
+  className
 }) => {
   return (
-    <div className={cn("mt-1 flex items-start gap-1", className)}>
-      <NotificationIcon 
-        type={type} 
-        icon={icon}
-        className="mt-0.5"
-        color={iconColor}
-      />
-      <p className="text-xs text-gray-700">
-        {text}
-      </p>
+    <div className={cn("text-xs text-gray-600 flex items-center gap-1 mt-1", className)}>
+      {Icon && <Icon className={`h-3 w-3 text-${iconColor}`} />}
+      <span>{text}</span>
     </div>
   );
 };
