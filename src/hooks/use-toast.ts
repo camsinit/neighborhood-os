@@ -1,37 +1,26 @@
-/**
- * Re-export the toast hook from sonner
- * 
- * This file provides a consistent API for toast notifications across the application
- * by re-exporting functionality from the Sonner library
- */
-import { toast as sonnerToast } from 'sonner';
 
 /**
- * Toast utility for displaying notifications
+ * Toast utility hook using Sonner
  * 
- * This maintains compatibility with existing code by providing both a 
- * function-style API and an object-style API
+ * This file provides a centralized way to access toast functionality
+ * throughout the application by re-exporting from Sonner.
  */
-const toast = Object.assign(
-  // Make the toast function itself callable
-  (message: string, options?: any) => sonnerToast(message, options),
-  // Add all the sonnerToast methods as properties
-  sonnerToast
-);
+import { toast } from 'sonner';
+
+// Re-export Sonner's toast directly
+export { toast };
 
 /**
- * Simple hook that returns the toast utilities
- * This maintains compatibility with existing code that uses useToast()
+ * Legacy hook for backward compatibility with older components
+ * This maintains the same API signature that older components expect
  */
 export function useToast() {
   return {
-    toast: toast,
-    // Provide a compatible API for components using toast.X directly
-    toasts: [] as any[],
-    // Other methods needed for backward compatibility
+    toast, // Provide the toast function directly
+    // Additional compatibility methods that some components might expect
     dismiss: toast.dismiss,
-    update: toast.update
+    update: toast.update,
+    // Placeholder for components that expect toasts array
+    toasts: [] as any[]
   };
 }
-
-export { toast };

@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner'; // Updated import for toast
 import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from '@/utils/timeslotUtils';
@@ -24,7 +24,6 @@ export const useContributionSubmit = (
 ) => {
   // State and hooks
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   /**
@@ -42,11 +41,7 @@ export const useContributionSubmit = (
     // Validate time slots - require at least 1 date with time preferences
     const validation = validateTimeSlots(selectedTimeSlots);
     if (!validation.isValid) {
-      toast({
-        title: "Validation error",
-        description: validation.message,
-        variant: "destructive"
-      });
+      toast.error(validation.message);
       return;
     }
 
@@ -96,10 +91,7 @@ export const useContributionSubmit = (
       window.dispatchEvent(new CustomEvent('skills-updated'));
 
       // Show success message
-      toast({
-        title: "Skill contribution offered",
-        description: "The requester will be notified to schedule a time",
-      });
+      toast.success("Skill contribution offered. The requester will be notified to schedule a time.");
       
       // Close the dialog
       onSuccess();
@@ -117,17 +109,9 @@ export const useContributionSubmit = (
       
       // Display appropriate error message
       if (error.name === "ValidationError") {
-        toast({
-          title: "Validation Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error(error.message);
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to submit skill contribution. Please try again.",
-          variant: "destructive"
-        });
+        toast.error("Failed to submit skill contribution. Please try again.");
       }
     } finally {
       setIsSubmitting(false);

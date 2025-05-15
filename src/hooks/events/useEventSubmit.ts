@@ -1,6 +1,6 @@
 
 import { useUser } from "@supabase/auth-helpers-react";
-import { toast } from "sonner";
+import { toast } from "sonner"; // Updated import for toast
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { transformEventFormData, transformEventUpdateData } from "./utils/eventDataTransformer";
@@ -119,7 +119,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       return data;
     } catch (error: any) {
       console.error('[useEventSubmit] Error creating event:', error);
-      toast.error(`Failed to create event: ${error.message}`);
+      toast.error("Failed to create event: " + error.message);
       
       // Re-throw the error for the component to handle if needed
       throw error;
@@ -167,7 +167,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       return data;
     } catch (error: any) {
       console.error('[useEventSubmit] Error updating event:', error);
-      toast.error(`Failed to update event: ${error.message}`);
+      toast.error("Failed to update event: " + error.message);
       throw error;
     }
   };
