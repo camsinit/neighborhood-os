@@ -7,7 +7,7 @@
  */
 import { notificationClient } from "@/utils/notifications/notificationClient";
 
-// Re-export all methods from the notification client
+// Re-export methods from the notification client
 export const {
   markAsRead,
   archiveNotification,
