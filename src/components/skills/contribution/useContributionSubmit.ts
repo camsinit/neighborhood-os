@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +5,7 @@ import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from '@/utils/timeslotUtils';
 import { createSkillSessionWithTimeSlots } from './services/contributionService';
-import refreshEvents from '@/utils/refreshEvents';
+import { refreshEvents, dispatchRefreshEvent } from '@/utils/refreshEvents';
 import { useQueryClient } from '@tanstack/react-query';
 
 /**
@@ -87,7 +86,7 @@ export const useContributionSubmit = (
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
-      // Trigger notification refresh events
+      // Trigger notification refresh events - corrected to use direct function calls
       refreshEvents.notifications();
       refreshEvents.skills();
       

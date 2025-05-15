@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { refreshEvents, EventActionType } from "@/utils/refreshEvents";
 import { useEffect } from "react";
 import { fetchDirectNotifications } from "@/hooks/notifications/fetchDirectNotifications";
 
@@ -46,19 +46,26 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
       query.refetch();
     };
     
-    // Listen for specific events that should trigger a refresh
-    window.addEventListener('event-rsvp-updated', handleRefreshEvent);
-    window.addEventListener('skills-updated', handleRefreshEvent);
-    window.addEventListener('notification-created', handleRefreshEvent);
+    // Define the refresh event types
+    const refreshEventTypes: EventActionType[] = [
+      'event-rsvp-updated',
+      'skills-updated',
+      'notification-created'
+    ];
     
-    // Set up subscription with refreshEvents utility
+    // Listen for specific events that should trigger a refresh
+    refreshEventTypes.forEach(eventType => {
+      window.addEventListener(eventType, handleRefreshEvent);
+    });
+    
+    // Use the correctly typed subscription method
     const unsubscribe = refreshEvents.on('notification-created', handleRefreshEvent);
     
     // Clean up event listeners on unmount
     return () => {
-      window.removeEventListener('event-rsvp-updated', handleRefreshEvent);
-      window.removeEventListener('skills-updated', handleRefreshEvent);
-      window.removeEventListener('notification-created', handleRefreshEvent);
+      refreshEventTypes.forEach(eventType => {
+        window.removeEventListener(eventType, handleRefreshEvent);
+      });
       
       // Unsubscribe from the refreshEvents utility
       if (unsubscribe) unsubscribe();

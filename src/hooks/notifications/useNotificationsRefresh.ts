@@ -7,7 +7,7 @@
  */
 import { useEffect } from "react";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import refreshEvents, { EventActionType } from "@/utils/refreshEvents"; // Import EventActionType
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { BaseNotification } from "@/hooks/notifications/types";
 
@@ -30,7 +30,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
     logger.debug("Setting up notification refresh listeners");
     
     // Define all the events that should trigger a refresh
-    const refreshEventTypes = [
+    const refreshEventTypes: EventActionType[] = [
       'event-rsvp-updated',
       'skills-updated',
       'notification-created',
@@ -50,7 +50,7 @@ export const useNotificationsRefresh = ({ refetch }: UseNotificationsRefreshPara
       window.addEventListener(eventName, handleRefreshEvent);
     });
     
-    // Set up subscription with the refreshEvents utility (using its method properly)
+    // Set up subscription with the refreshEvents utility using the correct on method
     const unsubscribe = refreshEvents.on('notification-created', handleRefreshEvent);
     
     // Clean up event listeners on unmount

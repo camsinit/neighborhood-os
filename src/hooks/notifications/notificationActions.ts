@@ -7,6 +7,7 @@
  * 
  * UPDATED: Now uses the unified notification service
  */
+import { supabase } from "@/integrations/supabase/client"; // Added missing import
 import notificationService from "@/utils/notifications/notificationService";
 import { HighlightableItemType } from "@/utils/highlight/types";
 import { createLogger } from "@/utils/logger";

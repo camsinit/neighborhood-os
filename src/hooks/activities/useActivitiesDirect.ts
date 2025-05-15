@@ -1,148 +1,101 @@
-
 /**
  * useActivitiesDirect.ts
  * 
- * Simplified hook for fetching neighborhood activities using React Query
- * Directly queries the database without complex transformations
+ * Fetches activity data directly from the database using Supabase.
+ * This hook simplifies data fetching and provides real-time updates.
  */
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Activity } from '@/components/activity/types';
+import { createLogger } from '@/utils/logger';
+import { refreshEvents, EventActionType } from '@/utils/refreshEvents';
 
-// Create a dedicated logger for this hook
+// Initialize logger for this module
 const logger = createLogger('useActivitiesDirect');
 
 /**
- * Activity type definition that matches the database schema
+ * Fetches activities directly from the database
  */
-export interface Activity {
-  id: string;
-  actor_id: string;
-  activity_type: string;
-  content_id: string;
-  content_type: string;
-  title: string;
-  created_at: string;
-  neighborhood_id: string | null;
-  metadata?: any;
-  // Join data
-  profiles?: {
-    display_name?: string;
-    avatar_url?: string;
-  }
-}
-
-/**
- * Simple function to fetch activities directly from the database
- */
-const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
-  logger.debug(`Fetching activities, limit=${limit}`);
-  
-  // Get the current user - we need their ID for neighborhood access
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    logger.warn('No authenticated user found, returning empty activities array');
-    return [];
-  }
-  
-  // First get the list of neighborhood IDs the user has access to
-  const { data: neighborhoods, error: neighborhoodError } = await supabase
-    .rpc('get_user_neighborhoods_simple', {
-      user_uuid: user.id
-    });
+const fetchActivities = async (): Promise<Activity[]> => {
+  try {
+    // Log the start of the fetch operation
+    logger.debug('Fetching activities from Supabase');
     
-  if (neighborhoodError) {
-    logger.error('Error fetching user neighborhoods:', neighborhoodError);
-    throw neighborhoodError;
-  }
-  
-  // Extract the neighborhood IDs
-  const neighborhoodIds = neighborhoods.map((n: any) => n.id);
-  
-  if (neighborhoodIds.length === 0) {
-    logger.debug('User has no neighborhoods, returning empty activities array');
-    return [];
-  }
-  
-  // Query the activities table with a join to get actor profiles
-  const { data: activities, error: activitiesError } = await supabase
-    .from('activities')
-    .select(`
-      *,
-      profiles:actor_id (
-        display_name,
-        avatar_url
-      )
-    `)
-    .in('neighborhood_id', neighborhoodIds)
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    // Perform the Supabase query
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .order('created_at', { ascending: false });
     
-  if (activitiesError) {
-    logger.error('Error fetching activities:', activitiesError);
-    throw activitiesError;
+    // Handle any errors
+    if (error) {
+      logger.error('Error fetching activities:', error.message, error.details);
+      throw new Error(error.message);
+    }
+    
+    // Log the successful data retrieval
+    logger.debug(`Successfully fetched ${data.length} activities`);
+    
+    // Return the data
+    return data || [];
+  } catch (error: any) {
+    // Log any exceptions
+    logger.error('Exception during activity fetch:', error.message);
+    throw error;
   }
-  
-  logger.debug(`Retrieved ${activities?.length || 0} activities`);
-  return activities || [];
 };
 
 /**
- * Custom hook for fetching activities
+ * useActivitiesDirect hook
  * 
- * @param limit - Maximum number of activities to fetch
- * @returns Query result with activities data
+ * Fetches activity data and provides real-time updates using React Query.
+ * 
+ * @returns query - React Query's query result object
  */
-export const useActivitiesDirect = (limit: number = 20) => {
-  // Use React Query with polling enabled
+export const useActivitiesDirect = () => {
+  // Use React Query to manage data fetching
   const query = useQuery({
-    queryKey: ["activities", limit],
-    queryFn: () => fetchActivities(limit),
-    // Set up automatic polling
-    refetchInterval: 60000, // 1 minute
-    refetchIntervalInBackground: false,
-    // Enable automatic refetching when window regains focus
+    queryKey: ['activities'],
+    queryFn: fetchActivities,
+    refetchOnMount: true,
     refetchOnWindowFocus: true,
-    // Add some retry logic
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    refetchInterval: 60000, // 60 seconds
+    onError: (error: any) => {
+      logger.error('React Query error fetching activities:', error.message);
+    }
   });
   
-  // Set up listeners for activity refresh events
+  // State to track subscription status
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  
+  // Set up real-time subscription using useEffect
   useEffect(() => {
-    // Create a handler for events that should trigger a refresh
+    // Prevent multiple subscriptions
+    if (isSubscribed) return;
+    
+    // Log the setup of the subscription
+    logger.debug('Setting up real-time activity subscription');
+    
+    // Handler for refresh events
     const handleRefreshEvent = () => {
-      logger.debug("Activity refresh event detected");
+      logger.debug('Activity refresh event detected, refetching data');
       query.refetch();
     };
     
-    // Listen for the activities-updated event
-    window.addEventListener('activities-updated', handleRefreshEvent);
-    
-    // Set up subscription with refreshEvents utility
+    // Subscribe to the 'activities-updated' event using refreshEvents utility
     const unsubscribe = refreshEvents.on('activities-updated', handleRefreshEvent);
     
-    // Also listen to content-specific events that should trigger activity updates
-    window.addEventListener('event-submitted', handleRefreshEvent);
-    window.addEventListener('safety-updated', handleRefreshEvent);
-    window.addEventListener('goods-updated', handleRefreshEvent);
-    window.addEventListener('skills-updated', handleRefreshEvent);
+    // Mark as subscribed
+    setIsSubscribed(true);
     
-    // Clean up event listeners on unmount
+    // Clean up subscription on unmount
     return () => {
-      window.removeEventListener('activities-updated', handleRefreshEvent);
-      window.removeEventListener('event-submitted', handleRefreshEvent);
-      window.removeEventListener('safety-updated', handleRefreshEvent);
-      window.removeEventListener('goods-updated', handleRefreshEvent);
-      window.removeEventListener('skills-updated', handleRefreshEvent);
-      
-      // Unsubscribe from the refreshEvents utility
-      if (unsubscribe) unsubscribe();
+      logger.debug('Cleaning up real-time activity subscription');
+      unsubscribe();
+      setIsSubscribed(false);
     };
-  }, [query]);
+  }, [query, isSubscribed]);
   
   // Return the query result
   return query;

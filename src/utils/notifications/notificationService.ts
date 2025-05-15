@@ -1,4 +1,3 @@
-
 /**
  * Unified Notification Service
  * 
@@ -54,7 +53,7 @@ export async function createNotification(params: NotificationParams): Promise<st
     const relevanceScore = params.relevanceScore || 1;
     const metadata = params.metadata || {};
 
-    // Insert notification directly
+    // Insert notification directly - fixed to use a properly typed object
     const { data, error } = await supabase
       .from('notifications')
       .insert({

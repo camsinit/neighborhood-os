@@ -16,7 +16,7 @@ export type RefreshEventType =
   | 'activities';
 
 // Specific event action types
-type EventActionType = 
+export type EventActionType = 
   | 'event-submitted'
   | 'event-deleted'
   | 'event-updated'
@@ -36,6 +36,29 @@ type EventActionType =
 export const dispatchRefreshEvent = (eventType: EventActionType, data?: any): void => {
   const event = new CustomEvent(eventType, { detail: data });
   window.dispatchEvent(event);
+};
+
+/**
+ * Subscribe to a refresh event
+ * 
+ * @param eventType The type of refresh event to listen for
+ * @param callback The function to call when the event is fired
+ * @returns A function to unsubscribe from the event
+ */
+export const subscribeToRefreshEvent = (eventType: EventActionType, callback: (data?: any) => void): () => void => {
+  // Create an event listener that calls the callback with the event detail
+  const eventListener = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    callback(customEvent.detail);
+  };
+  
+  // Add the event listener to the window object
+  window.addEventListener(eventType, eventListener);
+  
+  // Return a function that removes the event listener
+  return () => {
+    window.removeEventListener(eventType, eventListener);
+  };
 };
 
 /**
@@ -72,10 +95,12 @@ export const refreshEvents = {
   activities: (data?: any) => {
     dispatchRefreshEvent('activities-updated', data);
   },
+
+  // Add an 'on' method to subscribe to refresh events
+  on: (eventType: EventActionType, callback: (data?: any) => void): () => void => {
+    return subscribeToRefreshEvent(eventType, callback);
+  }
 };
 
 // Default export for simpler imports
-export default {
-  dispatchRefreshEvent,
-  refreshEvents
-};
+export default refreshEvents;

@@ -1,4 +1,3 @@
-
 /**
  * Hook for handling skill request submission
  * This hook has been refactored to use the new database function for creating sessions
@@ -11,7 +10,7 @@ import { TimeSlot } from "../contribution/TimeSlotSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { prepareTimeSlots } from "@/utils/timeslotUtils";
 import { Json } from "@/integrations/supabase/types"; // Import the Json type from Supabase types
-import refreshEvents from "@/utils/refreshEvents";
+import { refreshEvents, dispatchRefreshEvent } from "@/utils/refreshEvents";
 
 /**
  * Form data structure for skill requests
@@ -112,7 +111,7 @@ export const useSkillRequestSubmit = (
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Also invalidate notifications
       
-      // Trigger notification refresh
+      // Trigger notification refresh - corrected to use direct function calls
       refreshEvents.notifications();
       // Also trigger skills refresh
       refreshEvents.skills();
