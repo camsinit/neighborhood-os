@@ -66,18 +66,14 @@ export const rsvpService = {
       recordCreated: !!data?.length
     });
     
-    // Dispatch notification events in multiple ways to ensure delivery
+    // Use the refreshEvents system to notify components 
+    // No need to manually trigger notifications - the database trigger handles that
     logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Method 1: Using refreshEvents utility (observers pattern)
-    refreshEvents.notifications();
+    // Use our improved event system
+    refreshEvents.emit('notification-created');
+    refreshEvents.emit('event-rsvp-updated');
     
-    // Method 2: Using direct event dispatch
-    window.dispatchEvent(new CustomEvent('notification-created'));
-    
-    // Method 3: Dispatch RSVP-specific event
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
-
     // Log successful event dispatch  
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
     
@@ -119,17 +115,11 @@ export const rsvpService = {
 
     logger.debug(`[${transactionId}] Successfully removed RSVP`);
     
-    // Dispatch notification events in multiple ways to ensure delivery
+    // Use the refreshEvents system to notify components
     logger.debug(`[${transactionId}] Dispatching notification events`);
     
-    // Method 1: Using refreshEvents utility (observers pattern)
-    refreshEvents.notifications();
-    
-    // Method 2: Using direct event dispatch
-    window.dispatchEvent(new CustomEvent('notification-created'));
-    
-    // Method 3: Dispatch RSVP-specific event
-    window.dispatchEvent(new CustomEvent('event-rsvp-updated'));
+    // Use our improved event system
+    refreshEvents.emit('event-rsvp-updated');
     
     // Log successful event dispatch
     logger.debug(`[${transactionId}] Successfully dispatched notification events`);
