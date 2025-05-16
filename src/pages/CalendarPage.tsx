@@ -28,7 +28,7 @@ function CalendarPage() {
       description="Upcoming events in your neighborhood"
       themeColor="calendar"
       actions={
-        <Button className="whitespace-nowrap flex items-center gap-1.5">
+        <Button className="whitespace-nowrap flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white">
           <PlusCircle className="h-4 w-4" />
           <span>Add Event</span>
         </Button>
