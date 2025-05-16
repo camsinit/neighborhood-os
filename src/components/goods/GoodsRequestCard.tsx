@@ -5,6 +5,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import RequestDetailCard from './components/RequestDetailCard';
 import RequestGoodsCard from './cards/RequestGoodsCard';
 
+/**
+ * GoodsRequestCard Component
+ * 
+ * This component wraps a RequestGoodsCard with a popover for showing details
+ */
 interface GoodsRequestCardProps {
   request: GoodsExchangeItem;
   isOpen: boolean;
@@ -25,8 +30,9 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
       <PopoverTrigger asChild>
         <div className="w-full">
           <RequestGoodsCard
-            request={request}
+            item={request} {/* Changed from 'request' to 'item' to match prop interface */}
             onSelect={() => onOpenChange(true)}
+            urgency={request.urgency}
           />
         </div>
       </PopoverTrigger>

@@ -31,13 +31,18 @@ interface GoodsFilterBarProps {
 }
 
 // Category configuration with colors and labels
-const categoryConfig: Record<GoodsItemCategory, { color: string, bgColor: string, label: string }> = {
+const categoryConfig: Record<GoodsItemCategory, { color: string; bgColor: string; label: string }> = {
   furniture: { color: 'text-[#8B5CF6]', bgColor: 'bg-[#E5DEFF]', label: 'Furniture' },
   clothing: { color: 'text-[#F97316]', bgColor: 'bg-[#FDE1D3]', label: 'Clothing' },
   books: { color: 'text-emerald-600', bgColor: 'bg-[#F2FCE2]', label: 'Books' },
   electronics: { color: 'text-[#221F26]', bgColor: 'bg-[#D3E4FD]', label: 'Electronics' },
   tools: { color: 'text-[#0EA5E9]', bgColor: 'bg-[#D3EFFD]', label: 'Tools' },
   toys: { color: 'text-[#D946EF]', bgColor: 'bg-[#FFDEE2]', label: 'Toys' },
+  kitchen: { color: 'text-amber-600', bgColor: 'bg-amber-50', label: 'Kitchen Items' },
+  sports: { color: 'text-cyan-600', bgColor: 'bg-cyan-50', label: 'Sports' },
+  garden: { color: 'text-green-600', bgColor: 'bg-green-50', label: 'Garden' },
+  produce: { color: 'text-lime-600', bgColor: 'bg-lime-50', label: 'Produce' },
+  household: { color: 'text-blue-600', bgColor: 'bg-blue-50', label: 'Household' },
   other: { color: 'text-gray-600', bgColor: 'bg-gray-100', label: 'Other' },
 };
 
@@ -49,6 +54,11 @@ const categories: GoodsItemCategory[] = [
   'electronics',
   'tools',
   'toys',
+  'kitchen',
+  'sports',
+  'garden',
+  'produce',
+  'household',
   'other'
 ];
 

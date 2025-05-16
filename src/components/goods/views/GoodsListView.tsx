@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { useGoodsItemDeletion } from '../hooks/useGoodsItemDeletion';
 import { filterBySearch } from '../utils/sectionHelpers';
-import { EmptyState } from "@/components/ui/empty-state";
+import EmptyState from "@/components/ui/empty-state"; // Changed to default import
 import { PackageSearch, CirclePlus } from "lucide-react";
 import GoodsCard from '../cards/GoodsCard';
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
