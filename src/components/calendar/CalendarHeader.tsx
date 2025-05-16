@@ -14,16 +14,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { CalendarViewType } from "@/hooks/calendar/useCalendarView";
 
 /**
- * Updated interface to include 'agenda' as a valid view type
+ * Updated interface to match the functions without view parameters
  */
 interface CalendarHeaderProps {
-  // Updated to include 'agenda' as a valid view type
-  view: 'week' | 'month' | 'agenda';
+  view: CalendarViewType;
   currentDate: Date;
-  // Updated to include 'agenda' as a valid view type
-  setView: (view: 'week' | 'month' | 'agenda') => void;
+  setView: (view: CalendarViewType) => void;
+  // Fixed: Change these to accept no parameters
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   handleToday: () => void;
@@ -146,7 +146,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
                 key={viewType}
                 variant="ghost"
                 size="sm"
-                onClick={() => setView(viewType.toLowerCase() as 'week' | 'month' | 'agenda')}
+                onClick={() => setView(viewType.toLowerCase() as CalendarViewType)}
                 className={cn(
                   "font-medium transition-all",
                   view === viewType.toLowerCase() 

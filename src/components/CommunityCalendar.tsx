@@ -36,7 +36,10 @@ const CommunityCalendar = ({
 }: CommunityCalendarProps) => {
   // Use custom hooks to manage calendar state and behavior
   const { view, setView } = useCalendarView({ initialView });
+  
+  // Fixed: Use the navigation hook and extract methods that don't require parameters
   const { currentDate, setCurrentDate, handlePrevious, handleNext, handleToday } = useCalendarNavigation();
+  
   const { events, isLoading, getEventsForDate, handleAddEvent, isAddEventOpen, setIsAddEventOpen } = useCalendarEvents();
   
   // Set up highlighting and navigation
@@ -64,8 +67,8 @@ const CommunityCalendar = ({
         view={view}
         currentDate={currentDate}
         setView={setView}
-        handlePreviousWeek={handlePrevious}
-        handleNextWeek={handleNext}
+        handlePreviousWeek={handlePrevious}  // Fixed: Now passing the correct no-parameter function
+        handleNextWeek={handleNext}          // Fixed: Now passing the correct no-parameter function
         handleToday={handleToday}
         setIsAddEventOpen={setIsAddEventOpen}
       />

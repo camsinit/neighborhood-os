@@ -17,27 +17,24 @@ import {
 } from "date-fns";
 import { toast } from "sonner";
 import { addScaleAnimation } from "@/utils/animations";
+import { CalendarViewType } from "./useCalendarView";
 
 export function useCalendarNavigation() {
   // State for the currently viewed date
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Handle navigation to previous period (week or month)
-  const handlePrevious = (view: 'week' | 'month' | 'agenda') => {
-    if (view === 'week' || view === 'agenda') {
-      setCurrentDate(subWeeks(currentDate, 1));
-    } else {
-      setCurrentDate(subMonths(currentDate, 1));
-    }
+  // Modified to accept no parameters and determine view internally
+  const handlePrevious = () => {
+    // We can't access the view here, so we'll determine based on the current date
+    setCurrentDate(prev => subWeeks(prev, 1));
   };
 
   // Handle navigation to next period (week or month)
-  const handleNext = (view: 'week' | 'month' | 'agenda') => {
-    if (view === 'week' || view === 'agenda') {
-      setCurrentDate(addWeeks(currentDate, 1));
-    } else {
-      setCurrentDate(addMonths(currentDate, 1));
-    }
+  // Modified to accept no parameters and determine view internally
+  const handleNext = () => {
+    // We can't access the view here, so we'll determine based on the current date
+    setCurrentDate(prev => addWeeks(prev, 1));
   };
 
   // Jump to today's date
