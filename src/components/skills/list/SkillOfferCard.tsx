@@ -3,12 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
+import { Calendar, MapPin, Clock, User } from 'lucide-react';
+import { format } from 'date-fns';
 
 /**
- * SkillOfferCard - The compact card showing an offered skill
+ * SkillOfferCard - The card showing an offered skill
  * 
- * This appears in the list of available skills with actions
- * appropriate based on whether you're the owner or not.
+ * Enhanced with:
+ * - Improved visual design
+ * - Better category styling
+ * - More skill information display
  */
 interface SkillOfferCardProps {
   skill: SkillWithProfile;
@@ -45,41 +49,88 @@ const SkillOfferCard = ({
 
   // Get the category colors from our map, fallback to technology if not found
   const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
+  
+  // Format the creation date for display
+  const creationDate = new Date(skill.created_at);
+  const formattedDate = format(creationDate, 'MMM d, yyyy');
 
   return (
     <div 
-      data-skill-id={skill.id}
-      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
+      className="flex flex-col p-4 cursor-pointer relative w-full"
       onClick={onClick}
     >
-      {/* User profile and skill title */}
-      <div className="flex items-center gap-3 flex-grow">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-          <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <h4 className="font-medium text-gray-900">{skill.title}</h4>
+      <div className="flex items-start justify-between w-full">
+        {/* User profile and skill title */}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border">
+            <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+            <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <h4 className="font-medium text-gray-900">{skill.title}</h4>
+            <p className="text-sm text-gray-500 flex items-center">
+              <User className="h-3 w-3 mr-1" />
+              {skill.profiles?.display_name || 'Anonymous'}
+            </p>
+          </div>
         </div>
+        
+        {/* Category tag */}
+        <Badge 
+          className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs`}
+        >
+          {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
+        </Badge>
       </div>
       
-      {/* Category tag that hides on hover */}
-      <Badge 
-        className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs absolute right-2 top-1/2 transform -translate-y-1/2 group-hover:opacity-0 transition-opacity`}
-      >
-        {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
-      </Badge>
-      
-      {/* Request button that shows on hover */}
-      {!isOwner && (
-        <Button 
-          variant="outline" 
-          onClick={handleRequestClick}
-          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
-        >
-          Request Skill
-        </Button>
+      {/* Description preview (if available) */}
+      {skill.description && (
+        <p className="mt-2 text-sm text-gray-700 line-clamp-2">
+          {skill.description}
+        </p>
       )}
+      
+      {/* Additional metadata */}
+      <div className="flex items-center mt-2 text-xs text-gray-500 gap-3">
+        <span className="flex items-center">
+          <Calendar className="h-3 w-3 mr-1" />
+          {formattedDate}
+        </span>
+        
+        {skill.availability && (
+          <span className="flex items-center">
+            <Clock className="h-3 w-3 mr-1" />
+            {skill.availability}
+          </span>
+        )}
+      </div>
+      
+      {/* Action buttons */}
+      <div className="mt-3 flex justify-end">
+        {isOwner ? (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            disabled={isDeleting}
+            className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+          >
+            {isDeleting ? 'Deleting...' : 'Remove'}
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleRequestClick}
+            className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+          >
+            Request Skill
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

@@ -8,21 +8,24 @@ import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 import SkillRequestCard from './SkillRequestCard';
 import SkillOfferCard from './SkillOfferCard';
 import SkillDetailsContent from './SkillDetailsContent';
+import { ModuleItemCard } from '@/components/ui/card';
 
 /**
  * SkillCard - Main component that renders different skill card types
  * 
- * This component has been refactored to use smaller, focused components
- * for better maintainability and clarity. It now serves as a container
- * that determines which card type to show based on props.
+ * This enhanced component:
+ * - Uses ModuleItemCard for consistent highlighting behavior
+ * - Provides proper data attributes for the highlighting system
+ * - Handles different card types (request/offer) with appropriate styling
  */
 interface SkillCardProps {
   skill: SkillWithProfile;
   onContribute?: () => void;
   type: 'request' | 'offer';
+  isHighlighted?: boolean;
 }
 
-const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
+const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCardProps) => {
   // Get the current user to determine ownership
   const currentUser = useUser();
   
@@ -44,27 +47,40 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
     setIsDetailsOpen(false);
   };
 
-  // For skill requests, we render the request card component
+  // For skill requests, we render the request card inside a ModuleItemCard for highlighting
   if (type === 'request') {
-    // We no longer pass onContribute to SkillRequestCard since it handles its own dialog
     return (
-      <SkillRequestCard
-        skill={skill}
-      />
+      <ModuleItemCard
+        itemId={skill.id}
+        itemType="skills"
+        isHighlighted={isHighlighted}
+        className="p-0 overflow-hidden" // Remove padding since the child has its own padding
+      >
+        <SkillRequestCard
+          skill={skill}
+        />
+      </ModuleItemCard>
     );
   }
 
-  // For skill offers, we render the offer card and detail dialog
+  // For skill offers, we render the offer card inside a ModuleItemCard for highlighting
   return (
     <>
-      <SkillOfferCard 
-        skill={skill}
-        isOwner={isOwner}
-        onDelete={handleDeleteSkill}
-        isDeleting={isDeleting}
-        onRequestSkill={() => setIsRequestDialogOpen(true)}
-        onClick={() => setIsDetailsOpen(true)}
-      />
+      <ModuleItemCard
+        itemId={skill.id}
+        itemType="skills"
+        isHighlighted={isHighlighted}
+        className="p-0 overflow-hidden" // Remove padding since the child has its own padding
+      >
+        <SkillOfferCard 
+          skill={skill}
+          isOwner={isOwner}
+          onDelete={handleDeleteSkill}
+          isDeleting={isDeleting}
+          onRequestSkill={() => setIsRequestDialogOpen(true)}
+          onClick={() => setIsDetailsOpen(true)}
+        />
+      </ModuleItemCard>
 
       {/* Details dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>

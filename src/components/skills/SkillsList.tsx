@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory, SkillWithProfile } from './types/skillTypes';
@@ -7,9 +8,10 @@ import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 
 /**
- * Props for the SkillsList component
+ * Props for the SkillsList component with enhanced filtering
  */
 interface SkillsListProps {
   selectedCategory: SkillCategory | undefined;
@@ -28,6 +30,9 @@ const SkillsList = ({
   
   // Setup auto-refresh for skills data
   useAutoRefresh(['skills-exchange'], ['skills-updated']);
+  
+  // Set up highlight tracking
+  const { id: highlightedSkillId } = useHighlightedItem('skills');
   
   const {
     data: skills,
@@ -49,8 +54,8 @@ const SkillsList = ({
         *,
         profiles:user_id (
           id,
-          avatar_url,
-          display_name
+          display_name,
+          avatar_url
         )
       `).order('created_at', {
         ascending: false
@@ -132,11 +137,15 @@ const SkillsList = ({
       description = "Share your skills and knowledge with your neighbors";
       actionLabel = "Share a Skill";
     } else if (showRequests) {
-      title = "No Skill Requests Available";
+      title = selectedCategory 
+        ? `No ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skill Requests Available` 
+        : "No Skill Requests Available";
       description = "Be the first to request a skill from your neighbors";
       actionLabel = "Request a Skill";
     } else {
-      title = `No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`;
+      title = selectedCategory 
+        ? `No ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills Available` 
+        : "No Skills Available";
       description = `Be the first to share your ${selectedCategory || ''} skills with the community`;
       actionLabel = `Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`;
     }
@@ -150,6 +159,7 @@ const SkillsList = ({
     />;
   }
 
+  // Render the list of skills with proper highlighting
   return (
     <div className="space-y-4">
       {filteredSkills.map(skill => (
@@ -157,6 +167,7 @@ const SkillsList = ({
           key={skill.id} 
           skill={skill} 
           type={showRequests ? 'request' : 'offer'}
+          isHighlighted={skill.id === highlightedSkillId}
         />
       ))}
     </div>
