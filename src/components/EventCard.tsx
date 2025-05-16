@@ -1,7 +1,7 @@
 
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Pencil, Clock, Users } from "lucide-react";
+import { Pencil, Clock, Users, Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -11,6 +11,7 @@ import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { motion } from "framer-motion";
 
 /**
  * EventCard component displays an event in the calendar
@@ -21,14 +22,20 @@ import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
  * - Shows event details on hover
  * - Opens a full event sheet when clicked
  * - Shows edit controls for event hosts
+ * - Supports highlighted state for focus
+ * - Supports list view for agenda display
  * 
  * @param event - The event data to display
  * @param onDelete - Callback function when event is deleted
+ * @param isHighlighted - Whether this event should be highlighted
+ * @param listView - Whether to display in list view (for agenda)
  */
 const EventCard = ({
   event,
-  onDelete
-}: EventCardProps) => {
+  onDelete,
+  isHighlighted = false,
+  listView = false
+}: EventCardProps & { isHighlighted?: boolean, listView?: boolean }) => {
   // Get current user and set up state
   const user = useUser();
   const [isRsvped, setIsRsvped] = useState(false);
@@ -139,23 +146,78 @@ const EventCard = ({
     setIsSheetOpen(false);
   };
 
-  // Event preview card with hover effect for showing edit button
-  // Added mb-2 (margin-bottom) to create space between events
-  const eventPreview = <div 
+  // Different card rendering for list view vs calendar view
+  if (listView) {
+    return (
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetTrigger asChild>
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className={`p-4 cursor-pointer rounded-md ${isHighlighted ? 'ring-2 ring-blue-400' : ''}`}
+            data-event-id={event.id}
+          >
+            <div className="flex justify-between">
+              <div>
+                <h3 className="font-medium text-lg">{event.title}</h3>
+                <div className="flex items-center gap-2 text-gray-500 mt-1">
+                  <Clock className="h-4 w-4" />
+                  <span>{displayTime}</span>
+                  <span className="mx-2">•</span>
+                  <span>{event.location}</span>
+                </div>
+              </div>
+              {rsvpCount > 0 && (
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Users className="h-4 w-4" />
+                  <span>{rsvpCount}</span>
+                </div>
+              )}
+            </div>
+            {isRsvped && (
+              <div className="mt-2">
+                <span className="text-xs font-medium px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                  You're attending
+                </span>
+              </div>
+            )}
+          </motion.div>
+        </SheetTrigger>
+        <EventSheetContent 
+          event={eventWithRequiredProps} 
+          EditButton={EditButton} 
+          onOpenChange={setIsSheetOpen}
+        />
+      </Sheet>
+    );
+  }
+
+  // Standard calendar view event card
+  const eventPreview = (
+    <motion.div 
       data-event-id={event.id} 
-      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative ${isHighlighted ? 'ring-2 ring-blue-400' : ''}`} 
       onMouseEnter={() => setIsHovering(true)} 
       onMouseLeave={() => setIsHovering(false)}
+      animate={isHighlighted ? { scale: [1, 1.05, 1] } : {}}
+      transition={{ duration: 0.5 }}
     >
       {/* Host edit button - only shows when hovering on events you created */}
       {isHost && isHovering}
       
       <div className="font-medium line-clamp-2">{event.title}</div>
-      {rsvpCount > 0 && <div className="flex items-center gap-1 text-gray-600 mt-1">
+      <div className="flex items-center gap-1 text-gray-600 mt-1">
+        <Clock className="h-3 w-3" />
+        <span className="truncate">{displayTime}</span>
+      </div>
+      {rsvpCount > 0 && (
+        <div className="flex items-center gap-1 text-gray-600 mt-1">
           <Users className="h-3 w-3" />
           <span>{rsvpCount}</span>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </motion.div>
+  );
 
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>

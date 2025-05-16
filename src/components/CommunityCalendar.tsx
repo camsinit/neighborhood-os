@@ -12,38 +12,52 @@ import {
   parseISO,
   isEqual,
   isSameMonth,
+  format,
 } from "date-fns";
 import AddEventDialog from "./AddEventDialog";
 import { useEvents } from "@/utils/queries/useEvents";
 import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
+import AgendaView from "./calendar/AgendaView";
 import { addScaleAnimation } from "@/utils/animations";
-import { toast } from "sonner"; // Updated import for toast
+import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
-import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
+import { Event as LocalEvent } from "@/types/localTypes";
+import { highlightItem } from "@/utils/highlight";
+import { motion } from "framer-motion";
 
 // Create a logger for the CommunityCalendar component
 const logger = createLogger('CommunityCalendar');
 
+interface CommunityCalendarProps {
+  initialView?: 'week' | 'month' | 'agenda';
+  highlightedId?: string | null;
+}
+
 /**
  * CommunityCalendar component
  * 
- * This component displays events in either a week or month view.
+ * This component displays events in either a week, month, or agenda view.
  * It allows users to navigate between weeks/months and add new events.
+ * 
+ * @param initialView - The initial calendar view to display
+ * @param highlightedId - ID of event to highlight (if any)
  */
-const CommunityCalendar = () => {
+const CommunityCalendar = ({ 
+  initialView = 'week',
+  highlightedId = null 
+}: CommunityCalendarProps) => {
   // State for current date and view mode
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'week' | 'month'>('week');
+  const [view, setView] = useState<'week' | 'month' | 'agenda'>(initialView);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   
   // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();
   
   // Set up auto-refresh for calendar events
-  // This will listen for multiple events that should trigger a calendar refresh
   useAutoRefresh(
     ['events'], 
     ['event-submitted', 'event-deleted', 'event-updated']
@@ -66,24 +80,10 @@ const CommunityCalendar = () => {
           setView('month');
         }
 
-        // Highlight the event's day
+        // Highlight the event
         setTimeout(() => {
-          const dayCell = document.querySelector(`[data-date="${event.time.split('T')[0]}"]`);
-          if (dayCell) {
-            dayCell.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-            dayCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Remove highlight after animation
-            setTimeout(() => {
-              dayCell.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-            }, 2000);
-          }
+          highlightItem('event', eventId, true);
         }, 100);
-
-        // Show toast using Sonner directly
-        toast("Event Located", {
-          description: `Navigated to "${event.title}"`
-        });
       }
     };
 
@@ -92,6 +92,18 @@ const CommunityCalendar = () => {
       window.removeEventListener('navigateToEvent', handleNavigateToEvent as EventListener);
     };
   }, [events, currentDate]);
+  
+  // Handle highlighting when highlightedId changes
+  useEffect(() => {
+    if (highlightedId && events) {
+      const event = events.find(event => event.id === highlightedId);
+      if (event) {
+        const eventDate = parseISO(event.time);
+        // Update current date to event date to ensure it's visible
+        setCurrentDate(eventDate);
+      }
+    }
+  }, [highlightedId, events]);
 
   // Calculate date ranges based on current view
   const weekStart = startOfWeek(currentDate);
@@ -124,20 +136,25 @@ const CommunityCalendar = () => {
   const getEventsForDate = (date: Date): LocalEvent[] => {
     if (!events) return [];
     
-    // Convert fetched events to LocalEvent type with required properties
     return events.filter(event => {
       const eventDate = parseISO(event.time);
       return isEqual(
         new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()),
         new Date(date.getFullYear(), date.getMonth(), date.getDate())
       );
-    }) as LocalEvent[]; // Type assertion here as we know the structure matches
+    }) as LocalEvent[];
   };
 
   // Handle event addition and trigger refetch
   const handleAddEvent = async () => {
     logger.debug("Event added, refreshing data");
     await refetch();
+  };
+
+  // Animation variants for view transitions
+  const viewTransitions = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
@@ -152,22 +169,42 @@ const CommunityCalendar = () => {
         setIsAddEventOpen={setIsAddEventOpen}
       />
       
-      <div className="calendar-container">
-        {view === 'week' ? (
+      <motion.div 
+        className="calendar-container"
+        key={`${view}-${format(currentDate, 'yyyy-MM-dd')}`}
+        initial="hidden"
+        animate="visible"
+        variants={viewTransitions}
+        transition={{ duration: 0.3 }}
+      >
+        {view === 'week' && (
           <WeekView 
             weekDates={weekDates}
             events={events as LocalEvent[] | undefined}
             isLoading={isLoading}
             getEventsForDate={getEventsForDate}
+            highlightedId={highlightedId}
           />
-        ) : (
+        )}
+        
+        {view === 'month' && (
           <MonthView 
             currentDate={currentDate}
             events={events as LocalEvent[] || []}
             isLoading={isLoading}
+            highlightedId={highlightedId}
           />
         )}
-      </div>
+        
+        {view === 'agenda' && (
+          <AgendaView
+            currentDate={currentDate}
+            events={events as LocalEvent[] || []}
+            isLoading={isLoading}
+            highlightedId={highlightedId}
+          />
+        )}
+      </motion.div>
 
       <AddEventDialog 
         open={isAddEventOpen}

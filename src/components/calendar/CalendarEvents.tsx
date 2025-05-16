@@ -1,24 +1,19 @@
 
 /**
- * CalendarEvents component (placeholder)
- * This component displays calendar events in different views
+ * CalendarEvents component
+ * This component is a simple bridge to the CommunityCalendar component
+ * for backward compatibility with existing code.
  */
 import React from 'react';
+import CommunityCalendar from '../CommunityCalendar';
 
 interface CalendarEventsProps {
   view: 'month' | 'week' | 'agenda';
+  highlightedId?: string | null;
 }
 
-const CalendarEvents: React.FC<CalendarEventsProps> = ({ view }) => {
-  return (
-    <div className="p-4 bg-white rounded-md shadow">
-      <p className="text-center text-gray-500">
-        {view === 'month' ? 'Monthly Calendar View' : 
-         view === 'week' ? 'Weekly Calendar View' : 
-         'Agenda View'}
-      </p>
-    </div>
-  );
+const CalendarEvents: React.FC<CalendarEventsProps> = ({ view, highlightedId }) => {
+  return <CommunityCalendar initialView={view} highlightedId={highlightedId} />;
 };
 
 export default CalendarEvents;

@@ -1,9 +1,9 @@
 
 import { format, isToday } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus } from "lucide-react"; // Import the Plus icon
+import { Plus } from "lucide-react";
 import EventCard from "../EventCard";
-import { Event } from "@/types/localTypes"; // Import from localTypes instead of calendar
+import { Event } from "@/types/localTypes";
 
 interface DayCellProps {
   date: Date;
@@ -11,7 +11,8 @@ interface DayCellProps {
   events: Event[];
   isLoading: boolean;
   className?: string;
-  onAddEvent?: (date: Date) => void; // Add callback for handling new event creation
+  onAddEvent?: (date: Date) => void;
+  highlightedId?: string | null;
 }
 
 /**
@@ -21,6 +22,7 @@ interface DayCellProps {
  * - The date number
  * - Events scheduled for that date
  * - An "add event" button that appears on hover
+ * - Highlighted state for specific events
  * 
  * @param date - The date this cell represents
  * @param isCurrentMonth - Whether this date is in the current month (for styling)
@@ -28,6 +30,7 @@ interface DayCellProps {
  * @param isLoading - Whether events are loading
  * @param className - Additional CSS classes
  * @param onAddEvent - Callback function when user clicks "+" button to add an event
+ * @param highlightedId - ID of event to highlight (if any)
  */
 const DayCell = ({ 
   date, 
@@ -35,29 +38,36 @@ const DayCell = ({
   events,
   isLoading,
   className = "",
-  onAddEvent
+  onAddEvent,
+  highlightedId
 }: DayCellProps) => {
+  // Check if this cell contains the highlighted event
+  const hasHighlightedEvent = events.some(event => event.id === highlightedId);
+  
   return (
     <div 
       className={`group relative bg-white border-r border-b border-gray-200 min-h-[120px] transition-all duration-300 last:border-r-0
         ${!isCurrentMonth ? 'opacity-50' : ''}
         ${isToday(date) ? 'outline outline-1 outline-[#0EA5E9] outline-offset-[-1px] z-10' : ''}
+        ${hasHighlightedEvent ? 'bg-blue-50' : ''}
         ${className}
       `}
-      data-date={format(date, 'yyyy-MM-dd')} // Add data attribute for date identification
+      data-date={format(date, 'yyyy-MM-dd')}
     >
       {/* Add Event Button - Hidden by default, shown on hover */}
       <button
-        onClick={() => onAddEvent?.(date)} // Pass the cell's date to the callback
+        onClick={() => onAddEvent?.(date)}
         className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 
                  opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-        aria-label={`Add event on ${format(date, 'MMM d, yyyy')}`} // Improved accessibility
+        aria-label={`Add event on ${format(date, 'MMM d, yyyy')}`}
       >
         <Plus className="h-4 w-4 text-gray-600" />
       </button>
 
       <div className="p-2">
-        <span className="text-lg font-medium">{format(date, 'd')}</span>
+        <span className={`text-lg font-medium ${isToday(date) ? 'text-blue-500' : ''}`}>
+          {format(date, 'd')}
+        </span>
       </div>
       
       {/* Add a scrollable container for events when they overflow */}
@@ -72,6 +82,7 @@ const DayCell = ({
             <EventCard 
               key={event.id} 
               event={event}
+              isHighlighted={event.id === highlightedId}
             />
           ))
         )}
