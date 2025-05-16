@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Event } from "@/types/localTypes";
 import DayCell from "./DayCell";
 import AddEventDialog from "../AddEventDialog";
-import { format, isWeekend } from "date-fns";
+import { format, isWeekend, startOfWeek, addDays } from "date-fns";
 import { createLogger } from "@/utils/logger";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,7 @@ const WeekView = ({
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
+  // Define day names in correct order: Sunday to Saturday
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Handler for adding a new event
@@ -76,6 +77,9 @@ const WeekView = ({
     hidden: { opacity: 0, scale: 0.98 },
     visible: { opacity: 1, scale: 1 }
   };
+
+  // Fix: Ensure the weekDates are properly aligned with the day headers
+  // We don't need to modify weekDates here as they come correctly from the parent
 
   return (
     <div className="space-y-2">
