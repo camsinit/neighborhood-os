@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -5,10 +6,16 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+
+/**
+ * Updated interface to include 'agenda' as a valid view type
+ */
 interface CalendarHeaderProps {
-  view: 'week' | 'month';
+  // Updated to include 'agenda' as a valid view type
+  view: 'week' | 'month' | 'agenda';
   currentDate: Date;
-  setView: (view: 'week' | 'month') => void;
+  // Updated to include 'agenda' as a valid view type
+  setView: (view: 'week' | 'month' | 'agenda') => void;
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   handleToday: () => void;
@@ -53,11 +60,8 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
 
   // Format the current date according to the view and neighborhood timezone
   const formattedDate = useMemo(() => {
-    if (view === 'week') {
-      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
-    } else {
-      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
-    }
+    // Simplify this, all views can use the same format
+    return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
   }, [currentDate, view, neighborhoodTimezone]);
 
   // Get the timezone abbreviation for display
@@ -73,6 +77,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     const parts = neighborhoodTimezone.split('/');
     return parts[parts.length - 1].replace('_', ' ');
   };
+
   return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
       <div className="flex items-center space-x-2">
         <CalendarIcon className="h-5 w-5 text-blue-500" />
@@ -101,6 +106,10 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           </Button>
           <Button variant={view === 'month' ? "secondary" : "outline"} size="sm" onClick={() => setView('month')}>
             Month
+          </Button>
+          {/* Add button for agenda view */}
+          <Button variant={view === 'agenda' ? "secondary" : "outline"} size="sm" onClick={() => setView('agenda')}>
+            Agenda
           </Button>
         </div>
         
