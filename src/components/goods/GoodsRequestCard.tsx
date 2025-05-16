@@ -30,7 +30,7 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
       <PopoverTrigger asChild>
         <div className="w-full">
           <RequestGoodsCard
-            item={request} {/* Changed from 'request' to 'item' to match prop interface */}
+            item={request} /* Changed from 'request' to 'item' to match prop interface */
             onSelect={() => onOpenChange(true)}
             urgency={request.urgency}
           />
