@@ -1,4 +1,3 @@
-
 /**
  * CommunityCalendar component
  * 
@@ -24,99 +23,89 @@ import { useEventNavigation } from "@/hooks/calendar/useEventNavigation";
 import { useWeekCalculation } from "@/hooks/calendar/useWeekCalculation";
 import { useMonthCalculation } from "@/hooks/calendar/useMonthCalculation";
 import { format } from "date-fns";
-
 interface CommunityCalendarProps {
   initialView?: 'week' | 'month' | 'agenda';
   highlightedId?: string | null;
 }
-
-const CommunityCalendar = ({ 
+const CommunityCalendar = ({
   initialView = 'week',
-  highlightedId = null 
+  highlightedId = null
 }: CommunityCalendarProps) => {
   // Use custom hooks to manage calendar state and behavior
-  const { view, setView } = useCalendarView({ initialView });
-  
+  const {
+    view,
+    setView
+  } = useCalendarView({
+    initialView
+  });
+
   // Fixed: Use the navigation hook and extract methods that don't require parameters
-  const { currentDate, setCurrentDate, handlePrevious, handleNext, handleToday } = useCalendarNavigation();
-  
-  const { events, isLoading, getEventsForDate, handleAddEvent, isAddEventOpen, setIsAddEventOpen } = useCalendarEvents();
-  
+  const {
+    currentDate,
+    setCurrentDate,
+    handlePrevious,
+    handleNext,
+    handleToday
+  } = useCalendarNavigation();
+  const {
+    events,
+    isLoading,
+    getEventsForDate,
+    handleAddEvent,
+    isAddEventOpen,
+    setIsAddEventOpen
+  } = useCalendarEvents();
+
   // Set up highlighting and navigation
-  useEventHighlighting({ highlightedId, events, currentDate, setCurrentDate });
-  useEventNavigation({ events, currentDate, setCurrentDate, view, setView });
-  
+  useEventHighlighting({
+    highlightedId,
+    events,
+    currentDate,
+    setCurrentDate
+  });
+  useEventNavigation({
+    events,
+    currentDate,
+    setCurrentDate,
+    view,
+    setView
+  });
+
   // Calculate date ranges based on current view
-  const { weekDates } = useWeekCalculation(currentDate);
-  
+  const {
+    weekDates
+  } = useWeekCalculation(currentDate);
+
   // Set up auto-refresh for calendar events
-  useAutoRefresh(
-    ['events'], 
-    ['event-submitted', 'event-deleted', 'event-updated']
-  );
+  useAutoRefresh(['events'], ['event-submitted', 'event-deleted', 'event-updated']);
 
   // Animation variants for view transitions
   const viewTransitions = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+    hidden: {
+      opacity: 0,
+      y: 10
+    },
+    visible: {
+      opacity: 1,
+      y: 0
+    }
   };
-
-  return (
-    <div className="w-full">
-      <CalendarHeader 
-        view={view}
-        currentDate={currentDate}
-        setView={setView}
-        handlePreviousWeek={handlePrevious}  // Fixed: Now passing the correct no-parameter function
-        handleNextWeek={handleNext}          // Fixed: Now passing the correct no-parameter function
-        handleToday={handleToday}
-        setIsAddEventOpen={setIsAddEventOpen}
-      />
+  return <div className="w-full">
+      <CalendarHeader view={view} currentDate={currentDate} setView={setView} handlePreviousWeek={handlePrevious} // Fixed: Now passing the correct no-parameter function
+    handleNextWeek={handleNext} // Fixed: Now passing the correct no-parameter function
+    handleToday={handleToday} setIsAddEventOpen={setIsAddEventOpen} />
       
-      <motion.div 
-        className="calendar-container bg-white rounded-xl shadow-md p-4"
-        key={`${view}-${format(currentDate, 'yyyy-MM-dd')}`}
-        initial="hidden"
-        animate="visible"
-        variants={viewTransitions}
-        transition={{ duration: 0.3 }}
-      >
-        {view === 'week' && (
-          <WeekView 
-            weekDates={weekDates}
-            events={events}
-            isLoading={isLoading}
-            getEventsForDate={getEventsForDate}
-            highlightedId={highlightedId}
-          />
-        )}
+      <motion.div key={`${view}-${format(currentDate, 'yyyy-MM-dd')}`} initial="hidden" animate="visible" variants={viewTransitions} transition={{
+      duration: 0.3
+    }} className="calendar-container bg-white rounded-xl shadow-md p-4 px-0">
+        {view === 'week' && <WeekView weekDates={weekDates} events={events} isLoading={isLoading} getEventsForDate={getEventsForDate} highlightedId={highlightedId} />}
         
-        {view === 'month' && (
-          <MonthView 
-            currentDate={currentDate}
-            events={events || []}
-            isLoading={isLoading}
-            highlightedId={highlightedId}
-          />
-        )}
+        {view === 'month' && <MonthView currentDate={currentDate} events={events || []} isLoading={isLoading} highlightedId={highlightedId} />}
         
-        {view === 'agenda' && (
-          <AgendaView
-            currentDate={currentDate}
-            events={events || []}
-            isLoading={isLoading}
-            highlightedId={highlightedId}
-          />
-        )}
+        {view === 'agenda' && <AgendaView currentDate={currentDate} events={events || []} isLoading={isLoading} highlightedId={highlightedId} />}
       </motion.div>
 
-      <AddEventDialog 
-        open={isAddEventOpen}
-        onOpenChange={setIsAddEventOpen}
-        onAddEvent={handleAddEvent}
-      />
-    </div>
-  );
+      <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={handleAddEvent} />
+    </div>;
 };
-
 export default CommunityCalendar;
