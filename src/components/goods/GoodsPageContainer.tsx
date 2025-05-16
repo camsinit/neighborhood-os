@@ -1,32 +1,38 @@
 
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
-import GoodsSections from './GoodsSections';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import GoodsPageHeader from './GoodsPageHeader';
 import GoodsDialogs from './GoodsDialogs';
-import { Tabs } from "@/components/ui/tabs";
+import GoodsFilterBar from './GoodsFilterBar';
+import GoodsListView from './views/GoodsListView';
+import { GoodsItemCategory } from "@/components/support/types/formTypes";
 
 /**
  * GoodsPageContainer Component
  * 
- * This is the main container for the Goods Exchange page, structured similarly
- * to the Skills page for consistency across modules.
+ * This is the main container for the Goods Exchange page, restructured to:
+ * - Use a consistent tab system with filters
+ * - Support proper highlighting for deep-linked items
+ * - Organize layout similar to the Skills page
  */
 const GoodsPageContainer = () => {
   // State management for filters and views
   const [searchQuery, setSearchQuery] = useState("");
-  const [showUrgent, setShowUrgent] = useState(true);
-  const [showRequests, setShowRequests] = useState(true);
-  const [showAvailable, setShowAvailable] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory | null>(null);
   const [activeTab, setActiveTab] = useState("offers");
   
   // Dialog state management
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [initialRequestType, setInitialRequestType] = useState(null);
+  const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  
+  // Get highlighted item details from the URL if any
+  const highlightedItem = useHighlightedItem('goods');
   
   // Fetch goods data
-  const { data: goodsData, isLoading, refetch } = useGoodsExchange();
+  const { data: goodsData = [], isLoading, refetch } = useGoodsExchange();
 
   // Action handlers
   const handleAddItem = () => {
@@ -43,25 +49,53 @@ const GoodsPageContainer = () => {
     setActiveTab(tab);
   };
 
+  const handleCategoryChange = (category: GoodsItemCategory | null) => {
+    setSelectedCategory(category);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Main content area with simplified structure */}
+      {/* Filter bar with actions */}
+      <GoodsFilterBar 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        onOfferItem={handleAddItem}
+        onRequestItem={handleAddRequest}
+      />
+      
+      {/* Tab content */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <GoodsSections 
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          goodsData={goodsData}
-          isLoading={isLoading}
-          showUrgent={showUrgent}
-          showRequests={showRequests}
-          showAvailable={showAvailable}
-          onRequestSelect={setSelectedRequest}
-          onRefresh={refetch}
-          onOfferItem={handleAddItem}
-          onRequestItem={handleAddRequest}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
+        {/* Offers Tab */}
+        <TabsContent value="offers" className="space-y-6 mt-0">
+          <GoodsListView 
+            goodsData={goodsData}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            requestType="offer"
+            selectedCategory={selectedCategory}
+            highlightedItemId={highlightedItem.id}
+            onRefresh={refetch}
+            onItemSelect={setSelectedRequest}
+          />
+        </TabsContent>
+        
+        {/* Requests Tab */}
+        <TabsContent value="needs" className="space-y-6 mt-0">
+          <GoodsListView 
+            goodsData={goodsData}
+            isLoading={isLoading}
+            searchQuery={searchQuery}
+            requestType="need"
+            selectedCategory={selectedCategory}
+            highlightedItemId={highlightedItem.id}
+            onRefresh={refetch}
+            onItemSelect={setSelectedRequest}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Dialogs */}

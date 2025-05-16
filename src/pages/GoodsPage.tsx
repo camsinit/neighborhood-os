@@ -6,7 +6,14 @@ import { useSearchParams } from 'react-router-dom';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 
+/**
+ * GoodsPage Component
+ * 
+ * This component is the main page for the Goods Exchange module.
+ * It handles deep linking to goods items via URL parameters.
+ */
 function GoodsPage() {
+  // Access URL parameters and highlight system
   const [searchParams] = useSearchParams();
   const highlightedItem = useHighlightedItem('goods');
   

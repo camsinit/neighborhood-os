@@ -11,7 +11,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Filter, XCircle } from 'lucide-react';
-import { SkillCategory } from '../skills/types/skillTypes';
+import { SkillCategory } from './types/skillTypes';
 import { cn } from '@/lib/utils';
 
 // Define the props for the component
