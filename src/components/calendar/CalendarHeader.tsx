@@ -1,11 +1,19 @@
 
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { 
+  Calendar as CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Clock 
+} from "lucide-react";
 import { format } from "date-fns";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 /**
  * Updated interface to include 'agenda' as a valid view type
@@ -78,45 +86,90 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     return parts[parts.length - 1].replace('_', ' ');
   };
 
-  return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-      <div className="flex items-center space-x-2">
-        <CalendarIcon className="h-5 w-5 text-blue-500" />
-        <h2 className="text-xl font-semibold flex flex-col sm:flex-row sm:items-center gap-1">
-          <span>{formattedDate}</span>
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-xl shadow-md p-4 mb-6 border border-gray-100"
+    >
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        {/* Calendar title section */}
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-500/10 p-2.5 rounded-lg">
+            <CalendarIcon className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              {formattedDate}
+            </h2>
+            <div className="flex items-center text-sm text-gray-500">
+              <Clock className="w-3.5 h-3.5 mr-1" />
+              <span>{getTimezoneAbbreviation()} timezone</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Calendar controls section */}
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Navigation controls */}
+          <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handlePreviousWeek}
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleToday}
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium"
+            >
+              Today
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleNextWeek}
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
           
-        </h2>
-      </div>
-      
-      <div className="flex flex-wrap gap-2">
-        <div className="flex rounded-md shadow-sm">
-          <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleToday}>
-            Today
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleNextWeek}>
-            <ChevronRight className="h-4 w-4" />
+          {/* View selector */}
+          <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
+            {['Week', 'Month', 'Agenda'].map((viewType) => (
+              <Button
+                key={viewType}
+                variant="ghost"
+                size="sm"
+                onClick={() => setView(viewType.toLowerCase() as 'week' | 'month' | 'agenda')}
+                className={cn(
+                  "font-medium transition-all",
+                  view === viewType.toLowerCase() 
+                    ? "bg-white text-blue-600 shadow-sm" 
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                )}
+              >
+                {viewType}
+              </Button>
+            ))}
+          </div>
+          
+          {/* Add event button */}
+          <Button 
+            onClick={() => setIsAddEventOpen(true)} 
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto"
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Event
           </Button>
         </div>
-        
-        <div className="flex rounded-md shadow-sm">
-          <Button variant={view === 'week' ? "secondary" : "outline"} size="sm" onClick={() => setView('week')}>
-            Week
-          </Button>
-          <Button variant={view === 'month' ? "secondary" : "outline"} size="sm" onClick={() => setView('month')}>
-            Month
-          </Button>
-          {/* Add button for agenda view */}
-          <Button variant={view === 'agenda' ? "secondary" : "outline"} size="sm" onClick={() => setView('agenda')}>
-            Agenda
-          </Button>
-        </div>
-        
-        <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
-          <Plus className="h-4 w-4 mr-1" /> Add Event
-        </Button>
       </div>
-    </div>;
+    </motion.div>
+  );
 };
 export default CalendarHeader;

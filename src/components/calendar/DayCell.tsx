@@ -4,6 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus } from "lucide-react";
 import EventCard from "../EventCard";
 import { Event } from "@/types/localTypes";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface DayCellProps {
   date: Date;
@@ -43,47 +45,66 @@ const DayCell = ({
 }: DayCellProps) => {
   // Check if this cell contains the highlighted event
   const hasHighlightedEvent = events.some(event => event.id === highlightedId);
+  const today = isToday(date);
   
   return (
     <div 
-      className={`group relative bg-white border-r border-b border-gray-200 min-h-[120px] transition-all duration-300 last:border-r-0
-        ${!isCurrentMonth ? 'opacity-50' : ''}
-        ${isToday(date) ? 'outline outline-1 outline-[#0EA5E9] outline-offset-[-1px] z-10' : ''}
-        ${hasHighlightedEvent ? 'bg-blue-50' : ''}
-        ${className}
-      `}
+      className={cn(
+        "group relative bg-white min-h-[120px] transition-all duration-300",
+        !isCurrentMonth ? "opacity-60" : "",
+        today ? "ring-2 ring-blue-400" : "border border-gray-100",
+        hasHighlightedEvent ? "bg-blue-50" : "",
+        className
+      )}
       data-date={format(date, 'yyyy-MM-dd')}
     >
       {/* Add Event Button - Hidden by default, shown on hover */}
       <button
         onClick={() => onAddEvent?.(date)}
-        className="absolute top-2 right-2 p-1 rounded-full bg-gray-100 hover:bg-gray-200 
-                 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-blue-500 text-white
+                 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10
+                 hover:bg-blue-600 hover:shadow-md transform hover:scale-105"
         aria-label={`Add event on ${format(date, 'MMM d, yyyy')}`}
       >
-        <Plus className="h-4 w-4 text-gray-600" />
+        <Plus className="h-3.5 w-3.5" />
       </button>
 
-      <div className="p-2">
-        <span className={`text-lg font-medium ${isToday(date) ? 'text-blue-500' : ''}`}>
+      {/* Date indicator */}
+      <div className={cn(
+        "p-2 border-b", 
+        today ? "bg-blue-500 text-white" : "border-gray-100"
+      )}>
+        <span className={cn(
+          "flex items-center justify-center w-7 h-7 text-sm font-medium rounded-full",
+          today ? "bg-white text-blue-600" : ""
+        )}>
           {format(date, 'd')}
         </span>
       </div>
       
-      {/* Add a scrollable container for events when they overflow */}
-      <div className="space-y-0 p-2 max-h-[calc(100%-40px)] overflow-y-auto">
+      {/* Events container with scrolling */}
+      <div className="space-y-1 p-2 max-h-[calc(100%-40px)] overflow-y-auto">
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 w-full mb-2" />
             <Skeleton className="h-8 w-full mb-2" />
           </div>
+        ) : events.length === 0 ? (
+          <div className="flex items-center justify-center h-[60px] text-xs text-gray-400 italic">
+            No events
+          </div>
         ) : (
           events.map((event) => (
-            <EventCard 
-              key={event.id} 
-              event={event}
-              isHighlighted={event.id === highlightedId}
-            />
+            <motion.div 
+              key={event.id}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <EventCard 
+                event={event}
+                isHighlighted={event.id === highlightedId}
+              />
+            </motion.div>
           ))
         )}
       </div>

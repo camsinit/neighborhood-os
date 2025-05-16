@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { Event } from "@/types/localTypes";
 import DayCell from "./DayCell";
 import AddEventDialog from "../AddEventDialog";
-import { format } from "date-fns";
+import { format, isWeekend } from "date-fns";
 import { createLogger } from "@/utils/logger";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // Create a logger for the WeekView component
 const logger = createLogger('WeekView');
@@ -72,16 +73,22 @@ const WeekView = ({
   };
 
   const cellAnimation = {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, scale: 0.98 },
     visible: { opacity: 1, scale: 1 }
   };
 
   return (
     <div className="space-y-2">
       {/* Day names header */}
-      <div className="grid grid-cols-7">
-        {days.map((day) => (
-          <div key={day} className="text-lg font-medium px-4">
+      <div className="grid grid-cols-7 mb-2">
+        {days.map((day, index) => (
+          <div 
+            key={day} 
+            className={cn(
+              "text-sm font-medium px-4 py-2 rounded-md text-center",
+              isWeekend(weekDates[index]) ? "bg-gray-50 text-gray-600" : "bg-white text-gray-800"
+            )}
+          >
             {day}
           </div>
         ))}
@@ -89,19 +96,20 @@ const WeekView = ({
 
       {/* Calendar grid with animation */}
       <motion.div 
-        className="grid grid-cols-7 border border-gray-200 rounded-lg overflow-hidden"
+        className="grid grid-cols-7 rounded-lg overflow-hidden gap-1 shadow-sm bg-gray-50 p-1"
         variants={gridAnimation}
         initial="hidden"
         animate="visible"
       >
         {weekDates.map((date, i) => (
-          <motion.div key={i} variants={cellAnimation}>
+          <motion.div key={i} variants={cellAnimation} className="rounded-md overflow-hidden shadow-sm">
             <DayCell
               date={date}
               events={getEventsForDate(date)}
               isLoading={isLoading}
               onAddEvent={handleAddEvent}
               highlightedId={highlightedId}
+              className={cn("h-[150px] rounded-md", isWeekend(date) ? "bg-gray-50/80" : "")}
             />
           </motion.div>
         ))}

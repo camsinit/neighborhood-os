@@ -130,6 +130,12 @@ const CommunityCalendar = ({
     const today = new Date();
     setCurrentDate(today);
     addScaleAnimation(document.querySelector('.calendar-container'));
+    
+    // Show toast confirming navigation to today
+    toast.success("Navigated to today's date", {
+      position: "bottom-right",
+      duration: 2000
+    });
   };
 
   // Type-safe function to get events for a specific date
@@ -149,6 +155,12 @@ const CommunityCalendar = ({
   const handleAddEvent = async () => {
     logger.debug("Event added, refreshing data");
     await refetch();
+    
+    // Show toast confirming event creation
+    toast.success("Event created successfully!", {
+      position: "bottom-right",
+      duration: 3000
+    });
   };
 
   // Animation variants for view transitions
@@ -170,7 +182,7 @@ const CommunityCalendar = ({
       />
       
       <motion.div 
-        className="calendar-container"
+        className="calendar-container bg-white rounded-xl shadow-md p-4"
         key={`${view}-${format(currentDate, 'yyyy-MM-dd')}`}
         initial="hidden"
         animate="visible"
