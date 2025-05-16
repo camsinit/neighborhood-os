@@ -1,6 +1,14 @@
 
 /**
  * Unified exports for notification element components
+ * 
+ * This index file provides a centralized place to export all notification
+ * element components, making imports cleaner throughout the codebase.
+ * 
+ * Usage example:
+ * ```
+ * import { NotificationAvatar, NotificationBadge } from '@/components/notifications/elements';
+ * ```
  */
 
 // Export all notification elements

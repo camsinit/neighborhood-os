@@ -2,8 +2,22 @@
 /**
  * useNotificationsPopoverData.ts
  * 
- * Simplified hook to fetch notification data for the notifications popover
- * Uses React Query's built-in polling capabilities for automatic refreshes
+ * Simplified hook to fetch notification data for the notifications popover.
+ * Uses React Query's built-in polling capabilities for automatic refreshes.
+ * 
+ * Component Integration Guide:
+ * 1. Import this hook in your notification popover component
+ * 2. Call the hook with the showArchived parameter
+ * 3. Destructure data, isLoading, and refetch from the result
+ * 4. Use these values to render your component
+ * 5. The hook handles data fetching, caching, and refresh events
+ * 
+ * Data Flow:
+ * 1. Component mounts and hook fetches initial data
+ * 2. Hook sets up polling for periodic refreshes
+ * 3. Hook subscribes to relevant refresh events
+ * 4. When events occur, data is automatically refetched
+ * 5. Component receives updated data via React Query
  */
 import { useQuery } from "@tanstack/react-query";
 import { createLogger } from "@/utils/logger";
@@ -16,10 +30,14 @@ const logger = createLogger('useNotificationsPopoverData');
 
 /**
  * Custom hook that provides notification data for the popover
- * Simplified to rely on React Query's built-in polling
+ * 
+ * This hook simplifies data fetching for the notifications popover by:
+ * 1. Setting up React Query for data fetching and caching
+ * 2. Configuring automatic polling for fresh data
+ * 3. Subscribing to relevant events for immediate updates
  * 
  * @param showArchived - Whether to show archived notifications
- * @returns Query result with notification data
+ * @returns Query result with notification data, loading state, and refetch function
  */
 export const useNotificationsPopoverData = (showArchived: boolean) => {
   // Use React Query with polling enabled
@@ -52,7 +70,10 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
       'skill-completed'
     ];
     
-    // Create a handler for the refresh events
+    /**
+     * Handler for refresh events
+     * Immediately triggers a data refetch when relevant events occur
+     */
     const handleRefreshEvent = () => {
       logger.debug("Refresh event detected, updating notifications");
       query.refetch();

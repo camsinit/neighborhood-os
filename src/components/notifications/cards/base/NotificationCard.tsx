@@ -2,7 +2,19 @@
 /**
  * NotificationCard.tsx
  * 
- * Base notification card with minimalist design principles
+ * Base notification card with minimalist design principles.
+ * 
+ * Component Responsibility:
+ * - Renders the core notification UI structure
+ * - Handles common notification interactions (view, archive)
+ * - Provides consistent styling and animation
+ * - Allows specialized content via children prop
+ * 
+ * Notification Flow:
+ * 1. Card receives notification data from parent
+ * 2. Card handles click events and navigation
+ * 3. Card triggers read/archive actions when appropriate
+ * 4. Card emits events for parent components via callbacks
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -18,7 +30,17 @@ import NotificationAvatar from "../../elements/NotificationAvatar";
 import NotificationContent from "../../elements/NotificationContent";
 import NotificationTimeStamp from "../../elements/NotificationTimeStamp";
 
-// Props for all notification card variants
+/**
+ * Props for all notification card variants
+ * 
+ * @property {BaseNotification} notification - The notification data to display
+ * @property {() => void} onAction - Optional callback for when the card is clicked
+ * @property {() => void} onDismiss - Optional callback for when notification is dismissed
+ * @property {string} className - Optional additional CSS classes
+ * @property {boolean} showActions - Whether to show action buttons
+ * @property {boolean} showTimestamp - Whether to show the timestamp
+ * @property {React.ReactNode} children - Optional additional content
+ */
 export interface NotificationCardProps {
   notification: BaseNotification;
   onAction?: () => void;
@@ -31,6 +53,13 @@ export interface NotificationCardProps {
 
 /**
  * The base notification card with minimalist design
+ * 
+ * This component provides the foundation for all notification cards.
+ * It handles common functionality like marking as read and archiving,
+ * while allowing specialized content via children.
+ * 
+ * @param props - Component props (see NotificationCardProps)
+ * @returns A Card component with notification content
  */
 export const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
@@ -62,12 +91,20 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   const actorName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
   const avatarUrl = notification.profiles?.avatar_url || notification.context?.avatarUrl;
 
-  // Handle card click
+  /**
+   * Handle card click
+   * Triggers the onAction callback if provided
+   */
   const handleCardClick = () => {
     if (onAction) onAction();
   };
   
-  // Handle view button click
+  /**
+   * Handle view button click
+   * Marks notification as read and navigates to the related content
+   * 
+   * @param e - Click event
+   */
   const handleView = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -93,7 +130,12 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     if (onDismiss) onDismiss();
   };
   
-  // Handle archive button click
+  /**
+   * Handle archive button click
+   * Animates the card away and then archives the notification
+   * 
+   * @param e - Click event
+   */
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
     

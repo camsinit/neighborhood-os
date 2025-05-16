@@ -4,6 +4,13 @@
  * 
  * This service provides a centralized API for working with notifications.
  * It exclusively uses database functions and triggers for notification creation.
+ * 
+ * Notification Lifecycle:
+ * 1. Creation: Using createNotification() or database triggers
+ * 2. Storage: In the notifications table with metadata
+ * 3. Delivery: Fetched by the notification client
+ * 4. User Actions: Mark as read, archive, etc.
+ * 5. Cleanup: Automatic archiving based on app settings
  */
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
@@ -14,18 +21,20 @@ const logger = createLogger('notificationService');
 
 /**
  * Notification types supported by the system
- * NOTE: Must match the database enum values
+ * These must match the database enum values defined in the Supabase schema
  */
 export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome';
 
 /**
  * Action types for notifications
- * NOTE: Must match the database enum values
+ * These determine what happens when a user interacts with a notification
+ * Must match the database enum values
  */
 export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 'learn' | 'rsvp' | 'comment' | 'share';
 
 /**
  * Interface for notification creation parameters
+ * Defines all the fields needed to create a complete notification
  */
 export interface NotificationParams {
   userId: string;              // Who receives the notification
@@ -42,6 +51,9 @@ export interface NotificationParams {
 
 /**
  * Creates a new notification using the database function
+ * 
+ * This method uses a Supabase RPC call to the create_unified_system_notification
+ * database function, which handles consistent notification creation and triggers.
  * 
  * @param params Notification parameters
  * @returns Promise resolving to created notification ID if successful
