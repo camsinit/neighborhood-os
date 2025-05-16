@@ -1,6 +1,7 @@
 
 import { UserWithRole } from "@/types/roles";
-import { ModuleItemCard } from "@/components/ui/card";
+// Fix the import path for ModuleItemCard
+import { ModuleItemCard } from "@/components/ui/card/ModuleItemCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, MapPin, Phone, Mail } from "lucide-react";
 import { highlightClassNames } from "@/utils/highlight/types";
