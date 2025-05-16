@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { SafetyUpdateFormData } from '../schema/safetyUpdateSchema';
+import { SafetyUpdateFormData } from '@/components/safety/schema/safetyUpdateSchema';
 import { toast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood/types';

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -53,7 +52,7 @@ const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCa
     return (
       <ModuleItemCard
         itemId={skill.id}
-        itemType="skills"
+        itemType="skill"
         isHighlighted={isHighlighted}
         className="p-0 overflow-hidden" // Remove padding since the child has its own padding
       >
@@ -69,7 +68,7 @@ const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCa
     <>
       <ModuleItemCard
         itemId={skill.id}
-        itemType="skills"
+        itemType="skill"
         isHighlighted={isHighlighted}
         className="p-0 overflow-hidden" // Remove padding since the child has its own padding
       >

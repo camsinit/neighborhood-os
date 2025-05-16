@@ -33,7 +33,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
     });
     
     // Navigate to the neighbors section and highlight this neighbor
-    highlightItem('neighbors', notification.content_id);
+    highlightItem('neighbor', notification.content_id);
     
     if (onDismiss) onDismiss();
   };

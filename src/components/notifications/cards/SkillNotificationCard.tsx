@@ -55,7 +55,7 @@ const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notificat
   // Handle viewing the skill details
   const handleViewSkill = () => {
     if (notification.content_id) {
-      highlightItem('skills', notification.content_id);
+      highlightItem('skill', notification.content_id);
     }
     
     if (onDismiss) onDismiss();

@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Skill, SkillCategory, SkillWithProfile } from './types/skillTypes';
@@ -32,7 +31,7 @@ const SkillsList = ({
   useAutoRefresh(['skills-exchange'], ['skills-updated']);
   
   // Set up highlight tracking
-  const { id: highlightedSkillId } = useHighlightedItem('skills');
+  const { id: highlightedSkillId } = useHighlightedItem('skill');
   
   const {
     data: skills,

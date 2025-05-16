@@ -7,6 +7,10 @@
  */
 import { highlightItem } from "./highlightItem";
 import { HighlightableItemType } from "./types";
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this utility
+const logger = createLogger('highlightListener');
 
 /**
  * Creates an event listener for highlighting items

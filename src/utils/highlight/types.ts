@@ -8,7 +8,7 @@
  */
 export type HighlightableItemType = 
   | 'event'
-  | 'skill'
+  | 'skill'  
   | 'goods'
   | 'safety'
   | 'care'
@@ -32,3 +32,13 @@ export const highlightClassNames = {
   active: 'active',
   item: 'highlight-item'
 };
+
+/**
+ * Result interface for useHighlightedItem hook
+ */
+export interface UseHighlightedItemResult {
+  id: string | null;
+  isHighlighted: boolean;
+  clearHighlight: () => void;
+}
+

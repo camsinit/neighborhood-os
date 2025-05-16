@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ModuleLayout } from '@/components/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,7 +33,7 @@ function SkillsPage() {
   const user = useUser();
   
   // Use the highlight system to highlight skills when requested
-  const highlightedSkill = useHighlightedItem('skills');
+  const highlightedSkill = useHighlightedItem('skill');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   
   const { searchQuery: storeSearchQuery, setSearchQuery } = useSkillsStore();
@@ -48,7 +47,7 @@ function SkillsPage() {
   useEffect(() => {
     const skillId = searchParams.get('skillId');
     if (skillId) {
-      highlightItem('skills', skillId);
+      highlightItem('skill', skillId);
     }
   }, [searchParams]);
   

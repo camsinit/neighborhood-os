@@ -16,13 +16,13 @@ import GodModeSelector from '@/components/neighbors/GodModeSelector';
  */
 function NeighborsPage() {
   const [searchParams] = useSearchParams();
-  const highlightedNeighbor = useHighlightedItem('neighbors');
+  const highlightedNeighbor = useHighlightedItem('neighbor');
   
   // Effect to handle deep linking to specific neighbor profiles
   useEffect(() => {
     const neighborId = searchParams.get('neighborId');
     if (neighborId) {
-      highlightItem('neighbors', neighborId);
+      highlightItem('neighbor', neighborId);
     }
   }, [searchParams]);
   

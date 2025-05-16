@@ -61,7 +61,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     }
     
     // Navigate to the skill details
-    highlightItem('skills', skillId);
+    highlightItem('skill', skillId);
     
     if (onDismiss) onDismiss();
   };

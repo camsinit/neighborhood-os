@@ -1,4 +1,3 @@
-
 /**
  * SkillSessionNotificationCard.tsx
  * 
@@ -61,13 +60,12 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
     title: sentenceTitle
   };
   
-  // Handle viewing session details - redirects to calendar if there's an event,
-  // otherwise to the skill details - fixed highlightItem calls
+  // Handle viewing session details
   const handleViewSession = async () => {
     if (eventId) {
       highlightItem('event', eventId);
     } else {
-      highlightItem('skills', skillId);
+      highlightItem('skill', skillId);
     }
     
     if (onDismiss) onDismiss();
