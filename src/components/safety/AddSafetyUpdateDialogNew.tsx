@@ -5,7 +5,7 @@ import SafetyUpdateFormNew from "./SafetyUpdateFormNew";
 /**
  * AddSafetyUpdateDialogNew component
  * 
- * Updated dialog for sharing safety updates in the community
+ * Updated dialog for sharing community updates
  * with a cleaner interface and more specific fields
  */
 interface AddSafetyUpdateDialogNewProps {
@@ -23,8 +23,8 @@ const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogN
     <UniversalDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Share Safety Update"
-      description="Share important safety information with your neighbors. Add details and optionally include an image to help illustrate the situation."
+      title="Share Community Update"
+      description="Share important information with your neighbors. Add details to help everyone stay informed about what's happening in your community."
       maxWidth="sm"
     >
       {/* Pass onSuccess instead of onClose */}

@@ -2,8 +2,8 @@
 /**
  * SafetyUpdates.tsx
  * 
- * Main component for the Safety Updates feature.
- * Presents a list of safety updates and handles dialog interactions.
+ * Main component for the Community Updates feature.
+ * Presents a list of updates and handles dialog interactions.
  */
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import SafetyUpdateDetail from "./safety/detail/SafetyUpdateDetail";
 const logger = createLogger('SafetyUpdates');
 
 /**
- * SafetyUpdates component displays a list of safety updates for the neighborhood
+ * SafetyUpdates component displays a list of community updates
  * and provides functionality to create, view, and edit updates
  */
 const SafetyUpdates = () => {
@@ -44,7 +44,7 @@ const SafetyUpdates = () => {
     handleDeleteSafetyUpdate
   } = useSafetyUpdateActions();
   
-  // Fetch safety updates data
+  // Fetch updates data
   const { data: safetyUpdatesResponse, isLoading } = useSafetyUpdates();
   // Extract the data array safely, ensuring it's always an array even if there's an error
   const safetyUpdates = safetyUpdatesResponse?.data || [];
@@ -52,7 +52,7 @@ const SafetyUpdates = () => {
   // Get current user for permission checks
   const user = useUser();
 
-  // Set up auto-refresh for safety updates data
+  // Set up auto-refresh for updates data
   useAutoRefresh(['safety-updates'], ['safety-update-submitted', 'safety-updated']);
 
   // Handle custom events for opening safety dialogs
@@ -76,7 +76,7 @@ const SafetyUpdates = () => {
   
   return (
     <>
-      {/* Safety updates list with improved empty state and relocated button */}
+      {/* Updates list with improved empty state and relocated button */}
       <div className="bg-transparent">
         <SafetyUpdatesList
           updates={safetyUpdates}
@@ -91,13 +91,13 @@ const SafetyUpdates = () => {
         <Button 
           variant="outline"
           onClick={openArchiveDialog}
-          className="w-full max-w-xs border-amber-500 border-dotted hover:bg-amber-50 rounded-md"
+          className="w-full max-w-xs border-blue-500 border-dotted hover:bg-blue-50 rounded-md"
         >
-          Archive
+          View Archive
         </Button>
       </div>
 
-      {/* Safety Update Dialog */}
+      {/* Update Dialog */}
       <AddSafetyUpdateDialogNew 
         open={isAddUpdateOpen}
         onOpenChange={setIsAddUpdateOpen}
@@ -116,7 +116,7 @@ const SafetyUpdates = () => {
       >
         <DialogContent className="sm:max-w-[600px] bg-white p-6 rounded-lg shadow-lg">
           <DialogHeader>
-            <DialogTitle>{selectedUpdate?.title}</DialogTitle>
+            <DialogTitle>Community Update</DialogTitle>
           </DialogHeader>
           
           {selectedUpdate && (

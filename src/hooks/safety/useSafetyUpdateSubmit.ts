@@ -18,9 +18,9 @@ interface SafetyUpdateSubmitProps {
 }
 
 /**
- * Custom hook for handling safety update submissions
+ * Custom hook for handling community update submissions
  * 
- * This hook provides methods to create and update safety updates
+ * This hook provides methods to create and update community updates
  * with consistent error handling and state management
  * Now using database triggers for notifications
  */
@@ -32,17 +32,17 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   /**
-   * Create a new safety update
+   * Create a new community update
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
     if (!user) {
-      toast.error("You must be logged in to create a safety update");
+      toast.error("You must be logged in to create a community update");
       return;
     }
 
     // Check that we have a valid neighborhood
     if (!neighborhood || !neighborhood.id) {
-      toast.error("You must be part of a neighborhood to create a safety update");
+      toast.error("You must be part of a neighborhood to create a community update");
       return;
     }
 
@@ -51,13 +51,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Creating safety update:", {
+      logger.debug("Creating community update:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
-      // Insert the safety update
+      // Insert the update
       // Database trigger will handle notifications and activities
       const { error, data } = await supabase
         .from('safety_updates')
@@ -77,7 +77,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       }
 
       // Success handling
-      toast.success("Safety update created successfully");
+      toast.success("Community update created successfully");
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
       // Use refreshEvents to signal update
@@ -89,12 +89,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         props.onSuccess();
       }
       
-      logger.debug("Successfully created safety update - database trigger handled notifications");
+      logger.debug("Successfully created community update - database trigger handled notifications");
       
       return data;
     } catch (err) {
-      logger.error('Error creating safety update:', err);
-      toast.error("Failed to create safety update. Please try again.");
+      logger.error('Error creating community update:', err);
+      toast.error("Failed to create community update. Please try again.");
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
     } finally {
@@ -103,11 +103,11 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   };
 
   /**
-   * Update an existing safety update
+   * Update an existing community update
    */
   const handleUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
     if (!user) {
-      toast.error("You must be logged in to update a safety update");
+      toast.error("You must be logged in to update a community update");
       return;
     }
 
@@ -116,13 +116,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Updating safety update:", {
+      logger.debug("Updating community update:", {
         updateId,
         userId: user.id,
         formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
       });
 
-      // Update the safety update
+      // Update the community update
       // Database trigger will handle notifications and activity updates
       const { error, data } = await supabase
         .from('safety_updates')
@@ -142,7 +142,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       }
 
       // Success handling
-      toast.success("Safety update updated successfully");
+      toast.success("Community update updated successfully");
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
       // Use refreshEvents to signal update
@@ -154,12 +154,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         props.onSuccess();
       }
       
-      logger.debug("Successfully updated safety update - database trigger handled notifications");
+      logger.debug("Successfully updated community update - database trigger handled notifications");
       
       return data;
     } catch (err) {
-      logger.error('Error updating safety update:', err);
-      toast.error("Failed to update safety update. Please try again.");
+      logger.error('Error updating community update:', err);
+      toast.error("Failed to update community update. Please try again.");
       setError(err instanceof Error ? err : new Error(String(err)));
       throw err;
     } finally {

@@ -24,8 +24,8 @@ function SafetyPage() {
   
   return (
     <ModuleLayout
-      title="Safety Updates" 
-      description="Stay informed about safety in your community"
+      title="Community Updates" 
+      description="Stay informed about important updates in your community"
       themeColor="safety"
       actions={
         <Button 

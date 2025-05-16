@@ -1,50 +1,43 @@
 
 /**
- * A utility for creating highlight event listeners
+ * Highlight listener creation utility
  * 
- * This simplified approach returns a function that can be called
- * when an item matching the specified criteria is highlighted
+ * This file provides a function to create event listeners for
+ * highlighting items in response to custom events.
  */
-import { HighlightItemDetail } from './types';
-import { createLogger } from '@/utils/logger';
-
-// Create a dedicated logger for this utility
-const logger = createLogger('createHighlightListener');
-
-// Event name for highlight events
-const HIGHLIGHT_EVENT_NAME = 'item-highlight';
+import { highlightItem } from "./highlightItem";
+import { HighlightableItemType } from "./types";
 
 /**
- * Create a listener for highlight events
+ * Creates an event listener for highlighting items
  * 
- * @param callback Function to call when an item is highlighted
- * @returns Function to remove the listener
+ * @param itemType The type of items this listener should highlight
+ * @param eventName The name of the custom event to listen for
+ * @returns A cleanup function to remove the event listener
  */
-export function createHighlightListener(
-  callback: (detail: HighlightItemDetail) => void
-): () => void {
-  logger.debug('Creating highlight event listener');
-  
-  // Create event handler function
-  const handler = (event: CustomEvent<HighlightItemDetail>) => {
-    logger.debug('Highlight event received:', event.detail);
-    callback(event.detail);
+export const createHighlightListener = (
+  itemType: HighlightableItemType,
+  eventName: string = `highlight-${itemType}`
+): () => void => {
+  // The event handler function
+  const handleHighlightEvent = (event: CustomEvent<{ id: string }>) => {
+    if (!event.detail || !event.detail.id) return;
+    
+    // Highlight the item with the provided ID
+    highlightItem(itemType, event.detail.id, true);
   };
   
-  // Add event listener to window
+  // Add the event listener
   window.addEventListener(
-    HIGHLIGHT_EVENT_NAME, 
-    handler as EventListener
+    eventName, 
+    handleHighlightEvent as EventListener
   );
   
-  // Return cleanup function
+  // Return a cleanup function
   return () => {
-    logger.debug('Removing highlight event listener');
     window.removeEventListener(
-      HIGHLIGHT_EVENT_NAME, 
-      handler as EventListener
+      eventName, 
+      handleHighlightEvent as EventListener
     );
   };
-}
-
-export default createHighlightListener;
+};

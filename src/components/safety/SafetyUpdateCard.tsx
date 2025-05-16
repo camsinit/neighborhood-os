@@ -2,13 +2,13 @@
 /**
  * SafetyUpdateCard.tsx
  * 
- * Card component for displaying safety updates
+ * Card component for displaying community updates
  */
 import React from "react";
 // Import directly from the source file to avoid circular dependencies
 import ModuleItemCard from "@/components/ui/card/ModuleItemCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AlertTriangle, Construction, Eye, User } from "lucide-react";
+import { AlertTriangle, Construction, Info, Wrench, User } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,7 @@ interface SafetyUpdateCardProps {
 }
 
 /**
- * SafetyUpdateCard - Displays a safety update using our unified design system
+ * SafetyUpdateCard - Displays a community update using our unified design system
  * 
  * This component showcases our new card system with proper data attributes
  * and consistent styling.
@@ -31,7 +31,7 @@ const SafetyUpdateCard = ({
   // Helper function to get tag color based on type
   const getTypeStyles = (type: string) => {
     switch (type) {
-      case "Alert":
+      case "Emergency":
         return {
           bg: "bg-red-50",
           text: "text-red-700",
@@ -39,19 +39,27 @@ const SafetyUpdateCard = ({
           border: "border-red-200",
           accentColor: "#EF4444"
         };
+      case "Alert":
+        return {
+          bg: "bg-orange-50",
+          text: "text-orange-700",
+          icon: AlertTriangle,
+          border: "border-orange-200",
+          accentColor: "#F97316"
+        };
       case "Maintenance":
         return {
           bg: "bg-yellow-50",
           text: "text-yellow-700",
-          icon: Construction,
+          icon: Wrench,
           border: "border-yellow-200",
           accentColor: "#F59E0B"
         };
-      case "Observation":
+      case "Infrastructure":
         return {
           bg: "bg-blue-50",
           text: "text-blue-700",
-          icon: Eye,
+          icon: Construction,
           border: "border-blue-200",
           accentColor: "#3B82F6"
         };
@@ -59,7 +67,7 @@ const SafetyUpdateCard = ({
         return {
           bg: "bg-gray-50",
           text: "text-gray-700",
-          icon: Eye,
+          icon: Info,
           border: "border-gray-200",
           accentColor: "#6B7280"
         };
@@ -73,7 +81,7 @@ const SafetyUpdateCard = ({
     <ModuleItemCard
       itemType="safety"
       itemId={update.id}
-      className="p-4 rounded-lg"
+      className="p-4 rounded-lg hover:shadow-md transition-all duration-200"
       accentColor={typeStyles.accentColor}
       onClick={onClick}
     >
@@ -106,8 +114,13 @@ const SafetyUpdateCard = ({
           </div>
 
           {/* Description with line clamp */}
-          <p className="text-sm text-gray-500 truncate-2 mb-2">
+          <p className="text-sm text-gray-500 line-clamp-2 mb-2">
             {update.description}
+          </p>
+          
+          {/* Author name - added for better context */}
+          <p className="text-xs text-gray-500">
+            Posted by {update.profiles?.display_name || 'A neighbor'}
           </p>
         </div>
       </div>
