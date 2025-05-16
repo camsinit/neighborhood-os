@@ -10,4 +10,3 @@ export { default as NotificationBadge } from './NotificationBadge';
 export { default as NotificationContent } from './NotificationContent';
 export { default as NotificationDescription } from './NotificationDescription';
 export { default as NotificationTimeStamp } from './NotificationTimeStamp';
-

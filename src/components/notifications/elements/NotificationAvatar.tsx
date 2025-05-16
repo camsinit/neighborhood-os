@@ -2,66 +2,69 @@
 /**
  * NotificationAvatar.tsx
  * 
- * A minimalist avatar component for notifications
+ * A reusable component for displaying notification avatars with appropriate styling
  */
 import React from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { User } from "lucide-react";
-import { getNotificationTextColor, getNotificationBorderColor } from "../utils/notificationColorUtils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getNotificationStyle } from "../utils/notificationStyles";
 
-export interface NotificationAvatarProps {
-  url?: string | null;
-  name: string;
+interface NotificationAvatarProps {
+  url?: string;
+  name?: string;
   isUnread?: boolean;
-  className?: string;
-  size?: "sm" | "md" | "lg";
   notificationType?: string;
+  size?: "sm" | "md" | "lg";
 }
 
 /**
- * Renders a clean avatar for notification items
- * with subtle module-specific styling
+ * Renders an avatar with appropriate styling based on notification properties
  */
-export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
+const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   url,
-  name,
+  name = "N",
   isUnread = false,
-  className,
-  size = "md",
-  notificationType
+  notificationType = "default",
+  size = "md"
 }) => {
-  // Determine size class
-  const sizeClass = {
+  // Get the notification style based on type
+  const style = getNotificationStyle(notificationType);
+  const Icon = style.icon;
+  
+  // Determine size class based on size prop
+  const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
     lg: "h-12 w-12"
-  }[size];
+  };
   
-  // Get text color and background color based on notification type
-  const textColorClass = getNotificationTextColor(notificationType);
-  const bgColorClass = getNotificationBorderColor(notificationType); // Fixed: using the correct function
+  const avatarSize = sizeClasses[size];
+  
+  // Calculate icon size based on avatar size
+  const iconSize = {
+    sm: "h-3.5 w-3.5",
+    md: "h-4 w-4",
+    lg: "h-5 w-5"
+  };
   
   return (
-    <Avatar 
-      className={cn(
-        sizeClass, 
-        "flex-shrink-0", 
-        className
-      )}
-    >
-      {url ? (
-        <AvatarImage src={url} alt={name} className="object-cover" />
-      ) : (
-        <AvatarFallback 
-          className={cn(
-            "bg-gray-100",
-            isUnread && notificationType ? cn(bgColorClass, textColorClass) : "text-gray-600"
-          )}
-        >
-          {name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      )}
+    <Avatar className={cn(
+      avatarSize,
+      isUnread ? "ring-2 ring-offset-2" : "ring-0",
+      isUnread ? style.borderColor.replace("border-", "ring-") : ""
+    )}>
+      <AvatarImage src={url} alt={name} />
+      <AvatarFallback className={cn(
+        style.backgroundColor,
+        "flex items-center justify-center"
+      )}>
+        {url ? name.charAt(0).toUpperCase() : (
+          <Icon className={cn(
+            style.textColor,
+            iconSize[size]
+          )} />
+        )}
+      </AvatarFallback>
     </Avatar>
   );
 };
