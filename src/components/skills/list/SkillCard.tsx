@@ -8,7 +8,8 @@ import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 import SkillRequestCard from './SkillRequestCard';
 import SkillOfferCard from './SkillOfferCard';
 import SkillDetailsContent from './SkillDetailsContent';
-import { ModuleItemCard } from '@/components/ui/card';
+// Fix the import to use the correct path that provides ModuleItemCard
+import { ModuleItemCard } from '@/components/ui/card/index';
 
 /**
  * SkillCard - Main component that renders different skill card types
