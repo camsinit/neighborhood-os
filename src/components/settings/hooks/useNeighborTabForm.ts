@@ -1,46 +1,57 @@
 
 import { UseFormReturn } from "react-hook-form";
+import { useState } from "react";
 import { ProfileFormValues } from "../types";
-import { SkillCategory } from "@/components/skills/types/skillTypes";
+import { SKILL_CATEGORIES } from "../../onboarding/survey/steps/skills/skillCategories";
 
 /**
- * Hook for handling NeighborTab form logic
+ * Custom hook for handling the Neighbor tab form logic
  * 
- * Centralizes the logic for the neighbor tab in the settings form
+ * This hook provides utilities for managing user settings related to
+ * their neighborhood profile, including skills and visibility settings.
  * 
  * @param form - The form instance from react-hook-form
- * @returns The form instance and additional methods/data needed by the NeighborTab
  */
 export const useNeighborTabForm = (form: UseFormReturn<ProfileFormValues>) => {
-  // Define all available skill categories that can be added
-  const skillCategories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
-  
+  // Extract all skills from categories into a flat array for display
+  const flattenedSkills = Object.values(SKILL_CATEGORIES).reduce(
+    (acc, category) => [...acc, ...category.skills],
+    [] as string[]
+  );
+
+  // Get skill categories for the selection dropdown
+  const skillCategories = Object.keys(SKILL_CATEGORIES);
+
   /**
-   * Add a skill to the user's skills array
-   * 
+   * Add a skill to the user's profile
    * @param skill - The skill to add
    */
   const addSkill = (skill: string) => {
-    const currentSkills = form.getValues().skills || [];
-    if (!currentSkills.includes(skill)) {
-      form.setValue('skills', [...currentSkills, skill], { shouldDirty: true });
+    const currentSkills = form.getValues("skills") || [];
+    
+    // Don't add if already exists
+    if (currentSkills.includes(skill)) {
+      return;
     }
+    
+    // Update the form with the new skill
+    form.setValue("skills", [...currentSkills, skill]);
   };
-  
+
   /**
-   * Remove a skill from the user's skills array
-   * 
+   * Remove a skill from the user's profile
    * @param index - The index of the skill to remove
    */
   const removeSkill = (index: number) => {
-    const newSkills = form.getValues().skills?.filter((_, i) => i !== index);
-    form.setValue('skills', newSkills || [], { shouldDirty: true });
+    const currentSkills = form.getValues("skills") || [];
+    const updatedSkills = currentSkills.filter((_, i) => i !== index);
+    form.setValue("skills", updatedSkills);
   };
-  
+
   return {
-    form,
     skillCategories,
+    flattenedSkills,
     addSkill,
-    removeSkill
+    removeSkill,
   };
 };

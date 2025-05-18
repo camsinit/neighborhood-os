@@ -1,9 +1,9 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
 import { ContactInfoStep } from "./survey/steps/ContactInfoStep";
 import { AddressStep } from "./survey/steps/AddressStep";
 import { ProfilePhotoStep } from "./survey/steps/ProfilePhotoStep";
+import { SkillsStep } from "./survey/steps/SkillsStep";
 import SurveyProgress from "./survey/SurveyProgress";
 import SurveyStepHeader from "./survey/SurveyStepHeader";
 
@@ -30,6 +31,7 @@ interface SurveyDialogProps {
  * - Contact info (email, phone)
  * - Address info
  * - Profile photo
+ * - Skills
  */
 const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
   // Navigation
@@ -44,6 +46,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
   const [address, setAddress] = useState<string>("");
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
+  const [skills, setSkills] = useState<string[]>([]);
   
   // Survey state
   const [currentStep, setCurrentStep] = useState(0);
@@ -96,6 +99,16 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
           setPhotoUrl={setPhotoUrl}
         />
       )
+    },
+    {
+      title: "Your Skills",
+      description: "Share skills you'd be willing to offer neighbors",
+      component: (
+        <SkillsStep
+          selectedSkills={skills}
+          onSkillsChange={setSkills}
+        />
+      )
     }
   ];
   
@@ -128,6 +141,14 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
     if (currentStep === 2) {
       if (!address.trim()) {
         toast.error("Please enter your address");
+        return;
+      }
+    }
+    
+    // Skills step validation - not strictly required but we encourage at least one
+    if (currentStep === 4 && skills.length === 0) {
+      const confirmContinue = window.confirm("You haven't selected any skills. Are you sure you want to continue without adding skills?");
+      if (!confirmContinue) {
         return;
       }
     }
@@ -198,6 +219,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
           phone_number: phone,
           address: address,
           avatar_url: avatarUrl || undefined,
+          skills: skills.length > 0 ? skills : null,
           completed_onboarding: true
         })
         .eq('id', user.id);

@@ -1,4 +1,3 @@
-
 /**
  * Index page component
  * 
@@ -47,7 +46,7 @@ const Index = () => {
         // Check if the user has completed onboarding
         const { data, error } = await supabase
           .from('profiles')
-          .select('display_name, completed_onboarding')
+          .select('completed_onboarding')
           .eq('id', user.id)
           .single();
         
@@ -58,9 +57,8 @@ const Index = () => {
           return;
         }
         
-        // If the user has a display name or completed_onboarding is true, consider onboarding completed
-        const hasCompletedOnboarding = data?.completed_onboarding || (data?.display_name ? true : false);
-        setHasCompletedOnboarding(hasCompletedOnboarding);
+        // Set the onboarding status based on the database value
+        setHasCompletedOnboarding(data?.completed_onboarding === true);
       } catch (err) {
         console.error("Failed to check onboarding status:", err);
         // Default to true if there's an error to avoid blocking users

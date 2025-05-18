@@ -1,4 +1,10 @@
 
+/**
+ * Predefined skill categories and their respective skills
+ * 
+ * This structure organizes skills into categories for easier selection
+ * during onboarding. Each category has a title and an array of skills.
+ */
 export const SKILL_CATEGORIES = {
   technology: {
     title: "Technology",
@@ -8,7 +14,9 @@ export const SKILL_CATEGORIES = {
       "IT Support",
       "Cybersecurity",
       "Data Analysis",
-      "Digital Marketing"
+      "Digital Marketing",
+      "Computer Repair",
+      "Smart Home Setup"
     ],
   },
   emergency: {
@@ -19,6 +27,8 @@ export const SKILL_CATEGORIES = {
       "Emergency Response Training",
       "Search and Rescue Experience",
       "Fire Safety Training",
+      "Crisis Management",
+      "Disaster Preparedness"
     ],
   },
   professional: {
@@ -26,9 +36,12 @@ export const SKILL_CATEGORIES = {
     skills: [
       "Legal Knowledge",
       "Financial/Accounting",
-      "IT/Technical Support",
-      "Mental Health (Counselor, Therapist)",
-      "Language Translation/Interpretation",
+      "Tax Preparation",
+      "Mental Health Support",
+      "Language Translation",
+      "Resume/Job Search Help",
+      "Business Consulting",
+      "Notary Public"
     ],
   },
   maintenance: {
@@ -38,17 +51,37 @@ export const SKILL_CATEGORIES = {
       "Electrical Work",
       "Plumbing",
       "Car Maintenance/Repair",
-      "Solar/Alternative Energy Knowledge",
+      "Solar/Alternative Energy",
       "Gardening/Landscaping",
+      "Furniture Repair",
+      "Painting",
+      "Yard Work"
     ],
   },
   care: {
     title: "Care & Support",
     skills: [
-      "Childcare/Education",
+      "Childcare",
+      "Pet Care",
       "Elder Care",
-      "Pet Care/Veterinary",
       "Cooking/Meal Preparation",
+      "Grocery Shopping",
+      "Transportation",
+      "House Sitting",
+      "Pet Sitting"
+    ],
+  },
+  education: {
+    title: "Education & Arts",
+    skills: [
+      "Tutoring",
+      "Music Lessons",
+      "Art/Craft Instruction",
+      "Language Teaching",
+      "Photography",
+      "Athletic Coaching",
+      "Mentoring",
+      "Workshop Facilitation"
     ],
   },
 };
