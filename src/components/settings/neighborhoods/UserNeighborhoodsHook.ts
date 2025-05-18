@@ -65,7 +65,8 @@ export const useUserNeighborhoods = () => {
       if (membershipCheckError) throw membershipCheckError;
       
       if (isMember) {
-        toast.info(`User is already a member of "${neighborhoodName}"`);
+        // Don't show a toast if they're already a member
+        logger.debug(`User is already a member of "${neighborhoodName}"`);
         return;
       }
 
