@@ -1,4 +1,3 @@
-
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "./types";
 import { UserNeighborhoods } from "./UserNeighborhoods";
@@ -18,11 +17,10 @@ export const NeighborTab = ({
 }: {
   form: UseFormReturn<ProfileFormValues>;
 }) => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Neighborhoods Section */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Your Neighborhoods</h3>
+        
         <UserNeighborhoods />
       </div>
 
@@ -31,6 +29,5 @@ export const NeighborTab = ({
 
       {/* Contact Visibility Settings */}
       <VisibilitySettings form={form} />
-    </div>
-  );
+    </div>;
 };
