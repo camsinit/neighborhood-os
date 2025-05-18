@@ -30,7 +30,8 @@ function SkillsPage() {
   
   // Local state to manage dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(action === 'create');
-  const [dialogMode, setDialogMode] = useState<'offer' | 'need'>('offer');
+  // Fixed: Changed type 'offer' | 'need' to 'offer' | 'request' to match expected type
+  const [dialogMode, setDialogMode] = useState<'offer' | 'request'>('offer');
   
   const user = useUser();
   
@@ -83,7 +84,7 @@ function SkillsPage() {
   };
   
   // Open skill dialog with specified mode
-  const handleOpenSkillDialog = (mode: 'offer' | 'need') => {
+  const handleOpenSkillDialog = (mode: 'offer' | 'request') => {
     setDialogMode(mode);
     setIsSkillDialogOpen(true);
     
