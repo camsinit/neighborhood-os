@@ -85,7 +85,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   }} animate={{
     opacity: 1,
     y: 0
-  }} className="bg-white p-4 mb-6 shadow-sm py-0 rounded-none">
+  }} className="bg-white p-4 mb-6 py-0 rounded-none">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         {/* Calendar title section */}
         <div className="flex items-center gap-3">
