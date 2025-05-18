@@ -6,6 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileFormSchema, ProfileFormValues, NotificationPreferences } from "@/components/settings/types";
+import { fetchUserSkills } from "@/utils/notifications/skillNotifications";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this module
+const logger = createLogger('useSettingsForm');
 
 /**
  * Custom hook to handle all settings form logic
@@ -62,7 +67,7 @@ export const useSettingsForm = () => {
       // Don't proceed if user isn't available
       if (!user) return;
       
-      console.log("[useSettingsForm] Loading profile and skills for user:", user.id);
+      logger.debug("Loading profile and skills for user:", user.id);
       
       try {
         // Fetch user profile from database
@@ -74,7 +79,7 @@ export const useSettingsForm = () => {
 
         // Handle fetch errors
         if (profileError) {
-          console.error("[useSettingsForm] Error loading profile:", profileError);
+          logger.error("Error loading profile:", profileError);
           toast({
             title: "Error loading profile",
             description: profileError.message,
@@ -84,22 +89,8 @@ export const useSettingsForm = () => {
         }
 
         // Fetch user's skills from skills_exchange table
-        const { data: skillsData, error: skillsError } = await supabase
-          .from("skills_exchange")
-          .select("skill_category")
-          .eq("user_id", user.id)
-          .eq("request_type", "offer");
-
-        if (skillsError) {
-          console.error("[useSettingsForm] Error loading skills:", skillsError);
-        }
-
-        // Extract unique skill categories
-        const skillCategories = skillsData ? 
-          [...new Set(skillsData.map(item => item.skill_category))] : 
-          [];
-
-        console.log("[useSettingsForm] Loaded skills from skills_exchange:", skillCategories);
+        const skillCategories = await fetchUserSkills(user.id);
+        logger.debug("Loaded skills from skills_exchange:", skillCategories);
 
         // Process and set form values if data exists
         if (profileData) {
@@ -122,7 +113,7 @@ export const useSettingsForm = () => {
           const profileSkills = profileData.skills || [];
           const combinedSkills = [...new Set([...profileSkills, ...skillCategories])];
           
-          console.log("[useSettingsForm] Combined skills:", combinedSkills);
+          logger.debug("Combined skills:", combinedSkills);
 
           const values = {
             display_name: profileData.display_name || "",
@@ -143,7 +134,7 @@ export const useSettingsForm = () => {
           form.reset(values);
         }
       } catch (error) {
-        console.error("[useSettingsForm] Unexpected error:", error);
+        logger.error("Unexpected error:", error);
         toast({
           title: "Error loading profile data",
           description: "Please try again later",
@@ -162,7 +153,7 @@ export const useSettingsForm = () => {
     setLoading(true);
     
     try {
-      console.log("[useSettingsForm] Saving profile with skills:", values.skills);
+      logger.debug("Saving profile with skills:", values.skills);
       
       // Update user profile in database
       const { error } = await supabase
@@ -195,7 +186,7 @@ export const useSettingsForm = () => {
       return true;
     } catch (error: any) {
       // Handle update errors
-      console.error("[useSettingsForm] Error saving settings:", error);
+      logger.error("Error saving settings:", error);
       toast({
         title: "Error saving settings",
         description: error.message,

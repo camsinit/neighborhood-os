@@ -4,8 +4,20 @@ import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "./types";
 import { Separator } from "@/components/ui/separator";
+import { useNotificationsTabForm } from "./hooks/useNotificationsTabForm";
 
+/**
+ * NotificationsTab component
+ * 
+ * Displays and manages user notification preferences in the settings form
+ * 
+ * @param form - The form instance from react-hook-form
+ */
 export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValues> }) => {
+  // Use our dedicated hook for this tab
+  const { form: processedForm } = useNotificationsTabForm(form);
+  
+  // Define page-specific notification settings
   const pageSpecificSettings = [
     { key: "events", label: "Events" },
     { key: "safety", label: "Safety Updates" },
@@ -17,8 +29,9 @@ export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValu
 
   return (
     <div className="space-y-6">
+      {/* Involved-only toggle */}
       <FormField
-        control={form.control}
+        control={processedForm.control}
         name="notification_preferences.involved_only"
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -40,13 +53,14 @@ export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValu
 
       <Separator className="my-4" />
       
+      {/* Page-specific notification settings */}
       <div>
         <h3 className="text-lg font-medium mb-4">Page-Specific Notifications</h3>
         <div className="space-y-4">
           {pageSpecificSettings.map(({ key, label }) => (
             <FormField
               key={key}
-              control={form.control}
+              control={processedForm.control}
               name={`notification_preferences.page_specific.${key}` as const}
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -71,8 +85,9 @@ export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValu
 
       <Separator className="my-4" />
 
+      {/* All activity toggle */}
       <FormField
-        control={form.control}
+        control={processedForm.control}
         name="notification_preferences.all_activity"
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -92,8 +107,9 @@ export const NotificationsTab = ({ form }: { form: UseFormReturn<ProfileFormValu
         )}
       />
 
+      {/* New neighbors toggle */}
       <FormField
-        control={form.control}
+        control={processedForm.control}
         name="notification_preferences.new_neighbors"
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">

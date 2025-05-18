@@ -1,101 +1,39 @@
 
 /**
- * skillNotifications.ts
- * 
- * Helper utility for triggering UI refreshes after skill-related database events
- * No direct notification creation - all notifications are created by database triggers
+ * Utility functions for handling skill notifications
  */
-import { refreshEvents } from "@/utils/refreshEvents";
+import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
 
-// Create a dedicated logger for this module
+// Create a logger for this module
 const logger = createLogger('skillNotifications');
 
 /**
- * Signal that a skill has been requested
- * Refreshes UI components after database triggers create notifications
+ * Fetch skills from the skills_exchange table
  * 
- * @param skillTitle - Title of the skill (for logging only)
+ * @param userId - The user's ID
+ * @returns Array of skill categories
  */
-export const sendSkillRequestNotification = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill request for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skill-request-created');
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
-};
+export const fetchUserSkills = async (userId: string): Promise<string[]> => {
+  try {
+    const { data: skillsData, error: skillsError } = await supabase
+      .from("skills_exchange")
+      .select("skill_category")
+      .eq("user_id", userId)
+      .eq("request_type", "offer");
 
-/**
- * Signal that a skill session has been confirmed
- * Refreshes UI components after database triggers create notifications
- * 
- * @param skillTitle - Title of the skill (for logging only)
- */
-export const sendSkillConfirmationNotifications = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill confirmation for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skill-session-confirmed');
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
-};
+    if (skillsError) {
+      logger.error("Error loading skills:", skillsError);
+      return [];
+    }
 
-/**
- * Signal that a skill session has been cancelled
- * Refreshes UI components after database triggers create notifications
- * 
- * @param skillTitle - Title of the skill (for logging only)
- */
-export const sendSkillCancellationNotification = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill cancellation for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skill-session-cancelled');
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
-};
-
-/**
- * Signal that a skill session has been rescheduled
- * Refreshes UI components after database triggers create notifications
- * 
- * @param skillTitle - Title of the skill (for logging only)
- */
-export const sendSkillRescheduleNotification = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill reschedule for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skill-session-rescheduled');
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
-};
-
-/**
- * Signal that a skill session has been completed
- * Refreshes UI components after database triggers create notifications
- * 
- * @param skillTitle - Title of the skill (for logging only)
- */
-export const sendSkillCompletionNotification = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill completion for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skill-completed');
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
-};
-
-/**
- * Signal that a skill listing has been updated
- * Refreshes UI components after database triggers create notifications
- * 
- * @param skillTitle - Title of the skill (for logging only)
- */
-export const sendSkillUpdateNotification = async (
-  skillTitle: string
-): Promise<void> => {
-  logger.debug(`Skill update for ${skillTitle} - DB trigger will handle notification`);
-  refreshEvents.emit('skills-updated');
-  refreshEvents.emit('notification-created');
+    // Extract unique skill categories
+    return skillsData ? 
+      [...new Set(skillsData.map(item => item.skill_category))] : 
+      [];
+    
+  } catch (error) {
+    logger.error("Unexpected error fetching skills:", error);
+    return [];
+  }
 };
