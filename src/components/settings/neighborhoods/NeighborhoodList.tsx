@@ -19,8 +19,9 @@ interface NeighborhoodListProps {
 const NeighborhoodList: React.FC<NeighborhoodListProps> = ({
   neighborhoods
 }) => {
+  // Return badges directly without the wrapping div
   return (
-    <div className="space-y-2">
+    <>
       <h3 className="text-base font-medium">Your Neighborhoods</h3>
       <div className="flex flex-wrap gap-2">
         {neighborhoods.map((neighborhood) => (
@@ -29,7 +30,7 @@ const NeighborhoodList: React.FC<NeighborhoodListProps> = ({
           </Badge>
         ))}
       </div>
-    </div>
+    </>
   );
 };
 
