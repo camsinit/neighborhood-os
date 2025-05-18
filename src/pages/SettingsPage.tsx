@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SettingsDialogContent from '@/components/settings/SettingsDialogContent';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
  * SettingsPage component
  * 
  * Provides a page-based interface for settings by directly embedding
- * the SettingsDialogContent component
+ * the SettingsDialogContent component without extra wrappers
  */
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,10 +26,10 @@ const SettingsPage: React.FC = () => {
     <ModuleLayout
       title="Account Settings"
       themeColor="neighbors" // Using 'neighbors' theme since settings are user/profile related
+      className="pb-6" // Add padding to bottom for spacing
     >
-      <div className="bg-white rounded-lg border shadow-sm p-6">
-        <SettingsDialogContent onClose={handleClose} />
-      </div>
+      {/* Render settings content directly without the extra div wrapper */}
+      <SettingsDialogContent onClose={handleClose} />
     </ModuleLayout>
   );
 };
