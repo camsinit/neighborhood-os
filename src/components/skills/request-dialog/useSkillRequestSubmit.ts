@@ -1,7 +1,7 @@
 
 /**
  * Hook for handling skill request submission
- * This hook has been refactored to rely on database triggers for notifications
+ * Updated to support multi-provider requests
  */
 import { useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -24,10 +24,11 @@ export interface SkillRequestFormData {
 
 /**
  * Custom hook for handling the skill request submission process
+ * Updated to support multi-provider requests when providerId is undefined
  */
 export const useSkillRequestSubmit = (
   skillId: string,
-  providerId: string,
+  providerId?: string, // Now optional for multi-provider requests
   onClose: () => void
 ) => {
   // State management
@@ -39,6 +40,7 @@ export const useSkillRequestSubmit = (
 
   /**
    * Submit a skill request with selected time slots
+   * Now supports multi-provider requests when providerId is undefined
    */
   const submitSkillRequest = async (
     data: SkillRequestFormData,
@@ -53,7 +55,7 @@ export const useSkillRequestSubmit = (
     // Log input time slots array for debugging
     console.log("[submitSkillRequest] Starting request submission:", {
       skillId,
-      providerId,
+      providerId: providerId || 'MULTI_PROVIDER', // Log if this is a multi-provider request
       requesterId: user.id,
       formData: JSON.stringify(data, null, 2),
       timeSlots: JSON.stringify(selectedTimeSlots, null, 2)
@@ -81,49 +83,91 @@ export const useSkillRequestSubmit = (
         timePreference: data.timePreference
       };
       
-      // Call the database function directly using RPC
-      // Using proper typing to ensure compatibility with Supabase
-      console.log("[submitSkillRequest] Making RPC call with params:", {
-        p_skill_id: skillId,
-        p_provider_id: providerId,
-        p_requester_id: user.id
-      });
+      // Determine the status based on whether this is a multi-provider or specific provider request
+      const initialStatus = providerId ? 'pending_provider_times' : 'open_for_providers';
       
-      const { data: result, error } = await supabase.rpc(
-        'create_skill_session_with_timeslots',
-        {
-          p_skill_id: skillId,
-          p_provider_id: providerId,
-          p_requester_id: user.id,
-          p_requester_availability: formDataForRpc,
-          p_timeslots: preparedTimeSlots
-        }
-      );
+      // Create the skill session
+      const { data: session, error } = await supabase
+        .from('skill_sessions')
+        .insert({
+          skill_id: skillId,
+          provider_id: providerId, // This can be null for multi-provider requests
+          requester_id: user.id,
+          status: initialStatus,
+          requester_availability: formDataForRpc,
+        })
+        .select();
 
       if (error) {
-        console.error("[submitSkillRequest] RPC error:", error);
+        console.error("[submitSkillRequest] Error creating skill session:", error);
         throw error;
       }
       
-      console.log("[submitSkillRequest] Success! Result:", result);
+      console.log("[submitSkillRequest] Skill session created:", session);
       
-      // Fix: Use the correct property access pattern for the RPC result
-      // The result is a JSON object with a session_id property
-      // We need to extract it safely
-      let sessionId: string | undefined;
-      if (result && typeof result === 'object' && 'session_id' in result) {
-        sessionId = result.session_id as string;
+      // Get the session ID from the result
+      const sessionId = session?.[0]?.id;
+      if (!sessionId) {
+        throw new Error("Failed to get session ID from the created session");
       }
       
-      // No need for edge function call - database triggers create notifications now
-      console.log("[submitSkillRequest] DB triggers create notifications");
+      // Now insert time slots for the session
+      const timeSlotObjects = selectedTimeSlots.map(slot => {
+        // For each date, create entries for each selected time preference
+        const timeSlots = [];
+        const dateString = typeof slot.date === 'string' ? slot.date : slot.date.toISOString().split('T')[0];
+        
+        // Create a time slot for each selected preference (morning, afternoon, evening)
+        for (const pref of slot.preferences) {
+          let timeString;
+          switch(pref) {
+            case 'morning':
+              timeString = 'T09:00:00.000Z'; // 9 AM
+              break;
+            case 'afternoon':
+              timeString = 'T13:00:00.000Z'; // 1 PM
+              break;
+            case 'evening':
+              timeString = 'T18:00:00.000Z'; // 6 PM
+              break;
+            default:
+              timeString = 'T12:00:00.000Z'; // Default to noon
+          }
+          
+          timeSlots.push({
+            session_id: sessionId,
+            proposed_time: dateString + timeString
+          });
+        }
+        
+        return timeSlots;
+      }).flat();
       
-      // Show success message and update UI
-      toast.success('Skill request submitted successfully');
+      // Insert the time slots
+      const { error: timeSlotError } = await supabase
+        .from('skill_session_time_slots')
+        .insert(timeSlotObjects);
+        
+      if (timeSlotError) {
+        console.error("[submitSkillRequest] Error inserting time slots:", timeSlotError);
+        throw timeSlotError;
+      }
+      
+      // Show success message based on request type
+      if (providerId) {
+        toast.success('Skill request submitted successfully', {
+          description: 'The provider will be notified of your request.'
+        });
+      } else {
+        toast.success('Skill request submitted successfully', {
+          description: 'Your request has been sent to all matching providers.'
+        });
+      }
       
       // Invalidate queries and emit events to refresh UI
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
       
       refreshEvents.emit('skill-request-created');
       refreshEvents.emit('skills-updated');
@@ -136,7 +180,7 @@ export const useSkillRequestSubmit = (
       // Enhanced error logging
       console.error('[submitSkillRequest] Error context:', {
         skillId,
-        providerId,
+        providerId: providerId || 'MULTI_PROVIDER',
         requesterId: user?.id,
         errorMessage: error.message,
         errorCode: error.code

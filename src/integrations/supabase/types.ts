@@ -790,7 +790,7 @@ export type Database = {
           id: string
           location_details: string | null
           location_preference: string | null
-          provider_id: string
+          provider_id: string | null
           requester_availability: Json
           requester_id: string
           skill_id: string
@@ -804,7 +804,7 @@ export type Database = {
           id?: string
           location_details?: string | null
           location_preference?: string | null
-          provider_id: string
+          provider_id?: string | null
           requester_availability: Json
           requester_id: string
           skill_id: string
@@ -818,7 +818,7 @@ export type Database = {
           id?: string
           location_details?: string | null
           location_preference?: string | null
-          provider_id?: string
+          provider_id?: string | null
           requester_availability?: Json
           requester_id?: string
           skill_id?: string
@@ -1160,6 +1160,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      claim_skill_request: {
+        Args: { p_session_id: string; p_provider_id: string }
+        Returns: Json
+      }
       create_skill_session_with_timeslots: {
         Args: {
           p_skill_id: string
@@ -1184,6 +1188,12 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: string
+      }
+      find_matching_skill_providers: {
+        Args: { p_skill_id: string }
+        Returns: {
+          provider_id: string
+        }[]
       }
       get_activities_safe: {
         Args: { user_uuid: string; limit_count?: number }
@@ -1356,6 +1366,8 @@ export type Database = {
         | "expired"
         | "completed"
         | "in_progress"
+        | "open_for_providers"
+        | "claimed_by_provider"
       user_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -1509,6 +1521,8 @@ export const Constants = {
         "expired",
         "completed",
         "in_progress",
+        "open_for_providers",
+        "claimed_by_provider",
       ],
       user_role: ["super_admin", "admin", "moderator", "user"],
     },

@@ -2,7 +2,7 @@
 /**
  * Dialog component for requesting a skill session
  * 
- * This component has been refactored for better maintainability and readability
+ * This component has been updated to support multi-provider skill requests
  */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,17 +23,19 @@ import { validateTimeSlots } from "@/utils/timeslotUtils";
 
 /**
  * Props for the dialog component
+ * (Note: providerId is now optional to support our multi-provider flow)
  */
 interface SkillSessionRequestDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   skillId: string;
   skillTitle: string;
-  providerId: string;
+  providerId?: string; // Now optional - if not provided, will send to all providers
 }
 
 /**
  * A dialog component for requesting a skill session
+ * Updated to support multi-provider requests when no providerId is specified
  */
 const SkillSessionRequestDialog = ({
   open,
@@ -54,10 +56,10 @@ const SkillSessionRequestDialog = ({
     },
   });
 
-  // Custom hook for form submission logic
+  // Custom hook for form submission logic - updated to handle multi-provider flow
   const { isSubmitting, submitSkillRequest } = useSkillRequestSubmit(
     skillId, 
-    providerId, 
+    providerId, // This can be undefined now for multi-provider requests
     () => onOpenChange(false)
   );
 
@@ -104,13 +106,26 @@ const SkillSessionRequestDialog = ({
     await submitSkillRequest(data, selectedTimeSlots);
   };
 
+  // Determine the title based on whether this is a specific provider or multi-provider request
+  const dialogTitle = providerId 
+    ? `Request Help with: ${skillTitle}` 
+    : `Request Help with: ${skillTitle} (Multiple Providers)`;
+
   return (
     <TooltipProvider>
       <UniversalDialog
         open={open}
         onOpenChange={onOpenChange}
-        title={`Request Help with: ${skillTitle}`}
+        title={dialogTitle}
       >
+        {/* Display an informational message for multi-provider requests */}
+        {!providerId && (
+          <div className="bg-blue-50 text-blue-700 p-3 rounded-md mb-4 text-sm">
+            This request will be sent to all neighbors who can help with this skill. 
+            The first provider to claim your request will be matched with you.
+          </div>
+        )}
+        
         {/* Wrap everything in a Form component with the onSubmit handler */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-0">
@@ -123,7 +138,7 @@ const SkillSessionRequestDialog = ({
                 selectedTimeSlots={selectedTimeSlots}
                 setSelectedTimeSlots={setSelectedTimeSlots}
                 disabledDays={disabledDays}
-                requiredDatesCount={1} // Change from 3 to 1 to match database requirement
+                requiredDatesCount={1} // We only require 1 date minimum
               />
             </div>
 

@@ -16,8 +16,7 @@ const logger = createLogger('SkillsPage');
 /**
  * SkillsPage - Main component for the Skills Exchange feature
  * 
- * This component has been refactored to use smaller, focused components
- * to improve maintainability and readability.
+ * This component has been updated to support multi-provider requests.
  */
 function SkillsPage() {
   // Use our custom hook to manage page state and URL parameters

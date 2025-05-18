@@ -8,8 +8,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 /**
  * Custom hook for managing Skills page state and URL parameters
  * 
- * This hook centralizes all the state management and URL parameter handling
- * for the Skills page, making the main component cleaner and more focused.
+ * This hook has been updated to support multi-provider skill requests
  */
 export function useSkillsPageState() {
   // Get search parameters from URL
@@ -23,7 +22,7 @@ export function useSkillsPageState() {
   
   // Local state to manage dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(action === 'create');
-  const [dialogMode, setDialogMode] = useState<'offer' | 'request'>('offer');
+  const [dialogMode, setDialogMode] = useState<'offer' | 'request' | 'multi-request'>('offer');
   
   const { setSearchQuery } = useSkillsStore();
   
@@ -70,7 +69,7 @@ export function useSkillsPageState() {
   };
   
   // Open skill dialog with specified mode
-  const handleOpenSkillDialog = (mode: 'offer' | 'request') => {
+  const handleOpenSkillDialog = (mode: 'offer' | 'request' | 'multi-request') => {
     setDialogMode(mode);
     setIsSkillDialogOpen(true);
     
