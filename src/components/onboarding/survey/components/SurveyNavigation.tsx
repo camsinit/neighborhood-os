@@ -1,7 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
+/**
+ * SurveyNavigation component
+ * 
+ * Renders navigation buttons for the survey dialog
+ */
 interface SurveyNavigationProps {
   currentStep: number;
   totalSteps: number;
@@ -10,12 +15,6 @@ interface SurveyNavigationProps {
   onNext: () => void;
 }
 
-/**
- * SurveyNavigation component
- * 
- * This component renders the navigation buttons for moving between steps
- * in the survey, with enhanced visual styling and animations
- */
 export const SurveyNavigation = ({
   currentStep,
   totalSteps,
@@ -23,45 +22,29 @@ export const SurveyNavigation = ({
   onBack,
   onNext,
 }: SurveyNavigationProps) => {
-  const isFirstStep = currentStep === 0;
-  const isLastStep = currentStep === totalSteps - 1;
-
   return (
-    <div className="flex justify-between items-center pt-4">
+    <div className="flex justify-between mt-6">
       <Button
-        type="button"
         variant="outline"
         onClick={onBack}
-        className={`transition-all duration-300 ${
-          isFirstStep ? 'opacity-0 pointer-events-none' : 'bg-white/70 hover:bg-white'
-        }`}
         disabled={isSubmitting}
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {currentStep === 0 ? "Cancel" : "Back"}
       </Button>
-
-      <Button
-        type="button"
+      
+      <Button 
         onClick={onNext}
-        className="transition-all duration-300 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-md hover:shadow-lg"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
             Saving...
           </>
-        ) : isLastStep ? (
-          <>
-            Complete
-            <Check className="ml-2 h-4 w-4" />
-          </>
+        ) : currentStep === totalSteps - 1 ? (
+          "Complete"
         ) : (
-          <>
-            Next
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </>
+          "Continue"
         )}
       </Button>
     </div>

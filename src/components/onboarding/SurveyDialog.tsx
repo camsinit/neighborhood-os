@@ -107,28 +107,15 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
   // Get current step data
   const currentStepData = steps[surveyState.currentStep];
   
-  // Determine background gradient based on current step
-  const gradientClasses = [
-    "from-blue-50 via-indigo-50 to-purple-50", // Step 1: Basic Info
-    "from-emerald-50 via-teal-50 to-cyan-50",  // Step 2: Contact Info
-    "from-amber-50 via-yellow-50 to-orange-50", // Step 3: Address
-    "from-rose-50 via-pink-50 to-fuchsia-50",  // Step 4: Profile Photo
-    "from-violet-50 via-purple-50 to-indigo-50" // Step 5: Skills
-  ];
-  
-  const currentGradient = gradientClasses[surveyState.currentStep];
-  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className={`sm:max-w-md md:max-w-lg lg:max-w-xl overflow-hidden bg-gradient-to-br ${currentGradient} border border-white/20 shadow-xl`}
-      >
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl">
         {/* Show success state when complete */}
         {surveyState.isComplete ? (
           <CompletionScreen />
         ) : (
           <>
-            {/* Progress Indicator - At the top */}
+            {/* Progress Indicator - Moved to the top */}
             <SurveyProgress 
               currentStep={surveyState.currentStep} 
               totalSteps={steps.length} 
@@ -141,7 +128,7 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
             />
             
             {/* Step Content */}
-            <div className="py-4 bg-white/60 backdrop-blur-sm rounded-lg p-4 shadow-sm">
+            <div className="py-4">
               {currentStepData.component}
             </div>
             
