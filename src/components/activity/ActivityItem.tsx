@@ -25,7 +25,7 @@ interface ActivityItemProps {
 
 /**
  * Component for displaying a single activity item in the feed
- * Now with enhanced action details in the badge
+ * Now with enhanced action details in the badge and improved context passing
  */
 const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
   const navigate = useNavigate();
@@ -93,6 +93,8 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
         <ActivityBadge 
           activityType={activity.activity_type}
           action={action} 
+          title={activity.title}
+          metadata={activity.metadata}
         />
       </div>
     </div>
