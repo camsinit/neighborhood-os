@@ -45,6 +45,10 @@ export const ContactInfoStep = ({
                      touched.phone && !/^\(\d{3}\) \d{3}-\d{4}$/.test(phone) ? 
                      "Please enter a complete phone number" : "";
 
+  // Determine text color based on input content
+  const emailTextColorClass = email.trim() ? "text-black" : "text-gray-500";
+  const phoneTextColorClass = phone.trim() ? "text-black" : "text-gray-500";
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -57,7 +61,7 @@ export const ContactInfoStep = ({
           value={email}
           onChange={(e) => onEmailChange(e.target.value)}
           onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
-          className={emailError ? "border-red-500" : ""}
+          className={`${emailError ? "border-red-500" : ""} ${emailTextColorClass}`}
           placeholder="your.email@example.com"
           required
         />
@@ -78,7 +82,7 @@ export const ContactInfoStep = ({
           onChange={(e) => onPhoneChange(formatPhoneNumber(e.target.value))}
           onBlur={() => setTouched(prev => ({ ...prev, phone: true }))}
           placeholder="(555) 555-5555"
-          className={phoneError ? "border-red-500" : ""}
+          className={`${phoneError ? "border-red-500" : ""} ${phoneTextColorClass}`}
           maxLength={14}
           required
         />

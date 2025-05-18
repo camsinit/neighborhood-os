@@ -54,6 +54,9 @@ export const SkillsStep = ({
   // Get the current category key
   const currentCategoryKey = categoryKeys[currentCategoryIndex];
 
+  // Determine text color based on input content
+  const customSkillTextColorClass = customSkill.trim() ? "text-black" : "text-gray-500";
+
   return (
     <div className="space-y-6">
       {/* Instruction text */}
@@ -67,7 +70,7 @@ export const SkillsStep = ({
           placeholder="Add a custom skill..."
           value={customSkill}
           onChange={(e) => setCustomSkill(e.target.value)}
-          className="flex-1"
+          className={`flex-1 ${customSkillTextColorClass}`}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();

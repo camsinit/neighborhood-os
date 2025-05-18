@@ -26,6 +26,10 @@ export const BasicInfoStep = ({
   const firstNameError = touched.firstName && !firstName.trim() ? "First name is required" : "";
   const lastNameError = touched.lastName && !lastName.trim() ? "Last name is required" : "";
 
+  // Determine text color based on input content
+  const firstNameTextColorClass = firstName.trim() ? "text-black" : "text-gray-500";
+  const lastNameTextColorClass = lastName.trim() ? "text-black" : "text-gray-500";
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -38,7 +42,7 @@ export const BasicInfoStep = ({
             value={firstName}
             onChange={(e) => onFirstNameChange(e.target.value)}
             onBlur={() => setTouched({ ...touched, firstName: true })}
-            className={firstNameError ? "border-red-500" : ""}
+            className={`${firstNameError ? "border-red-500" : ""} ${firstNameTextColorClass}`}
             required
             placeholder="Your first name"
           />
@@ -54,7 +58,7 @@ export const BasicInfoStep = ({
             value={lastName}
             onChange={(e) => onLastNameChange(e.target.value)}
             onBlur={() => setTouched({ ...touched, lastName: true })}
-            className={lastNameError ? "border-red-500" : ""}
+            className={`${lastNameError ? "border-red-500" : ""} ${lastNameTextColorClass}`}
             required
             placeholder="Your last name"
           />

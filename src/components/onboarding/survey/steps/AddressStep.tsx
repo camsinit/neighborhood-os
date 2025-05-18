@@ -15,6 +15,10 @@ export const AddressStep = ({ address, onAddressChange }: AddressStepProps) => {
   // Simple validation - just check if address is provided
   const addressError = touched && !address.trim() ? "Address is required" : "";
 
+  // Determine text color based on whether user has entered text
+  // When empty, text will be gray; when user types, it becomes black
+  const textColorClass = address.trim() ? "text-black" : "text-gray-500";
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -26,7 +30,7 @@ export const AddressStep = ({ address, onAddressChange }: AddressStepProps) => {
           value={address}
           onChange={(e) => onAddressChange(e.target.value)}
           onBlur={() => setTouched(true)}
-          className={`${addressError ? "border-red-500" : ""} text-gray-500 placeholder:text-gray-400`}
+          className={`${addressError ? "border-red-500" : ""} ${textColorClass} placeholder:text-gray-400`}
           placeholder="123 Main St, City, State, ZIP"
           required
         />
