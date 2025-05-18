@@ -14,18 +14,15 @@ import DiagnosticsPanel from './DiagnosticsPanel';
  * Props for the Sidebar component
  */
 interface SidebarProps {
-  // Function to call when the settings button is clicked
-  onOpenSettings?: () => void;
+  // Removed onOpenSettings since we're navigating instead
 }
 
 /**
  * Sidebar component
  * 
  * Displays the navigation sidebar with links to different sections of the app
- * 
- * @param onOpenSettings - Function to call when the settings button is clicked
  */
-const Sidebar = ({ onOpenSettings }: SidebarProps) => {
+const Sidebar = ({}: SidebarProps) => {
   // Get current user
   const user = useUser();
   
@@ -53,10 +50,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         {/* Divider before bottom actions */}
         <div className="my-4 h-px bg-gray-200" />
 
-        {/* Settings and Invite buttons */}
-        <ActionButtons 
-          onOpenSettings={onOpenSettings}
-        />
+        {/* Settings and Invite buttons - no longer needs onOpenSettings prop */}
+        <ActionButtons />
         
         {/* Diagnostics information panel - with reduced content */}
         <DiagnosticsPanel 

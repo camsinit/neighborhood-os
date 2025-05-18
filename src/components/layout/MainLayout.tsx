@@ -25,25 +25,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const location = useLocation();
   const isHomePage = location.pathname === '/home';
 
-  /**
-   * Handler for settings button click
-   * This is passed to the Header component
-   */
-  const handleOpenSettings = () => {
-    // In the future, this will trigger the settings dialog
-    console.log("Settings button clicked");
-  };
-
   return (
     <div className="h-screen flex">
-      {/* Sidebar navigation */}
+      {/* Sidebar navigation - removed onOpenSettings prop */}
       <Sidebar />
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Only render the header on the homepage */}
         {isHomePage && (
-          <Header onOpenSettings={handleOpenSettings} />
+          <Header />
         )}
         
         {/* Main content - takes full height */}
