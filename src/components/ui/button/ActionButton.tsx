@@ -8,7 +8,8 @@ import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
-import { moduleThemeColors, ModuleThemeColor } from '@/theme/moduleTheme';
+import { moduleThemeColors } from '@/theme/moduleTheme';
+import { ModuleThemeColor } from '@/types/module';
 
 // Module theme colors for buttons
 export type ActionButtonTheme = 'calendar' | 'skills' | 'goods' | 'safety' | 'care' | 'neighbors' | 'default' | 'gray';
