@@ -25,6 +25,9 @@ export const ProfilePhotoStep = ({
   // Reference to the file input element
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // Track if field has been touched for validation
+  const [touched, setTouched] = useState(false);
+  
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,6 +49,7 @@ export const ProfilePhotoStep = ({
     onPhotoChange(file);
     const objectUrl = URL.createObjectURL(file);
     setPhotoUrl(objectUrl);
+    setTouched(true);
   };
   
   // Handle removing the selected photo
@@ -55,6 +59,7 @@ export const ProfilePhotoStep = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    setTouched(true);
   };
   
   // Open the file selector
@@ -65,15 +70,18 @@ export const ProfilePhotoStep = ({
   // Prepare the initials for the avatar fallback
   const getInitials = () => "?";
   
+  // Error state when user tries to proceed without a photo
+  const photoError = touched && !photoUrl ? true : false;
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center justify-center space-y-4">
         {/* Avatar with preview or placeholder */}
         <div className="relative">
-          <Avatar className="h-32 w-32">
+          <Avatar className={`h-32 w-32 ${photoError ? "ring-2 ring-red-500" : ""}`}>
             <AvatarImage src={photoUrl} />
             <AvatarFallback className="text-4xl bg-primary/10">
-              <UserCircle className="h-16 w-16 text-muted-foreground" />
+              <UserCircle className={`h-16 w-16 ${photoError ? "text-red-500" : "text-muted-foreground"}`} />
             </AvatarFallback>
           </Avatar>
           
@@ -93,13 +101,20 @@ export const ProfilePhotoStep = ({
         {/* Upload button */}
         <Button 
           type="button" 
-          variant="outline"
+          variant={photoError ? "destructive" : "outline"}
           onClick={handleSelectPhoto}
           className="flex gap-2"
         >
           <Camera className="h-4 w-4" />
           {photoUrl ? "Change Photo" : "Upload Photo"}
         </Button>
+        
+        {/* Error message */}
+        {photoError && (
+          <p className="text-sm text-red-500">
+            Please upload a profile photo
+          </p>
+        )}
         
         {/* Hidden file input */}
         <input
@@ -115,9 +130,6 @@ export const ProfilePhotoStep = ({
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground text-center">
           Adding a photo helps neighbors recognize you and builds community trust.
-        </p>
-        <p className="text-xs text-muted-foreground text-center">
-          You can skip this step and add a photo later in your profile settings.
         </p>
       </div>
     </div>

@@ -145,6 +145,13 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
       }
     }
     
+    if (currentStep === 3) {
+      if (!profilePhoto) {
+        toast.error("Please upload a profile photo");
+        return;
+      }
+    }
+    
     // Skills step validation - not strictly required but we encourage at least one
     if (currentStep === 4 && skills.length === 0) {
       const confirmContinue = window.confirm("You haven't selected any skills. Are you sure you want to continue without adding skills?");

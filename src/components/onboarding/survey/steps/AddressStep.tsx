@@ -26,7 +26,7 @@ export const AddressStep = ({ address, onAddressChange }: AddressStepProps) => {
           value={address}
           onChange={(e) => onAddressChange(e.target.value)}
           onBlur={() => setTouched(true)}
-          className={addressError ? "border-red-500" : ""}
+          className={`${addressError ? "border-red-500" : ""} text-gray-500 placeholder:text-gray-400`}
           placeholder="123 Main St, City, State, ZIP"
           required
         />
