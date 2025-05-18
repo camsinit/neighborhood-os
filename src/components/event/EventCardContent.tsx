@@ -1,14 +1,21 @@
+
 /**
  * EventCardContent component
  * 
  * This component:
  * - Displays event details in a compact card format
  * - Shows different styling based on RSVP status
+ * - Shows popover with RSVP information when clicked
  */
 import { Clock, Users } from "lucide-react";
 import { Event } from "@/types/localTypes";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import RSVPList from "../event/RSVPList";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { parseISO } from "date-fns";
+
 interface EventCardContentProps {
   event: Event;
   isHost: boolean;
@@ -17,6 +24,7 @@ interface EventCardContentProps {
   displayTime: string;
   isHighlighted?: boolean;
 }
+
 const EventCardContent = ({
   event,
   isHost,
@@ -32,17 +40,69 @@ const EventCardContent = ({
     }
     return "border-gray-200 bg-white shadow-sm";
   };
-  return <motion.div data-event-id={event.id} className={cn("rounded-md px-2 py-1.5 mb-1.5 text-xs cursor-pointer hover:bg-opacity-80 border-l-4", getEventColor(), isHighlighted ? "ring-2 ring-blue-400" : "", isHost ? "border-l-blue-500" : isRsvped ? "border-l-green-500" : "border-l-gray-300")} animate={isHighlighted ? {
-    scale: [1, 1.05, 1]
-  } : {}} transition={{
-    duration: 0.5
-  }}>      
-      <div className="font-medium line-clamp-2 text-gray-800">{event.title}</div>
-      <div className="flex items-center gap-1 text-gray-600 mt-1">
-        <Clock className="h-3 w-3" />
-        <span className="truncate">{displayTime}</span>
-      </div>
-      {rsvpCount > 0}
-    </motion.div>;
+
+  // Format date for the popover
+  const formattedDate = event.time ? 
+    formatInNeighborhoodTimezone(parseISO(event.time), 'EEE, MMM d', 'America/Los_Angeles') : '';
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <motion.div 
+          data-event-id={event.id} 
+          className={cn(
+            "rounded-md px-2 py-1.5 mb-1.5 text-xs cursor-pointer hover:bg-opacity-80 border-l-4", 
+            getEventColor(), 
+            isHighlighted ? "ring-2 ring-blue-400" : "", 
+            isHost ? "border-l-blue-500" : isRsvped ? "border-l-green-500" : "border-l-gray-300"
+          )} 
+          animate={isHighlighted ? {
+            scale: [1, 1.05, 1]
+          } : {}} 
+          transition={{
+            duration: 0.5
+          }}
+        >      
+          <div className="font-medium line-clamp-2 text-gray-800">{event.title}</div>
+          <div className="flex items-center gap-1 text-gray-600 mt-1">
+            <Clock className="h-3 w-3" />
+            <span className="truncate">{displayTime}</span>
+          </div>
+          {rsvpCount > 0 && (
+            <div className="flex items-center gap-1 text-gray-600 mt-0.5">
+              <Users className="h-3 w-3" />
+              <span>{rsvpCount}</span>
+            </div>
+          )}
+        </motion.div>
+      </PopoverTrigger>
+      
+      {/* Popover content showing RSVPs with stacked avatars */}
+      <PopoverContent className="w-72 p-4 shadow-md border-light" sideOffset={5}>
+        <div className="space-y-3">
+          <h3 className="font-medium text-base">{event.title}</h3>
+          
+          <div className="flex items-center gap-1.5 text-sm text-gray-600">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{formattedDate} • {displayTime}</span>
+          </div>
+          
+          {event.location && (
+            <div className="text-sm text-gray-500 mb-2">
+              {event.location}
+            </div>
+          )}
+          
+          {/* RSVPs section with stacked avatars */}
+          <RSVPList 
+            eventId={event.id} 
+            className="mt-2" 
+            showEmptyState={false} 
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 };
+
 export default EventCardContent;
