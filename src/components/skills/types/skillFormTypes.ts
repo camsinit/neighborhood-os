@@ -1,10 +1,12 @@
 
-// If this file exists, we'll update it; if not, we'll create it
+// Type definitions for the skill form
+
+import { SkillCategory } from "./skillTypes";
 
 export type TimePreference = 'morning' | 'afternoon' | 'evening';
 
 export interface SkillFormData {
-  category: string;
+  category: string | SkillCategory;
   title?: string;
   description?: string;
   availability?: 'weekdays' | 'weekends' | 'both';

@@ -1,3 +1,4 @@
+
 // This is the main skill form component that uses smaller, focused components
 // to create a form for offering or requesting skills
 
@@ -23,7 +24,7 @@ import TimePreferenceField from "./form/TimePreferenceField";
  * This component has been refactored to use smaller, focused components
  * for each part of the form.
  */
-const SkillForm = ({ onClose, mode }: SkillFormProps) => {
+const SkillForm = ({ onSuccess, onCancel, mode }: SkillFormProps) => {
   // State to store form data
   const [formData, setFormData] = useState<SkillFormData>({
     category: 'technology',
@@ -46,7 +47,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       
       // Add a slight delay before closing to make sure everything gets refreshed
       setTimeout(() => {
-        onClose();
+        onSuccess();
       }, 300);
     }
   });
@@ -118,7 +119,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Category selection field */}
       <CategoryField 
-        value={formData.category} 
+        value={formData.category as SkillCategory} 
         onChange={(value) => updateField('category', value)} 
       />
 
