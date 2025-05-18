@@ -4,6 +4,7 @@
  * 
  * This component serves as the entry point to the application when a user visits the index route.
  * It redirects users based on authentication status and neighborhood context.
+ * It now also checks if a user needs to go through onboarding.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,12 +13,14 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Index component that handles routing logic
  * 
  * This component determines where to send users based on their authentication
  * and neighborhood status. It shows a loading indicator while making this determination.
+ * It now also checks if a user has completed onboarding.
  */
 const Index = () => {
   // Navigation hook for redirecting users
@@ -29,8 +32,38 @@ const Index = () => {
   // State to track if we need to wait longer than expected
   const [isDelayed, setIsDelayed] = useState(false);
   
+  // State to track if user has completed onboarding
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
+  
   // Get neighborhood context
   const { currentNeighborhood, isLoading: isLoadingNeighborhood, error, refreshNeighborhoodData } = useNeighborhood();
+  
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!user) return;
+      
+      try {
+        // Check if user has completed_onboarding flag in profile
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('completed_onboarding')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error("Error checking onboarding status:", error);
+          return;
+        }
+        
+        setHasCompletedOnboarding(data?.completed_onboarding || false);
+      } catch (err) {
+        console.error("Failed to check onboarding status:", err);
+      }
+    };
+    
+    checkOnboardingStatus();
+  }, [user]);
   
   // Set a timer to detect if loading is taking too long
   useEffect(() => {
@@ -46,8 +79,8 @@ const Index = () => {
   // Effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
     // Safety check: If we're still loading neighborhood data, wait
-    if (isLoadingNeighborhood) {
-      console.log("[Index] Still loading neighborhood data, waiting before routing...");
+    if (isLoadingNeighborhood || hasCompletedOnboarding === null) {
+      console.log("[Index] Still loading data, waiting before routing...");
       return;
     }
     
@@ -58,14 +91,21 @@ const Index = () => {
       neighborhoodId: currentNeighborhood?.id,
       userId: user?.id,
       neighborhoodError: error,
+      hasCompletedOnboarding,
       timestamp: new Date().toISOString()
     });
     
-    // Use immediate routing with replace to prevent history buildup
     // If user is not authenticated, redirect to landing page
     if (!user) {
       console.log("[Index] User not authenticated, redirecting to landing page");
       navigate("/", { replace: true });
+      return;
+    }
+    
+    // If authenticated but hasn't completed onboarding, redirect to onboarding
+    if (user && hasCompletedOnboarding === false) {
+      console.log("[Index] User needs to complete onboarding");
+      navigate("/onboarding", { replace: true });
       return;
     }
     
@@ -82,7 +122,7 @@ const Index = () => {
       navigate("/join", { replace: true });
       return;
     }
-  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error]);
+  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, hasCompletedOnboarding]);
 
   // Handle manual retry when there's an issue
   const handleRetry = async () => {

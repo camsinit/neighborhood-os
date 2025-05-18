@@ -29,6 +29,7 @@ import InvitePage from './pages/InvitePage';
 // Import components
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
+import OnboardingDialog from './components/onboarding/OnboardingDialog';
 
 /**
  * Create a client for React Query
@@ -108,6 +109,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               <Route path="/index" element={<Index />} />
+              
+              {/* New onboarding route */}
+              <Route path="/onboarding" element={<OnboardingDialog open={true} onOpenChange={() => {}} />} />
               
               {/* Protected routes with MainLayout */}
               <Route 
