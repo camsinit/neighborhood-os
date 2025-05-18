@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
 import { format } from "date-fns";
@@ -84,7 +85,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   }} animate={{
     opacity: 1,
     y: 0
-  }} className="bg-white rounded-xl p-4 mb-6 border border-gray-100 py-0">
+  }} className="bg-white rounded-xl p-4 mb-6 shadow-sm py-0">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         {/* Calendar title section */}
         <div className="flex items-center gap-3">
