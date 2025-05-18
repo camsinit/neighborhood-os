@@ -26,10 +26,13 @@ const SurveyProgress = ({ currentStep, totalSteps }: SurveyProgressProps) => {
         <span>{Math.round(progressPercentage)}% Complete</span>
       </div>
       
-      {/* Use the Shadcn UI Progress component instead of custom implementation */}
+      {/* 
+        Use the Shadcn UI Progress component with explicit styling to ensure visibility
+        The Progress component needs to have its indicator styled properly to show progress
+      */}
       <Progress 
         value={progressPercentage} 
-        className="h-2.5" 
+        className="h-2.5 bg-secondary" 
         aria-label="Survey progress"
       />
     </div>
