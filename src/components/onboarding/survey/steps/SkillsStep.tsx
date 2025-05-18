@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SKILL_CATEGORIES } from './skills/skillCategories';
@@ -119,10 +120,10 @@ export const SkillsStep = ({
           </CarouselContent>
         </Carousel>
         
-        {/* Single Continue button for advancing through categories */}
-        <div className="flex justify-end mt-4">
+        {/* Next button - Changed from "Continue" to "Next" and centered */}
+        <div className="flex justify-center mt-4">
           <Button size="sm" onClick={handleContinueToNextCategory} variant="light" className="flex items-center text-center">
-            Continue
+            Next
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
