@@ -19,7 +19,7 @@ const SurveyProgress = ({ currentStep, totalSteps }: SurveyProgressProps) => {
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   
   return (
-    <div className="w-full space-y-2 mt-4">
+    <div className="w-full space-y-2 mb-4">
       {/* Step counter - Shows text indicating which step we're on */}
       <div className="flex justify-between text-xs text-muted-foreground">
         <span>Step {currentStep + 1} of {totalSteps}</span>
@@ -27,8 +27,8 @@ const SurveyProgress = ({ currentStep, totalSteps }: SurveyProgressProps) => {
       </div>
       
       {/* 
-        Use the Shadcn UI Progress component with explicit styling to ensure visibility
-        The Progress component needs to have its indicator styled properly to show progress
+        Progress component with explicit styling to ensure visibility
+        We're using primary color for the indicator and making sure the height is sufficient
       */}
       <Progress 
         value={progressPercentage} 

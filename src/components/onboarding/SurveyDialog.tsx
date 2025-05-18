@@ -115,6 +115,12 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
           <CompletionScreen />
         ) : (
           <>
+            {/* Progress Indicator - Moved to the top */}
+            <SurveyProgress 
+              currentStep={surveyState.currentStep} 
+              totalSteps={steps.length} 
+            />
+            
             {/* Step Header */}
             <SurveyStepHeader
               title={currentStepData.title}
@@ -125,12 +131,6 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
             <div className="py-4">
               {currentStepData.component}
             </div>
-            
-            {/* Progress Indicator */}
-            <SurveyProgress 
-              currentStep={surveyState.currentStep} 
-              totalSteps={steps.length} 
-            />
             
             {/* Navigation Buttons */}
             <SurveyNavigation

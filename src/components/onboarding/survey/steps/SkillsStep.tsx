@@ -90,7 +90,9 @@ export const SkillsStep = ({
       <Carousel 
         className="w-full"
         setApi={setApi} // Connect the Carousel API to our state
-        onSelect={handleCarouselChange} // Add callback when carousel changes
+        opts={{
+          align: "start",
+        }}
       >
         {/* Category title and navigation, now inside the carousel div */}
         <div className="flex items-center justify-between mb-3">
