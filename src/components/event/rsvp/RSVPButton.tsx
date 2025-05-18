@@ -1,5 +1,4 @@
 
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
 import { RSVPButtonProps } from "./types";
@@ -8,6 +7,7 @@ import { useEventNeighborhood } from "./useEventNeighborhood";
 import { rsvpService } from "./rsvpService";
 import { useUser } from "@supabase/auth-helpers-react";
 import { createLogger } from "@/utils/logger";
+import ActionButton from "@/components/ui/button/ActionButton";
 
 // Setup logger for this component
 const logger = createLogger('RSVPButton');
@@ -100,13 +100,14 @@ const RSVPButton = ({
     }
   };
 
-  // Updated button styling using blue background by default with light gray border when outlined
+  // Using ActionButton with calendar theme since this is an event-related button
   return (
-    <Button
+    <ActionButton
       onClick={toggleRSVP}
       disabled={isLoading}
-      variant={hasRSVPed ? "default" : "outline"}
-      className={`${hasRSVPed ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'border-light'} transition-colors ${className}`}
+      theme={hasRSVPed ? "calendar" : "default"}
+      outline={!hasRSVPed}
+      className={`transition-colors ${className}`}
       data-testid="rsvp-button"
     >
       {isLoading ? (
@@ -122,7 +123,7 @@ const RSVPButton = ({
       ) : (
         "RSVP"
       )}
-    </Button>
+    </ActionButton>
   );
 };
 

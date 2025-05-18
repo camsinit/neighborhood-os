@@ -9,7 +9,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * FeatureNavigation component
  * 
  * Displays the feature navigation items with their respective theme colors
- * Order: Calendar, Skills, Freebies, Updates (formerly Safety), Neighbors
+ * Now with improved visual consistency using the new button styles
  */
 const FeatureNavigation = () => {
   // Get current location to determine which nav item is active
@@ -61,7 +61,7 @@ const FeatureNavigation = () => {
         return (
           <Link key={item.href} to={item.href}>
             <Button
-              variant="ghost"
+              variant={isActive ? "light" : "ghost"}
               className={cn(
                 "w-full justify-start gap-3 text-base font-medium",
                 isActive && "bg-gray-100" // Highlight active item

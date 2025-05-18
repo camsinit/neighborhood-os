@@ -17,6 +17,7 @@ interface ActivityBadgeProps {
 /**
  * Component that displays a styled badge indicating the specific activity action
  * The badge shows a more detailed description of what happened rather than just the activity type
+ * Now with improved color usage from the theme system
  */
 const ActivityBadge: React.FC<ActivityBadgeProps> = ({ activityType, action }) => {
   // Get the appropriate color for this activity type
@@ -30,9 +31,9 @@ const ActivityBadge: React.FC<ActivityBadgeProps> = ({ activityType, action }) =
       variant="outline" 
       className="ml-auto flex-shrink-0 text-sm px-2.5 py-0.5 font-medium" 
       style={{ 
-        backgroundColor: `${activityColor}15`,
-        color: activityColor,
-        borderColor: `${activityColor}30`
+        backgroundColor: `${activityColor}15`,  // Very light background
+        color: activityColor,                   // Text in theme color
+        borderColor: `${activityColor}30`       // Slightly darker border
       }}
     >
       {badgeLabel}

@@ -16,6 +16,7 @@ interface ActionButtonsProps {
  * ActionButtons component
  * 
  * Displays the settings and invite buttons at the bottom of the sidebar
+ * Now uses the light variant for more visual consistency
  * 
  * @param onOpenSettings - Function to call when the settings button is clicked
  */
@@ -25,9 +26,9 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-2">
-      {/* Settings button */}
+      {/* Settings button - using light variant */}
       <Button
-        variant="ghost"
+        variant="light"
         size="sm"
         className="w-full justify-start"
         onClick={onOpenSettings}
@@ -36,9 +37,9 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Settings
       </Button>
       
-      {/* Invite button */}
+      {/* Invite button - using light variant */}
       <Button
-        variant="ghost"
+        variant="light"
         size="sm"
         className="w-full justify-start"
         onClick={() => setIsInviteOpen(true)}

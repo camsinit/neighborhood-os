@@ -1,10 +1,11 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import ModuleButton from "./ui/module-button";
+import ActionButton from "./ui/button/ActionButton";
 import { moduleThemeColors } from "@/theme/moduleTheme";
 
 /**
@@ -16,7 +17,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * - Sharing or requesting skills
  * - Adding safety updates
  * 
- * Now organized into columns by module type for better usability
+ * Now with improved button styling using ActionButton and ModuleButton components
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -108,17 +109,22 @@ const QuickActions = () => {
       
       {/* Actions in this column with enhanced styling but less saturated colors */}
       <div className="space-y-3">
-        {actions.map(action => <ModuleButton key={action.label} moduleTheme={action.moduleTheme} variant="pastel" // Keeping pastel variant for buttons
-      className="w-full justify-start shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]" onClick={action.onClick}>
+        {actions.map(action => (
+          <ModuleButton 
+            key={action.label} 
+            moduleTheme={action.moduleTheme} 
+            variant="pastel"
+            className="w-full justify-start shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]" 
+            onClick={action.onClick}
+          >
             <action.icon className="h-5 w-5 mr-2" />
             <span className="text-sm font-medium">{action.label}</span>
-          </ModuleButton>)}
+          </ModuleButton>
+        ))}
       </div>
     </div>;
+    
   return <div className="w-full">
-      {/* Brief welcome message */}
-      
-
       {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-6">
         <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />

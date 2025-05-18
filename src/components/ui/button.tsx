@@ -14,11 +14,13 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-gray-200 bg-background hover:bg-accent hover:text-accent-foreground", // Updated to use gray-200 instead of default input color
+          "border border-gray-200 bg-background hover:bg-accent hover:text-accent-foreground", // Using gray-200 for consistency
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // New light variant for subtle buttons with light gray background
+        light: "bg-[#F1F1F1] hover:bg-[#E1E1E1] text-gray-700 border border-gray-200",
       },
       size: {
         default: "h-10 px-4 py-2",
