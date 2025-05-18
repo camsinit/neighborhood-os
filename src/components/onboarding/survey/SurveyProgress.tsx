@@ -44,8 +44,8 @@ const SurveyProgress = ({ currentStep, totalSteps }: SurveyProgressProps) => {
       </div>
       
       {/* 
-        Progress component with explicit styling to ensure visibility
-        We're using primary color for the indicator and making sure the height is sufficient
+        Progress component - Ensure the value is passed correctly
+        and the bar is visible with sufficient height
       */}
       <Progress 
         value={progressPercentage} 
