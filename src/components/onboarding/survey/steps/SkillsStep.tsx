@@ -79,9 +79,6 @@ export const SkillsStep = ({
   // Determine text color based on input content
   const customSkillTextColorClass = customSkill.trim() ? "text-black" : "text-gray-500";
 
-  // Determine the text for the continue button
-  const nextCategoryName = isLastCategory ? SKILL_CATEGORIES[categoryKeys[0]].title // Loop back to first category
-  : SKILL_CATEGORIES[categoryKeys[currentCategoryIndex + 1]].title;
   return <div className="space-y-6">
       {/* Custom skill input */}
       <div className="flex items-center space-x-2">
@@ -124,9 +121,8 @@ export const SkillsStep = ({
         
         {/* Single Continue button for advancing through categories */}
         <div className="flex justify-end mt-4">
-          <Button size="sm" onClick={handleContinueToNextCategory} variant="light" // Using the light variant for a softer look
-        className="flex items-center text-center">
-            Continue to {nextCategoryName}
+          <Button size="sm" onClick={handleContinueToNextCategory} variant="light" className="flex items-center text-center">
+            Continue
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
