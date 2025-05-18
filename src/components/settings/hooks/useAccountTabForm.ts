@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "../types";
 
@@ -12,10 +13,22 @@ import { ProfileFormValues } from "../types";
  * @returns The processed form instance and any additional helpers
  */
 export const useAccountTabForm = (form: UseFormReturn<ProfileFormValues>) => {
-  // Currently a simple pass-through, but can add more specific logic as needed
-  // For example: field-specific validation, transformations, etc.
+  // Tracks if profile image is being uploaded
+  const [imageUploading, setImageUploading] = useState(false);
+  
+  /**
+   * Handle image upload state changes
+   * This is used by the ProfileImageUpload component
+   * 
+   * @param uploading - Whether an image is currently uploading
+   */
+  const handleImageUploadState = (uploading: boolean) => {
+    setImageUploading(uploading);
+  };
   
   return {
-    form
+    form,
+    imageUploading,
+    handleImageUploadState
   };
 };
