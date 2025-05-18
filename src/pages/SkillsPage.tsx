@@ -30,7 +30,6 @@ function SkillsPage() {
   
   // Local state to manage dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(action === 'create');
-  // Fixed: Changed type 'offer' | 'need' to 'offer' | 'request' to match expected type
   const [dialogMode, setDialogMode] = useState<'offer' | 'request'>('offer');
   
   const user = useUser();
@@ -127,10 +126,10 @@ function SkillsPage() {
       <div className="flex flex-col space-y-4">
         {/* Entire page uses a single Tabs component for navigation */}
         <Tabs value={view} onValueChange={handleTabChange} className="w-full">
-          {/* Reorganized top section with search on left and button on right */}
+          {/* Reorganized top section with all controls in a single row */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
-              {/* Search input on the LEFT as requested */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center w-full">
+              {/* Search input */}
               <SearchInput 
                 placeholder="Search skills..."
                 onChange={(e) => handleSearchChange(e.target.value)}
@@ -139,30 +138,28 @@ function SkillsPage() {
                 className="w-full sm:w-[200px]"
               />
               
+              {/* Category filter - moved here from below */}
+              <SkillsFilter 
+                selectedCategory={getTypedCategory(category) || null}
+                onCategoryChange={handleCategoryChange}
+              />
+              
               {/* TabsList is now properly inside the Tabs component */}
-              <TabsList>
+              <TabsList className="ml-0 sm:ml-2">
                 <TabsTrigger value="offers">Offers</TabsTrigger>
                 <TabsTrigger value="requests">Requests</TabsTrigger>
                 <TabsTrigger value="mine">My Skills</TabsTrigger>
               </TabsList>
             </div>
             
-            {/* Add Skill button on the RIGHT of tabs as requested */}
+            {/* Add Skill button on the RIGHT of tabs */}
             <Button 
-              className="whitespace-nowrap flex items-center gap-1.5"
+              className="whitespace-nowrap flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white"
               onClick={() => handleOpenSkillDialog('offer')}
             >
               <PlusCircle className="h-4 w-4" />
               <span>Add Skill</span>
             </Button>
-          </div>
-          
-          {/* Category filter section */}
-          <div className="mb-4">
-            <SkillsFilter 
-              selectedCategory={getTypedCategory(category) || null}
-              onCategoryChange={handleCategoryChange}
-            />
           </div>
           
           <TabsContent value="offers" className="mt-0">

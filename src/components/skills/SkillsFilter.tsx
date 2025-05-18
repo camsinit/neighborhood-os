@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { SkillCategory } from './types/skillTypes';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, ChevronDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 /**
@@ -34,14 +34,39 @@ const SkillsFilter: React.FC<SkillsFilterProps> = ({
   selectedCategory,
   onCategoryChange,
 }) => {
+  // Get the label for the selected category or use default text
+  const selectedCategoryLabel = selectedCategory 
+    ? CATEGORIES.find(cat => cat.value === selectedCategory)?.label 
+    : "Category";
+    
   return (
     <div className="flex items-center gap-2">
-      {/* Category filter dropdown */}
+      {/* Category filter dropdown - simplified label */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex gap-2 items-center">
-            <Filter className="h-4 w-4" />
-            <span>Filter by Category</span>
+          <Button variant="outline" className="flex gap-1 items-center">
+            {/* Show either badge or regular text */}
+            {selectedCategory ? (
+              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">
+                {selectedCategoryLabel}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent dropdown from opening
+                    onCategoryChange(null);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ) : (
+              <>
+                <span>Category</span>
+                <ChevronDown className="h-4 w-4" />
+              </>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white">
@@ -67,23 +92,6 @@ const SkillsFilter: React.FC<SkillsFilterProps> = ({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Show selected category as badge */}
-      {selectedCategory && (
-        <Badge 
-          className={`bg-gray-100 text-gray-800 hover:bg-gray-200 flex items-center gap-1`}
-        >
-          {CATEGORIES.find(cat => cat.value === selectedCategory)?.label || selectedCategory}
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
-            onClick={() => onCategoryChange(null)}
-          >
-            <X className="h-3 w-3" />
-          </Button>
-        </Badge>
-      )}
     </div>
   );
 };
