@@ -5,7 +5,7 @@
  */
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
-import ActivityFeed from "@/components/activity/ActivityFeed";
+import ActivitySection from "@/components/activity/ActivitySection";
 
 const HomePage = () => {
   return (
@@ -20,10 +20,7 @@ const HomePage = () => {
           <Separator className="my-2 bg-gray-200" />
 
           {/* Activity Section */}
-          <section className="w-full">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
-            <ActivityFeed />
-          </section>
+          <ActivitySection />
         </div>
       </div>
     </div>
