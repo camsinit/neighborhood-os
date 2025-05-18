@@ -1,3 +1,4 @@
+
 import { UseFormReturn } from "react-hook-form";
 import { ProfileFormValues } from "./types";
 import { UserNeighborhoods } from "./UserNeighborhoods";
@@ -20,7 +21,6 @@ export const NeighborTab = ({
   return <div className="space-y-6">
       {/* Neighborhoods Section */}
       <div className="space-y-4">
-        
         <UserNeighborhoods />
       </div>
 
