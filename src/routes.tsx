@@ -16,24 +16,24 @@ const createAppRouter = () => {
   return createBrowserRouter([
     {
       path: "/",
-      element: <ProtectedRoute />,
+      element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
       children: [
         {
           path: "/",
-          element: <MainLayout><HomePage /></MainLayout>,
+          element: <HomePage />,
         },
         {
           path: "/home",
-          element: <MainLayout><HomePage /></MainLayout>,
+          element: <HomePage />,
         },
         // New dedicated pages for Settings and Invite
         {
           path: "/settings",
-          element: <MainLayout><SettingsPage /></MainLayout>,
+          element: <SettingsPage />,
         },
         {
           path: "/invite",
-          element: <MainLayout><InvitePage /></MainLayout>,
+          element: <InvitePage />,
         },
         // Add other routes as needed
       ]

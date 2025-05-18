@@ -19,19 +19,19 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   return (
-    <ModuleLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
-        <div className="bg-white rounded-lg border shadow-sm">
-          {/* 
-            * We're reusing the existing SettingsDialog component but embedding it directly in the page
-            * The dialog's open state is always true since it's now embedded in the page 
-            */}
-          <SettingsDialog 
-            open={isOpen} 
-            onOpenChange={setIsOpen} 
-          />
-        </div>
+    <ModuleLayout
+      title="Account Settings"
+      themeColor="neighbors" // Using 'neighbors' theme since settings are user/profile related
+    >
+      <div className="bg-white rounded-lg border shadow-sm">
+        {/* 
+          * We're reusing the existing SettingsDialog component but embedding it directly in the page
+          * The dialog's open state is always true since it's now embedded in the page 
+          */}
+        <SettingsDialog 
+          open={isOpen} 
+          onOpenChange={setIsOpen} 
+        />
       </div>
     </ModuleLayout>
   );
