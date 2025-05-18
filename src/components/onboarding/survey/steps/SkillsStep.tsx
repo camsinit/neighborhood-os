@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SKILL_CATEGORIES } from './skills/skillCategories';
@@ -33,7 +32,7 @@ export const SkillsStep = ({
 
   // State to track the current category index
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
-  
+
   // Create a ref for the carousel API
   const [api, setApi] = useState<any>(null);
 
@@ -79,33 +78,20 @@ export const SkillsStep = ({
 
   // Determine text color based on input content
   const customSkillTextColorClass = customSkill.trim() ? "text-black" : "text-gray-500";
-  
+
   // Determine the text for the continue button
-  const nextCategoryName = isLastCategory 
-    ? SKILL_CATEGORIES[categoryKeys[0]].title  // Loop back to first category
-    : SKILL_CATEGORIES[categoryKeys[currentCategoryIndex + 1]].title;
-  
+  const nextCategoryName = isLastCategory ? SKILL_CATEGORIES[categoryKeys[0]].title // Loop back to first category
+  : SKILL_CATEGORIES[categoryKeys[currentCategoryIndex + 1]].title;
   return <div className="space-y-6">
       {/* Custom skill input */}
       <div className="flex items-center space-x-2">
-        <Input 
-          placeholder="Add a custom skill..." 
-          value={customSkill} 
-          onChange={e => setCustomSkill(e.target.value)} 
-          className={`flex-1 ${customSkillTextColorClass}`} 
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              handleAddCustomSkill();
-            }
-          }} 
-        />
-        <Button 
-          type="button" 
-          size="sm" 
-          onClick={handleAddCustomSkill} 
-          disabled={!customSkill.trim()}
-        >
+        <Input placeholder="Add a custom skill..." value={customSkill} onChange={e => setCustomSkill(e.target.value)} className={`flex-1 ${customSkillTextColorClass}`} onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddCustomSkill();
+        }
+      }} />
+        <Button type="button" size="sm" onClick={handleAddCustomSkill} disabled={!customSkill.trim()}>
           <PlusCircle className="h-4 w-4 mr-1" />
           Add
         </Button>
@@ -113,13 +99,10 @@ export const SkillsStep = ({
       
       {/* Skills Carousel */}
       <div className="border rounded-md p-4">
-        <Carousel 
-          className="w-full"
-          setApi={setApi} // Connect the Carousel API to our state
-          opts={{
-            align: "start",
-          }}
-        >
+        <Carousel className="w-full" setApi={setApi} // Connect the Carousel API to our state
+      opts={{
+        align: "start"
+      }}>
           {/* Category title, now inside the carousel div */}
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-semibold">
@@ -131,29 +114,18 @@ export const SkillsStep = ({
           </div>
           
           <CarouselContent className="h-[200px]">
-            {categoryKeys.map((category, index) => (
-              <CarouselItem key={category} className="h-full">
+            {categoryKeys.map((category, index) => <CarouselItem key={category} className="h-full">
                 <div className="h-full overflow-auto">
-                  <SkillCategory 
-                    title={SKILL_CATEGORIES[category].title} 
-                    skills={SKILL_CATEGORIES[category].skills} 
-                    selectedSkills={selectedSkills} 
-                    onSkillsChange={onSkillsChange} 
-                  />
+                  <SkillCategory title={SKILL_CATEGORIES[category].title} skills={SKILL_CATEGORIES[category].skills} selectedSkills={selectedSkills} onSkillsChange={onSkillsChange} />
                 </div>
-              </CarouselItem>
-            ))}
+              </CarouselItem>)}
           </CarouselContent>
         </Carousel>
         
         {/* Single Continue button for advancing through categories */}
         <div className="flex justify-end mt-4">
-          <Button 
-            size="sm" 
-            onClick={handleContinueToNextCategory} 
-            className="flex items-center"
-            variant="light" // Using the light variant for a softer look
-          >
+          <Button size="sm" onClick={handleContinueToNextCategory} variant="light" // Using the light variant for a softer look
+        className="flex items-center text-center">
             Continue to {nextCategoryName}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
@@ -162,33 +134,19 @@ export const SkillsStep = ({
       
       {/* Selected skills display as tags */}
       <div className="space-y-2">
-        {selectedSkills.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No skills selected yet. Select at least one skill to continue.</p>
-        ) : (
-          <div>
+        {selectedSkills.length === 0 ? <p className="text-sm text-muted-foreground">No skills selected yet. Select at least one skill to continue.</p> : <div>
             <div className="flex flex-wrap gap-2 mt-2">
-              {selectedSkills.map((skill, index) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary"
-                  className="group relative py-1.5 pl-3 pr-8 text-sm bg-blue-50 border-blue-100 text-blue-800 hover:bg-blue-100"
-                >
+              {selectedSkills.map((skill, index) => <Badge key={index} variant="secondary" className="group relative py-1.5 pl-3 pr-8 text-sm bg-blue-50 border-blue-100 text-blue-800 hover:bg-blue-100">
                   {skill}
-                  <button
-                    onClick={() => handleRemoveSkill(skill)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Remove ${skill} skill`}
-                  >
+                  <button onClick={() => handleRemoveSkill(skill)} className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" aria-label={`Remove ${skill} skill`}>
                     <X className="h-3 w-3 text-blue-800" />
                   </button>
-                </Badge>
-              ))}
+                </Badge>)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               You've selected {selectedSkills.length} {selectedSkills.length === 1 ? 'skill' : 'skills'}.
             </p>
-          </div>
-        )}
+          </div>}
       </div>
     </div>;
 };
