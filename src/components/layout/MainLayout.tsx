@@ -1,15 +1,9 @@
 
 import { useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom"; // Add this import for React Router's Outlet
 import Sidebar from "./sidebar";
 import Header from "./Header";
 import LoggingControls from "@/components/debug/LoggingControls";
-
-/**
- * MainLayout component props
- */
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
 
 /**
  * MainLayout component
@@ -18,16 +12,16 @@ interface MainLayoutProps {
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
  * 
- * @param children - Content to render in the main area
+ * Now uses React Router's Outlet to render child routes
  */
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = () => {
   // Get the current location to determine if we're on the homepage
   const location = useLocation();
-  const isHomePage = location.pathname === '/home';
+  const isHomePage = location.pathname === '/' || location.pathname === '/home';
 
   return (
     <div className="h-screen flex">
-      {/* Sidebar navigation - removed onOpenSettings prop */}
+      {/* Sidebar navigation */}
       <Sidebar />
       
       {/* Main content area */}
@@ -39,7 +33,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         
         {/* Main content - takes full height */}
         <main className="flex-1 overflow-auto">
-          {children}
+          {/* Use Outlet to render child routes instead of children prop */}
+          <Outlet />
         </main>
         
         {/* Add the logging controls component */}

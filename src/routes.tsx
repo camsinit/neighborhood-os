@@ -16,6 +16,7 @@ const createAppRouter = () => {
   return createBrowserRouter([
     {
       path: "/",
+      // The key fix: Using Outlet from react-router-dom within MainLayout for nested routes
       element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
       children: [
         {
