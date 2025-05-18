@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SKILL_CATEGORIES } from './skills/skillCategories';
@@ -67,45 +68,37 @@ export const SkillsStep = ({
         </Button>
       </div>
       
-      {/* Category title indicator */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-semibold">
-          {SKILL_CATEGORIES[currentCategoryKey].title}
-        </h3>
-        <div className="text-sm text-muted-foreground">
-          {currentCategoryIndex + 1} of {categoryKeys.length}
-        </div>
-      </div>
-      
       {/* Skills Carousel */}
-      <Carousel className="w-full"
-    // Fixed: Changed to use setCurrentCategoryIndex directly with the index number
-    // instead of trying to pass the event object
-    >
+      <Carousel className="w-full">
         <CarouselContent className="h-[240px]">
           {categoryKeys.map((category, index) => <CarouselItem key={category} className="h-full">
               <div className="h-full border rounded-md p-4 overflow-auto">
+                {/* Moved: Category title and navigation arrows into this div */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base font-semibold">
+                    {SKILL_CATEGORIES[category].title}
+                  </h3>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const newIndex = currentCategoryIndex === 0 ? categoryKeys.length - 1 : currentCategoryIndex - 1;
+                      setCurrentCategoryIndex(newIndex);
+                    }} className="h-8 w-8 rounded-full p-0" aria-label="Previous category">
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const newIndex = currentCategoryIndex === categoryKeys.length - 1 ? 0 : currentCategoryIndex + 1;
+                      setCurrentCategoryIndex(newIndex);
+                    }} className="h-8 w-8 rounded-full p-0" aria-label="Next category">
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
                 <SkillCategory title={SKILL_CATEGORIES[category].title} skills={SKILL_CATEGORIES[category].skills} selectedSkills={selectedSkills} onSkillsChange={onSkillsChange} />
               </div>
             </CarouselItem>)}
         </CarouselContent>
-        
-        {/* Custom position for previous/next buttons at the bottom */}
-        <div className="flex justify-center mt-4 space-x-2">
-          <Button variant="outline" size="sm" onClick={() => {
-          const newIndex = currentCategoryIndex === 0 ? categoryKeys.length - 1 : currentCategoryIndex - 1;
-          setCurrentCategoryIndex(newIndex);
-        }} className="h-8 w-8 rounded-full p-0" aria-label="Previous category">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={() => {
-          const newIndex = currentCategoryIndex === categoryKeys.length - 1 ? 0 : currentCategoryIndex + 1;
-          setCurrentCategoryIndex(newIndex);
-        }} className="h-8 w-8 rounded-full p-0" aria-label="Next category">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
       </Carousel>
       
       {/* Selected skills count */}
