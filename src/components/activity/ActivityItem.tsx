@@ -1,6 +1,7 @@
 
 /**
  * ActivityItem component that shows a single activity in the feed
+ * with enhanced details about the specific action
  */
 import React from "react";
 import { Activity } from "@/utils/queries/useActivities";
@@ -24,11 +25,16 @@ interface ActivityItemProps {
 
 /**
  * Component for displaying a single activity item in the feed
+ * Now with enhanced action details in the badge
  */
 const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
   const navigate = useNavigate();
   const activityColor = getActivityColor(activity.activity_type);
   const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
+  
+  // Extract action from metadata for more specific badge labeling
+  // This allows us to show badges like "Event Created" instead of just "Event"
+  const action = activity.metadata?.action;
   
   // Check if the content has been deleted
   const isDeleted = activity.metadata?.deleted === true;
@@ -83,8 +89,11 @@ const ActivityItem = ({ activity, onAction }: ActivityItemProps) => {
           activityType={activity.activity_type}
         />
 
-        {/* Activity action badge */}
-        <ActivityBadge activityType={activity.activity_type} />
+        {/* Activity action badge - now with more detailed information */}
+        <ActivityBadge 
+          activityType={activity.activity_type}
+          action={action} 
+        />
       </div>
     </div>
   );
