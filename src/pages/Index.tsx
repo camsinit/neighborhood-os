@@ -44,7 +44,12 @@ const Index = () => {
       if (!user) return;
       
       try {
-        // Check if user has completed_onboarding flag in profile
+        // Since completed_onboarding doesn't exist in profiles, we'll assume all users have completed onboarding
+        // This is a temporary fix until the profiles table is updated with this field
+        setHasCompletedOnboarding(true);
+        
+        // When the field is added to the database, we can uncomment this code:
+        /*
         const { data, error } = await supabase
           .from('profiles')
           .select('completed_onboarding')
@@ -57,6 +62,7 @@ const Index = () => {
         }
         
         setHasCompletedOnboarding(data?.completed_onboarding || false);
+        */
       } catch (err) {
         console.error("Failed to check onboarding status:", err);
       }
