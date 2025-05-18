@@ -1,3 +1,4 @@
+
 /**
  * EventCardContent component
  * 
@@ -78,7 +79,7 @@ const EventCardContent = ({
           
           <div className="flex items-center gap-1.5 text-sm text-gray-600">
             <Clock className="h-3.5 w-3.5" />
-            <span>{formattedDate} • {displayTime}</span>
+            <span>{displayTime}</span>
           </div>
           
           {event.location && <div className="text-sm text-gray-500 mb-2">
