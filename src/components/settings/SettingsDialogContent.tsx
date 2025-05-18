@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";  // Updated import path
 import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
@@ -119,67 +119,104 @@ const SettingsDialogContent = ({ onClose }: { onClose: () => void }) => {
     })();
   };
 
-  // Load user profile data when component mounts
+  // Load user profile data and skills data when component mounts
   useEffect(() => {
-    const loadProfile = async () => {
+    const loadProfileAndSkills = async () => {
       // Don't proceed if user isn't available
       if (!user) return;
       
-      // Fetch user profile from database
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      console.log("[SettingsDialogContent] Loading profile and skills for user:", user.id);
+      
+      try {
+        // Fetch user profile from database
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      // Handle fetch errors
-      if (error) {
+        // Handle fetch errors
+        if (profileError) {
+          console.error("[SettingsDialogContent] Error loading profile:", profileError);
+          toast({
+            title: "Error loading profile",
+            description: profileError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Fetch user's skills from skills_exchange table
+        const { data: skillsData, error: skillsError } = await supabase
+          .from("skills_exchange")
+          .select("skill_category")
+          .eq("user_id", user.id)
+          .eq("request_type", "offer");
+
+        if (skillsError) {
+          console.error("[SettingsDialogContent] Error loading skills:", skillsError);
+        }
+
+        // Extract unique skill categories
+        const skillCategories = skillsData ? 
+          [...new Set(skillsData.map(item => item.skill_category))] : 
+          [];
+
+        console.log("[SettingsDialogContent] Loaded skills from skills_exchange:", skillCategories);
+
+        // Process and set form values if data exists
+        if (profileData) {
+          // Load notification preferences with defaults for missing fields
+          const notificationPrefs = profileData.notification_preferences as NotificationPreferences || {
+            involved_only: true,
+            page_specific: {
+              events: true,
+              safety: true,
+              care: true,
+              goods: true,
+              skills: true,
+              neighbors: true
+            },
+            all_activity: false,
+            new_neighbors: true
+          };
+
+          // Combine profile skills with skills_exchange skills
+          const profileSkills = profileData.skills || [];
+          const combinedSkills = [...new Set([...profileSkills, ...skillCategories])];
+          
+          console.log("[SettingsDialogContent] Combined skills:", combinedSkills);
+
+          const values = {
+            display_name: profileData.display_name || "",
+            bio: profileData.bio || "",
+            timezone: profileData.timezone || "UTC",
+            language: profileData.language || "en",
+            theme: profileData.theme || "light",
+            skills: combinedSkills,
+            notification_preferences: notificationPrefs,
+            email_visible: profileData.email_visible || false,
+            phone_visible: profileData.phone_visible || false,
+            address_visible: profileData.address_visible || false,
+            needs_visible: profileData.needs_visible || false,
+          };
+
+          // Update initial values and reset form
+          setInitialValues(values);
+          form.reset(values);
+        }
+      } catch (error) {
+        console.error("[SettingsDialogContent] Unexpected error:", error);
         toast({
-          title: "Error loading profile",
-          description: error.message,
+          title: "Error loading profile data",
+          description: "Please try again later",
           variant: "destructive",
         });
-        return;
-      }
-
-      // Process and set form values if data exists
-      if (data) {
-        const notificationPrefs = data.notification_preferences as NotificationPreferences || {
-          involved_only: true,
-          page_specific: {
-            events: true,
-            safety: true,
-            care: true,
-            goods: true,
-            skills: true,
-            neighbors: true
-          },
-          all_activity: false,
-          new_neighbors: true
-        };
-
-        const values = {
-          display_name: data.display_name || "",
-          bio: data.bio || "",
-          timezone: data.timezone || "UTC",
-          language: data.language || "en",
-          theme: data.theme || "light",
-          skills: data.skills || [],
-          notification_preferences: notificationPrefs,
-          email_visible: data.email_visible || false,
-          phone_visible: data.phone_visible || false,
-          address_visible: data.address_visible || false,
-          needs_visible: data.needs_visible || false,
-        };
-
-        // Update initial values and reset form
-        setInitialValues(values);
-        form.reset(values);
       }
     };
 
-    loadProfile();
-  }, [user]);
+    loadProfileAndSkills();
+  }, [user, form, toast]);
 
   // Handle form submission
   const onSubmit = async (values: ProfileFormValues) => {
@@ -188,6 +225,8 @@ const SettingsDialogContent = ({ onClose }: { onClose: () => void }) => {
     setLoading(true);
     
     try {
+      console.log("[SettingsDialogContent] Saving profile with skills:", values.skills);
+      
       // Update user profile in database
       const { error } = await supabase
         .from("profiles")
@@ -213,10 +252,11 @@ const SettingsDialogContent = ({ onClose }: { onClose: () => void }) => {
       
       // Show success notification
       toast({
-        title: "Settings saved",
+        title: "Settings saved successfully",
       });
     } catch (error: any) {
       // Handle update errors
+      console.error("[SettingsDialogContent] Error saving settings:", error);
       toast({
         title: "Error saving settings",
         description: error.message,
@@ -280,7 +320,7 @@ const SettingsDialogContent = ({ onClose }: { onClose: () => void }) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction
+            <AlertDialogCancel
               onClick={() => {
                 setShowUnsavedDialog(false);
                 onClose();
@@ -288,7 +328,7 @@ const SettingsDialogContent = ({ onClose }: { onClose: () => void }) => {
               className={buttonVariants({ variant: "destructive" })}
             >
               Leave without saving
-            </AlertDialogAction>
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSaveAndClose}
               className="bg-primary text-primary-foreground hover:bg-primary/90"

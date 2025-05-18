@@ -1,11 +1,13 @@
 
 /**
- * Re-export the toast hook from our central implementation
+ * Re-export our centralized toast implementation
  * 
- * This maintains the existing API used in the codebase
- * while allowing us to switch toast libraries if needed
+ * This ensures components using the shadcn pattern automatically use our
+ * standardized Sonner implementation
  */
 import { toast, useToast } from '@/hooks/use-toast';
 
-// Export toast function and hook directly
+// Export for component usage
 export { toast, useToast };
+
+// No types to re-export since we're handling all types in the main implementation

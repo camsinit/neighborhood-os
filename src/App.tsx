@@ -6,7 +6,7 @@ import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
+import { Toaster } from 'sonner'; // Import Sonner Toaster directly
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
 // Import pages
@@ -138,7 +138,17 @@ function App() {
               {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            <Toaster position="top-center" />
+            {/* Configure the Sonner Toaster with consistent positioning and styling */}
+            <Toaster 
+              position="top-center" 
+              toastOptions={{
+                duration: 4000,
+                className: "toast-custom-class",
+                style: { 
+                  fontSize: '14px'
+                }
+              }}
+            />
           </Router>
         </NeighborhoodProvider>
       </SessionContextProvider>

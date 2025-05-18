@@ -1,52 +1,56 @@
 
 /**
- * This is a compatibility layer for Sonner toast
+ * Standardized toast hook that uses Sonner as the underlying implementation
  * 
- * It provides a unified API that works with both the older toast system
- * and the newer Sonner toast implementation.
+ * This centralizes all toast notifications through a single consistent interface
+ * and removes the compatibility layer that was causing duplicate notifications
  */
 import { toast as sonnerToast } from 'sonner';
 
-// Custom toast type that handles both the old API (title/description) and new API (description only)
-export type Toast = {
+// Define our toast types for consistent usage
+export type ToastProps = {
   title?: string;
   description?: string;
   variant?: 'default' | 'destructive' | 'success';
 };
 
-// Adapter function that converts our app's toast format to Sonner's format
-const adaptToastToSonner = (props: Toast) => {
-  // If using the old API with title, combine title and description
-  if (props.title) {
-    const message = props.description 
-      ? `${props.title}: ${props.description}`
-      : props.title;
-    
-    // Map variant to Sonner's variants
-    if (props.variant === 'destructive') {
-      return sonnerToast.error(message);
-    } else if (props.variant === 'success') {
-      return sonnerToast.success(message);
-    } else {
-      return sonnerToast(message);
-    }
-  } 
-  // If using the new API with just description
-  else {
-    return sonnerToast(props.description || '');
+/**
+ * Primary toast function - use this for all notifications
+ * 
+ * @param props Toast configuration properties
+ */
+export const toast = (props: ToastProps) => {
+  const { title, description, variant } = props;
+  
+  // For simple messages, use the title directly
+  const message = title || "";
+  
+  // Determine which Sonner method to use based on variant
+  if (variant === 'destructive') {
+    return sonnerToast.error(message, {
+      description: description,
+    });
+  } else if (variant === 'success') {
+    return sonnerToast.success(message, {
+      description: description,
+    });
+  } else {
+    // Default toast
+    return sonnerToast(message, {
+      description: description,
+    });
   }
 };
 
-// Compatibility function that mimics the old toast API but uses Sonner
-export const toast = (props: Toast) => {
-  return adaptToastToSonner(props);
-};
-
-// For backwards compatibility with components using useToast hook
+/**
+ * Hook for consuming toast functionality in components
+ * 
+ * Maintains the previous API for backward compatibility
+ */
 export function useToast() {
   return {
-    toast: adaptToastToSonner,
-    // For compatibility with components expecting toasts array
+    toast,
+    // Empty array for compatibility with components that expect toasts array
     toasts: [] 
   };
 }
