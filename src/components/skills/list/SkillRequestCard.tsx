@@ -1,24 +1,27 @@
 
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
 import SkillContributionDialog from '../SkillContributionDialog';
-import { Calendar, Clock, User, HelpingHand } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
+  hideActions?: boolean; // New prop to control action visibility
 }
 
 /**
  * SkillRequestCard - Displays a skill request
  * 
- * This component has been updated to match the design of SkillOfferCard for consistency
+ * This component has been updated with a simplified design
+ * and actions that are only shown in detail view
  */
-const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
+const SkillRequestCard = ({ 
+  skill,
+  hideActions = false
+}: SkillRequestCardProps) => {
   // State for managing dialogs
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
@@ -35,25 +38,21 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // Get the category colors from our map, fallback to technology if not found
   const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
   
-  // Format the creation date for display
-  const creationDate = new Date(skill.created_at);
-  const formattedDate = format(creationDate, 'MMM d, yyyy');
-
   return (
     <div 
       className="flex flex-col p-4 cursor-pointer relative w-full"
-      onClick={() => setIsContributeDialogOpen(true)}
+      onClick={() => hideActions ? undefined : setIsContributeDialogOpen(true)}
     >
       <div className="flex items-start justify-between w-full">
         {/* User profile and skill title */}
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border">
+          <Avatar className="h-8 w-8 border">
             <AvatarImage src={skill.profiles?.avatar_url || undefined} />
             <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <h4 className="font-medium text-gray-900">{skill.title}</h4>
-            <p className="text-sm text-gray-500 flex items-center">
+            <p className="text-xs text-gray-500 flex items-center">
               <User className="h-3 w-3 mr-1" />
               {skill.profiles?.display_name || 'Anonymous'}
             </p>
@@ -68,46 +67,15 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         </Badge>
       </div>
       
-      {/* Description preview (if available) */}
+      {/* Description preview - limit to just 1 line */}
       {skill.description && (
-        <p className="mt-2 text-sm text-gray-700 line-clamp-2">
+        <p className="mt-2 text-sm text-gray-700 line-clamp-1">
           {skill.description}
         </p>
       )}
       
-      {/* Additional metadata */}
-      <div className="flex items-center mt-2 text-xs text-gray-500 gap-3">
-        <span className="flex items-center">
-          <Calendar className="h-3 w-3 mr-1" />
-          {formattedDate}
-        </span>
-        
-        {skill.availability && (
-          <span className="flex items-center">
-            <Clock className="h-3 w-3 mr-1" />
-            {skill.availability}
-          </span>
-        )}
-      </div>
-      
-      {/* Action buttons */}
-      <div className="mt-3 flex justify-end">
-        <Button 
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsContributeDialogOpen(true);
-          }}
-          className="bg-[#22C55E] hover:bg-[#16A34A] text-white border-0"
-        >
-          <HelpingHand className="h-3 w-3 mr-1" />
-          Offer Help
-        </Button>
-      </div>
-
       {/* Only show scheduling button if status is pending_scheduling */}
-      {skill.status === 'pending_scheduling' && (
+      {skill.status === 'pending_scheduling' && !hideActions && (
         <FinalizeDateDialog
           sessionId={skill.id}
           open={isScheduleDialogOpen}
@@ -115,14 +83,16 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         />
       )}
 
-      {/* Contribution dialog */}
-      <SkillContributionDialog
-        open={isContributeDialogOpen}
-        onOpenChange={setIsContributeDialogOpen}
-        skillRequestId={skill.id}
-        requestTitle={skill.title}
-        requesterId={skill.user_id}
-      />
+      {/* Contribution dialog - only available when not in card view */}
+      {!hideActions && (
+        <SkillContributionDialog
+          open={isContributeDialogOpen}
+          onOpenChange={setIsContributeDialogOpen}
+          skillRequestId={skill.id}
+          requestTitle={skill.title}
+          requesterId={skill.user_id}
+        />
+      )}
     </div>
   );
 };

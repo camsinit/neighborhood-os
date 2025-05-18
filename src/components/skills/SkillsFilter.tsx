@@ -1,93 +1,88 @@
 
-/**
- * Enhanced SkillsFilter component
- * 
- * This component provides filtering controls for skills listings with:
- * - Category filtering
- * - Type filtering (offers/requests)
- * - Search functionality
- */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Filter, XCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { SkillCategory } from './types/skillTypes';
-import { cn } from '@/lib/utils';
+import { Filter, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
-// Define the props for the component
+/**
+ * Props for the SkillsFilter component
+ */
 interface SkillsFilterProps {
   selectedCategory: SkillCategory | null;
   onCategoryChange: (category: SkillCategory | null) => void;
 }
 
-// Category configuration with colors and labels
-const categoryConfig: Record<SkillCategory, { color: string, bgColor: string, label: string }> = {
-  creative: { color: 'text-[#F97316]', bgColor: 'bg-[#FDE1D3]', label: 'Creative' },
-  trade: { color: 'text-[#8B5CF6]', bgColor: 'bg-[#E5DEFF]', label: 'Trade' },
-  technology: { color: 'text-[#221F26]', bgColor: 'bg-[#D3E4FD]', label: 'Technology' },
-  education: { color: 'text-emerald-600', bgColor: 'bg-[#F2FCE2]', label: 'Education' },
-  wellness: { color: 'text-[#D946EF]', bgColor: 'bg-[#FFDEE2]', label: 'Wellness' },
-};
-
-// Categories array for iteration
-const categories: SkillCategory[] = [
-  'creative',
-  'trade',
-  'technology',
-  'education',
-  'wellness'
+/**
+ * Categories available for filtering skills
+ */
+const CATEGORIES: { label: string; value: SkillCategory; color: string; }[] = [
+  { label: 'Creative', value: 'creative', color: 'bg-orange-100 text-orange-800 hover:bg-orange-200' },
+  { label: 'Trade', value: 'trade', color: 'bg-purple-100 text-purple-800 hover:bg-purple-200' },
+  { label: 'Technology', value: 'technology', color: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
+  { label: 'Education', value: 'education', color: 'bg-green-100 text-green-800 hover:bg-green-200' },
+  { label: 'Wellness', value: 'wellness', color: 'bg-pink-100 text-pink-800 hover:bg-pink-200' },
 ];
 
-const SkillsFilter: React.FC<SkillsFilterProps> = ({ 
-  selectedCategory, 
-  onCategoryChange 
+/**
+ * SkillsFilter - Filter component for the skills page
+ * 
+ * This component provides a dropdown to filter skills by category
+ */
+const SkillsFilter: React.FC<SkillsFilterProps> = ({
+  selectedCategory,
+  onCategoryChange,
 }) => {
-  // Handle category selection
-  const handleCategoryClick = (category: SkillCategory) => {
-    // If the category is already selected, clear it. Otherwise, select it.
-    onCategoryChange(selectedCategory === category ? null : category);
-  };
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    onCategoryChange(null);
-  };
-
   return (
-    <div className="flex flex-wrap gap-2 items-center">
-      {/* Category filtering */}
-      <div className="flex flex-wrap gap-2 items-center">
-        {categories.map(category => {
-          const isSelected = selectedCategory === category;
-          const config = categoryConfig[category];
-          
-          return (
-            <Badge
-              key={category}
-              className={cn(
-                `${config.bgColor} ${config.color} cursor-pointer hover:opacity-90 border-0 transition-all`,
-                isSelected && 'ring-2 ring-offset-1 ring-primary'
-              )}
-              onClick={() => handleCategoryClick(category)}
+    <div className="flex items-center gap-2">
+      {/* Category filter dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex gap-2 items-center">
+            <Filter className="h-4 w-4" />
+            <span>Filter by Category</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-white">
+          <DropdownMenuItem 
+            className="cursor-pointer font-medium" 
+            onSelect={() => onCategoryChange(null)}
+          >
+            All Categories
+          </DropdownMenuItem>
+          {CATEGORIES.map((category) => (
+            <DropdownMenuItem 
+              key={category.value}
+              className="cursor-pointer"
+              onSelect={() => onCategoryChange(category.value)}
             >
-              {config.label}
-              {isSelected && <CheckCircle className="ml-1 h-3 w-3" />}
-            </Badge>
-          );
-        })}
-      </div>
+              <div className="flex items-center justify-between w-full">
+                <span>{category.label}</span>
+                {selectedCategory === category.value && (
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                )}
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {/* Clear filters button - only show when filters are active */}
+      {/* Show selected category as badge */}
       {selectedCategory && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={handleClearFilters}
-          className="text-gray-500 hover:text-gray-700 p-1 h-auto"
+        <Badge 
+          className={`bg-gray-100 text-gray-800 hover:bg-gray-200 flex items-center gap-1`}
         >
-          <XCircle className="h-4 w-4 mr-1" />
-          <span>Clear</span>
-        </Button>
+          {CATEGORIES.find(cat => cat.value === selectedCategory)?.label || selectedCategory}
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+            onClick={() => onCategoryChange(null)}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </Badge>
       )}
     </div>
   );

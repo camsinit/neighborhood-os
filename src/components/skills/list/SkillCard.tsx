@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +18,7 @@ import { ModuleItemCard } from '@/components/ui/card/index';
  * - Uses ModuleItemCard for consistent highlighting behavior
  * - Provides proper data attributes for the highlighting system
  * - Handles different card types (request/offer) with appropriate styling
+ * - Adds a colored left border based on category
  */
 interface SkillCardProps {
   skill: SkillWithProfile;
@@ -47,19 +49,65 @@ const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCa
     setIsDetailsOpen(false);
   };
 
+  // Category color mapping
+  const getCategoryColorClass = () => {
+    switch(skill.skill_category) {
+      case 'creative': return 'border-l-orange-500';
+      case 'trade': return 'border-l-purple-500';
+      case 'technology': return 'border-l-blue-500';
+      case 'education': return 'border-l-green-500';
+      case 'wellness': return 'border-l-pink-500';
+      default: return 'border-l-gray-500';
+    }
+  };
+
   // For skill requests, we render the request card inside a ModuleItemCard for highlighting
   if (type === 'request') {
     return (
-      <ModuleItemCard
-        itemId={skill.id}
-        itemType="skill"
-        isHighlighted={isHighlighted}
-        className="p-0 overflow-hidden" // Remove padding since the child has its own padding
-      >
-        <SkillRequestCard
-          skill={skill}
+      <>
+        <ModuleItemCard
+          itemId={skill.id}
+          itemType="skill"
+          isHighlighted={isHighlighted}
+          className={`p-0 overflow-hidden border-l-4 ${getCategoryColorClass()}`}
+          onClick={() => setIsDetailsOpen(true)}
+        >
+          <SkillRequestCard
+            skill={skill}
+            hideActions={true} // Hide actions from card view
+          />
+        </ModuleItemCard>
+
+        {/* Details dialog */}
+        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{skill.title}</DialogTitle>
+            </DialogHeader>
+            
+            <SkillDetailsContent 
+              skill={skill}
+              isOwner={isOwner}
+              onDelete={handleDeleteSkill}
+              isDeleting={isDeleting}
+              onRequestSkill={() => {
+                setIsDetailsOpen(false);
+                setIsRequestDialogOpen(true);
+              }}
+              showActions={true} // Show actions in detail view
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Skill contribution dialog */}
+        <SkillSessionRequestDialog
+          open={isRequestDialogOpen}
+          onOpenChange={setIsRequestDialogOpen}
+          skillId={skill.id}
+          skillTitle={skill.title}
+          providerId={skill.user_id}
         />
-      </ModuleItemCard>
+      </>
     );
   }
 
@@ -70,15 +118,13 @@ const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCa
         itemId={skill.id}
         itemType="skill"
         isHighlighted={isHighlighted}
-        className="p-0 overflow-hidden" // Remove padding since the child has its own padding
+        className={`p-0 overflow-hidden border-l-4 ${getCategoryColorClass()}`}
+        onClick={() => setIsDetailsOpen(true)}
       >
         <SkillOfferCard 
           skill={skill}
           isOwner={isOwner}
-          onDelete={handleDeleteSkill}
-          isDeleting={isDeleting}
-          onRequestSkill={() => setIsRequestDialogOpen(true)}
-          onClick={() => setIsDetailsOpen(true)}
+          hideActions={true} // Hide actions from card view
         />
       </ModuleItemCard>
 
@@ -98,6 +144,7 @@ const SkillCard = ({ skill, onContribute, type, isHighlighted = false }: SkillCa
               setIsDetailsOpen(false);
               setIsRequestDialogOpen(true);
             }}
+            showActions={true} // Show actions in detail view
           />
         </DialogContent>
       </Dialog>

@@ -1,160 +1,111 @@
 
-/**
- * Component for displaying detailed information about a skill
- */
-import React, { useState } from 'react';
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useUser } from '@supabase/auth-helpers-react';
-import SkillSessionRequestDialog from '@/components/skills/SkillSessionRequestDialog';
-import { SkillWithProfile } from '../types/skillTypes';
-import SkillDetailsHeader from './SkillDetailsHeader';
-import UserProfileSection from './UserProfileSection';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
+import { Calendar, MapPin, Clock, User } from 'lucide-react';
 import ActionButtons from './ActionButtons';
 
 /**
- * Props for SkillDetailsContent
- * This component accepts either individual properties or a complete skill object
+ * Props for the SkillDetailsContent component
  */
 interface SkillDetailsContentProps {
-  // Individual properties approach
-  id?: string;
-  title?: string;
-  description?: string | null;
-  category?: string;
-  profiles?: {
-    display_name: string | null;
-    avatar_url: string | null;
-    id: string;
-  } | null;
-  created_at?: string;
-  request_type?: string;
-  availability?: string | null;
-  time_preferences?: string[] | null;
-  onClose?: () => void;
-  
-  // Alternative: pass the complete skill object
-  skill?: SkillWithProfile;
-  
-  // Actions for owner
-  isOwner?: boolean;
+  skill: SkillWithProfile;
+  isOwner: boolean;
   onDelete?: () => void;
   isDeleting?: boolean;
   onRequestSkill?: () => void;
+  showActions?: boolean; // New prop to control action visibility
 }
 
 /**
- * SkillDetailsContent - Displays detailed information about a skill
+ * Component for displaying the details of a skill
+ * This is shown in the details dialog
  */
-const SkillDetailsContent: React.FC<SkillDetailsContentProps> = (props) => {
-  // Initialize state for request dialog
-  const [showRequestDialog, setShowRequestDialog] = useState(false);
-  const user = useUser();
-
-  // Extract properties, either from individual props or from skill object
-  const id = props.skill?.id || props.id || '';
-  const title = props.skill?.title || props.title || '';
-  const description = props.skill?.description || props.description;
-  const category = props.skill?.skill_category || props.category || 'other';
-  
-  // Handle profiles data - ensure it's properly typed
-  let profileData: { display_name: string | null; avatar_url: string | null; id: string } | null = null;
-  
-  if (props.skill?.profiles) {
-    // If we have a skill object with profiles
-    profileData = props.skill.profiles as { display_name: string | null; avatar_url: string | null; id: string };
-  } else if (props.profiles) {
-    // If we have profiles from individual props
-    profileData = props.profiles;
-  }
-  
-  const created_at = props.skill?.created_at || props.created_at || '';
-  const request_type = props.skill?.request_type || props.request_type || '';
-  const availability = props.skill?.availability || props.availability;
-  const time_preferences = props.skill?.time_preferences || props.time_preferences;
-  
-  // Determine if the current user is the owner
-  const isOwnSkill = props.isOwner !== undefined 
-    ? props.isOwner 
-    : (user?.id === profileData?.id);
-  const isRequest = request_type === 'need';
-
-  // Fallback display name and avatar handling for better UX
-  const displayName = profileData?.display_name || 'Neighbor';
-  const avatarUrl = profileData?.avatar_url || null;
-  const providerId = profileData?.id || '';
-
-  // Handle the request skill action
-  const handleRequestSkill = () => {
-    if (props.onRequestSkill) {
-      props.onRequestSkill();
-    } else {
-      setShowRequestDialog(true);
-    }
+const SkillDetailsContent: React.FC<SkillDetailsContentProps> = ({
+  skill,
+  isOwner,
+  onDelete,
+  isDeleting = false,
+  onRequestSkill,
+  showActions = true // Show actions by default in the details view
+}) => {
+  // Category color mapping
+  const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
+    creative: {bg: 'bg-[#FDE1D3]', text: 'text-[#F97316]'},
+    trade: {bg: 'bg-[#E5DEFF]', text: 'text-[#8B5CF6]'},
+    technology: {bg: 'bg-[#D3E4FD]', text: 'text-[#221F26]'},
+    education: {bg: 'bg-[#F2FCE2]', text: 'text-emerald-600'},
+    wellness: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
   };
-
+  
+  // Get the category style
+  const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
+  
+  // Format the creation date
+  const creationDate = new Date(skill.created_at);
+  const formattedDate = format(creationDate, 'MMM d, yyyy');
+  
   return (
-    <div className="space-y-6 p-1">
-      {/* Header with title and category */}
-      <SkillDetailsHeader 
-        title={title} 
-        category={category} 
-        created_at={created_at} 
-      />
-
-      {/* User profile information */}
-      <UserProfileSection 
-        displayName={displayName} 
-        avatarUrl={avatarUrl} 
-        isRequest={isRequest} 
-      />
-
-      {/* Description section */}
-      {description && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-900">Description</h3>
-          <p className="text-gray-600 text-sm whitespace-pre-wrap">{description}</p>
+    <div className="space-y-4">
+      {/* User profile section */}
+      <div className="flex items-center gap-3 mb-4">
+        <Avatar className="h-12 w-12 border">
+          <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+          <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <p className="font-medium text-gray-900 flex items-center">
+            {skill.profiles?.display_name || 'Anonymous'}
+          </p>
+          <p className="text-sm text-gray-500">
+            Shared on {formattedDate}
+          </p>
+        </div>
+      </div>
+      
+      {/* Category */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-gray-500">Category:</span>
+        <Badge 
+          className={`${categoryStyle.bg} ${categoryStyle.text} border-0`}
+        >
+          {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
+        </Badge>
+      </div>
+      
+      {/* Description */}
+      {skill.description && (
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium text-gray-500">Description:</h4>
+          <p className="text-gray-700 whitespace-pre-wrap">{skill.description}</p>
         </div>
       )}
-
-      {/* Availability section */}
-      {availability && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-900">Availability</h3>
-          <p className="text-gray-600 text-sm">{availability}</p>
+      
+      {/* Availability */}
+      {skill.availability && (
+        <div className="space-y-1">
+          <h4 className="text-sm font-medium text-gray-500">Availability:</h4>
+          <p className="text-gray-700 flex items-center">
+            <Clock className="h-4 w-4 mr-2 text-gray-400" />
+            {skill.availability}
+          </p>
         </div>
       )}
-
-      {/* Time preferences section */}
-      {time_preferences && time_preferences.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-900">Time Preferences</h3>
-          <div className="flex flex-wrap gap-2">
-            {time_preferences.map((time, i) => (
-              <Badge key={i} variant="outline" className="bg-gray-100 text-gray-800 border-none">
-                {time}
-              </Badge>
-            ))}
-          </div>
-        </div>
+      
+      {/* Action buttons - only shown when showActions is true */}
+      {showActions && (
+        <ActionButtons 
+          isOwner={isOwner}
+          isRequest={skill.request_type === 'need'}
+          onDelete={onDelete}
+          onRequestSkill={onRequestSkill}
+          isDeleting={isDeleting}
+        />
       )}
-
-      {/* Action buttons */}
-      <ActionButtons 
-        isOwner={isOwnSkill}
-        isRequest={isRequest}
-        onDelete={props.onDelete}
-        onRequestSkill={handleRequestSkill}
-        isDeleting={props.isDeleting}
-      />
-
-      {/* Request dialog */}
-      <SkillSessionRequestDialog
-        open={showRequestDialog}
-        onOpenChange={setShowRequestDialog}
-        skillId={id}
-        skillTitle={title}
-        providerId={providerId}
-      />
     </div>
   );
 };
