@@ -7,7 +7,7 @@
  * - Shows different styling based on RSVP status
  * - Shows popover with RSVP information when clicked
  */
-import { Clock, Users } from "lucide-react";
+import { Clock, Users, Pencil } from "lucide-react";
 import { Event } from "@/types/localTypes";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import RSVPList from "../event/RSVPList";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { parseISO } from "date-fns";
+import EditEventDialog from "./EditEventDialog"; // Import the edit dialog component
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Import avatar component
 
 interface EventCardContentProps {
   event: Event;
@@ -80,7 +82,22 @@ const EventCardContent = ({
       {/* Popover content showing RSVPs with stacked avatars */}
       <PopoverContent className="w-72 p-4 shadow-md border-light" sideOffset={5}>
         <div className="space-y-3">
-          <h3 className="font-medium text-base">{event.title}</h3>
+          {/* Host avatar and event title in a flex row */}
+          <div className="flex items-center gap-2">
+            {/* Host avatar - displays profile image or fallback with initials */}
+            <Avatar className="h-8 w-8">
+              <AvatarImage 
+                src={event.profiles?.avatar_url || ''} 
+                alt={event.profiles?.display_name || 'Host'} 
+              />
+              <AvatarFallback>
+                {(event.profiles?.display_name || 'H').charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            
+            {/* Event title */}
+            <h3 className="font-medium text-base">{event.title}</h3>
+          </div>
           
           <div className="flex items-center gap-1.5 text-sm text-gray-600">
             <Clock className="h-3.5 w-3.5" />
@@ -99,6 +116,16 @@ const EventCardContent = ({
             className="mt-2" 
             showEmptyState={false} 
           />
+          
+          {/* Edit button for hosts */}
+          {isHost && (
+            <EditEventDialog event={event}>
+              <div className="flex items-center gap-2 text-blue-600 mt-2 cursor-pointer hover:text-blue-700">
+                <Pencil className="h-4 w-4" />
+                <span className="text-sm">Edit event</span>
+              </div>
+            </EditEventDialog>
+          )}
         </div>
       </PopoverContent>
     </Popover>
