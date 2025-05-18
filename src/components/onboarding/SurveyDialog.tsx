@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useUser } from "@supabase/auth-helpers-react";
 
@@ -32,6 +32,8 @@ interface SurveyDialogProps {
  * - Skills
  */
 const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
+  console.log("[DEBUG] SurveyDialog rendering, open:", open);
+  
   // Get form state and handlers from custom hook
   const {
     formData,
@@ -44,6 +46,11 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
       onOpenChange(false);
     }, 2000);
   });
+  
+  // Add effect to log when currentStep changes
+  useEffect(() => {
+    console.log("[DEBUG] SurveyDialog - currentStep changed:", surveyState.currentStep);
+  }, [surveyState.currentStep]);
   
   // Define the steps for the survey
   const steps = [
@@ -106,6 +113,13 @@ const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
   
   // Get current step data
   const currentStepData = steps[surveyState.currentStep];
+  
+  // Log progress information
+  console.log("[DEBUG] Progress info:", {
+    currentStep: surveyState.currentStep,
+    totalSteps: steps.length,
+    progressPercentage: ((surveyState.currentStep + 1) / steps.length) * 100
+  });
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

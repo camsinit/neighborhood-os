@@ -3,6 +3,10 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { createLogger } from "@/utils/logger"; // Import logger
+
+// Create a logger for this component
+const logger = createLogger("useSurveyForm");
 
 /**
  * Custom hook to manage survey form state and submission
@@ -28,73 +32,106 @@ export const useSurveyForm = (onComplete: () => void) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+
+  // Log current step state whenever it changes
+  console.log("[DEBUG] Current step:", currentStep);
   
   // Handle next step button click
   const handleNext = () => {
+    console.log("[DEBUG] handleNext called, current step:", currentStep);
+    
     // Validate current step before proceeding
     if (currentStep === 0) {
+      console.log("[DEBUG] Validating step 0 - Basic Info", { firstName, lastName });
       if (!firstName.trim()) {
+        console.log("[DEBUG] First name validation failed");
         toast.error("Please enter your first name");
         return;
       }
       if (!lastName.trim()) {
+        console.log("[DEBUG] Last name validation failed");
         toast.error("Please enter your last name");
         return;
       }
+      console.log("[DEBUG] Basic info validation passed");
     }
     
     if (currentStep === 1) {
+      console.log("[DEBUG] Validating step 1 - Contact Info", { email, phone });
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
+        console.log("[DEBUG] Email validation failed");
         toast.error("Please enter a valid email address");
         return;
       }
       if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
+        console.log("[DEBUG] Phone validation failed");
         toast.error("Please enter a valid phone number");
         return;
       }
+      console.log("[DEBUG] Contact info validation passed");
     }
     
     if (currentStep === 2) {
+      console.log("[DEBUG] Validating step 2 - Address", { address });
       if (!address.trim()) {
+        console.log("[DEBUG] Address validation failed");
         toast.error("Please enter your address");
         return;
       }
+      console.log("[DEBUG] Address validation passed");
     }
     
     if (currentStep === 3) {
-      if (!profilePhoto) {
+      console.log("[DEBUG] Validating step 3 - Profile photo", { profilePhoto });
+      if (!profilePhoto && !photoUrl) {
+        console.log("[DEBUG] Profile photo validation failed");
         toast.error("Please upload a profile photo");
         return;
       }
+      console.log("[DEBUG] Profile photo validation passed");
     }
     
     // Skills step validation - not strictly required but we encourage at least one
     if (currentStep === 4 && skills.length === 0) {
+      console.log("[DEBUG] Skills step - no skills selected, asking for confirmation");
       const confirmContinue = window.confirm("You haven't selected any skills. Are you sure you want to continue without adding skills?");
       if (!confirmContinue) {
+        console.log("[DEBUG] User chose not to continue without skills");
         return;
       }
+      console.log("[DEBUG] User confirmed continuing without skills");
     }
     
     // If we're on the last step, submit the form
     if (currentStep === 4) { // Assuming there are 5 steps (0-4)
+      console.log("[DEBUG] On last step, submitting form");
       handleSubmit();
       return;
     }
     
     // Otherwise, go to the next step
-    setCurrentStep(currentStep + 1);
+    console.log("[DEBUG] Advancing to next step:", currentStep + 1);
+    setCurrentStep(prevStep => {
+      console.log("[DEBUG] Setting current step from", prevStep, "to", prevStep + 1);
+      return prevStep + 1;
+    });
   };
   
   // Handle back button click
   const handleBack = (onOpenChange: (open: boolean) => void) => {
+    console.log("[DEBUG] handleBack called, current step:", currentStep);
     if (currentStep === 0) {
       // First step, close the dialog
+      console.log("[DEBUG] On first step, closing dialog");
       onOpenChange(false);
     } else {
       // Go back one step
-      setCurrentStep(currentStep - 1);
+      console.log("[DEBUG] Going back to previous step:", currentStep - 1);
+      setCurrentStep(prevStep => {
+        console.log("[DEBUG] Setting current step from", prevStep, "to", prevStep - 1);
+        return prevStep - 1;
+      });
     }
   };
   
