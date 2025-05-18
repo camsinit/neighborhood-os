@@ -59,7 +59,7 @@ const ActionButtons = () => {
       <Button
         variant="ghost" 
         size="sm"
-        className="w-full justify-start bg-white" 
+        className="w-full justify-start bg-white gap-3 text-base font-medium" 
         onClick={() => navigate('/settings')}
       >
         {/* Replace the Settings icon with the user's Avatar */}
@@ -76,7 +76,7 @@ const ActionButtons = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start bg-white"
+        className="w-full justify-start bg-white gap-3 text-base font-medium"
         onClick={() => navigate('/invite')}
       >
         <UserPlus className="mr-2 h-4 w-4" />
