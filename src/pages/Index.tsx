@@ -44,15 +44,10 @@ const Index = () => {
       if (!user) return;
       
       try {
-        // Since completed_onboarding doesn't exist in profiles, we'll assume all users have completed onboarding
-        // This is a temporary fix until the profiles table is updated with this field
-        setHasCompletedOnboarding(true);
-        
-        // When the field is added to the database, we can uncomment this code:
-        /*
+        // Check if the user has completed onboarding
         const { data, error } = await supabase
           .from('profiles')
-          .select('completed_onboarding')
+          .select('display_name, completed_onboarding')
           .eq('id', user.id)
           .single();
         
@@ -61,8 +56,10 @@ const Index = () => {
           return;
         }
         
-        setHasCompletedOnboarding(data?.completed_onboarding || false);
-        */
+        // If the user has a display name, consider onboarding completed for backward compatibility
+        // Eventually we'll rely on the completed_onboarding field once it's universally populated
+        const hasCompletedOnboarding = data?.completed_onboarding || (data?.display_name ? true : false);
+        setHasCompletedOnboarding(hasCompletedOnboarding);
       } catch (err) {
         console.error("Failed to check onboarding status:", err);
       }
