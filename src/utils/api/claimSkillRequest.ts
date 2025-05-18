@@ -50,11 +50,15 @@ export async function claimSkillRequest(sessionId: string): Promise<ClaimSkillRe
       };
     }
     
+    // Properly cast the response data to access its properties
+    // The result from RPC is of type Json, so we need to ensure it's an object
+    const result = data as { success: boolean; message: string; session_id?: string };
+    
     // Return the result from the database function
     return {
-      success: data.success,
-      message: data.message,
-      sessionId: data.session_id
+      success: result.success,
+      message: result.message,
+      sessionId: result.session_id
     };
   } catch (error: any) {
     console.error("Exception in claimSkillRequest:", error);

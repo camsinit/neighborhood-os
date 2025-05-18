@@ -28,8 +28,8 @@ export interface SkillRequestFormData {
  */
 export const useSkillRequestSubmit = (
   skillId: string,
-  providerId?: string, // Now optional for multi-provider requests
-  onClose: () => void
+  onClose: () => void,
+  providerId?: string // Make providerId optional and place it last
 ) => {
   // State management
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +115,13 @@ export const useSkillRequestSubmit = (
       const timeSlotObjects = selectedTimeSlots.map(slot => {
         // For each date, create entries for each selected time preference
         const timeSlots = [];
-        const dateString = typeof slot.date === 'string' ? slot.date : slot.date.toISOString().split('T')[0];
+        
+        // Fix date handling - ensure we have a proper string or convert Date object
+        const dateString = typeof slot.date === 'string' 
+          ? slot.date 
+          : (slot.date instanceof Date 
+            ? slot.date.toISOString().split('T')[0]
+            : String(slot.date));
         
         // Create a time slot for each selected preference (morning, afternoon, evening)
         for (const pref of slot.preferences) {

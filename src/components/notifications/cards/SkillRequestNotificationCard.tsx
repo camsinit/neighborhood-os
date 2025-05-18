@@ -131,7 +131,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     }
   };
 
-  // New function to handle claiming a skill request
+  // Handle claiming a skill request with proper type casting
   const handleClaim = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsClaiming(true);
@@ -150,7 +150,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
       }
       
       // Call the claim_skill_request function
-      const { data: result, error } = await supabase.rpc(
+      const { data, error } = await supabase.rpc(
         'claim_skill_request',
         {
           p_session_id: sessionId,
@@ -159,6 +159,9 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
       );
       
       if (error) throw error;
+      
+      // Cast the result to access properties
+      const result = data as { success: boolean; message: string };
       
       if (!result.success) {
         // The claim was unsuccessful - session might have been claimed by another provider

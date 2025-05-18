@@ -1,3 +1,4 @@
+
 // This is the main skill form component that uses smaller, focused components
 // to create a form for offering or requesting skills
 
@@ -8,7 +9,7 @@ import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import { useToast } from "@/hooks/use-toast";
 import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 import { SkillCategory } from "./types/skillTypes";
-import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
+import { SkillFormData, TimePreference } from "./types/skillFormTypes";
 
 // Import the individual form field components
 import CategoryField from "./form/CategoryField";
