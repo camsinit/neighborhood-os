@@ -1,4 +1,3 @@
-
 /**
  * EventCardContent component
  * 
@@ -26,7 +25,6 @@ interface EventCardContentProps {
   displayTime: string;
   isHighlighted?: boolean;
 }
-
 const EventCardContent = ({
   event,
   isHost,
@@ -44,38 +42,20 @@ const EventCardContent = ({
   };
 
   // Format date for the popover
-  const formattedDate = event.time ? 
-    formatInNeighborhoodTimezone(parseISO(event.time), 'EEE, MMM d', 'America/Los_Angeles') : '';
-  
-  return (
-    <Popover>
+  const formattedDate = event.time ? formatInNeighborhoodTimezone(parseISO(event.time), 'EEE, MMM d', 'America/Los_Angeles') : '';
+  return <Popover>
       <PopoverTrigger asChild>
-        <motion.div 
-          data-event-id={event.id} 
-          className={cn(
-            "rounded-md px-2 py-1.5 mb-1.5 text-xs cursor-pointer hover:bg-opacity-80 border-l-4", 
-            getEventColor(), 
-            isHighlighted ? "ring-2 ring-blue-400" : "", 
-            isHost ? "border-l-blue-500" : isRsvped ? "border-l-green-500" : "border-l-gray-300"
-          )} 
-          animate={isHighlighted ? {
-            scale: [1, 1.05, 1]
-          } : {}} 
-          transition={{
-            duration: 0.5
-          }}
-        >      
+        <motion.div data-event-id={event.id} className={cn("rounded-md px-2 py-1.5 mb-1.5 text-xs cursor-pointer hover:bg-opacity-80 border-l-4", getEventColor(), isHighlighted ? "ring-2 ring-blue-400" : "", isHost ? "border-l-blue-500" : isRsvped ? "border-l-green-500" : "border-l-gray-300")} animate={isHighlighted ? {
+        scale: [1, 1.05, 1]
+      } : {}} transition={{
+        duration: 0.5
+      }}>      
           <div className="font-medium line-clamp-2 text-gray-800">{event.title}</div>
           <div className="flex items-center gap-1 text-gray-600 mt-1">
             <Clock className="h-3 w-3" />
             <span className="truncate">{displayTime}</span>
           </div>
-          {rsvpCount > 0 && (
-            <div className="flex items-center gap-1 text-gray-600 mt-0.5">
-              <Users className="h-3 w-3" />
-              <span>{rsvpCount}</span>
-            </div>
-          )}
+          {rsvpCount > 0}
         </motion.div>
       </PopoverTrigger>
       
@@ -86,10 +66,7 @@ const EventCardContent = ({
           <div className="flex items-center gap-2">
             {/* Host avatar - displays profile image or fallback with initials */}
             <Avatar className="h-8 w-8">
-              <AvatarImage 
-                src={event.profiles?.avatar_url || ''} 
-                alt={event.profiles?.display_name || 'Host'} 
-              />
+              <AvatarImage src={event.profiles?.avatar_url || ''} alt={event.profiles?.display_name || 'Host'} />
               <AvatarFallback>
                 {(event.profiles?.display_name || 'H').charAt(0).toUpperCase()}
               </AvatarFallback>
@@ -104,32 +81,22 @@ const EventCardContent = ({
             <span>{formattedDate} • {displayTime}</span>
           </div>
           
-          {event.location && (
-            <div className="text-sm text-gray-500 mb-2">
+          {event.location && <div className="text-sm text-gray-500 mb-2">
               {event.location}
-            </div>
-          )}
+            </div>}
           
           {/* RSVPs section with stacked avatars */}
-          <RSVPList 
-            eventId={event.id} 
-            className="mt-2" 
-            showEmptyState={false} 
-          />
+          <RSVPList eventId={event.id} className="mt-2" showEmptyState={false} />
           
           {/* Edit button for hosts */}
-          {isHost && (
-            <EditEventDialog event={event}>
+          {isHost && <EditEventDialog event={event}>
               <div className="flex items-center gap-2 text-blue-600 mt-2 cursor-pointer hover:text-blue-700">
                 <Pencil className="h-4 w-4" />
                 <span className="text-sm">Edit event</span>
               </div>
-            </EditEventDialog>
-          )}
+            </EditEventDialog>}
         </div>
       </PopoverContent>
-    </Popover>
-  );
+    </Popover>;
 };
-
 export default EventCardContent;
