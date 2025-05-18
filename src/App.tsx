@@ -23,6 +23,8 @@ import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
 import WaitlistAdmin from './pages/WaitlistAdmin';
+import SettingsPage from './pages/SettingsPage';
+import InvitePage from './pages/InvitePage';
 
 // Import components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -123,6 +125,10 @@ function App() {
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
+                
+                {/* New dedicated routes for Settings and Invite */}
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/invite" element={<InvitePage />} />
                 
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />

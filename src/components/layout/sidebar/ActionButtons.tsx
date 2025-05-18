@@ -4,26 +4,18 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 /**
- * Props for the ActionButtons component
- */
-interface ActionButtonsProps {
-  // No longer needed as we'll navigate instead of opening settings
-  // onOpenSettings?: () => void;
-}
-
-/**
  * ActionButtons component
  * 
  * Displays the settings and invite buttons at the bottom of the sidebar
  * Now navigates to dedicated pages instead of opening dialogs
  */
-const ActionButtons = ({}: ActionButtonsProps) => {
+const ActionButtons = () => {
   // Use React Router's navigate function for page navigation
   const navigate = useNavigate();
   
   return (
     <div className="space-y-2">
-      {/* Settings button - using default variant now for consistent white background */}
+      {/* Settings button - Navigate to settings page */}
       <Button
         variant="ghost" 
         size="sm"
@@ -34,7 +26,7 @@ const ActionButtons = ({}: ActionButtonsProps) => {
         Settings
       </Button>
       
-      {/* Invite button - using default variant now for consistent white background */}
+      {/* Invite button - Navigate to invite page */}
       <Button
         variant="ghost"
         size="sm"

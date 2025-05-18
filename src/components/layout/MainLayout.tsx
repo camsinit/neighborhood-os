@@ -1,6 +1,6 @@
 
 import { useLocation } from "react-router-dom";
-import { Outlet } from "react-router-dom"; // Add this import for React Router's Outlet
+import { Outlet } from "react-router-dom"; // Import Outlet for nested routing
 import Sidebar from "./sidebar";
 import Header from "./Header";
 import LoggingControls from "@/components/debug/LoggingControls";
@@ -11,8 +11,9 @@ import LoggingControls from "@/components/debug/LoggingControls";
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
+ * - Uses React Router's Outlet to render child routes
  * 
- * Now uses React Router's Outlet to render child routes
+ * @returns The main layout structure with sidebar and content area
  */
 const MainLayout = () => {
   // Get the current location to determine if we're on the homepage
@@ -33,7 +34,7 @@ const MainLayout = () => {
         
         {/* Main content - takes full height */}
         <main className="flex-1 overflow-auto">
-          {/* Use Outlet to render child routes instead of children prop */}
+          {/* Use Outlet to render child routes from App.tsx */}
           <Outlet />
         </main>
         

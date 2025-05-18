@@ -1,45 +1,28 @@
-import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout";
-import HomePage from "./components/HomePage";
-import SettingsPage from "./pages/SettingsPage";
-import InvitePage from "./pages/InvitePage";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-
-// Other imports would go here as needed
-
 /**
- * Application routes configuration
+ * IMPORTANT: This file is currently NOT being used for routing.
+ * All routes are defined in App.tsx
  * 
- * This defines all the routes for the application, including the new Settings and Invite pages
+ * This file is kept as a placeholder for potential future refactoring.
  */
+
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import HomePage from "./components/HomePage";
+
+// This is a placeholder router configuration that matches our App.tsx routes
+// Not currently in use, but kept for reference and potential future refactoring
 const createAppRouter = () => {
   return createBrowserRouter([
     {
       path: "/",
-      // The key fix: Using Outlet from react-router-dom within MainLayout for nested routes
-      element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+      // Add routes here if migrating to createBrowserRouter in the future
       children: [
-        {
-          path: "/",
-          element: <HomePage />,
-        },
         {
           path: "/home",
           element: <HomePage />,
         },
-        // New dedicated pages for Settings and Invite
-        {
-          path: "/settings",
-          element: <SettingsPage />,
-        },
-        {
-          path: "/invite",
-          element: <InvitePage />,
-        },
-        // Add other routes as needed
+        // Other routes would go here
       ]
     },
-    // Auth routes would go here
   ]);
 };
 
