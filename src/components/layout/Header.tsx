@@ -1,10 +1,10 @@
 
 /**
- * Header component props
+ * Header component that displays the application header
  */
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { UserCircle2, Settings } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import NotificationsPopover from "@/components/notifications/NotificationsPopover";
@@ -17,21 +17,15 @@ interface HeaderProps {
 }
 
 /**
- * Header component
+ * Header component 
  * 
- * Displays the application header with neighborhood name, user information,
- * notifications popover, and quick access to settings
+ * Displays the application header with neighborhood name and notifications
  */
 const Header = ({}: HeaderProps) => {
   const user = useUser();
   const { currentNeighborhood } = useNeighborhood();
   const navigate = useNavigate();
   
-  // Handle opening the settings page
-  const handleOpenSettings = () => {
-    navigate("/settings");
-  };
-
   return (
     <header className="bg-white border-b p-4">
       <div className="flex justify-between items-center">
@@ -40,23 +34,33 @@ const Header = ({}: HeaderProps) => {
           {currentNeighborhood?.name || "Your Neighborhood"}
         </h1>
         
-        {/* User info, notifications, and settings on the right */}
-        <div className="flex items-center gap-2">
-          {/* User name or welcome message */}
-          <span className="mr-2 font-medium">
-            {user?.user_metadata?.name || "Welcome"}
-          </span>
-          
-          {/* User avatar icon */}
-          <UserCircle2 className="h-8 w-8 text-gray-500" />
-          
+        {/* Notifications and profile on the right */}
+        <div className="flex items-center gap-4">
           {/* Notifications popover */}
-          <NotificationsPopover />
+          <div className="bg-gray-50 px-4 py-2 rounded-full flex items-center gap-2">
+            <Bell className="h-5 w-5 text-purple-600" />
+            <span className="font-medium">Notifications</span>
+          </div>
           
-          {/* Settings button */}
-          <Button variant="ghost" size="icon" onClick={handleOpenSettings}>
-            <Settings className="h-[1.2rem] w-[1.2rem]" />
-          </Button>
+          {/* User avatar/profile */}
+          <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
+            {user?.user_metadata?.avatar_url ? (
+              <img 
+                src={user.user_metadata.avatar_url} 
+                alt="Profile" 
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center font-medium">
+                {user?.user_metadata?.name?.[0] || "?"}
+              </div>
+            )}
+          </div>
+          
+          {/* User name */}
+          <span className="font-medium">
+            {user?.user_metadata?.name || "Cam"}
+          </span>
         </div>
       </div>
     </header>

@@ -12,8 +12,9 @@ const HomePage = () => {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
-          {/* Quick Actions Section with no heading (moved to Header) */}
+          {/* Quick Actions Section with proper heading */}
           <section>
+            <h1 className="text-3xl font-bold mb-4">Quick Actions</h1>
             <QuickActions />
           </section>
 

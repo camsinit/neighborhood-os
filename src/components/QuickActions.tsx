@@ -1,4 +1,3 @@
-
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
@@ -15,9 +14,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * - Adding events
  * - Sharing or requesting items (goods)
  * - Sharing or requesting skills
- * - Adding safety updates
- * 
- * Now with improved button styling using ActionButton and ModuleButton components
+ * - Sharing or requesting safety updates
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -124,7 +121,8 @@ const QuickActions = () => {
       </div>
     </div>;
     
-  return <div className="w-full">
+  return (
+    <div className="w-full">
       {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-6">
         <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />
@@ -136,6 +134,8 @@ const QuickActions = () => {
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
       <AddSafetyUpdateDialog open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
-    </div>;
+    </div>
+  );
 };
+
 export default QuickActions;
