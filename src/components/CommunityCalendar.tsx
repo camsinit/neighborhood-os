@@ -1,4 +1,3 @@
-
 /**
  * CommunityCalendar component
  * 
@@ -98,7 +97,7 @@ const CommunityCalendar = ({
       
       <motion.div key={`${view}-${format(currentDate, 'yyyy-MM-dd')}`} initial="hidden" animate="visible" variants={viewTransitions} transition={{
       duration: 0.3
-    }} className="calendar-container bg-white rounded-xl p-4 px-0">
+    }} className="calendar-container bg-white rounded-xl p-4 px-0 py-0">
         {view === 'week' && <WeekView weekDates={weekDates} events={events} isLoading={isLoading} getEventsForDate={getEventsForDate} highlightedId={highlightedId} />}
         
         {view === 'month' && <MonthView currentDate={currentDate} events={events || []} isLoading={isLoading} highlightedId={highlightedId} />}
