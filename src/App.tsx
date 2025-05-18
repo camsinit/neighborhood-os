@@ -113,9 +113,7 @@ function App() {
               <Route 
                 element={
                   <ProtectedRoute>
-                    <MainLayout>
-                      <Outlet />
-                    </MainLayout>
+                    <MainLayout />
                   </ProtectedRoute>
                 }
               >
