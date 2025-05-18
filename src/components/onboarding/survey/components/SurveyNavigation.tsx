@@ -1,11 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRight } from "lucide-react";
 
 /**
  * SurveyNavigation component
  * 
  * Renders navigation buttons for the survey dialog
+ * - Uses a consistent style for the Continue button to match the Next buttons elsewhere
  */
 interface SurveyNavigationProps {
   currentStep: number;
@@ -24,6 +25,7 @@ export const SurveyNavigation = ({
 }: SurveyNavigationProps) => {
   return (
     <div className="flex justify-between mt-6">
+      {/* Back button */}
       <Button
         variant="outline"
         onClick={onBack}
@@ -32,9 +34,13 @@ export const SurveyNavigation = ({
         {currentStep === 0 ? "Cancel" : "Back"}
       </Button>
       
+      {/* Continue button - Updated to match the style of the Next button */}
       <Button 
         onClick={onNext}
         disabled={isSubmitting}
+        variant="light" // Using the light variant to match the Next button style
+        className="flex items-center text-center"
+        size="sm" // Adding size to match the Next button
       >
         {isSubmitting ? (
           <>
@@ -42,9 +48,15 @@ export const SurveyNavigation = ({
             Saving...
           </>
         ) : currentStep === totalSteps - 1 ? (
-          "Complete"
+          <>
+            Complete
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </>
         ) : (
-          "Continue"
+          <>
+            Continue
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </>
         )}
       </Button>
     </div>
