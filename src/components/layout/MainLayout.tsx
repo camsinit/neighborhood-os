@@ -2,7 +2,6 @@
 import { useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom"; // Import Outlet for nested routing
 import Sidebar from "./sidebar";
-import Header from "./Header";
 import LoggingControls from "@/components/debug/LoggingControls";
 
 /**
@@ -10,7 +9,7 @@ import LoggingControls from "@/components/debug/LoggingControls";
  * 
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
- * - Main content area with conditional header (only on homepage) on the right
+ * - Main content area without header (removed)
  * - Uses React Router's Outlet to render child routes
  * 
  * @returns The main layout structure with sidebar and content area
@@ -18,7 +17,8 @@ import LoggingControls from "@/components/debug/LoggingControls";
 const MainLayout = () => {
   // Get the current location to determine if we're on the homepage
   const location = useLocation();
-  const isHomePage = location.pathname === '/' || location.pathname === '/home';
+  // We no longer use this variable since we're removing the header
+  // const isHomePage = location.pathname === '/' || location.pathname === '/home';
 
   return (
     <div className="h-screen flex">
@@ -27,10 +27,7 @@ const MainLayout = () => {
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Only render the header on the homepage */}
-        {isHomePage && (
-          <Header />
-        )}
+        {/* Header removed as requested */}
         
         {/* Main content - takes full height */}
         <main className="flex-1 overflow-auto">
