@@ -1,50 +1,38 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
-import InviteDialog from '@/components/InviteDialog';
-import { useNavigate } from 'react-router-dom'; // Import for navigation
+import InviteDialogContent from '@/components/invite/InviteDialogContent';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * InvitePage component
  * 
- * This page displays the invite interface directly in the page layout
- * rather than in a dialog/popover.
- * 
- * It handles the invitation form in-page and provides navigation back to previous pages.
+ * Provides a page-based interface for inviting neighbors by directly
+ * embedding the InviteDialogContent component
  */
 const InvitePage: React.FC = () => {
-  // We'll use this state to control the embedded invite component
-  const [isOpen, setIsOpen] = useState(true);
-  const navigate = useNavigate(); // For navigation back when closed
+  const { currentNeighborhood } = useNeighborhood();
+  const navigate = useNavigate();
   
-  // Handle dialog close by navigating back
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      // Navigate back when dialog is closed
-      navigate(-1);
-    }
-  };
-
   // Log when the component mounts for debugging
   useEffect(() => {
     console.log("[InvitePage] Page mounted");
   }, []);
 
+  // Handle dialog close by navigating back
+  const handleClose = () => {
+    navigate(-1);
+  };
+
   return (
     <ModuleLayout
-      title="Invite Neighbors" 
-      themeColor="neighbors" // Using 'neighbors' theme since this is related to neighborhood members
+      title="Invite Neighbors"
+      themeColor="neighbors"
+      description={currentNeighborhood ? `Invite others to join ${currentNeighborhood.name}` : undefined}
     >
-      <div className="bg-white rounded-lg border shadow-sm">
-        {/* 
-          * We're reusing the existing InviteDialog component but embedding it directly in the page
-          * When dialog is "closed" we navigate back instead of just hiding it
-          */}
-        <InviteDialog 
-          open={isOpen} 
-          onOpenChange={handleOpenChange} 
-        />
+      <div className="bg-white rounded-lg border shadow-sm p-6">
+        <InviteDialogContent onClose={handleClose} />
       </div>
     </ModuleLayout>
   );
