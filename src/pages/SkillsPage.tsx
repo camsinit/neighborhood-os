@@ -4,7 +4,7 @@ import { ModuleLayout } from '@/components/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Filter, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import SkillsList from '@/components/skills/SkillsList';
 import SkillsFilter from '@/components/skills/SkillsFilter';
 import SearchInput from '@/components/ui/search-input';
@@ -30,6 +30,7 @@ function SkillsPage() {
   
   // Local state to manage dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(action === 'create');
+  // Fixed: Changed type 'offer' | 'need' to 'offer' | 'request' to match expected type
   const [dialogMode, setDialogMode] = useState<'offer' | 'request'>('offer');
   
   const user = useUser();
@@ -126,63 +127,44 @@ function SkillsPage() {
       <div className="flex flex-col space-y-4">
         {/* Entire page uses a single Tabs component for navigation */}
         <Tabs value={view} onValueChange={handleTabChange} className="w-full">
-          {/* IMPROVED HEADER: Clean layout with aligned elements */}
-          <div className="flex flex-col space-y-4">
-            {/* Top row with search, tabs, and add skill button */}
-            <div className="flex items-center justify-between">
-              {/* Left side with search and filter button */}
-              <div className="flex items-center gap-3">
-                {/* Search input with proper spacing */}
-                <SearchInput 
-                  placeholder="Search skills..."
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  value={searchQuery}
-                  ref={searchInputRef}
-                  className="w-[200px]"
-                />
-                
-                {/* Simplified Category filter button */}
-                <Button 
-                  variant="outline" 
-                  className="flex gap-2 items-center"
-                  onClick={() => {
-                    // Toggle filter visibility or show dropdown
-                    // This would be handled by the SkillsFilter component
-                  }}
-                >
-                  <Filter className="h-4 w-4" />
-                  <span>Category</span>
-                </Button>
-              </div>
+          {/* Reorganized top section with search on left and button on right */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+              {/* Search input on the LEFT as requested */}
+              <SearchInput 
+                placeholder="Search skills..."
+                onChange={(e) => handleSearchChange(e.target.value)}
+                value={searchQuery}
+                ref={searchInputRef}
+                className="w-full sm:w-[200px]"
+              />
               
-              {/* Center section with tabs */}
+              {/* TabsList is now properly inside the Tabs component */}
               <TabsList>
                 <TabsTrigger value="offers">Offers</TabsTrigger>
                 <TabsTrigger value="requests">Requests</TabsTrigger>
                 <TabsTrigger value="mine">My Skills</TabsTrigger>
               </TabsList>
-              
-              {/* Right side with Add Skill button - made more prominent */}
-              <Button 
-                className="bg-primary text-white hover:bg-primary/90 flex items-center gap-1.5"
-                onClick={() => handleOpenSkillDialog('offer')}
-              >
-                <PlusCircle className="h-4 w-4" />
-                <span className="font-medium">Add Skill</span>
-              </Button>
             </div>
             
-            {/* Second row with filter options that appear when needed */}
-            {/* This area shows active filters */}
-            <div className="mb-4">
-              <SkillsFilter 
-                selectedCategory={getTypedCategory(category) || null}
-                onCategoryChange={handleCategoryChange}
-              />
-            </div>
+            {/* Add Skill button on the RIGHT of tabs as requested */}
+            <Button 
+              className="whitespace-nowrap flex items-center gap-1.5"
+              onClick={() => handleOpenSkillDialog('offer')}
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span>Add Skill</span>
+            </Button>
           </div>
           
-          {/* Tab content panels */}
+          {/* Category filter section */}
+          <div className="mb-4">
+            <SkillsFilter 
+              selectedCategory={getTypedCategory(category) || null}
+              onCategoryChange={handleCategoryChange}
+            />
+          </div>
+          
           <TabsContent value="offers" className="mt-0">
             <SkillsList 
               showRequests={false} 
