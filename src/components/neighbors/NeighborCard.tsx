@@ -35,8 +35,8 @@ export const NeighborCard = ({ user, onClick, isHighlighted = false }: NeighborC
       onClick={onClick}
     >
       <div className="flex flex-col items-center p-4 space-y-4">
-        {/* Avatar - increased size for better visibility */}
-        <Avatar className="h-20 w-20 border-2 border-purple-100">
+        {/* Avatar - increased size for better visibility with light gray border */}
+        <Avatar className="h-20 w-20 border-2 border-light">
           <AvatarImage src={user.profiles?.avatar_url || ''} />
           <AvatarFallback className="bg-purple-50">
             <User className="h-8 w-8 text-purple-400" />

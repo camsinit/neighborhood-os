@@ -26,12 +26,12 @@ const EventRSVPButton = ({
   // Don't show RSVP button for the host
   if (isHost) return null;
   
-  // Use the dedicated RSVPButton component
+  // Use the dedicated RSVPButton component with light gray border
   return (
     <RSVPButton 
       eventId={eventId} 
       neighborhoodId={neighborhoodId}
-      className="w-full"
+      className="w-full border-light"
     />
   );
 };

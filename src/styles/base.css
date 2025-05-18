@@ -6,6 +6,7 @@
 @layer base {
   :root {
     --radius: 0.75rem;
+    --border-color: #f1f1f1; /* Added global border color variable */
   }
   
   html {
@@ -37,5 +38,10 @@
   .popover, 
   .dropdown {
     @apply rounded-md;
+  }
+  
+  /* Global border color override */
+  .border, .border-2, .border-3, .border-4 {
+    @apply border-gray-200;
   }
 }

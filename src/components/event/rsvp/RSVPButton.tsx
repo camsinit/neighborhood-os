@@ -100,13 +100,13 @@ const RSVPButton = ({
     }
   };
 
-  // Updated button styling using blue background by default
+  // Updated button styling using blue background by default with light gray border when outlined
   return (
     <Button
       onClick={toggleRSVP}
       disabled={isLoading}
       variant={hasRSVPed ? "default" : "outline"}
-      className={`bg-blue-500 hover:bg-blue-600 text-white transition-colors ${className}`}
+      className={`${hasRSVPed ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'border-light'} transition-colors ${className}`}
       data-testid="rsvp-button"
     >
       {isLoading ? (

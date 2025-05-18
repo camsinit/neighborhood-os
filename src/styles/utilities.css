@@ -58,4 +58,9 @@
   .status-dot-info {
     @apply status-dot bg-blue-500;
   }
+  
+  /* Border utilities for softer borders */
+  .border-light {
+    @apply border-gray-200; /* Light gray border instead of the default black */
+  }
 }

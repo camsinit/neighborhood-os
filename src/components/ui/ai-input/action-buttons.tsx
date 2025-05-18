@@ -59,7 +59,7 @@ export function ActionButtons({
               compactMode ? "px-2 py-1" : "px-3 py-1.5",
               isSelected
                 ? `${action.colors.bg} ${action.colors.border}`
-                : "border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03]",
+                : "border-gray-200 bg-black/[0.03] dark:bg-white/[0.03]", // Updated to use gray-200 instead of black/10
               isLoading && "opacity-50 cursor-not-allowed"
             )}
           >

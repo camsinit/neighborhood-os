@@ -41,11 +41,11 @@ const ModuleButton = ({
       break;
     
     case 'outline':
-      // Outline button with colored border
+      // Outline button with light gray border and colored text
       style = { 
         backgroundColor: 'transparent', 
         color: themeColor, 
-        borderColor: themeColor 
+        borderColor: '#f1f1f1' // Using light gray instead of the theme color
       };
       break;
       
