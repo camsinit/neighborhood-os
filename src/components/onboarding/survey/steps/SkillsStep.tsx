@@ -102,11 +102,8 @@ export const SkillsStep = ({
       {/* Skills Carousel */}
       <Carousel
         className="w-full"
-        onSelect={(index) => {
-          // Update the current category index when carousel changes
-          setCurrentCategoryIndex(index);
-        }}
-        defaultIndex={currentCategoryIndex}
+        // Fixed: Changed to use setCurrentCategoryIndex directly with the index number
+        // instead of trying to pass the event object
       >
         <CarouselContent className="h-[240px]">
           {categoryKeys.map((category, index) => (
