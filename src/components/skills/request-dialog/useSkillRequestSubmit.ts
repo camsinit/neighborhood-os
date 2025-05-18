@@ -116,12 +116,10 @@ export const useSkillRequestSubmit = (
         // For each date, create entries for each selected time preference
         const timeSlots = [];
         
-        // Fix date handling - ensure we have a proper string or convert Date object
+        // Fix date handling - ensure we have a proper string format
         const dateString = typeof slot.date === 'string' 
           ? slot.date 
-          : (slot.date instanceof Date 
-            ? slot.date.toISOString().split('T')[0]
-            : String(slot.date));
+          : new Date(slot.date).toISOString().split('T')[0];
         
         // Create a time slot for each selected preference (morning, afternoon, evening)
         for (const pref of slot.preferences) {

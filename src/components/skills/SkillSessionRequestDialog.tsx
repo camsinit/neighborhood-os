@@ -59,8 +59,8 @@ const SkillSessionRequestDialog = ({
   // Custom hook for form submission logic - updated to handle multi-provider flow
   const { isSubmitting, submitSkillRequest } = useSkillRequestSubmit(
     skillId, 
-    providerId, // This can be undefined now for multi-provider requests
-    () => onOpenChange(false)
+    () => onOpenChange(false),
+    providerId // This can be undefined now for multi-provider requests
   );
 
   // Settings for the date picker
