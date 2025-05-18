@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
@@ -89,9 +89,6 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         {/* Calendar title section */}
         <div className="flex items-center gap-3">
-          <div className="bg-blue-500/10 p-2.5 rounded-lg">
-            <CalendarIcon className="h-5 w-5 text-blue-600" />
-          </div>
           <div>
             <h2 className="text-xl font-bold text-gray-800">
               {formattedDate}
