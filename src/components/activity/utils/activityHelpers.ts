@@ -1,58 +1,181 @@
 
-/**
- * Helper functions for working with activities
- * Enhanced with better color management and consistency
- */
+import { Calendar, Book, Package, Heart, Shield } from "lucide-react";
 
 /**
- * Get a consistent color for an activity type
- * Uses the same colors as module theming for consistency
- * 
- * @param activityType The type of activity
- * @returns A CSS color string
+ * Color mapping for different activity types
+ * Used for visual distinction in the activity feed
  */
-export const getActivityColor = (activityType: string): string => {
-  switch (activityType) {
-    case 'event':
-    case 'calendar':
+export const getActivityColor = (type: string): string => {
+  switch (type) {
+    case 'event_created':
+    case 'event_rsvp':
       return '#0EA5E9'; // Calendar blue
-    case 'safety':
-      return '#EA384C'; // Safety red
-    case 'skills':
-      return '#22C55E'; // Skills green
-    case 'goods':
+    case 'skill_offered':
+    case 'skill_requested':
+      return '#9b87f5'; // Skills purple
+    case 'good_shared':
+    case 'good_requested':
       return '#F97316'; // Goods orange
-    case 'neighbors':
-      return '#7E69AB'; // Neighbors purple
-    case 'care':
-      return '#EC4899'; // Care pink
+    case 'care_offered':
+    case 'care_requested':
+    case 'care_completed':
+      return '#22C55E'; // Care green
+    case 'safety_update':
+      return '#EA384C'; // Safety red
     default:
-      return '#64748B'; // Default slate
+      return '#8E9196'; // Default gray
   }
 };
 
 /**
- * Determine if an activity is recent (within the last 24 hours)
- * 
- * @param timestamp The activity timestamp
- * @returns True if the activity is recent
+ * Icon mapping for different activity types
+ * Provides a visual indicator for each activity type
  */
-export const isRecentActivity = (timestamp: string): boolean => {
-  const activityDate = new Date(timestamp);
-  const now = new Date();
-  const hoursDiff = (now.getTime() - activityDate.getTime()) / (1000 * 60 * 60);
-  return hoursDiff < 24;
+export const getActivityIcon = (type: string) => {
+  switch (type) {
+    case 'event_created':
+    case 'event_rsvp':
+      return Calendar;
+    case 'skill_offered':
+    case 'skill_requested':
+      return Book;
+    case 'good_shared':
+    case 'good_requested':
+      return Package;
+    case 'care_offered':
+    case 'care_requested':
+    case 'care_completed':
+      return Heart;
+    case 'safety_update':
+      return Shield;
+    default:
+      return null;
+  }
 };
 
 /**
- * Get a background color for activity items with appropriate opacity
- * 
- * @param activityType The type of activity
- * @param isHighlighted Whether the item is highlighted
- * @returns CSS background color with opacity
+ * Background color mapping for different activity types
+ * Used for hover effects
  */
-export const getActivityBackground = (activityType: string, isHighlighted: boolean = false): string => {
-  const baseColor = getActivityColor(activityType);
-  const opacity = isHighlighted ? '15' : '08'; // 15% or 8% opacity
-  return `${baseColor}${opacity}`;
+export const getActivityBackground = (type: string) => {
+  switch (type) {
+    case 'event_created':
+    case 'event_rsvp':
+      return 'hover:bg-[#D3E4FD]/50';
+    case 'skill_offered':
+    case 'skill_requested':
+      return 'hover:bg-[#E5DEFF]/50';
+    case 'good_shared':
+    case 'good_requested':
+      return 'hover:bg-[#FEF7CD]/50';
+    case 'care_offered':
+    case 'care_requested':
+      return 'hover:bg-[#F2FCE2]/50';
+    case 'safety_update':
+      return 'hover:bg-[#FDE1D3]/50';
+    default:
+      return 'hover:bg-gray-50';
+  }
+};
+
+/**
+ * Enhanced contextual descriptions for activity types
+ * Provides more specific information for each activity
+ */
+export const getActivityContext = (type: string): string => {
+  switch (type) {
+    case 'event_created':
+      return "New event added to the calendar";
+    case 'event_rsvp':
+      return "New event RSVP received";
+    case 'skill_offered':
+      return "A neighbor is offering to share their skills";
+    case 'skill_requested':
+      return "A neighbor is looking for help with a skill";
+    case 'good_shared':
+      return "New item shared with the community";
+    case 'good_requested':
+      return "New item request posted";
+    case 'care_offered':
+      return "New care offering available";
+    case 'care_requested':
+      return "A neighbor needs help";
+    case 'care_completed':
+      return "Help has been provided";
+    case 'safety_update':
+      return "New safety update posted";
+    default:
+      return "New activity in the neighborhood";
+  }
+};
+
+/**
+ * Action button configuration for different activity types
+ */
+export const getActionButton = (activity: any) => {
+  switch (activity.activity_type) {
+    case 'event_created':
+    case 'event_rsvp':
+      return {
+        label: "View Event",
+        icon: Calendar,
+        variant: "outline" as const,
+      };
+    case 'skill_offered':
+    case 'skill_requested':
+      return {
+        label: activity.activity_type === 'skill_offered' ? "Learn More" : "Help Out",
+        icon: Book,
+        variant: "outline" as const,
+      };
+    case 'good_shared':
+    case 'good_requested':
+      return {
+        label: "View Item",
+        icon: Package,
+        variant: "outline" as const,
+      };
+    case 'care_offered':
+    case 'care_requested':
+      return {
+        label: activity.activity_type === 'care_offered' ? "Request Help" : "Offer Help",
+        icon: Heart,
+        variant: "outline" as const,
+      };
+    case 'safety_update':
+      return {
+        label: "Read More",
+        icon: Shield,
+        variant: "outline" as const,
+      };
+    default:
+      return null;
+  }
+};
+
+/**
+ * Extract description from activity metadata
+ */
+export const getActivityDescription = (metadata: any) => {
+  if (!metadata) return null;
+  if (typeof metadata === 'object' && metadata !== null && 'description' in metadata) {
+    return metadata.description as string;
+  }
+  return null;
+};
+
+/**
+ * Get a more descriptive title for skill activities
+ */
+export const getSkillActivityTitle = (activity: any) => {
+  const baseTitle = activity.title || "Skill Exchange";
+  const type = activity.activity_type;
+  
+  if (type === 'skill_offered') {
+    return `Skill Offering: ${baseTitle}`;
+  } else if (type === 'skill_requested') {
+    return `Skill Request: ${baseTitle}`;
+  }
+  
+  return baseTitle;
 };
