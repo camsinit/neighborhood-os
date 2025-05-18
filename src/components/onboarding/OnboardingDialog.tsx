@@ -10,6 +10,8 @@ import { Loader2 } from "lucide-react";
 interface OnboardingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // Add testing mode prop to support the testing panel
+  testMode?: boolean;
 }
 
 /**
@@ -17,9 +19,10 @@ interface OnboardingDialogProps {
  * 
  * This component renders a modal dialog for the user onboarding process.
  * It checks if the user needs to go through onboarding and redirects them
- * accordingly. If they already completed onboarding, it redirects them to home.
+ * accordingly. If they already completed onboarding, it redirects them to home
+ * unless in test mode.
  */
-const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
+const OnboardingDialog = ({ open, onOpenChange, testMode = false }: OnboardingDialogProps) => {
   const navigate = useNavigate();
   const user = useUser();
   const [loading, setLoading] = useState(true);
@@ -48,8 +51,8 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
         } else {
           setHasCompletedOnboarding(data?.completed_onboarding || false);
           
-          // If they've already completed onboarding, redirect to home
-          if (data?.completed_onboarding) {
+          // If they've already completed onboarding and we're not in test mode, redirect to home
+          if (data?.completed_onboarding && !testMode) {
             navigate("/home");
           }
         }
@@ -62,7 +65,7 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
     };
 
     checkOnboardingStatus();
-  }, [user, navigate]);
+  }, [user, navigate, testMode]);
 
   // Show loading state while checking onboarding status
   if (loading) {
@@ -80,8 +83,7 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
     );
   }
 
-  // If onboarding is complete, the useEffect will have redirected
-  // If still here, show the survey
+  // If in test mode or onboarding is incomplete, show the survey
   return <SurveyDialog open={open} onOpenChange={onOpenChange} />;
 };
 

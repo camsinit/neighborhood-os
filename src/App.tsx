@@ -110,8 +110,12 @@ function App() {
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               <Route path="/index" element={<Index />} />
               
-              {/* New onboarding route */}
-              <Route path="/onboarding" element={<OnboardingDialog open={true} onOpenChange={() => {}} />} />
+              {/* Onboarding route - with testMode=true to allow viewing even when onboarding is complete */}
+              <Route path="/onboarding" element={
+                <ProtectedRoute>
+                  <OnboardingDialog open={true} onOpenChange={() => {}} testMode={true} />
+                </ProtectedRoute>
+              } />
               
               {/* Protected routes with MainLayout */}
               <Route 

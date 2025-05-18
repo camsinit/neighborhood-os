@@ -1,14 +1,13 @@
 
 /**
- * DiagnosticsPanel component (SIMPLIFIED VERSION)
+ * DiagnosticsPanel component
  * 
  * A diagnostic panel shown at the bottom of the sidebar with basic information
- * for debugging purposes. Core contributor mode has been removed.
- * Logging controls have been temporarily disabled.
+ * for debugging purposes. Now includes onboarding testing controls.
  */
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood';
-// Removed LoggingControls import since it's temporarily disabled
+import OnboardingTestControl from './OnboardingTestControl';
 
 // Define the component props interface
 interface DiagnosticsPanelProps {
@@ -18,8 +17,7 @@ interface DiagnosticsPanelProps {
 
 /**
  * DiagnosticsPanel displays basic debugging information in the sidebar
- * This simplified version has removed the core contributor functionality
- * Logging controls are temporarily disabled
+ * This version includes onboarding test controls
  */
 const DiagnosticsPanel = ({ 
   user,
@@ -51,6 +49,9 @@ const DiagnosticsPanel = ({
           <span className="text-amber-700">⚠️ No neighborhood</span>
         )}
       </div>
+      
+      {/* Onboarding Testing Controls */}
+      <OnboardingTestControl />
       
       {/* Logging Controls temporarily removed */}
       <div className="mt-3 pt-2 border-t border-gray-200">
