@@ -53,15 +53,18 @@ const Index = () => {
         
         if (error) {
           console.error("Error checking onboarding status:", error);
+          // Default to true if there's an error to avoid blocking users
+          setHasCompletedOnboarding(true);
           return;
         }
         
-        // If the user has a display name, consider onboarding completed for backward compatibility
-        // Eventually we'll rely on the completed_onboarding field once it's universally populated
+        // If the user has a display name or completed_onboarding is true, consider onboarding completed
         const hasCompletedOnboarding = data?.completed_onboarding || (data?.display_name ? true : false);
         setHasCompletedOnboarding(hasCompletedOnboarding);
       } catch (err) {
         console.error("Failed to check onboarding status:", err);
+        // Default to true if there's an error to avoid blocking users
+        setHasCompletedOnboarding(true);
       }
     };
     

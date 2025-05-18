@@ -1,206 +1,293 @@
-
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { SurveyStepHeader } from "./survey/SurveyStepHeader";
-import { SurveyProgress } from "./survey/SurveyProgress";
-import { getSurveySteps } from "./survey/config/surveySteps";
 import { useUser } from "@supabase/auth-helpers-react";
-import { SurveyFormData } from "./survey/types/surveyTypes";
-import { AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/ui/avatar";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-/**
- * SurveyDialog Component
- * 
- * Handles the multi-step form process for collecting user information during onboarding.
- * Manages state, validation, and submission of user profile data.
- */
+// Import survey steps
+import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
+import { ContactInfoStep } from "./survey/steps/ContactInfoStep";
+import { AddressStep } from "./survey/steps/AddressStep";
+import { ProfilePhotoStep } from "./survey/steps/ProfilePhotoStep";
+import SurveyProgress from "./survey/SurveyProgress";
+import SurveyStepHeader from "./survey/SurveyStepHeader";
+
 interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * Multi-step survey dialog for collecting user information during onboarding
+ * 
+ * This component collects basic profile information from users to complete
+ * their onboarding process including:
+ * - Basic info (first name, last name)
+ * - Contact info (email, phone)
+ * - Address info
+ * - Profile photo
+ */
 const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
-  // Form state management
-  const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState<SurveyFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    skills: [],
-  });
-  // Track validation errors for each step
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  // Navigation
   const navigate = useNavigate();
-  const { toast } = useToast();
   const user = useUser();
-  const steps = getSurveySteps(formData, setFormData);
-
-  // Pre-fill email if user is logged in
-  useEffect(() => {
-    if (user?.email) {
-      setFormData(prev => ({ ...prev, email: user.email || "" }));
+  
+  // Form state
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [email, setEmail] = useState<string>(user?.email || "");
+  const [phone, setPhone] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string>("");
+  
+  // Survey state
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  
+  // Define the steps for the survey
+  const steps = [
+    {
+      title: "Basic Information",
+      description: "Let's start with your name",
+      component: (
+        <BasicInfoStep
+          firstName={firstName}
+          lastName={lastName}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+        />
+      )
+    },
+    {
+      title: "Contact Information",
+      description: "How can neighbors reach you?",
+      component: (
+        <ContactInfoStep
+          email={email}
+          phone={phone}
+          onEmailChange={setEmail}
+          onPhoneChange={setPhone}
+        />
+      )
+    },
+    {
+      title: "Home Address",
+      description: "Where do you live in the neighborhood?",
+      component: (
+        <AddressStep
+          address={address}
+          onAddressChange={setAddress}
+        />
+      )
+    },
+    {
+      title: "Profile Photo",
+      description: "Add a photo so neighbors can recognize you",
+      component: (
+        <ProfilePhotoStep
+          onPhotoChange={setProfilePhoto}
+          photoUrl={photoUrl}
+          setPhotoUrl={setPhotoUrl}
+        />
+      )
     }
-  }, [user]);
-
-  // Validate current step data
-  const validateCurrentStep = () => {
-    const currentStepErrors: Record<string, string> = {};
-    
-    // Validation for basic info step
-    if (step === 0) {
-      if (!formData.firstName.trim()) {
-        currentStepErrors.firstName = "First name is required";
-      }
-      if (!formData.lastName.trim()) {
-        currentStepErrors.lastName = "Last name is required";
-      }
-    }
-    
-    // Validation for contact info step
-    else if (step === 2) {
-      if (!formData.email.trim()) {
-        currentStepErrors.email = "Email is required";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        currentStepErrors.email = "Please enter a valid email address";
-      }
-      
-      if (!formData.phone.trim()) {
-        currentStepErrors.phone = "Phone number is required";
-      } else if (!/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.phone)) {
-        currentStepErrors.phone = "Please enter a valid phone number format";
-      }
-    }
-    
-    // Validation for address step
-    else if (step === 3) {
-      if (!formData.address.trim()) {
-        currentStepErrors.address = "Address is required";
-      }
-    }
-    
-    setErrors(currentStepErrors);
-    return Object.keys(currentStepErrors).length === 0;
-  };
-
-  const handleNext = async () => {
+  ];
+  
+  // Handle next step button click
+  const handleNext = () => {
     // Validate current step before proceeding
-    if (!validateCurrentStep()) {
+    if (currentStep === 0) {
+      if (!firstName.trim()) {
+        toast.error("Please enter your first name");
+        return;
+      }
+      if (!lastName.trim()) {
+        toast.error("Please enter your last name");
+        return;
+      }
+    }
+    
+    if (currentStep === 1) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+      if (!phone.trim() || phone.replace(/\D/g, "").length < 10) {
+        toast.error("Please enter a valid phone number");
+        return;
+      }
+    }
+    
+    if (currentStep === 2) {
+      if (!address.trim()) {
+        toast.error("Please enter your address");
+        return;
+      }
+    }
+    
+    // If we're on the last step, submit the form
+    if (currentStep === steps.length - 1) {
+      handleSubmit();
       return;
     }
     
-    if (step === steps.length - 1) {
-      await submitProfile();
-    } else {
-      setStep(step + 1);
-    }
+    // Otherwise, go to the next step
+    setCurrentStep(currentStep + 1);
   };
-
+  
+  // Handle back button click
   const handleBack = () => {
-    if (step > 0) {
-      setStep(step - 1);
+    if (currentStep === 0) {
+      // First step, close the dialog
+      onOpenChange(false);
+    } else {
+      // Go back one step
+      setCurrentStep(currentStep - 1);
     }
   };
   
-  const submitProfile = async () => {
+  // Handle form submission
+  const handleSubmit = async () => {
+    if (!user) {
+      toast.error("You must be logged in to complete onboarding");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
     try {
-      setIsSubmitting(true);
+      // Prepare display name from first and last name
+      const displayName = `${firstName} ${lastName}`;
       
-      if (!user?.id) {
-        throw new Error("User not authenticated");
+      // Upload profile photo if available
+      let avatarUrl = null;
+      if (profilePhoto) {
+        const fileExt = profilePhoto.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+        
+        // Upload the file
+        const { error: uploadError } = await supabase.storage
+          .from('profiles')
+          .upload(filePath, profilePhoto);
+          
+        if (uploadError) {
+          throw new Error(`Error uploading profile photo: ${uploadError.message}`);
+        }
+        
+        // Get the public URL
+        const { data: publicUrlData } = supabase.storage
+          .from('profiles')
+          .getPublicUrl(filePath);
+          
+        avatarUrl = publicUrlData.publicUrl;
       }
-
-      // Update profile information
+      
+      // Update user profile
       const { error } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update({
-          display_name: `${formData.firstName} ${formData.lastName}`,
-          phone_number: formData.phone,
-          address: formData.address,
-          skills: formData.skills,
-          completed_onboarding: true // Mark onboarding as complete
+          display_name: displayName,
+          phone_number: phone,
+          address: address,
+          avatar_url: avatarUrl || undefined,
+          completed_onboarding: true
         })
-        .eq("id", user.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Profile Created",
-        description: "Your profile has been successfully set up.",
-      });
-
-      // Close the dialog and navigate to home
-      onOpenChange(false);
-      navigate("/home");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+        .eq('id', user.id);
+        
+      if (error) {
+        throw new Error(`Error updating profile: ${error.message}`);
+      }
+      
+      // Show success message
+      setIsComplete(true);
+      toast.success("Your profile has been updated!");
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        onOpenChange(false);
+        navigate("/home");
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error during onboarding:", error);
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // Don't render if dialog is closed
-  if (!open) return null;
-
+  
+  // Get current step data
+  const currentStepData = steps[currentStep];
+  
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
-      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-lg">
-          <SurveyStepHeader
-            icon={steps[step].icon}
-            title={steps[step].title}
-          />
-          <p className="text-center text-sm text-muted-foreground mb-6">
-            {steps[step].description}
-          </p>
-          
-          {/* Display validation errors if any */}
-          {Object.keys(errors).length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-              <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
-                <p className="text-sm font-medium text-red-800">Please fix the following errors:</p>
-              </div>
-              <ul className="mt-2 text-sm text-red-700 list-disc pl-5">
-                {Object.values(errors).map((error, i) => (
-                  <li key={i}>{error}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          <div className="py-4">{steps[step].component}</div>
-          
-          <SurveyProgress currentStep={step} totalSteps={steps.length} />
-          
-          <div className="flex justify-between pt-4">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={step === 0}
-            >
-              Back
-            </Button>
-            <Button 
-              onClick={handleNext} 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Saving..." : step === steps.length - 1 ? "Complete" : "Next"}
-            </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl">
+        {/* Show success state when complete */}
+        {isComplete ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
+            <h2 className="text-xl font-bold text-center">Onboarding Complete!</h2>
+            <p className="text-center text-muted-foreground mt-2">
+              Welcome to your neighborhood community!
+            </p>
           </div>
-        </div>
-      </div>
-    </div>
+        ) : (
+          <>
+            {/* Step Header */}
+            <SurveyStepHeader
+              title={currentStepData.title}
+              description={currentStepData.description}
+            />
+            
+            {/* Step Content */}
+            <div className="py-4">
+              {currentStepData.component}
+            </div>
+            
+            {/* Progress Indicator */}
+            <SurveyProgress 
+              currentStep={currentStep} 
+              totalSteps={steps.length} 
+            />
+            
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-6">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}
+              >
+                {currentStep === 0 ? "Cancel" : "Back"}
+              </Button>
+              
+              <Button 
+                onClick={handleNext}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                    Saving...
+                  </>
+                ) : currentStep === steps.length - 1 ? (
+                  "Complete"
+                ) : (
+                  "Continue"
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 
