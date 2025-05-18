@@ -19,47 +19,47 @@
 .calendar-gradient::before {
   /* Calendar gradient: Bright blue with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(221.2, 100%, 53.3%, 0.3) 0%,
-    hsla(221.2, 15%, 97%, 0.2) 100%
+    hsla(199, 89%, 48%, 0.3) 0%,
+    hsla(199, 89%, 48%, 0.2) 100%
   );
 }
 
 .skills-gradient::before {
   /* Skills gradient: Vibrant green with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(142.1, 100%, 36.3%, 0.3) 0%,
-    hsla(142.1, 15%, 97%, 0.2) 100%
+    hsla(142, 70%, 45%, 0.3) 0%,
+    hsla(142, 70%, 45%, 0.2) 100%
   );
 }
 
 .goods-gradient::before {
   /* Goods gradient: Bright orange with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(24.6, 100%, 53.1%, 0.3) 0%,
-    hsla(24.6, 15%, 97%, 0.2) 100%
+    hsla(24, 95%, 53%, 0.3) 0%,
+    hsla(24, 95%, 53%, 0.2) 100%
   );
 }
 
 .safety-gradient::before {
   /* Safety gradient: Bright red with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(0, 100%, 60.2%, 0.3) 0%,
-    hsla(0, 15%, 97%, 0.2) 100%
+    hsla(354, 80%, 57%, 0.3) 0%,
+    hsla(354, 80%, 57%, 0.2) 100%
   );
 }
 
 .care-gradient::before {
-  /* Care gradient: Rich purple with reduced opacity */
+  /* Care gradient: Rich pink with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(262.1, 100%, 57.8%, 0.3) 0%,
-    hsla(262.1, 15%, 97%, 0.2) 100%
+    hsla(328, 73%, 60%, 0.3) 0%,
+    hsla(328, 73%, 60%, 0.2) 100%
   );
 }
 
 .neighbors-gradient::before {
   /* Neighbors gradient: Rich purple with reduced opacity */
   background: linear-gradient(to bottom,
-    hsla(262.1, 100%, 57.8%, 0.3) 0%,
-    hsla(262.1, 15%, 97%, 0.2) 100%
+    hsla(262, 27%, 54%, 0.3) 0%,
+    hsla(262, 27%, 54%, 0.2) 100%
   );
 }

@@ -8,27 +8,33 @@
 
 /* Module-specific gradients */
 .calendar-gradient {
-  background: linear-gradient(135deg, rgba(79, 209, 197, 0.1), rgba(79, 209, 197, 0.05));
+  /* Calendar gradient: Bright blue */
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.05));
 }
 
 .skills-gradient {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+  /* Skills gradient: Vibrant green */
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
 }
 
 .goods-gradient {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+  /* Goods gradient: Bright orange */
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.05));
 }
 
 .safety-gradient {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+  /* Safety gradient: Bright red */
+  background: linear-gradient(135deg, rgba(234, 56, 76, 0.1), rgba(234, 56, 76, 0.05));
 }
 
 .care-gradient {
+  /* Care gradient: Rich pink */
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05));
 }
 
 .neighbors-gradient {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+  /* Neighbors gradient: Rich purple */
+  background: linear-gradient(135deg, rgba(126, 105, 171, 0.1), rgba(126, 105, 171, 0.05));
 }
 
 /* Improved styling for dialog components to match chat aesthetic */
