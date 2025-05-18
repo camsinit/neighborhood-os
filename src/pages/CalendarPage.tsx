@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { ModuleLayout } from '@/components/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams, useNavigate } from 'react-router-dom'; 
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import CommunityCalendar from '@/components/CommunityCalendar';
@@ -57,15 +55,6 @@ function CalendarPage() {
       title="Community Calendar"
       description="Plan, discover, and join upcoming events in your neighborhood"
       themeColor="calendar"
-      actions={
-        <Button 
-          onClick={() => setIsAddEventOpen(true)} 
-          className="whitespace-nowrap flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span>Add Event</span>
-        </Button>
-      }
     >
       <motion.div
         initial="initial"
