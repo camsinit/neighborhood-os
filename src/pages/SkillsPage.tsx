@@ -125,36 +125,38 @@ function SkillsPage() {
       themeColor="skills"
     >
       <div className="flex flex-col space-y-4">
-        {/* Reorganized top section with search on left and button on right */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
-            {/* Search input on the LEFT as requested */}
-            <SearchInput 
-              placeholder="Search skills..."
-              onChange={(e) => handleSearchChange(e.target.value)}
-              value={searchQuery}
-              ref={searchInputRef}
-              className="w-full sm:w-[200px]"
-            />
+        {/* Entire page uses a single Tabs component for navigation */}
+        <Tabs value={view} onValueChange={handleTabChange} className="w-full">
+          {/* Reorganized top section with search on left and button on right */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+              {/* Search input on the LEFT as requested */}
+              <SearchInput 
+                placeholder="Search skills..."
+                onChange={(e) => handleSearchChange(e.target.value)}
+                value={searchQuery}
+                ref={searchInputRef}
+                className="w-full sm:w-[200px]"
+              />
+              
+              {/* TabsList is now properly inside the Tabs component */}
+              <TabsList>
+                <TabsTrigger value="offers">Offers</TabsTrigger>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
+                <TabsTrigger value="mine">My Skills</TabsTrigger>
+              </TabsList>
+            </div>
             
-            <TabsList>
-              <TabsTrigger value="offers">Offers</TabsTrigger>
-              <TabsTrigger value="requests">Requests</TabsTrigger>
-              <TabsTrigger value="mine">My Skills</TabsTrigger>
-            </TabsList>
+            {/* Add Skill button on the RIGHT of tabs as requested */}
+            <Button 
+              className="whitespace-nowrap flex items-center gap-1.5"
+              onClick={() => handleOpenSkillDialog('offer')}
+            >
+              <PlusCircle className="h-4 w-4" />
+              <span>Add Skill</span>
+            </Button>
           </div>
           
-          {/* Add Skill button on the RIGHT of tabs as requested */}
-          <Button 
-            className="whitespace-nowrap flex items-center gap-1.5"
-            onClick={() => handleOpenSkillDialog('offer')}
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span>Add Skill</span>
-          </Button>
-        </div>
-        
-        <Tabs value={view} onValueChange={handleTabChange} className="w-full">
           {/* Category filter section */}
           <div className="mb-4">
             <SkillsFilter 

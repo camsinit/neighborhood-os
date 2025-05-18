@@ -1,21 +1,18 @@
 
-// This file contains all types related to the skill form
-import { SkillCategory } from "./skillTypes";
+// If this file exists, we'll update it; if not, we'll create it
 
-// Types for the form component props
-export interface SkillFormProps {
-  onClose: () => void;
-  mode: 'offer' | 'request';
-}
-
-// Type for time preference options
 export type TimePreference = 'morning' | 'afternoon' | 'evening';
 
-// Main form data structure
 export interface SkillFormData {
+  category: string;
   title?: string;
   description?: string;
-  category?: SkillCategory;
   availability?: 'weekdays' | 'weekends' | 'both';
-  timePreference?: TimePreference[];
+  timePreference: TimePreference[];
+}
+
+export interface SkillFormProps {
+  mode: 'offer' | 'request';
+  onSuccess: () => void;
+  onCancel: () => void;
 }
