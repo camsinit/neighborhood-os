@@ -35,14 +35,18 @@ export interface MockupProps
  * 
  * @param type - The type of mockup (mobile or responsive)
  * @param className - Additional CSS classes
+ * @param children - Content to display within the mockup
  */
 const Mockup = React.forwardRef<HTMLDivElement, MockupProps>(
-  ({ className, type, ...props }, ref) => (
+  ({ className, type, children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(mockupVariants({ type, className }))}
       {...props}
-    />
+    >
+      {/* Ensuring children are properly rendered within the mockup */}
+      {children}
+    </div>
   ),
 );
 Mockup.displayName = "Mockup";
@@ -78,14 +82,18 @@ export interface MockupFrameProps
  * 
  * @param size - The size of the frame (small or large)
  * @param className - Additional CSS classes
+ * @param children - Content to display within the frame
  */
 const MockupFrame = React.forwardRef<HTMLDivElement, MockupFrameProps>(
-  ({ className, size, ...props }, ref) => (
+  ({ className, size, children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(frameVariants({ size, className }))}
       {...props}
-    />
+    >
+      {/* Ensuring children are properly rendered within the frame */}
+      {children}
+    </div>
   ),
 );
 MockupFrame.displayName = "MockupFrame";
