@@ -9,14 +9,17 @@ export const SKILL_CATEGORIES = {
   technology: {
     title: "Technology",
     skills: [
-      "Web Development",
-      "Mobile App Development",
-      "IT Support",
-      "Cybersecurity",
-      "Data Analysis",
-      "Digital Marketing",
-      "Computer Repair",
-      "Smart Home Setup"
+      "Website Help",
+      "Smartphone/Tablet Help",
+      "Computer Troubleshooting",
+      "Internet Safety",
+      "Computer/Device Repair",
+      "Smart Home Setup",
+      "WiFi Network Setup",
+      "Video Call Help",
+      "Internet Account Help",
+      "Photo Organization",
+      "Data Backup & Recovery"
     ],
   },
   emergency: {
@@ -84,4 +87,38 @@ export const SKILL_CATEGORIES = {
       "Workshop Facilitation"
     ],
   },
+};
+
+/**
+ * Definition for skills that require additional specificity
+ * 
+ * This helps the UI know when to show additional input fields for
+ * more detailed information about certain skills.
+ */
+export const SKILLS_REQUIRING_DETAILS = {
+  "Language Translation": {
+    prompt: "Which languages?",
+    placeholder: "Spanish, Mandarin, French",
+    examples: ["Spanish", "Mandarin", "French"]
+  },
+  "Tutoring": {
+    prompt: "Which subjects?",
+    placeholder: "Math, Science, English",
+    examples: ["Math", "Science", "English"]
+  },
+  "Music Lessons": {
+    prompt: "Which instruments?",
+    placeholder: "Piano, Guitar, Bass",
+    examples: ["Piano", "Guitar", "Bass"] 
+  },
+  "Athletic Coaching": {
+    prompt: "Which sports?",
+    placeholder: "Soccer, Basketball, Swimming",
+    examples: ["Soccer", "Basketball", "Swimming"]
+  },
+  "Language Teaching": {
+    prompt: "Which languages?",
+    placeholder: "Spanish, English, Japanese",
+    examples: ["Spanish", "English", "Japanese"]
+  }
 };

@@ -1,3 +1,4 @@
+
 /**
  * SurveyProgress component
  * 
@@ -6,10 +7,12 @@
  * visual progress bar.
  */
 import { Progress } from "@/components/ui/progress";
+
 interface SurveyProgressProps {
   currentStep: number;
   totalSteps: number;
 }
+
 const SurveyProgress = ({
   currentStep,
   totalSteps
@@ -17,6 +20,16 @@ const SurveyProgress = ({
   // Calculate the progress percentage
   // This determines how wide our colored progress bar should be
   const progressPercentage = (currentStep + 1) / totalSteps * 100;
-  return;
+  
+  return (
+    <div className="w-full space-y-1">
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>Step {currentStep + 1} of {totalSteps}</span>
+        <span>{Math.round(progressPercentage)}% Complete</span>
+      </div>
+      <Progress value={progressPercentage} className="h-2" />
+    </div>
+  );
 };
+
 export default SurveyProgress;
