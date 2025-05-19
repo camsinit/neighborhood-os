@@ -57,7 +57,7 @@ export function HeroSection({
       zIndex: 0
     }} />
       
-      <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10 py-0">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 pt-8 sm:gap-16 pb-24 relative z-10 py-0">
         <div className="flex flex-col items-center gap-4 text-center sm:gap-8">
           {badge && <Badge variant="outline" className="gap-2 animate-pulse">
               <span className="text-muted-foreground">{badge.text}</span>
@@ -68,10 +68,12 @@ export function HeroSection({
             </Badge>}
 
           <h1 className="relative z-10 inline-block bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-7xl md:leading-tight">
-            neighborhoodOS
+            {title}
           </h1>
 
-          <p className="text-md relative z-10 max-w-[550px] font-medium text-muted-foreground sm:text-xl">The open-source Nextdoor replacement to create a more caring neighborhood</p>
+          <p className="text-md relative z-10 max-w-[550px] font-medium text-muted-foreground sm:text-xl">
+            {description}
+          </p>
 
           {actions.length > 0 && <div className="relative z-10 flex justify-center gap-4">
               {actions.map((action, index) => <Button key={index} variant={action.variant || "default"} size="lg" asChild>
