@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
@@ -132,7 +132,7 @@ function App() {
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
                 
-                {/* New dedicated routes for Settings and Invite */}
+                {/* Dedicated routes for Settings and Invite */}
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/invite" element={<InvitePage />} />
                 
@@ -140,8 +140,7 @@ function App() {
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
 
-              {/* Redirect /dashboard to /home for backward compatibility */}
-              <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+              {/* Remove the redundant /dashboard redirect to simplify routing */}
               
               {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />

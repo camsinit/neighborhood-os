@@ -41,7 +41,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     isLoadingNeighborhood,
     hasUser: !!user,
     hasNeighborhood: !!currentNeighborhood,
-    neighborhoodError: error ? true : false
+    neighborhoodError: error ? true : false,
+    timestamp: new Date().toISOString()
   });
 
   // Show loading spinner while checking authentication and neighborhood
@@ -66,11 +67,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   // Handle special cases for join pages to avoid infinite loops
   const isJoinPage = location.pathname === '/join' || location.pathname.startsWith('/join/');
-  const isHomePage = location.pathname === '/home'; // Simplified home page check
+  const isHomePage = location.pathname === '/home'; 
+  const isOnboardingPage = location.pathname === '/onboarding';
   
   // If user has no neighborhood and trying to access a page that requires one,
-  // redirect to join page - except for the join page itself and home page to avoid loops
-  if (!currentNeighborhood && !isJoinPage && !isHomePage) {
+  // redirect to join page - except for the join page itself, home page, and onboarding to avoid loops
+  if (!currentNeighborhood && !isJoinPage && !isHomePage && !isOnboardingPage) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
     return <Navigate to="/join" replace />;
   }

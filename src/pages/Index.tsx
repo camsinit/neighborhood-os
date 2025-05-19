@@ -1,9 +1,9 @@
+
 /**
  * Index page component
  * 
  * This component serves as the entry point to the application when a user visits the index route.
- * It redirects users based on authentication status and neighborhood context.
- * It now also checks if a user needs to go through onboarding.
+ * It makes routing decisions based on authentication status and neighborhood context.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,6 @@ import { supabase } from "@/integrations/supabase/client";
  * 
  * This component determines where to send users based on their authentication
  * and neighborhood status. It shows a loading indicator while making this determination.
- * It now also checks if a user has completed onboarding.
  */
 const Index = () => {
   // Navigation hook for redirecting users
@@ -35,7 +34,21 @@ const Index = () => {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
   
   // Get neighborhood context
-  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error, refreshNeighborhoodData } = useNeighborhood();
+  const { 
+    currentNeighborhood, 
+    isLoading: isLoadingNeighborhood, 
+    error, 
+    refreshNeighborhoodData 
+  } = useNeighborhood();
+  
+  // Debug information to track what's happening
+  console.log("[Index] Component rendered:", {
+    isAuthenticated: !!user,
+    isLoadingNeighborhood,
+    hasNeighborhood: !!currentNeighborhood,
+    onboardingStatus: hasCompletedOnboarding,
+    timestamp: new Date().toISOString()
+  });
   
   // Check if user has completed onboarding
   useEffect(() => {
@@ -48,10 +61,10 @@ const Index = () => {
           .from('profiles')
           .select('completed_onboarding')
           .eq('id', user.id)
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
         
         if (error) {
-          console.error("Error checking onboarding status:", error);
+          console.error("[Index] Error checking onboarding status:", error);
           // Default to true if there's an error to avoid blocking users
           setHasCompletedOnboarding(true);
           return;
@@ -59,8 +72,13 @@ const Index = () => {
         
         // Set the onboarding status based on the database value
         setHasCompletedOnboarding(data?.completed_onboarding === true);
+        
+        console.log("[Index] Onboarding status checked:", {
+          status: data?.completed_onboarding,
+          userId: user.id
+        });
       } catch (err) {
-        console.error("Failed to check onboarding status:", err);
+        console.error("[Index] Failed to check onboarding status:", err);
         // Default to true if there's an error to avoid blocking users
         setHasCompletedOnboarding(true);
       }
@@ -82,22 +100,11 @@ const Index = () => {
   
   // Effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
-    // Safety check: If we're still loading neighborhood data, wait
+    // Safety check: If we're still loading data, wait
     if (isLoadingNeighborhood || hasCompletedOnboarding === null) {
       console.log("[Index] Still loading data, waiting before routing...");
       return;
     }
-    
-    // Logging to help with debugging
-    console.log("[Index] Routing decision point reached:", {
-      isAuthenticated: !!user,
-      hasNeighborhood: !!currentNeighborhood,
-      neighborhoodId: currentNeighborhood?.id,
-      userId: user?.id,
-      neighborhoodError: error,
-      hasCompletedOnboarding,
-      timestamp: new Date().toISOString()
-    });
     
     // If user is not authenticated, redirect to landing page
     if (!user) {
@@ -115,14 +122,14 @@ const Index = () => {
     
     // If authenticated and has neighborhood, redirect to home page
     if (user && currentNeighborhood) {
-      console.log("[Index] User authenticated with neighborhood, redirecting to home page");
+      console.log("[Index] User authenticated with neighborhood, redirecting to home");
       navigate("/home", { replace: true });
       return;
     }
     
     // If there was an error loading neighborhood data or no neighborhood, redirect to join page
     if (user && (!currentNeighborhood || error)) {
-      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join page:", error);
+      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join");
       navigate("/join", { replace: true });
       return;
     }

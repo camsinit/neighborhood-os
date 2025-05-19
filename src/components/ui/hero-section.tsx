@@ -51,7 +51,9 @@ export function HeroSection({
   waitlistForm,
   image
 }: HeroProps) {
-  // Using properly defined classes - max-w-7xl instead of max-w-container
+  // Debug log to confirm component is rendering with expected props
+  console.log("[HeroSection] Rendering component", { hasImage: !!image, hasWaitlistForm: !!waitlistForm });
+  
   return (
     <section className={cn(
       "bg-background text-foreground relative",
