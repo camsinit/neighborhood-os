@@ -137,7 +137,8 @@ const WaitlistForm = () => {
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="rounded-full" // Oval shape for the button
+              variant="default"  
+              className="rounded-full bg-primary text-white border-0 hover:bg-primary/90" // Restored proper styling
             >
               {isLoading ? "Joining..." : "Join Waitlist"}
             </Button>
