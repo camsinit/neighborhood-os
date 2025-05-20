@@ -11,9 +11,8 @@ import { ArrowRight } from "lucide-react";
 /**
  * LandingPage component
  * 
- * The public-facing landing page that conditionally shows content based on
- * authentication status. Authenticated users see a welcome dashboard preview,
- * while non-authenticated users see the waitlist signup form.
+ * The public-facing landing page that shows features of neighborhoodOS.
+ * Now accessible to both authenticated and non-authenticated users.
  */
 const LandingPage = () => {
   // Initialize the navigate function from React Router to handle redirections
@@ -86,38 +85,31 @@ const LandingPage = () => {
         )}
       </header>
       
-      {/* Conditional content based on authentication status */}
-      {isAuthenticated ? (
-        // Welcome message for authenticated users
-        <div className="container mx-auto px-4 py-12 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Welcome to neighborhoodOS!</h2>
-          <p className="text-xl mb-8">You're signed in. Continue to your neighborhood dashboard or explore our landing page.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="rounded-full">
-              <Link to="/home" className="flex items-center gap-2">
-                Go to Dashboard <ArrowRight className="h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
+      {/* IMPORTANT: Always show the full landing page content, regardless of authentication status */}
+      {/* Hero section with waitlist form and app preview */}
+      <HeroSection 
+        title="neighborhoodOS" 
+        description="The neighborhood operating system to create a caring neighborhood"
+        actions={[]} 
+        waitlistForm={isAuthenticated ? null : <WaitlistForm />} 
+        image={{
+          src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
+          alt: "Skills exchange platform preview"
+        }} 
+      />
+      
+      {/* Features section */}
+      <Features />
+      
+      {/* Add a back to dashboard button for authenticated users */}
+      {isAuthenticated && (
+        <div className="container mx-auto px-4 py-12 max-w-3xl text-center mb-8">
+          <Button asChild size="lg" className="rounded-full">
+            <Link to="/home" className="flex items-center gap-2">
+              Return to Dashboard <ArrowRight className="h-5 w-5" />
+            </Link>
+          </Button>
         </div>
-      ) : (
-        // Standard landing page for non-authenticated users
-        <>
-          {/* Hero section with waitlist form and app preview */}
-          <HeroSection 
-            title="neighborhoodOS" 
-            description="The neighborhood operating system to create a caring neighborhood"
-            actions={[]} 
-            waitlistForm={<WaitlistForm />} 
-            image={{
-              src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
-              alt: "Skills exchange platform preview"
-            }} 
-          />
-          
-          {/* Features section */}
-          <Features />
-        </>
       )}
     </div>
   );
