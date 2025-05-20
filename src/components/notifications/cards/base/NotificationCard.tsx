@@ -156,7 +156,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-3 relative shadow-sm", 
+        "transition-all duration-300 overflow-hidden mb-3 relative shadow-md border border-gray-200", 
         isAnimating && "transform translate-x-full opacity-0",
         className
       )}
@@ -196,19 +196,19 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             {showActions && (
               <div className="flex justify-end gap-2 mt-3">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleView}
-                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                  className="h-8 text-xs"
                 >
                   <Eye className="h-3.5 w-3.5 mr-1" />
                   View
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleArchive}
-                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                  className="h-8 text-xs"
                 >
                   <Archive className="h-3.5 w-3.5 mr-1" />
                   Archive

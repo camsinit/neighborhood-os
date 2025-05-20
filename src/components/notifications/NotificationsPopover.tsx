@@ -51,7 +51,7 @@ const NotificationsPopover = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0" align="end">
+      <PopoverContent className="w-[380px] p-0 border shadow-md" align="end">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between px-4 py-2 border-b">
             <NotificationsHeader 

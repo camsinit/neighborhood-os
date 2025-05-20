@@ -22,7 +22,12 @@ export const useNotificationsPopoverData = (showArchived: boolean): UseQueryResu
   const query = useNotificationsData(showArchived);
   
   // Add refresh listeners
-  useNotificationsRefresh({ refetch: query.refetch });
+  useNotificationsRefresh({ 
+    refetch: query.refetch,
+    // Add additional options to ensure refresh works properly
+    enablePolling: true,
+    pollingInterval: 30000 // Poll every 30 seconds as a fallback
+  });
   
   // Return the query result
   return query;

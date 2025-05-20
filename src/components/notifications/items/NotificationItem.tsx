@@ -102,7 +102,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         className="mb-3"
         layout
       >
-        <div className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`}>
+        <div className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-200' : 'border-gray-300'} shadow-md bg-white border-l-4 ${borderColorClass}`}>
           <div className="relative p-4 pb-2">
             {/* Timestamp in top right */}
             <NotificationTimeStamp date={notification.created_at} isUnread={!notification.is_read} />

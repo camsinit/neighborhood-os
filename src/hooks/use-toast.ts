@@ -1,56 +1,43 @@
 
 /**
- * Standardized toast hook that uses Sonner as the underlying implementation
+ * Custom toast hook
  * 
- * This centralizes all toast notifications through a single consistent interface
- * and removes the compatibility layer that was causing duplicate notifications
+ * This is a centralized toast implementation that standardizes toast appearance
+ * and behavior across the application.
  */
-import { toast as sonnerToast } from 'sonner';
+import { toast as sonnerToast, type ToastOptions } from 'sonner';
 
-// Define our toast types for consistent usage
-export type ToastProps = {
+type ToastProps = {
+  description: string;
   title?: string;
-  description?: string;
-  variant?: 'default' | 'destructive' | 'success';
-};
+  variant?: 'default' | 'destructive';
+} & ToastOptions;
 
 /**
- * Primary toast function - use this for all notifications
+ * Toast function for showing notifications
  * 
- * @param props Toast configuration properties
+ * @param props - Toast properties including description, title and variant
  */
-export const toast = (props: ToastProps) => {
-  const { title, description, variant } = props;
-  
-  // For simple messages, use the title directly
-  const message = title || "";
-  
-  // Determine which Sonner method to use based on variant
+export const toast = ({ description, title, variant = 'default', ...props }: ToastProps) => {
+  // Use different toast types based on the variant
   if (variant === 'destructive') {
-    return sonnerToast.error(message, {
-      description: description,
-    });
-  } else if (variant === 'success') {
-    return sonnerToast.success(message, {
-      description: description,
-    });
-  } else {
-    // Default toast
-    return sonnerToast(message, {
-      description: description,
+    return sonnerToast.error(title || 'Error', {
+      description,
+      ...props,
     });
   }
+  
+  return sonnerToast(title || 'Notice', {
+    description,
+    ...props,
+  });
 };
 
 /**
- * Hook for consuming toast functionality in components
+ * Hook for accessing toast functionality
  * 
- * Maintains the previous API for backward compatibility
+ * @returns Toast function and promise methods
  */
-export function useToast() {
-  return {
-    toast,
-    // Empty array for compatibility with components that expect toasts array
-    toasts: [] 
-  };
-}
+export const useToast = () => {
+  return { toast };
+};
