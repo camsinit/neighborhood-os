@@ -140,7 +140,8 @@ function App() {
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
 
-              {/* Remove the redundant /dashboard redirect to simplify routing */}
+              {/* Redirect /dashboard to /home */}
+              <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               
               {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -50,14 +50,14 @@ const AuthForm = () => {
       
       // When user is signed in, navigate to the dashboard
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        logNavigation("/dashboard", {
+        logNavigation("/home", {
           replace: true,
           cause: "Authentication successful",
           authState: "authenticated"
         });
         
-        console.log("[AuthForm] Valid session detected, navigating to dashboard");
-        navigate("/dashboard", { replace: true });
+        console.log("[AuthForm] Valid session detected, navigating to home");
+        navigate("/home", { replace: true });
       }
     });
 
