@@ -7,10 +7,9 @@ import SkillCard from './list/SkillCard';
 import EmptyState from '@/components/ui/empty-state';
 import { Sparkles } from 'lucide-react';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 
 /**
- * Props for the SkillsList component with enhanced filtering
+ * Props for the SkillsList component
  */
 interface SkillsListProps {
   selectedCategory: SkillCategory | undefined;
@@ -29,9 +28,6 @@ const SkillsList = ({
   
   // Setup auto-refresh for skills data
   useAutoRefresh(['skills-exchange'], ['skills-updated']);
-  
-  // Set up highlight tracking
-  const { id: highlightedSkillId } = useHighlightedItem('skill');
   
   const {
     data: skills,
@@ -53,8 +49,8 @@ const SkillsList = ({
         *,
         profiles:user_id (
           id,
-          display_name,
-          avatar_url
+          avatar_url,
+          display_name
         )
       `).order('created_at', {
         ascending: false
@@ -136,15 +132,11 @@ const SkillsList = ({
       description = "Share your skills and knowledge with your neighbors";
       actionLabel = "Share a Skill";
     } else if (showRequests) {
-      title = selectedCategory 
-        ? `No ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skill Requests Available` 
-        : "No Skill Requests Available";
+      title = "No Skill Requests Available";
       description = "Be the first to request a skill from your neighbors";
       actionLabel = "Request a Skill";
     } else {
-      title = selectedCategory 
-        ? `No ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Skills Available` 
-        : "No Skills Available";
+      title = `No ${selectedCategory ? selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : ''} Skills Available`;
       description = `Be the first to share your ${selectedCategory || ''} skills with the community`;
       actionLabel = `Share ${selectedCategory ? 'a ' + selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1) : 'a'} Skill`;
     }
@@ -158,7 +150,6 @@ const SkillsList = ({
     />;
   }
 
-  // Render the list of skills with proper highlighting
   return (
     <div className="space-y-4">
       {filteredSkills.map(skill => (
@@ -166,7 +157,6 @@ const SkillsList = ({
           key={skill.id} 
           skill={skill} 
           type={showRequests ? 'request' : 'offer'}
-          isHighlighted={skill.id === highlightedSkillId}
         />
       ))}
     </div>

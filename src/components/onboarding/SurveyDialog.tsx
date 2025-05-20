@@ -1,149 +1,103 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { SurveyStepHeader } from "./survey/SurveyStepHeader";
+import { SurveyProgress } from "./survey/SurveyProgress";
+import { getSurveySteps } from "./survey/config/surveySteps";
 import { useUser } from "@supabase/auth-helpers-react";
-
-// Import survey steps
-import { BasicInfoStep } from "./survey/steps/BasicInfoStep";
-import { ContactInfoStep } from "./survey/steps/ContactInfoStep";
-import { AddressStep } from "./survey/steps/AddressStep";
-import { ProfilePhotoStep } from "./survey/steps/ProfilePhotoStep";
-import { SkillsStep } from "./survey/steps/SkillsStep";
-import SurveyProgress from "./survey/SurveyProgress";
-import SurveyStepHeader from "./survey/SurveyStepHeader";
-import { CompletionScreen } from "./survey/components/CompletionScreen";
-import { SurveyNavigation } from "./survey/components/SurveyNavigation";
-import { useSurveyForm } from "./survey/hooks/useSurveyForm";
+import { SurveyFormData } from "./survey/types/surveyTypes";
 
 interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Multi-step survey dialog for collecting user information during onboarding
- * 
- * This component collects basic profile information from users to complete
- * their onboarding process including:
- * - Basic info (first name, last name)
- * - Contact info (email, phone)
- * - Address info
- * - Profile photo
- * - Skills
- */
 const SurveyDialog = ({ open, onOpenChange }: SurveyDialogProps) => {
-  // Get form state and handlers from custom hook
-  const {
-    formData,
-    setters,
-    surveyState,
-    actions
-  } = useSurveyForm(() => {
-    // This callback is called when the form is successfully submitted
-    setTimeout(() => {
-      onOpenChange(false);
-    }, 2000);
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState<SurveyFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    skills: [],
   });
   
-  // Define the steps for the survey
-  const steps = [
-    {
-      title: "Basic Information",
-      description: "Let's start with your name",
-      component: (
-        <BasicInfoStep
-          firstName={formData.firstName}
-          lastName={formData.lastName}
-          onFirstNameChange={setters.setFirstName}
-          onLastNameChange={setters.setLastName}
-        />
-      )
-    },
-    {
-      title: "Contact Information",
-      description: "How can neighbors reach you?",
-      component: (
-        <ContactInfoStep
-          email={formData.email}
-          phone={formData.phone}
-          onEmailChange={setters.setEmail}
-          onPhoneChange={setters.setPhone}
-        />
-      )
-    },
-    {
-      title: "Home Address",
-      description: "Where do you live in the neighborhood?",
-      component: (
-        <AddressStep
-          address={formData.address}
-          onAddressChange={setters.setAddress}
-        />
-      )
-    },
-    {
-      title: "Profile Photo",
-      description: "Add a photo so neighbors can recognize you",
-      component: (
-        <ProfilePhotoStep
-          onPhotoChange={setters.setProfilePhoto}
-          photoUrl={formData.photoUrl}
-          setPhotoUrl={setters.setPhotoUrl}
-        />
-      )
-    },
-    {
-      title: "Your Skills",
-      description: "Share skills you'd be willing to offer neighbors",
-      component: (
-        <SkillsStep
-          selectedSkills={formData.skills}
-          onSkillsChange={setters.setSkills}
-        />
-      )
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const user = useUser();
+  const steps = getSurveySteps(formData, setFormData);
+
+  const handleNext = async () => {
+    if (step === steps.length - 1) {
+      try {
+        if (!user?.id) {
+          throw new Error("User not authenticated");
+        }
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            display_name: `${formData.firstName} ${formData.lastName}`,
+            phone_number: formData.phone,
+            address: formData.address,
+            skills: formData.skills,
+          })
+          .eq("id", user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Profile Updated",
+          description: "Your profile has been successfully updated.",
+        });
+
+        onOpenChange(false);
+        navigate("/");
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } else {
+      setStep(step + 1);
     }
-  ];
-  
-  // Get current step data
-  const currentStepData = steps[surveyState.currentStep];
-  
+  };
+
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md md:max-w-lg lg:max-w-xl">
-        {/* Show success state when complete */}
-        {surveyState.isComplete ? (
-          <CompletionScreen />
-        ) : (
-          <>
-            {/* Progress Indicator - Moved to the top */}
-            <SurveyProgress 
-              currentStep={surveyState.currentStep} 
-              totalSteps={steps.length} 
-            />
-            
-            {/* Step Header */}
-            <SurveyStepHeader
-              title={currentStepData.title}
-              description={currentStepData.description}
-            />
-            
-            {/* Step Content */}
-            <div className="py-4">
-              {currentStepData.component}
-            </div>
-            
-            {/* Navigation Buttons */}
-            <SurveyNavigation
-              currentStep={surveyState.currentStep}
-              totalSteps={steps.length}
-              isSubmitting={surveyState.isSubmitting}
-              onBack={() => actions.handleBack(onOpenChange)}
-              onNext={actions.handleNext}
-            />
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
+    <div className="fixed inset-0 bg-gradient-to-br from-gray-100 via-pink-100 to-orange-100">
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-lg">
+          <SurveyStepHeader
+            icon={steps[step].icon}
+            title={steps[step].title}
+          />
+          <p className="text-center text-sm text-muted-foreground mb-6">
+            {steps[step].description}
+          </p>
+          <div className="py-4">{steps[step].component}</div>
+          <SurveyProgress currentStep={step} totalSteps={steps.length} />
+          <div className="flex justify-between pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setStep(step - 1)}
+              disabled={step === 0}
+            >
+              Back
+            </Button>
+            <Button onClick={handleNext}>
+              {step === steps.length - 1 ? "Complete" : "Next"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

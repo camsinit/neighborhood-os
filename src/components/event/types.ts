@@ -1,3 +1,4 @@
+
 import { Event } from "@/types/localTypes";
 
 /**
@@ -8,8 +9,6 @@ import { Event } from "@/types/localTypes";
 export interface EventCardProps {
   event: Event;
   onDelete?: () => void;
-  isHighlighted?: boolean;
-  listView?: boolean;
 }
 
 /**

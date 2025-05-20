@@ -1,3 +1,4 @@
+
 /**
  * Central date utilities for the application
  * 
@@ -6,10 +7,6 @@
  */
 import { format, parseISO, formatISO } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
-import { createLogger } from "@/utils/logger";
-
-// Create a logger for date utilities
-const logger = createLogger('dateUtils');
 
 /**
  * Normalize a date to an ISO string
@@ -43,22 +40,9 @@ export const formatInNeighborhoodTimezone = (
   formatString: string,
   timezone: string = 'America/Los_Angeles'
 ): string => {
-  try {
-    // Convert string dates to Date objects if needed
-    const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    
-    // Log the date conversion for debugging
-    logger.debug(`Formatting date: ${dateObj.toISOString()} in timezone: ${timezone} using format: ${formatString}`);
-    
-    // Use date-fns-tz to format in the correct timezone
-    const formattedDate = formatInTimeZone(dateObj, timezone, formatString);
-    
-    logger.debug(`Formatted result: ${formattedDate}`);
-    return formattedDate;
-  } catch (error) {
-    logger.error(`Error formatting date: ${error}`);
-    return 'Invalid date';
-  }
+  // Convert string dates to Date objects if needed
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return formatInTimeZone(dateObj, timezone, formatString);
 };
 
 /**
@@ -72,18 +56,8 @@ export const toNeighborhoodTimezone = (
   date: Date | string,
   timezone: string = 'America/Los_Angeles'
 ): Date => {
-  try {
-    const dateObj = typeof date === 'string' ? parseISO(date) : date;
-    
-    // Log the conversion for debugging
-    logger.debug(`Converting date to timezone: ${dateObj.toISOString()} -> ${timezone}`);
-    
-    const zonedDate = toZonedTime(dateObj, timezone);
-    return zonedDate;
-  } catch (error) {
-    logger.error(`Error converting date to timezone: ${error}`);
-    return new Date(); // Return current date as fallback
-  }
+  const dateObj = typeof date === 'string' ? parseISO(date) : date;
+  return toZonedTime(dateObj, timezone);
 };
 
 /**

@@ -1,4 +1,17 @@
 
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "./ui/button";
+import { Pencil, Clock, Users } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import EditEventDialog from "./event/EditEventDialog";
+import { useUser } from "@supabase/auth-helpers-react";
+import EventHoverCard from "./event/EventHoverCard";
+import EventSheetContent from "./event/EventSheetContent";
+import { EventCardProps } from "./event/types";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+
 /**
  * EventCard component displays an event in the calendar
  * 
@@ -8,43 +21,112 @@
  * - Shows event details on hover
  * - Opens a full event sheet when clicked
  * - Shows edit controls for event hosts
- * - Supports highlighted state for focus
- * - Supports list view for agenda display
- */
-import { useState } from "react";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { format, parseISO } from "date-fns";
-import { EventCardProps } from "./event/types";
-import EventHoverCard from "./event/EventHoverCard";
-import EventSheetContent from "./event/EventSheetContent";
-import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
-import CardActions from "./event/CardActions";
-import EventCardContent from "./event/EventCardContent";
-import EventCardList from "./event/EventCardList";
-import { useEventRsvpStatus } from "@/hooks/events/useEventRsvpStatus";
-import { useNeighborhoodTimezone } from "@/hooks/events/useNeighborhoodTimezone";
-
-/**
- * EventCard Component
  * 
- * Displays an event in either compact calendar view or expanded list view
+ * @param event - The event data to display
+ * @param onDelete - Callback function when event is deleted
  */
 const EventCard = ({
   event,
-  onDelete,
-  isHighlighted = false,
-  listView = false
-}: EventCardProps & { isHighlighted?: boolean, listView?: boolean }) => {
-  // State for controlling the Sheet open state
+  onDelete
+}: EventCardProps) => {
+  // Get current user and set up state
+  const user = useUser();
+  const [isRsvped, setIsRsvped] = useState(false);
+  const [rsvpCount, setRsvpCount] = useState(0);
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>("America/Los_Angeles");
+  // Add state to track hover state for showing edit button
+  const [isHovering, setIsHovering] = useState(false);
+  // Add state to control the Sheet open state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  
-  // Get RSVP status and neighborhood timezone
-  const { isRsvped, rsvpCount, isHost } = useEventRsvpStatus(event);
-  const { neighborhoodTimezone } = useNeighborhoodTimezone(event.neighborhood_id);
 
   // Format display time using the neighborhood timezone
   const displayTime = formatInNeighborhoodTimezone(parseISO(event.time), 'h:mm a', neighborhoodTimezone);
-  const displayDate = formatInNeighborhoodTimezone(parseISO(event.time), 'EEE, MMM d', neighborhoodTimezone);
+
+  // Check if current user is the host of the event
+  const isHost = user?.id === event.host_id;
+
+  // Get the neighborhood timezone
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (event.neighborhood_id) {
+        const {
+          data,
+          error
+        } = await supabase.from('neighborhoods').select('timezone').eq('id', event.neighborhood_id).single();
+        if (!error && data) {
+          setNeighborhoodTimezone(data.timezone || "America/Los_Angeles");
+        }
+      }
+    };
+    fetchNeighborhoodTimezone();
+  }, [event.neighborhood_id]);
+
+  // Check if the current user has RSVP'd to this event and get the count
+  useEffect(() => {
+    if (user && event.id) {
+      checkRsvpStatus();
+      fetchRsvpCount();
+    }
+  }, [user, event.id]);
+
+  // Check if current user has RSVP'd
+  const checkRsvpStatus = async () => {
+    if (!user) return;
+    const {
+      data
+    } = await supabase.from('event_rsvps').select().eq('event_id', event.id).eq('user_id', user.id).maybeSingle();
+    setIsRsvped(!!data);
+  };
+
+  // Get total RSVP count for this event
+  const fetchRsvpCount = async () => {
+    const {
+      count,
+      error
+    } = await supabase.from('event_rsvps').select('id', {
+      count: 'exact',
+      head: true
+    }).eq('event_id', event.id);
+    if (error) {
+      console.error('Error fetching RSVP count:', error);
+      return;
+    }
+    setRsvpCount(count || 0);
+  };
+
+  // Handle event deletion
+  const handleDelete = () => {
+    // Close the sheet when the event is deleted
+    setIsSheetOpen(false);
+    
+    // Add a small delay before calling onDelete to ensure sheet animations complete
+    setTimeout(() => {
+      // Call the onDelete callback if provided
+      if (onDelete) onDelete();
+    }, 200);
+  };
+
+  // Edit Button component with white styling for the hover state
+  const EditButton = ({ onSheetClose }: { onSheetClose?: () => void }) => isHost ? (
+    <EditEventDialog 
+      event={event} 
+      onDelete={handleDelete}
+      onSheetClose={onSheetClose}
+    >
+      <div className="flex items-center gap-2 text-white">
+        <Pencil className="h-4 w-4" />
+        Edit
+      </div>
+    </EditEventDialog>
+  ) : null;
+
+  // Determine event color based on RSVP status
+  const getEventColor = () => {
+    if (isRsvped) {
+      return "border-green-300 bg-green-100";
+    }
+    return "border-gray-300 bg-gray-100";
+  };
 
   // Create a simple event object with just the required fields from our Event type
   const eventWithRequiredProps = {
@@ -57,53 +139,29 @@ const EventCard = ({
     setIsSheetOpen(false);
   };
 
-  // Edit Button component with props for the sheet
-  const EditButton = ({ onSheetClose }: { onSheetClose?: () => void }) => (
-    <CardActions 
-      event={event}
-      isHost={isHost}
-      onDelete={onDelete}
-      onSheetClose={onSheetClose}
-    />
-  );
+  // Event preview card with hover effect for showing edit button
+  // Added mb-2 (margin-bottom) to create space between events
+  const eventPreview = <div 
+      data-event-id={event.id} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      onMouseEnter={() => setIsHovering(true)} 
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Host edit button - only shows when hovering on events you created */}
+      {isHost && isHovering}
+      
+      <div className="font-medium line-clamp-2">{event.title}</div>
+      {rsvpCount > 0 && <div className="flex items-center gap-1 text-gray-600 mt-1">
+          <Users className="h-3 w-3" />
+          <span>{rsvpCount}</span>
+        </div>}
+    </div>;
 
-  // Different rendering for list view vs calendar view
-  if (listView) {
-    return (
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetTrigger asChild>
-          <EventCardList
-            event={event}
-            isHost={isHost}
-            isRsvped={isRsvped}
-            rsvpCount={rsvpCount}
-            displayTime={displayTime}
-            displayDate={displayDate}
-            isHighlighted={isHighlighted}
-          />
-        </SheetTrigger>
-        <EventSheetContent 
-          event={eventWithRequiredProps} 
-          EditButton={EditButton} 
-          onOpenChange={setIsSheetOpen}
-        />
-      </Sheet>
-    );
-  }
-
-  // Standard calendar view event card
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
         <EventHoverCard event={eventWithRequiredProps}>
-          <EventCardContent
-            event={event}
-            isHost={isHost}
-            isRsvped={isRsvped}
-            rsvpCount={rsvpCount}
-            displayTime={displayTime}
-            isHighlighted={isHighlighted}
-          />
+          {eventPreview}
         </EventHoverCard>
       </SheetTrigger>
       <EventSheetContent 

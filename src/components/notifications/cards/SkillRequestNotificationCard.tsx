@@ -1,9 +1,8 @@
-
 /**
  * SkillRequestNotificationCard.tsx
  * 
  * Specialized notification card for skill request notifications.
- * Updated to support the multi-provider request claiming system.
+ * This includes accept/decline actions and skill request details.
  */
 import React, { useState } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -33,18 +32,12 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
   // State for tracking loading states and dialog visibility
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const queryClient = useQueryClient();
   
   // Extract skill info from context
   const skillData = notification.context?.skillRequestData || {};
   const skillId = notification.context?.skillId || notification.content_id;
-  const sessionId = notification.context?.sessionId || notification.content_id;
-  
-  // Check if this notification is for a claimable skill request
-  const canClaim = notification.context?.canClaim === true;
-  const wasClaimed = notification.context?.claimed === true;
   
   // Get actor name for descriptive text
   const actorName = notification.context?.neighborName || 
@@ -58,8 +51,6 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     actionText = `${actorName} accepted your skill request`;
   } else if (notification.action_type === "decline") {
     actionText = `${actorName} declined your skill request`;
-  } else if (wasClaimed) {
-    actionText = "This request has been claimed by another provider";
   }
   
   // Handle viewing skill details
@@ -70,7 +61,7 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     }
     
     // Navigate to the skill details
-    highlightItem('skill', skillId);
+    highlightItem('skills', skillId);
     
     if (onDismiss) onDismiss();
   };
@@ -131,66 +122,6 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
     }
   };
 
-  // Handle claiming a skill request with proper type casting
-  const handleClaim = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsClaiming(true);
-    
-    try {
-      // Mark as read
-      if (!notification.is_read) {
-        await markAsRead('skills', notification.id);
-      }
-      
-      const user = await supabase.auth.getUser();
-      const userId = user.data.user?.id;
-      
-      if (!userId) {
-        throw new Error("User not authenticated");
-      }
-      
-      // Call the claim_skill_request function
-      const { data, error } = await supabase.rpc(
-        'claim_skill_request',
-        {
-          p_session_id: sessionId,
-          p_provider_id: userId
-        }
-      );
-      
-      if (error) throw error;
-      
-      // Cast the result to access properties
-      const result = data as { success: boolean; message: string };
-      
-      if (!result.success) {
-        // The claim was unsuccessful - session might have been claimed by another provider
-        toast.warning(result.message || "This request has already been claimed by another provider");
-        
-        // Refresh the notifications to update UI
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        
-        if (onDismiss) onDismiss();
-        return;
-      }
-      
-      toast.success("Skill request claimed successfully", {
-        description: "You've been matched with the requester."
-      });
-      
-      // Refresh data
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['skill-sessions'] });
-      
-      if (onDismiss) onDismiss();
-    } catch (error) {
-      console.error("Error claiming skill request:", error);
-      toast.error("Failed to claim skill request");
-    } finally {
-      setIsClaiming(false);
-    }
-  };
-
   return (
     <>
       <NotificationCard
@@ -224,41 +155,8 @@ export const SkillRequestNotificationCard: React.FC<SkillRequestNotificationCard
           </div>
         )}
         
-        {/* Show status if this request was already claimed by someone else */}
-        {wasClaimed && !canClaim && notification.context?.claimedBy && (
-          <div className="mt-2 text-xs text-gray-500 italic">
-            This request has been claimed by another provider
-          </div>
-        )}
-        
         {/* Action buttons for skill request */}
-        {canClaim && !wasClaimed && (
-          <div className="mt-2 flex gap-2">
-            <Button
-              size="sm"
-              variant="default"
-              className="w-full text-xs py-0 h-8 bg-green-500 hover:bg-green-600"
-              onClick={handleClaim}
-              disabled={isClaiming}
-            >
-              <CheckCircle className="h-3.5 w-3.5 mr-1" />
-              {isClaiming ? "Claiming..." : "Claim Request"}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full text-xs py-0 h-8 border-red-200 text-red-500 hover:bg-red-50"
-              onClick={handleDecline}
-              disabled={isDeclining}
-            >
-              <XCircle className="h-3.5 w-3.5 mr-1" />
-              {isDeclining ? "Declining..." : "Decline"}
-            </Button>
-          </div>
-        )}
-        
-        {/* Action buttons for regular skill request (non-multi-provider) */}
-        {notification.context?.actionRequired && !canClaim && !wasClaimed && (
+        {notification.context?.actionRequired && (
           <div className="mt-2 flex gap-2">
             <Button
               size="sm"

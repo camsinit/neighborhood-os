@@ -1,27 +1,14 @@
-
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { CalendarViewType } from "@/hooks/calendar/useCalendarView";
-import { createLogger } from "@/utils/logger";
-
-// Create a logger for this component with enhanced debugging
-const logger = createLogger('CalendarHeader');
-
-/**
- * Updated interface to match the functions without view parameters
- */
 interface CalendarHeaderProps {
-  view: CalendarViewType;
+  view: 'week' | 'month';
   currentDate: Date;
-  setView: (view: CalendarViewType) => void;
-  // Fixed: Change these to accept no parameters
+  setView: (view: 'week' | 'month') => void;
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   handleToday: () => void;
@@ -43,28 +30,21 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     handleToday,
     setIsAddEventOpen
   } = props;
-
-  const { currentNeighborhood } = useNeighborhood();
+  const {
+    currentNeighborhood
+  } = useNeighborhood();
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
-
-  // Log the currentDate to verify it's correctly set
-  logger.debug(`Current date: ${currentDate.toISOString()}`);
-  logger.debug(`Day of week (0=Sun, 6=Sat): ${currentDate.getDay()}`);
-  logger.debug(`Day name: ${format(currentDate, 'EEEE')}`);
 
   // Fetch neighborhood timezone
   useEffect(() => {
     const fetchNeighborhoodTimezone = async () => {
       if (currentNeighborhood?.id) {
-        const { data, error } = await supabase
-          .from('neighborhoods')
-          .select('timezone')
-          .eq('id', currentNeighborhood.id)
-          .single();
-          
+        const {
+          data,
+          error
+        } = await supabase.from('neighborhoods').select('timezone').eq('id', currentNeighborhood.id).single();
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
-          logger.debug(`Fetched neighborhood timezone: ${data.timezone}`);
         }
       }
     };
@@ -73,18 +53,10 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
 
   // Format the current date according to the view and neighborhood timezone
   const formattedDate = useMemo(() => {
-    try {
-      // Format the date based on the current view
-      const dateFormat = view === 'month' ? 'MMMM yyyy' : 'MMMM d, yyyy';
-      
-      // Get the formatted date in the neighborhood timezone
-      const formattedDate = formatInNeighborhoodTimezone(currentDate, dateFormat, neighborhoodTimezone);
-      logger.debug(`Formatted date: ${formattedDate} using timezone: ${neighborhoodTimezone}`);
-      
-      return formattedDate;
-    } catch (error) {
-      logger.error("Error formatting date:", error);
-      return format(currentDate, 'MMMM yyyy');
+    if (view === 'week') {
+      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
+    } else {
+      return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
     }
   }, [currentDate, view, neighborhoodTimezone]);
 
@@ -101,85 +73,41 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     const parts = neighborhoodTimezone.split('/');
     return parts[parts.length - 1].replace('_', ' ');
   };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: -5 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-4 mb-6 py-0 rounded-none"
-    >
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        {/* Calendar title section */}
-        <div className="flex items-center gap-3">
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">
-              {formattedDate}
-            </h2>
-          </div>
-        </div>
-        
-        {/* Calendar controls section */}
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Navigation controls */}
-          <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handlePreviousWeek} 
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleToday} 
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium"
-            >
-              Today
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleNextWeek} 
-              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+  return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+      <div className="flex items-center space-x-2">
+        <CalendarIcon className="h-5 w-5 text-blue-500" />
+        <h2 className="text-xl font-semibold flex flex-col sm:flex-row sm:items-center gap-1">
+          <span>{formattedDate}</span>
           
-          {/* View selector */}
-          <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
-            {['Week', 'Month', 'Agenda'].map(viewType => (
-              <Button 
-                key={viewType} 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setView(viewType.toLowerCase() as CalendarViewType)} 
-                className={cn(
-                  "font-medium transition-all", 
-                  view === viewType.toLowerCase() 
-                    ? "bg-white text-blue-600 shadow-sm" 
-                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
-                )}
-              >
-                {viewType}
-              </Button>
-            ))}
-          </div>
-          
-          {/* Add event button */}
-          <Button 
-            onClick={() => setIsAddEventOpen(true)} 
-            size="sm" 
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto"
-          >
-            <Plus className="h-4 w-4 mr-1" /> Add Event
+        </h2>
+      </div>
+      
+      <div className="flex flex-wrap gap-2">
+        <div className="flex rounded-md shadow-sm">
+          <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleToday}>
+            Today
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleNextWeek}>
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
+        
+        <div className="flex rounded-md shadow-sm">
+          <Button variant={view === 'week' ? "secondary" : "outline"} size="sm" onClick={() => setView('week')}>
+            Week
+          </Button>
+          <Button variant={view === 'month' ? "secondary" : "outline"} size="sm" onClick={() => setView('month')}>
+            Month
+          </Button>
+        </div>
+        
+        <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
+          <Plus className="h-4 w-4 mr-1" /> Add Event
+        </Button>
       </div>
-    </motion.div>
-  );
+    </div>;
 };
-
 export default CalendarHeader;

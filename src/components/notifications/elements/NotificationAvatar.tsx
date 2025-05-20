@@ -2,87 +2,66 @@
 /**
  * NotificationAvatar.tsx
  * 
- * A reusable component for displaying notification avatars with appropriate styling.
- * This component is responsible for rendering avatars differently based on notification
- * type and read status.
+ * A minimalist avatar component for notifications
  */
 import React from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getNotificationStyle } from "../utils/notificationStyles";
+import { User } from "lucide-react";
+import { getNotificationTextColor, getNotificationBgColor } from "../utils/notificationColorUtils";
 
-/**
- * Props for the NotificationAvatar component
- * 
- * @property {string} url - Optional URL for the avatar image
- * @property {string} name - Display name for the avatar fallback text
- * @property {boolean} isUnread - Whether the notification is unread
- * @property {string} notificationType - Type of notification (event, safety, etc.)
- * @property {('sm'|'md'|'lg')} size - Size variant for the avatar
- */
-interface NotificationAvatarProps {
-  url?: string;
-  name?: string;
+export interface NotificationAvatarProps {
+  url?: string | null;
+  name: string;
   isUnread?: boolean;
-  notificationType?: string;
+  className?: string;
   size?: "sm" | "md" | "lg";
+  notificationType?: string;
 }
 
 /**
- * Renders an avatar with appropriate styling based on notification properties
- * 
- * This component displays either an image avatar (if URL is provided) or an
- * icon representing the notification type. It also applies different styling
- * based on whether the notification is read or unread.
- * 
- * @param props - Component props (see NotificationAvatarProps)
- * @returns A styled Avatar component
+ * Renders a clean avatar for notification items
+ * with subtle module-specific styling
  */
-const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
+export const NotificationAvatar: React.FC<NotificationAvatarProps> = ({
   url,
-  name = "N",
+  name,
   isUnread = false,
-  notificationType = "default",
-  size = "md"
+  className,
+  size = "md",
+  notificationType
 }) => {
-  // Get the notification style based on type
-  const style = getNotificationStyle(notificationType);
-  const Icon = style.icon;
-  
-  // Determine size class based on size prop
-  const sizeClasses = {
+  // Determine size class
+  const sizeClass = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
     lg: "h-12 w-12"
-  };
+  }[size];
   
-  const avatarSize = sizeClasses[size];
-  
-  // Calculate icon size based on avatar size
-  const iconSize = {
-    sm: "h-3.5 w-3.5",
-    md: "h-4 w-4",
-    lg: "h-5 w-5"
-  };
+  // Get text color and background color based on notification type
+  const textColorClass = getNotificationTextColor(notificationType);
+  const bgColorClass = getNotificationBgColor(notificationType);
   
   return (
-    <Avatar className={cn(
-      avatarSize,
-      isUnread ? "ring-2 ring-offset-2" : "ring-0",
-      isUnread ? style.borderColor.replace("border-", "ring-") : ""
-    )}>
-      <AvatarImage src={url} alt={name} />
-      <AvatarFallback className={cn(
-        style.backgroundColor,
-        "flex items-center justify-center"
-      )}>
-        {url ? name.charAt(0).toUpperCase() : (
-          <Icon className={cn(
-            style.textColor,
-            iconSize[size]
-          )} />
-        )}
-      </AvatarFallback>
+    <Avatar 
+      className={cn(
+        sizeClass, 
+        "flex-shrink-0", 
+        className
+      )}
+    >
+      {url ? (
+        <AvatarImage src={url} alt={name} className="object-cover" />
+      ) : (
+        <AvatarFallback 
+          className={cn(
+            "bg-gray-100",
+            isUnread && notificationType ? cn(bgColorClass, textColorClass) : "text-gray-600"
+          )}
+        >
+          {name.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      )}
     </Avatar>
   );
 };

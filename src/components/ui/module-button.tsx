@@ -17,15 +17,6 @@ interface ModuleButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'filled' | 'outline' | 'pastel';
 }
 
-/**
- * ModuleButton uses the theme colors from moduleTheme.ts to ensure
- * all buttons within a module have consistent colors.
- * 
- * Three variants are available:
- * - filled: Full color background with white text
- * - outline: Transparent with colored border and text
- * - pastel: Light version of the color for subtle actions
- */
 const ModuleButton = ({ 
   moduleTheme, 
   variant = 'filled',
@@ -41,32 +32,30 @@ const ModuleButton = ({
   
   switch (variant) {
     case 'filled':
-      // Standard filled button with full saturation and shadow
+      // Standard filled button with full saturation
       style = { 
         backgroundColor: themeColor, 
         color: 'white', 
-        borderColor: 'transparent',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+        borderColor: 'transparent' 
       };
       break;
     
     case 'outline':
-      // Outline button with theme-colored border and text
+      // Outline button with colored border
       style = { 
         backgroundColor: 'transparent', 
         color: themeColor, 
-        borderColor: themeColor,
-        borderWidth: '1px' // Ensure border is visible
+        borderColor: themeColor 
       };
       break;
       
     case 'pastel':
-      // Pastel variant with light background and darker text
+      // New pastel variant with less saturation - using light theme colors with darker text
       style = { 
         backgroundColor: lightThemeColor,
+        // Use a darker shade of the theme color for text to maintain contrast
         color: themeColor,
-        borderColor: 'transparent',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+        borderColor: 'transparent'
       };
       break;
       
@@ -74,14 +63,13 @@ const ModuleButton = ({
       style = { 
         backgroundColor: themeColor, 
         color: 'white', 
-        borderColor: 'transparent',
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+        borderColor: 'transparent' 
       };
   }
   
   return (
     <Button
-      className={`hover:opacity-90 transition-all duration-200 ${className}`}
+      className={`hover:opacity-90 ${className}`}
       style={style}
       {...props}
     />

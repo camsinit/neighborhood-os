@@ -1,48 +1,55 @@
 /**
  * NotificationBadge.tsx
  * 
- * A reusable badge component for notifications
+ * A reusable badge component for notifications with various styling options
  */
 import React from "react";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-interface NotificationBadgeProps {
+// Define the props interface for the badge component
+export interface NotificationBadgeProps {
+  // The text to display in the badge or a count number
   label?: string;
-  count?: number; // Added count property for number badges
-  variant?: "default" | "outline" | "secondary";
+  // For count badge usage
+  count?: number;
+  // Optional variant to control the badge style
+  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info";
+  // Optional additional class names
   className?: string;
+  // Optional click handler
+  onClick?: () => void;
 }
 
 /**
- * Badge component for showing category or status in notifications
+ * A customizable badge component for notifications
+ * Can be used for displaying labels or a count
  */
-const NotificationBadge: React.FC<NotificationBadgeProps> = ({
-  label,
+const NotificationBadge: React.FC<NotificationBadgeProps> = ({ 
+  label, 
   count,
-  variant = "default",
-  className
+  variant = "default", 
+  className,
+  onClick
 }) => {
-  // If count is provided, show as a number badge
+  // If count is provided and we're rendering a notification count badge
   if (count !== undefined) {
+    // Only show if there are unread notifications
+    if (count <= 0) return null;
+    
     return (
-      <Badge 
-        variant="destructive" 
-        className={cn(
-          "absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs",
-          className
-        )}
-      >
+      <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
         {count > 9 ? '9+' : count}
-      </Badge>
+      </span>
     );
   }
   
-  // Otherwise, show as a label badge
+  // Otherwise render a standard badge with label
   return (
     <Badge 
       variant={variant} 
-      className={cn("text-xs font-medium", className)}
+      className={cn("font-normal truncate", className)}
+      onClick={onClick}
     >
       {label}
     </Badge>

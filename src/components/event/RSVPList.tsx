@@ -63,9 +63,9 @@ const RSVPList = ({ eventId, className = "", showEmptyState = true }: RSVPListPr
     <div className={`${className}`}>
       <h4 className="font-medium mb-2">Attendees ({rsvps.length})</h4>
       <div className="flex -space-x-2">
-        {/* Show avatars for the first few RSVPs with light gray borders */}
+        {/* Show avatars for the first few RSVPs */}
         {displayedRsvps.map((rsvp) => (
-          <Avatar key={rsvp.id} className="border-2 border-light w-8 h-8">
+          <Avatar key={rsvp.id} className="border-2 border-background w-8 h-8">
             <AvatarImage 
               src={rsvp.profiles?.avatar_url || ""} 
               alt={rsvp.profiles?.display_name || "Attendee"} 
@@ -78,7 +78,7 @@ const RSVPList = ({ eventId, className = "", showEmptyState = true }: RSVPListPr
         
         {/* Show "and X more" if there are additional RSVPs */}
         {remainingCount > 0 && (
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 border-2 border-light text-xs font-medium">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 border-2 border-background text-xs font-medium">
             +{remainingCount}
           </div>
         )}

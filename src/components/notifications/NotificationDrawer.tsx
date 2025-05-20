@@ -59,11 +59,11 @@ export default function NotificationDrawer() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        {/* Enhanced notification button styling with light gray border for better visibility */}
+        {/* Enhanced notification button styling for better visibility */}
         <Button 
           variant="outline" 
           size="lg" 
-          className="relative flex items-center gap-2 border-2 border-light hover:bg-purple-50 hover:border-purple-300 transition-colors"
+          className="relative flex items-center gap-2 border-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
         >
           <BellRing className="h-5 w-5 text-purple-600" />
           <span className="hidden sm:inline text-sm font-medium">Notifications</span>
@@ -85,7 +85,7 @@ export default function NotificationDrawer() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => setShowArchived(!showArchived)}
-                className="text-xs border-light"
+                className="text-xs"
               >
                 {showArchived ? "Active" : "Read"}
               </Button>
@@ -95,7 +95,7 @@ export default function NotificationDrawer() {
                 variant="outline" 
                 size="sm" 
                 onClick={handleArchiveAll}
-                className="text-xs flex items-center gap-1 border-light"
+                className="text-xs flex items-center gap-1"
                 disabled={!activeNotifications || activeNotifications.length === 0}
               >
                 <Archive className="h-3 w-3" />

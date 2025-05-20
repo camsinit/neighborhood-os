@@ -1,4 +1,3 @@
-
 /**
  * This file defines styling properties for different types of notifications
  * These styles are used to provide visual differentiation between notification types

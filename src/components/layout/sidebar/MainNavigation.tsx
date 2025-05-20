@@ -13,12 +13,12 @@ const MainNavigation = () => {
   // Get current location to determine which nav item is active
   const location = useLocation();
   
-  // Define a single navigation item for home
+  // Main navigation item (Home) - This is the main entry point
   const mainNavItems = [
     { 
       icon: Home, 
       label: "Home", 
-      href: "/home"
+      href: "/home" // Standardized to use /home path
     }
   ];
 
@@ -27,7 +27,6 @@ const MainNavigation = () => {
       {mainNavItems.map((item) => {
         // Check if current path matches this nav item
         const isActive = location.pathname === item.href;
-          
         return (
           <Link key={item.href} to={item.href}>
             <Button

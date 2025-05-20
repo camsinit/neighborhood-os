@@ -1,100 +1,110 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ModuleLayout } from '@/components/layout';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSearchParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 import SkillsList from '@/components/skills/SkillsList';
+import SkillsFilter from '@/components/skills/SkillsFilter';
+import SearchInput from '@/components/ui/search-input';
+import { useSkillsStore } from '@/stores/skillsStore';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
-import { useUser } from '@supabase/auth-helpers-react';
-import { useSkillsPageState } from '@/hooks/skills/useSkillsPageState';
-import SkillsPageHeader from '@/components/skills/page/SkillsPageHeader';
-import SkillsDialog from '@/components/skills/page/SkillsDialog';
+import { SkillCategory } from '@/components/skills/types/skillTypes';
 
 // Create a logger for this component
 const logger = createLogger('SkillsPage');
 
-/**
- * SkillsPage - Main component for the Skills Exchange feature
- * 
- * This component has been updated to support multi-provider requests.
- */
 function SkillsPage() {
-  // Use our custom hook to manage page state and URL parameters
-  const {
-    view,
-    category,
-    searchQuery,
-    isSkillDialogOpen,
-    dialogMode,
-    handleTabChange,
-    handleCategoryChange,
-    handleSearchChange,
-    handleOpenSkillDialog,
-    handleCloseSkillDialog,
-    handleSkillAdded,
-    getTypedCategory
-  } = useSkillsPageState();
-  
-  const user = useUser();
+  // Get search parameters from URL
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get('view') || 'offers';
+  const category = searchParams.get('category') || null;
+  const searchQuery = searchParams.get('q') || '';
   
   // Use the highlight system to highlight skills when requested
-  const highlightedSkill = useHighlightedItem('skill');
+  const highlightedSkill = useHighlightedItem('skills');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
-
+  
+  const { setSearchQuery } = useSkillsStore();
+  
+  // Set up search from URL params
+  useEffect(() => {
+    setSearchQuery(searchQuery);
+  }, [searchQuery, setSearchQuery]);
+  
+  // Handle direct links to specific skills
+  useEffect(() => {
+    const skillId = searchParams.get('skillId');
+    if (skillId) {
+      highlightItem('skills', skillId);
+    }
+  }, [searchParams]);
+  
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('view', value);
+    setSearchParams(newParams);
+  };
+  
+  // Convert string category to SkillCategory type or undefined
+  const getTypedCategory = (categoryString: string | null): SkillCategory | undefined => {
+    if (!categoryString) return undefined;
+    return categoryString as SkillCategory;
+  };
+  
   return (
     <ModuleLayout 
       title="Skills Exchange"
       description="Share skills and knowledge with your neighbors"
       themeColor="skills"
+      actions={
+        <Button className="whitespace-nowrap flex items-center gap-1.5">
+          <PlusCircle className="h-4 w-4" />
+          <span>Add Skill</span>
+        </Button>
+      }
     >
-      <div className="flex flex-col space-y-4">
-        {/* Entire page uses a single Tabs component for navigation */}
-        <Tabs value={view} onValueChange={handleTabChange} className="w-full">
-          {/* Header component with search, filter and tabs */}
-          <SkillsPageHeader
-            searchQuery={searchQuery}
-            handleSearchChange={handleSearchChange}
-            category={category}
-            handleCategoryChange={handleCategoryChange}
-            view={view}
-            handleTabChange={handleTabChange}
-            handleOpenSkillDialog={handleOpenSkillDialog}
-          />
+      <Tabs value={view} onValueChange={handleTabChange}>
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
+          <TabsList>
+            <TabsTrigger value="offers">Offers</TabsTrigger>
+            <TabsTrigger value="requests">Requests</TabsTrigger>
+            <TabsTrigger value="mine">My Skills</TabsTrigger>
+          </TabsList>
           
-          {/* Tab content sections */}
-          <TabsContent value="offers" className="mt-0">
-            <SkillsList 
-              showRequests={false} 
-              selectedCategory={getTypedCategory(category)} 
-              searchQuery={searchQuery} 
+          <div className="flex gap-2">
+            <SkillsFilter />
+            <SearchInput 
+              placeholder="Search skills..."
+              onChange={(e) => {
+                const newParams = new URLSearchParams(searchParams);
+                if (e.target.value) {
+                  newParams.set('q', e.target.value);
+                } else {
+                  newParams.delete('q');
+                }
+                setSearchParams(newParams);
+              }}
+              value={searchQuery}
+              ref={searchInputRef}
             />
-          </TabsContent>
-          <TabsContent value="requests" className="mt-0">
-            <SkillsList 
-              showRequests={true} 
-              selectedCategory={getTypedCategory(category)} 
-              searchQuery={searchQuery} 
-            />
-          </TabsContent>
-          <TabsContent value="mine" className="mt-0">
-            <SkillsList 
-              showMine={true} 
-              selectedCategory={getTypedCategory(category)} 
-              searchQuery={searchQuery} 
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Skill dialog component */}
-      {isSkillDialogOpen && (
-        <SkillsDialog
-          isOpen={isSkillDialogOpen}
-          mode={dialogMode}
-          onClose={handleCloseSkillDialog}
-          onSuccess={handleSkillAdded}
-        />
-      )}
+          </div>
+        </div>
+        
+        <TabsContent value="offers" className="mt-0">
+          <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+        </TabsContent>
+        <TabsContent value="requests" className="mt-0">
+          <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+        </TabsContent>
+        <TabsContent value="mine" className="mt-0">
+          <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+        </TabsContent>
+      </Tabs>
     </ModuleLayout>
   );
 }

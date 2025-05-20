@@ -1,6 +1,4 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 interface OnboardingNavigationProps {
   currentStep: number;
@@ -9,39 +7,23 @@ interface OnboardingNavigationProps {
   onBack: () => void;
 }
 
-/**
- * OnboardingNavigation component
- * 
- * Provides navigation buttons for moving between onboarding steps
- * with smooth transitions and appropriate button labels.
- * 
- * @param currentStep - The current step index (0-based)
- * @param isLastStep - Whether this is the final step in the flow
- * @param onNext - Function to call when moving to next step
- * @param onBack - Function to call when moving to previous step
- */
-const OnboardingNavigation: React.FC<OnboardingNavigationProps> = ({
-  currentStep,
-  isLastStep,
-  onNext,
-  onBack,
-}) => {
+const OnboardingNavigation = ({ 
+  currentStep, 
+  isLastStep, 
+  onNext, 
+  onBack 
+}: OnboardingNavigationProps) => {
   return (
-    <div className="flex justify-between pt-8">
-      <Button
+    <div className="flex flex-col items-center gap-2">
+      <Button onClick={onNext}>
+        {isLastStep ? "Get Started" : "Next"}
+      </Button>
+      <button
         onClick={onBack}
-        variant="outline"
-        className="transition-all duration-300 hover:bg-gray-100"
+        className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
       >
-        {currentStep === 0 ? 'Cancel' : 'Back'}
-      </Button>
-      
-      <Button 
-        onClick={onNext}
-        className="transition-all duration-300"
-      >
-        {isLastStep ? 'Get Started' : 'Next'}
-      </Button>
+        {currentStep === 0 ? "Login" : "Back"}
+      </button>
     </div>
   );
 };

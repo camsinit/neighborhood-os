@@ -1,26 +1,19 @@
+import { LucideIcon } from "lucide-react";
 
-/**
- * SurveyStepHeader component
- * 
- * This component displays the title and description for each step
- * in a multi-step survey form.
- */
 interface SurveyStepHeaderProps {
+  icon: LucideIcon;
   title: string;
-  description: string;
 }
 
-const SurveyStepHeader = ({ title, description }: SurveyStepHeaderProps) => {
+export const SurveyStepHeader = ({ icon: Icon, title }: SurveyStepHeaderProps) => {
   return (
-    <div className="space-y-1.5 text-center sm:text-left">
-      <h2 className="text-lg sm:text-xl font-semibold leading-7 tracking-tight">
+    <div>
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      <h2 className="text-center text-xl font-semibold">
         {title}
       </h2>
-      <p className="text-sm text-muted-foreground">
-        {description}
-      </p>
     </div>
   );
 };
-
-export default SurveyStepHeader;

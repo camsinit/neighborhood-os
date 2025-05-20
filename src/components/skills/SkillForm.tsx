@@ -1,4 +1,3 @@
-
 // This is the main skill form component that uses smaller, focused components
 // to create a form for offering or requesting skills
 
@@ -9,7 +8,7 @@ import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
 import { useToast } from "@/hooks/use-toast";
 import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 import { SkillCategory } from "./types/skillTypes";
-import { SkillFormData, TimePreference } from "./types/skillFormTypes";
+import { SkillFormData, SkillFormProps, TimePreference } from "./types/skillFormTypes";
 
 // Import the individual form field components
 import CategoryField from "./form/CategoryField";
@@ -19,23 +18,12 @@ import AvailabilityField from "./form/AvailabilityField";
 import TimePreferenceField from "./form/TimePreferenceField";
 
 /**
- * Props for the SkillForm component
- * Updated with isMultiProvider flag
- */
-interface SkillFormProps {
-  mode: 'offer' | 'request';
-  isMultiProvider?: boolean; // New prop to indicate if this is a multi-provider request
-  onSuccess: () => void;
-  onCancel: () => void;
-}
-
-/**
  * The main SkillForm component that allows users to offer or request skills
  * 
  * This component has been refactored to use smaller, focused components
  * for each part of the form.
  */
-const SkillForm = ({ onSuccess, onCancel, mode, isMultiProvider }: SkillFormProps) => {
+const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   // State to store form data
   const [formData, setFormData] = useState<SkillFormData>({
     category: 'technology',
@@ -58,7 +46,7 @@ const SkillForm = ({ onSuccess, onCancel, mode, isMultiProvider }: SkillFormProp
       
       // Add a slight delay before closing to make sure everything gets refreshed
       setTimeout(() => {
-        onSuccess();
+        onClose();
       }, 300);
     }
   });
@@ -130,7 +118,7 @@ const SkillForm = ({ onSuccess, onCancel, mode, isMultiProvider }: SkillFormProp
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Category selection field */}
       <CategoryField 
-        value={formData.category as SkillCategory} 
+        value={formData.category} 
         onChange={(value) => updateField('category', value)} 
       />
 

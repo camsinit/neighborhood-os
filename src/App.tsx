@@ -1,12 +1,12 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner'; 
+import { Toaster } from 'sonner';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
 // Import pages
@@ -23,13 +23,10 @@ import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
 import WaitlistAdmin from './pages/WaitlistAdmin';
-import SettingsPage from './pages/SettingsPage';
-import InvitePage from './pages/InvitePage';
 
 // Import components
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import OnboardingDialog from './components/onboarding/OnboardingDialog';
 
 /**
  * Create a client for React Query
@@ -96,65 +93,48 @@ function App() {
     return null;
   }
 
+  // Provide session context and neighborhood context to the app
   return (
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase} initialSession={session}>
         <NeighborhoodProvider>
+          {/* IMPORTANT: Only ONE Router component in the entire app */}
           <Router>
             <Routes>
-              {/* Public routes - each route defined exactly once */}
+              {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
-              <Route path="/landing" element={<LandingPage />} /> {/* Route to access landing page while authenticated */}
               <Route path="/login" element={<Login />} />
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
-              
-              {/* Special routing helper - redirects to correct page based on auth state */}
               <Route path="/index" element={<Index />} />
-              
-              {/* Onboarding route */}
-              <Route path="/onboarding" element={
-                <ProtectedRoute>
-                  <OnboardingDialog open={true} onOpenChange={() => {}} testMode={true} />
-                </ProtectedRoute>
-              } />
               
               {/* Protected routes with MainLayout */}
               <Route 
                 element={
                   <ProtectedRoute>
-                    <MainLayout />
+                    <MainLayout>
+                      <Outlet />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               >
-                {/* Main pages - each defined exactly once */}
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/invite" element={<InvitePage />} />
                 
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
 
-              {/* Removed the /dashboard redirect since it's no longer needed */}
+              {/* Redirect /dashboard to /home for backward compatibility */}
+              <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               
-              {/* Catch-all route */}
+              {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            <Toaster 
-              position="top-center" 
-              toastOptions={{
-                duration: 4000,
-                className: "toast-custom-class",
-                style: { 
-                  fontSize: '14px'
-                }
-              }}
-            />
+            <Toaster position="top-center" />
           </Router>
         </NeighborhoodProvider>
       </SessionContextProvider>

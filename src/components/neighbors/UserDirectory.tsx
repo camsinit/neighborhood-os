@@ -1,13 +1,11 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborUsers } from "./hooks/useNeighborUsers";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { toast } from "@/components/ui/use-toast";
 import { NeighborProfileDialog } from "./NeighborProfileDialog";
-import { useHighlightedItem } from "@/hooks/useHighlightedItem";
-import { createLogger } from "@/utils/logger";
 
 // Import our components
 import { LoadingState } from "./components/LoadingState";
@@ -18,30 +16,22 @@ import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
 import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
 
-// Create a logger for this component
-const logger = createLogger('UserDirectory');
-
 /**
  * UserDirectory Component
  * 
  * This is the main component that displays a directory of users in the neighborhood.
  * It handles loading, error states, and rendering the appropriate UI based on the data.
- * Now includes support for highlighting specific neighbors from notifications.
  * 
  * @param searchQuery - Optional search query to filter users
  */
 interface UserDirectoryProps {
   searchQuery?: string;
 }
-
 export const UserDirectory = ({
   searchQuery = ""
 }: UserDirectoryProps) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
-  
-  // Container ref for scrolling to highlighted elements
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Get neighborhood context to show appropriate messages
   const {
@@ -57,36 +47,10 @@ export const UserDirectory = ({
     error,
     refetch
   } = useNeighborUsers();
-  
-  // Get the currently highlighted neighbor ID
-  const { id: highlightedNeighborId } = useHighlightedItem('neighbor');
-  
-  // Effect to handle scrolling to highlighted neighbor
-  useEffect(() => {
-    if (highlightedNeighborId && containerRef.current && users) {
-      logger.debug('Scrolling to highlighted neighbor:', highlightedNeighborId);
-      
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
-        // Find the highlighted neighbor element
-        const element = document.querySelector(`[data-neighbor-id="${highlightedNeighborId}"]`) as HTMLElement;
-        
-        if (element) {
-          // Smooth scroll to the element
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-          
-          logger.debug('Scrolled to highlighted neighbor element');
-        }
-      }, 100);
-    }
-  }, [highlightedNeighborId, users]);
 
   // Add detailed debugging for tracking the neighborhood state
   useEffect(() => {
-    logger.debug("Neighborhood state updated:", {
+    console.log("[UserDirectory] Neighborhood state updated:", {
       neighborhoodId: currentNeighborhood?.id,
       neighborhoodName: currentNeighborhood?.name,
       isLoading: isLoadingNeighborhood,
@@ -95,12 +59,23 @@ export const UserDirectory = ({
     });
   }, [currentNeighborhood, isLoadingNeighborhood, neighborhoodError]);
 
+  // Add debugging for tracking the query state
+  useEffect(() => {
+    console.log("[UserDirectory] Query state updated:", {
+      isLoading,
+      usersCount: users?.length || 0,
+      error: error ? error.message : null,
+      timestamp: new Date().toISOString()
+    });
+  }, [users, isLoading, error]);
+
   // Set up auto-refresh for neighbors data
+  // This will listen for profile update events and refresh the data
   useAutoRefresh(['neighbor-users'], ['profile-updated']);
 
   // Handle manual refresh of the neighbors list
   const handleRefresh = () => {
-    logger.debug("Manual refresh triggered");
+    console.log("[UserDirectory] Manual refresh triggered");
     toast({
       title: "Refreshing...",
       description: "Updating neighbor data"
@@ -109,12 +84,17 @@ export const UserDirectory = ({
   };
 
   // Filter users based on search query
-  const filteredUsers = users?.filter(user => 
-    searchQuery === "" || 
-    user.profiles?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    user.profiles?.bio?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users?.filter(user => searchQuery === "" || user.profiles?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) || user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || user.profiles?.bio?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // Add debugging for search results
+  useEffect(() => {
+    console.log("[UserDirectory] Filtered users:", {
+      searchQuery,
+      totalUsers: users?.length || 0,
+      filteredCount: filteredUsers?.length || 0,
+      timestamp: new Date().toISOString()
+    });
+  }, [searchQuery, users, filteredUsers]);
 
   // Show loading state while users or neighborhood are loading
   if (isLoading || isLoadingNeighborhood) {
@@ -123,7 +103,7 @@ export const UserDirectory = ({
 
   // If there's a neighborhood error
   if (neighborhoodError) {
-    logger.error("Neighborhood error:", neighborhoodError);
+    console.error("[UserDirectory] Neighborhood error:", neighborhoodError);
     return <NeighborhoodError error={neighborhoodError} onRetry={handleRefresh} />;
   }
 
@@ -134,19 +114,18 @@ export const UserDirectory = ({
 
   // If there's an error loading users
   if (error) {
-    logger.error("Error loading users:", error);
+    console.error("[UserDirectory] Error loading users:", error);
     return <UserError error={error} onRetry={handleRefresh} />;
   }
 
   // If no users found
   if (!users?.length) {
-    logger.debug("No users found to display");
+    console.log("[UserDirectory] No users found to display");
     return <EmptyState neighborhoodName={currentNeighborhood.name} onRefresh={handleRefresh} />;
   }
   
   return (
-    // Added ref to the container for scrolling
-    <div className="p-6" ref={containerRef}>
+    <div className="p-6">
       {/* Grid of neighbor cards */}
       <UserGrid users={filteredUsers || []} onUserSelect={setSelectedUser} />
 

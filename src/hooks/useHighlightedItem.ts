@@ -28,7 +28,12 @@ export function useHighlightedItem(type: HighlightableItemType): UseHighlightedI
     logger.debug(`Setting up highlight listener for ${type} items`);
     
     // Create a listener for highlight events that match this component's type
-    const removeListener = createHighlightListener(type);
+    const removeListener = createHighlightListener((detail) => {
+      if (detail.type === type) {
+        logger.debug(`Highlighting ${type} item with ID: ${detail.id}`);
+        setHighlightedId(detail.id);
+      }
+    });
     
     // Clean up listener on unmount
     return removeListener;

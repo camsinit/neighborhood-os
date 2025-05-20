@@ -1,4 +1,3 @@
-
 /**
  * Module Theme Registry
  * 

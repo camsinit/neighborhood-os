@@ -3,7 +3,7 @@
  * Index page component
  * 
  * This component serves as the entry point to the application when a user visits the index route.
- * It makes routing decisions based on authentication status and neighborhood context.
+ * It redirects users based on authentication status and neighborhood context.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,8 +12,6 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import createNavigationLogger from "@/utils/navigationLogger";
 
 /**
  * Index component that handles routing logic
@@ -25,72 +23,14 @@ const Index = () => {
   // Navigation hook for redirecting users
   const navigate = useNavigate();
   
-  // Create navigation logger for this component
-  const logNavigation = createNavigationLogger("Index");
-  
   // Get the current authenticated user
   const user = useUser();
   
   // State to track if we need to wait longer than expected
   const [isDelayed, setIsDelayed] = useState(false);
   
-  // State to track if user has completed onboarding
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
-  
   // Get neighborhood context
-  const { 
-    currentNeighborhood, 
-    isLoading: isLoadingNeighborhood, 
-    error, 
-    refreshNeighborhoodData 
-  } = useNeighborhood();
-  
-  // Debug information to track what's happening
-  console.log("[Index] Component rendered:", {
-    isAuthenticated: !!user,
-    isLoadingNeighborhood,
-    hasNeighborhood: !!currentNeighborhood,
-    onboardingStatus: hasCompletedOnboarding,
-    pathname: window.location.pathname,
-    timestamp: new Date().toISOString()
-  });
-  
-  // Check if user has completed onboarding
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      if (!user) return;
-      
-      try {
-        // Check if the user has completed onboarding
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('completed_onboarding')
-          .eq('id', user.id)
-          .maybeSingle(); // Using maybeSingle instead of single to avoid errors
-        
-        if (error) {
-          console.error("[Index] Error checking onboarding status:", error);
-          // Default to true if there's an error to avoid blocking users
-          setHasCompletedOnboarding(true);
-          return;
-        }
-        
-        // Set the onboarding status based on the database value
-        setHasCompletedOnboarding(data?.completed_onboarding === true);
-        
-        console.log("[Index] Onboarding status checked:", {
-          status: data?.completed_onboarding,
-          userId: user.id
-        });
-      } catch (err) {
-        console.error("[Index] Failed to check onboarding status:", err);
-        // Default to true if there's an error to avoid blocking users
-        setHasCompletedOnboarding(true);
-      }
-    };
-    
-    checkOnboardingStatus();
-  }, [user]);
+  const { currentNeighborhood, isLoading: isLoadingNeighborhood, error, refreshNeighborhoodData } = useNeighborhood();
   
   // Set a timer to detect if loading is taking too long
   useEffect(() => {
@@ -103,77 +43,50 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [isLoadingNeighborhood]);
   
-  // Simplified effect to handle routing logic based on authentication and neighborhood status
+  // Effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
-    // Safety check: If we're still loading data, wait
-    if (isLoadingNeighborhood || hasCompletedOnboarding === null) {
-      console.log("[Index] Still loading data, waiting before routing...");
+    // Safety check: If we're still loading neighborhood data, wait
+    if (isLoadingNeighborhood) {
+      console.log("[Index] Still loading neighborhood data, waiting before routing...");
       return;
     }
     
+    // Logging to help with debugging
+    console.log("[Index] Routing decision point reached:", {
+      isAuthenticated: !!user,
+      hasNeighborhood: !!currentNeighborhood,
+      neighborhoodId: currentNeighborhood?.id,
+      userId: user?.id,
+      neighborhoodError: error,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Use immediate routing with replace to prevent history buildup
     // If user is not authenticated, redirect to landing page
     if (!user) {
-      logNavigation("/", { 
-        replace: true, 
-        cause: "User not authenticated",
-        authState: "unauthenticated" 
-      });
-      
       console.log("[Index] User not authenticated, redirecting to landing page");
       navigate("/", { replace: true });
       return;
     }
     
-    // If authenticated but hasn't completed onboarding, redirect to onboarding
-    if (user && hasCompletedOnboarding === false) {
-      logNavigation("/onboarding", { 
-        replace: true, 
-        cause: "Onboarding required",
-        authState: "authenticated" 
-      });
-      
-      console.log("[Index] User needs to complete onboarding");
-      navigate("/onboarding", { replace: true });
-      return;
-    }
-    
     // If authenticated and has neighborhood, redirect to home page
     if (user && currentNeighborhood) {
-      logNavigation("/home", { 
-        replace: true, 
-        cause: "User has neighborhood",
-        authState: "authenticated" 
-      });
-      
-      console.log("[Index] User authenticated with neighborhood, redirecting to home");
+      console.log("[Index] User authenticated with neighborhood, redirecting to home page");
       navigate("/home", { replace: true });
       return;
     }
     
     // If there was an error loading neighborhood data or no neighborhood, redirect to join page
     if (user && (!currentNeighborhood || error)) {
-      logNavigation("/join", { 
-        replace: true, 
-        cause: error ? "Error loading neighborhood" : "No neighborhood",
-        authState: "authenticated" 
-      });
-      
-      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join");
+      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join page:", error);
       navigate("/join", { replace: true });
       return;
     }
-  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, hasCompletedOnboarding, logNavigation]);
+  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error]);
 
   // Handle manual retry when there's an issue
   const handleRetry = async () => {
     await refreshNeighborhoodData();
-    
-    logNavigation("/home", { 
-      replace: true, 
-      cause: "Manual retry",
-      authState: user ? "authenticated" : "unauthenticated" 
-    });
-    
     // If we have a user and neighborhood after refresh, go to home
     if (user && currentNeighborhood) {
       navigate("/home", { replace: true });
@@ -196,14 +109,7 @@ const Index = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => {
-                logNavigation("/home", { 
-                  replace: true, 
-                  cause: "Manual navigation",
-                  authState: user ? "authenticated" : "unauthenticated" 
-                });
-                navigate("/home", { replace: true });
-              }} 
+              onClick={() => navigate("/home")} 
               className="w-full"
             >
               Go to Home Anyway

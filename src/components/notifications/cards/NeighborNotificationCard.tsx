@@ -3,7 +3,7 @@
  * NeighborNotificationCard.tsx
  * 
  * Specialized notification card for new neighbor announcements.
- * Now with improved highlighting behavior for seamless navigation.
+ * Now using proper sentence formatting without brackets.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -25,7 +25,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   notification,
   onDismiss,
 }) => {
-  // Handle viewing neighbor profile with improved highlighting
+  // Handle viewing neighbor profile
   const handleViewNeighbor = () => {
     logger.debug("Viewing neighbor profile", { 
       contentId: notification.content_id,
@@ -33,8 +33,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
     });
     
     // Navigate to the neighbors section and highlight this neighbor
-    // Pass true to show the toast notification when highlighting
-    highlightItem('neighbor', notification.content_id, true);
+    highlightItem('neighbors', notification.content_id);
     
     if (onDismiss) onDismiss();
   };
@@ -68,12 +67,12 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
       onAction={handleViewNeighbor}
       onDismiss={onDismiss}
     >
-      {/* View profile button with improved styling */}
+      {/* Welcome/Visit profile button */}
       <div className="mt-2">
         <Button
           size="sm"
           variant="outline"
-          className="w-full text-xs py-0 h-7 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+          className="w-full text-xs py-0 h-7"
           onClick={handleViewNeighbor}
         >
           <UserPlus className="h-3.5 w-3.5 mr-1" />

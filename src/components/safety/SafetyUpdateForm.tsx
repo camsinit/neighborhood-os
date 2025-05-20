@@ -25,13 +25,12 @@ interface SafetyUpdateFormProps {
 export default function SafetyUpdateForm({ onClose, existingData, mode = 'create', updateId }: SafetyUpdateFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Fix: Change "General Safety" to "General" which is a valid type in the schema
   const form = useForm<SafetyUpdateFormData>({
     resolver: zodResolver(safetyUpdateSchema),
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "General", // Fixed: Changed from "General Safety" to "General"
+      type: existingData?.type || "General Safety", // Updated to match schema
       imageUrl: existingData?.imageUrl || ""
     },
   });
@@ -71,7 +70,7 @@ export default function SafetyUpdateForm({ onClose, existingData, mode = 'create
         form.reset({
           title: "",
           description: "",
-          type: "General", // Fixed: Changed from "General Safety" to "General"
+          type: "General Safety", // Fixed to match schema
           imageUrl: ""
         });
       }

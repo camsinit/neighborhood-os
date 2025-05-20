@@ -2,7 +2,7 @@
 /**
  * SafetyNotificationCard.tsx
  * 
- * Specialized notification card for community updates and alerts.
+ * Specialized notification card for safety alerts and updates.
  * Includes prominent visual indicators for urgency.
  */
 import React from "react";
@@ -19,8 +19,8 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   notification,
   onDismiss,
 }) => {
-  // Get the update type
-  const updateType = notification.context?.safetyType || 'alert';
+  // Get the safety update type
+  const safetyType = notification.context?.safetyType || 'alert';
   
   // Get actor name for descriptive text
   const actorName = notification.context?.neighborName || 
@@ -28,20 +28,18 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   
   // Create sentence-style title with proper subject-verb-object structure
   const createSentenceTitle = () => {
-    const updateTitle = notification.title || "a community update";
+    const safetyTitle = notification.title || "a safety update";
     
-    // Customize text based on update type
-    if (updateType === 'Emergency') {
-      return `${actorName} reported EMERGENCY: ${updateTitle}`;
-    } else if (updateType === 'Alert') {
-      return `${actorName} posted important alert: ${updateTitle}`;
-    } else if (updateType === 'Infrastructure') {
-      return `${actorName} shared infrastructure update: ${updateTitle}`;
-    } else if (updateType === 'Maintenance') {
-      return `${actorName} posted maintenance notice: ${updateTitle}`;
+    // Customize text based on safety type
+    if (safetyType === 'emergency') {
+      return `${actorName} reported EMERGENCY: ${safetyTitle}`;
+    } else if (safetyType === 'alert') {
+      return `${actorName} posted safety alert: ${safetyTitle}`;
+    } else if (safetyType === 'info') {
+      return `${actorName} shared safety info: ${safetyTitle}`;
     } else {
       // Fallback format
-      return `${actorName} posted community update: ${updateTitle}`;
+      return `${actorName} posted safety update: ${safetyTitle}`;
     }
   };
   
@@ -54,9 +52,9 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
     title: sentenceTitle
   };
   
-  // Handle viewing update details
-  const handleViewUpdate = async () => {
-    // Navigate to the update details
+  // Handle viewing safety details
+  const handleViewSafety = async () => {
+    // Navigate to the safety details
     highlightItem('safety', notification.content_id);
     
     if (onDismiss) onDismiss();
@@ -65,7 +63,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   return (
     <NotificationCard
       notification={notificationWithSentenceTitle}
-      onAction={handleViewUpdate}
+      onAction={handleViewSafety}
       onDismiss={onDismiss}
     />
   );

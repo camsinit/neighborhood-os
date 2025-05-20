@@ -4,16 +4,18 @@ import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 /**
- * Mockup component variants definition using class-variance-authority
- * This defines the different styling options available for the mockup
+ * A component that creates a device or browser mockup container
+ * Used to showcase screenshots or UI examples within a frame
  */
 const mockupVariants = cva(
-  "flex relative z-10 overflow-hidden shadow-2xl border border-border/5 border-t-border/15",
+  // Enhanced shadow properties with larger blur radius and spread
+  // Removed overflow-hidden to prevent shadow clipping
+  "flex relative z-10 border border-border/5 border-t-border/15",
   {
     variants: {
       type: {
-        mobile: "rounded-[48px] max-w-[350px]",
-        responsive: "rounded-md",
+        mobile: "rounded-[48px] max-w-[350px]", // Mobile phone style mockup
+        responsive: "rounded-md", // Generic browser/desktop style mockup
       },
     },
     defaultVariants: {
@@ -22,46 +24,39 @@ const mockupVariants = cva(
   },
 );
 
-/**
- * Props interface for the Mockup component
- * Extends HTML div attributes with custom variant props
- */
 export interface MockupProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof mockupVariants> {}
 
 /**
- * Mockup - A component that frames content as a device mockup
- * 
- * @param type - The type of mockup (mobile or responsive)
- * @param className - Additional CSS classes
- * @param children - Content to display within the mockup
+ * The Mockup component creates a container that resembles a device or browser window
  */
 const Mockup = React.forwardRef<HTMLDivElement, MockupProps>(
-  ({ className, type, children, ...props }, ref) => (
+  ({ className, type, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(mockupVariants({ type, className }))}
+      // Added custom shadow classes for a softer, more spread out shadow
+      className={cn(
+        mockupVariants({ type, className }),
+        "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)]"
+      )}
       {...props}
-    >
-      {/* Ensuring children are properly rendered within the mockup */}
-      {children}
-    </div>
+    />
   ),
 );
 Mockup.displayName = "Mockup";
 
 /**
- * MockupFrame variants definition
- * Defines styling options for the frame around mockups
+ * The outer frame that contains the mockup, providing background and padding
  */
 const frameVariants = cva(
-  "bg-accent/5 flex relative z-10 overflow-hidden rounded-2xl",
+  // Removed overflow-hidden to allow shadow to extend naturally
+  "bg-accent/5 flex relative z-10 rounded-2xl",
   {
     variants: {
       size: {
-        small: "p-2",
-        large: "p-4",
+        small: "p-2", // Less padding for a smaller frame
+        large: "p-4", // More padding for a larger frame
       },
     },
     defaultVariants: {
@@ -70,30 +65,21 @@ const frameVariants = cva(
   },
 );
 
-/**
- * Props interface for the MockupFrame component
- */
 export interface MockupFrameProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof frameVariants> {}
 
-/**
- * MockupFrame - A component that adds a frame around mockups
- * 
- * @param size - The size of the frame (small or large)
- * @param className - Additional CSS classes
- * @param children - Content to display within the frame
- */
 const MockupFrame = React.forwardRef<HTMLDivElement, MockupFrameProps>(
-  ({ className, size, children, ...props }, ref) => (
+  ({ className, size, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(frameVariants({ size, className }))}
+      // Added custom shadow class for the frame
+      className={cn(
+        frameVariants({ size, className }),
+        "shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)]"
+      )}
       {...props}
-    >
-      {/* Ensuring children are properly rendered within the frame */}
-      {children}
-    </div>
+    />
   ),
 );
 MockupFrame.displayName = "MockupFrame";

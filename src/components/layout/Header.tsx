@@ -1,90 +1,119 @@
 
-/**
- * Header component that displays the application header
- */
-import { useUser } from "@supabase/auth-helpers-react";
-import { useNeighborhood } from "@/contexts/neighborhood";
-import { useNavigate, Link } from "react-router-dom";
-import NotificationsPopover from "@/components/notifications/NotificationsPopover";
+import { Settings } from "lucide-react";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NotificationDrawer from "@/components/notifications/NotificationDrawer";
 
 /**
  * Header component props
+ * onOpenSettings is a function that will be called when the settings option is clicked
  */
 interface HeaderProps {
-  // No additional props needed
+  onOpenSettings: () => void;
 }
 
 /**
- * Header component 
+ * Header component
  * 
- * Displays the application header with neighborhood name and notifications
- * Uses consistent routing strategy with useNavigate for all navigation
+ * Displays the top navigation bar with:
+ * - Quick Actions title (now moved from HomePage)
+ * - Notifications button
+ * - User profile dropdown
  */
-const Header = ({}: HeaderProps) => {
-  // Get current user information from Supabase auth
+const Header = ({
+  onOpenSettings
+}: HeaderProps) => {
+  // Get the Supabase client for authentication actions
+  const supabaseClient = useSupabaseClient();
+  // Get the current user
   const user = useUser();
-  
-  // Get neighborhood information from context
-  const {
-    currentNeighborhood
-  } = useNeighborhood();
-  
-  // For navigation
+  // Get the navigation function from react-router
   const navigate = useNavigate();
+  // Get the toast function for showing notifications
+  const { toast } = useToast();
 
-  // Handle profile/settings click
-  const handleProfileClick = () => {
-    console.log("[Header] Navigating to settings page");
-    navigate('/settings');
+  // Query the profile data for the current user
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', user.id).single();
+      return data;
+    },
+    enabled: !!user?.id // Only run the query when user is available
+  });
+
+  /**
+   * Handle signing out the user
+   */
+  const handleSignOut = async () => {
+    try {
+      await supabaseClient.auth.signOut();
+      navigate("/login");
+      toast({
+        title: "Signed out successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        variant: "destructive"
+      });
+    }
   };
 
-  // Handle click on neighborhood name (home)
-  const handleHomeClick = () => {
-    console.log("[Header] Navigating to home page");
-    navigate('/home');
-  };
-
-  // Handle view landing page click
-  const handleViewLandingClick = () => {
-    console.log("[Header] Navigating to landing page");
-    navigate('/landing');
-  };
-
-  // Return the header UI with neighborhood name and user controls
   return (
-    <header className="w-full border-b bg-white px-4 py-3">
-      <div className="flex items-center justify-between">
-        {/* Neighborhood name section - clickable to go home */}
-        <div>
-          <button 
-            onClick={handleHomeClick} 
-            className="font-bold text-2xl hover:text-primary transition-colors"
-          >
-            {currentNeighborhood?.name || 'Welcome'}
-          </button>
-        </div>
-
-        {/* User controls section */}
-        <div className="flex items-center space-x-4">
-          {/* Landing page link */}
-          <button
-            onClick={handleViewLandingClick}
-            className="text-sm text-gray-600 hover:text-primary transition-colors"
-          >
-            View Landing Page
-          </button>
+    // Removed the 'border-b' class from the header to remove the bottom border stroke
+    <header className="h-16 px-4 flex items-center justify-between">
+      {/* Left side - Quick Actions title */}
+      <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+      
+      {/* Right side - notifications and profile */}
+      <div className="flex items-center gap-2">
+        {/* Add the enhanced notification button */}
+        <NotificationDrawer />
+        
+        {/* User profile dropdown menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-md p-1 transition-colors">
+              {/* User avatar */}
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.display_name || 'User'} />
+                <AvatarFallback>
+                  {profile?.display_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              
+              {/* Display name (only show on larger screens) */}
+              <span className="text-sm font-medium hidden md:inline-block">
+                {profile?.display_name || user?.email?.split('@')[0] || 'User'}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
           
-          {/* Notifications */}
-          <NotificationsPopover />
-          
-          {/* User avatar/profile - simplified version */}
-          <button
-            className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium"
-            onClick={handleProfileClick}
-          >
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
-          </button>
-        </div>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            {/* Settings option */}
+            <DropdownMenuItem onClick={onOpenSettings} className="cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator />
+            
+            {/* Sign out option */}
+            <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

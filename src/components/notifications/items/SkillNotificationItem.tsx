@@ -21,7 +21,7 @@ const SkillNotificationItem: React.FC<SkillNotificationItemProps> = ({
     // Mark as read and navigate
     if (notification.content_id) {
       // Fixed highlightItem call to use proper API
-      highlightItem('skill', notification.content_id);
+      highlightItem('skills', notification.content_id);
       onDismiss();
     }
   };

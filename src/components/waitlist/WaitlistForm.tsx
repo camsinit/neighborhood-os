@@ -1,15 +1,18 @@
 
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
+import { StarBorder } from "@/components/ui/star-border"; // Import the StarBorder component
+import { Badge } from "@/components/ui/badge"; // Import Badge for the banner
 
 /**
  * WaitlistForm component
  * 
- * This component renders an enhanced form for users to join the waitlist
- * using the animated PlaceholdersAndVanishInput component.
+ * This component renders a form for users to join the waitlist
+ * by submitting their email address. It uses the StarBorder component
+ * for a more decorative, animated appearance.
  */
 const WaitlistForm = () => {
   // State to track the email input value
@@ -20,22 +23,6 @@ const WaitlistForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   // Get toast notification function
   const { toast } = useToast();
-
-  // Placeholder suggestions for the input field
-  const placeholders = [
-    "Enter your email to join the waitlist",
-    "Get early access to neighborhoodOS",
-    "Be the first to know when we launch",
-    "Connect with your neighbors",
-    "Join our community of neighbors",
-  ];
-
-  /**
-   * Handle email input changes
-   */
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
 
   /**
    * Handle form submission
@@ -109,7 +96,8 @@ const WaitlistForm = () => {
   };
 
   return (
-    // Container for the entire form with the badge
+    // Modified container to control width directly at this level 
+    // and ensure it applies to both the badge and form
     <div className="w-full max-w-[600px] mx-auto">
       {/* Banner announcing invite rollout */}
       <div className="w-full text-center mb-2">
@@ -121,20 +109,41 @@ const WaitlistForm = () => {
         </Badge>
       </div>
       
-      {/* If submitted, show confirmation message. Otherwise, show enhanced input */}
-      {isSubmitted ? (
-        <div className="w-full flex justify-center">
-          <div className="text-center py-3 px-6 rounded-full border border-green-200 bg-green-50 text-green-700 font-medium">
-            We'll be in touch!
-          </div>
-        </div>
-      ) : (
-        <PlaceholdersAndVanishInput 
-          placeholders={placeholders}
-          onChange={handleEmailChange}
-          onSubmit={handleSubmit}
-        />
-      )}
+      {/* Changed wrapper to full width to properly apply max-width */}
+      <StarBorder as="div" className="w-full">
+        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
+          {/* If submitted, show confirmation message. Otherwise, show email input field */}
+          {isSubmitted ? (
+            // Confirmation message displayed in place of the input
+            <div className="flex-grow py-2 px-4 text-center text-primary font-medium">
+              We'll be in touch!
+            </div>
+          ) : (
+            // Email input field with rounded corners
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="flex-grow rounded-full" // Oval shape for the input
+              disabled={isLoading}
+              aria-label="Email for waitlist"
+            />
+          )}
+          
+          {/* Submit button with rounded corners - hidden after successful submission */}
+          {!isSubmitted && (
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="rounded-full" // Oval shape for the button
+            >
+              {isLoading ? "Joining..." : "Join Waitlist"}
+            </Button>
+          )}
+        </form>
+      </StarBorder>
     </div>
   );
 };

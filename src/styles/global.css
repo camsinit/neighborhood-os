@@ -28,9 +28,4 @@
   animation: rainbow-pulse 2s 1;
 }
 
-/* Button consistent styling */
-button, .button {
-  @apply shadow-sm transition-all duration-200;
-}
-
 /* Other global styles can go here */

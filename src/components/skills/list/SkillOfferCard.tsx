@@ -1,25 +1,22 @@
 
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
-import { User } from 'lucide-react';
 
 /**
- * SkillOfferCard - The card showing an offered skill
+ * SkillOfferCard - The compact card showing an offered skill
  * 
- * Enhanced with:
- * - Simplified visual design
- * - Hidden actions that appear only in detail view
- * - More streamlined information display
+ * This appears in the list of available skills with actions
+ * appropriate based on whether you're the owner or not.
  */
 interface SkillOfferCardProps {
   skill: SkillWithProfile;
   isOwner: boolean;
-  onDelete?: () => void;
-  isDeleting?: boolean;
-  onRequestSkill?: () => void;
-  onClick?: () => void;
-  hideActions?: boolean; // New prop to control action visibility
+  onDelete: () => void;
+  isDeleting: boolean;
+  onRequestSkill: () => void;
+  onClick: () => void;
 }
 
 // This maps categories to their appropriate colors
@@ -33,50 +30,55 @@ const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
 
 const SkillOfferCard = ({ 
   skill, 
-  isOwner,
+  isOwner, 
   onDelete,
-  isDeleting,
+  isDeleting, 
   onRequestSkill,
-  onClick,
-  hideActions = false
+  onClick 
 }: SkillOfferCardProps) => {
+  // This function handles the request button click
+  // We stop propagation to prevent the card onClick
+  const handleRequestClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRequestSkill();
+  };
+
   // Get the category colors from our map, fallback to technology if not found
   const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
-  
+
   return (
     <div 
-      className="flex flex-col p-4 cursor-pointer relative w-full"
+      data-skill-id={skill.id}
+      className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
       onClick={onClick}
     >
-      <div className="flex items-start justify-between w-full">
-        {/* User profile and skill title */}
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border">
-            <AvatarImage src={skill.profiles?.avatar_url || undefined} />
-            <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <h4 className="font-medium text-gray-900">{skill.title}</h4>
-            <p className="text-xs text-gray-500 flex items-center">
-              <User className="h-3 w-3 mr-1" />
-              {skill.profiles?.display_name || 'Anonymous'}
-            </p>
-          </div>
+      {/* User profile and skill title */}
+      <div className="flex items-center gap-3 flex-grow">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={skill.profiles?.avatar_url || undefined} />
+          <AvatarFallback>{skill.profiles?.display_name?.[0] || '?'}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          <h4 className="font-medium text-gray-900">{skill.title}</h4>
         </div>
-        
-        {/* Category tag */}
-        <Badge 
-          className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs`}
-        >
-          {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
-        </Badge>
       </div>
       
-      {/* Description preview - only show 1 line instead of 2 */}
-      {skill.description && (
-        <p className="mt-2 text-sm text-gray-700 line-clamp-1">
-          {skill.description}
-        </p>
+      {/* Category tag that hides on hover */}
+      <Badge 
+        className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs absolute right-2 top-1/2 transform -translate-y-1/2 group-hover:opacity-0 transition-opacity`}
+      >
+        {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
+      </Badge>
+      
+      {/* Request button that shows on hover */}
+      {!isOwner && (
+        <Button 
+          variant="outline" 
+          onClick={handleRequestClick}
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+        >
+          Request Skill
+        </Button>
       )}
     </div>
   );

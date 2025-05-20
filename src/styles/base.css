@@ -1,47 +1,60 @@
+/* Base styling to match chat aesthetic */
+@tailwind base;
+@tailwind utilities;
 
-/**
- * Base styles for the application
- */
+/* Import Inter font for consistent typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Base styling to match chat aesthetic */
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    
     --radius: 0.75rem;
-    --border-color: #f1f1f1; /* Added global border color variable */
-  }
-  
-  html {
-    scroll-behavior: smooth;
-  }
-  
-  body {
-    @apply bg-background text-foreground antialiased;
-  }
-  
-  /* Interactive element focus states */
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-primary;
-  }
-  
-  /* Visual indicator for keyboard navigation */
-  .focus-indicator:focus-visible {
-    @apply ring-2 ring-offset-2 ring-primary;
-  }
-  
-  /* Ensure all UI elements have rounded corners by default */
-  button, 
-  .btn, 
-  input, 
-  select, 
-  textarea, 
-  .card, 
-  .modal, 
-  .popover, 
-  .dropdown {
-    @apply rounded-md;
-  }
-  
-  /* Global border color override */
-  .border, .border-2, .border-3, .border-4 {
-    @apply border-gray-200;
+    
+    /* Section-specific color variables - updated with full saturation values */
+    --calendar-color: 221.2 100% 53.3%;
+    --calendar-light: 221.2 10% 96%;
+    
+    --skills-color: 142.1 100% 36.3%;
+    --skills-light: 142.1 10% 96%;
+    
+    --goods-color: 24.6 100% 53.1%;
+    --goods-light: 24.6 10% 96%;
+    
+    --safety-color: 0 100% 60.2%;
+    --safety-light: 0 10% 96%;
+    
+    --care-color: 262.1 100% 57.8%;
+    --care-light: 262.1 10% 96%;
+    
+    --neighbors-color: 262.1 100% 57.8%;
+    --neighbors-light: 262.1 10% 96%;
   }
 }

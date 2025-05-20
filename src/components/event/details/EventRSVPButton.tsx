@@ -1,4 +1,5 @@
 
+import { Button } from "@/components/ui/button";
 import { useUser } from "@supabase/auth-helpers-react";
 import RSVPButton from "@/components/event/rsvp/RSVPButton";
 
@@ -26,7 +27,6 @@ const EventRSVPButton = ({
   if (isHost) return null;
   
   // Use the dedicated RSVPButton component
-  // The RSVPButton now uses ActionButton with calendar theme
   return (
     <RSVPButton 
       eventId={eventId} 

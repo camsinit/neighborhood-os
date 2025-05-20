@@ -3,42 +3,23 @@
  * Types for the highlight system
  */
 
-/**
- * Valid item types that can be highlighted
- */
+// Valid item types that can be highlighted in the UI
 export type HighlightableItemType = 
-  | 'event'
-  | 'skill'  
-  | 'goods'
-  | 'safety'
-  | 'care'
-  | 'neighbor'
-  | 'profile';
+  | 'event' 
+  | 'safety' 
+  | 'skills' 
+  | 'goods' 
+  | 'neighbors';
 
-/**
- * Detail object for highlighting
- * 
- * Contains all the information needed to highlight an item
- */
+// Structure for a highlight event
 export interface HighlightItemDetail {
-  itemType: HighlightableItemType;
-  itemId: string;
+  type: HighlightableItemType;
+  id: string;
 }
 
-/**
- * CSS class names used by the highlight system
- */
-export const highlightClassNames = {
-  active: 'active',
-  item: 'highlight-item'
-};
-
-/**
- * Result interface for useHighlightedItem hook
- */
+// Hook result type for highlighted items
 export interface UseHighlightedItemResult {
   id: string | null;
   isHighlighted: boolean;
   clearHighlight: () => void;
 }
-

@@ -1,43 +1,99 @@
-
 import { UseFormReturn } from "react-hook-form";
-import { ProfileFormValues } from "./types";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProfileImageUpload } from "./ProfileImageUpload";
-import { BasicInfoFields } from "./account/BasicInfoFields";
-import { PreferenceFields } from "./account/PreferenceFields";
-import { useAccountTabForm } from "./hooks/useAccountTabForm";
-
-/**
- * AccountTab component for user settings
- * 
- * Displays and manages user profile settings like display name, bio, 
- * language preference, timezone, and theme.
- * 
- * @param form - The form instance from react-hook-form
- */
+import { ProfileFormValues } from "./types";
 export const AccountTab = ({
   form
 }: {
   form: UseFormReturn<ProfileFormValues>;
 }) => {
-  // Use the dedicated hook for this tab
-  const { form: processedForm } = useAccountTabForm(form);
-  
-  return (
-    <div className="space-y-6">
-      {/* Profile image upload component */}
+  return <div className="space-y-6">
       <ProfileImageUpload />
       
-      {/* Basic profile information */}
+      {/* Basic Info */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Basic Information</h3>
-        <BasicInfoFields form={processedForm} />
-      </div>
+        <FormField control={form.control} name="display_name" render={({
+        field
+      }) => <FormItem>
+              <FormLabel>Display Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Your display name" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your public display name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>} />
 
-      {/* User preferences */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Preferences</h3>
-        <PreferenceFields form={processedForm} />
+        <FormField control={form.control} name="bio" render={({
+        field
+      }) => <FormItem>
+              <FormLabel>Bio</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Tell us about yourself" className="resize-none" {...field} />
+              </FormControl>
+              <FormDescription>
+                Write a brief bio about yourself.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>} />
+
+        {/* Preferences */}
+        <FormField control={form.control} name="language" render={({
+        field
+      }) => <FormItem>
+              
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Spanish</SelectItem>
+                  <SelectItem value="fr">French</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>} />
+
+        <FormField control={form.control} name="timezone" render={({
+        field
+      }) => <FormItem>
+              
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="UTC">UTC</SelectItem>
+                  <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                  <SelectItem value="America/Chicago">Central Time</SelectItem>
+                  <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>} />
+
+        <FormField control={form.control} name="theme" render={({
+        field
+      }) => <FormItem>
+              
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>} />
       </div>
-    </div>
-  );
+    </div>;
 };

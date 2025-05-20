@@ -1,5 +1,3 @@
-
-
 import {
   Dialog,
   DialogContent,
@@ -88,4 +86,3 @@ const SafetyArchiveDialog = ({ open, onOpenChange }: SafetyArchiveDialogProps) =
 };
 
 export default SafetyArchiveDialog;
-

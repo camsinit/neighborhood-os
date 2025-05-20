@@ -21,11 +21,8 @@ export const useNotificationsPopoverData = (showArchived: boolean): UseQueryResu
   // Use the base notifications data hook
   const query = useNotificationsData(showArchived);
   
-  // Add refresh listeners - only passing the refetch function
-  // which is the only parameter expected by useNotificationsRefresh
-  useNotificationsRefresh({ 
-    refetch: query.refetch
-  });
+  // Add refresh listeners
+  useNotificationsRefresh({ refetch: query.refetch });
   
   // Return the query result
   return query;

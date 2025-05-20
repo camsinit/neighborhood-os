@@ -1,62 +1,52 @@
 
 /**
- * Custom toast hook
+ * This is a compatibility layer for Sonner toast
  * 
- * This is a centralized toast implementation that standardizes toast appearance
- * and behavior across the application.
+ * It provides a unified API that works with both the older toast system
+ * and the newer Sonner toast implementation.
  */
 import { toast as sonnerToast } from 'sonner';
 
-// Define our own ToastOptions type instead of importing it
-type ToastOptions = {
-  id?: string | number;
-  duration?: number;
-  icon?: string | React.ReactNode;
-  promise?: Promise<any>;
-  description?: string | React.ReactNode;
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
-  cancel?: React.ReactNode;
-  action?: React.ReactNode;
-  onDismiss?: (id: string | number) => void;
-  onAutoClose?: (id: string | number) => void;
-  className?: string;
-  style?: React.CSSProperties;
-  cancelButtonStyle?: React.CSSProperties;
-  actionButtonStyle?: React.CSSProperties;
-  unstyled?: boolean;
-};
-
-type ToastProps = {
-  description: string;
+// Custom toast type that handles both the old API (title/description) and new API (description only)
+export type Toast = {
   title?: string;
-  variant?: 'default' | 'destructive';
-} & ToastOptions;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success';
+};
 
-/**
- * Toast function for showing notifications
- * 
- * @param props - Toast properties including description, title and variant
- */
-export const toast = ({ description, title, variant = 'default', ...props }: ToastProps) => {
-  // Use different toast types based on the variant
-  if (variant === 'destructive') {
-    return sonnerToast.error(title || 'Error', {
-      description,
-      ...props,
-    });
+// Adapter function that converts our app's toast format to Sonner's format
+const adaptToastToSonner = (props: Toast) => {
+  // If using the old API with title, combine title and description
+  if (props.title) {
+    const message = props.description 
+      ? `${props.title}: ${props.description}`
+      : props.title;
+    
+    // Map variant to Sonner's variants
+    if (props.variant === 'destructive') {
+      return sonnerToast.error(message);
+    } else if (props.variant === 'success') {
+      return sonnerToast.success(message);
+    } else {
+      return sonnerToast(message);
+    }
+  } 
+  // If using the new API with just description
+  else {
+    return sonnerToast(props.description || '');
   }
-  
-  return sonnerToast(title || 'Notice', {
-    description,
-    ...props,
-  });
 };
 
-/**
- * Hook for accessing toast functionality
- * 
- * @returns Toast function and promise methods
- */
-export const useToast = () => {
-  return { toast };
+// Compatibility function that mimics the old toast API but uses Sonner
+export const toast = (props: Toast) => {
+  return adaptToastToSonner(props);
 };
+
+// For backwards compatibility with components using useToast hook
+export function useToast() {
+  return {
+    toast: adaptToastToSonner,
+    // For compatibility with components expecting toasts array
+    toasts: [] 
+  };
+}

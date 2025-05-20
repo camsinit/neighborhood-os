@@ -25,16 +25,16 @@
   
   /* Card styling based on chat messages */
   .chat-card {
-    @apply rounded-lg px-4 py-3 shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200;
+    @apply rounded-lg px-4 py-3 shadow-chat hover:shadow-chat-hover transition-shadow duration-200;
   }
 
   /* Module card styling for consistent component appearance */
   .module-card {
-    @apply bg-white rounded-lg p-6 shadow-md border border-gray-100;
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg;
   }
 
   .module-card-sm {
-    @apply bg-white rounded-lg p-4 shadow-sm border border-gray-100;
+    @apply bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm;
   }
   
   /* Highlight animations */
@@ -63,28 +63,5 @@
     100% {
       box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
     }
-  }
-
-  /* Ensure UI elements have consistent rounded corners */
-  button, 
-  .button,
-  input,
-  select,
-  textarea,
-  .card,
-  .dialog,
-  .popover,
-  .dropdown-menu,
-  .alert,
-  .toast,
-  .badge {
-    @apply rounded-md;
-  }
-  
-  /* Ensure avatars have full rounded appearance */
-  .avatar, 
-  .avatar-image, 
-  .avatar-fallback {
-    @apply rounded-full;
   }
 }

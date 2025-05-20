@@ -57,8 +57,7 @@ const AddSupportRequestDialog = ({
       {/* Render the appropriate form based on the view prop */}
       {isSkillsView ? (
         <SkillForm 
-          onSuccess={() => onOpenChange(false)}
-          onCancel={() => onOpenChange(false)}
+          onClose={() => onOpenChange(false)}
           mode={initialRequestType === 'need' ? 'request' : 'offer'}
         />
       ) : isGoodsView ? (

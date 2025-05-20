@@ -4,7 +4,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { refreshEvents } from "@/utils/refreshEvents";
-import { toast } from "@/hooks/use-toast"; // Updated import path
+import { toast } from "sonner";
 import { createLogger } from "@/utils/logger";
 
 // Create a dedicated logger for this module
@@ -58,11 +58,7 @@ export async function archiveNotification(notificationId: string): Promise<boole
       
     if (error) {
       logger.error('Error archiving notification:', error);
-      toast({
-        title: "Couldn't archive notification",
-        description: "Please try again later",
-        variant: "destructive"
-      });
+      toast.error("Couldn't archive notification. Please try again later.");
       return false;
     }
     
@@ -72,11 +68,7 @@ export async function archiveNotification(notificationId: string): Promise<boole
     return true;
   } catch (error) {
     logger.error('Exception in archiveNotification:', error);
-    toast({
-      title: "Couldn't archive notification",
-      description: "An unexpected error occurred",
-      variant: "destructive"
-    });
+    toast.error("Couldn't archive notification. An unexpected error occurred.");
     return false;
   }
 }
@@ -105,11 +97,7 @@ export async function markAllAsRead(userId: string): Promise<boolean> {
       
     if (error) {
       logger.error('Error marking all as read:', error);
-      toast({
-        title: "Couldn't update notifications",
-        description: "Please try again later", 
-        variant: "destructive"
-      });
+      toast.error("Couldn't update notifications. Please try again later.");
       return false;
     }
     
@@ -119,11 +107,7 @@ export async function markAllAsRead(userId: string): Promise<boolean> {
     return true;
   } catch (error) {
     logger.error('Exception in markAllAsRead:', error);
-    toast({
-      title: "Couldn't update notifications", 
-      description: "An unexpected error occurred",
-      variant: "destructive"
-    });
+    toast.error("Couldn't update notifications. An unexpected error occurred.");
     return false;
   }
 }

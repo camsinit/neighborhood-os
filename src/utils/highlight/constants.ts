@@ -2,55 +2,43 @@
 /**
  * Constants for the highlight system
  * 
- * This file contains constants used throughout the highlight system,
- * including data attributes, route mappings, etc.
+ * This file contains route mappings and configuration for the highlight system.
  */
+import { HighlightableItemType } from './types';
 
-import { HighlightableItemType } from "./types";
-
-/**
- * Data attributes for each highlightable item type
- * 
- * These attributes are added to DOM elements to make them findable
- * by the highlight system.
- */
-export const dataAttributeMap: Record<HighlightableItemType, string> = {
-  event: 'event-id',
-  skill: 'skill-id',
-  goods: 'goods-id',
-  safety: 'update-id',  // We're keeping "safety" for backwards compatibility
-  care: 'care-id',
-  neighbor: 'neighbor-id',
-  profile: 'profile-id'
-};
-
-/**
- * Route mapping for each highlightable item type
- * 
- * These routes are used to navigate to the correct page when
- * highlighting an item.
- */
+// Map item types to their respective routes
 export const routeMap: Record<HighlightableItemType, string> = {
   event: '/calendar',
-  skill: '/skills',
-  goods: '/goods',
   safety: '/safety',
-  care: '/care',
-  neighbor: '/neighbors',
-  profile: '/profile'
+  skills: '/skills',
+  goods: '/goods',
+  neighbors: '/neighbors'
 };
 
-/**
- * Human-readable names for each item type
- * 
- * These are used in toast notifications and other user-facing messages.
- */
+// Animation configuration for highlighted items
+export const highlightConfig = {
+  duration: 2000,       // Duration of highlight in milliseconds
+  color: '#FBBF24',     // Amber color for highlight
+  fadeDuration: 500     // Fade out duration in milliseconds
+};
+
+// Delay before scrolling to an element
+export const scrollDelay = 200;  // milliseconds
+
+// Map item types to their respective data attributes
+export const dataAttributeMap: Record<HighlightableItemType, string> = {
+  event: 'event-id',
+  safety: 'update-id',
+  skills: 'skill-id',
+  goods: 'goods-id',
+  neighbors: 'neighbor-id'
+};
+
+// Readable names for item types (for notifications)
 export const readableTypeNames: Record<HighlightableItemType, string> = {
   event: 'Event',
-  skill: 'Skill',
-  goods: 'Item',
-  safety: 'Update',  // Changed from "Safety Update" to just "Update"
-  care: 'Care Request',
-  neighbor: 'Neighbor',
-  profile: 'Profile'
+  safety: 'Safety Update',
+  skills: 'Skill',
+  goods: 'Goods Item',
+  neighbors: 'Neighbor'
 };
