@@ -6,7 +6,7 @@
  */
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import HomePage from "./components/HomePage";
+import HomePage from "./pages/HomePage"; // Corrected import path
 
 // This is a placeholder router configuration that matches our App.tsx routes
 // Not currently in use, but kept for reference and potential future refactoring
