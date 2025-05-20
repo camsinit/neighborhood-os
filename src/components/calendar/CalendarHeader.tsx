@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { CalendarViewType } from "@/hooks/calendar/useCalendarView";
 import { createLogger } from "@/utils/logger";
 
-// Create a logger for this component
+// Create a logger for this component with enhanced debugging
 const logger = createLogger('CalendarHeader');
 
 /**
@@ -47,8 +47,10 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   const { currentNeighborhood } = useNeighborhood();
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
 
-  // Log the currentDate to verify it's correct
-  logger.debug(`Current date: ${currentDate.toISOString()} - Day of week: ${currentDate.getDay()} (${format(currentDate, 'EEEE')})`);
+  // Log the currentDate to verify it's correctly set
+  logger.debug(`Current date: ${currentDate.toISOString()}`);
+  logger.debug(`Day of week (0=Sun, 6=Sat): ${currentDate.getDay()}`);
+  logger.debug(`Day name: ${format(currentDate, 'EEEE')}`);
 
   // Fetch neighborhood timezone
   useEffect(() => {
@@ -62,6 +64,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
+          logger.debug(`Fetched neighborhood timezone: ${data.timezone}`);
         }
       }
     };
@@ -76,6 +79,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       
       // Get the formatted date in the neighborhood timezone
       const formattedDate = formatInNeighborhoodTimezone(currentDate, dateFormat, neighborhoodTimezone);
+      logger.debug(`Formatted date: ${formattedDate} using timezone: ${neighborhoodTimezone}`);
       
       return formattedDate;
     } catch (error) {

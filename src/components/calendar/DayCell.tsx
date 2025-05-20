@@ -6,6 +6,10 @@ import EventCard from "../EventCard";
 import { Event } from "@/types/localTypes";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for the DayCell component for better debugging
+const logger = createLogger('DayCell');
 
 interface DayCellProps {
   date: Date;
@@ -48,7 +52,12 @@ const DayCell = ({
   const today = isToday(date);
   
   // Get the day name directly from the date object to ensure correctness
+  // This ensures each cell knows its own day of week correctly
   const dayName = format(date, 'EEEE');
+  const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Add debug logging to help identify day of week issues
+  logger.debug(`DayCell for ${format(date, 'yyyy-MM-dd')} has day ${dayOfWeek} (${dayName})`);
   
   return (
     <div 
@@ -60,7 +69,8 @@ const DayCell = ({
         className
       )}
       data-date={format(date, 'yyyy-MM-dd')}
-      data-day={dayName} // Add data attribute for the day name for debugging
+      data-day={dayName} // Add data attribute for the day name for easier debugging
+      data-daynum={dayOfWeek} // Add numeric day of week for easier debugging
     >
       {/* Add Event Button - Hidden by default, shown on hover */}
       <button

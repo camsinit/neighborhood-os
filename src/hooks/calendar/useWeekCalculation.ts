@@ -27,10 +27,12 @@ export function useWeekCalculation(currentDate: Date) {
     return addDays(new Date(weekStart), i);
   });
   
-  // Log the dates to help with debugging
-  logger.debug(`Week dates calculated from ${currentDate.toDateString()}:`);
+  // Enhanced logging to help with debugging
+  logger.debug(`Week calculation for date ${currentDate.toDateString()}`);
+  logger.debug(`Week starts on ${weekStart.toDateString()}`);
   weekDates.forEach((date, i) => {
-    logger.debug(`Day ${i} (${date.toDateString()}) is a ${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()]}`);
+    const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][date.getDay()];
+    logger.debug(`Index ${i}: ${date.toDateString()} is a ${dayName} (day ${date.getDay()})`);
   });
   
   return { weekDates };

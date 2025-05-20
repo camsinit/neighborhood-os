@@ -77,10 +77,10 @@ const WeekView = ({
 
   return (
     <div className="space-y-2">
-      {/* Day names header - Using the actual dates to determine day names */}
+      {/* Day names header - Getting day names directly from the weekDates array */}
       <div className="grid grid-cols-7 mb-2">
         {weekDates.map((date, index) => {
-          // Get day name directly from the date object to ensure correct alignment
+          // Get day name directly from each date object to ensure correct alignment
           const dayName = format(date, 'EEE');
           return (
             <div 

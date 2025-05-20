@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isWeekend } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isWeekend, startOfWeek } from 'date-fns';
 import { Event } from '@/types/localTypes';
 import DayCell from './DayCell';
 import AddEventDialog from '../AddEventDialog';
@@ -77,12 +77,17 @@ const MonthView = ({
     visible: { opacity: 1 }
   };
 
-  // Get day names for the header - using actual dates from first week
+  // Get consistent week days for the header - make sure they're derived consistently
+  // Use startOfWeek to get Sunday, then add days to get consistent day names
+  const firstDayOfWeek = startOfWeek(new Date(), { weekStartsOn: 0 }); // 0 = Sunday
   const dayNames = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(days[0]); // Start with the first day
-    date.setDate(date.getDate() - date.getDay() + i); // Adjust to get Sunday through Saturday
-    return format(date, 'EEE');
+    const date = new Date(firstDayOfWeek);
+    date.setDate(date.getDate() + i);
+    return format(date, 'EEE'); // Short day name
   });
+
+  logger.debug("MonthView rendering with day names:", dayNames.join(", "));
+  logger.debug(`First day: ${format(days[0], 'yyyy-MM-dd')} is ${format(days[0], 'EEEE')}`);
 
   return (
     <div>
@@ -92,11 +97,13 @@ const MonthView = ({
         initial="hidden"
         animate="visible"
       >
-        {/* Day name headers */}
+        {/* Day name headers - These will always be Sun, Mon, Tue, etc. in correct order */}
         {dayNames.map((day, index) => (
           <div 
             key={`header-${index}`} 
             className="text-sm font-medium text-gray-700 text-center p-2 bg-gray-100 rounded-t-md"
+            data-index={index}
+            data-day={['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][index]}
           >
             {day}
           </div>
@@ -109,11 +116,19 @@ const MonthView = ({
             format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
           );
           
+          // Calculate the grid position based on day of week
+          // We need to position the first day of the month correctly
+          const dayOfWeek = day.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const dayName = format(day, 'EEEE'); // Full day name for debugging
+          
+          logger.debug(`Cell for ${format(day, 'yyyy-MM-dd')} has day of week: ${dayOfWeek} (${dayName})`);
+          
           return (
             <motion.div 
               key={format(day, 'yyyy-MM-dd')} 
               variants={cellAnimation}
               className="rounded-md overflow-hidden shadow-sm"
+              style={day.getDate() === 1 ? { gridColumnStart: dayOfWeek + 1 } : undefined}
             >
               <DayCell
                 date={day}
