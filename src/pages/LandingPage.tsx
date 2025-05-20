@@ -11,8 +11,9 @@ import { ArrowRight } from "lucide-react";
 /**
  * LandingPage component
  * 
- * The public-facing landing page that shows features of neighborhoodOS.
- * Now accessible to both authenticated and non-authenticated users.
+ * The public-facing landing page showcasing the features and benefits of neighborhoodOS.
+ * This page is accessible to both authenticated and non-authenticated users,
+ * with adjustments to the call-to-actions based on authentication status.
  */
 const LandingPage = () => {
   // Initialize the navigate function from React Router to handle redirections
@@ -85,17 +86,23 @@ const LandingPage = () => {
         )}
       </header>
       
-      {/* IMPORTANT: Always show the full landing page content, regardless of authentication status */}
-      {/* Hero section with waitlist form and app preview */}
+      {/* Hero section with waitlist form and neighborhood dashboard preview */}
       <HeroSection 
-        title="neighborhoodOS" 
-        description="The neighborhood operating system to create a caring neighborhood"
+        title="Create a caring neighborhood" 
+        description="neighborhoodOS helps build stronger community connections through sharing skills, resources, and support"
         actions={[]} 
-        waitlistForm={isAuthenticated ? null : <WaitlistForm />} 
+        waitlistForm={isAuthenticated ? null : <WaitlistForm />}
         image={{
-          src: "/lovable-uploads/f04070b4-dab4-46df-8af0-0d0960eb1119.png",
-          alt: "Skills exchange platform preview"
+          src: "/lovable-uploads/9f431737-fadd-45cd-a000-e759985ae867.png",
+          alt: "Neighborhood dashboard preview showing activity feed and quick actions"
         }} 
+        badge={{
+          text: "Now accepting new neighborhoods",
+          action: {
+            text: "Join waitlist",
+            href: "#waitlist"
+          }
+        }}
       />
       
       {/* Features section */}

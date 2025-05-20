@@ -89,7 +89,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Add brand colors for the glow component
+                brand: {
+                    DEFAULT: "hsl(var(--brand, var(--primary)))",
+                    foreground: "hsl(var(--brand-foreground, var(--primary-foreground)))"
+                }
 			},
 			keyframes: {
 				'accordion-down': {

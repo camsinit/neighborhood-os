@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
-import { Mockup } from "@/components/ui/mockup";
+import { Mockup, MockupFrame } from "@/components/ui/mockup";
+import { Glow } from "@/components/ui/glow";
 import { cn } from "@/lib/utils";
 import React from "react";
 
