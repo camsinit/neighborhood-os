@@ -1,4 +1,12 @@
 
+/**
+ * EventSheetContent component displays the full details of an event
+ * in a slide-out sheet
+ * 
+ * @param event - The event data to display
+ * @param EditButton - Optional edit button component
+ * @param onOpenChange - Function to control the sheet's open state
+ */
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -12,14 +20,6 @@ import EventDescription from "./details/EventDescription";
 import EventRSVPButton from "./details/EventRSVPButton";
 import EventAttendeesList from "./details/EventAttendeesList";
 
-/**
- * EventSheetContent component displays the full details of an event
- * in a slide-out sheet
- * 
- * @param event - The event data to display
- * @param EditButton - Optional edit button component
- * @param onOpenChange - Function to control the sheet's open state
- */
 const EventSheetContent = ({ 
   event, 
   EditButton,
@@ -73,7 +73,7 @@ const EventSheetContent = ({
       </SheetHeader>
 
       <div className="space-y-6">
-        {/* Event details using our new components */}
+        {/* Event details using our components */}
         <EventDateTime 
           date={event.time} 
           neighborhoodTimezone={neighborhoodTimezone} 
@@ -88,7 +88,7 @@ const EventSheetContent = ({
         
         <EventDescription description={event.description} />
         
-        {/* RSVP button */}
+        {/* RSVP button - added explicitly here to ensure it appears */}
         <EventRSVPButton 
           eventId={event.id} 
           isHost={isHost}

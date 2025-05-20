@@ -1,4 +1,10 @@
 
+/**
+ * RSVPButton component allows users to RSVP to events
+ * 
+ * This component handles both adding and removing RSVPs for events,
+ * and visually indicates the current RSVP status.
+ */
 import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
 import { RSVPButtonProps } from "./types";
