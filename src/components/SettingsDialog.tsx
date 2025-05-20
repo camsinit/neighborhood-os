@@ -1,4 +1,10 @@
 
+/**
+ * DEPRECATED: This component is no longer used in the main application flow.
+ * Settings functionality is now provided through the dedicated SettingsPage component.
+ * This file is kept only for reference or legacy support.
+ */
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import SettingsDialogContent from "./settings/SettingsDialogContent";
 
@@ -8,8 +14,7 @@ import SettingsDialogContent from "./settings/SettingsDialogContent";
  * This is a simplified wrapper component that provides the dialog shell
  * and delegates the actual content to the SettingsDialogContent component.
  * 
- * @param open - Whether the dialog is open
- * @param onOpenChange - Function to call when open state changes
+ * @deprecated Use SettingsPage instead for the main application flow
  */
 const SettingsDialog = ({ 
   open, 
@@ -18,6 +23,8 @@ const SettingsDialog = ({
   open: boolean; 
   onOpenChange: (open: boolean) => void 
 }) => {
+  console.log("[SettingsDialog] DEPRECATED: This component should not be used directly anymore");
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[calc(96vh)] overflow-hidden flex flex-col">

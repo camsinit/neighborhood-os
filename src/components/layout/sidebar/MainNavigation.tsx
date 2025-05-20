@@ -13,20 +13,23 @@ const MainNavigation = () => {
   // Get current location to determine which nav item is active
   const location = useLocation();
   
-  // Main navigation item (Home) - This is the main entry point
+  // Define a single navigation item for home
   const mainNavItems = [
     { 
       icon: Home, 
       label: "Home", 
-      href: "/home" // Standardized to use /home path
+      href: "/home" // Always use /home (not /dashboard)
     }
   ];
 
   return (
     <div className="space-y-1">
       {mainNavItems.map((item) => {
-        // Check if current path matches this nav item
-        const isActive = location.pathname === item.href;
+        // Check if current path matches this nav item or is dashboard (which redirects to home)
+        const isActive = 
+          location.pathname === item.href || 
+          (item.href === "/home" && location.pathname === "/dashboard");
+          
         return (
           <Link key={item.href} to={item.href}>
             <Button

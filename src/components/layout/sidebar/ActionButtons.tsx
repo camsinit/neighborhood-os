@@ -10,8 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * ActionButtons component
  * 
- * Displays the settings and invite buttons at the bottom of the sidebar
- * Now uses the user's avatar for the settings button instead of a gear icon
+ * Displays the settings and invite buttons at the bottom of the sidebar.
+ * Now uses direct navigation to dedicated pages instead of opening dialogs.
  */
 const ActionButtons = () => {
   // Use React Router's navigate function for page navigation
@@ -53,6 +53,17 @@ const ActionButtons = () => {
     }
   }, [user]);
   
+  // Log navigation for debugging purposes
+  const handleSettingsClick = () => {
+    console.log("[ActionButtons] Navigating to settings page");
+    navigate('/settings');
+  };
+  
+  const handleInviteClick = () => {
+    console.log("[ActionButtons] Navigating to invite page");
+    navigate('/invite');
+  };
+  
   return (
     <div className="space-y-2">
       {/* Settings button - Navigate to settings page */}
@@ -60,9 +71,8 @@ const ActionButtons = () => {
         variant="ghost" 
         size="sm"
         className="w-full justify-start bg-white gap-3 text-base font-medium" 
-        onClick={() => navigate('/settings')}
+        onClick={handleSettingsClick}
       >
-        {/* Replace the Settings icon with the user's Avatar */}
         <Avatar className="mr-2 h-6 w-6">
           <AvatarImage src={avatarUrl} />
           <AvatarFallback>
@@ -77,7 +87,7 @@ const ActionButtons = () => {
         variant="ghost"
         size="sm"
         className="w-full justify-start bg-white gap-3 text-base font-medium"
-        onClick={() => navigate('/invite')}
+        onClick={handleInviteClick}
       >
         <UserPlus className="mr-2 h-4 w-4" />
         Invite Neighbor

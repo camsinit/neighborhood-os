@@ -11,18 +11,12 @@ import DiagnosticsPanel from './DiagnosticsPanel';
 // LoggingControls import is already handled inside DiagnosticsPanel
 
 /**
- * Props for the Sidebar component
- */
-interface SidebarProps {
-  // Removed onOpenSettings since we're navigating instead
-}
-
-/**
  * Sidebar component
  * 
- * Displays the navigation sidebar with links to different sections of the app
+ * Displays the navigation sidebar with links to different sections of the app.
+ * Now uses direct page navigation without dialogs.
  */
-const Sidebar = ({}: SidebarProps) => {
+const Sidebar = () => {
   // Get current user
   const user = useUser();
   
@@ -50,7 +44,7 @@ const Sidebar = ({}: SidebarProps) => {
         {/* Divider before bottom actions */}
         <div className="my-4 h-px bg-gray-200" />
 
-        {/* Settings and Invite buttons - no longer needs onOpenSettings prop */}
+        {/* Settings and Invite buttons - using direct navigation */}
         <ActionButtons />
         
         {/* Diagnostics information panel - with reduced content */}
@@ -58,8 +52,6 @@ const Sidebar = ({}: SidebarProps) => {
           user={user}
           currentNeighborhood={currentNeighborhood}
         />
-        
-        {/* The LoggingControls have been moved into the DiagnosticsPanel component */}
       </nav>
     </div>
   );

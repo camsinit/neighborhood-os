@@ -11,7 +11,7 @@ import createNavigationLogger from "@/utils/navigationLogger";
  * Login page component
  * 
  * This page displays the authentication form and header,
- * now styled to match our chat interface aesthetic.
+ * styled to match our chat interface aesthetic.
  */
 const Login = () => {
   // Get navigation and session context
@@ -24,6 +24,7 @@ const Login = () => {
   // Redirect authenticated users to home page
   useEffect(() => {
     if (!isLoading && session) {
+      // Always use the standardized /home path, not /dashboard
       logNavigation("/home", { 
         replace: true, 
         cause: "Already authenticated",

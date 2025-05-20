@@ -6,7 +6,7 @@ import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner'; // Import Sonner Toaster directly
+import { Toaster } from 'sonner'; 
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 
 // Import pages
@@ -96,12 +96,10 @@ function App() {
     return null;
   }
 
-  // Provide session context and neighborhood context to the app
   return (
     <QueryClientProvider client={queryClient}>
       <SessionContextProvider supabaseClient={supabase} initialSession={session}>
         <NeighborhoodProvider>
-          {/* IMPORTANT: Only ONE Router component in the entire app */}
           <Router>
             <Routes>
               {/* Public routes */}
@@ -110,7 +108,7 @@ function App() {
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               <Route path="/index" element={<Index />} />
               
-              {/* Onboarding route - with testMode=true to allow viewing even when onboarding is complete */}
+              {/* Onboarding route */}
               <Route path="/onboarding" element={
                 <ProtectedRoute>
                   <OnboardingDialog open={true} onOpenChange={() => {}} testMode={true} />
@@ -125,14 +123,13 @@ function App() {
                   </ProtectedRoute>
                 }
               >
+                {/* Main pages */}
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
-                
-                {/* Dedicated routes for Settings and Invite */}
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/invite" element={<InvitePage />} />
                 
@@ -140,13 +137,12 @@ function App() {
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
 
-              {/* Redirect /dashboard to /home */}
+              {/* Redirects */}
               <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               
-              {/* Catch-all route - redirect to landing page */}
+              {/* Catch-all route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            {/* Configure the Sonner Toaster with consistent positioning and styling */}
             <Toaster 
               position="top-center" 
               toastOptions={{

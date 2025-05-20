@@ -11,18 +11,15 @@ import createNavigationLogger from "@/utils/navigationLogger";
 /**
  * Authentication Form Component
  * 
- * This component provides both sign in and sign up functionality.
+ * This component provides sign in functionality.
  * It manages user authentication state, form submission, and navigation
- * to the dashboard upon successful authentication.
- * 
- * Updated with styling to match the landing page aesthetics.
+ * to the home page upon successful authentication.
  */
 const AuthForm = () => {
   // State for form fields and loading state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // Removed isSignUp state since we're directing users to waitlist instead
   
   // Hook for programmatic navigation
   const navigate = useNavigate();
@@ -33,8 +30,7 @@ const AuthForm = () => {
   // Toast hook for displaying notifications
   const { toast } = useToast();
 
-  // Listen for auth state changes - we're using the supabase client directly here
-  // to ensure we're not depending on the context which might not be initialized properly
+  // Listen for auth state changes
   useEffect(() => {
     console.log("[AuthForm] Setting up auth state change listener");
     
@@ -48,7 +44,7 @@ const AuthForm = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
-      // When user is signed in, navigate to the dashboard
+      // When user is signed in, navigate to the home page (not dashboard)
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         logNavigation("/home", {
           replace: true,
@@ -66,7 +62,7 @@ const AuthForm = () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
       subscription?.unsubscribe?.();
     };
-  }, [navigate, logNavigation]); // Only re-run if navigate or logNavigation changes
+  }, [navigate, logNavigation]);
   
   // Form submission handler for login only
   const handleSubmit = async (e: React.FormEvent) => {
