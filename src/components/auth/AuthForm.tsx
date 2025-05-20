@@ -94,13 +94,8 @@ const AuthForm = () => {
 
       console.log("[AuthForm] Signin successful", { user: data.user?.id });
       
-      // Show success toast
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in",
-      });
-      
-      // No need to navigate here as the auth state change listener will handle that
+      // Success toast has been removed
+      // Navigation is handled by the auth state change listener
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);
       toast({
