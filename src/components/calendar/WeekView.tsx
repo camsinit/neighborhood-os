@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Event } from "@/types/localTypes";
 import DayCell from "./DayCell";
 import AddEventDialog from "../AddEventDialog";
-import { format, isWeekend, startOfWeek, addDays } from "date-fns";
+import { format, isWeekend } from "date-fns";
 import { createLogger } from "@/utils/logger";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -44,9 +44,6 @@ const WeekView = ({
   // State for the Add Event dialog
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
-  // Define day names in correct order: Sunday to Saturday
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Handler for adding a new event
   const handleAddEvent = (date: Date) => {
@@ -78,24 +75,27 @@ const WeekView = ({
     visible: { opacity: 1, scale: 1 }
   };
 
-  // Fix: Ensure the weekDates are properly aligned with the day headers
-  // We don't need to modify weekDates here as they come correctly from the parent
-
   return (
     <div className="space-y-2">
-      {/* Day names header */}
+      {/* Day names header - Using the actual dates to determine day names */}
       <div className="grid grid-cols-7 mb-2">
-        {days.map((day, index) => (
-          <div 
-            key={day} 
-            className={cn(
-              "text-sm font-medium px-4 py-2 rounded-md text-center",
-              isWeekend(weekDates[index]) ? "bg-gray-50 text-gray-600" : "bg-white text-gray-800"
-            )}
-          >
-            {day}
-          </div>
-        ))}
+        {weekDates.map((date, index) => {
+          // Get day name directly from the date object to ensure correct alignment
+          const dayName = format(date, 'EEE');
+          return (
+            <div 
+              key={`dayheader-${index}`} 
+              className={cn(
+                "text-sm font-medium px-4 py-2 rounded-md text-center",
+                isWeekend(date) ? "bg-gray-50 text-gray-600" : "bg-white text-gray-800"
+              )}
+              data-day={format(date, 'EEEE')}
+              data-date={format(date, 'yyyy-MM-dd')}
+            >
+              {dayName}
+            </div>
+          );
+        })}
       </div>
 
       {/* Calendar grid with animation */}
@@ -106,7 +106,11 @@ const WeekView = ({
         animate="visible"
       >
         {weekDates.map((date, i) => (
-          <motion.div key={i} variants={cellAnimation} className="rounded-md overflow-hidden shadow-sm">
+          <motion.div 
+            key={`day-${format(date, 'yyyy-MM-dd')}`} 
+            variants={cellAnimation} 
+            className="rounded-md overflow-hidden shadow-sm"
+          >
             <DayCell
               date={date}
               events={getEventsForDate(date)}

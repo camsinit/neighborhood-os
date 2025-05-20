@@ -47,8 +47,8 @@ const DayCell = ({
   const hasHighlightedEvent = events.some(event => event.id === highlightedId);
   const today = isToday(date);
   
-  // Debug the date for this cell to ensure correctness
-  console.log(`Rendering DayCell: ${date.toDateString()} (${format(date, 'EEEE')}) - Today: ${today}`);
+  // Get the day name directly from the date object to ensure correctness
+  const dayName = format(date, 'EEEE');
   
   return (
     <div 
@@ -60,7 +60,7 @@ const DayCell = ({
         className
       )}
       data-date={format(date, 'yyyy-MM-dd')}
-      data-day={format(date, 'EEEE')} // Add data attribute for the day name for debugging
+      data-day={dayName} // Add data attribute for the day name for debugging
     >
       {/* Add Event Button - Hidden by default, shown on hover */}
       <button

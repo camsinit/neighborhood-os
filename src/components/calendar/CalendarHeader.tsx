@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
@@ -8,6 +9,10 @@ import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { CalendarViewType } from "@/hooks/calendar/useCalendarView";
+import { createLogger } from "@/utils/logger";
+
+// Create a logger for this component
+const logger = createLogger('CalendarHeader');
 
 /**
  * Updated interface to match the functions without view parameters
@@ -38,22 +43,23 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     handleToday,
     setIsAddEventOpen
   } = props;
-  const {
-    currentNeighborhood
-  } = useNeighborhood();
+
+  const { currentNeighborhood } = useNeighborhood();
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
 
   // Log the currentDate to verify it's correct
-  console.log(`CalendarHeader: Current date is ${currentDate.toISOString()} - Day of week: ${currentDate.getDay()} (${format(currentDate, 'EEEE')})`);
+  logger.debug(`Current date: ${currentDate.toISOString()} - Day of week: ${currentDate.getDay()} (${format(currentDate, 'EEEE')})`);
 
   // Fetch neighborhood timezone
   useEffect(() => {
     const fetchNeighborhoodTimezone = async () => {
       if (currentNeighborhood?.id) {
-        const {
-          data,
-          error
-        } = await supabase.from('neighborhoods').select('timezone').eq('id', currentNeighborhood.id).single();
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', currentNeighborhood.id)
+          .single();
+          
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
         }
@@ -71,12 +77,9 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       // Get the formatted date in the neighborhood timezone
       const formattedDate = formatInNeighborhoodTimezone(currentDate, dateFormat, neighborhoodTimezone);
       
-      // Log for debugging
-      console.log(`Formatted date: ${formattedDate} (from ${currentDate.toISOString()} in ${neighborhoodTimezone})`);
-      
       return formattedDate;
     } catch (error) {
-      console.error("Error formatting date:", error);
+      logger.error("Error formatting date:", error);
       return format(currentDate, 'MMMM yyyy');
     }
   }, [currentDate, view, neighborhoodTimezone]);
@@ -94,13 +97,13 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     const parts = neighborhoodTimezone.split('/');
     return parts[parts.length - 1].replace('_', ' ');
   };
-  return <motion.div initial={{
-    opacity: 0,
-    y: -5
-  }} animate={{
-    opacity: 1,
-    y: 0
-  }} className="bg-white p-4 mb-6 py-0 rounded-none">
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white p-4 mb-6 py-0 rounded-none"
+    >
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         {/* Calendar title section */}
         <div className="flex items-center gap-3">
@@ -108,7 +111,6 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
             <h2 className="text-xl font-bold text-gray-800">
               {formattedDate}
             </h2>
-            
           </div>
         </div>
         
@@ -116,30 +118,64 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
         <div className="flex flex-wrap gap-3 items-center">
           {/* Navigation controls */}
           <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
-            <Button variant="ghost" size="sm" onClick={handlePreviousWeek} className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handlePreviousWeek} 
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleToday} className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleToday} 
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium"
+            >
               Today
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleNextWeek} className="text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleNextWeek} 
+              className="text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
           
           {/* View selector */}
           <div className="bg-gray-50 rounded-lg p-1 flex shadow-sm">
-            {['Week', 'Month', 'Agenda'].map(viewType => <Button key={viewType} variant="ghost" size="sm" onClick={() => setView(viewType.toLowerCase() as CalendarViewType)} className={cn("font-medium transition-all", view === viewType.toLowerCase() ? "bg-white text-blue-600 shadow-sm" : "text-gray-600 hover:text-blue-600 hover:bg-blue-50")}>
+            {['Week', 'Month', 'Agenda'].map(viewType => (
+              <Button 
+                key={viewType} 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setView(viewType.toLowerCase() as CalendarViewType)} 
+                className={cn(
+                  "font-medium transition-all", 
+                  view === viewType.toLowerCase() 
+                    ? "bg-white text-blue-600 shadow-sm" 
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                )}
+              >
                 {viewType}
-              </Button>)}
+              </Button>
+            ))}
           </div>
           
           {/* Add event button */}
-          <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto">
+          <Button 
+            onClick={() => setIsAddEventOpen(true)} 
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium ml-auto"
+          >
             <Plus className="h-4 w-4 mr-1" /> Add Event
           </Button>
         </div>
       </div>
-    </motion.div>;
+    </motion.div>
+  );
 };
+
 export default CalendarHeader;

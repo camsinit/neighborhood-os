@@ -38,9 +38,6 @@ const MonthView = ({
   isLoading = false,
   highlightedId
 }: MonthViewProps) => {
-  // Log current date to verify it's correct
-  logger.debug(`MonthView rendering for date: ${currentDate.toISOString()}`);
-  
   // State for the Add Event dialog
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -49,10 +46,6 @@ const MonthView = ({
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
-
-  // Log month range for debugging
-  logger.debug(`Month range: ${monthStart.toDateString()} to ${monthEnd.toDateString()}`);
-  logger.debug(`Days in month: ${days.length}, first day: ${days[0].toDateString()} (${format(days[0], 'EEEE')})`);
 
   // Handler for adding new events - stores the selected date and opens dialog
   const handleAddEvent = (date: Date) => {
@@ -84,6 +77,13 @@ const MonthView = ({
     visible: { opacity: 1 }
   };
 
+  // Get day names for the header - using actual dates from first week
+  const dayNames = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(days[0]); // Start with the first day
+    date.setDate(date.getDate() - date.getDay() + i); // Adjust to get Sunday through Saturday
+    return format(date, 'EEE');
+  });
+
   return (
     <div>
       <motion.div 
@@ -93,9 +93,9 @@ const MonthView = ({
         animate="visible"
       >
         {/* Day name headers */}
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+        {dayNames.map((day, index) => (
           <div 
-            key={day} 
+            key={`header-${index}`} 
             className="text-sm font-medium text-gray-700 text-center p-2 bg-gray-100 rounded-t-md"
           >
             {day}
@@ -104,21 +104,21 @@ const MonthView = ({
         
         {/* Day cells */}
         {days.map((day) => {
-          // Log each day to verify it has the correct day of week
-          logger.debug(`Rendering day: ${format(day, 'yyyy-MM-dd')} (${format(day, 'EEEE')})`);
+          // Get events for this specific day
+          const dayEvents = events.filter(event => 
+            format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+          );
           
           return (
             <motion.div 
-              key={day.toISOString()} 
+              key={format(day, 'yyyy-MM-dd')} 
               variants={cellAnimation}
               className="rounded-md overflow-hidden shadow-sm"
             >
               <DayCell
                 date={day}
                 isCurrentMonth={isSameMonth(day, currentDate)}
-                events={events.filter(event => 
-                  format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-                )}
+                events={dayEvents}
                 isLoading={isLoading}
                 onAddEvent={handleAddEvent}
                 highlightedId={highlightedId}
