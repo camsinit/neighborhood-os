@@ -38,6 +38,9 @@ const MonthView = ({
   isLoading = false,
   highlightedId
 }: MonthViewProps) => {
+  // Log current date to verify it's correct
+  logger.debug(`MonthView rendering for date: ${currentDate.toISOString()}`);
+  
   // State for the Add Event dialog
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -47,9 +50,13 @@ const MonthView = ({
   const monthEnd = endOfMonth(currentDate);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+  // Log month range for debugging
+  logger.debug(`Month range: ${monthStart.toDateString()} to ${monthEnd.toDateString()}`);
+  logger.debug(`Days in month: ${days.length}, first day: ${days[0].toDateString()} (${format(days[0], 'EEEE')})`);
+
   // Handler for adding new events - stores the selected date and opens dialog
   const handleAddEvent = (date: Date) => {
-    logger.debug(`Opening add event dialog for date: ${format(date, 'yyyy-MM-dd')}`);
+    logger.debug(`Opening add event dialog for date: ${format(date, 'yyyy-MM-dd')} (${format(date, 'EEEE')})`);
     setSelectedDate(date);
     setIsAddEventOpen(true);
   };
@@ -96,25 +103,30 @@ const MonthView = ({
         ))}
         
         {/* Day cells */}
-        {days.map((day) => (
-          <motion.div 
-            key={day.toISOString()} 
-            variants={cellAnimation}
-            className="rounded-md overflow-hidden shadow-sm"
-          >
-            <DayCell
-              date={day}
-              isCurrentMonth={isSameMonth(day, currentDate)}
-              events={events.filter(event => 
-                format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
-              )}
-              isLoading={isLoading}
-              onAddEvent={handleAddEvent}
-              highlightedId={highlightedId}
-              className={cn("h-[140px] rounded-md", isWeekend(day) ? "bg-gray-50/80" : "")}
-            />
-          </motion.div>
-        ))}
+        {days.map((day) => {
+          // Log each day to verify it has the correct day of week
+          logger.debug(`Rendering day: ${format(day, 'yyyy-MM-dd')} (${format(day, 'EEEE')})`);
+          
+          return (
+            <motion.div 
+              key={day.toISOString()} 
+              variants={cellAnimation}
+              className="rounded-md overflow-hidden shadow-sm"
+            >
+              <DayCell
+                date={day}
+                isCurrentMonth={isSameMonth(day, currentDate)}
+                events={events.filter(event => 
+                  format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+                )}
+                isLoading={isLoading}
+                onAddEvent={handleAddEvent}
+                highlightedId={highlightedId}
+                className={cn("h-[140px] rounded-md", isWeekend(day) ? "bg-gray-50/80" : "")}
+              />
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       {/* Pass the selected date to the dialog */}

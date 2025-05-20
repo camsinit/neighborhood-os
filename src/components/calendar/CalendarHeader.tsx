@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
 import { format } from "date-fns";
@@ -44,6 +43,9 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   } = useNeighborhood();
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
 
+  // Log the currentDate to verify it's correct
+  console.log(`CalendarHeader: Current date is ${currentDate.toISOString()} - Day of week: ${currentDate.getDay()} (${format(currentDate, 'EEEE')})`);
+
   // Fetch neighborhood timezone
   useEffect(() => {
     const fetchNeighborhoodTimezone = async () => {
@@ -62,8 +64,21 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
 
   // Format the current date according to the view and neighborhood timezone
   const formattedDate = useMemo(() => {
-    // Simplify this, all views can use the same format
-    return formatInNeighborhoodTimezone(currentDate, 'MMMM yyyy', neighborhoodTimezone);
+    try {
+      // Format the date based on the current view
+      const dateFormat = view === 'month' ? 'MMMM yyyy' : 'MMMM d, yyyy';
+      
+      // Get the formatted date in the neighborhood timezone
+      const formattedDate = formatInNeighborhoodTimezone(currentDate, dateFormat, neighborhoodTimezone);
+      
+      // Log for debugging
+      console.log(`Formatted date: ${formattedDate} (from ${currentDate.toISOString()} in ${neighborhoodTimezone})`);
+      
+      return formattedDate;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return format(currentDate, 'MMMM yyyy');
+    }
   }, [currentDate, view, neighborhoodTimezone]);
 
   // Get the timezone abbreviation for display
