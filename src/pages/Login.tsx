@@ -24,7 +24,7 @@ const Login = () => {
   // Redirect authenticated users to home page
   useEffect(() => {
     if (!isLoading && session) {
-      // Always use the standardized /home path, not /dashboard
+      // Always use the standardized /home path
       logNavigation("/home", { 
         replace: true, 
         cause: "Already authenticated",
@@ -41,20 +41,18 @@ const Login = () => {
     <div className={cn(
       "min-h-screen relative", 
       "flex flex-col justify-center py-12 sm:px-6 lg:px-8",
-      "bg-background text-foreground font-sans" // Added font-sans for consistency
+      "bg-background text-foreground font-sans" 
     )}>
-      {/* 
-        Background gradient with blue tones to match the original aesthetic
-      */}
+      {/* Background gradient with blue tones */}
       <div 
         className="absolute inset-0 opacity-10 filter blur-[120px]" 
         style={{
-          background: "linear-gradient(135deg, #0EA5E9, #33C3F0, #1EAEDB)", // Using ocean blue and sky blue tones
+          background: "linear-gradient(135deg, #0EA5E9, #33C3F0, #1EAEDB)",
           zIndex: 0
         }}
       />
       
-      {/* Auth form container with updated styling to match chat interface */}
+      {/* Auth form container */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         {/* AuthHeader component */}
         <AuthHeader />

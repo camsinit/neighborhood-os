@@ -102,10 +102,12 @@ function App() {
         <NeighborhoodProvider>
           <Router>
             <Routes>
-              {/* Public routes */}
+              {/* Public routes - each route defined exactly once */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
+              
+              {/* Special routing helper - redirects to correct page based on auth state */}
               <Route path="/index" element={<Index />} />
               
               {/* Onboarding route */}
@@ -123,7 +125,7 @@ function App() {
                   </ProtectedRoute>
                 }
               >
-                {/* Main pages */}
+                {/* Main pages - each defined exactly once */}
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/neighbors" element={<NeighborsPage />} />
                 <Route path="/skills" element={<SkillsPage />} />
@@ -137,7 +139,7 @@ function App() {
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>
 
-              {/* Redirects */}
+              {/* Redirects - standardize on /home for dashboard */}
               <Route path="/dashboard" element={<Navigate to="/home" replace />} />
               
               {/* Catch-all route */}

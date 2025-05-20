@@ -4,8 +4,6 @@
  */
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 
@@ -20,6 +18,7 @@ interface HeaderProps {
  * Header component 
  * 
  * Displays the application header with neighborhood name and notifications
+ * Uses consistent routing strategy with useNavigate for all navigation
  */
 const Header = ({}: HeaderProps) => {
   // Get current user information from Supabase auth
@@ -32,6 +31,12 @@ const Header = ({}: HeaderProps) => {
   
   // For navigation
   const navigate = useNavigate();
+
+  // Handle profile/settings click
+  const handleProfileClick = () => {
+    console.log("[Header] Navigating to settings page");
+    navigate('/settings');
+  };
 
   // Return the header UI with neighborhood name and user controls
   return (
@@ -48,13 +53,12 @@ const Header = ({}: HeaderProps) => {
           <NotificationsPopover />
           
           {/* User avatar/profile - simplified version */}
-          <Button
-            variant="ghost"
-            className="rounded-full"
-            onClick={() => navigate('/settings')}
+          <button
+            className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium"
+            onClick={handleProfileClick}
           >
             {user?.email?.charAt(0).toUpperCase() || 'U'}
-          </Button>
+          </button>
         </div>
       </div>
     </header>
