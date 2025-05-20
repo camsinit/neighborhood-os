@@ -5,7 +5,26 @@
  * This is a centralized toast implementation that standardizes toast appearance
  * and behavior across the application.
  */
-import { toast as sonnerToast, type ToastOptions } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
+
+// Define our own ToastOptions type instead of importing it
+type ToastOptions = {
+  id?: string | number;
+  duration?: number;
+  icon?: string | React.ReactNode;
+  promise?: Promise<any>;
+  description?: string | React.ReactNode;
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
+  cancel?: React.ReactNode;
+  action?: React.ReactNode;
+  onDismiss?: (id: string | number) => void;
+  onAutoClose?: (id: string | number) => void;
+  className?: string;
+  style?: React.CSSProperties;
+  cancelButtonStyle?: React.CSSProperties;
+  actionButtonStyle?: React.CSSProperties;
+  unstyled?: boolean;
+};
 
 type ToastProps = {
   description: string;
