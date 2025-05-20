@@ -6,7 +6,7 @@ import { useNeighborhood } from '@/contexts/neighborhood';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { InfoCircled } from 'lucide-react';
+import { Info } from 'lucide-react'; // Fixed: Changed InfoCircled to Info
 
 /**
  * InvitePage component
@@ -39,7 +39,7 @@ const InvitePage: React.FC = () => {
       >
         <div className="bg-white rounded-lg border shadow-sm p-6">
           <Alert className="mb-4">
-            <InfoCircled className="h-4 w-4" />
+            <Info className="h-4 w-4" />
             <AlertTitle>No Neighborhood Found</AlertTitle>
             <AlertDescription>
               You need to be part of a neighborhood before you can invite others.
@@ -66,7 +66,7 @@ const InvitePage: React.FC = () => {
       <div className="bg-white rounded-lg border shadow-sm p-6">
         {/* Informational alert about invitations */}
         <Alert className="mb-6 bg-blue-50 border-blue-200">
-          <InfoCircled className="h-4 w-4 text-blue-500" />
+          <Info className="h-4 w-4 text-blue-500" />
           <AlertTitle className="text-blue-700">Neighborhood Invitation Information</AlertTitle>
           <AlertDescription className="text-blue-600">
             As a member of {currentNeighborhood.name}, you can invite neighbors to join your
