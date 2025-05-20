@@ -18,17 +18,15 @@ const MainNavigation = () => {
     { 
       icon: Home, 
       label: "Home", 
-      href: "/home" // Always use /home (not /dashboard)
+      href: "/home"
     }
   ];
 
   return (
     <div className="space-y-1">
       {mainNavItems.map((item) => {
-        // Check if current path matches this nav item or is dashboard (which redirects to home)
-        const isActive = 
-          location.pathname === item.href || 
-          (item.href === "/home" && location.pathname === "/dashboard");
+        // Check if current path matches this nav item
+        const isActive = location.pathname === item.href;
           
         return (
           <Link key={item.href} to={item.href}>
