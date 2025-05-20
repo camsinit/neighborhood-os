@@ -4,7 +4,7 @@
  */
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import NotificationsPopover from "@/components/notifications/NotificationsPopover";
 
 /**
@@ -38,17 +38,42 @@ const Header = ({}: HeaderProps) => {
     navigate('/settings');
   };
 
+  // Handle click on neighborhood name (home)
+  const handleHomeClick = () => {
+    console.log("[Header] Navigating to home page");
+    navigate('/home');
+  };
+
+  // Handle view landing page click
+  const handleViewLandingClick = () => {
+    console.log("[Header] Navigating to landing page");
+    navigate('/landing');
+  };
+
   // Return the header UI with neighborhood name and user controls
   return (
     <header className="w-full border-b bg-white px-4 py-3">
       <div className="flex items-center justify-between">
-        {/* Neighborhood name section */}
+        {/* Neighborhood name section - clickable to go home */}
         <div>
-          <h1 className="font-bold text-2xl">{currentNeighborhood?.name || 'Welcome'}</h1>
+          <button 
+            onClick={handleHomeClick} 
+            className="font-bold text-2xl hover:text-primary transition-colors"
+          >
+            {currentNeighborhood?.name || 'Welcome'}
+          </button>
         </div>
 
         {/* User controls section */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
+          {/* Landing page link */}
+          <button
+            onClick={handleViewLandingClick}
+            className="text-sm text-gray-600 hover:text-primary transition-colors"
+          >
+            View Landing Page
+          </button>
+          
           {/* Notifications */}
           <NotificationsPopover />
           

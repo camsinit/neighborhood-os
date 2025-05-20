@@ -104,6 +104,7 @@ function App() {
             <Routes>
               {/* Public routes - each route defined exactly once */}
               <Route path="/" element={<LandingPage />} />
+              <Route path="/landing" element={<LandingPage />} /> {/* New route to access landing page while authenticated */}
               <Route path="/login" element={<Login />} />
               <Route path="/join/:inviteCode?" element={<JoinPage />} />
               

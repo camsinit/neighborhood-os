@@ -12,7 +12,7 @@ import { ArrowRight } from "lucide-react";
  * LandingPage component
  * 
  * The public-facing landing page that conditionally shows content based on
- * authentication status. Authenticated users see a welcome dashboard,
+ * authentication status. Authenticated users see a welcome dashboard preview,
  * while non-authenticated users see the waitlist signup form.
  */
 const LandingPage = () => {
@@ -35,6 +35,7 @@ const LandingPage = () => {
     console.log("[LandingPage] Session state changed:", { 
       hasSession: !!session,
       userId: session?.user?.id,
+      pathname: window.location.pathname,
       timestamp: new Date().toISOString()
     });
     
@@ -44,16 +45,6 @@ const LandingPage = () => {
     // Mark component as mounted
     setHasMounted(true);
   }, [session]);
-  
-  // Navigate directly to home if user is in deep-linked paths that require auth
-  useEffect(() => {
-    if (session && window.location.pathname === '/') {
-      // Only perform auto-navigation if user is on the root path
-      // and is authenticated - prevents unwanted redirects
-      console.log("[LandingPage] Auto-navigating authenticated user to home page");
-      navigate("/home", { replace: true });
-    }
-  }, [session, navigate]);
   
   // Log render to help with debugging navigation issues
   console.log("[LandingPage] Rendering:", { 
@@ -99,13 +90,15 @@ const LandingPage = () => {
       {isAuthenticated ? (
         // Welcome message for authenticated users
         <div className="container mx-auto px-4 py-12 max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Welcome back to neighborhoodOS!</h2>
-          <p className="text-xl mb-8">You're already signed in. Continue to your neighborhood dashboard.</p>
-          <Button asChild size="lg" className="rounded-full">
-            <Link to="/home" className="flex items-center gap-2">
-              Go to Dashboard <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
+          <h2 className="text-3xl font-bold mb-4">Welcome to neighborhoodOS!</h2>
+          <p className="text-xl mb-8">You're signed in. Continue to your neighborhood dashboard or explore our landing page.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="rounded-full">
+              <Link to="/home" className="flex items-center gap-2">
+                Go to Dashboard <ArrowRight className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       ) : (
         // Standard landing page for non-authenticated users
