@@ -65,7 +65,8 @@
     }
   }
 
-  /* Ensure all UI elements have rounded corners */
+  /* Ensure UI elements have consistent rounded corners */
+  /* Removed the !important flag to avoid overriding specific button styling */
   button, 
   .button,
   input,
@@ -78,13 +79,13 @@
   .alert,
   .toast,
   .badge {
-    @apply rounded-md !important;
+    @apply rounded-md;
   }
   
   /* Ensure avatars have full rounded appearance */
   .avatar, 
   .avatar-image, 
   .avatar-fallback {
-    @apply rounded-full !important;
+    @apply rounded-full;
   }
 }

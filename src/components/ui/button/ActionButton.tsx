@@ -21,16 +21,16 @@ export type ActionButtonTheme = 'calendar' | 'skills' | 'goods' | 'safety' | 'ca
  */
 const themeColors: Record<ActionButtonTheme, string> = {
   // Module-specific themes using moduleThemeColors to maintain consistency
-  calendar: 'bg-[#0EA5E9] hover:bg-[#0893D1] text-white',
-  skills: 'bg-[#22C55E] hover:bg-[#1FA84F] text-white',
-  goods: 'bg-[#F97316] hover:bg-[#EA6104] text-white',
-  safety: 'bg-[#EA384C] hover:bg-[#D31F32] text-white',
-  care: 'bg-[#EC4899] hover:bg-[#DB2777] text-white',
-  neighbors: 'bg-[#7E69AB] hover:bg-[#6A5696] text-white',
+  calendar: 'bg-[#0EA5E9] hover:bg-[#0893D1] text-white shadow-sm',
+  skills: 'bg-[#22C55E] hover:bg-[#1FA84F] text-white shadow-sm',
+  goods: 'bg-[#F97316] hover:bg-[#EA6104] text-white shadow-sm',
+  safety: 'bg-[#EA384C] hover:bg-[#D31F32] text-white shadow-sm',
+  care: 'bg-[#EC4899] hover:bg-[#DB2777] text-white shadow-sm',
+  neighbors: 'bg-[#7E69AB] hover:bg-[#6A5696] text-white shadow-sm',
   // Default theme uses the primary color from the theme
-  default: 'bg-primary hover:bg-primary/90 text-primary-foreground',
-  // New gray theme for buttons on homepage or non-module contexts
-  gray: 'bg-[#F1F1F1] hover:bg-[#E1E1E1] text-gray-700 border border-gray-200'
+  default: 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm',
+  // Gray theme for buttons on homepage or non-module contexts
+  gray: 'bg-[#F1F1F1] hover:bg-[#E1E1E1] text-gray-700 border border-gray-200 shadow-sm'
 };
 
 // Props for the Action Button
@@ -70,7 +70,7 @@ const ActionButton = ({
     const moduleColor = moduleThemeColors[themeColor as ModuleThemeColor]?.primary || null;
     
     if (moduleColor) {
-      buttonStyle = `bg-transparent text-[${moduleColor}] border border-[${moduleColor}] hover:bg-[${moduleColor}]/10`;
+      buttonStyle = `bg-transparent text-[${moduleColor}] border border-[${moduleColor}] hover:bg-[${moduleColor}]/10 shadow-sm`;
     }
   }
 

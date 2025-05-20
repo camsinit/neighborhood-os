@@ -12,6 +12,7 @@
 @import './components.css';
 @import './layout.css';
 @import './highlight.css';
+@import './global.css'; /* Make sure global styles are imported */
 
 /* Utility styles */
 @import 'tailwindcss/utilities';

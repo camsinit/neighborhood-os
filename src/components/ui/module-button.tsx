@@ -41,11 +41,12 @@ const ModuleButton = ({
   
   switch (variant) {
     case 'filled':
-      // Standard filled button with full saturation
+      // Standard filled button with full saturation and shadow
       style = { 
         backgroundColor: themeColor, 
         color: 'white', 
-        borderColor: 'transparent' 
+        borderColor: 'transparent',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
       };
       break;
     
@@ -64,7 +65,8 @@ const ModuleButton = ({
       style = { 
         backgroundColor: lightThemeColor,
         color: themeColor,
-        borderColor: 'transparent'
+        borderColor: 'transparent',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
       };
       break;
       
@@ -72,7 +74,8 @@ const ModuleButton = ({
       style = { 
         backgroundColor: themeColor, 
         color: 'white', 
-        borderColor: 'transparent' 
+        borderColor: 'transparent',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
       };
   }
   

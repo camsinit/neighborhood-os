@@ -156,7 +156,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-3 relative", 
+        "transition-all duration-300 overflow-hidden mb-3 relative shadow-sm", 
         isAnimating && "transform translate-x-full opacity-0",
         className
       )}
