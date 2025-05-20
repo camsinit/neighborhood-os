@@ -17,6 +17,7 @@ import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { parseISO } from "date-fns";
 import EditEventDialog from "./EditEventDialog"; // Import the edit dialog component
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Import avatar component
+import RSVPButton from "./rsvp/RSVPButton"; // Import the RSVP button component
 
 interface EventCardContentProps {
   event: Event;
@@ -88,6 +89,18 @@ const EventCardContent = ({
           
           {/* RSVPs section with stacked avatars */}
           <RSVPList eventId={event.id} className="mt-2" showEmptyState={false} />
+          
+          {/* Add RSVP button for non-hosts */}
+          {!isHost && (
+            <div className="mt-3">
+              <RSVPButton 
+                eventId={event.id} 
+                neighborhoodId={event.neighborhood_id}
+                initialRSVPState={isRsvped}
+                className="w-full"
+              />
+            </div>
+          )}
           
           {/* Edit button for hosts */}
           {isHost && <EditEventDialog event={event}>
