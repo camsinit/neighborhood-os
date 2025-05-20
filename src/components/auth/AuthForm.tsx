@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import createNavigationLogger from "@/utils/navigationLogger";
 
 /**
  * Authentication Form Component
@@ -25,6 +26,9 @@ const AuthForm = () => {
   
   // Hook for programmatic navigation
   const navigate = useNavigate();
+  
+  // Create navigation logger for this component
+  const logNavigation = createNavigationLogger("AuthForm");
   
   // Toast hook for displaying notifications
   const { toast } = useToast();
@@ -46,6 +50,12 @@ const AuthForm = () => {
       
       // When user is signed in, navigate to the dashboard
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        logNavigation("/dashboard", {
+          replace: true,
+          cause: "Authentication successful",
+          authState: "authenticated"
+        });
+        
         console.log("[AuthForm] Valid session detected, navigating to dashboard");
         navigate("/dashboard", { replace: true });
       }
@@ -56,7 +66,7 @@ const AuthForm = () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
       subscription?.unsubscribe?.();
     };
-  }, [navigate]); // Only re-run if navigate changes
+  }, [navigate, logNavigation]); // Only re-run if navigate or logNavigation changes
   
   // Form submission handler for login only
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,6 +120,12 @@ const AuthForm = () => {
 
   // Function to handle redirecting to homepage/waitlist
   const handleWaitlistRedirect = () => {
+    logNavigation("/", {
+      replace: true,
+      cause: "User needs account - redirecting to waitlist",
+      authState: "unauthenticated"
+    });
+    
     // Navigate to the homepage where the waitlist form is located
     navigate("/", { replace: true });
   };

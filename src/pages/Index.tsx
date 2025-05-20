@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import createNavigationLogger from "@/utils/navigationLogger";
 
 /**
  * Index component that handles routing logic
@@ -23,6 +24,9 @@ import { supabase } from "@/integrations/supabase/client";
 const Index = () => {
   // Navigation hook for redirecting users
   const navigate = useNavigate();
+  
+  // Create navigation logger for this component
+  const logNavigation = createNavigationLogger("Index");
   
   // Get the current authenticated user
   const user = useUser();
@@ -47,6 +51,7 @@ const Index = () => {
     isLoadingNeighborhood,
     hasNeighborhood: !!currentNeighborhood,
     onboardingStatus: hasCompletedOnboarding,
+    pathname: window.location.pathname,
     timestamp: new Date().toISOString()
   });
   
@@ -98,7 +103,7 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [isLoadingNeighborhood]);
   
-  // Effect to handle routing logic based on authentication and neighborhood status
+  // Simplified effect to handle routing logic based on authentication and neighborhood status
   useEffect(() => {
     // Safety check: If we're still loading data, wait
     if (isLoadingNeighborhood || hasCompletedOnboarding === null) {
@@ -108,6 +113,12 @@ const Index = () => {
     
     // If user is not authenticated, redirect to landing page
     if (!user) {
+      logNavigation("/", { 
+        replace: true, 
+        cause: "User not authenticated",
+        authState: "unauthenticated" 
+      });
+      
       console.log("[Index] User not authenticated, redirecting to landing page");
       navigate("/", { replace: true });
       return;
@@ -115,6 +126,12 @@ const Index = () => {
     
     // If authenticated but hasn't completed onboarding, redirect to onboarding
     if (user && hasCompletedOnboarding === false) {
+      logNavigation("/onboarding", { 
+        replace: true, 
+        cause: "Onboarding required",
+        authState: "authenticated" 
+      });
+      
       console.log("[Index] User needs to complete onboarding");
       navigate("/onboarding", { replace: true });
       return;
@@ -122,6 +139,12 @@ const Index = () => {
     
     // If authenticated and has neighborhood, redirect to home page
     if (user && currentNeighborhood) {
+      logNavigation("/home", { 
+        replace: true, 
+        cause: "User has neighborhood",
+        authState: "authenticated" 
+      });
+      
       console.log("[Index] User authenticated with neighborhood, redirecting to home");
       navigate("/home", { replace: true });
       return;
@@ -129,15 +152,28 @@ const Index = () => {
     
     // If there was an error loading neighborhood data or no neighborhood, redirect to join page
     if (user && (!currentNeighborhood || error)) {
+      logNavigation("/join", { 
+        replace: true, 
+        cause: error ? "Error loading neighborhood" : "No neighborhood",
+        authState: "authenticated" 
+      });
+      
       console.log("[Index] User authenticated but no neighborhood or error, redirecting to join");
       navigate("/join", { replace: true });
       return;
     }
-  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, hasCompletedOnboarding]);
+  }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, hasCompletedOnboarding, logNavigation]);
 
   // Handle manual retry when there's an issue
   const handleRetry = async () => {
     await refreshNeighborhoodData();
+    
+    logNavigation("/home", { 
+      replace: true, 
+      cause: "Manual retry",
+      authState: user ? "authenticated" : "unauthenticated" 
+    });
+    
     // If we have a user and neighborhood after refresh, go to home
     if (user && currentNeighborhood) {
       navigate("/home", { replace: true });
@@ -160,7 +196,14 @@ const Index = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate("/home")} 
+              onClick={() => {
+                logNavigation("/home", { 
+                  replace: true, 
+                  cause: "Manual navigation",
+                  authState: user ? "authenticated" : "unauthenticated" 
+                });
+                navigate("/home", { replace: true });
+              }} 
               className="w-full"
             >
               Go to Home Anyway

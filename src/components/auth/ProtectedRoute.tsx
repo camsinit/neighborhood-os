@@ -9,6 +9,7 @@ import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
+import createNavigationLogger from "@/utils/navigationLogger";
 
 /**
  * Props for the ProtectedRoute component
@@ -30,6 +31,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isLoading: isLoadingAuth, session } = useSessionContext();
   const user = useUser();
   const location = useLocation();
+  
+  // Create a navigation logger for this component
+  const logNavigation = createNavigationLogger("ProtectedRoute");
   
   // Get neighborhood status - using our updated neighborhood context
   const { currentNeighborhood, isLoading: isLoadingNeighborhood, error } = useNeighborhood();
@@ -61,6 +65,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // If not authenticated, redirect to login page
   if (!user || !session) {
+    logNavigation("/login", { 
+      replace: true, 
+      cause: "User not authenticated",
+      authState: "unauthenticated"
+    });
+    
     console.log("[ProtectedRoute] User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -73,6 +83,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // If user has no neighborhood and trying to access a page that requires one,
   // redirect to join page - except for the join page itself, home page, and onboarding to avoid loops
   if (!currentNeighborhood && !isJoinPage && !isHomePage && !isOnboardingPage) {
+    logNavigation("/join", { 
+      replace: true, 
+      cause: "User has no neighborhood",
+      authState: "authenticated"
+    });
+    
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
     return <Navigate to="/join" replace />;
   }

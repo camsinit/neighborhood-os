@@ -5,6 +5,7 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
 import { cn } from "@/lib/utils";
+import createNavigationLogger from "@/utils/navigationLogger";
 
 /**
  * Login page component
@@ -17,13 +18,22 @@ const Login = () => {
   const navigate = useNavigate();
   const { session, isLoading } = useSessionContext();
   
+  // Create navigation logger for this component
+  const logNavigation = createNavigationLogger("Login");
+  
   // Redirect authenticated users to home page
   useEffect(() => {
     if (!isLoading && session) {
+      logNavigation("/home", { 
+        replace: true, 
+        cause: "Already authenticated",
+        authState: "authenticated"
+      });
+      
       console.log("[Login] User is already authenticated, redirecting to home page");
       navigate("/home", { replace: true });
     }
-  }, [session, isLoading, navigate]);
+  }, [session, isLoading, navigate, logNavigation]);
 
   // Improved styling to match our chat aesthetic
   return (
