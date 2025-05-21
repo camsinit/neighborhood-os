@@ -21,10 +21,10 @@ const ModuleHeader = ({
   actions
 }: ModuleHeaderProps) => {
   return <div className="module-header mb-4">
-      <div className="flex justify-between items-center px-1">
-        {/* Module title - Now uses the theme color with darker shade and consistent padding */}
+      <div className="flex justify-between items-center">
+        {/* Module title - Uses the theme color with darker shade and consistent padding */}
         <h2 className={cn(
-          "text-2xl font-bold pt-[15px] px-6 sm:px-6 lg:px-8",
+          "text-2xl font-bold px-6 sm:px-6 lg:px-8 pt-[15px]",
           {
             "text-blue-900": themeColor === 'calendar',
             "text-green-800": themeColor === 'skills',
@@ -34,16 +34,17 @@ const ModuleHeader = ({
           }
         )}>{title}</h2>
         
-        {/* Action buttons container */}
-        {actions && <div className="flex items-center gap-2">
+        {/* Action buttons container - Will stick to the right side */}
+        {actions && <div className="flex items-center gap-2 px-6 sm:px-6 lg:px-8">
             {actions}
           </div>}
       </div>
       
-      {/* Optional description box - Now has consistent margins */}
-      {description && <div className="module-description mt-4 mb-6 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+      {/* Optional description box - With consistent padding matching h2 */}
+      {description && <div className="module-description mt-4 mb-6 bg-white/80 backdrop-blur-sm rounded-lg p-4 mx-6 sm:mx-6 lg:mx-8 border border-gray-100 shadow-sm">
           <p className="text-gray-700 text-sm">{description}</p>
         </div>}
     </div>;
 };
+
 export default ModuleHeader;

@@ -8,6 +8,7 @@ import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layou
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useState } from 'react';
+import AddItemDialog from '@/components/goods/GoodsDialogs';
 
 /**
  * GoodsPage Component
@@ -16,8 +17,11 @@ import { useState } from 'react';
  * and supports highlighting goods items from deep links.
  */
 function GoodsPage() {
+  // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedItem = useHighlightedItem('goods');
+  
+  // State for dialog controls
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   
   // Effect to handle deep linking to specific goods items
@@ -32,7 +36,7 @@ function GoodsPage() {
     <ModuleContainer themeColor="goods">
       <ModuleHeader 
         title="Freebies & Exchanges"
-        description="Share items with your neighbors"
+        description="Share items with your neighbors or find what you need"
         themeColor="goods"
         actions={
           <Button 
@@ -45,7 +49,7 @@ function GoodsPage() {
         }
       />
       <ModuleContent>
-        <div className="module-card">
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           <GoodsPageContainer />
         </div>
       </ModuleContent>

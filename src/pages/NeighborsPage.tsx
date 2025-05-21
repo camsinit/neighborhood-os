@@ -1,14 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
-import { UserDirectory } from '@/components/neighbors/UserDirectory'; // Changed to named import
+import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { highlightItem } from '@/utils/highlight';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import GodModeSelector from '@/components/neighbors/GodModeSelector';
-import { useState } from 'react';
 import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover';
 
 /**
@@ -18,8 +16,11 @@ import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover'
  * and supports highlighting neighbors from deep links.
  */
 function NeighborsPage() {
+  // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedNeighbor = useHighlightedItem('neighbors');
+  
+  // State for dialog controls
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
   // Effect to handle deep linking to specific neighbor profiles
@@ -48,11 +49,16 @@ function NeighborsPage() {
         }
       />
       <ModuleContent>
-        <div className="module-card">
-          <GodModeSelector />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           <UserDirectory />
         </div>
       </ModuleContent>
+
+      {/* The popover will be rendered when the invite button is clicked */}
+      <InviteNeighborPopover 
+        open={isInviteOpen} 
+        onOpenChange={setIsInviteOpen}
+      />
     </ModuleContainer>
   );
 }
