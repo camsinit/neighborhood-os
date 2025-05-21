@@ -18,6 +18,7 @@ export type EventType =
   'skills' | 
   'notifications' | 
   'activities' | 
+  'neighbors' |  // Added 'neighbors' to EventType
   // Custom events
   'notification-created' |
   'event-rsvp-updated' | 
@@ -96,7 +97,8 @@ export const refreshEvents = {
   goods: () => emit('goods'),
   skills: () => emit('skills'),
   notifications: () => emit('notifications'),
-  activities: () => emit('activities')
+  activities: () => emit('activities'),
+  neighbors: () => emit('neighbors') // Added neighbors method to match the type
 };
 
 export default refreshEvents;
