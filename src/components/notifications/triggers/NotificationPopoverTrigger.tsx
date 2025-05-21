@@ -26,7 +26,7 @@ const NotificationPopoverTrigger: React.FC<NotificationPopoverTriggerProps> = ({
       className="relative hover:bg-gray-100"
     >
       <Bell className="h-5 w-5" />
-      {/* Now using count prop instead of label */}
+      {/* Display badge only if there are unread notifications */}
       {unreadCount > 0 && (
         <NotificationBadge 
           count={unreadCount} 

@@ -3,7 +3,7 @@
  * SafetyNotificationCard.tsx
  * 
  * Specialized notification card for safety alerts and updates.
- * Includes prominent visual indicators for urgency.
+ * Uses conversational language and clear visual indicators.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -28,30 +28,33 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with highlighted safety update title
-  const createSentenceTitle = () => {
+  // Create natural language sentence for the notification
+  const createNaturalSentence = () => {
     const safetyTitle = notification.title || "a safety update";
     
-    // Customize text based on safety type
+    // Remove any "safety alert:" prefix if present
+    const cleanTitle = safetyTitle.replace(/^safety alert:\s*/i, "");
+    
+    // Create different sentences based on safety type
     if (safetyType === 'emergency') {
-      return `${actorName} reported EMERGENCY: ${safetyTitle}`;
+      return `${actorName} reported emergency ${cleanTitle}`;
     } else if (safetyType === 'alert') {
-      return `${actorName} posted safety alert: ${safetyTitle}`;
+      return `${actorName} posted safety alert ${cleanTitle}`;
     } else if (safetyType === 'info') {
-      return `${actorName} shared safety info: ${safetyTitle}`;
+      return `${actorName} shared safety info ${cleanTitle}`;
     } else {
-      // Fallback format
-      return `${actorName} posted safety update: ${safetyTitle}`;
+      // Default format
+      return `${actorName} posted safety update ${cleanTitle}`;
     }
   };
   
-  // Create the sentence-style title
-  const sentenceTitle = createSentenceTitle();
+  // Create the natural language sentence
+  const naturalSentence = createNaturalSentence();
   
   // Override the notification title with our sentence format
-  const notificationWithSentenceTitle = {
+  const notificationWithSentence = {
     ...notification,
-    title: sentenceTitle
+    title: naturalSentence
   };
   
   // Handle viewing safety details
@@ -64,7 +67,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
 
   return (
     <NotificationCard
-      notification={notificationWithSentenceTitle}
+      notification={notificationWithSentence}
       onAction={handleViewSafety}
       onDismiss={onDismiss}
     >

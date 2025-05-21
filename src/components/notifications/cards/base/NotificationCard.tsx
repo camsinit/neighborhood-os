@@ -2,13 +2,13 @@
 /**
  * NotificationCard.tsx
  * 
- * Base notification card with minimalist design principles
+ * Base notification card with space-efficient design and natural language
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
-import { markAsRead, archiveNotification } from "@/hooks/notifications"; // Updated import path
+import { markAsRead, archiveNotification } from "@/hooks/notifications";
 import { useNavigate } from "react-router-dom";
 import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
@@ -31,7 +31,7 @@ export interface NotificationCardProps {
 }
 
 /**
- * The base notification card with minimalist design
+ * The base notification card with space-efficient design
  */
 export const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
@@ -59,7 +59,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
     notification_type
   } = notification;
 
-  // Actor info with fallbacks for missing data
+  // Actor info with fallbacks
   const actorName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
   const avatarUrl = notification.profiles?.avatar_url || notification.context?.avatarUrl;
 
@@ -120,62 +120,70 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-3 relative border-l-4", 
+        "transition-all duration-300 overflow-hidden mb-2 relative border-l-4", 
         isAnimating && "transform translate-x-full opacity-0",
-        borderColorClass, // Add left border color based on notification type
-        !is_read && "bg-gray-50", // Subtle background for unread notifications
+        borderColorClass,
+        !is_read && "bg-gray-50",
         className
       )}
     >
-      {/* Timestamp in top right */}
-      {showTimestamp && (
-        <NotificationTimeStamp 
-          date={created_at} 
-          isUnread={!is_read} 
-          position="corner"
-        />
-      )}
+      {/* More compact layout */}
+      <div className="p-3" onClick={handleCardClick}> {/* Reduced padding */}
+        {/* Timestamp in corner for better space usage */}
+        {showTimestamp && (
+          <NotificationTimeStamp 
+            date={created_at} 
+            isUnread={!is_read} 
+            position="corner"
+            className="absolute top-2 right-2 text-[10px]" // Smaller timestamp
+          />
+        )}
       
-      {/* Content area */}
-      <div className="p-4" onClick={handleCardClick}>
-        <div className="flex gap-3 items-start">
-          {/* Avatar */}
+        <div className="flex gap-2 items-start"> {/* Reduced gap */}
+          {/* Smaller avatar */}
           <NotificationAvatar
             url={avatarUrl}
             name={actorName}
             isUnread={!is_read}
             notificationType={notification_type}
+            size="sm"
           />
           
-          {/* Content area */}
-          <div className="flex-1 min-w-0">
+          {/* Content area with natural language sentence */}
+          <div className="flex-1 min-w-0 pr-6"> {/* Right padding for timestamp */}
             <NotificationContent 
               title={title}
+              actorName={actorName}
               contentType={content_type || notification_type}
               isUnread={!is_read}
-            >
-              {children}
-            </NotificationContent>
+            />
             
-            {/* Action buttons in a distinct action bar */}
+            {/* Optional custom content (badges, etc.) */}
+            {children && (
+              <div className="mt-1">
+                {children}
+              </div>
+            )}
+            
+            {/* Compact action buttons */}
             {showActions && (
-              <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
+              <div className="flex justify-end gap-1 mt-2 pt-1 border-t border-gray-100"> {/* Reduced spacing */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleView}
-                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" {/* Smaller button */}
                 >
-                  <Eye className="h-3.5 w-3.5 mr-1" />
+                  <Eye className="h-3 w-3 mr-1" />
                   View
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleArchive}
-                  className="h-8 text-xs text-gray-600 hover:bg-gray-50 px-3"
+                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" {/* Smaller button */}
                 >
-                  <Archive className="h-3.5 w-3.5 mr-1" />
+                  <Archive className="h-3 w-3 mr-1" />
                   Archive
                 </Button>
               </div>
