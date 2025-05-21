@@ -5,7 +5,7 @@
  * This maintains the existing API used in the codebase
  * while allowing us to switch toast libraries if needed
  */
-import { toast, useToast, type Toast, type ToastProps } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 
 // Export toast function and hook directly
-export { toast, useToast, type Toast, type ToastProps };
+export { toast, useToast };

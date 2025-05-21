@@ -1,6 +1,5 @@
 
 import React, { useEffect } from 'react';
-import { ModuleLayout } from '@/components/layout';
 import GoodsPageContainer from '@/components/goods/GoodsPageContainer';
 import { useSearchParams } from 'react-router-dom';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
@@ -18,15 +17,7 @@ function GoodsPage() {
     }
   }, [searchParams]);
   
-  return (
-    <ModuleLayout
-      title="Goods Exchange"
-      description="Share and request goods with your neighbors"
-      themeColor="goods"
-    >
-      <GoodsPageContainer />
-    </ModuleLayout>
-  );
+  return <GoodsPageContainer />;
 }
 
 export default GoodsPage;

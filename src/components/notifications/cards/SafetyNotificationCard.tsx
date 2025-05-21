@@ -26,20 +26,20 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with proper subject-verb-object structure
+  // Create sentence-style title with highlighted safety update title
   const createSentenceTitle = () => {
     const safetyTitle = notification.title || "a safety update";
     
     // Customize text based on safety type
     if (safetyType === 'emergency') {
-      return `${actorName} reported EMERGENCY: ${safetyTitle}`;
+      return `${actorName} reported EMERGENCY: [[${safetyTitle}]]`;
     } else if (safetyType === 'alert') {
-      return `${actorName} posted safety alert: ${safetyTitle}`;
+      return `${actorName} posted safety alert: [[${safetyTitle}]]`;
     } else if (safetyType === 'info') {
-      return `${actorName} shared safety info: ${safetyTitle}`;
+      return `${actorName} shared safety info: [[${safetyTitle}]]`;
     } else {
       // Fallback format
-      return `${actorName} posted safety update: ${safetyTitle}`;
+      return `${actorName} posted safety update: [[${safetyTitle}]]`;
     }
   };
   
@@ -55,6 +55,7 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   // Handle viewing safety details
   const handleViewSafety = async () => {
     // Navigate to the safety details
+    // Fixed highlightItem call to use proper API
     highlightItem('safety', notification.content_id);
     
     if (onDismiss) onDismiss();

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -7,9 +6,9 @@ import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 interface CalendarHeaderProps {
-  view: 'week' | 'month' | 'agenda';
+  view: 'week' | 'month';
   currentDate: Date;
-  setView: (view: 'week' | 'month' | 'agenda') => void;
+  setView: (view: 'week' | 'month') => void;
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   handleToday: () => void;

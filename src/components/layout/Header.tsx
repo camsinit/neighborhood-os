@@ -56,13 +56,11 @@ const Header = ({
       await supabaseClient.auth.signOut();
       navigate("/login");
       toast({
-        title: "Signed out successfully",
-        description: "You have been logged out"
+        title: "Signed out successfully"
       });
     } catch (error) {
       toast({
         title: "Error signing out",
-        description: "Failed to sign out",
         variant: "destructive"
       });
     }

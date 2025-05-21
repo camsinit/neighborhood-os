@@ -1,36 +1,4 @@
 
-/* Module gradient backgrounds */
-.page-gradient {
-  position: relative;
-  background-size: cover;
-  background-position: center;
-}
-
-/* Module-specific gradients */
-.calendar-gradient {
-  background: linear-gradient(135deg, rgba(79, 209, 197, 0.1), rgba(79, 209, 197, 0.05));
-}
-
-.skills-gradient {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
-}
-
-.goods-gradient {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
-}
-
-.safety-gradient {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-}
-
-.care-gradient {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.05));
-}
-
-.neighbors-gradient {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
-}
-
 /* Improved styling for dialog components to match chat aesthetic */
 .sm\:max-w-\[600px\] {
   max-width: 600px !important;
@@ -72,26 +40,4 @@
 /* Module description styling */
 .module-description {
   @apply mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm;
-}
-
-/* Animation for highlighted items */
-@keyframes highlight-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
-  }
-}
-
-.highlight-item {
-  animation: highlight-pulse 2s ease-out;
-}
-
-/* Smooth scrolling for the entire application */
-html {
-  scroll-behavior: smooth;
 }

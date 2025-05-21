@@ -5,11 +5,7 @@
  * This file contains utility functions for creating visual highlighting 
  * effects throughout the application
  */
-import { toast } from "sonner";
-import { createLogger } from '@/utils/logger';
-
-// Create a dedicated logger for this utility
-const logger = createLogger('highlightAnimation');
+import { toast } from "@/hooks/use-toast";
 
 /**
  * Adds a rainbow highlight animation to an element
@@ -19,19 +15,20 @@ const logger = createLogger('highlightAnimation');
 export const addRainbowHighlight = (element: HTMLElement | null) => {
   // Return early if no element is provided
   if (!element) {
-    logger.error("[addRainbowHighlight] Cannot add highlight to null element");
+    console.error("[addRainbowHighlight] Cannot add highlight to null element");
     return;
   }
   
   // Add rainbow animation class
   element.classList.add('rainbow-highlight');
   
-  logger.debug(`[addRainbowHighlight] Added highlight to element:`, element);
+  // Log for debugging
+  console.log(`[addRainbowHighlight] Added highlight to element:`, element);
   
-  // Remove the animation class after 5 seconds
+  // Remove the animation class after 5 seconds (as requested)
   setTimeout(() => {
     element.classList.remove('rainbow-highlight');
-    logger.debug(`[addRainbowHighlight] Removed highlight from element:`, element);
+    console.log(`[addRainbowHighlight] Removed highlight from element:`, element);
   }, 5000);
 };
 
@@ -43,7 +40,8 @@ export const addRainbowHighlight = (element: HTMLElement | null) => {
  * @return True if the element was found and highlighted, false otherwise
  */
 export const highlightElement = (selector: string, showErrorToast: boolean = false): boolean => {
-  logger.debug(`[highlightElement] Attempting to highlight element with selector: ${selector}`);
+  // Log attempt for debugging
+  console.log(`[highlightElement] Attempting to highlight element with selector: ${selector}`);
   
   // Use small delay to ensure DOM is ready
   setTimeout(() => {
@@ -58,15 +56,19 @@ export const highlightElement = (selector: string, showErrorToast: boolean = fal
         // Add the rainbow highlight animation
         addRainbowHighlight(element as HTMLElement);
         
-        logger.debug(`[highlightElement] Successfully highlighted element: ${selector}`);
+        // Log success for debugging
+        console.log(`[highlightElement] Successfully highlighted element: ${selector}`);
         return true;
       } else {
-        logger.warn(`[highlightElement] Could not find element: ${selector}`);
+        // Log failure for debugging
+        console.warn(`[highlightElement] Could not find element: ${selector}`);
         
         // Show error toast if requested
         if (showErrorToast) {
-          toast("Item not found", {
-            description: "The requested item could not be found on this page."
+          toast({
+            title: "Item not found",
+            description: "The requested item could not be found on this page.",
+            variant: "destructive",
           });
         }
         
@@ -74,12 +76,14 @@ export const highlightElement = (selector: string, showErrorToast: boolean = fal
       }
     } catch (error) {
       // Log any errors that occur during highlighting
-      logger.error(`[highlightElement] Error highlighting element: ${selector}`, error);
+      console.error(`[highlightElement] Error highlighting element: ${selector}`, error);
       
       // Show error toast if requested
       if (showErrorToast) {
-        toast("Highlighting error", {
-          description: "An error occurred while attempting to highlight the item."
+        toast({
+          title: "Highlighting error",
+          description: "An error occurred while attempting to highlight the item.",
+          variant: "destructive",
         });
       }
       
@@ -89,6 +93,27 @@ export const highlightElement = (selector: string, showErrorToast: boolean = fal
   
   // Return false by default since the actual highlighting happens asynchronously
   return false;
+};
+
+/**
+ * Adds a scale animation to an element (useful for button clicks)
+ * 
+ * @param element The DOM element to animate
+ */
+export const addScaleAnimation = (element: HTMLElement | null) => {
+  // Return early if no element is provided
+  if (!element) {
+    console.error("[addScaleAnimation] Cannot add animation to null element");
+    return;
+  }
+  
+  // Add scale animation class
+  element.classList.add('scale-animation');
+  
+  // Remove the animation class after animation completes
+  setTimeout(() => {
+    element.classList.remove('scale-animation');
+  }, 300);
 };
 
 /**
@@ -117,4 +142,3 @@ export const highlightElement = (selector: string, showErrorToast: boolean = fal
  *   }
  * }
  */
-

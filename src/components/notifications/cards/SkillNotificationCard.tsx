@@ -16,45 +16,17 @@ interface SkillNotificationCardProps {
 
 /**
  * Component for rendering notifications related to skills
- * This handles various skill-related notification types with proper sentence formatting
+ * This handles various skill-related notification types
  */
 const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notification, onDismiss }) => {
   // Extract context info if available
   const context = notification.context || {};
-  const neighborName = context.neighborName || notification.profiles?.display_name || 'A neighbor';
-  const skillTitle = context.skillTitle || notification.title || 'a skill';
-  
-  // Create a properly formatted title based on action type
-  const createFormattedTitle = () => {
-    const actionType = notification.action_type || 'view';
-    
-    switch (actionType) {
-      case 'request':
-        return `${neighborName} requested ${skillTitle}`;
-      case 'confirm':
-        return `${neighborName} confirmed ${skillTitle}`;
-      case 'cancel':
-        return `${neighborName} cancelled ${skillTitle}`;
-      case 'complete':
-        return `${neighborName} completed ${skillTitle}`;
-      case 'share':
-        return `${neighborName} is sharing ${skillTitle}`;
-      case 'update':
-        return `${neighborName} updated ${skillTitle}`;
-      default:
-        return notification.title || `${neighborName} interested in a skill`;
-    }
-  };
-  
-  // Create formatted notification with proper sentence structure
-  const formattedNotification = {
-    ...notification,
-    title: createFormattedTitle()
-  };
+  const neighborName = context.neighborName || 'A neighbor';
   
   // Handle viewing the skill details
   const handleViewSkill = () => {
     if (notification.content_id) {
+      // Fixed highlightItem call to use proper API
       highlightItem('skills', notification.content_id);
     }
     
@@ -63,7 +35,7 @@ const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notificat
 
   return (
     <NotificationCard
-      notification={formattedNotification}
+      notification={notification}
       onAction={handleViewSkill}
       onDismiss={onDismiss}
     />

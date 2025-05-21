@@ -8,9 +8,9 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { Card } from "@/components/ui/card";
-import { markAsRead, archiveNotification } from "@/hooks/notifications"; 
+import { markAsRead, archiveNotification } from "@/hooks/notifications"; // Updated import path
 import { useNavigate } from "react-router-dom";
-import { navigateAndHighlight } from "@/utils/highlight";
+import { highlightItem } from "@/utils/highlight";
 import { HighlightableItemType } from "@/utils/highlight/types";
 import { Button } from "@/components/ui/button";
 import { Archive, Eye } from "lucide-react";
@@ -80,14 +80,16 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
       }
     }
     
-    // Navigate to content using the unified navigateAndHighlight function
+    // Navigate to content
     if (content_type && content_id) {
-      navigateAndHighlight(
-        content_type as HighlightableItemType,
-        content_id,
-        navigate,
-        true
-      );
+      try {
+        // Using the highlightItem utility
+        const contentTypeAsHighlightable = content_type as HighlightableItemType;
+        highlightItem(contentTypeAsHighlightable, content_id);
+      } catch (error) {
+        console.error("Error navigating to content:", error);
+        navigate(`/${content_type}/${content_id}`);
+      }
     }
     
     if (onDismiss) onDismiss();

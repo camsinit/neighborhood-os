@@ -7,10 +7,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
-import { createLogger } from "@/utils/logger";
-
-// Initialize logger
-const logger = createLogger('UserNeighborhoodsHook');
 
 // Define the Neighborhood interface for type safety
 export interface Neighborhood {
@@ -36,8 +32,6 @@ export const useUserNeighborhoods = () => {
   // Helper function to add a user to a neighborhood
   const addUserToNeighborhood = async (userId: string, neighborhoodName: string) => {
     try {
-      logger.info("Adding user to neighborhood", { userId, neighborhoodName });
-      
       // First, find the neighborhood ID by name
       const {
         data: neighborhoods,
@@ -54,13 +48,17 @@ export const useUserNeighborhoods = () => {
       const neighborhoodId = neighborhoods[0].id;
 
       // Check if user is already a member
-      const { data: isMember, error: membershipCheckError } = await supabase.rpc(
-        'user_is_neighborhood_member',
-        {
-          user_uuid: userId,
-          neighborhood_uuid: neighborhoodId
-        }
-      );
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const response = await (supabase.rpc as any)('user_is_neighborhood_member', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
+      
+      // Use type assertion for the RPC response
+      const { data: isMember, error: membershipCheckError } = response as unknown as {
+        data: boolean | null;
+        error: Error | null;
+      };
       
       if (membershipCheckError) throw membershipCheckError;
       
@@ -69,14 +67,18 @@ export const useUserNeighborhoods = () => {
         return;
       }
 
-      // Add the user as a member
-      const { error: addError } = await supabase.rpc(
-        'add_neighborhood_member',
-        {
-          user_uuid: userId,
-          neighborhood_uuid: neighborhoodId
-        }
-      );
+      // Add the user as a member using RPC function
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const addMemberResponse = await (supabase.rpc as any)('add_neighborhood_member', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
+      
+      // Use type assertion for the RPC response
+      const { error: addError } = addMemberResponse as unknown as {
+        data: boolean | null;
+        error: Error | null;
+      };
       
       if (addError) throw addError;
 
@@ -88,7 +90,7 @@ export const useUserNeighborhoods = () => {
         refreshNeighborhoods();
       }
     } catch (err) {
-      logger.error("Error adding user to neighborhood:", err);
+      console.error("[UserNeighborhoods] Error adding user to neighborhood:", err);
       toast.error("Failed to add user to neighborhood");
     }
   };
@@ -104,15 +106,42 @@ export const useUserNeighborhoods = () => {
       setIsLoading(true);
       setError(null);
       
-      logger.info("Fetching neighborhoods for user:", user.id);
+      console.log("[UserNeighborhoods] Fetching neighborhoods for user:", user.id);
 
-      // Get user's neighborhoods using RPC function
-      const { data: membershipData, error: membershipError } = await supabase.rpc(
-        'get_user_neighborhoods',
-        {
-          user_uuid: user.id
-        }
-      );
+      // First check if the user created any neighborhoods directly
+      const {
+        data: createdNeighborhoods,
+        error: createdError
+      } = await supabase.from('neighborhoods').select('id, name').eq('created_by', user.id);
+      
+      if (createdError) {
+        console.warn("[UserNeighborhoods] Error checking created neighborhoods:", createdError);
+      }
+
+      // If user created neighborhoods, use those
+      if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+        const formattedNeighborhoods = createdNeighborhoods.map(item => ({
+          id: item.id,
+          name: item.name,
+          joined_at: new Date().toISOString() // Default value since we don't have joined_at for creators
+        }));
+        
+        setNeighborhoods(formattedNeighborhoods);
+        setIsLoading(false);
+        return;
+      }
+
+      // Call RPC function that safely checks membership
+      // Use the function call with 'any' type annotation to bypass TypeScript checking
+      const response = await (supabase.rpc as any)('get_user_neighborhoods', {
+        user_uuid: user.id
+      });
+      
+      // Use type assertion for the RPC response
+      const { data: membershipData, error: membershipError } = response as unknown as {
+        data: Neighborhood[] | null;
+        error: Error | null;
+      };
       
       if (membershipError) {
         throw membershipError;
@@ -124,7 +153,7 @@ export const useUserNeighborhoods = () => {
         setNeighborhoods([]);
       }
     } catch (err: any) {
-      logger.error("Error fetching neighborhoods:", err);
+      console.error("[UserNeighborhoods] Error fetching neighborhoods:", err);
       setError(err instanceof Error ? err.message : "Failed to load your neighborhoods");
       toast.error("Failed to load your neighborhoods");
     } finally {

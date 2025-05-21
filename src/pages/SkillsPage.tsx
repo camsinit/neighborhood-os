@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { ModuleLayout } from '@/components/layout';
+import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,14 @@ import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 
-// Create a logger for this component
 const logger = createLogger('SkillsPage');
 
 function SkillsPage() {
-  // Get search parameters from URL
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get('view') || 'offers';
   const category = searchParams.get('category') || null;
   const searchQuery = searchParams.get('q') || '';
   
-  // Use the highlight system to highlight skills when requested
   const highlightedSkill = useHighlightedItem('skills');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   
@@ -43,6 +40,11 @@ function SkillsPage() {
     }
   }, [searchParams]);
   
+  // Log component mounting
+  useEffect(() => {
+    logger.info('Component mounted, version: 2025-04-28');
+  }, []);
+  
   // Handle tab changes
   const handleTabChange = (value: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -57,55 +59,58 @@ function SkillsPage() {
   };
   
   return (
-    <ModuleLayout 
-      title="Skills Exchange"
-      description="Share skills and knowledge with your neighbors"
-      themeColor="skills"
-      actions={
-        <Button className="whitespace-nowrap flex items-center gap-1.5">
-          <PlusCircle className="h-4 w-4" />
-          <span>Add Skill</span>
-        </Button>
-      }
-    >
-      <Tabs value={view} onValueChange={handleTabChange}>
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
-          <TabsList>
-            <TabsTrigger value="offers">Offers</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-            <TabsTrigger value="mine">My Skills</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex gap-2">
-            <SkillsFilter />
-            <SearchInput 
-              placeholder="Search skills..."
-              onChange={(e) => {
-                const newParams = new URLSearchParams(searchParams);
-                if (e.target.value) {
-                  newParams.set('q', e.target.value);
-                } else {
-                  newParams.delete('q');
-                }
-                setSearchParams(newParams);
-              }}
-              value={searchQuery}
-              ref={searchInputRef}
-            />
+    <ModuleContainer themeColor="skills">
+      <ModuleHeader 
+        title="Skills Exchange"
+        description="Share skills and knowledge with your neighbors"
+        themeColor="skills"
+        actions={
+          <Button className="whitespace-nowrap flex items-center gap-1.5">
+            <PlusCircle className="h-4 w-4" />
+            <span>Add Skill</span>
+          </Button>
+        }
+      />
+      <ModuleContent>
+        <Tabs value={view} onValueChange={handleTabChange}>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
+            <TabsList>
+              <TabsTrigger value="offers">Offers</TabsTrigger>
+              <TabsTrigger value="requests">Requests</TabsTrigger>
+              <TabsTrigger value="mine">My Skills</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex gap-2">
+              <SkillsFilter />
+              <SearchInput 
+                placeholder="Search skills..."
+                onChange={(e) => {
+                  const newParams = new URLSearchParams(searchParams);
+                  if (e.target.value) {
+                    newParams.set('q', e.target.value);
+                  } else {
+                    newParams.delete('q');
+                  }
+                  setSearchParams(newParams);
+                }}
+                value={searchQuery}
+                ref={searchInputRef}
+              />
+            </div>
           </div>
-        </div>
-        
-        <TabsContent value="offers" className="mt-0">
-          <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-        </TabsContent>
-        <TabsContent value="requests" className="mt-0">
-          <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-        </TabsContent>
-        <TabsContent value="mine" className="mt-0">
-          <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-        </TabsContent>
-      </Tabs>
-    </ModuleLayout>
+          
+          <TabsContent value="offers" className="mt-0">
+            <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+          </TabsContent>
+          <TabsContent value="requests" className="mt-0">
+            <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+          </TabsContent>
+          <TabsContent value="mine" className="mt-0">
+            <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+          </TabsContent>
+        </Tabs>
+      </ModuleContent>
+    </ModuleContainer>
   );
 }
 

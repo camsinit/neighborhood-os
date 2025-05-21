@@ -3,7 +3,6 @@
  * NeighborNotificationCard.tsx
  * 
  * Specialized notification card for new neighbor announcements.
- * Now using proper sentence formatting without brackets.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -11,10 +10,6 @@ import NotificationCard from "./base/NotificationCard";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
-import { createLogger } from "@/utils/logger";
-
-// Initialize logger
-const logger = createLogger('NeighborNotificationCard');
 
 interface NeighborNotificationCardProps {
   notification: BaseNotification;
@@ -25,14 +20,10 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   notification,
   onDismiss,
 }) => {
-  // Handle viewing neighbor profile
-  const handleViewNeighbor = () => {
-    logger.debug("Viewing neighbor profile", { 
-      contentId: notification.content_id,
-      notificationType: notification.notification_type 
-    });
-    
+  // Handle viewing neighbor profile - fixed highlightItem call
+  const handleViewNeighbor = async () => {
     // Navigate to the neighbors section and highlight this neighbor
+    // Fixed highlightItem call to use proper API
     highlightItem('neighbors', notification.content_id);
     
     if (onDismiss) onDismiss();
@@ -42,14 +33,14 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "A neighbor";
   
-  // Create sentence-style title with proper subject-verb-object structure
+  // Create sentence-style title with highlighted neighbor name
   const createSentenceTitle = () => {
-    // For join notifications, put focus on the neighbor name
-    if (notification.action_type === "join" || notification.context?.action === "join") {
-      return `${actorName} joined your neighborhood`;
+    // For join notifications, highlight the neighbor name
+    if (notification.action_type === "join") {
+      return `[[${actorName}]] joined your neighborhood`;
     } 
     // For profile updates
-    return `${actorName} updated their profile`;
+    return `[[${actorName}]] updated their profile`;
   };
   
   // Create the sentence-style title

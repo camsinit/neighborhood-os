@@ -115,19 +115,22 @@ export const useSkillRequestSubmit = (
         sessionId = result.session_id as string;
       }
       
-      // No need for edge function call - database triggers create notifications now
-      console.log("[submitSkillRequest] DB triggers create notifications");
+      // Notifications are now handled by database triggers
+      // No need to manually call notification functions
       
       // Show success message and update UI
       toast.success('Skill request submitted successfully');
-      
-      // Invalidate queries and emit events to refresh UI
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Also invalidate notifications
       
-      refreshEvents.emit('skill-request-created');
-      refreshEvents.emit('skills-updated');
-      refreshEvents.emit('notification-created');
+      // Trigger notification refresh
+      refreshEvents.notifications();
+      // Also trigger skills refresh
+      refreshEvents.skills();
+      
+      // Dispatch DOM events for notifications
+      window.dispatchEvent(new CustomEvent('notification-created'));
+      window.dispatchEvent(new CustomEvent('skills-updated'));
       
       onClose();
     } catch (error: any) {

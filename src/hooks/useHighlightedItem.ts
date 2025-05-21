@@ -7,13 +7,8 @@
  * specific items in lists or views.
  */
 import { useEffect, useState } from 'react';
-// Fix imports to use the correct paths
-import { createHighlightListener } from '@/utils/highlight/createHighlightListener';
-import { HighlightableItemType, UseHighlightedItemResult } from '@/utils/highlight/types';
-import { createLogger } from '@/utils/logger';
-
-// Create a dedicated logger for this hook
-const logger = createLogger('useHighlightedItem');
+import { createHighlightListener, HighlightableItemType } from '@/utils/highlight';
+import { UseHighlightedItemResult } from '@/utils/highlight/types';
 
 /**
  * Hook to handle item highlighting in components
@@ -25,12 +20,9 @@ export function useHighlightedItem(type: HighlightableItemType): UseHighlightedI
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   
   useEffect(() => {
-    logger.debug(`Setting up highlight listener for ${type} items`);
-    
     // Create a listener for highlight events that match this component's type
     const removeListener = createHighlightListener((detail) => {
       if (detail.type === type) {
-        logger.debug(`Highlighting ${type} item with ID: ${detail.id}`);
         setHighlightedId(detail.id);
       }
     });

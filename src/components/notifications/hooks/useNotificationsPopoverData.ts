@@ -44,12 +44,7 @@ export const useNotificationsPopoverData = (showArchived: boolean) => {
     const refreshEventTypes: EventType[] = [
       'notification-created',
       'event-rsvp-updated',
-      'skills-updated',
-      'skill-request-created', 
-      'skill-session-confirmed',
-      'skill-session-cancelled',
-      'skill-session-rescheduled',
-      'skill-completed'
+      'skills-updated'
     ];
     
     // Create a handler for the refresh events

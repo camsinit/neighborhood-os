@@ -1,144 +1,267 @@
 
-/**
- * InviteNeighborPopover.tsx
- * 
- * This component provides a popover UI for inviting neighbors to join the neighborhood
- */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Copy, Check, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@supabase/auth-helpers-react';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
-import { useNeighborhood } from '@/contexts/NeighborhoodContext';
-import { Plus } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { createLogger } from '@/utils/logger';
-
-// Initialize logger
-const logger = createLogger('InviteNeighborPopover');
+import { UserPlus } from 'lucide-react';
 
 /**
- * Popover component for inviting neighbors
- * Uses direct DB operations that trigger the notification DB functions
+ * InviteNeighborPopover component
+ * 
+ * A streamlined UI for generating and sharing one-time invite codes
+ * that neighbors can use to join the neighborhood.
  */
-const InviteNeighborPopover: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [isInviting, setIsInviting] = useState(false);
-  const [open, setOpen] = useState(false);
+const InviteNeighborPopover = () => {
+  // State for tracking the invite code and UI states
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  // Add a state to track errors for better display
+  const [error, setError] = useState<string | null>(null);
+
+  // Get required hooks
+  const { toast } = useToast();
+  const user = useUser();
   const { currentNeighborhood } = useNeighborhood();
 
-  // Handle inviting a new neighbor
-  const handleInvite = async () => {
-    // Validate inputs
-    if (!email.trim()) {
-      toast({
-        title: "Email Required",
-        description: "Please enter an email address to invite a neighbor",
-        variant: "destructive"
-      });
-      return;
-    }
+  // Debug effect to track neighborhood data changes
+  useEffect(() => {
+    // Log when neighborhood data changes for debugging
+    console.log("[InvitePopover] Neighborhood data updated:", {
+      hasNeighborhood: !!currentNeighborhood,
+      neighborhoodId: currentNeighborhood?.id,
+      hasUser: !!user
+    });
+  }, [currentNeighborhood, user]);
 
-    if (!currentNeighborhood?.id) {
-      toast({
-        title: "No Neighborhood Selected",
-        description: "You need to be part of a neighborhood to invite neighbors",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  /**
+   * Generates a new invite code and stores it in the database
+   */
+  const generateInviteCode = async () => {
+    // Reset states at the beginning
+    setIsCopied(false);
+    setIsGenerating(true);
+    setError(null); // Clear any previous errors
+    
     try {
-      setIsInviting(true);
-      
-      // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      // Validate required data is present with more detailed logging
       if (!user) {
-        throw new Error("You must be logged in to invite neighbors");
+        console.error("[InvitePopover] Cannot generate invite: No user is logged in");
+        setError("You must be logged in to generate invites");
+        throw new Error("You must be logged in to generate invites");
       }
       
-      // Generate a unique invitation code
-      const inviteCode = Math.random().toString(36).substring(2, 10);
+      if (!currentNeighborhood) {
+        console.error("[InvitePopover] Cannot generate invite: No neighborhood selected");
+        setError("You need to join a neighborhood before inviting others");
+        throw new Error("No neighborhood selected");
+      }
       
-      logger.info("Creating invitation", { 
-        email, 
+      // Generate a unique UUID for the invite
+      const newInviteCode = crypto.randomUUID();
+      
+      console.log("[InvitePopover] Generating invite for neighborhood:", {
         neighborhoodId: currentNeighborhood.id,
-        inviterId: user.id 
+        neighborhoodName: currentNeighborhood.name,
+        userId: user.id
       });
       
-      // Insert invitation record directly - this will handle all necessary side effects
-      const { error } = await supabase
-        .from('invitations')
-        .insert({
-          email: email,
-          inviter_id: user.id,
-          neighborhood_id: currentNeighborhood.id,
-          invite_code: inviteCode,
-          status: 'pending'
-        });
-        
-      if (error) {
-        throw error;
+      // Create a new invitation record in the database
+      const { error: dbError } = await supabase.from("invitations").insert({
+        invite_code: newInviteCode,
+        inviter_id: user.id,
+        neighborhood_id: currentNeighborhood.id,
+      });
+
+      // Handle database errors
+      if (dbError) {
+        console.error("[InvitePopover] Database error:", dbError);
+        setError("Unable to create invitation in database");
+        throw dbError;
       }
+
+      // Update state with the new code
+      setInviteCode(newInviteCode);
       
-      // Success!
+      // Show success message
       toast({
-        title: "Invitation Sent",
-        description: `We've sent an invitation to ${email}`,
+        title: "Invite code generated!",
+        description: "You can now share this code with your neighbor.",
       });
-      
-      // Reset form and close popover
-      setEmail('');
-      setOpen(false);
     } catch (error: any) {
-      logger.error("Failed to invite neighbor", error);
+      // Log and handle any errors
+      console.error("[InvitePopover] Error generating invite:", error);
       
-      toast({
-        title: "Invitation Failed",
-        description: error.message || "Failed to send invitation. Please try again.",
-        variant: "destructive"
-      });
+      // Don't show toast for expected errors (no neighborhood/user)
+      if (!error.message.includes("No neighborhood") && 
+          !error.message.includes("logged in")) {
+        toast({
+          title: "Error generating invite code",
+          description: error.message || "Unknown error occurred",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsInviting(false);
+      // End the generation process
+      setIsGenerating(false);
     }
   };
 
+  /**
+   * Copies the complete invitation URL to clipboard
+   */
+  const copyInviteLink = async () => {
+    try {
+      if (!inviteCode) return;
+      
+      // Create the full invitation URL
+      const inviteUrl = `${window.location.origin}/join/${inviteCode}`;
+      
+      // Copy the URL to clipboard
+      await navigator.clipboard.writeText(inviteUrl);
+      
+      // Show success feedback
+      setIsCopied(true);
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000);
+      
+      // Show success message
+      toast({
+        title: "Invite link copied!",
+        description: "You can now share this link with your neighbor.",
+      });
+    } catch (error: any) {
+      console.error("[InvitePopover] Error copying invite link:", error);
+      toast({
+        title: "Error copying link",
+        description: "Could not copy the link to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
+  /**
+   * Handle popover open change - generate new code automatically
+   */
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    
+    // When opening, clear any previous errors
+    if (open) {
+      setError(null);
+    }
+    
+    // Only try to generate a code if we have both user and neighborhood data
+    if (open && !inviteCode && !isGenerating) {
+      if (user && currentNeighborhood) {
+        generateInviteCode();
+      }
+    }
+  };
+  
+  // Determine if button should be disabled
+  const isButtonDisabled = !inviteCode || isGenerating || !currentNeighborhood;
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="default" className="flex items-center gap-1.5">
-          <Plus className="h-4 w-4" />
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-base font-medium"
+          type="button"
+          aria-label="Invite a neighbor"
+        >
+          <UserPlus className="h-5 w-5" />
           Invite Neighbor
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4">
+      <PopoverContent className="w-[300px] p-4">
         <div className="space-y-4">
-          <div className="space-y-2">
-            <h4 className="font-medium">Invite a Neighbor</h4>
-            <p className="text-sm text-gray-500">
-              Enter your neighbor's email to send them an invitation to join your neighborhood.
+          <div className="text-center">
+            <h3 className="font-medium text-lg">Invite a Neighbor</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Share this link with someone to invite them to your neighborhood
             </p>
           </div>
-          <div className="space-y-2">
-            <Input
-              placeholder="neighbor@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-            />
-          </div>
-          <Button 
-            className="w-full" 
-            disabled={isInviting} 
-            onClick={handleInvite}
-          >
-            {isInviting ? "Sending..." : "Send Invitation"}
-          </Button>
+          
+          {/* Show neighborhood name if available */}
+          {currentNeighborhood && (
+            <div className="text-center">
+              <span className="text-sm font-medium">
+                {currentNeighborhood.name}
+              </span>
+            </div>
+          )}
+          
+          {/* Error state when no neighborhood or other errors */}
+          {(error || !currentNeighborhood) && !isGenerating && (
+            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
+              <div className="flex items-start">
+                <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+                <p className="text-sm text-yellow-800">
+                  {error || "You need to join a neighborhood before inviting others."}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {/* Loading state */}
+          {isGenerating && (
+            <div className="py-2 flex justify-center">
+              <RefreshCw className="h-5 w-5 animate-spin text-gray-400" />
+            </div>
+          )}
+          
+          {/* Display the invite code */}
+          {inviteCode && !isGenerating && (
+            <div className="mt-2">
+              <Button
+                variant="outline"
+                className="w-full justify-center gap-2"
+                onClick={copyInviteLink}
+                disabled={isButtonDisabled}
+              >
+                {isCopied ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4" />
+                    Copy Invite Link
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-center mt-2 text-muted-foreground">
+                This is a one-time use link that expires after use
+              </p>
+            </div>
+          )}
+          
+          {/* Button to generate a new code */}
+          {inviteCode && !isGenerating && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={generateInviteCode}
+              disabled={isGenerating}
+              className="w-full text-sm"
+            >
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Generate New Code
+            </Button>
+          )}
         </div>
       </PopoverContent>
     </Popover>

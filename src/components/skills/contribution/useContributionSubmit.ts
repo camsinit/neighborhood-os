@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from 'sonner'; // Updated import for toast
 import { TimeSlot } from './TimeSlotSelector';
 import { LocationPreference } from './LocationSelector';
 import { validateTimeSlots } from '@/utils/timeslotUtils';
@@ -76,6 +76,9 @@ export const useContributionSubmit = (
       // Extract the session ID from the result
       const sessionId = result?.id;
       
+      // Notifications are now handled by database triggers
+      // No need to manually call notification functions
+      
       // Optionally add skill to user profile
       if (addToProfile) {
         console.log("Adding skill to user profile");
@@ -86,11 +89,14 @@ export const useContributionSubmit = (
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
-      // Emit events for UI updates - notifications are created by database triggers
-      refreshEvents.emit('skill-request-created');
-      refreshEvents.emit('skills-updated');
-      refreshEvents.emit('notification-created');
+      // Trigger notification refresh events
+      refreshEvents.notifications();
+      refreshEvents.skills();
       
+      // Dispatch DOM events for listeners
+      window.dispatchEvent(new CustomEvent('notification-created'));
+      window.dispatchEvent(new CustomEvent('skills-updated'));
+
       // Show success message
       toast.success("Skill contribution offered. The requester will be notified to schedule a time.");
       

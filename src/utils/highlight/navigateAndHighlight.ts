@@ -20,6 +20,7 @@ const logger = createLogger('navigateAndHighlight');
  * @param itemId The ID of the item to highlight
  * @param navigate The navigate function from react-router
  * @param showToast Whether to show a toast notification
+ * @returns Promise that resolves when navigation and highlighting are complete
  */
 export const navigateAndHighlight = (
   itemType: HighlightableItemType,

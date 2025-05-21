@@ -1,44 +1,41 @@
 
 /**
- * Constants for the highlight system
+ * Constants for highlight navigation
  * 
- * This file contains route mappings and configuration for the highlight system.
+ * This file contains mapping objects used to associate item types 
+ * with their respective routing and DOM attributes
  */
 import { HighlightableItemType } from './types';
 
-// Map item types to their respective routes
+/**
+ * Maps item types to their respective routes in the application
+ */
 export const routeMap: Record<HighlightableItemType, string> = {
-  event: '/calendar',
-  safety: '/safety',
-  skills: '/skills',
-  goods: '/goods',
-  neighbors: '/neighbors'
+  safety: "/safety",
+  event: "/calendar", 
+  skills: "/skills",
+  goods: "/goods",
+  neighbors: "/neighbors"
 };
 
-// Animation configuration for highlighted items
-export const highlightConfig = {
-  duration: 2000,       // Duration of highlight in milliseconds
-  color: '#FBBF24',     // Amber color for highlight
-  fadeDuration: 500     // Fade out duration in milliseconds
-};
-
-// Delay before scrolling to an element
-export const scrollDelay = 200;  // milliseconds
-
-// Map item types to their respective data attributes
+/**
+ * Maps item types to their data attributes for DOM selection
+ */
 export const dataAttributeMap: Record<HighlightableItemType, string> = {
-  event: 'event-id',
-  safety: 'update-id',
-  skills: 'skill-id',
-  goods: 'goods-id',
-  neighbors: 'neighbor-id'
+  safety: "data-safety-id",
+  event: "data-event-id", 
+  skills: "data-skill-id", 
+  goods: "data-goods-id",
+  neighbors: "data-neighbor-id"
 };
 
-// Readable names for item types (for notifications)
+/**
+ * Maps item types to readable names for error messages
+ */
 export const readableTypeNames: Record<HighlightableItemType, string> = {
-  event: 'Event',
-  safety: 'Safety Update',
-  skills: 'Skill',
-  goods: 'Goods Item',
-  neighbors: 'Neighbor'
+  safety: "Safety Update",
+  event: "Event", 
+  skills: "Skill",
+  goods: "Goods Item",
+  neighbors: "Neighbor Profile"
 };

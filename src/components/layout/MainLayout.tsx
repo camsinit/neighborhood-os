@@ -17,6 +17,7 @@ interface MainLayoutProps {
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
+ * - Debug logging controls for development
  * 
  * @param children - Content to render in the main area
  */
@@ -36,18 +37,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <div className="h-screen flex">
-      {/* Sidebar navigation */}
       <Sidebar />
-      
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-auto">
         {/* Only render the header on the homepage */}
         {isHomePage && (
           <Header onOpenSettings={handleOpenSettings} />
         )}
-        
-        {/* Main content - takes full height */}
-        <main className="flex-1 overflow-auto">
+        {/* Removed padding from main element to allow gradients to touch edges */}
+        <main className="h-full">
           {children}
         </main>
         

@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { ModuleLayout } from '@/components/layout';
+import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import SafetyUpdates from '@/components/SafetyUpdates';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
@@ -23,28 +23,31 @@ function SafetyPage() {
   }, [searchParams]);
   
   return (
-    <ModuleLayout
-      title="Safety Updates" 
-      description="Stay informed about safety in your community"
-      themeColor="safety"
-      actions={
-        <Button 
-          className="whitespace-nowrap flex items-center gap-1.5"
-          onClick={() => setIsDialogOpen(true)}
-        >
-          <PlusCircle className="h-4 w-4" />
-          <span>Post Update</span>
-        </Button>
-      }
-    >
-      <SafetyUpdates />
+    <ModuleContainer themeColor="safety">
+      <ModuleHeader 
+        title="Safety Updates" 
+        description="Stay informed about safety in your community"
+        themeColor="safety"
+        actions={
+          <Button 
+            className="whitespace-nowrap flex items-center gap-1.5"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Post Update</span>
+          </Button>
+        }
+      />
+      <ModuleContent>
+        <SafetyUpdates />
+      </ModuleContent>
 
-      {/* Render the AddSafetyUpdateDialogNew component */}
+      {/* Properly render the AddSafetyUpdateDialogNew component */}
       <AddSafetyUpdateDialogNew 
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
-    </ModuleLayout>
+    </ModuleContainer>
   );
 }
 

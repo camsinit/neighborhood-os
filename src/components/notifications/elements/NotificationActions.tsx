@@ -8,10 +8,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Archive, Eye } from "lucide-react"; 
-import { markAsRead, archiveNotification } from "@/hooks/notifications";
+import { markAsRead, archiveNotification } from "@/hooks/notifications"; // Updated import path
 import { useNavigate } from "react-router-dom";
-import { navigateAndHighlight } from "@/utils/highlight";
-import { type HighlightableItemType } from "@/utils/highlight/types";
+import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
+import { type HighlightableItemType } from "@/utils/highlight";
 import { createLogger } from "@/utils/logger";
 
 // Create logger for this component
@@ -58,11 +58,13 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     
     // If we have content type and ID, navigate to it and highlight it
     if (contentId && contentType) {
-      // Use our unified navigateAndHighlight function
+      // Navigate and highlight the item
       navigateAndHighlight(contentType, contentId, navigate, true);
       
-      // We call onDismiss after navigation
-      if (onDismiss) onDismiss();
+      // We call onDismiss after a short delay to ensure navigation happens
+      setTimeout(() => {
+        if (onDismiss) onDismiss();
+      }, 100);
     } else {
       // If we don't have content info, just dismiss
       if (onDismiss) onDismiss();

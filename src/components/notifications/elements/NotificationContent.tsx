@@ -8,7 +8,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { getNotificationTextColor } from "../utils/notificationColorUtils";
-
 interface NotificationContentProps {
   title: string;
   actorName?: string;
@@ -20,6 +19,7 @@ interface NotificationContentProps {
 
 /**
  * Component for rendering the main content of a notification with plain English formatting
+ * Now with direct text highlighting instead of bracket notation
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -128,5 +128,4 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
       {children}
     </div>;
 };
-
 export default NotificationContent;

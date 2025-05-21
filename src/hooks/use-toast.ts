@@ -3,39 +3,37 @@
  * This is a compatibility layer for Sonner toast
  * 
  * It provides a unified API that works with both the older toast system
- * and the newer Sonner implementation.
+ * and the newer Sonner toast implementation.
  */
-import { toast as sonnerToast, type ToastT, type ExternalToast } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
 
 // Custom toast type that handles both the old API (title/description) and new API (description only)
 export type Toast = {
   title?: string;
-  description: string; // Make description required to match the error
+  description?: string;
   variant?: 'default' | 'destructive' | 'success';
 };
 
-// Define ToastProps type for backwards compatibility
-export type ToastProps = Toast;
-
 // Adapter function that converts our app's toast format to Sonner's format
 const adaptToastToSonner = (props: Toast) => {
-  // Create a Sonner-compatible toast object
-  const sonnerProps: ExternalToast = {
-    description: props.description
-  };
-  
-  // Add optional title if provided
+  // If using the old API with title, combine title and description
   if (props.title) {
-    sonnerProps.description = props.title + (props.description ? `: ${props.description}` : '');
-  }
-  
-  // Map variant to Sonner's variants
-  if (props.variant === 'destructive') {
-    return sonnerToast.error(props.description, sonnerProps);
-  } else if (props.variant === 'success') {
-    return sonnerToast.success(props.description, sonnerProps);
-  } else {
-    return sonnerToast(props.description, sonnerProps);
+    const message = props.description 
+      ? `${props.title}: ${props.description}`
+      : props.title;
+    
+    // Map variant to Sonner's variants
+    if (props.variant === 'destructive') {
+      return sonnerToast.error(message);
+    } else if (props.variant === 'success') {
+      return sonnerToast.success(message);
+    } else {
+      return sonnerToast(message);
+    }
+  } 
+  // If using the new API with just description
+  else {
+    return sonnerToast(props.description || '');
   }
 };
 
