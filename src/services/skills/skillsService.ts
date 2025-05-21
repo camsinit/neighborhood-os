@@ -178,6 +178,8 @@ export const updateSkill = async (
 
 /**
  * Delete a skill
+ * 
+ * Returns an object with details about the operation success or error
  */
 export const deleteSkill = async (
   skillId: string,
@@ -192,7 +194,39 @@ export const deleteSkill = async (
     timestamp: new Date().toISOString()
   });
 
-  // Delete the skill
+  // Check if skill has associated sessions first
+  const { data: sessions, error: sessionsError } = await supabase
+    .from('skill_sessions')
+    .select('id')
+    .eq('skill_id', skillId)
+    .limit(1);
+    
+  if (sessionsError) {
+    logger.error('Error checking for skill sessions:', sessionsError);
+    return { 
+      success: false, 
+      error: sessionsError 
+    };
+  }
+  
+  // If sessions exist, return a specific error
+  if (sessions && sessions.length > 0) {
+    const error = {
+      message: 'Cannot delete skill with active sessions',
+      code: '23503',
+      details: 'Key is still referenced from table "skill_sessions"'
+    };
+    logger.error('Cannot delete skill - has active sessions:', {
+      skillId,
+      error
+    });
+    return {
+      success: false,
+      error
+    };
+  }
+
+  // If no sessions, try to delete the skill
   const { error } = await supabase
     .from('skills_exchange')
     .delete()
@@ -211,7 +245,10 @@ export const deleteSkill = async (
       userId,
       timestamp: new Date().toISOString()
     });
-    throw error;
+    return { 
+      success: false, 
+      error 
+    };
   }
 
   logger.info('Skill deleted successfully:', {
@@ -219,6 +256,8 @@ export const deleteSkill = async (
     userId,
     timestamp: new Date().toISOString()
   });
+  
+  return { success: true };
 };
 
 /**

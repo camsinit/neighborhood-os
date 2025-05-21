@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * Props for ActionButtons component
@@ -14,6 +15,7 @@ interface ActionButtonsProps {
   onDelete?: () => void;
   onRequestSkill?: () => void;
   isDeleting?: boolean;
+  hasActiveSessions?: boolean;
 }
 
 /**
@@ -25,13 +27,15 @@ interface ActionButtonsProps {
  * @param onDelete - Function to call when delete button is clicked
  * @param onRequestSkill - Function to call when request/offer button is clicked
  * @param isDeleting - Whether the deletion is in progress
+ * @param hasActiveSessions - Whether this skill has active sessions that prevent deletion
  */
 const ActionButtons: React.FC<ActionButtonsProps> = ({
   isOwner,
   isRequest,
   onDelete,
   onRequestSkill,
-  isDeleting = false
+  isDeleting = false,
+  hasActiveSessions = false
 }) => {
   // For owners, show delete button
   if (isOwner && onDelete) {
@@ -40,12 +44,19 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         <Button 
           onClick={onDelete}
           variant="destructive"
-          disabled={isDeleting}
+          disabled={isDeleting || hasActiveSessions}
           className="w-full"
           aria-label="Delete this skill"
         >
           {isDeleting ? 'Deleting...' : 'Delete Skill'}
         </Button>
+        
+        {hasActiveSessions && (
+          <div className="mt-2 flex items-center gap-2 text-amber-500 text-xs">
+            <AlertCircle size={14} />
+            <span>Cannot delete skills with active sessions</span>
+          </div>
+        )}
       </div>
     );
   } 
