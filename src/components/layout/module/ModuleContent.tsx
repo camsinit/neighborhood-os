@@ -18,8 +18,8 @@ const ModuleContent = ({
 }: ModuleContentProps) => {
   return (
     <div className="min-h-full w-full">
-      {/* Content container with consistent padding */}
-      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8", className)}>
+      {/* Content container with improved consistent padding */}
+      <div className={cn("max-w-7xl mx-auto pb-10", className)}>
         {children}
       </div>
     </div>

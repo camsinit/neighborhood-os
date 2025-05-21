@@ -11,7 +11,7 @@ import CommunityCalendar from '@/components/CommunityCalendar';
  * 
  * Displays the community calendar with proper module styling
  * and supports highlighting events from deep links.
- * The description is now displayed in a full-width box beneath the header.
+ * The description is displayed in a full-width box beneath the header.
  */
 function CalendarPage() {
   const [searchParams] = useSearchParams();
@@ -27,20 +27,20 @@ function CalendarPage() {
 
   return (
     <ModuleContainer themeColor="calendar">
-      {/* Header without action buttons */}
+      {/* Header with improved spacing */}
       <ModuleHeader 
         title="Community Calendar"
         themeColor="calendar"
       />
       
-      {/* Full-width description box */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-        <div className="module-description mt-0">
+      {/* Full-width description box with consistent padding */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 mb-6">
+        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
           <p className="text-gray-700 text-sm">Upcoming events in your neighborhood</p>
         </div>
       </div>
       
-      <ModuleContent>
+      <ModuleContent className="px-4 sm:px-6 lg:px-8">
         <div className="module-card">
           <CommunityCalendar />
         </div>

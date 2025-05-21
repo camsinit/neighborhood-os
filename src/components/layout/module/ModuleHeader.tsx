@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ModuleHeaderProps } from '@/types/module';
 
@@ -18,9 +19,9 @@ const ModuleHeader = ({
   themeColor,
   actions
 }: ModuleHeaderProps) => {
-  return <div className="module-header mb-6">
-      <div className="flex justify-between items-center">
-        {/* Module title */}
+  return <div className="module-header mb-4">
+      <div className="flex justify-between items-center px-1">
+        {/* Module title - Added consistent padding and adjusted text styling */}
         <h2 className="text-2xl font-bold text-blue-800">{title}</h2>
         
         {/* Action buttons container */}
@@ -29,8 +30,8 @@ const ModuleHeader = ({
           </div>}
       </div>
       
-      {/* Optional description box */}
-      {description && <div className="module-description mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+      {/* Optional description box - Now has consistent margins */}
+      {description && <div className="module-description mt-4 mb-6 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
           <p className="text-gray-700 text-sm">{description}</p>
         </div>}
     </div>;
