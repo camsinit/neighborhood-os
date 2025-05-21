@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ModuleHeaderProps } from '@/types/module';
 
@@ -22,7 +21,7 @@ const ModuleHeader = ({
   return <div className="module-header mb-4">
       <div className="flex justify-between items-center px-1">
         {/* Module title - Added consistent padding and adjusted text styling */}
-        <h2 className="text-2xl font-bold text-blue-800">{title}</h2>
+        <h2 className="text-2xl font-bold text-blue-800 px-[25px]">{title}</h2>
         
         {/* Action buttons container */}
         {actions && <div className="flex items-center gap-2">
