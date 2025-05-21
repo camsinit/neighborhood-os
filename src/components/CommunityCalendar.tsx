@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   addWeeks, 
@@ -19,7 +18,7 @@ import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
-import { toast } from "@/hooks/use-toast"; // Updated import path
+import { toast } from "@/hooks/use-toast"; 
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
 import { Event as LocalEvent } from "@/types/localTypes";
@@ -31,7 +30,7 @@ const logger = createLogger('CommunityCalendar');
  * Props for the CommunityCalendar component
  */
 interface CommunityCalendarProps {
-  // View mode: week, month, or agenda
+  // Updated to include 'agenda' as a valid view type
   view?: 'week' | 'month' | 'agenda';
 }
 

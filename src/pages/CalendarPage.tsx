@@ -36,6 +36,12 @@ function CalendarPage() {
     }
   }, [searchParams]);
 
+  // Handle event addition
+  const handleAddEvent = () => {
+    // Simply close the dialog after adding an event
+    setIsAddEventOpen(false);
+  };
+
   return (
     <ModuleLayout
       title="Community Calendar"
@@ -69,11 +75,7 @@ function CalendarPage() {
         </TabsContent>
         
         <TabsContent value="agenda" className="mt-0">
-          {/* Agenda view - simplified for now */}
-          <div className="p-4 border border-gray-200 rounded-lg">
-            <h3 className="text-lg font-medium mb-4">Event Agenda</h3>
-            <CommunityCalendar view="agenda" />
-          </div>
+          <CommunityCalendar view="agenda" />
         </TabsContent>
       </Tabs>
       
@@ -81,6 +83,7 @@ function CalendarPage() {
       <AddEventDialog
         open={isAddEventOpen}
         onOpenChange={setIsAddEventOpen}
+        onAddEvent={handleAddEvent}
       />
     </ModuleLayout>
   );

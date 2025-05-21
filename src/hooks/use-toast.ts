@@ -26,16 +26,16 @@ const adaptToastToSonner = (props: Toast) => {
   
   // Add optional title if provided
   if (props.title) {
-    sonnerProps.title = props.title;
+    sonnerProps.description = props.title + (props.description ? `: ${props.description}` : '');
   }
   
   // Map variant to Sonner's variants
   if (props.variant === 'destructive') {
-    return sonnerToast.error(props.title || props.description, sonnerProps);
+    return sonnerToast.error(props.description, sonnerProps);
   } else if (props.variant === 'success') {
-    return sonnerToast.success(props.title || props.description, sonnerProps);
+    return sonnerToast.success(props.description, sonnerProps);
   } else {
-    return sonnerToast(props.title || props.description, sonnerProps);
+    return sonnerToast(props.description, sonnerProps);
   }
 };
 
