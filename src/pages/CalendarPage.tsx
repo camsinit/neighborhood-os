@@ -2,23 +2,20 @@
 import React, { useEffect } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { useSearchParams } from 'react-router-dom'; 
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import CommunityCalendar from '@/components/CommunityCalendar';
-import { useState } from 'react';
 
 /**
  * CalendarPage Component
  * 
  * Displays the community calendar with proper module styling
  * and supports highlighting events from deep links.
+ * The description is now displayed in a full-width box beneath the header.
  */
 function CalendarPage() {
   const [searchParams] = useSearchParams();
   const highlightedEvent = useHighlightedItem('event');
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
 
   // Effect to handle deep linking to specific events
   useEffect(() => {
@@ -30,20 +27,19 @@ function CalendarPage() {
 
   return (
     <ModuleContainer themeColor="calendar">
+      {/* Header without action buttons */}
       <ModuleHeader 
         title="Community Calendar"
-        description="Upcoming events in your neighborhood"
         themeColor="calendar"
-        actions={
-          <Button 
-            className="whitespace-nowrap flex items-center gap-1.5"
-            onClick={() => setIsAddEventOpen(true)}
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span>Add Event</span>
-          </Button>
-        }
       />
+      
+      {/* Full-width description box */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="module-description mt-0">
+          <p className="text-gray-700 text-sm">Upcoming events in your neighborhood</p>
+        </div>
+      </div>
+      
       <ModuleContent>
         <div className="module-card">
           <CommunityCalendar />
