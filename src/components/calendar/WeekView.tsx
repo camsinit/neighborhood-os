@@ -34,8 +34,6 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
   // Handler for adding a new event
   const handleAddEvent = (date: Date) => {
     logger.debug(`Opening add event dialog for date: ${format(date, 'yyyy-MM-dd')}`);
@@ -52,11 +50,11 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
 
   return (
     <div className="space-y-2">
-      {/* Day names header */}
+      {/* Day names header - Now using the actual dates for formatting */}
       <div className="grid grid-cols-7">
-        {days.map((day) => (
-          <div key={day} className="text-lg font-medium px-4">
-            {day}
+        {weekDates.map((date, i) => (
+          <div key={i} className="text-center font-medium py-2">
+            {format(date, 'EEE')}
           </div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, startOfWeek, addDays } from 'date-fns';
 import { Event } from '@/types/localTypes'; // Update import to localTypes
 import DayCell from './DayCell';
 import AddEventDialog from '../AddEventDialog';
@@ -35,7 +35,18 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
   // Calculate days to display in the month view
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  
+  // Get the first day of the first week of the month view
+  // This ensures we start the calendar grid from Sunday
+  const calendarStart = startOfWeek(monthStart);
+  
+  // Generate an array of 7 days for the week header (Sunday to Saturday)
+  // These will be the same days used in the grid, ensuring alignment
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(calendarStart, i));
+  
+  // Calculate all days to be shown in the month grid
+  // We'll show 6 weeks (42 days) to ensure we capture the full month
+  const days = Array.from({ length: 42 }, (_, i) => addDays(calendarStart, i));
 
   // Handler for adding new events - stores the selected date and opens dialog
   const handleAddEvent = (date: Date) => {
@@ -53,6 +64,16 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
 
   return (
     <div>
+      {/* Day names header - Added to ensure day names are displayed */}
+      <div className="grid grid-cols-7 mb-1">
+        {weekDays.map((day, index) => (
+          <div key={index} className="text-center font-medium py-2">
+            {format(day, 'EEE')}
+          </div>
+        ))}
+      </div>
+      
+      {/* Calendar grid with days */}
       <div className="grid grid-cols-7 h-full">
         {days.map((day) => (
           <DayCell
