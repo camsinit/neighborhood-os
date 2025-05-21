@@ -1,4 +1,3 @@
-
 /**
  * NotificationBadge.tsx
  * 
@@ -9,16 +8,20 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface NotificationBadgeProps {
-  label: string;
+  // Either a label string or a count number should be provided
+  label?: string;
+  count?: number;
   variant?: "default" | "outline" | "destructive";
   className?: string;
 }
 
 /**
- * A simple badge component for notification cards
+ * A badge component for notifications that can display either a text label
+ * or a numeric count (e.g., for unread notifications)
  */
 const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   label,
+  count,
   variant = "default",
   className
 }) => {
@@ -29,13 +32,18 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
     destructive: "bg-red-100 text-red-700"
   };
   
+  // If count is provided, we'll use that as the content
+  // otherwise we'll use the label
+  const content = count !== undefined ? count : label;
+  
   return (
     <span className={cn(
       "inline-flex items-center px-2 py-0.5 rounded-full text-xs",
-      badgeStyles[variant],
+      // If we're showing a count and it's greater than 0, use a more prominent style
+      count !== undefined && count > 0 ? "bg-red-500 text-white" : badgeStyles[variant],
       className
     )}>
-      {label}
+      {content}
     </span>
   );
 };
