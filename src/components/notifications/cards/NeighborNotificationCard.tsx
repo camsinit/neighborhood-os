@@ -56,10 +56,10 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
       
     // For join notifications, highlight the neighbor name
     if (action === "join") {
-      return `[[${actorName}]] joined your neighborhood`;
+      return `${actorName} joined your neighborhood`;
     } 
     // For profile updates
-    return `[[${actorName}]] updated their profile`;
+    return `${actorName} updated their profile`;
   };
   
   // Create the sentence-style title

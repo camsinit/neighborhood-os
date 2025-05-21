@@ -36,16 +36,16 @@ export const GoodsNotificationCard: React.FC<GoodsNotificationCardProps> = ({
     
     // Different sentence formats based on context and action
     if (requestType.includes("offer")) {
-      return `${actorName} is offering [[${itemName}]]`;
+      return `${actorName} is offering ${itemName}`;
     } else if (requestType.includes("request")) {
-      return `${actorName} is looking for [[${itemName}]]`;
+      return `${actorName} is looking for ${itemName}`;
     } else if (notification.action_type === "claim") {
-      return `${actorName} claimed [[${itemName}]]`;
+      return `${actorName} claimed ${itemName}`;
     } else if (notification.action_type === "cancel") {
-      return `${actorName} removed listing for [[${itemName}]]`;
+      return `${actorName} removed listing for ${itemName}`;
     } else {
       // Default format
-      return `${actorName} posted [[${itemName}]]`;
+      return `${actorName} posted ${itemName}`;
     }
   };
   

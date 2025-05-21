@@ -19,7 +19,7 @@ interface NotificationContentProps {
 
 /**
  * Component for rendering the main content of a notification with plain English formatting
- * Now with direct text highlighting instead of bracket notation
+ * This component now directly parses and highlights important content based on notification patterns
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,

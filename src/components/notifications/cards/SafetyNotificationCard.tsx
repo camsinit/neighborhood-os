@@ -32,14 +32,14 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
     
     // Customize text based on safety type
     if (safetyType === 'emergency') {
-      return `${actorName} reported EMERGENCY: [[${safetyTitle}]]`;
+      return `${actorName} reported EMERGENCY: ${safetyTitle}`;
     } else if (safetyType === 'alert') {
-      return `${actorName} posted safety alert: [[${safetyTitle}]]`;
+      return `${actorName} posted safety alert: ${safetyTitle}`;
     } else if (safetyType === 'info') {
-      return `${actorName} shared safety info: [[${safetyTitle}]]`;
+      return `${actorName} shared safety info: ${safetyTitle}`;
     } else {
       // Fallback format
-      return `${actorName} posted safety update: [[${safetyTitle}]]`;
+      return `${actorName} posted safety update: ${safetyTitle}`;
     }
   };
   
