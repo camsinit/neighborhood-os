@@ -41,7 +41,8 @@ const CommunityCalendar = ({ view: initialView = 'week' }: CommunityCalendarProp
     handlePrevious,
     handleNext,
     handleToday,
-    getEventsForDate
+    getEventsForDate,
+    setCurrentDate // Make sure we're extracting this from the hook
   } = useCalendarState(initialView);
   
   // Fetch events data with React Query
@@ -63,7 +64,7 @@ const CommunityCalendar = ({ view: initialView = 'week' }: CommunityCalendarProp
         const eventDate = parseISO(event.time);
         
         // Update current date to event date
-        setCurrentDate(eventDate);
+        setCurrentDate(eventDate); // Now this is defined correctly
         
         // Switch to appropriate view based on date
         if (!isSameMonth(eventDate, currentDate)) {
