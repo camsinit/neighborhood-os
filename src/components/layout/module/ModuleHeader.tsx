@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ModuleHeaderProps } from '@/types/module';
+import { cn } from '@/lib/utils';
 
 /**
  * ModuleHeader Component
@@ -21,8 +22,17 @@ const ModuleHeader = ({
 }: ModuleHeaderProps) => {
   return <div className="module-header mb-4">
       <div className="flex justify-between items-center px-1">
-        {/* Module title - Added consistent padding with 15px top padding */}
-        <h2 className="text-2xl font-bold text-blue-800 pt-[15px] px-[21px]">{title}</h2>
+        {/* Module title - Now uses the theme color with darker shade and consistent padding */}
+        <h2 className={cn(
+          "text-2xl font-bold pt-[15px] px-6 sm:px-6 lg:px-8",
+          {
+            "text-blue-900": themeColor === 'calendar',
+            "text-green-800": themeColor === 'skills',
+            "text-orange-800": themeColor === 'goods',
+            "text-red-800": themeColor === 'safety',
+            "text-purple-800": themeColor === 'neighbors',
+          }
+        )}>{title}</h2>
         
         {/* Action buttons container */}
         {actions && <div className="flex items-center gap-2">
