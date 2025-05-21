@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import SafetyUpdates from '@/components/SafetyUpdates';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
 import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
 import { useSearchParams } from 'react-router-dom'; 
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
@@ -37,15 +35,6 @@ function SafetyPage() {
         title="Safety Updates" 
         description="Stay informed about safety in your community"
         themeColor="safety"
-        actions={
-          <Button 
-            className="whitespace-nowrap flex items-center gap-1.5"
-            onClick={() => setIsDialogOpen(true)}
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span>Post Update</span>
-          </Button>
-        }
       />
       <ModuleContent>
         <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
