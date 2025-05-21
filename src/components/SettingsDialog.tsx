@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,10 +91,12 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       navigate("/login");
       toast({
         title: "Signed out successfully",
+        description: "You have been signed out of your account"
       });
     } catch (error) {
       toast({
         title: "Error signing out",
+        description: "There was a problem signing you out",
         variant: "destructive",
       });
     }
@@ -191,6 +194,7 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
       setInitialValues(values);
       toast({
         title: "Settings saved",
+        description: "Your changes have been saved successfully"
       });
     } catch (error: any) {
       toast({
