@@ -172,7 +172,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleView}
-                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" {/* Smaller button */}
+                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" // Smaller button
                 >
                   <Eye className="h-3 w-3 mr-1" />
                   View
@@ -181,7 +181,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleArchive}
-                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" {/* Smaller button */}
+                  className="h-7 text-xs text-gray-600 hover:bg-gray-50 px-2" // Smaller button
                 >
                   <Archive className="h-3 w-3 mr-1" />
                   Archive
