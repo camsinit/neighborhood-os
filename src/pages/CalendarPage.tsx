@@ -8,20 +8,11 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
-import AddEventDialog from '@/components/AddEventDialog';
 
-/**
- * CalendarPage Component
- * 
- * This page displays the community calendar events.
- * Uses the module system for consistent layout and theming.
- */
 function CalendarPage() {
-  // Get URL parameters and manage highlighting
   const [searchParams] = useSearchParams();
   const view = searchParams.get('view') || 'month';
   const highlightedEvent = useHighlightedItem('event');
-  const [isAddEventOpen, setIsAddEventOpen] = React.useState(false);
 
   // Effect to handle deep linking to specific events
   useEffect(() => {
@@ -38,10 +29,7 @@ function CalendarPage() {
         description="Upcoming events in your neighborhood"
         themeColor="calendar"
         actions={
-          <Button 
-            className="whitespace-nowrap flex items-center gap-1.5"
-            onClick={() => setIsAddEventOpen(true)}
-          >
+          <Button className="whitespace-nowrap flex items-center gap-1.5">
             <PlusCircle className="h-4 w-4" />
             <span>Add Event</span>
           </Button>
@@ -70,13 +58,6 @@ function CalendarPage() {
           </TabsContent>
         </Tabs>
       </ModuleContent>
-      
-      {/* Add Event Dialog */}
-      <AddEventDialog 
-        open={isAddEventOpen} 
-        onOpenChange={setIsAddEventOpen} 
-        onAddEvent={() => {}}
-      />
     </ModuleContainer>
   );
 }
