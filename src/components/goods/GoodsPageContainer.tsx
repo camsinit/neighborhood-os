@@ -2,9 +2,17 @@
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 import GoodsSections from './GoodsSections';
-import GoodsPageHeader from './GoodsPageHeader';
 import GoodsDialogs from './GoodsDialogs';
 import { Tabs } from "@/components/ui/tabs";
+
+/**
+ * GoodsPageContainer Component Props
+ */
+interface GoodsPageContainerProps {
+  // Dialog state is now controlled by the parent GoodsPage component
+  isAddDialogOpen?: boolean;
+  setIsAddDialogOpen?: (open: boolean) => void;
+}
 
 /**
  * GoodsPageContainer Component
@@ -12,7 +20,10 @@ import { Tabs } from "@/components/ui/tabs";
  * This is the main container for the Goods Exchange page, structured similarly
  * to the Skills page for consistency across modules.
  */
-const GoodsPageContainer = () => {
+const GoodsPageContainer = ({
+  isAddDialogOpen = false,
+  setIsAddDialogOpen = () => {}
+}: GoodsPageContainerProps) => {
   // State management for filters and views
   const [searchQuery, setSearchQuery] = useState("");
   const [showUrgent, setShowUrgent] = useState(true);
@@ -20,8 +31,7 @@ const GoodsPageContainer = () => {
   const [showAvailable, setShowAvailable] = useState(true);
   const [activeTab, setActiveTab] = useState("offers");
   
-  // Dialog state management
-  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  // Local dialog state management
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [initialRequestType, setInitialRequestType] = useState(null);
   
@@ -31,12 +41,12 @@ const GoodsPageContainer = () => {
   // Action handlers
   const handleAddItem = () => {
     setInitialRequestType('offer');
-    setIsAddRequestOpen(true);
+    setIsAddDialogOpen(true);
   };
 
   const handleAddRequest = () => {
     setInitialRequestType('need');
-    setIsAddRequestOpen(true);
+    setIsAddDialogOpen(true);
   };
 
   const handleTabChange = (tab: string) => {
@@ -66,9 +76,9 @@ const GoodsPageContainer = () => {
 
       {/* Dialogs */}
       <GoodsDialogs 
-        isAddRequestOpen={isAddRequestOpen}
+        isAddRequestOpen={isAddDialogOpen}
         selectedRequest={selectedRequest}
-        onAddRequestOpenChange={setIsAddRequestOpen}
+        onAddRequestOpenChange={setIsAddDialogOpen}
         onSelectedRequestChange={setSelectedRequest}
         initialRequestType={initialRequestType}
       />

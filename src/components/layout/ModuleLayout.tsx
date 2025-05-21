@@ -17,23 +17,26 @@ import { ModuleLayoutProps } from '@/types/module';
  * @param description - Optional description text for the module/page
  * @param themeColor - The theme color identifier for the module (e.g., 'calendar', 'skills')
  * @param className - Optional additional classes
+ * @param actions - Optional action buttons to display in the header
  */
 const ModuleLayout = ({
   children,
   title,
   description,
   themeColor,
-  className
+  className,
+  actions
 }: ModuleLayoutProps) => {
   return (
     // Main container with theme-specific gradient background
     <ModuleContainer themeColor={themeColor}>
       <ModuleContent className={className}>
-        {/* Header section with title and optional description */}
+        {/* Header section with title, optional description, and actions */}
         <ModuleHeader 
           title={title} 
           description={description} 
-          themeColor={themeColor} 
+          themeColor={themeColor}
+          actions={actions}
         />
         
         {/* Main content area */}

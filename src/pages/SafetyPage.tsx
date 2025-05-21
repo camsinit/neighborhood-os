@@ -9,7 +9,14 @@ import { useSearchParams } from 'react-router-dom';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 
+/**
+ * SafetyPage Component
+ * 
+ * This page displays safety updates and alerts for the neighborhood.
+ * Uses the module system for consistent layout and theming.
+ */
 function SafetyPage() {
+  // Hooks for handling URL params and highlighted items
   const [searchParams] = useSearchParams();
   const highlightedUpdate = useHighlightedItem('safety');
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -42,7 +49,7 @@ function SafetyPage() {
         <SafetyUpdates />
       </ModuleContent>
 
-      {/* Properly render the AddSafetyUpdateDialogNew component */}
+      {/* Safety update dialog */}
       <AddSafetyUpdateDialogNew 
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}

@@ -10,3 +10,5 @@
 export { default as MainLayout } from './MainLayout';
 export { default as Sidebar } from './sidebar';
 export { default as ModuleLayout } from './ModuleLayout';
+export * from './module'; // Export all module-related components
+
