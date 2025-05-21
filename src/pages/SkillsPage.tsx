@@ -60,9 +60,9 @@ function SkillsPage() {
   
   return (
     <ModuleContainer themeColor="skills">
+      {/* Header with improved spacing */}
       <ModuleHeader 
         title="Skills Exchange"
-        description="Share skills and knowledge with your neighbors"
         themeColor="skills"
         actions={
           <Button className="whitespace-nowrap flex items-center gap-1.5">
@@ -71,44 +71,54 @@ function SkillsPage() {
           </Button>
         }
       />
-      <ModuleContent>
-        <Tabs value={view} onValueChange={handleTabChange}>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
-            <TabsList>
-              <TabsTrigger value="offers">Offers</TabsTrigger>
-              <TabsTrigger value="requests">Requests</TabsTrigger>
-              <TabsTrigger value="mine">My Skills</TabsTrigger>
-            </TabsList>
-            
-            <div className="flex gap-2">
-              <SkillsFilter />
-              <SearchInput 
-                placeholder="Search skills..."
-                onChange={(e) => {
-                  const newParams = new URLSearchParams(searchParams);
-                  if (e.target.value) {
-                    newParams.set('q', e.target.value);
-                  } else {
-                    newParams.delete('q');
-                  }
-                  setSearchParams(newParams);
-                }}
-                value={searchQuery}
-                ref={searchInputRef}
-              />
+      
+      {/* Full-width description box with consistent padding - moved outside ModuleHeader */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-6 sm:px-[25px]">
+        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm mx-0 px-[16px]">
+          <p className="text-gray-700 text-sm">Share skills and knowledge with your neighbors</p>
+        </div>
+      </div>
+      
+      <ModuleContent className="px-4 sm:px-6 lg:px-8">
+        <div className="module-card">
+          <Tabs value={view} onValueChange={handleTabChange}>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
+              <TabsList>
+                <TabsTrigger value="offers">Offers</TabsTrigger>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
+                <TabsTrigger value="mine">My Skills</TabsTrigger>
+              </TabsList>
+              
+              <div className="flex gap-2">
+                <SkillsFilter />
+                <SearchInput 
+                  placeholder="Search skills..."
+                  onChange={(e) => {
+                    const newParams = new URLSearchParams(searchParams);
+                    if (e.target.value) {
+                      newParams.set('q', e.target.value);
+                    } else {
+                      newParams.delete('q');
+                    }
+                    setSearchParams(newParams);
+                  }}
+                  value={searchQuery}
+                  ref={searchInputRef}
+                />
+              </div>
             </div>
-          </div>
-          
-          <TabsContent value="offers" className="mt-0">
-            <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-          </TabsContent>
-          <TabsContent value="requests" className="mt-0">
-            <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-          </TabsContent>
-          <TabsContent value="mine" className="mt-0">
-            <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-          </TabsContent>
-        </Tabs>
+            
+            <TabsContent value="offers" className="mt-0">
+              <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+            </TabsContent>
+            <TabsContent value="requests" className="mt-0">
+              <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+            </TabsContent>
+            <TabsContent value="mine" className="mt-0">
+              <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </ModuleContent>
     </ModuleContainer>
   );
