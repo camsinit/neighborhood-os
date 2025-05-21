@@ -26,6 +26,7 @@ export interface BaseNotification {
   profiles?: ProfileData | null;
   context?: Record<string, any>;
   relevance_score?: number; // Added this field since it's used in processors
+  metadata?: Record<string, any>; // Add metadata field to resolve type error
 }
 
 /**

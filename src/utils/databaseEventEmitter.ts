@@ -31,7 +31,7 @@ export const emitDatabaseEvent = (
     'skills': 'skills',
     'notification': 'notifications',
     'activity': 'activities',
-    'neighbor': 'neighbor-users'
+    'neighbor': 'neighbors' // Changed from 'neighbor-users' to 'neighbors' to match refreshEvents types
   };
   
   // Get the corresponding event emitter function

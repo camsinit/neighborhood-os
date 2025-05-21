@@ -38,19 +38,20 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
     if (onDismiss) onDismiss();
   };
 
-  // Extract actor name from the notification metadata or context
+  // Extract actor name from the notification metadata, context or profiles
+  // Added type safety by checking if properties exist before accessing them
   const actorName = 
-    notification.metadata?.neighborName || 
-    notification.context?.neighborName || 
-    notification.profiles?.display_name || 
+    (notification.metadata && notification.metadata.neighborName) || 
+    (notification.context && notification.context.neighborName) || 
+    (notification.profiles && notification.profiles.display_name) || 
     "A neighbor";
   
   // Create sentence-style title with highlighted neighbor name
   const createSentenceTitle = () => {
     // Action could be stored in metadata or context
     const action = 
-      notification.metadata?.action || 
-      notification.context?.action || 
+      (notification.metadata && notification.metadata.action) || 
+      (notification.context && notification.context.action) || 
       'join';
       
     // For join notifications, highlight the neighbor name
