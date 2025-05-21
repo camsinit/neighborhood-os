@@ -136,15 +136,6 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       ...(notification.metadata || {})
     };
     
-    // Log individual notification processing for debugging
-    logger.debug(`Processing notification ${notification.id}:`, {
-      title: notification.title,
-      actor: notification.actor_id,
-      hasProfile: !!(notification as any).profiles,
-      contentType: notification.content_type,
-      context: notificationContext
-    });
-    
     // Return a properly formatted BaseNotification
     return {
       id: notification.id,

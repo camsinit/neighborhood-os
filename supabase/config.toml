@@ -9,3 +9,8 @@ project_id = "neighborhood-dashboard"
 [functions.notify-skills-changes]
 verify_jwt = true
 
+# The notify-neighbor-changes function is now deprecated
+# We use database triggers instead for better performance and reliability
+[functions.notify-neighbor-changes]
+verify_jwt = true
+enabled = false  # Disabled as functionality moved to database triggers

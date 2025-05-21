@@ -19,7 +19,7 @@ const logger = createLogger('databaseEventEmitter');
  */
 export const emitDatabaseEvent = (
   operation: 'create' | 'update' | 'delete',
-  contentType: 'event' | 'safety' | 'goods' | 'skills' | 'notification' | 'activity'
+  contentType: 'event' | 'safety' | 'goods' | 'skills' | 'notification' | 'activity' | 'neighbor'
 ) => {
   logger.debug(`Emitting database event: ${operation} ${contentType}`);
   
@@ -30,7 +30,8 @@ export const emitDatabaseEvent = (
     'goods': 'goods',
     'skills': 'skills',
     'notification': 'notifications',
-    'activity': 'activities'
+    'activity': 'activities',
+    'neighbor': 'neighbor-users'
   };
   
   // Get the corresponding event emitter function
