@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -5,6 +6,8 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 interface CalendarHeaderProps {
   view: 'week' | 'month';
   currentDate: Date;
@@ -73,6 +76,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     const parts = neighborhoodTimezone.split('/');
     return parts[parts.length - 1].replace('_', ' ');
   };
+  
   return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
       <div className="flex items-center space-x-2">
         <CalendarIcon className="h-5 w-5 text-blue-500" />
@@ -83,6 +87,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       </div>
       
       <div className="flex flex-wrap gap-2">
+        {/* Navigation buttons with improved styling */}
         <div className="flex rounded-md shadow-sm">
           <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
             <ChevronLeft className="h-4 w-4" />
@@ -95,14 +100,21 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           </Button>
         </div>
         
-        <div className="flex rounded-md shadow-sm">
-          <Button variant={view === 'week' ? "secondary" : "outline"} size="sm" onClick={() => setView('week')}>
+        {/* View toggle with enhanced styling to make active state more obvious */}
+        <ToggleGroup type="single" value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')} className="rounded-md overflow-hidden border shadow-sm">
+          <ToggleGroupItem 
+            value="week" 
+            className={`px-3 py-1.5 text-sm transition-colors ${view === 'week' ? 'bg-blue-500 text-white font-medium' : 'bg-white hover:bg-gray-50'}`}
+          >
             Week
-          </Button>
-          <Button variant={view === 'month' ? "secondary" : "outline"} size="sm" onClick={() => setView('month')}>
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="month" 
+            className={`px-3 py-1.5 text-sm transition-colors ${view === 'month' ? 'bg-blue-500 text-white font-medium' : 'bg-white hover:bg-gray-50'}`}
+          >
             Month
-          </Button>
-        </div>
+          </ToggleGroupItem>
+        </ToggleGroup>
         
         <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
           <Plus className="h-4 w-4 mr-1" /> Add Event
