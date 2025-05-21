@@ -9,6 +9,8 @@ import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import NotificationCard from "./base/NotificationCard";
 import { highlightItem } from "@/utils/highlight";
+import { AlertTriangle } from "lucide-react";
+import { NotificationBadge } from "../elements";
 
 interface SafetyNotificationCardProps {
   notification: BaseNotification;
@@ -55,7 +57,6 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
   // Handle viewing safety details
   const handleViewSafety = async () => {
     // Navigate to the safety details
-    // Fixed highlightItem call to use proper API
     highlightItem('safety', notification.content_id);
     
     if (onDismiss) onDismiss();
@@ -66,7 +67,29 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
       notification={notificationWithSentenceTitle}
       onAction={handleViewSafety}
       onDismiss={onDismiss}
-    />
+    >
+      {/* Add urgency indicator for emergency notifications */}
+      {safetyType === 'emergency' && (
+        <div className="mt-1">
+          <NotificationBadge 
+            label="EMERGENCY"
+            variant="destructive"
+            className="font-medium text-xs uppercase"
+          />
+        </div>
+      )}
+      
+      {/* Add a general badge for alert type */}
+      {safetyType !== 'emergency' && (
+        <div className="mt-1">
+          <NotificationBadge 
+            label={safetyType === 'alert' ? 'Alert' : 'Info'}
+            variant="outline"
+            className="font-normal text-xs"
+          />
+        </div>
+      )}
+    </NotificationCard>
   );
 };
 

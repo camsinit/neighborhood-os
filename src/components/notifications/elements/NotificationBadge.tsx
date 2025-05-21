@@ -1,58 +1,42 @@
+
 /**
  * NotificationBadge.tsx
  * 
- * A reusable badge component for notifications with various styling options
+ * A badge component for notification cards to display metadata
+ * like categories, status, and other details
  */
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-// Define the props interface for the badge component
-export interface NotificationBadgeProps {
-  // The text to display in the badge or a count number
-  label?: string;
-  // For count badge usage
-  count?: number;
-  // Optional variant to control the badge style
-  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info";
-  // Optional additional class names
+interface NotificationBadgeProps {
+  label: string;
+  variant?: "default" | "outline" | "destructive";
   className?: string;
-  // Optional click handler
-  onClick?: () => void;
 }
 
 /**
- * A customizable badge component for notifications
- * Can be used for displaying labels or a count
+ * A simple badge component for notification cards
  */
-const NotificationBadge: React.FC<NotificationBadgeProps> = ({ 
-  label, 
-  count,
-  variant = "default", 
-  className,
-  onClick
+const NotificationBadge: React.FC<NotificationBadgeProps> = ({
+  label,
+  variant = "default",
+  className
 }) => {
-  // If count is provided and we're rendering a notification count badge
-  if (count !== undefined) {
-    // Only show if there are unread notifications
-    if (count <= 0) return null;
-    
-    return (
-      <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full">
-        {count > 9 ? '9+' : count}
-      </span>
-    );
-  }
+  // Style based on variant
+  const badgeStyles = {
+    default: "bg-gray-100 text-gray-700",
+    outline: "border border-gray-200 text-gray-600",
+    destructive: "bg-red-100 text-red-700"
+  };
   
-  // Otherwise render a standard badge with label
   return (
-    <Badge 
-      variant={variant} 
-      className={cn("font-normal truncate", className)}
-      onClick={onClick}
-    >
+    <span className={cn(
+      "inline-flex items-center px-2 py-0.5 rounded-full text-xs",
+      badgeStyles[variant],
+      className
+    )}>
       {label}
-    </Badge>
+    </span>
   );
 };
 

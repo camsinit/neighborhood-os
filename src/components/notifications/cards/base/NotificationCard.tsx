@@ -17,6 +17,7 @@ import { Archive, Eye } from "lucide-react";
 import NotificationAvatar from "../../elements/NotificationAvatar";
 import NotificationContent from "../../elements/NotificationContent";
 import NotificationTimeStamp from "../../elements/NotificationTimeStamp";
+import { getNotificationBorderColor } from "../../utils/notificationColorUtils";
 
 // Props for all notification card variants
 export interface NotificationCardProps {
@@ -61,6 +62,9 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   // Actor info with fallbacks for missing data
   const actorName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
   const avatarUrl = notification.profiles?.avatar_url || notification.context?.avatarUrl;
+
+  // Get the border color based on notification type
+  const borderColorClass = getNotificationBorderColor(notification_type);
 
   // Handle card click
   const handleCardClick = () => {
@@ -116,8 +120,10 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-3 relative", 
+        "transition-all duration-300 overflow-hidden mb-3 relative border-l-4", 
         isAnimating && "transform translate-x-full opacity-0",
+        borderColorClass, // Add left border color based on notification type
+        !is_read && "bg-gray-50", // Subtle background for unread notifications
         className
       )}
     >
@@ -138,23 +144,22 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
             url={avatarUrl}
             name={actorName}
             isUnread={!is_read}
-            notificationType={notification.notification_type}
+            notificationType={notification_type}
           />
           
           {/* Content area */}
           <div className="flex-1 min-w-0">
             <NotificationContent 
               title={title}
-              actorName={actorName}
-              contentType={content_type}
+              contentType={content_type || notification_type}
               isUnread={!is_read}
             >
               {children}
             </NotificationContent>
             
-            {/* Action buttons */}
+            {/* Action buttons in a distinct action bar */}
             {showActions && (
-              <div className="flex justify-end gap-2 mt-3">
+              <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
                 <Button
                   variant="ghost"
                   size="sm"
