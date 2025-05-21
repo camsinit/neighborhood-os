@@ -54,7 +54,7 @@ function NeighborsPage() {
         </div>
       </ModuleContent>
 
-      {/* The popover will be rendered when the invite button is clicked */}
+      {/* The popover with proper props */}
       <InviteNeighborPopover 
         open={isInviteOpen} 
         onOpenChange={setIsInviteOpen}
