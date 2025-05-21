@@ -100,8 +100,13 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           </Button>
         </div>
         
-        {/* View toggle with enhanced styling to make active state more obvious */}
-        <ToggleGroup type="single" value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')} className="rounded-md overflow-hidden border shadow-sm">
+        {/* View toggle with enhanced styling for active/inactive states */}
+        <ToggleGroup 
+          type="single" 
+          value={view} 
+          onValueChange={(value) => value && setView(value as 'week' | 'month')} 
+          className="rounded-md overflow-hidden border shadow-sm"
+        >
           <ToggleGroupItem 
             value="week" 
             className={`px-3 py-1.5 text-sm transition-colors ${view === 'week' ? 'bg-blue-500 text-white font-medium' : 'bg-white hover:bg-gray-50'}`}
