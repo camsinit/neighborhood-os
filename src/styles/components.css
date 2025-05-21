@@ -36,4 +36,13 @@
   .module-card-sm {
     @apply bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm;
   }
+  
+  /* Module specific styling */
+  .module-header {
+    @apply mb-6;
+  }
+  
+  .module-description {
+    @apply mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm;
+  }
 }

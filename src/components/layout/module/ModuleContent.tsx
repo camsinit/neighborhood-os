@@ -19,10 +19,8 @@ const ModuleContent = ({
   return (
     <div className="min-h-full w-full">
       {/* Content container with consistent padding */}
-      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)}>
-        <div className="py-8">
-          {children}
-        </div>
+      <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8", className)}>
+        {children}
       </div>
     </div>
   );
