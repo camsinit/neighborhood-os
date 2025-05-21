@@ -3,16 +3,30 @@ import React, { useEffect } from 'react';
 import { ModuleLayout } from '@/components/layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'react-router-dom'; 
-import CalendarEvents from '@/components/calendar/CalendarEvents';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
+import CommunityCalendar from '@/components/CommunityCalendar';
+import AddEventDialog from '@/components/AddEventDialog';
+import { useState } from 'react';
 
+/**
+ * CalendarPage component displays the community calendar with various views
+ * 
+ * This component provides:
+ * - Month, week, and agenda views of community events
+ * - Deep linking to specific events
+ * - Add event functionality
+ */
 function CalendarPage() {
+  // Get URL parameters and highlighted events
   const [searchParams] = useSearchParams();
   const view = searchParams.get('view') || 'month';
   const highlightedEvent = useHighlightedItem('event');
+  
+  // State for the Add Event dialog
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
 
   // Effect to handle deep linking to specific events
   useEffect(() => {
@@ -28,7 +42,10 @@ function CalendarPage() {
       description="Upcoming events in your neighborhood"
       themeColor="calendar"
       actions={
-        <Button className="whitespace-nowrap flex items-center gap-1.5">
+        <Button 
+          className="whitespace-nowrap flex items-center gap-1.5"
+          onClick={() => setIsAddEventOpen(true)}
+        >
           <PlusCircle className="h-4 w-4" />
           <span>Add Event</span>
         </Button>
@@ -44,17 +61,27 @@ function CalendarPage() {
         </div>
         
         <TabsContent value="month" className="mt-0">
-          <CalendarEvents view="month" />
+          <CommunityCalendar view="month" />
         </TabsContent>
         
         <TabsContent value="week" className="mt-0">
-          <CalendarEvents view="week" />
+          <CommunityCalendar view="week" />
         </TabsContent>
         
         <TabsContent value="agenda" className="mt-0">
-          <CalendarEvents view="agenda" />
+          {/* Agenda view - simplified for now */}
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Event Agenda</h3>
+            <CommunityCalendar view="agenda" />
+          </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Add Event Dialog */}
+      <AddEventDialog
+        open={isAddEventOpen}
+        onOpenChange={setIsAddEventOpen}
+      />
     </ModuleLayout>
   );
 }

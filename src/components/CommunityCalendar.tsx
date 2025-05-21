@@ -19,25 +19,40 @@ import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
-import { toast } from "sonner"; // Updated import for toast
+import { toast } from "@/hooks/use-toast"; // Updated import path
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { createLogger } from "@/utils/logger";
-import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
+import { Event as LocalEvent } from "@/types/localTypes";
 
 // Create a logger for the CommunityCalendar component
 const logger = createLogger('CommunityCalendar');
 
 /**
+ * Props for the CommunityCalendar component
+ */
+interface CommunityCalendarProps {
+  // View mode: week, month, or agenda
+  view?: 'week' | 'month' | 'agenda';
+}
+
+/**
  * CommunityCalendar component
  * 
- * This component displays events in either a week or month view.
+ * This component displays events in either a week, month, or agenda view.
  * It allows users to navigate between weeks/months and add new events.
  */
-const CommunityCalendar = () => {
+const CommunityCalendar = ({ view: initialView = 'week' }: CommunityCalendarProps) => {
   // State for current date and view mode
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'week' | 'month'>('week');
+  const [view, setView] = useState<'week' | 'month' | 'agenda'>(initialView);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  
+  // Update view when initialView prop changes
+  useEffect(() => {
+    if (initialView !== view) {
+      setView(initialView);
+    }
+  }, [initialView]);
   
   // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();
@@ -80,8 +95,8 @@ const CommunityCalendar = () => {
           }
         }, 100);
 
-        // Show toast using Sonner directly
-        toast("Event Located", {
+        // Show toast
+        toast({
           description: `Navigated to "${event.title}"`
         });
       }
@@ -139,6 +154,45 @@ const CommunityCalendar = () => {
     logger.debug("Event added, refreshing data");
     await refetch();
   };
+
+  // Render agenda view
+  if (view === 'agenda') {
+    return (
+      <div className="space-y-6">
+        <CalendarHeader 
+          view={view}
+          currentDate={currentDate}
+          setView={setView}
+          handlePreviousWeek={handlePrevious}
+          handleNextWeek={handleNext}
+          handleToday={handleToday}
+          setIsAddEventOpen={setIsAddEventOpen}
+        />
+        
+        {/* Simple agenda view */}
+        <div className="space-y-4">
+          {events && events.length > 0 ? (
+            events.map(event => (
+              <div 
+                key={event.id} 
+                className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+              >
+                <h3 className="text-lg font-medium">{event.title}</h3>
+                <div className="text-sm text-gray-500">
+                  {new Date(event.time).toLocaleString()}
+                </div>
+                <div className="text-sm">{event.location}</div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 p-8">
+              {isLoading ? "Loading events..." : "No events scheduled"}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
