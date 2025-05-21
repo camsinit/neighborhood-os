@@ -64,12 +64,6 @@ function SkillsPage() {
       <ModuleHeader 
         title="Skills Exchange"
         themeColor="skills"
-        actions={
-          <Button className="whitespace-nowrap flex items-center gap-1.5">
-            <PlusCircle className="h-4 w-4" />
-            <span>Add Skill</span>
-          </Button>
-        }
       />
       
       {/* Full-width description box with consistent padding - moved outside ModuleHeader */}
@@ -83,14 +77,8 @@ function SkillsPage() {
         <div className="module-card">
           <Tabs value={view} onValueChange={handleTabChange}>
             <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
-              <TabsList>
-                <TabsTrigger value="offers">Offers</TabsTrigger>
-                <TabsTrigger value="requests">Requests</TabsTrigger>
-                <TabsTrigger value="mine">My Skills</TabsTrigger>
-              </TabsList>
-              
+              {/* Search bar moved to the left side */}
               <div className="flex gap-2">
-                <SkillsFilter />
                 <SearchInput 
                   placeholder="Search skills..."
                   onChange={(e) => {
@@ -105,7 +93,23 @@ function SkillsPage() {
                   value={searchQuery}
                   ref={searchInputRef}
                 />
+                <SkillsFilter />
               </div>
+              
+              {/* Tabs in the middle */}
+              <TabsList>
+                <TabsTrigger value="offers">Offers</TabsTrigger>
+                <TabsTrigger value="requests">Requests</TabsTrigger>
+                <TabsTrigger value="mine">My Skills</TabsTrigger>
+              </TabsList>
+              
+              {/* Green Add Skills button on the right */}
+              <Button 
+                className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+              >
+                <PlusCircle className="h-4 w-4" />
+                <span>Add Skill</span>
+              </Button>
             </div>
             
             <TabsContent value="offers" className="mt-0">
