@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { UserDirectory } from '@/components/neighbors/UserDirectory';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { highlightItem } from '@/utils/highlight';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
@@ -14,6 +12,7 @@ import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover'
  * 
  * Displays the neighbors directory with proper module styling
  * and supports highlighting neighbors from deep links.
+ * Now uses the standardized module layout with full-width description.
  */
 function NeighborsPage() {
   // State for route parameters and highlighting
@@ -33,21 +32,19 @@ function NeighborsPage() {
   
   return (
     <ModuleContainer themeColor="neighbors">
+      {/* Header with just the title */}
       <ModuleHeader 
         title="Neighbors" 
-        description="Get to know the people in your community"
         themeColor="neighbors"
-        actions={
-          <Button 
-            variant="default" 
-            className="flex items-center gap-1.5" 
-            onClick={() => setIsInviteOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Invite Neighbor</span>
-          </Button>
-        }
       />
+      
+      {/* Full-width description box with consistent padding */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-6 sm:px-[25px]">
+        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm mx-0 px-[16px]">
+          <p className="text-gray-700 text-sm">Get to know the people in your community</p>
+        </div>
+      </div>
+      
       <ModuleContent>
         <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           <UserDirectory />

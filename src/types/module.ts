@@ -82,10 +82,13 @@ export interface ModuleContentProps {
 
 /**
  * Props for module header
+ * 
+ * Updated to remove description and actions which are now handled separately
+ * for consistency across all pages
  */
 export interface ModuleHeaderProps {
   title: string;
-  description?: string;
+  description?: string; // Kept for backwards compatibility
   themeColor: ModuleThemeColor;
-  actions?: ReactNode; // Add actions prop to support button/action components
+  actions?: ReactNode; // Kept for backwards compatibility
 }
