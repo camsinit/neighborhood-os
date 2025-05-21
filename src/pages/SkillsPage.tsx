@@ -77,8 +77,8 @@ function SkillsPage() {
         <div className="module-card">
           <Tabs value={view} onValueChange={handleTabChange}>
             <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
-              {/* Search bar moved to the left side */}
-              <div className="flex gap-2">
+              {/* Search and filter section on left */}
+              <div className="flex gap-2 flex-grow">
                 <SearchInput 
                   placeholder="Search skills..."
                   onChange={(e) => {
@@ -94,18 +94,29 @@ function SkillsPage() {
                   ref={searchInputRef}
                 />
                 <SkillsFilter />
+                
+                {/* Tabs now hug the right side of the filter button */}
+                <div className="ml-auto hidden sm:block">
+                  <TabsList>
+                    <TabsTrigger value="offers">Offers</TabsTrigger>
+                    <TabsTrigger value="requests">Requests</TabsTrigger>
+                    <TabsTrigger value="mine">My Skills</TabsTrigger>
+                  </TabsList>
+                </div>
               </div>
               
-              {/* Tabs in the middle */}
-              <TabsList>
-                <TabsTrigger value="offers">Offers</TabsTrigger>
-                <TabsTrigger value="requests">Requests</TabsTrigger>
-                <TabsTrigger value="mine">My Skills</TabsTrigger>
-              </TabsList>
+              {/* Show tabs on mobile below search/filter */}
+              <div className="sm:hidden w-full">
+                <TabsList className="w-full">
+                  <TabsTrigger value="offers" className="flex-1">Offers</TabsTrigger>
+                  <TabsTrigger value="requests" className="flex-1">Requests</TabsTrigger>
+                  <TabsTrigger value="mine" className="flex-1">My Skills</TabsTrigger>
+                </TabsList>
+              </div>
               
               {/* Green Add Skills button on the right */}
               <Button 
-                className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
+                className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white shrink-0"
               >
                 <PlusCircle className="h-4 w-4" />
                 <span>Add Skill</span>
