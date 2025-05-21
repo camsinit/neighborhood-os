@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ModuleHeaderProps } from '@/types/module';
 
@@ -13,29 +12,27 @@ import { ModuleHeaderProps } from '@/types/module';
  * @param themeColor - The theme color identifier for styling
  * @param actions - Optional action buttons to display in the header
  */
-const ModuleHeader = ({ title, description, themeColor, actions }: ModuleHeaderProps) => {
-  return (
-    <div className="module-header mb-6">
+const ModuleHeader = ({
+  title,
+  description,
+  themeColor,
+  actions
+}: ModuleHeaderProps) => {
+  return <div className="module-header mb-6">
       <div className="flex justify-between items-center">
         {/* Module title */}
-        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+        <h2 className="text-2xl font-bold text-blue-800">{title}</h2>
         
         {/* Action buttons container */}
-        {actions && (
-          <div className="flex items-center gap-2">
+        {actions && <div className="flex items-center gap-2">
             {actions}
-          </div>
-        )}
+          </div>}
       </div>
       
       {/* Optional description box */}
-      {description && (
-        <div className="module-description mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+      {description && <div className="module-description mt-4 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
           <p className="text-gray-700 text-sm">{description}</p>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default ModuleHeader;
