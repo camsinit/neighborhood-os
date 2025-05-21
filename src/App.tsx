@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'; // Added Outlet import
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'; 
 import { NeighborhoodProvider } from './contexts/neighborhood';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from './integrations/supabase/client';
@@ -22,7 +22,6 @@ import SkillsPage from './pages/SkillsPage';
 import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
-// Removed CarePage import
 import WaitlistAdmin from './pages/WaitlistAdmin';
 
 // Import components
@@ -86,6 +85,7 @@ function App() {
       });
     });
 
+    // Clean up subscription when component unmounts
     return () => subscription.unsubscribe();
   }, []);
 
@@ -116,7 +116,6 @@ function App() {
               <Route path="/index" element={<Index />} />
               
               {/* Protected routes with MainLayout - this is the key fix */}
-              {/* We create a parent route that renders the MainLayout with the Outlet for child routes */}
               <Route 
                 element={
                   <ProtectedRoute>
