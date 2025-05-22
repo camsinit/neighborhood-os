@@ -3,7 +3,7 @@
  * SkillNotificationCard.tsx
  * 
  * Component for rendering skill-specific notifications
- * Uses simple language like "[name] shared [skill]"
+ * Uses simple language like "shared [skill]"
  */
 import React from 'react';
 import { BaseNotification } from '@/hooks/notifications/types';
@@ -40,18 +40,19 @@ const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notificat
     // Use action type to determine the verb
     const actionType = notification.action_type || context.contextType;
     
-    // Create simple sentence based on action type
+    // Create simple sentence based on action type - WITHOUT including the neighbor name
+    // (the neighbor name will be included by NotificationCard)
     if (actionType === 'request') {
-      return `${neighborName} requested ${cleanSkillTitle}`;
+      return `requested ${cleanSkillTitle}`;
     } else if (actionType === 'confirm' || actionType === 'schedule') {
-      return `${neighborName} confirmed ${cleanSkillTitle}`;
+      return `confirmed ${cleanSkillTitle}`;
     } else if (actionType === 'complete') {
-      return `${neighborName} completed ${cleanSkillTitle}`;
+      return `completed ${cleanSkillTitle}`;
     } else if (actionType === 'cancel') {
-      return `${neighborName} cancelled ${cleanSkillTitle}`;
+      return `cancelled ${cleanSkillTitle}`;
     } else {
       // Default to "shared" for any other action
-      return `${neighborName} shared ${cleanSkillTitle}`;
+      return `shared ${cleanSkillTitle}`;
     }
   };
   

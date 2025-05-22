@@ -1,3 +1,4 @@
+
 /**
  * NotificationContent.tsx
  * 
@@ -20,6 +21,8 @@ interface NotificationContentProps {
 /**
  * Component for rendering the main content of a notification with natural language formatting
  * This component directly parses and highlights important content
+ * 
+ * Now updated to prevent double "neighbor name" when notification cards already process the name
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -30,8 +33,9 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   children
 }) => {
   // Format the title to be more conversational
-  // If we have an actor name, use it to start the sentence
-  const formattedTitle = actorName ? `${actorName} ${title.toLowerCase()}` : title;
+  // Check if title already starts with actorName to avoid duplication
+  const titleAlreadyHasActor = actorName && title.startsWith(actorName);
+  const formattedTitle = !titleAlreadyHasActor && actorName ? `${actorName} ${title}` : title;
 
   // Get text color for highlighted content based on notification type
   const highlightColor = getNotificationTextColor(contentType);
@@ -93,7 +97,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
 
     // For skills notifications - natural sentences
     if (type === 'skills') {
-      const matches = text.match(/(.+?) (requested|confirmed|completed|scheduled|cancelled|is sharing) (.+)/i);
+      const matches = text.match(/(.+?) (requested|confirmed|completed|scheduled|cancelled|is sharing|shared) (.+)/i);
       if (matches && matches.length >= 4) {
         return <>
             {matches[1]} {matches[2]}{' '}

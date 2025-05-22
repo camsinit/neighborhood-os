@@ -37,19 +37,20 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
     const eventName = notification.title.replace(/^(.+?) (posted|shared|created|updated|is hosting)\s*/i, "") || "an event";
     const actionType = notification.action_type || "create";
     
-    // Simple sentence formats based on action type
+    // Simple sentence formats based on action type - WITHOUT the neighbor name prefix
+    // (the neighbor name will be added by NotificationCard)
     switch(actionType) {
       case "create":
       case "share":
-        return `${actorName} is hosting ${eventName}`;
+        return `is hosting ${eventName}`;
       case "update":
-        return `${actorName} updated ${eventName}`;
+        return `updated ${eventName}`;
       case "rsvp":
-        return `${actorName} is attending ${eventName}`;
+        return `is attending ${eventName}`;
       case "cancel":
-        return `${actorName} cancelled ${eventName}`;
+        return `cancelled ${eventName}`;
       default:
-        return `${actorName} is hosting ${eventName}`;
+        return `is hosting ${eventName}`;
     }
   };
   

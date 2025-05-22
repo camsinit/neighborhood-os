@@ -33,16 +33,17 @@ export const SafetyNotificationCard: React.FC<SafetyNotificationCardProps> = ({
     // Clean the title by removing redundant prefixes
     const cleanTitle = notification.title.replace(/^(safety alert:|safety update:|safety info:)\s*/i, "");
     
-    // Create different sentences based on safety type - simple and direct
+    // Create different sentences based on safety type - WITHOUT including the neighbor name
+    // (the neighbor name will be added by NotificationCard)
     if (safetyType === 'emergency') {
-      return `${actorName} reported emergency: ${cleanTitle}`;
+      return `reported emergency: ${cleanTitle}`;
     } else if (safetyType === 'alert') {
-      return `${actorName} reported ${cleanTitle}`;
+      return `reported ${cleanTitle}`;
     } else if (safetyType === 'info') {
-      return `${actorName} shared safety info: ${cleanTitle}`;
+      return `shared safety info: ${cleanTitle}`;
     } else {
       // Default clean format
-      return `${actorName} reported ${cleanTitle}`;
+      return `reported ${cleanTitle}`;
     }
   };
   
