@@ -3,7 +3,7 @@
  * EventNotificationCard.tsx
  * 
  * Specialized notification card for event-related notifications.
- * Includes event details and RSVP functionality.
+ * Uses clean, simple sentences for events.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -11,9 +11,7 @@ import { NotificationCard } from "./base/NotificationCard";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { highlightItem } from "@/utils/highlight";
-import { 
-  NotificationBadge 
-} from "../elements";
+import { NotificationBadge } from "../elements";
 
 interface EventNotificationCardProps {
   notification: BaseNotification;
@@ -33,14 +31,16 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
   const actorName = notification.context?.neighborName || 
     notification.profiles?.display_name || "Someone";
   
-  // Create sentence-style title with highlighted event name
-  const createSentenceTitle = () => {
-    const eventName = notification.title || "an event";
-    const actionType = notification.action_type || "share";
+  // Create clean sentence-style title based on action type
+  const createSimpleTitle = () => {
+    // Get the event name from the title, removing any prefixes
+    const eventName = notification.title.replace(/^(.+?) (posted|shared|created|updated|is hosting)\s*/i, "") || "an event";
+    const actionType = notification.action_type || "create";
     
-    // Different sentence formats based on action type
+    // Simple sentence formats based on action type
     switch(actionType) {
       case "create":
+      case "share":
         return `${actorName} is hosting ${eventName}`;
       case "update":
         return `${actorName} updated ${eventName}`;
@@ -49,21 +49,21 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
       case "cancel":
         return `${actorName} cancelled ${eventName}`;
       default:
-        return `${actorName} shared ${eventName}`;
+        return `${actorName} is hosting ${eventName}`;
     }
   };
   
-  // Create the sentence-style title
-  const sentenceTitle = createSentenceTitle();
+  // Create the simple title
+  const simpleTitle = createSimpleTitle();
   
-  // Override the notification title with our sentence format
-  const notificationWithSentenceTitle = {
+  // Override the notification title with our simplified format
+  const notificationWithSimpleTitle = {
     ...notification,
-    title: sentenceTitle
+    title: simpleTitle
   };
   
   // Handle viewing event details
-  const handleViewEvent = async () => {
+  const handleViewEvent = () => {
     // Navigate to the event details
     highlightItem('event', notification.content_id);
     
@@ -72,7 +72,7 @@ export const EventNotificationCard: React.FC<EventNotificationCardProps> = ({
 
   return (
     <NotificationCard
-      notification={notificationWithSentenceTitle}
+      notification={notificationWithSimpleTitle}
       onAction={handleViewEvent}
       onDismiss={onDismiss}
     >

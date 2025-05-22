@@ -17,6 +17,7 @@ DECLARE
   target_user_id UUID;
   event_title TEXT;
   log_id TEXT;
+  existing_notification_count INTEGER;
 BEGIN
   -- Generate a transaction ID for logging
   log_id := 'RSVP_NOTIFY_' || substr(md5(random()::text), 1, 8);
@@ -40,7 +41,25 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Set notification title
+  -- Check for existing notifications to prevent duplicates
+  SELECT COUNT(*) INTO existing_notification_count
+  FROM notifications
+  WHERE 
+    user_id = target_user_id AND 
+    actor_id = NEW.user_id AND 
+    content_type = 'events' AND
+    content_id = NEW.event_id AND
+    notification_type = 'event' AND
+    action_type = 'rsvp' AND
+    created_at > (NOW() - INTERVAL '30 minutes');
+    
+  -- Skip if we already have a recent notification for this RSVP
+  IF existing_notification_count > 0 THEN
+    RAISE LOG '[create_rsvp_notification] [%] Duplicate notification detected, skipping', log_id;
+    RETURN NEW;
+  END IF;
+
+  -- Set notification title - use simple format
   notification_title := 'New RSVP for ' || event_title;
 
   -- Log what we're about to insert
@@ -67,7 +86,7 @@ BEGIN
       'events',
       NEW.event_id,
       'event',
-      'view',
+      'rsvp',  -- Changed to 'rsvp' to be more specific
       'View Event',
       3, -- High relevance: direct involvement
       jsonb_build_object(
@@ -95,4 +114,4 @@ EXECUTE FUNCTION public.create_rsvp_notification();
 
 -- Add a comment explaining what this is for
 COMMENT ON FUNCTION public.create_rsvp_notification() IS 
-  'Creates a notification for the event host when someone RSVPs to their event';
+  'Creates a notification for the event host when someone RSVPs to their event, with duplicate prevention';
