@@ -13,10 +13,12 @@ import { useNavigate } from "react-router-dom";
 import { navigateAndHighlight } from "@/utils/highlight/navigateAndHighlight";
 import { type HighlightableItemType } from "@/utils/highlight";
 import { createLogger } from "@/utils/logger";
+import { cn } from "@/lib/utils"; // Import cn utility for className merging
 
 // Create logger for this component
 const logger = createLogger('NotificationActions');
 
+// Update interface to include className prop
 interface NotificationActionsProps {
   id: string;
   contentId?: string;
@@ -25,6 +27,7 @@ interface NotificationActionsProps {
   onDismiss?: () => void;
   triggerSwipeAnimation?: () => void;
   notificationType?: string;
+  className?: string; // Added className prop to fix the TypeScript error
 }
 
 /**
@@ -37,7 +40,8 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
   isRead,
   onDismiss,
   triggerSwipeAnimation = () => {},
-  notificationType
+  notificationType,
+  className // Accept the className prop
 }) => {
   // Get navigate function from react-router
   const navigate = useNavigate();
@@ -89,8 +93,9 @@ const NotificationActions: React.FC<NotificationActionsProps> = ({
     }, 500); // Match timing with animation duration
   };
 
+  // Use the cn utility to merge the provided className with our default classes
   return (
-    <div className="flex border-t border-gray-100">
+    <div className={cn("flex border-t border-gray-100", className)}>
       <Button
         variant="ghost"
         size="sm"
