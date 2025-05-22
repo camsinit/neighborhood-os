@@ -41,6 +41,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   const highlightColor = getNotificationTextColor(contentType);
 
   // Parse title into parts to create a natural sentence with highlights
+  // But ONLY highlight the specific item name, not any other text
   const renderNaturalSentence = (text: string, type?: string) => {
     // For event notifications - "Person posted Event Name"
     if (type === 'event' || type === 'calendar') {
@@ -71,12 +72,13 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
       }
       
       // Handle regular safety alerts
-      const matches = text.match(/(.+?) (posted|shared|reported) (safety alert:)?\s*(.+)/i);
-      if (matches && matches.length >= 5) {
+      // UPDATED: Only highlight the title, not "safety alert"
+      const matches = text.match(/(.+?) (posted|shared|reported) (?:safety alert:)?\s*(.+)/i);
+      if (matches && matches.length >= 4) {
         return <>
             {matches[1]} {matches[2]} safety alert{' '}
             <span className={cn("font-medium", highlightColor)}>
-              {matches[4]}
+              {matches[3]}
             </span>
           </>;
       }
@@ -108,7 +110,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
       }
     }
 
-    // For neighbors notifications - highlight the person
+    // For neighbors notifications - NOW highlight just the name, not the entire phrase
     if (type === 'neighbors' || type === 'neighbor_welcome') {
       const matches = text.match(/(.+?) (joined|updated|added)/i);
       if (matches && matches.length >= 3) {
@@ -122,6 +124,7 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     }
 
     // Default format for any other notification types
+    // Only highlight the specific content, not the verb or action
     const defaultMatches = text.match(/(.+?) (posted|shared|updated|created|requested|reported) (.+)/i);
     if (defaultMatches && defaultMatches.length >= 4) {
       return <>
