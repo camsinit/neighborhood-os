@@ -23,6 +23,7 @@ import GoodsPage from './pages/GoodsPage';
 import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
 import WaitlistAdmin from './pages/WaitlistAdmin';
+import OnboardingPage from './pages/OnboardingPage';
 
 // Import components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -114,6 +115,16 @@ function App() {
               
               {/* Route for determining navigation based on auth state */}
               <Route path="/index" element={<Index />} />
+              
+              {/* Onboarding route - protected but outside MainLayout */}
+              <Route 
+                path="/onboarding" 
+                element={
+                  <ProtectedRoute>
+                    <OnboardingPage />
+                  </ProtectedRoute>
+                } 
+              />
               
               {/* Protected routes with MainLayout - this is the key fix */}
               <Route 
