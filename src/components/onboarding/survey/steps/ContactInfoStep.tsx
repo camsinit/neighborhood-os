@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
  * Contact Information Step Component
  * 
  * This step collects the user's email and phone number
- * with validation and formatting for proper contact details.
+ * with validation to ensure both fields are provided in the correct format.
  */
 interface ContactInfoStepProps {
   email: string;
@@ -28,51 +28,64 @@ export const ContactInfoStep = ({
     phone: "",
   });
 
-  // Format phone number as user types (xxx) xxx-xxxx
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-numeric characters
-    const numbers = value.replace(/\D/g, "");
-    
-    // Format based on length
-    if (numbers.length <= 3) {
-      return numbers;
-    } else if (numbers.length <= 6) {
-      return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
-    } else {
-      return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
-    }
-  };
-
-  // Validate email with regex
-  const validateEmail = (email: string) => {
+  // Validate email format using regex
+  const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email.trim()) {
+    
+    if (!value.trim()) {
       setErrors(prev => ({ ...prev, email: "Email is required" }));
       return false;
-    } else if (!emailRegex.test(email)) {
+    }
+    
+    if (!emailRegex.test(value)) {
       setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
       return false;
     }
+    
     setErrors(prev => ({ ...prev, email: "" }));
     return true;
   };
 
-  // Validate phone number
-  const validatePhone = (phone: string) => {
-    const phoneDigits = phone.replace(/\D/g, "");
-    if (!phone.trim()) {
-      setErrors(prev => ({ ...prev, phone: "Phone number is required" }));
-      return false;
-    } else if (phoneDigits.length < 10) {
-      setErrors(prev => ({ ...prev, phone: "Please enter a complete phone number" }));
+  // Validate phone format
+  const validatePhone = (value: string) => {
+    // Allow empty phone for now (not required)
+    if (!value.trim()) {
+      return true;
+    }
+    
+    // Simple phone validation - at least 10 digits
+    const phoneDigits = value.replace(/\D/g, '');
+    
+    if (phoneDigits.length < 10) {
+      setErrors(prev => ({ ...prev, phone: "Please enter a valid phone number" }));
       return false;
     }
+    
     setErrors(prev => ({ ...prev, phone: "" }));
     return true;
   };
+  
+  // Format phone number as user types
+  const formatPhoneNumber = (value: string) => {
+    // Remove non-digit characters
+    const phoneDigits = value.replace(/\D/g, '');
+    
+    // Format based on length
+    let formattedPhone = '';
+    
+    if (phoneDigits.length <= 3) {
+      formattedPhone = phoneDigits;
+    } else if (phoneDigits.length <= 6) {
+      formattedPhone = `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3)}`;
+    } else {
+      formattedPhone = `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6, 10)}`;
+    }
+    
+    return formattedPhone;
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email Address</Label>
         <Input
@@ -84,29 +97,37 @@ export const ContactInfoStep = ({
           className={errors.email ? "border-red-500" : ""}
           required
         />
-        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email}</p>
+        )}
         <p className="text-sm text-muted-foreground">
-          We'll use this to send you important community updates and notifications.
+          Your email will only be shared with neighborhood administrators.
         </p>
       </div>
+      
       <div className="space-y-2">
         <Label htmlFor="phone">Phone Number</Label>
         <Input
           id="phone"
           type="tel"
           value={phone}
-          onChange={(e) => onPhoneChange(formatPhoneNumber(e.target.value))}
+          onChange={(e) => {
+            // Format phone number as user types
+            const formattedPhone = formatPhoneNumber(e.target.value);
+            onPhoneChange(formattedPhone);
+          }}
           onBlur={(e) => validatePhone(e.target.value)}
-          placeholder="(555) 555-5555"
           className={errors.phone ? "border-red-500" : ""}
-          maxLength={14}
-          required
+          placeholder="(123) 456-7890"
         />
-        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+        {errors.phone && (
+          <p className="text-sm text-red-500">{errors.phone}</p>
+        )}
         <p className="text-sm text-muted-foreground">
-          For emergency contacts and time-sensitive community alerts.
+          Optional. Only visible to neighborhood administrators in case of emergency.
         </p>
       </div>
     </div>
   );
 };
+

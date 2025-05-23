@@ -1,13 +1,16 @@
 
 /**
- * DiagnosticsPanel component (SIMPLIFIED VERSION)
+ * DiagnosticsPanel component
  * 
  * A diagnostic panel shown at the bottom of the sidebar with basic information
- * for debugging purposes. Core contributor mode has been removed.
- * Logging controls have been temporarily disabled.
+ * for debugging purposes, including a test mode for onboarding.
  */
+import { useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood';
+import { Button } from '@/components/ui/button';
+import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
+import { useUser } from '@supabase/auth-helpers-react';
 // Removed LoggingControls import since it's temporarily disabled
 
 // Define the component props interface
@@ -18,8 +21,7 @@ interface DiagnosticsPanelProps {
 
 /**
  * DiagnosticsPanel displays basic debugging information in the sidebar
- * This simplified version has removed the core contributor functionality
- * Logging controls are temporarily disabled
+ * and provides diagnostic tools like the onboarding test mode
  */
 const DiagnosticsPanel = ({ 
   user,
@@ -29,6 +31,9 @@ const DiagnosticsPanel = ({
   if (import.meta.env.PROD) {
     return null;
   }
+  
+  // State for controlling the test onboarding dialog
+  const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   
   return (
     <div className="mt-4 p-2 text-xs text-gray-500 bg-gray-50 rounded border border-gray-100">
@@ -52,7 +57,28 @@ const DiagnosticsPanel = ({
         )}
       </div>
       
-      {/* Logging Controls temporarily removed */}
+      {/* Testing Tools Section */}
+      <div className="mt-3 pt-2 border-t border-gray-200">
+        <h6 className="font-medium mb-1">Testing Tools</h6>
+        
+        {/* Onboarding Test Button */}
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full h-7 text-xs mb-2" 
+          onClick={() => setShowOnboardingTest(true)}
+        >
+          Test Onboarding Flow
+        </Button>
+        
+        {/* Onboarding Test Dialog */}
+        <OnboardingDialog 
+          open={showOnboardingTest} 
+          onOpenChange={setShowOnboardingTest} 
+        />
+      </div>
+      
+      {/* Logging Controls temporarily disabled section */}
       <div className="mt-3 pt-2 border-t border-gray-200">
         <h6 className="font-medium mb-1">Logging Controls</h6>
         <p className="text-amber-600 text-[10px]">

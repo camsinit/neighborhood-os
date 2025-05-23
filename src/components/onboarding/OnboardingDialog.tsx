@@ -11,13 +11,20 @@ import SurveyDialog from "./SurveyDialog";
  * 
  * A dialog that displays when a user needs to complete onboarding.
  * It wraps the survey dialog and handles the completion of onboarding.
+ * 
+ * When used in test mode, it bypasses the database update.
  */
 interface OnboardingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isTestMode?: boolean; // New prop to indicate if we're in test mode
 }
 
-const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
+const OnboardingDialog = ({ 
+  open, 
+  onOpenChange, 
+  isTestMode = false 
+}: OnboardingDialogProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const user = useUser();
@@ -25,6 +32,20 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
   // Handle completion of onboarding
   const handleOnboardingComplete = async () => {
     try {
+      // Skip database update if in test mode
+      if (isTestMode) {
+        // Show test mode completion toast
+        toast({
+          title: "Test Mode",
+          description: "Onboarding test completed. Your profile was not modified.",
+        });
+        
+        // Close dialog but don't navigate in test mode
+        onOpenChange(false);
+        return;
+      }
+      
+      // Normal operation - update database
       if (!user) return;
       
       // Mark onboarding as completed in the profiles table
@@ -61,6 +82,7 @@ const OnboardingDialog = ({ open, onOpenChange }: OnboardingDialogProps) => {
       open={open} 
       onOpenChange={onOpenChange} 
       onComplete={handleOnboardingComplete} 
+      isTestMode={isTestMode} // Pass test mode status to survey dialog
     />
   );
 };

@@ -5,7 +5,7 @@ import SurveyDialog from "@/components/onboarding/SurveyDialog";
 
 /**
  * A hidden test button component that allows triggering onboarding flow
- * Simplified for clarity
+ * Uses test mode to prevent modifying the user's actual profile
  */
 const SecretTestButton = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -26,10 +26,12 @@ const SecretTestButton = () => {
             setShowSurvey(true);
           }
         }}
+        isTestMode={true} // Mark this as test mode
       />
       <SurveyDialog
         open={showSurvey}
         onOpenChange={setShowSurvey}
+        isTestMode={true} // Mark this as test mode
       />
     </>
   );
