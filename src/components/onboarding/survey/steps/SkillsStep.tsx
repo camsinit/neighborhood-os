@@ -1,3 +1,4 @@
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -24,14 +25,27 @@ export const SKILLS_OPTIONS = [
   "Solar/Alternative Energy Knowledge",
 ];
 
+/**
+ * SkillsStep component
+ * 
+ * This step allows users to select skills they have that could benefit the neighborhood.
+ * Each skill is presented as a checkbox that can be toggled on/off.
+ */
 interface SkillsStepProps {
-  selectedSkills: string[];
+  selectedSkills: string[]; // Changed from 'skills' to 'selectedSkills'
   onSkillsChange: (skills: string[]) => void;
 }
 
 export const SkillsStep = ({ selectedSkills, onSkillsChange }: SkillsStepProps) => {
   return (
     <div className="space-y-4">
+      {/* Description text explaining the purpose of sharing skills */}
+      <p className="text-sm text-muted-foreground mb-4">
+        Select any skills you have that might benefit your neighborhood. 
+        These will be visible to neighbors who may need assistance.
+      </p>
+      
+      {/* Scrollable skills selection area */}
       <div className="h-[300px] overflow-y-auto space-y-2">
         {SKILLS_OPTIONS.map((skill) => (
           <div key={skill} className="flex items-center space-x-2">

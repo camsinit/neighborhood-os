@@ -189,7 +189,7 @@ const SurveyDialog = ({
           
           {currentStep === 4 && (
             <SkillsStep
-              skills={formData.skills}
+              selectedSkills={formData.skills} // Changed from skills to selectedSkills
               onSkillsChange={(value) => handleChange("skills", value)}
             />
           )}
