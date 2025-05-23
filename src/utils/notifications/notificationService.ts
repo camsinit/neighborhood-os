@@ -4,6 +4,11 @@
  * 
  * This service provides a centralized API for working with notifications.
  * It exclusively uses database functions and triggers for notification creation.
+ * 
+ * RULES:
+ * - Notifications are ONLY for personally relevant content
+ * - General content updates go to the activity feed only
+ * - No notifications for profile updates or event updates
  */
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";

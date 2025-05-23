@@ -2,6 +2,8 @@
 /**
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
+ * 
+ * UPDATED: Now focuses only on personally relevant notifications, not general updates
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
