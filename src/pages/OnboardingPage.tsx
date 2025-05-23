@@ -63,29 +63,6 @@ const OnboardingPage = () => {
     checkOnboardingStatus();
   }, [user, navigate, toast]);
   
-  // Handle onboarding completion (will be passed to dialog)
-  const onOnboardingComplete = async () => {
-    try {
-      await supabase
-        .from("profiles")
-        .update({ completed_onboarding: true })
-        .eq("id", user?.id);
-        
-      toast({
-        title: "Profile Setup Complete",
-        description: "Welcome to your neighborhood dashboard!",
-      });
-      navigate("/home");
-    } catch (error: any) {
-      console.error("Error completing onboarding:", error);
-      toast({
-        title: "Error",
-        description: "Unable to update your profile. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-  
   // Display loading state
   if (loading || needsOnboarding === null) {
     return (
