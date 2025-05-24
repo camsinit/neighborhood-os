@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -14,6 +14,7 @@ interface ContactInfoStepProps {
   phone: string;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
+  onValidation?: (field: string, isValid: boolean) => void; // Add validation callback
 }
 
 export const ContactInfoStep = ({
@@ -21,6 +22,7 @@ export const ContactInfoStep = ({
   phone,
   onEmailChange,
   onPhoneChange,
+  onValidation,
 }: ContactInfoStepProps) => {
   // Track validation errors
   const [errors, setErrors] = useState({
@@ -28,41 +30,48 @@ export const ContactInfoStep = ({
     phone: "",
   });
 
-  // Validate email format using regex
+  // Validate email format using regex and notify parent
   const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    let isValid = true;
     
     if (!value.trim()) {
       setErrors(prev => ({ ...prev, email: "Email is required" }));
-      return false;
-    }
-    
-    if (!emailRegex.test(value)) {
+      isValid = false;
+    } else if (!emailRegex.test(value)) {
       setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
-      return false;
+      isValid = false;
+    } else {
+      setErrors(prev => ({ ...prev, email: "" }));
     }
     
-    setErrors(prev => ({ ...prev, email: "" }));
-    return true;
+    // Notify parent component of validation result
+    onValidation?.("email", isValid);
+    return isValid;
   };
 
-  // Validate phone format
+  // Validate phone format and notify parent
   const validatePhone = (value: string) => {
     // Allow empty phone for now (not required)
     if (!value.trim()) {
+      setErrors(prev => ({ ...prev, phone: "" }));
+      onValidation?.("phone", true);
       return true;
     }
     
     // Simple phone validation - at least 10 digits
     const phoneDigits = value.replace(/\D/g, '');
+    const isValid = phoneDigits.length >= 10;
     
-    if (phoneDigits.length < 10) {
+    if (!isValid) {
       setErrors(prev => ({ ...prev, phone: "Please enter a valid phone number" }));
-      return false;
+    } else {
+      setErrors(prev => ({ ...prev, phone: "" }));
     }
     
-    setErrors(prev => ({ ...prev, phone: "" }));
-    return true;
+    // Notify parent component of validation result
+    onValidation?.("phone", isValid);
+    return isValid;
   };
   
   // Format phone number as user types
@@ -83,6 +92,15 @@ export const ContactInfoStep = ({
     
     return formattedPhone;
   };
+
+  // Run validation on mount and whenever values change
+  useEffect(() => {
+    validateEmail(email);
+  }, [email]);
+
+  useEffect(() => {
+    validatePhone(phone);
+  }, [phone]);
 
   return (
     <div className="space-y-4">
@@ -130,4 +148,3 @@ export const ContactInfoStep = ({
     </div>
   );
 };
-

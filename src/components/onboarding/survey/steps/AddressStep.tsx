@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -12,21 +12,35 @@ import { Label } from "@/components/ui/label";
 interface AddressStepProps {
   address: string;
   onAddressChange: (value: string) => void;
+  onValidation?: (field: string, isValid: boolean) => void; // Add validation callback
 }
 
-export const AddressStep = ({ address, onAddressChange }: AddressStepProps) => {
+export const AddressStep = ({ 
+  address, 
+  onAddressChange,
+  onValidation 
+}: AddressStepProps) => {
   // Track validation error
   const [error, setError] = useState("");
 
-  // Validate address
+  // Validate address and notify parent
   const validateAddress = (value: string) => {
-    if (!value.trim()) {
+    const isValid = value.trim().length > 0;
+    if (!isValid) {
       setError("Address is required");
-      return false;
+    } else {
+      setError("");
     }
-    setError("");
-    return true;
+    
+    // Notify parent component of validation result
+    onValidation?.("address", isValid);
+    return isValid;
   };
+
+  // Run validation on mount and whenever value changes
+  useEffect(() => {
+    validateAddress(address);
+  }, [address]);
 
   return (
     <div className="space-y-4">
