@@ -22,13 +22,14 @@ export const useSurveyState = () => {
     skills: [],
   });
   
-  // Field validation state
+  // Field validation state - updated to include contact visibility
   const [validFields, setValidFields] = useState<Record<string, boolean>>({
     firstName: false,
     lastName: false,
     email: false,
     phone: false,
     address: false,
+    contactVisibility: true, // Default to true since email is checked by default
   });
   
   // Handle form field changes
@@ -41,13 +42,13 @@ export const useSurveyState = () => {
     setValidFields((prev) => ({ ...prev, [field]: isValid }));
   };
   
-  // Check if current step is valid
+  // Check if current step is valid - updated to include contact visibility validation
   const isCurrentStepValid = () => {
     switch (currentStep) {
       case 0: // Basic Info
         return validFields.firstName && validFields.lastName;
-      case 1: // Contact Info
-        return validFields.email && validFields.phone;
+      case 1: // Contact Info - now includes phone and contact visibility validation
+        return validFields.email && validFields.phone && validFields.contactVisibility;
       case 2: // Address
         return validFields.address;
       default:
