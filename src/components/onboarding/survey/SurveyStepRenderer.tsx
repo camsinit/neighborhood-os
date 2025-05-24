@@ -16,12 +16,14 @@ interface SurveyStepRendererProps {
   currentStep: number;
   formData: SurveyFormData;
   handleChange: (field: keyof SurveyFormData, value: any) => void;
+  handleValidation: (field: string, isValid: boolean) => void; // Add validation handler
 }
 
 export const SurveyStepRenderer = ({
   currentStep,
   formData,
   handleChange,
+  handleValidation,
 }: SurveyStepRendererProps) => {
   // Render the appropriate step component based on current step
   switch (currentStep) {
@@ -32,6 +34,7 @@ export const SurveyStepRenderer = ({
           lastName={formData.lastName}
           onFirstNameChange={(value) => handleChange("firstName", value)}
           onLastNameChange={(value) => handleChange("lastName", value)}
+          onValidation={handleValidation} // Pass validation callback
         />
       );
     
@@ -42,6 +45,7 @@ export const SurveyStepRenderer = ({
           phone={formData.phone}
           onEmailChange={(value) => handleChange("email", value)}
           onPhoneChange={(value) => handleChange("phone", value)}
+          onValidation={handleValidation} // Pass validation callback
         />
       );
     
@@ -50,6 +54,7 @@ export const SurveyStepRenderer = ({
         <AddressStep
           address={formData.address}
           onAddressChange={(value) => handleChange("address", value)}
+          onValidation={handleValidation} // Pass validation callback
         />
       );
     

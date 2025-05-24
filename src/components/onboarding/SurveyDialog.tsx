@@ -49,6 +49,7 @@ const SurveyDialog = ({
     currentStep,
     formData,
     handleChange,
+    handleValidation, // Get validation handler from hook
     isCurrentStepValid,
     handleNext,
     handlePrevious,
@@ -97,6 +98,7 @@ const SurveyDialog = ({
             currentStep={currentStep}
             formData={formData}
             handleChange={handleChange}
+            handleValidation={handleValidation} // Pass validation handler
           />
         </div>
         

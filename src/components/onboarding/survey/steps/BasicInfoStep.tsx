@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -14,6 +14,7 @@ interface BasicInfoStepProps {
   lastName: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
+  onValidation?: (field: string, isValid: boolean) => void; // Add validation callback
 }
 
 export const BasicInfoStep = ({
@@ -21,31 +22,48 @@ export const BasicInfoStep = ({
   lastName,
   onFirstNameChange,
   onLastNameChange,
+  onValidation,
 }: BasicInfoStepProps) => {
-  // Track validation errors
+  // Track validation errors for display
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
   });
 
-  // Validate on blur
+  // Validate first name and notify parent
   const validateFirstName = (value: string) => {
-    if (!value.trim()) {
+    const isValid = value.trim().length > 0;
+    if (!isValid) {
       setErrors(prev => ({ ...prev, firstName: "First name is required" }));
-      return false;
+    } else {
+      setErrors(prev => ({ ...prev, firstName: "" }));
     }
-    setErrors(prev => ({ ...prev, firstName: "" }));
-    return true;
+    // Notify parent component of validation result
+    onValidation?.("firstName", isValid);
+    return isValid;
   };
 
+  // Validate last name and notify parent
   const validateLastName = (value: string) => {
-    if (!value.trim()) {
+    const isValid = value.trim().length > 0;
+    if (!isValid) {
       setErrors(prev => ({ ...prev, lastName: "Last name is required" }));
-      return false;
+    } else {
+      setErrors(prev => ({ ...prev, lastName: "" }));
     }
-    setErrors(prev => ({ ...prev, lastName: "" }));
-    return true;
+    // Notify parent component of validation result
+    onValidation?.("lastName", isValid);
+    return isValid;
   };
+
+  // Run validation on mount and whenever values change
+  useEffect(() => {
+    validateFirstName(firstName);
+  }, [firstName]);
+
+  useEffect(() => {
+    validateLastName(lastName);
+  }, [lastName]);
 
   return (
     <div className="space-y-4">
