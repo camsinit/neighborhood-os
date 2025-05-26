@@ -17,7 +17,7 @@ interface WelcomeScreenProps {
 
 export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
   // Get the current neighborhood data for personalized welcome message
-  const { neighborhood } = useCurrentNeighborhood();
+  const neighborhood = useCurrentNeighborhood();
   const confettiRef = useRef<ConfettiRef>(null);
 
   // Trigger confetti effect when component mounts
