@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
-import SurveyDialog from "./SurveyDialog";
+import SurveyDialog from "./survey/SurveyDialog";
 
 /**
  * OnboardingDialog component
