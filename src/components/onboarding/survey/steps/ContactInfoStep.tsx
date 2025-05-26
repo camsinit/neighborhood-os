@@ -143,49 +143,52 @@ export const ContactInfoStep = ({
 
   return (
     <div className="space-y-6">
-      {/* Email field */}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email Address *</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
-          onBlur={(e) => validateEmail(e.target.value)}
-          className={errors.email ? "border-red-500" : ""}
-          required
-        />
-        {errors.email && (
-          <p className="text-sm text-red-500">{errors.email}</p>
-        )}
-        <p className="text-sm text-muted-foreground">
-          Your email will only be shared with neighborhood administrators.
-        </p>
-      </div>
-      
-      {/* Phone field - now required */}
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number *</Label>
-        <Input
-          id="phone"
-          type="tel"
-          value={phone}
-          onChange={(e) => {
-            // Format phone number as user types
-            const formattedPhone = formatPhoneNumber(e.target.value);
-            onPhoneChange(formattedPhone);
-          }}
-          onBlur={(e) => validatePhone(e.target.value)}
-          className={errors.phone ? "border-red-500" : ""}
-          placeholder="(123) 456-7890"
-          required
-        />
-        {errors.phone && (
-          <p className="text-sm text-red-500">{errors.phone}</p>
-        )}
-        <p className="text-sm text-muted-foreground">
-          Required. Only visible to neighborhood administrators in case of emergency.
-        </p>
+      {/* Email and Phone fields side by side */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Email field */}
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            onBlur={(e) => validateEmail(e.target.value)}
+            className={errors.email ? "border-red-500" : ""}
+            required
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email}</p>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Your email will only be shared with neighborhood administrators.
+          </p>
+        </div>
+        
+        {/* Phone field - now required */}
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number *</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => {
+              // Format phone number as user types
+              const formattedPhone = formatPhoneNumber(e.target.value);
+              onPhoneChange(formattedPhone);
+            }}
+            onBlur={(e) => validatePhone(e.target.value)}
+            className={errors.phone ? "border-red-500" : ""}
+            placeholder="(123) 456-7890"
+            required
+          />
+          {errors.phone && (
+            <p className="text-sm text-red-500">{errors.phone}</p>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Required. Only visible to neighborhood administrators in case of emergency.
+          </p>
+        </div>
       </div>
 
       {/* Contact visibility preferences */}
