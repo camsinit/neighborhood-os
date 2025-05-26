@@ -8,13 +8,15 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle, XCircle, Play, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, XCircle, Play, RefreshCw, Bug } from 'lucide-react';
 import { runFullRLSDiagnostics, testNeighborhoodAccess, logAuthState } from '@/utils/rls-diagnostics';
+import { runFullRecursionDebug } from '@/utils/rls-recursion-debugger';
 import { useNeighborhood } from '@/contexts/neighborhood';
 
 export const RLSDiagnosticsPanel = () => {
   const [diagnosticsResults, setDiagnosticsResults] = useState<any>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isDebugging, setIsDebugging] = useState(false);
   const [neighborhoodAccess, setNeighborhoodAccess] = useState<any>(null);
   const { currentNeighborhood } = useNeighborhood();
 
@@ -41,6 +43,20 @@ export const RLSDiagnosticsPanel = () => {
       console.error('❌ RLS Diagnostics Failed:', error);
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const runRecursionDebug = async () => {
+    setIsDebugging(true);
+    console.log('🐛 Starting Recursion Debug...');
+    
+    try {
+      await runFullRecursionDebug();
+      console.log('✅ Recursion Debug Complete - Check console for detailed results');
+    } catch (error) {
+      console.error('❌ Recursion Debug Failed:', error);
+    } finally {
+      setIsDebugging(false);
     }
   };
 
@@ -79,6 +95,20 @@ export const RLSDiagnosticsPanel = () => {
               <Play className="w-4 h-4" />
             )}
             {isRunning ? 'Running Diagnostics...' : 'Run Full Diagnostics'}
+          </Button>
+          
+          <Button 
+            onClick={runRecursionDebug} 
+            disabled={isDebugging}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {isDebugging ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Bug className="w-4 h-4" />
+            )}
+            {isDebugging ? 'Debugging...' : 'Debug Recursion'}
           </Button>
         </div>
 
@@ -171,6 +201,13 @@ export const RLSDiagnosticsPanel = () => {
             </div>
           </div>
         )}
+
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+          <p className="text-sm text-blue-800">
+            <strong>Instructions:</strong> Click "Debug Recursion" and then check your browser console for detailed logs. 
+            Look for messages starting with "🚨 RECURSION TRIGGER" to identify the exact cause of infinite recursion.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
