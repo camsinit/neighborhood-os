@@ -1,15 +1,18 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SurveyStepHeader } from "./SurveyStepHeader";
 import { SurveyProgress } from "./SurveyProgress";
 import { SurveyStepRenderer } from "./SurveyStepRenderer";
 import { SurveyNavigation } from "./SurveyNavigation";
 import { useSurveyState } from "./hooks/useSurveyState";
+import { useState } from "react";
 
 /**
  * SurveyDialog component
  * 
  * A multi-step survey dialog that collects user information during onboarding.
  * Now refactored into smaller, focused components for better maintainability.
+ * Includes skills survey validation to ensure users complete the mini-survey.
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -18,7 +21,7 @@ interface SurveyDialogProps {
   isTestMode?: boolean;
 }
 
-// Define the survey steps - updated to reflect the enhanced skills section
+// Define the survey steps
 const steps = [
   {
     title: "Basic Information",
@@ -33,7 +36,7 @@ const steps = [
     title: "Profile Photo",
   },
   {
-    title: "Skills & Expertise", // Updated title to reflect enhanced capabilities
+    title: "Skills & Interests",
   },
 ];
 
@@ -47,12 +50,30 @@ const SurveyDialog = ({
   const {
     currentStep,
     formData,
+    skillsSurveyState,
     handleChange,
-    handleValidation, // Get validation handler from hook
+    handleValidation,
+    handleSkillsSurveyStateChange,
     isCurrentStepValid,
     handleNext,
     handlePrevious,
   } = useSurveyState();
+  
+  // Track skills mini-survey progress for progress bar calculation
+  const [skillsMiniSurveyProgress, setSkillsMiniSurveyProgress] = useState({
+    currentStep: 0,
+    totalSteps: 7, // 6 categories + 1 summary
+    hasCompleted: false,
+  });
+  
+  // Handle skills mini-survey progress updates
+  const handleSkillsMiniSurveyProgress = (currentStep: number, totalSteps: number, hasCompleted: boolean) => {
+    setSkillsMiniSurveyProgress({
+      currentStep,
+      totalSteps,
+      hasCompleted,
+    });
+  };
   
   // Handle dialog close request
   const handleCloseRequest = (open: boolean) => {
@@ -88,8 +109,12 @@ const SurveyDialog = ({
         {/* Survey header */}
         <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
         
-        {/* Progress indicator */}
-        <SurveyProgress currentStep={currentStep} totalSteps={steps.length} />
+        {/* Progress indicator - now includes skills mini-survey progress */}
+        <SurveyProgress 
+          currentStep={currentStep} 
+          totalSteps={steps.length}
+          skillsSurveyProgress={currentStep === 4 ? skillsMiniSurveyProgress : undefined}
+        />
         
         {/* Current step component */}
         <div className="py-4">
@@ -97,7 +122,9 @@ const SurveyDialog = ({
             currentStep={currentStep}
             formData={formData}
             handleChange={handleChange}
-            handleValidation={handleValidation} // Pass validation handler
+            handleValidation={handleValidation}
+            onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
+            onSkillsMiniSurveyProgress={handleSkillsMiniSurveyProgress}
           />
         </div>
         
@@ -108,6 +135,9 @@ const SurveyDialog = ({
           isCurrentStepValid={isCurrentStepValid()}
           onPrevious={handlePrevious}
           onNext={() => handleNext(onComplete, steps.length)}
+          isSkillsStep={currentStep === 4}
+          hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
+          hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
         />
       </DialogContent>
     </Dialog>

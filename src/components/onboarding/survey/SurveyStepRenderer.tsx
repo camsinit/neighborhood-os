@@ -20,6 +20,7 @@ interface SurveyStepRendererProps {
   handleChange: (field: keyof SurveyFormData, value: any) => void;
   handleValidation: (field: string, isValid: boolean) => void;
   onSkillsSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
+  onSkillsMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
 }
 
 export const SurveyStepRenderer = ({
@@ -28,6 +29,7 @@ export const SurveyStepRenderer = ({
   handleChange,
   handleValidation,
   onSkillsSurveyStateChange,
+  onSkillsMiniSurveyProgress,
 }: SurveyStepRendererProps) => {
   // Render the appropriate step component based on current step
   switch (currentStep) {
@@ -71,6 +73,7 @@ export const SurveyStepRenderer = ({
           selectedSkills={formData.skills}
           onSkillsChange={(value) => handleChange("skills", value)}
           onSurveyStateChange={onSkillsSurveyStateChange}
+          onMiniSurveyProgress={onSkillsMiniSurveyProgress}
         />
       );
     

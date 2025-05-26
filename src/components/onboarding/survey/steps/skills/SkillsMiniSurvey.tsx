@@ -25,12 +25,14 @@ interface SkillsMiniSurveyProps {
   selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
+  onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
 }
 
 export const SkillsMiniSurvey = ({ 
   selectedSkills, 
   onSkillsChange, 
-  onSurveyStateChange 
+  onSurveyStateChange,
+  onMiniSurveyProgress
 }: SkillsMiniSurveyProps) => {
   // Convert selectedSkills prop to internal format for easier manipulation
   const [skillsWithDetails, setSkillsWithDetails] = useState<SelectedSkill[]>(() => {
@@ -66,11 +68,12 @@ export const SkillsMiniSurvey = ({
   const totalSteps = categoryKeys.length + 1; // categories + summary
   const isOnSummary = currentStep === categoryKeys.length;
 
-  // Notify parent component of survey state changes
+  // Notify parent component of mini-survey progress changes
   useEffect(() => {
-    const hasSkills = skillsWithDetails.length > 0;
-    onSurveyStateChange?.(hasCompletedSurvey, hasSkills);
-  }, [hasCompletedSurvey, skillsWithDetails, onSurveyStateChange]);
+    if (onMiniSurveyProgress) {
+      onMiniSurveyProgress(currentStep, totalSteps, hasCompletedSurvey);
+    }
+  }, [currentStep, totalSteps, hasCompletedSurvey, onMiniSurveyProgress]);
 
   /**
    * Update parent component with formatted skills array

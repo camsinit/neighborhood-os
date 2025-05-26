@@ -1,3 +1,4 @@
+
 import { SkillsMiniSurvey } from "./skills/SkillsMiniSurvey";
 
 /**
@@ -11,13 +12,17 @@ interface EnhancedSkillsStepProps {
   selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
+  onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
 }
+
 export const EnhancedSkillsStep = ({
   selectedSkills,
   onSkillsChange,
-  onSurveyStateChange
+  onSurveyStateChange,
+  onMiniSurveyProgress
 }: EnhancedSkillsStepProps) => {
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       {/* Introduction text */}
       <div className="text-center space-y-2">
         
@@ -25,6 +30,12 @@ export const EnhancedSkillsStep = ({
       </div>
 
       {/* Mini-survey component */}
-      <SkillsMiniSurvey selectedSkills={selectedSkills} onSkillsChange={onSkillsChange} onSurveyStateChange={onSurveyStateChange} />
-    </div>;
+      <SkillsMiniSurvey 
+        selectedSkills={selectedSkills} 
+        onSkillsChange={onSkillsChange} 
+        onSurveyStateChange={onSurveyStateChange}
+        onMiniSurveyProgress={onMiniSurveyProgress}
+      />
+    </div>
+  );
 };
