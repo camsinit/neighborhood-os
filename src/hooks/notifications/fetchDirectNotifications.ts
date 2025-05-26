@@ -3,7 +3,7 @@
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
  * 
- * UPDATED: Now focuses only on personally relevant notifications, not general updates
+ * UPDATED: Now works with clean RLS policies - much simpler!
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
@@ -15,34 +15,28 @@ const logger = createLogger('fetchDirectNotifications');
 /**
  * Fetch direct notifications from the dedicated notifications table
  * 
+ * With our new clean RLS, this is much simpler - just query notifications
+ * and the RLS policy handles access control automatically
+ * 
  * @param showArchived - Whether to include archived notifications
  * @returns Formatted array of notifications
  */
 export const fetchDirectNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
-  // Get the current user - we need their ID to fetch their notifications
-  const user = await supabase.auth.getUser();
-  const userId = user.data.user?.id;
-  
-  // If no user is authenticated, return empty array
-  if (!userId) {
-    logger.debug('No user ID found, returning empty notifications');
-    return [];
-  }
-
   // Log the query parameters for debugging
   logger.debug('Fetching direct notifications with params:', {
-    userId,
     showArchived,
     timestamp: new Date().toISOString()
   });
   
   try {
-    // FIXED: Using a more reliable query without problematic joins that might fail
-    // This query fetches notifications first, then separately fetches profiles
+    // SIMPLIFIED: With clean RLS, we can just query directly
+    // The RLS policy "users_own_notifications" handles access control
     const { data: notifications, error } = await supabase
       .from('notifications')
-      .select('*')
-      .eq('user_id', userId)
+      .select(`
+        *,
+        profiles:actor_id(id, display_name, avatar_url)
+      `)
       .eq('is_archived', showArchived)
       .order('created_at', { ascending: false });
       
@@ -54,59 +48,14 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
     // Log the raw notifications count
     logger.debug(`Found ${notifications?.length || 0} direct notifications`);
     
-    // If we have notifications, fetch actor profiles separately
-    // This prevents join errors when profiles are missing
-    if (notifications && notifications.length > 0) {
-      // Collect unique actor IDs for profile lookup
-      const actorIds = notifications
-        .map(n => n.actor_id)
-        .filter((id): id is string => !!id); // Filter out undefined/null
-      
-      // Only fetch profiles if we have actor IDs
-      if (actorIds.length > 0) {
-        const uniqueActorIds = [...new Set(actorIds)]; // Remove duplicates
-        
-        logger.debug(`Fetching profiles for ${uniqueActorIds.length} actors`);
-        
-        // Fetch profiles separately
-        const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, display_name, avatar_url')
-          .in('id', uniqueActorIds);
-          
-        if (profileError) {
-          logger.error('Error fetching actor profiles:', profileError);
-        } else {
-          // Create a map for quick profile lookup
-          const profilesMap = new Map();
-          profiles?.forEach(profile => {
-            if (profile && profile.id) {
-              profilesMap.set(profile.id, profile);
-            }
-          });
-          
-          // Attach profiles to notifications
-          for (const notification of notifications) {
-            if (notification.actor_id && profilesMap.has(notification.actor_id)) {
-              // FIX: TypeScript doesn't know about our profiles field, so we need to add it properly
-              (notification as any).profiles = profilesMap.get(notification.actor_id);
-            }
-          }
-          
-          logger.debug(`Successfully attached profiles to notifications`);
-        }
-      }
-    }
-    
-    // Process and return the notifications with profiles attached
+    // Process and return the notifications
     return processDirectNotifications(notifications || []);
     
   } catch (error: any) {
     // Improved error handling with detailed logging
     logger.error('Unexpected error in fetchDirectNotifications:', {
       error: error.message,
-      stack: error.stack,
-      userId
+      stack: error.stack
     });
     return [];
   }
@@ -127,8 +76,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
 
   return notifications.map(notification => {
     // Extract profile data if available, provide fallbacks if not
-    // FIX: Use optional chaining to safely access profiles
-    const actorProfile = (notification as any).profiles || {};
+    const actorProfile = notification.profiles || {};
     
     // Build a standardized context object from metadata
     const notificationContext = {
@@ -156,7 +104,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       context: notificationContext,
       // Include additional fields for consistency with other notification types
       description: notification.description || null,
-      profiles: (notification as any).profiles || null
+      profiles: notification.profiles || null
     };
   });
 };

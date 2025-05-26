@@ -13,7 +13,8 @@ interface Neighborhood {
 
 /**
  * Custom hook to fetch and manage a user's neighborhoods
- * Uses security definer functions to avoid RLS recursion issues
+ * 
+ * SIMPLIFIED: With clean RLS, we can query directly without security definer functions
  */
 export function useNeighborhoodData() {
   const user = useUser();
@@ -41,48 +42,61 @@ export function useNeighborhoodData() {
         
         console.log("[useNeighborhoodData] Fetching neighborhoods for user:", user.id);
         
-        // First check if user created any neighborhoods
+        // SIMPLIFIED: With clean RLS, just query the neighborhoods directly
+        // Check neighborhoods created by user
         const { data: createdNeighborhoods, error: createdError } = await supabase
           .from('neighborhoods')
-          .select('id, name')
+          .select('id, name, created_at')
           .eq('created_by', user.id);
 
         if (createdError) {
           console.warn("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
         }
         
-        // If user created neighborhoods, use those
-        if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-          const formattedNeighborhoods = createdNeighborhoods.map(item => ({
-            id: item.id,
-            name: item.name,
-            joined_at: new Date().toISOString() // Default value
-          }));
-          
-          setNeighborhoods(formattedNeighborhoods);
-          setIsLoading(false);
-          return;
-        }
-
-        // Call our RPC function that safely checks membership
-        // NOTE: We need to use explicit typing because TypeScript doesn't know about our custom RPC functions
+        // Check neighborhoods where user is a member
         const { data: membershipData, error: membershipError } = await supabase
-          .rpc('get_user_neighborhoods', {
-            user_uuid: user.id
-          }) as {
-            data: Neighborhood[] | null;
-            error: Error | null;
-          };
-        
+          .from('neighborhood_members')
+          .select(`
+            neighborhood_id,
+            joined_at,
+            neighborhoods:neighborhood_id(id, name)
+          `)
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+          
         if (membershipError) {
-          throw membershipError;
+          console.warn("[useNeighborhoodData] Error checking memberships:", membershipError);
         }
         
-        if (membershipData) {
-          setNeighborhoods(membershipData);
-        } else {
-          setNeighborhoods([]);
+        // Combine results
+        const allNeighborhoods: Neighborhood[] = [];
+        
+        // Add created neighborhoods
+        if (createdNeighborhoods) {
+          createdNeighborhoods.forEach(n => {
+            allNeighborhoods.push({
+              id: n.id,
+              name: n.name,
+              joined_at: n.created_at
+            });
+          });
         }
+        
+        // Add member neighborhoods (avoid duplicates)
+        if (membershipData) {
+          membershipData.forEach((m: any) => {
+            const neighborhood = m.neighborhoods;
+            if (neighborhood && !allNeighborhoods.find(n => n.id === neighborhood.id)) {
+              allNeighborhoods.push({
+                id: neighborhood.id,
+                name: neighborhood.name,
+                joined_at: m.joined_at
+              });
+            }
+          });
+        }
+        
+        setNeighborhoods(allNeighborhoods);
       } catch (err: any) {
         console.error("[useNeighborhoodData] Error fetching neighborhoods:", err);
         setError(err instanceof Error ? err : new Error(err.message || 'Unknown error'));

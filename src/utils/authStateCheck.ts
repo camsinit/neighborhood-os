@@ -2,7 +2,7 @@
 /**
  * Authentication state checking utilities
  * 
- * Simplified to work with the direct data access model without RLS
+ * SIMPLIFIED: With clean RLS policies, we don't need complex auth checking
  */
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,7 +10,9 @@ import { toast } from "sonner";
 type QueryFunction<T> = () => Promise<T>;
 
 /**
- * Run a query with auth check to handle missing auth context
+ * Run a query with basic auth check
+ * 
+ * With clean RLS, this is much simpler - just check if user is authenticated
  * 
  * @param queryFn Function that performs the actual Supabase query
  * @param operationName Name of the operation (for logging)
@@ -21,13 +23,10 @@ export const runWithAuthCheck = async <T>(
   operationName = 'query'
 ): Promise<T> => {
   try {
-    // First check if auth context is available
-    const { data: authCheck, error: authError } = await supabase
-      .from('auth_users_view')
-      .select('id')
-      .limit(1);
+    // Simple auth check - get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-    if (authError) {
+    if (authError || !user) {
       console.warn(`[${operationName}] Auth check failed:`, authError);
       
       // Try refreshing the session if auth check fails
