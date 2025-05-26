@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Confetti, ConfettiRef } from "@/components/ui/confetti";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { PartyPopper, Sparkles, Heart, Users, Gift, Shield } from "lucide-react";
+import { PartyPopper, Sparkles, Users, Gift, Shield } from "lucide-react";
 
 /**
  * WelcomeScreen component
@@ -11,6 +11,7 @@ import { PartyPopper, Sparkles, Heart, Users, Gift, Shield } from "lucide-react"
  * Displays an exciting, colorful welcome message to the user after completing onboarding.
  * Shows confetti animation covering the entire screen.
  * Includes the neighborhood name they're joining with vibrant styling and animations.
+ * Condensed version with better space utilization.
  */
 interface WelcomeScreenProps {
   onGetStarted: () => void;
@@ -91,76 +92,71 @@ export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
         }}
       />
       
-      {/* Welcome content with vibrant styling */}
-      <div className="text-center space-y-8 relative z-20 p-6">
-        {/* Animated welcome title with gradient and party popper */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-center gap-3 animate-bounce">
-            <PartyPopper className="h-12 w-12 text-yellow-500 animate-pulse" />
-            <Sparkles className="h-8 w-8 text-pink-500 animate-spin" />
-            <PartyPopper className="h-12 w-12 text-blue-500 animate-pulse" />
+      {/* Welcome content with condensed layout */}
+      <div className="text-center space-y-4 relative z-20 p-4">
+        {/* Animated welcome title with gradient */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-2 animate-bounce">
+            <PartyPopper className="h-8 w-8 text-yellow-500 animate-pulse" />
+            <Sparkles className="h-6 w-6 text-pink-500 animate-spin" />
+            <PartyPopper className="h-8 w-8 text-blue-500 animate-pulse" />
           </div>
           
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent animate-fade-in">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-500 bg-clip-text text-transparent animate-fade-in">
             Welcome to {neighborhood?.name || "Your Neighborhood"}!
           </h1>
           
-          <div className="flex items-center justify-center gap-2">
-            <Heart className="h-6 w-6 text-red-500 animate-pulse" />
-            <p className="text-xl text-gray-700 font-medium animate-fade-in">
-              Your profile is all set up and ready to go!
-            </p>
-            <Heart className="h-6 w-6 text-red-500 animate-pulse" />
-          </div>
+          <p className="text-lg text-gray-700 font-medium animate-fade-in">
+            Your profile is all set up and ready to go!
+          </p>
         </div>
 
-        {/* Exciting community message with gradient background */}
-        <div className="space-y-6 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-200 shadow-lg transform hover:scale-105 transition-all duration-300">
-          <div className="flex items-center justify-center gap-3">
-            <Users className="h-8 w-8 text-blue-600 animate-bounce" />
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        {/* Compact community message with condensed grid */}
+        <div className="space-y-3 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200 shadow-lg transform hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-center gap-2">
+            <Users className="h-6 w-6 text-blue-600 animate-bounce" />
+            <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               You're now part of the community!
             </h2>
-            <Users className="h-8 w-8 text-purple-600 animate-bounce" />
           </div>
           
-          <div className="text-gray-800 space-y-4">
-            <p className="text-lg font-semibold text-blue-700">Here's what amazing things you can do next:</p>
-            <div className="grid grid-cols-1 gap-3 max-w-lg mx-auto">
-              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
-                <Users className="h-5 w-5 text-blue-500" />
-                <span className="font-medium">Connect with your neighbors</span>
+          <div className="text-gray-800 space-y-2">
+            <p className="font-semibold text-blue-700">Here's what you can do next:</p>
+            <div className="grid grid-cols-1 gap-2 max-w-sm mx-auto text-sm">
+              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
+                <Users className="h-4 w-4 text-blue-500" />
+                <span className="font-medium">Connect with neighbors</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
-                <Sparkles className="h-5 w-5 text-purple-500" />
+              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
+                <Sparkles className="h-4 w-4 text-purple-500" />
                 <span className="font-medium">Share and discover skills</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
-                <Gift className="h-5 w-5 text-green-500" />
+              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
+                <Gift className="h-4 w-4 text-green-500" />
                 <span className="font-medium">Exchange goods and services</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
-                <PartyPopper className="h-5 w-5 text-yellow-500" />
+              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
+                <PartyPopper className="h-4 w-4 text-yellow-500" />
                 <span className="font-medium">Join community events</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
-                <Shield className="h-5 w-5 text-red-500" />
-                <span className="font-medium">Contribute to neighborhood safety</span>
+              <div className="flex items-center gap-2 p-2 bg-white/70 rounded-lg transform hover:scale-105 transition-all duration-200">
+                <Shield className="h-4 w-4 text-red-500" />
+                <span className="font-medium">Contribute to safety</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Exciting get started button */}
-        <div className="pt-6">
+        {/* Compact get started button */}
+        <div className="pt-3">
           <Button 
             onClick={onGetStarted}
             size="lg"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 py-4 text-lg font-bold rounded-full shadow-lg transform hover:scale-110 transition-all duration-300 animate-pulse"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 text-lg font-bold rounded-full shadow-lg transform hover:scale-110 transition-all duration-300 animate-pulse"
           >
-            <Sparkles className="mr-2 h-5 w-5" />
+            <Sparkles className="mr-2 h-4 w-4" />
             Get Started
-            <PartyPopper className="ml-2 h-5 w-5" />
+            <PartyPopper className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
