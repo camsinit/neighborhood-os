@@ -9,7 +9,6 @@ export { useNotifications } from "./useNotifications";
 export { useNotificationsData } from "./useNotificationsData";
 export { useNotificationsRefresh } from "./useNotificationsRefresh";
 export { useNotificationsPopoverData } from "./useNotificationsPopoverData";
-export { useNotificationDensity } from "./useNotificationDensity";
 
 // Export the actions (consolidated utilities)
 export {

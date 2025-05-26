@@ -51,7 +51,7 @@ const NotificationsPopover = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[420px] p-0" align="end">
+      <PopoverContent className="w-[380px] p-0" align="end">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between px-4 py-2 border-b">
             <NotificationsHeader 
@@ -68,22 +68,25 @@ const NotificationsPopover = () => {
             </TabsTrigger>
           </TabsList>
           
-          {/* Increased height to fit more compact notifications */}
-          <div className="max-h-[500px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto">
             <TabsContent value="all" className="p-0 m-0">
-              <NotificationsList 
-                notifications={notifications} 
-                isLoading={isLoading} 
-                showDensityControl={true}
-              />
+              {groupedNotifications.length > 0 ? (
+                <div className="divide-y">
+                  {groupedNotifications.map((group, index) => (
+                    <NotificationGroup 
+                      key={index} 
+                      title={group.title} 
+                      notifications={group.notifications} 
+                    />
+                  ))}
+                </div>
+              ) : (
+                <NotificationsList notifications={notifications} isLoading={isLoading} />
+              )}
             </TabsContent>
             
             <TabsContent value="unread" className="p-0 m-0">
-              <NotificationsList 
-                notifications={unreadNotifications} 
-                isLoading={isLoading} 
-                showDensityControl={true}
-              />
+              <NotificationsList notifications={unreadNotifications} isLoading={isLoading} />
             </TabsContent>
           </div>
           
