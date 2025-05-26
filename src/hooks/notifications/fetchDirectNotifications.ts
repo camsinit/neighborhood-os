@@ -29,19 +29,21 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // SIMPLIFIED: With clean RLS, we can just query directly
-    // The RLS policy "users_own_notifications" handles access control
+    // FIXED: Remove the problematic join that was causing RLS issues
+    // Just query notifications directly - the RLS policy handles access
     const { data: notifications, error } = await supabase
       .from('notifications')
-      .select(`
-        *,
-        profiles:actor_id(id, display_name, avatar_url)
-      `)
+      .select('*')  // Remove the join for now
       .eq('is_archived', showArchived)
       .order('created_at', { ascending: false });
       
     if (error) {
-      logger.error('Error fetching notifications:', error);
+      logger.error('Error fetching notifications:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       return [];
     }
     
@@ -75,14 +77,11 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
   });
 
   return notifications.map(notification => {
-    // Extract profile data if available, provide fallbacks if not
-    const actorProfile = notification.profiles || {};
-    
     // Build a standardized context object from metadata
     const notificationContext = {
       contextType: notification.notification_type || 'general',
-      neighborName: actorProfile.display_name || "A neighbor",
-      avatarUrl: actorProfile.avatar_url || null,
+      neighborName: "A neighbor", // Default since we removed the join
+      avatarUrl: null, // Default since we removed the join
       ...(notification.metadata || {})
     };
     
@@ -104,7 +103,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       context: notificationContext,
       // Include additional fields for consistency with other notification types
       description: notification.description || null,
-      profiles: notification.profiles || null
+      profiles: null // Set to null since we removed the join
     };
   });
 };

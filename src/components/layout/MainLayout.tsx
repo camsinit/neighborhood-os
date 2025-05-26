@@ -2,7 +2,7 @@
 import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
-import LoggingControls from "@/components/debug/LoggingControls";
+import { DebugDashboard } from "@/components/debug/DebugDashboard";
 
 /**
  * MainLayout component props
@@ -17,7 +17,7 @@ interface MainLayoutProps {
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
- * - Debug logging controls for development
+ * - Debug dashboard for development
  * 
  * @param children - Content to render in the main area
  */
@@ -48,8 +48,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children}
         </main>
         
-        {/* Add the logging controls component */}
-        <LoggingControls />
+        {/* Add the debug dashboard - only shows in development */}
+        <DebugDashboard />
       </div>
     </div>
   );
