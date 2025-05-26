@@ -51,13 +51,14 @@ export const useSurveyState = () => {
   
   // Handle skills survey state changes
   const handleSkillsSurveyStateChange = (hasCompleted: boolean, hasSkills: boolean) => {
+    console.log('Skills survey state change:', { hasCompleted, hasSkills });
     setSkillsSurveyState({
       hasCompletedSurvey: hasCompleted,
       hasSelectedSkills: hasSkills,
     });
   };
   
-  // Check if current step is valid - updated to include skills survey validation
+  // Check if current step is valid - updated to make skills completion more flexible
   const isCurrentStepValid = () => {
     switch (currentStep) {
       case 0: // Basic Info
@@ -66,8 +67,10 @@ export const useSurveyState = () => {
         return validFields.email && validFields.phone && validFields.contactVisibility;
       case 2: // Address
         return validFields.address;
-      case 4: // Skills - require completion of mini-survey and at least one skill
-        return skillsSurveyState.hasCompletedSurvey && skillsSurveyState.hasSelectedSkills;
+      case 3: // Profile Photo - optional step
+        return true;
+      case 4: // Skills - only require completion of mini-survey (skills selection is optional)
+        return skillsSurveyState.hasCompletedSurvey;
       default:
         return true;
     }

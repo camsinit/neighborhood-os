@@ -34,9 +34,10 @@ export const SurveyNavigation = ({
   
   // Determine if the next button should be disabled
   const isNextDisabled = () => {
-    // For skills step, require completion of mini-survey and at least one skill selected
+    // For skills step, only require completion of mini-survey (skills selection is optional)
     if (isSkillsStep) {
-      return !hasCompletedSkillsSurvey || !hasSelectedSkills;
+      console.log('Skills step validation:', { hasCompletedSkillsSurvey, hasSelectedSkills });
+      return !hasCompletedSkillsSurvey;
     }
     
     // For other steps that require validation (steps 0-2), use the existing validation
@@ -47,6 +48,15 @@ export const SurveyNavigation = ({
     // For steps that don't require validation, allow progression
     return false;
   };
+
+  const buttonDisabled = isNextDisabled();
+  console.log('Navigation button state:', { 
+    currentStep, 
+    isSkillsStep, 
+    hasCompletedSkillsSurvey, 
+    hasSelectedSkills, 
+    buttonDisabled 
+  });
 
   return (
     <div className="flex justify-between pt-2">
@@ -63,7 +73,7 @@ export const SurveyNavigation = ({
       {/* Next/Complete button - validation applies based on step requirements */}
       <Button
         onClick={onNext}
-        disabled={isNextDisabled()}
+        disabled={buttonDisabled}
       >
         {currentStep < totalSteps - 1 ? (
           <>

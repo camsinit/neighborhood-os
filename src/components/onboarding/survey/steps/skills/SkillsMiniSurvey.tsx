@@ -68,6 +68,27 @@ export const SkillsMiniSurvey = ({
   const totalSteps = categoryKeys.length + 1; // categories + summary
   const isOnSummary = currentStep === categoryKeys.length;
 
+  // Update survey completion state whenever currentStep changes
+  useEffect(() => {
+    const isCompleted = isOnSummary;
+    const hasSkills = skillsWithDetails.length > 0;
+    
+    console.log('Skills mini-survey state update:', { 
+      currentStep, 
+      isOnSummary, 
+      isCompleted, 
+      hasSkills, 
+      skillsCount: skillsWithDetails.length 
+    });
+    
+    setHasCompletedSurvey(isCompleted);
+    
+    // Notify parent component of survey state changes
+    if (onSurveyStateChange) {
+      onSurveyStateChange(isCompleted, hasSkills);
+    }
+  }, [currentStep, isOnSummary, skillsWithDetails.length, onSurveyStateChange]);
+
   // Notify parent component of mini-survey progress changes
   useEffect(() => {
     if (onMiniSurveyProgress) {
@@ -188,11 +209,6 @@ export const SkillsMiniSurvey = ({
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
       setShowCustomInput(false); // Reset custom input when moving to next step
-      
-      // If moving to summary step, mark as completed
-      if (currentStep === totalSteps - 2) {
-        setHasCompletedSurvey(true);
-      }
     }
   };
 
@@ -211,7 +227,7 @@ export const SkillsMiniSurvey = ({
         <div className="text-center space-y-1">
           <h3 className="text-lg font-semibold">Skills Summary</h3>
           <p className="text-xs text-muted-foreground">
-            Review your selected skills. You can go back to make changes if needed.
+            Review your selected skills. You can go back to make changes or continue to complete the onboarding.
           </p>
         </div>
 
@@ -255,7 +271,7 @@ export const SkillsMiniSurvey = ({
             Back
           </Button>
           <div className="text-xs text-muted-foreground">
-            Step {currentStep + 1} of {totalSteps}
+            Step {currentStep + 1} of {totalSteps} - Complete!
           </div>
           <div className="w-16" /> {/* Spacer for layout balance */}
         </div>
