@@ -1265,6 +1265,12 @@ export type Database = {
           needs_visible: boolean
         }[]
       }
+      get_user_accessible_neighborhoods: {
+        Args: { user_uuid: string }
+        Returns: {
+          neighborhood_id: string
+        }[]
+      }
       get_user_current_neighborhood: {
         Args: { user_uuid: string }
         Returns: string

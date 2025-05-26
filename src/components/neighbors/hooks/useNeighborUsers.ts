@@ -7,7 +7,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Now works with clean RLS policies - much simpler queries!
+ * UPDATED: Now works with simplified RLS policies - uses view that handles access control
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -33,8 +33,7 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // SIMPLIFIED: With clean RLS, we can query the view directly
-        // The RLS policies handle access control automatically
+        // UPDATED: Use the view directly - it should handle access through the user's membership
         const { data: neighborsData, error } = await supabase
           .from('neighborhood_members_with_profiles')
           .select('*')
@@ -51,12 +50,12 @@ export const useNeighborUsers = () => {
           neighborhoodId: currentNeighborhood.id
         });
         
-        // Get auth details (emails) for the users
-        const userIds = neighborsData?.map(n => n.user_id) || [];
-        
-        if (userIds.length === 0) {
+        // Get auth details (emails) for the users - only if we have neighbors
+        if (!neighborsData || neighborsData.length === 0) {
           return [];
         }
+
+        const userIds = neighborsData.map(n => n.user_id);
         
         const { data: authUsers, error: authError } = await supabase
           .from('auth_users_view')
@@ -65,7 +64,7 @@ export const useNeighborUsers = () => {
           
         if (authError) {
           console.error("[useNeighborUsers] Error fetching auth users:", authError);
-          throw authError;
+          // Continue without auth data rather than failing completely
         }
         
         // Transform data into expected format
@@ -74,7 +73,7 @@ export const useNeighborUsers = () => {
           
           return {
             id: neighbor.user_id,
-            email: authUser?.email,
+            email: authUser?.email || 'Unknown',
             created_at: authUser?.created_at,
             roles: ['user'], // Default role
             profiles: {

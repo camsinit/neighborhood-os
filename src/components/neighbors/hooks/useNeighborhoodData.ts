@@ -14,7 +14,7 @@ interface Neighborhood {
 /**
  * Custom hook to fetch and manage a user's neighborhoods
  * 
- * SIMPLIFIED: With clean RLS, we can query directly without security definer functions
+ * UPDATED: Now works with simplified RLS policies using security definer function
  */
 export function useNeighborhoodData() {
   const user = useUser();
@@ -42,61 +42,41 @@ export function useNeighborhoodData() {
         
         console.log("[useNeighborhoodData] Fetching neighborhoods for user:", user.id);
         
-        // SIMPLIFIED: With clean RLS, just query the neighborhoods directly
-        // Check neighborhoods created by user
-        const { data: createdNeighborhoods, error: createdError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, created_at')
-          .eq('created_by', user.id);
+        // UPDATED: Use the new security definer function
+        const { data: accessibleNeighborhoods, error: accessError } = await supabase
+          .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
 
-        if (createdError) {
-          console.warn("[useNeighborhoodData] Error checking created neighborhoods:", createdError);
+        if (accessError) {
+          console.warn("[useNeighborhoodData] Error getting accessible neighborhoods:", accessError);
+          throw accessError;
         }
-        
-        // Check neighborhoods where user is a member
-        const { data: membershipData, error: membershipError } = await supabase
-          .from('neighborhood_members')
-          .select(`
-            neighborhood_id,
-            joined_at,
-            neighborhoods:neighborhood_id(id, name)
-          `)
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+
+        if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
+          // Get details for all accessible neighborhoods
+          const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
           
-        if (membershipError) {
-          console.warn("[useNeighborhoodData] Error checking memberships:", membershipError);
+          const { data: neighborhoodDetails, error: detailsError } = await supabase
+            .from('neighborhoods')
+            .select('id, name, created_at')
+            .in('id', neighborhoodIds);
+
+          if (detailsError) {
+            console.warn("[useNeighborhoodData] Error getting neighborhood details:", detailsError);
+            throw detailsError;
+          }
+
+          // Transform the data to match our interface
+          const allNeighborhoods: Neighborhood[] = neighborhoodDetails?.map(n => ({
+            id: n.id,
+            name: n.name,
+            joined_at: n.created_at
+          })) || [];
+          
+          setNeighborhoods(allNeighborhoods);
+        } else {
+          setNeighborhoods([]);
         }
         
-        // Combine results
-        const allNeighborhoods: Neighborhood[] = [];
-        
-        // Add created neighborhoods
-        if (createdNeighborhoods) {
-          createdNeighborhoods.forEach(n => {
-            allNeighborhoods.push({
-              id: n.id,
-              name: n.name,
-              joined_at: n.created_at
-            });
-          });
-        }
-        
-        // Add member neighborhoods (avoid duplicates)
-        if (membershipData) {
-          membershipData.forEach((m: any) => {
-            const neighborhood = m.neighborhoods;
-            if (neighborhood && !allNeighborhoods.find(n => n.id === neighborhood.id)) {
-              allNeighborhoods.push({
-                id: neighborhood.id,
-                name: neighborhood.name,
-                joined_at: m.joined_at
-              });
-            }
-          });
-        }
-        
-        setNeighborhoods(allNeighborhoods);
       } catch (err: any) {
         console.error("[useNeighborhoodData] Error fetching neighborhoods:", err);
         setError(err instanceof Error ? err : new Error(err.message || 'Unknown error'));

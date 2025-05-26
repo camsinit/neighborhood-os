@@ -3,7 +3,7 @@
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
  * 
- * UPDATED: Now works with clean RLS policies - much simpler!
+ * UPDATED: Now works with simplified RLS policies - much cleaner!
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
@@ -15,7 +15,7 @@ const logger = createLogger('fetchDirectNotifications');
 /**
  * Fetch direct notifications from the dedicated notifications table
  * 
- * With our new clean RLS, this is much simpler - just query notifications
+ * With our new simplified RLS, this is much simpler - just query notifications
  * and the RLS policy handles access control automatically
  * 
  * @param showArchived - Whether to include archived notifications
@@ -29,11 +29,10 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // FIXED: Remove the problematic join that was causing RLS issues
-    // Just query notifications directly - the RLS policy handles access
+    // UPDATED: With simplified RLS, just query notifications directly
     const { data: notifications, error } = await supabase
       .from('notifications')
-      .select('*')  // Remove the join for now
+      .select('*')
       .eq('is_archived', showArchived)
       .order('created_at', { ascending: false });
       
@@ -80,8 +79,8 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
     // Build a standardized context object from metadata
     const notificationContext = {
       contextType: notification.notification_type || 'general',
-      neighborName: "A neighbor", // Default since we removed the join
-      avatarUrl: null, // Default since we removed the join
+      neighborName: "A neighbor", // Default since we simplified the policies
+      avatarUrl: null, // Default since we simplified the policies
       ...(notification.metadata || {})
     };
     
@@ -103,7 +102,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       context: notificationContext,
       // Include additional fields for consistency with other notification types
       description: notification.description || null,
-      profiles: null // Set to null since we removed the join
+      profiles: null // Set to null since we simplified the policies
     };
   });
 };
