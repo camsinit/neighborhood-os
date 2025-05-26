@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useFormSubmission } from "@/hooks/useFormSubmission";
 import SurveyDialog from "./SurveyDialog";
 
 /**
@@ -11,6 +12,7 @@ import SurveyDialog from "./SurveyDialog";
  * 
  * A dialog that displays when a user needs to complete onboarding.
  * It wraps the survey dialog and handles the completion of onboarding.
+ * Now includes form submission logic with proper data persistence.
  * 
  * When used in test mode, it bypasses the database update.
  */
@@ -29,10 +31,13 @@ const OnboardingDialog = ({
   const { toast } = useToast();
   const user = useUser();
   
+  // Get form submission hook
+  const { submitForm, submissionState } = useFormSubmission();
+  
   // Handle completion of onboarding
-  const handleOnboardingComplete = async () => {
+  const handleOnboardingComplete = async (formData: any) => {
     try {
-      // Skip database update if in test mode
+      // Skip form submission if in test mode
       if (isTestMode) {
         // Show test mode completion toast
         toast({
@@ -45,26 +50,15 @@ const OnboardingDialog = ({
         return;
       }
       
-      // Normal operation - update database
-      if (!user) return;
+      // Normal operation - submit form data
+      const success = await submitForm(formData);
       
-      // Mark onboarding as completed in the profiles table
-      const { error } = await supabase
-        .from("profiles")
-        .update({ completed_onboarding: true })
-        .eq("id", user.id);
-        
-      if (error) throw error;
-      
-      // Show success toast
-      toast({
-        title: "Profile setup complete!",
-        description: "Your neighborhood profile is now set up.",
-      });
-      
-      // Close dialog and navigate to home
-      onOpenChange(false);
-      navigate("/home");
+      if (success) {
+        // Close dialog and navigate to home
+        onOpenChange(false);
+        navigate("/home");
+      }
+      // Error handling is done in the submitForm function
     } catch (error: any) {
       console.error("Error completing onboarding:", error);
       
@@ -82,7 +76,8 @@ const OnboardingDialog = ({
       open={open} 
       onOpenChange={onOpenChange} 
       onComplete={handleOnboardingComplete} 
-      isTestMode={isTestMode} // Pass test mode status to survey dialog
+      isTestMode={isTestMode}
+      submissionState={submissionState}
     />
   );
 };

@@ -7,13 +7,13 @@ import { SurveyFormData } from "../types/surveyTypes";
  * 
  * Centralizes all survey state management including form data, validation,
  * current step tracking, and step validation logic.
- * Now includes skills survey completion tracking.
+ * Now includes skills survey completion tracking and new profile fields.
  */
 export const useSurveyState = () => {
   // Current step index
   const [currentStep, setCurrentStep] = useState(0);
   
-  // Form data state
+  // Form data state with enhanced fields
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
@@ -21,9 +21,17 @@ export const useSurveyState = () => {
     phone: "",
     address: "",
     skills: [],
+    // New fields with defaults
+    profileImage: undefined,
+    bio: "",
+    emailVisible: true, // Default to visible
+    phoneVisible: false,
+    addressVisible: false,
+    skillAvailability: "",
+    skillTimePreferences: [],
   });
   
-  // Field validation state - updated to include contact visibility
+  // Field validation state - updated to include new fields
   const [validFields, setValidFields] = useState<Record<string, boolean>>({
     firstName: false,
     lastName: false,
@@ -31,6 +39,9 @@ export const useSurveyState = () => {
     phone: false,
     address: false,
     contactVisibility: true, // Default to true since email is checked by default
+    profileImage: true, // Optional field
+    bio: true, // Optional field
+    skillAvailability: true, // Optional field
   });
   
   // Skills survey completion state

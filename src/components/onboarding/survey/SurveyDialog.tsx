@@ -7,6 +7,8 @@ import { SurveyNavigation } from "./SurveyNavigation";
 import { useSurveyState } from "./hooks/useSurveyState";
 import { WelcomeScreen } from "../WelcomeScreen";
 import { useState } from "react";
+import { FormSubmissionState } from "./types/surveyTypes";
+import { Progress } from "@/components/ui/progress";
 
 /**
  * SurveyDialog component
@@ -15,12 +17,14 @@ import { useState } from "react";
  * Now refactored into smaller, focused components for better maintainability.
  * Includes skills survey validation to ensure users complete the mini-survey.
  * Shows a welcome screen with confetti after completion.
+ * Now includes form submission progress tracking.
  */
 interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onComplete?: () => void;
+  onComplete?: (formData: any) => void;
   isTestMode?: boolean;
+  submissionState?: FormSubmissionState;
 }
 
 // Define the survey steps
@@ -46,7 +50,8 @@ const SurveyDialog = ({
   open, 
   onOpenChange, 
   onComplete,
-  isTestMode = false
+  isTestMode = false,
+  submissionState
 }: SurveyDialogProps) => {
   // Track if survey is completed and showing welcome screen
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
@@ -67,7 +72,7 @@ const SurveyDialog = ({
   // Track skills mini-survey progress for progress bar calculation
   const [skillsMiniSurveyProgress, setSkillsMiniSurveyProgress] = useState({
     currentStep: 0,
-    totalSteps: 7, // 6 categories + 1 summary
+    totalSteps: 7, // 6 categories + 1 availability + 1 summary
     hasCompleted: false,
   });
   
@@ -82,12 +87,16 @@ const SurveyDialog = ({
   
   // Handle survey completion - show welcome screen first
   const handleSurveyComplete = () => {
+    // Pass form data to completion handler
+    onComplete?.(formData);
     setShowWelcomeScreen(true);
   };
   
   // Handle final completion when user clicks "Get Started" from welcome screen
   const handleFinalComplete = () => {
-    onComplete?.();
+    // This is called after the welcome screen, form data was already submitted
+    setShowWelcomeScreen(false);
+    onOpenChange(false);
   };
   
   // Handle dialog close request
@@ -95,6 +104,11 @@ const SurveyDialog = ({
     // If test mode, allow closing without warning
     if (isTestMode) {
       onOpenChange(open);
+      return;
+    }
+    
+    // Don't allow closing during submission
+    if (submissionState?.isSubmitting) {
       return;
     }
     
@@ -139,6 +153,20 @@ const SurveyDialog = ({
           </div>
         )}
         
+        {/* Submission progress overlay */}
+        {submissionState?.isSubmitting && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-lg">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Setting up your profile...</p>
+                <Progress value={submissionState.progress} className="w-64" />
+                <p className="text-xs text-gray-500">{submissionState.progress}% complete</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Survey header */}
         <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
         
@@ -171,6 +199,7 @@ const SurveyDialog = ({
           isSkillsStep={currentStep === 4}
           hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
           hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
+          disabled={submissionState?.isSubmitting}
         />
       </DialogContent>
     </Dialog>

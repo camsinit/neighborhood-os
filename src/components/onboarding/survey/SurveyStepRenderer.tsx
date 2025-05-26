@@ -12,7 +12,7 @@ import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
  * 
  * Handles rendering the appropriate step component based on the current step index.
  * This component encapsulates all the step-specific logic and props passing.
- * Now tracks skills survey completion state for navigation validation.
+ * Now tracks skills survey completion state and availability preferences for navigation validation.
  */
 interface SurveyStepRendererProps {
   currentStep: number;
@@ -31,6 +31,18 @@ export const SurveyStepRenderer = ({
   onSkillsSurveyStateChange,
   onSkillsMiniSurveyProgress,
 }: SurveyStepRendererProps) => {
+  
+  // Handle availability and time preferences changes from skills step
+  const handleAvailabilityChange = (availability: string, timePreferences: string[]) => {
+    handleChange("skillAvailability", availability);
+    handleChange("skillTimePreferences", timePreferences);
+  };
+
+  // Handle profile image change
+  const handleProfileImageChange = (file: File | null) => {
+    handleChange("profileImage", file);
+  };
+
   // Render the appropriate step component based on current step
   switch (currentStep) {
     case 0:
@@ -65,7 +77,11 @@ export const SurveyStepRenderer = ({
       );
     
     case 3:
-      return <ProfileImageStep />;
+      return (
+        <ProfileImageStep 
+          onImageChange={handleProfileImageChange}
+        />
+      );
     
     case 4:
       return (
@@ -74,6 +90,7 @@ export const SurveyStepRenderer = ({
           onSkillsChange={(value) => handleChange("skills", value)}
           onSurveyStateChange={onSkillsSurveyStateChange}
           onMiniSurveyProgress={onSkillsMiniSurveyProgress}
+          onAvailabilityChange={handleAvailabilityChange}
         />
       );
     

@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
  * Handles the navigation buttons (Back/Next/Complete) for the survey steps.
  * Includes validation logic to determine when navigation should be enabled.
  * Now includes special validation for skills step to ensure users complete the mini-survey.
+ * Can be disabled during form submission.
  */
 interface SurveyNavigationProps {
   currentStep: number;
@@ -19,6 +20,7 @@ interface SurveyNavigationProps {
   isSkillsStep?: boolean;
   hasCompletedSkillsSurvey?: boolean;
   hasSelectedSkills?: boolean;
+  disabled?: boolean; // New prop to disable during submission
 }
 
 export const SurveyNavigation = ({
@@ -30,10 +32,14 @@ export const SurveyNavigation = ({
   isSkillsStep = false,
   hasCompletedSkillsSurvey = false,
   hasSelectedSkills = false,
+  disabled = false,
 }: SurveyNavigationProps) => {
   
   // Determine if the next button should be disabled
   const isNextDisabled = () => {
+    // Disable if form is being submitted
+    if (disabled) return true;
+    
     // For skills step, only require completion of mini-survey (skills selection is optional)
     if (isSkillsStep) {
       console.log('Skills step validation:', { hasCompletedSkillsSurvey, hasSelectedSkills });
@@ -55,16 +61,17 @@ export const SurveyNavigation = ({
     isSkillsStep, 
     hasCompletedSkillsSurvey, 
     hasSelectedSkills, 
-    buttonDisabled 
+    buttonDisabled,
+    disabled 
   });
 
   return (
     <div className="flex justify-between pt-2">
-      {/* Back button - disabled on first step */}
+      {/* Back button - disabled on first step or during submission */}
       <Button
         variant="outline"
         onClick={onPrevious}
-        disabled={currentStep === 0}
+        disabled={currentStep === 0 || disabled}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
@@ -82,7 +89,7 @@ export const SurveyNavigation = ({
           </>
         ) : (
           <>
-            Complete
+            Complete Setup
             <Check className="ml-2 h-4 w-4" />
           </>
         )}
