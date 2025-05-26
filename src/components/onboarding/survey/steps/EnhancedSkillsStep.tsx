@@ -20,9 +20,7 @@ export const EnhancedSkillsStep = ({
   return <div className="space-y-6">
       {/* Introduction text */}
       <div className="text-center space-y-2">
-        <p className="text-sm text-muted-foreground">
-          Share your skills and expertise with your neighborhood community.
-        </p>
+        
         
       </div>
 
