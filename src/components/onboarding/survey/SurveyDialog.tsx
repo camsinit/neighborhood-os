@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SurveyStepHeader } from "./SurveyStepHeader";
 import { SurveyProgress } from "./SurveyProgress";
@@ -85,9 +84,9 @@ const SurveyDialog = ({
     });
   };
   
-  // Handle survey completion - show welcome screen first
+  // Handle survey completion - pass form data to completion handler
   const handleSurveyComplete = () => {
-    // Pass form data to completion handler
+    // Pass form data to completion handler immediately
     onComplete?.(formData);
     setShowWelcomeScreen(true);
   };
