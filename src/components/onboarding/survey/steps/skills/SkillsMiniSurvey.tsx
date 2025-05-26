@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,6 +13,7 @@ import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
  * 
  * This component creates a condensed mini-survey experience within the Skills & Interests step,
  * optimized for better space utilization and visibility of all UI elements.
+ * Now tracks completion state to enable proper navigation validation.
  */
 
 interface SelectedSkill {
@@ -24,9 +24,14 @@ interface SelectedSkill {
 interface SkillsMiniSurveyProps {
   selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
+  onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
 }
 
-export const SkillsMiniSurvey = ({ selectedSkills, onSkillsChange }: SkillsMiniSurveyProps) => {
+export const SkillsMiniSurvey = ({ 
+  selectedSkills, 
+  onSkillsChange, 
+  onSurveyStateChange 
+}: SkillsMiniSurveyProps) => {
   // Convert selectedSkills prop to internal format for easier manipulation
   const [skillsWithDetails, setSkillsWithDetails] = useState<SelectedSkill[]>(() => {
     return selectedSkills.map(skill => {
@@ -37,6 +42,9 @@ export const SkillsMiniSurvey = ({ selectedSkills, onSkillsChange }: SkillsMiniS
 
   // Current category step (0-5: categories, 6: summary)
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Track if user has completed the mini-survey (reached the summary step)
+  const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
   
   // Dialog state for special skills that require additional details
   const [specialSkillDialog, setSpecialSkillDialog] = useState<{
@@ -57,6 +65,12 @@ export const SkillsMiniSurvey = ({ selectedSkills, onSkillsChange }: SkillsMiniS
   const categoryKeys = Object.keys(SKILL_CATEGORIES);
   const totalSteps = categoryKeys.length + 1; // categories + summary
   const isOnSummary = currentStep === categoryKeys.length;
+
+  // Notify parent component of survey state changes
+  useEffect(() => {
+    const hasSkills = skillsWithDetails.length > 0;
+    onSurveyStateChange?.(hasCompletedSurvey, hasSkills);
+  }, [hasCompletedSurvey, skillsWithDetails, onSurveyStateChange]);
 
   /**
    * Update parent component with formatted skills array
@@ -171,6 +185,11 @@ export const SkillsMiniSurvey = ({ selectedSkills, onSkillsChange }: SkillsMiniS
     if (currentStep < totalSteps - 1) {
       setCurrentStep(prev => prev + 1);
       setShowCustomInput(false); // Reset custom input when moving to next step
+      
+      // If moving to summary step, mark as completed
+      if (currentStep === totalSteps - 2) {
+        setHasCompletedSurvey(true);
+      }
     }
   };
 
@@ -197,7 +216,7 @@ export const SkillsMiniSurvey = ({ selectedSkills, onSkillsChange }: SkillsMiniS
         {skillsWithDetails.length > 0 ? (
           <div className="space-y-3">
             <div className="text-center">
-              <Badge variant="success" className="text-xs px-2 py-1">
+              <Badge variant="secondary" className="text-xs px-2 py-1">
                 {skillsWithDetails.length} skills selected
               </Badge>
             </div>

@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { SurveyFormData } from "./types/surveyTypes";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { ContactInfoStep } from "./steps/ContactInfoStep";
@@ -11,12 +12,14 @@ import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
  * 
  * Handles rendering the appropriate step component based on the current step index.
  * This component encapsulates all the step-specific logic and props passing.
+ * Now tracks skills survey completion state for navigation validation.
  */
 interface SurveyStepRendererProps {
   currentStep: number;
   formData: SurveyFormData;
   handleChange: (field: keyof SurveyFormData, value: any) => void;
   handleValidation: (field: string, isValid: boolean) => void;
+  onSkillsSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
 }
 
 export const SurveyStepRenderer = ({
@@ -24,6 +27,7 @@ export const SurveyStepRenderer = ({
   formData,
   handleChange,
   handleValidation,
+  onSkillsSurveyStateChange,
 }: SurveyStepRendererProps) => {
   // Render the appropriate step component based on current step
   switch (currentStep) {
@@ -66,6 +70,7 @@ export const SurveyStepRenderer = ({
         <EnhancedSkillsStep
           selectedSkills={formData.skills}
           onSkillsChange={(value) => handleChange("skills", value)}
+          onSurveyStateChange={onSkillsSurveyStateChange}
         />
       );
     

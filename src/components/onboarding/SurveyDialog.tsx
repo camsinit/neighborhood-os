@@ -11,6 +11,7 @@ import { useSurveyState } from "./survey/hooks/useSurveyState";
  * 
  * A multi-step survey dialog that collects user information during onboarding.
  * Now refactored into smaller, focused components for better maintainability.
+ * Includes skills survey validation to ensure users complete the mini-survey.
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -48,8 +49,10 @@ const SurveyDialog = ({
   const {
     currentStep,
     formData,
+    skillsSurveyState,
     handleChange,
-    handleValidation, // Get validation handler from hook
+    handleValidation,
+    handleSkillsSurveyStateChange,
     isCurrentStepValid,
     handleNext,
     handlePrevious,
@@ -98,7 +101,8 @@ const SurveyDialog = ({
             currentStep={currentStep}
             formData={formData}
             handleChange={handleChange}
-            handleValidation={handleValidation} // Pass validation handler
+            handleValidation={handleValidation}
+            onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
           />
         </div>
         
@@ -109,6 +113,9 @@ const SurveyDialog = ({
           isCurrentStepValid={isCurrentStepValid()}
           onPrevious={handlePrevious}
           onNext={() => handleNext(onComplete, steps.length)}
+          isSkillsStep={currentStep === 4}
+          hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
+          hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
         />
       </DialogContent>
     </Dialog>

@@ -7,6 +7,7 @@ import { SurveyFormData } from "../types/surveyTypes";
  * 
  * Centralizes all survey state management including form data, validation,
  * current step tracking, and step validation logic.
+ * Now includes skills survey completion tracking.
  */
 export const useSurveyState = () => {
   // Current step index
@@ -32,6 +33,12 @@ export const useSurveyState = () => {
     contactVisibility: true, // Default to true since email is checked by default
   });
   
+  // Skills survey completion state
+  const [skillsSurveyState, setSkillsSurveyState] = useState({
+    hasCompletedSurvey: false,
+    hasSelectedSkills: false,
+  });
+  
   // Handle form field changes
   const handleChange = (field: keyof SurveyFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -42,7 +49,15 @@ export const useSurveyState = () => {
     setValidFields((prev) => ({ ...prev, [field]: isValid }));
   };
   
-  // Check if current step is valid - updated to include contact visibility validation
+  // Handle skills survey state changes
+  const handleSkillsSurveyStateChange = (hasCompleted: boolean, hasSkills: boolean) => {
+    setSkillsSurveyState({
+      hasCompletedSurvey: hasCompleted,
+      hasSelectedSkills: hasSkills,
+    });
+  };
+  
+  // Check if current step is valid - updated to include skills survey validation
   const isCurrentStepValid = () => {
     switch (currentStep) {
       case 0: // Basic Info
@@ -51,6 +66,8 @@ export const useSurveyState = () => {
         return validFields.email && validFields.phone && validFields.contactVisibility;
       case 2: // Address
         return validFields.address;
+      case 4: // Skills - require completion of mini-survey and at least one skill
+        return skillsSurveyState.hasCompletedSurvey && skillsSurveyState.hasSelectedSkills;
       default:
         return true;
     }
@@ -77,8 +94,10 @@ export const useSurveyState = () => {
     currentStep,
     formData,
     validFields,
+    skillsSurveyState,
     handleChange,
     handleValidation,
+    handleSkillsSurveyStateChange,
     isCurrentStepValid,
     handleNext,
     handlePrevious,

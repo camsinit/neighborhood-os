@@ -6,13 +6,19 @@ import { SkillsMiniSurvey } from "./skills/SkillsMiniSurvey";
  * 
  * This component now uses a mini-survey approach where users progress
  * through each skill category one at a time, with a summary at the end.
+ * It tracks completion state and selected skills for navigation validation.
  */
 interface EnhancedSkillsStepProps {
   selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
+  onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
 }
 
-export const EnhancedSkillsStep = ({ selectedSkills, onSkillsChange }: EnhancedSkillsStepProps) => {
+export const EnhancedSkillsStep = ({ 
+  selectedSkills, 
+  onSkillsChange,
+  onSurveyStateChange 
+}: EnhancedSkillsStepProps) => {
   return (
     <div className="space-y-6">
       {/* Introduction text */}
@@ -29,6 +35,7 @@ export const EnhancedSkillsStep = ({ selectedSkills, onSkillsChange }: EnhancedS
       <SkillsMiniSurvey 
         selectedSkills={selectedSkills}
         onSkillsChange={onSkillsChange}
+        onSurveyStateChange={onSurveyStateChange}
       />
     </div>
   );
