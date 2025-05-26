@@ -10,10 +10,24 @@ import { createLogger } from "@/utils/logger";
 
 const logger = createLogger('RLS-Diagnostics');
 
+// Define valid table names that we can test
+type TestableTable = 
+  | 'profiles'
+  | 'user_roles' 
+  | 'neighborhoods'
+  | 'neighborhood_members'
+  | 'notifications'
+  | 'activities'
+  | 'events'
+  | 'event_rsvps'
+  | 'skills_exchange'
+  | 'goods_exchange'
+  | 'safety_updates';
+
 /**
  * Test RLS access for a specific table and operation
  */
-export const testTableAccess = async (tableName: string, operation: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' = 'SELECT') => {
+export const testTableAccess = async (tableName: TestableTable, operation: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' = 'SELECT') => {
   const startTime = Date.now();
   
   try {
@@ -32,18 +46,18 @@ export const testTableAccess = async (tableName: string, operation: 'SELECT' | '
       return { success: false, error: 'Authentication failed', duration: Date.now() - startTime };
     }
 
-    // Test the actual table access
+    // Test the actual table access - using type assertion to handle dynamic table names
     let result;
     switch (operation) {
       case 'SELECT':
-        result = await supabase.from(tableName).select('*').limit(1);
+        result = await (supabase.from as any)(tableName).select('*').limit(1);
         break;
       case 'INSERT':
         // We won't actually insert, just test the query structure
-        result = await supabase.from(tableName).select('*').limit(0);
+        result = await (supabase.from as any)(tableName).select('*').limit(0);
         break;
       default:
-        result = await supabase.from(tableName).select('*').limit(1);
+        result = await (supabase.from as any)(tableName).select('*').limit(1);
     }
 
     const duration = Date.now() - startTime;
@@ -85,7 +99,7 @@ export const testTableAccess = async (tableName: string, operation: 'SELECT' | '
 export const runFullRLSDiagnostics = async () => {
   logger.info('=== Starting Full RLS Diagnostics ===');
   
-  const tables = [
+  const tables: TestableTable[] = [
     'profiles',
     'user_roles', 
     'neighborhoods',
