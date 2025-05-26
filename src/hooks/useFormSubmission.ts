@@ -137,6 +137,7 @@ export const useFormSubmission = () => {
 
     try {
       const profileData = {
+        id: user.id, // Include the required id field
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
         bio: formData.bio || null,
         phone_number: formData.phone || null,
@@ -149,9 +150,13 @@ export const useFormSubmission = () => {
         completed_onboarding: true,
       };
 
+      // Use upsert with proper conflict resolution
       const { error } = await supabase
         .from('profiles')
-        .upsert(profileData, { onConflict: 'id' });
+        .upsert(profileData, { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        });
 
       if (error) throw error;
     } catch (error) {

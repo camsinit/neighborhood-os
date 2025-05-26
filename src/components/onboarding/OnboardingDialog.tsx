@@ -34,7 +34,7 @@ const OnboardingDialog = ({
   // Get form submission hook
   const { submitForm, submissionState } = useFormSubmission();
   
-  // Handle completion of onboarding
+  // Handle completion of onboarding - now expects formData parameter
   const handleOnboardingComplete = async (formData: any) => {
     try {
       // Skip form submission if in test mode
