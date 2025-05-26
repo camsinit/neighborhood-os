@@ -18,7 +18,7 @@ interface SurveyDialogProps {
   isTestMode?: boolean;
 }
 
-// Define the survey steps - updated to match the actual survey flow
+// Define the survey steps - updated to reflect the enhanced skills section
 const steps = [
   {
     title: "Basic Information",
@@ -33,7 +33,7 @@ const steps = [
     title: "Profile Photo",
   },
   {
-    title: "Skills & Interests",
+    title: "Skills & Expertise", // Updated title to reflect enhanced capabilities
   },
 ];
 

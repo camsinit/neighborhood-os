@@ -1,14 +1,26 @@
 
+/**
+ * Comprehensive skill categories for the neighborhood dashboard
+ * 
+ * This file defines six main categories of skills that neighbors can offer,
+ * along with special skills that require additional details from users.
+ */
+
 export const SKILL_CATEGORIES = {
   technology: {
     title: "Technology",
     skills: [
-      "Web Development",
-      "Mobile App Development",
-      "IT Support",
-      "Cybersecurity",
-      "Data Analysis",
-      "Digital Marketing"
+      "Website Help",
+      "Smartphone/Tablet Help", 
+      "Computer Troubleshooting",
+      "Internet Safety",
+      "Computer/Device Repair",
+      "Smart Home Setup",
+      "WiFi Network Setup",
+      "Video Call Help",
+      "Internet Account Help",
+      "Photo Organization",
+      "Data Backup & Recovery"
     ],
   },
   emergency: {
@@ -19,6 +31,8 @@ export const SKILL_CATEGORIES = {
       "Emergency Response Training",
       "Search and Rescue Experience",
       "Fire Safety Training",
+      "Crisis Management",
+      "Disaster Preparedness"
     ],
   },
   professional: {
@@ -26,9 +40,12 @@ export const SKILL_CATEGORIES = {
     skills: [
       "Legal Knowledge",
       "Financial/Accounting",
-      "IT/Technical Support",
-      "Mental Health (Counselor, Therapist)",
-      "Language Translation/Interpretation",
+      "Tax Preparation",
+      "Mental Health Support",
+      "Language Translation",
+      "Resume/Job Search Help",
+      "Business Consulting",
+      "Notary Public"
     ],
   },
   maintenance: {
@@ -38,17 +55,80 @@ export const SKILL_CATEGORIES = {
       "Electrical Work",
       "Plumbing",
       "Car Maintenance/Repair",
-      "Solar/Alternative Energy Knowledge",
+      "Solar/Alternative Energy",
       "Gardening/Landscaping",
+      "Furniture Repair",
+      "Painting",
+      "Yard Work"
     ],
   },
   care: {
     title: "Care & Support",
     skills: [
-      "Childcare/Education",
+      "Childcare",
+      "Pet Care",
       "Elder Care",
-      "Pet Care/Veterinary",
       "Cooking/Meal Preparation",
+      "Grocery Shopping",
+      "Transportation",
+      "House Sitting",
+      "Pet Sitting"
     ],
   },
+  education: {
+    title: "Education & Arts",
+    skills: [
+      "Tutoring",
+      "Music Lessons",
+      "Art/Craft Instruction",
+      "Language Teaching",
+      "Photography",
+      "Athletic Coaching",
+      "Mentoring",
+      "Workshop Facilitation"
+    ],
+  },
+};
+
+/**
+ * Skills that require additional details from the user
+ * These skills will trigger a custom input dialog for specificity
+ */
+export const SPECIAL_SKILLS = {
+  "Language Translation": {
+    prompt: "Which languages?",
+    placeholder: "Spanish, Mandarin, French"
+  },
+  "Tutoring": {
+    prompt: "Which subjects?",
+    placeholder: "Math, Science, English"
+  },
+  "Music Lessons": {
+    prompt: "Which instruments?",
+    placeholder: "Piano, Guitar, Bass"
+  },
+  "Athletic Coaching": {
+    prompt: "Which sports?",
+    placeholder: "Soccer, Basketball, Swimming"
+  },
+  "Language Teaching": {
+    prompt: "Which languages?",
+    placeholder: "Spanish, English, Japanese"
+  }
+};
+
+/**
+ * Timing preference options for skill availability
+ */
+export const TIMING_PREFERENCES = {
+  days: [
+    { value: "weekdays", label: "Weekdays" },
+    { value: "weekends", label: "Weekends" },
+    { value: "both", label: "Both" }
+  ],
+  times: [
+    { value: "morning", label: "Morning" },
+    { value: "afternoon", label: "Afternoon" },
+    { value: "evening", label: "Evening" }
+  ]
 };
