@@ -1,10 +1,9 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { SurveyStepHeader } from "./survey/SurveyStepHeader";
-import { SurveyProgress } from "./survey/SurveyProgress";
-import { SurveyStepRenderer } from "./survey/SurveyStepRenderer";
-import { SurveyNavigation } from "./survey/SurveyNavigation";
-import { useSurveyState } from "./survey/hooks/useSurveyState";
+import { SurveyStepHeader } from "./SurveyStepHeader";
+import { SurveyProgress } from "./SurveyProgress";
+import { SurveyStepRenderer } from "./SurveyStepRenderer";
+import { SurveyNavigation } from "./SurveyNavigation";
+import { useSurveyState } from "./hooks/useSurveyState";
 
 /**
  * SurveyDialog component
