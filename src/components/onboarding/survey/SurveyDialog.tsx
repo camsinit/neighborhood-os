@@ -5,6 +5,7 @@ import { SurveyProgress } from "./SurveyProgress";
 import { SurveyStepRenderer } from "./SurveyStepRenderer";
 import { SurveyNavigation } from "./SurveyNavigation";
 import { useSurveyState } from "./hooks/useSurveyState";
+import { WelcomeScreen } from "../WelcomeScreen";
 import { useState } from "react";
 
 /**
@@ -13,6 +14,7 @@ import { useState } from "react";
  * A multi-step survey dialog that collects user information during onboarding.
  * Now refactored into smaller, focused components for better maintainability.
  * Includes skills survey validation to ensure users complete the mini-survey.
+ * Shows a welcome screen with confetti after completion.
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -46,6 +48,9 @@ const SurveyDialog = ({
   onComplete,
   isTestMode = false
 }: SurveyDialogProps) => {
+  // Track if survey is completed and showing welcome screen
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  
   // Use custom hook for survey state management
   const {
     currentStep,
@@ -75,6 +80,16 @@ const SurveyDialog = ({
     });
   };
   
+  // Handle survey completion - show welcome screen first
+  const handleSurveyComplete = () => {
+    setShowWelcomeScreen(true);
+  };
+  
+  // Handle final completion when user clicks "Get Started" from welcome screen
+  const handleFinalComplete = () => {
+    onComplete?.();
+  };
+  
   // Handle dialog close request
   const handleCloseRequest = (open: boolean) => {
     // If test mode, allow closing without warning
@@ -95,6 +110,24 @@ const SurveyDialog = ({
   
   // Get test mode indicator for the dialog title
   const testModeIndicator = isTestMode ? " (Test Mode)" : "";
+  
+  // Show welcome screen after survey completion
+  if (showWelcomeScreen) {
+    return (
+      <Dialog open={open} onOpenChange={handleCloseRequest}>
+        <DialogContent className="sm:max-w-[500px]">
+          {/* Test mode indicator */}
+          {isTestMode && (
+            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
+              Test Mode - No changes will be saved to your profile
+            </div>
+          )}
+          
+          <WelcomeScreen onGetStarted={handleFinalComplete} />
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
@@ -134,7 +167,7 @@ const SurveyDialog = ({
           totalSteps={steps.length}
           isCurrentStepValid={isCurrentStepValid()}
           onPrevious={handlePrevious}
-          onNext={() => handleNext(onComplete, steps.length)}
+          onNext={() => handleNext(handleSurveyComplete, steps.length)}
           isSkillsStep={currentStep === 4}
           hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
           hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
