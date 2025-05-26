@@ -11,6 +11,7 @@ import { Sparkles } from "lucide-react";
  * A minimalist welcome screen that displays after completing onboarding.
  * Features simple, clean messaging with confetti animation from the top.
  * Focuses on essential information without visual clutter.
+ * Now dynamically references the specific neighborhood the user is joining.
  */
 interface WelcomeScreenProps {
   onGetStarted: () => void;
@@ -76,7 +77,8 @@ export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
           </h1>
           
           <p className="text-gray-600">
-            Your profile is complete and you're ready to connect with your community.
+            You're now part of the {neighborhood?.name || "neighborhood"} community! 
+            Your profile is complete and you're ready to connect with your neighbors.
           </p>
         </div>
 
