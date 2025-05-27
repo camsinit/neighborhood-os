@@ -17,6 +17,7 @@ interface ActionButtonsProps {
  * 
  * Displays the settings and invite buttons at the bottom of the sidebar
  * Now navigates to the settings page instead of opening a dialog
+ * Updated to match the font size and spacing of main navigation items
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get navigation function
@@ -35,25 +36,25 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-2">
-      {/* Settings button - now navigates to /settings page */}
+      {/* Settings button - now matches main navigation styling */}
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start"
+        className="w-full justify-start h-10 px-3 text-base font-normal"
         onClick={handleSettingsClick}
       >
-        <Settings className="mr-2 h-4 w-4" />
+        <Settings className="mr-3 h-5 w-5" />
         Settings
       </Button>
       
-      {/* Invite button - still opens the unified dialog */}
+      {/* Invite button - now matches main navigation styling */}
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start"
+        className="w-full justify-start h-10 px-3 text-base font-normal"
         onClick={() => setIsInviteOpen(true)}
       >
-        <UserPlus className="mr-2 h-4 w-4" />
+        <UserPlus className="mr-3 h-5 w-5" />
         Invite Neighbor
       </Button>
       
