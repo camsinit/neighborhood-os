@@ -1,194 +1,158 @@
 
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { LoadingSpinner } from "@/components/ui/loading";
-import { useUser } from "@supabase/auth-helpers-react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, MapPin, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@supabase/auth-helpers-react';
 
 /**
- * Interface for the invitation data structure
- * This defines what we expect from the database for invitations
+ * Interface for neighborhood preview data
  */
-interface Invitation {
+interface NeighborhoodPreview {
   id: string;
-  neighborhood_id: string;
-  neighborhoods: {
-    name: string;
-  };
-  inviter_id: string;
-  status: 'pending' | 'accepted' | 'expired';
+  name: string;
+  city?: string;
+  state?: string;
+  created_at: string;
+  memberCount: number;
 }
 
 /**
  * JoinPage Component
  * 
- * This component handles the process of joining a neighborhood through an invitation link.
- * It validates the invite code, shows relevant UI states, and processes the join request.
- * 
- * The inviteCode parameter is optional, so this single component handles both
- * /join and /join/:inviteCode paths.
+ * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
+ * Shows a neighborhood preview before allowing users to join
  */
 const JoinPage = () => {
-  // Get the invite code from URL parameters (will be undefined for /join route)
-  const { inviteCode } = useParams<{ inviteCode?: string }>();
-  
-  // Track the invitation data
-  const [invitation, setInvitation] = useState<Invitation | null>(null);
-  // Track loading state
-  const [loading, setLoading] = useState(true);
-  // Track joining process state
-  const [joining, setJoining] = useState(false);
-  // Track any errors that occur
-  const [error, setError] = useState<string | null>(null);
-  // Get current user
-  const user = useUser();
-  // Get toast functionality for notifications
-  const { toast } = useToast();
-  // Get navigation functionality
+  // Get the invite code from the URL params
+  const { inviteCode } = useParams<{ inviteCode: string }>();
   const navigate = useNavigate();
-  // Get current location to understand what URL we're on
-  const location = useLocation();
+  const user = useUser();
+  
+  // Component state
+  const [neighborhood, setNeighborhood] = useState<NeighborhoodPreview | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isJoining, setIsJoining] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Debug the current URL and parameters
+  /**
+   * Load neighborhood information from the invite code
+   */
   useEffect(() => {
-    console.log("[JoinPage] Render with:", {
-      path: location.pathname,
-      inviteCode,
-      hasUser: !!user
-    });
-  }, [location.pathname, inviteCode, user]);
+    const loadNeighborhoodFromInvite = async () => {
+      if (!inviteCode) {
+        setError("Invalid invite link - no invite code found.");
+        setIsLoading(false);
+        return;
+      }
 
-  // Effect to fetch invitation data when component mounts
-  useEffect(() => {
-    async function fetchInvitation() {
       try {
-        // Clear any previous errors
-        setError(null);
+        console.log("[JoinPage] Loading neighborhood for invite code:", inviteCode);
         
-        // If no invite code, show appropriate message for the join landing page
-        if (!inviteCode) {
-          console.log("[JoinPage] No invitation code in URL - this is the join landing page");
-          setInvitation(null);
-          setLoading(false);
-          return;
-        }
-        
-        console.log("[JoinPage] Fetching invitation:", inviteCode);
-        
-        // Query the database for the invitation
-        const { data, error: fetchError } = await supabase
+        // First, verify the invitation exists and get the neighborhood ID
+        const { data: invitation, error: inviteError } = await supabase
           .from('invitations')
-          .select(`
-            *,
-            neighborhoods (
-              name
-            )
-          `)
+          .select('neighborhood_id, status')
           .eq('invite_code', inviteCode)
           .single();
 
-        // If there was a database error, throw it
-        if (fetchError) {
-          console.error("[JoinPage] Database error fetching invitation:", fetchError);
-          throw new Error(`Error fetching invitation: ${fetchError.message}`);
+        if (inviteError || !invitation) {
+          console.error("[JoinPage] Invalid invite code:", inviteError);
+          setError("This invite link is invalid or has expired.");
+          setIsLoading(false);
+          return;
         }
-        
-        // If no data was returned, the invitation doesn't exist
-        if (!data) {
-          console.log("[JoinPage] No invitation found for code:", inviteCode);
-          throw new Error('Invitation not found');
-        }
-        
-        // Check if invitation is expired
-        if (data.status === 'expired') {
-          console.log("[JoinPage] Invitation expired:", data);
-          throw new Error('This invitation has expired');
-        }
-        
-        // Check if invitation is already used
-        if (data.status === 'accepted') {
-          console.log("[JoinPage] Invitation already used:", data);
-          throw new Error('This invitation has already been used');
-        }
-        
-        console.log("[JoinPage] Invitation found:", data);
-        setInvitation(data as Invitation);
-      } catch (err) {
-        console.error("[JoinPage] Error in invitation process:", err);
-        setError(err instanceof Error ? err.message : 'Failed to load invitation');
-      } finally {
-        setLoading(false);
-      }
-    }
 
-    // Fetch invitation if we're on a join page with a code
-    if (inviteCode) {
-      fetchInvitation();
-    } else {
-      // If we're just on /join with no code, show the join landing page
-      console.log("[JoinPage] On /join with no code - showing join landing page");
-      setLoading(false);
-    }
+        // Check if invitation is still pending (not used)
+        if (invitation.status !== 'pending') {
+          setError("This invite link has already been used.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Get neighborhood details
+        const { data: neighborhoodData, error: neighborhoodError } = await supabase
+          .from('neighborhoods')
+          .select('id, name, city, state, created_at')
+          .eq('id', invitation.neighborhood_id)
+          .single();
+
+        if (neighborhoodError || !neighborhoodData) {
+          console.error("[JoinPage] Error loading neighborhood:", neighborhoodError);
+          setError("Unable to load neighborhood information.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Get member count
+        const { count: memberCount } = await supabase
+          .from('neighborhood_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('neighborhood_id', invitation.neighborhood_id)
+          .eq('status', 'active');
+
+        // Set the neighborhood preview data
+        setNeighborhood({
+          ...neighborhoodData,
+          memberCount: memberCount || 0
+        });
+
+      } catch (error: any) {
+        console.error("[JoinPage] Unexpected error:", error);
+        setError("An unexpected error occurred. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNeighborhoodFromInvite();
   }, [inviteCode]);
 
-  // Function to handle completion of join process
-  const handleJoinComplete = () => {
-    toast({
-      title: "Welcome!",
-      description: `You've successfully joined. Let's meet your neighbors!`,
-    });
-    navigate('/neighbors');
-  };
+  /**
+   * Handle joining the neighborhood
+   */
+  const handleJoinNeighborhood = async () => {
+    if (!user || !neighborhood || !inviteCode) {
+      if (!user) {
+        toast.error("Please log in to join a neighborhood.");
+        navigate('/login');
+      }
+      return;
+    }
 
-  // Function to handle the join button click
-  const handleJoin = async () => {
-    // Safety checks
-    if (!user || !invitation) return;
-    
-    setJoining(true);
+    setIsJoining(true);
     try {
-      // Check if already a member of this neighborhood
-      const { data: existingMember, error: memberCheckError } = await supabase
+      // Check if user is already a member
+      const { data: existingMember } = await supabase
         .from('neighborhood_members')
         .select('id')
         .eq('user_id', user.id)
-        .eq('neighborhood_id', invitation.neighborhood_id)
+        .eq('neighborhood_id', neighborhood.id)
         .single();
-        
-      if (memberCheckError && memberCheckError.code !== 'PGRST116') {
-        // If error is not "no rows returned" then it's a real error
-        console.error("[JoinPage] Error checking membership:", memberCheckError);
-        throw new Error(`Could not verify existing membership: ${memberCheckError.message}`);
-      }
-      
-      // If already a member, show message and navigate
+
       if (existingMember) {
-        toast({
-          title: "Already a member",
-          description: "You are already a member of this neighborhood.",
-        });
-        navigate('/neighbors');
+        toast.success("You're already a member of this neighborhood!");
+        navigate('/');
         return;
       }
-      
-      // Add the user to neighborhood members
+
+      // Add user as a neighborhood member
       const { error: memberError } = await supabase
         .from('neighborhood_members')
         .insert({
           user_id: user.id,
-          neighborhood_id: invitation.neighborhood_id,
+          neighborhood_id: neighborhood.id,
           status: 'active'
         });
-        
+
       if (memberError) {
-        console.error("[JoinPage] Error adding member:", memberError);
         throw memberError;
       }
-      
-      // Update invitation status to accepted
+
+      // Mark the invitation as accepted
       const { error: inviteError } = await supabase
         .from('invitations')
         .update({
@@ -196,117 +160,139 @@ const JoinPage = () => {
           accepted_by_id: user.id,
           accepted_at: new Date().toISOString()
         })
-        .eq('id', invitation.id);
-        
+        .eq('invite_code', inviteCode);
+
       if (inviteError) {
-        console.error("[JoinPage] Error updating invitation:", inviteError);
-        throw inviteError;
+        console.warn("[JoinPage] Failed to update invitation status:", inviteError);
+        // Don't fail the join process for this
       }
-      
-      // Complete the join process
-      handleJoinComplete();
-    } catch (err) {
-      console.error("[JoinPage] Error joining neighborhood:", err);
-      toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to join neighborhood. Please try again.",
-        variant: "destructive",
-      });
+
+      // Success!
+      toast.success(`Welcome to ${neighborhood.name}!`);
+      navigate('/');
+
+    } catch (error: any) {
+      console.error("[JoinPage] Error joining neighborhood:", error);
+      toast.error("Failed to join neighborhood. Please try again.");
     } finally {
-      setJoining(false);
+      setIsJoining(false);
     }
   };
 
-  // Show loading spinner while loading
-  if (loading) {
+  // Loading state
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading neighborhood information...</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  // If we're on the join page without an invite code, show the join landing page
-  if (!inviteCode) {
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-6 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center mb-4">Join a Neighborhood</h1>
-          <p className="text-center text-gray-600 mb-4">
-            To join a neighborhood, you need an invitation link from an existing member.
-          </p>
-          {!user ? (
-            <div className="space-y-4">
-              <Button className="w-full" onClick={() => navigate('/login')}>
-                Sign in first
-              </Button>
-              <p className="text-center text-sm text-gray-500">
-                You'll need to sign in before you can join a neighborhood.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-center text-amber-600">
-                Please use an invitation link to join a neighborhood.
-              </p>
-              <Button className="w-full" onClick={() => navigate('/')}>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Invite Not Found</h2>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <Button onClick={() => navigate('/')} variant="outline">
                 Go Home
               </Button>
             </div>
-          )}
+          </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Show error message if there is an error with the invitation
-  if (error || !invitation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-6 max-w-md w-full">
-          <h1 className="text-2xl font-bold text-center mb-4">Invalid Invitation</h1>
-          <p className="text-center text-gray-600 mb-4">
-            {error || "This invitation link is invalid or has expired."}
-          </p>
-          <Button className="w-full" onClick={() => navigate('/')}>
-            Go Home
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show join UI if everything is valid
+  // Main join page content
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="p-6 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-center mb-4">
-          Join {invitation.neighborhoods.name}
-        </h1>
-        <p className="text-center text-gray-600 mb-6">
-          You've been invited to join this neighborhood community.
-        </p>
-        {!user ? (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
+            <Users className="h-8 w-8 text-blue-600" />
+          </div>
+          <CardTitle className="text-2xl">Join {neighborhood?.name}</CardTitle>
+          <CardDescription>
+            You've been invited to join this neighborhood community
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {/* Neighborhood Preview Information */}
           <div className="space-y-4">
-            <Button className="w-full" onClick={() => navigate('/login')}>
-              Sign in to join
-            </Button>
-            <p className="text-center text-sm text-gray-500">
-              Don't have an account?{" "}
-              <a href="/login" className="text-blue-600 hover:underline">
-                Create one
-              </a>
+            <div className="flex items-center space-x-3 text-gray-600">
+              <MapPin className="h-5 w-5" />
+              <span>
+                {neighborhood?.city && neighborhood?.state 
+                  ? `${neighborhood.city}, ${neighborhood.state}`
+                  : 'Location not specified'
+                }
+              </span>
+            </div>
+            
+            <div className="flex items-center space-x-3 text-gray-600">
+              <Users className="h-5 w-5" />
+              <span>{neighborhood?.memberCount || 0} members</span>
+            </div>
+            
+            <div className="flex items-center space-x-3 text-gray-600">
+              <Calendar className="h-5 w-5" />
+              <span>
+                Created {neighborhood?.created_at 
+                  ? new Date(neighborhood.created_at).toLocaleDateString()
+                  : 'recently'
+                }
+              </span>
+            </div>
+          </div>
+
+          {/* Join Button */}
+          <div className="space-y-3">
+            {user ? (
+              <Button 
+                onClick={handleJoinNeighborhood}
+                disabled={isJoining}
+                className="w-full"
+                size="lg"
+              >
+                <CheckCircle className="mr-2 h-5 w-5" />
+                {isJoining ? 'Joining...' : `Join ${neighborhood?.name}`}
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600 text-center">
+                  You need to log in to join this neighborhood
+                </p>
+                <Button 
+                  onClick={() => navigate('/login')}
+                  className="w-full"
+                  size="lg"
+                >
+                  Log In to Join
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              By joining, you'll be able to connect with your neighbors and participate in community activities.
             </p>
           </div>
-        ) : (
-          <Button 
-            className="w-full"
-            onClick={handleJoin}
-            disabled={joining}
-          >
-            {joining ? "Joining..." : "Join Neighborhood"}
-          </Button>
-        )}
+        </CardContent>
       </Card>
     </div>
   );

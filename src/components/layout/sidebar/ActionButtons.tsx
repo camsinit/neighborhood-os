@@ -2,7 +2,7 @@
 import { Settings, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import InviteDialog from "@/components/InviteDialog";
+import UnifiedInviteDialog from "@/components/invite/UnifiedInviteDialog";
 
 /**
  * Props for the ActionButtons component
@@ -16,11 +16,12 @@ interface ActionButtonsProps {
  * ActionButtons component
  * 
  * Displays the settings and invite buttons at the bottom of the sidebar
+ * Now uses the new unified invite dialog system
  * 
  * @param onOpenSettings - Function to call when the settings button is clicked
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
-  // State to control the invite dialog visibility
+  // State to control the unified invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
   return (
@@ -36,7 +37,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Settings
       </Button>
       
-      {/* Invite button */}
+      {/* Invite button - now opens the unified dialog */}
       <Button
         variant="ghost"
         size="sm"
@@ -47,8 +48,8 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Invite Neighbor
       </Button>
       
-      {/* Invite dialog */}
-      <InviteDialog
+      {/* Unified invite dialog */}
+      <UnifiedInviteDialog
         open={isInviteOpen}
         onOpenChange={setIsInviteOpen}
       />

@@ -5,21 +5,21 @@ import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { useSearchParams } from 'react-router-dom';
 import { highlightItem } from '@/utils/highlight';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import InviteNeighborPopover from '@/components/neighbors/InviteNeighborPopover';
+import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
 
 /**
  * NeighborsPage Component
  * 
  * Displays the neighbors directory with proper module styling
  * and supports highlighting neighbors from deep links.
- * Now uses the standardized module layout with full-width description.
+ * Now uses the unified invite dialog system.
  */
 function NeighborsPage() {
   // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedNeighbor = useHighlightedItem('neighbors');
   
-  // State for dialog controls
+  // State for dialog controls - now uses unified invite dialog
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
   // Effect to handle deep linking to specific neighbor profiles
@@ -51,8 +51,8 @@ function NeighborsPage() {
         </div>
       </ModuleContent>
 
-      {/* The popover with proper props */}
-      <InviteNeighborPopover 
+      {/* The unified invite dialog */}
+      <UnifiedInviteDialog 
         open={isInviteOpen} 
         onOpenChange={setIsInviteOpen}
       />
