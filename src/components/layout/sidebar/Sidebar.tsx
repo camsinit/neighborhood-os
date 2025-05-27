@@ -22,6 +22,7 @@ interface SidebarProps {
  * Sidebar component
  * 
  * Displays the navigation sidebar with links to different sections of the app
+ * Now properly passes the onOpenSettings handler to ActionButtons
  * 
  * @param onOpenSettings - Function to call when the settings button is clicked
  */
@@ -53,7 +54,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         {/* Divider before bottom actions */}
         <div className="my-4 h-px bg-gray-200" />
 
-        {/* Settings and Invite buttons */}
+        {/* Settings and Invite buttons - now properly passing onOpenSettings */}
         <ActionButtons 
           onOpenSettings={onOpenSettings}
         />
