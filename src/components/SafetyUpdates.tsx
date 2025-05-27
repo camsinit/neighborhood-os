@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { SafetyUpdateComments } from "./safety/SafetyUpdateComments";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Pencil, Trash2 } from "lucide-react";
+import { User, Pencil, Trash2, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -23,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { refreshEvents } from "@/utils/refreshEvents";
 import { createLogger } from "@/utils/logger";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 // Create a logger for this component
 const logger = createLogger('SafetyUpdates');
@@ -102,6 +104,20 @@ const SafetyUpdates = () => {
       }
     }
   };
+
+  // Helper function to get safety type badge styling
+  const getSafetyTypeBadge = (type: string) => {
+    switch (type?.toLowerCase()) {
+      case 'emergency':
+        return { label: 'Emergency', variant: 'destructive' as const, icon: AlertTriangle };
+      case 'alert':
+        return { label: 'Alert', variant: 'secondary' as const, icon: AlertTriangle };
+      case 'info':
+        return { label: 'Information', variant: 'outline' as const, icon: Clock };
+      default:
+        return { label: 'Update', variant: 'outline' as const, icon: Clock };
+    }
+  };
   
   return (
     <>
@@ -138,59 +154,108 @@ const SafetyUpdates = () => {
         onOpenChange={setIsArchiveOpen}
       />
       
-      {/* Detail view dialog for a selected update */}
+      {/* Redesigned detail view dialog for a selected update */}
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
-        <DialogContent className="sm:max-w-[600px] bg-white p-6 rounded-lg shadow-lg">
-          <DialogHeader>
-            <DialogTitle>{selectedUpdate?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-10 w-10">
-                <AvatarImage 
-                  src={selectedUpdate?.profiles?.avatar_url || ''} 
-                  alt={selectedUpdate?.profiles?.display_name || 'User'} 
-                />
-                <AvatarFallback>
-                  <User className="h-6 w-6" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{selectedUpdate?.profiles?.display_name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedUpdate?.created_at && format(new Date(selectedUpdate.created_at), 'MMM d, yyyy')}
-                </p>
+        <DialogContent className="sm:max-w-[700px] bg-white rounded-xl shadow-xl border-0 p-0 overflow-hidden">
+          {/* Header section with improved design */}
+          <DialogHeader className="px-8 pt-8 pb-6 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                {/* Safety type badge */}
+                {selectedUpdate?.type && (
+                  <div className="mb-3">
+                    {(() => {
+                      const badgeConfig = getSafetyTypeBadge(selectedUpdate.type);
+                      const IconComponent = badgeConfig.icon;
+                      return (
+                        <Badge variant={badgeConfig.variant} className="gap-1.5 px-3 py-1">
+                          <IconComponent className="h-3.5 w-3.5" />
+                          {badgeConfig.label}
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+                )}
+                
+                {/* Title with better typography */}
+                <DialogTitle className="text-2xl font-bold text-gray-900 leading-tight mb-4 pr-4">
+                  {selectedUpdate?.title}
+                </DialogTitle>
+                
+                {/* Author and date info with improved layout */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                      <AvatarImage 
+                        src={selectedUpdate?.profiles?.avatar_url || ''} 
+                        alt={selectedUpdate?.profiles?.display_name || 'User'} 
+                      />
+                      <AvatarFallback className="bg-amber-100 text-amber-800">
+                        <User className="h-6 w-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-gray-900 text-base">
+                        {selectedUpdate?.profiles?.display_name || 'Anonymous'}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        {selectedUpdate?.created_at && format(new Date(selectedUpdate.created_at), 'MMM d, yyyy • h:mm a')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <p className="text-gray-700">{selectedUpdate?.description}</p>
-            
-            {/* Moved Edit and Delete buttons here */}
-            {user && user.id === selectedUpdate?.author_id && (
-              <div className="flex items-center gap-2">
-                <EditSafetyUpdateDialog update={selectedUpdate}>
-                  <Button 
-                    variant="ghost" 
+              
+              {/* Action buttons for author */}
+              {user && user.id === selectedUpdate?.author_id && (
+                <div className="flex items-center gap-2 ml-4">
+                  <EditSafetyUpdateDialog update={selectedUpdate}>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-white hover:bg-gray-50 border-gray-200"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </EditSafetyUpdateDialog>
+                  <Button
+                    variant="outline"
                     size="sm"
-                    className="hover:bg-secondary"
+                    onClick={() => handleDeleteSafetyUpdate(selectedUpdate.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                   >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
                   </Button>
-                </EditSafetyUpdateDialog>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteSafetyUpdate(selectedUpdate.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+                </div>
+              )}
+            </div>
+          </DialogHeader>
+          
+          {/* Content section with better spacing */}
+          <div className="px-8 py-6">
+            {/* Description with improved typography */}
+            {selectedUpdate?.description && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Details</h3>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {selectedUpdate.description}
+                  </p>
+                </div>
               </div>
             )}
             
+            {/* Separator before comments */}
+            <Separator className="mb-6" />
+            
+            {/* Comments section with improved design */}
             {selectedUpdate && (
-              <SafetyUpdateComments updateId={selectedUpdate.id} />
+              <div className="bg-white">
+                <SafetyUpdateComments updateId={selectedUpdate.id} />
+              </div>
             )}
           </div>
         </DialogContent>
