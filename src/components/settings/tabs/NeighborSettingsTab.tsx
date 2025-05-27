@@ -67,8 +67,14 @@ export const NeighborSettingsTab: React.FC = () => {
         if (error) throw error;
         
         if (data) {
+          // Filter skills to only include valid categories and cast to correct type
+          const validSkills = (data.skills || [])
+            .filter((skill: string): skill is SkillCategory => 
+              skillCategories.includes(skill as SkillCategory)
+            );
+          
           setSettings({
-            skills: data.skills || [],
+            skills: validSkills,
             email_visible: data.email_visible || false,
             phone_visible: data.phone_visible || false,
             address_visible: data.address_visible || false,

@@ -145,6 +145,7 @@ function App() {
                 <Route path="/goods" element={<GoodsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 {/* Admin routes */}
                 <Route path="/admin/waitlist" element={<WaitlistAdmin />} />
               </Route>

@@ -26,6 +26,27 @@ interface NotificationPreferences {
 }
 
 /**
+ * Type guard to check if data is valid NotificationPreferences
+ */
+function isValidNotificationPreferences(data: any): data is NotificationPreferences {
+  return (
+    data &&
+    typeof data === 'object' &&
+    typeof data.involved_only === 'boolean' &&
+    data.page_specific &&
+    typeof data.page_specific === 'object' &&
+    typeof data.page_specific.events === 'boolean' &&
+    typeof data.page_specific.safety === 'boolean' &&
+    typeof data.page_specific.care === 'boolean' &&
+    typeof data.page_specific.goods === 'boolean' &&
+    typeof data.page_specific.skills === 'boolean' &&
+    typeof data.page_specific.neighbors === 'boolean' &&
+    typeof data.all_activity === 'boolean' &&
+    typeof data.new_neighbors === 'boolean'
+  );
+}
+
+/**
  * NotificationSettingsTab Component
  * 
  * Handles notification preferences with auto-saving functionality
@@ -69,7 +90,12 @@ export const NotificationSettingsTab: React.FC = () => {
         if (error) throw error;
         
         if (data && data.notification_preferences) {
-          setPreferences(data.notification_preferences as NotificationPreferences);
+          // Validate and type-cast the notification preferences
+          if (isValidNotificationPreferences(data.notification_preferences)) {
+            setPreferences(data.notification_preferences);
+          } else {
+            console.warn('[NotificationSettingsTab] Invalid notification preferences format, using defaults');
+          }
         }
       } catch (error: any) {
         console.error('[NotificationSettingsTab] Error loading preferences:', error);
