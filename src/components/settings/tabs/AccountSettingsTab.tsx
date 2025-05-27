@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,9 +19,6 @@ import { FormSection } from '../FormSection';
 interface AccountSettings {
   display_name: string;
   bio: string;
-  timezone: string;
-  language: string;
-  theme: string;
 }
 
 /**
@@ -38,10 +35,7 @@ export const AccountSettingsTab: React.FC = () => {
   // State for account settings
   const [settings, setSettings] = useState<AccountSettings>({
     display_name: '',
-    bio: '',
-    timezone: 'UTC',
-    language: 'en',
-    theme: 'light'
+    bio: ''
   });
   
   // Loading state
@@ -57,7 +51,7 @@ export const AccountSettingsTab: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('display_name, bio, timezone, language, theme')
+          .select('display_name, bio')
           .eq('id', user.id)
           .single();
 
@@ -66,10 +60,7 @@ export const AccountSettingsTab: React.FC = () => {
         if (data) {
           setSettings({
             display_name: data.display_name || '',
-            bio: data.bio || '',
-            timezone: data.timezone || 'UTC',
-            language: data.language || 'en',
-            theme: data.theme || 'light'
+            bio: data.bio || ''
           });
         }
       } catch (error: any) {
@@ -109,7 +100,6 @@ export const AccountSettingsTab: React.FC = () => {
       <div className="space-y-6">
         <div className="animate-pulse">
           <div className="h-32 bg-gray-200 rounded-lg mb-6"></div>
-          <div className="h-48 bg-gray-200 rounded-lg mb-6"></div>
           <div className="h-32 bg-gray-200 rounded-lg"></div>
         </div>
       </div>
@@ -166,85 +156,6 @@ export const AccountSettingsTab: React.FC = () => {
                 </AutoSaveField>
               </div>
             </FormSection>
-          </div>
-        </div>
-      </SettingsCard>
-
-      {/* Preferences Card */}
-      <SettingsCard 
-        title="Preferences" 
-        description="Customize your experience with language, timezone, and theme settings"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Language */}
-          <div className="space-y-2">
-            <Label>Language</Label>
-            <AutoSaveField 
-              fieldName="language" 
-              value={settings.language}
-            >
-              <Select 
-                value={settings.language} 
-                onValueChange={(value) => updateField('language', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Spanish</SelectItem>
-                  <SelectItem value="fr">French</SelectItem>
-                </SelectContent>
-              </Select>
-            </AutoSaveField>
-          </div>
-
-          {/* Timezone */}
-          <div className="space-y-2">
-            <Label>Timezone</Label>
-            <AutoSaveField 
-              fieldName="timezone" 
-              value={settings.timezone}
-            >
-              <Select 
-                value={settings.timezone} 
-                onValueChange={(value) => updateField('timezone', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UTC">UTC</SelectItem>
-                  <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                  <SelectItem value="America/Chicago">Central Time</SelectItem>
-                  <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                  <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
-                </SelectContent>
-              </Select>
-            </AutoSaveField>
-          </div>
-
-          {/* Theme */}
-          <div className="space-y-2">
-            <Label>Theme</Label>
-            <AutoSaveField 
-              fieldName="theme" 
-              value={settings.theme}
-            >
-              <Select 
-                value={settings.theme} 
-                onValueChange={(value) => updateField('theme', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
-                </SelectContent>
-              </Select>
-            </AutoSaveField>
           </div>
         </div>
       </SettingsCard>
