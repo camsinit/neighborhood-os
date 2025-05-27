@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SettingsSidebar } from './SettingsSidebar';
+import { SettingsHeader } from './SettingsHeader';
 
 /**
  * Props for the SettingsLayout component
@@ -14,9 +14,9 @@ interface SettingsLayoutProps {
 /**
  * SettingsLayout Component
  * 
- * Provides the main layout structure for the settings page with sidebar
- * navigation and content area. Uses a dashboard-style layout for better
- * space utilization and user experience.
+ * Provides the main layout structure for the settings page with horizontal
+ * tab navigation at the top and content area below. Uses a clean, spacious
+ * design for better user experience.
  */
 export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
   children,
@@ -25,22 +25,15 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Main container with flexbox layout */}
-      <div className="flex h-screen">
-        {/* Sidebar navigation */}
-        <SettingsSidebar 
-          activeTab={activeTab} 
-          onTabChange={onTabChange} 
-        />
-        
-        {/* Main content area */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-8">
-            <div className="max-w-4xl mx-auto">
-              {children}
-            </div>
-          </div>
-        </div>
+      {/* Header with horizontal tabs */}
+      <SettingsHeader 
+        activeTab={activeTab} 
+        onTabChange={onTabChange} 
+      />
+      
+      {/* Main content area */}
+      <div className="max-w-6xl mx-auto px-8 py-8">
+        {children}
       </div>
     </div>
   );
