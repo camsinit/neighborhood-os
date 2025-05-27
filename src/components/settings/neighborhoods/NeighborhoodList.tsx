@@ -1,7 +1,7 @@
 
 /**
  * NeighborhoodList component
- * Displays a list of neighborhoods the user is a member of
+ * Displays just the neighborhood name in a simple, clean format
  */
 import React from "react";
 import { Neighborhood } from "./UserNeighborhoodsHook";
@@ -11,13 +11,10 @@ interface NeighborhoodListProps {
 }
 
 const NeighborhoodList: React.FC<NeighborhoodListProps> = ({ neighborhoods }) => {
-  // Render neighborhoods inline
+  // Render just the neighborhood name without repetitive labels
   return (
-    <div className="flex items-center gap-2">
-      <span className="font-semibold text-lg">Your Neighborhoods:</span>
-      <span className="text-blue-500 text-lg font-medium">
-        {neighborhoods.map(n => n.name).join(", ")}
-      </span>
+    <div className="text-lg font-medium text-gray-900">
+      {neighborhoods.map(n => n.name).join(", ")}
     </div>
   );
 };
