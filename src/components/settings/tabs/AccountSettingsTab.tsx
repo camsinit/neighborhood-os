@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AutoSaveField } from '../AutoSaveField';
 import { ProfileImageUpload } from '../ProfileImageUpload';
+import { SettingsCard } from '../SettingsCard';
+import { FormSection } from '../FormSection';
 
 /**
  * Account settings data structure
@@ -27,6 +29,7 @@ interface AccountSettings {
  * AccountSettingsTab Component
  * 
  * Handles account-related settings with auto-saving functionality
+ * using the new card-based layout design.
  */
 export const AccountSettingsTab: React.FC = () => {
   // Get current user and navigation
@@ -104,154 +107,167 @@ export const AccountSettingsTab: React.FC = () => {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-10 bg-gray-200 rounded"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-20 bg-gray-200 rounded"></div>
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-48 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Profile Image Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">Profile Image</h3>
-        <ProfileImageUpload />
-      </div>
+    <div className="space-y-6">
+      {/* Profile Card */}
+      <SettingsCard 
+        title="Profile Information" 
+        description="Manage your public profile and basic information"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Profile Image Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <ProfileImageUpload />
+            <p className="text-xs text-gray-500 text-center">
+              Click to upload a new profile picture
+            </p>
+          </div>
 
-      {/* Basic Information */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Basic Information</h3>
-        
-        {/* Display Name */}
-        <div className="space-y-2">
-          <Label htmlFor="display_name">Display Name</Label>
-          <AutoSaveField 
-            fieldName="display_name" 
-            value={settings.display_name}
-          >
-            <Input
-              id="display_name"
-              placeholder="Your display name"
-              value={settings.display_name}
-              onChange={(e) => updateField('display_name', e.target.value)}
-            />
-          </AutoSaveField>
-          <p className="text-sm text-gray-500">
-            This is your public display name.
-          </p>
+          {/* Basic Information */}
+          <div className="space-y-6">
+            <FormSection title="Basic Information">
+              {/* Display Name */}
+              <div className="space-y-2">
+                <Label htmlFor="display_name">Display Name</Label>
+                <AutoSaveField 
+                  fieldName="display_name" 
+                  value={settings.display_name}
+                >
+                  <Input
+                    id="display_name"
+                    placeholder="Your display name"
+                    value={settings.display_name}
+                    onChange={(e) => updateField('display_name', e.target.value)}
+                  />
+                </AutoSaveField>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <AutoSaveField 
+                  fieldName="bio" 
+                  value={settings.bio}
+                >
+                  <Textarea
+                    id="bio"
+                    placeholder="Tell us about yourself"
+                    value={settings.bio}
+                    onChange={(e) => updateField('bio', e.target.value)}
+                    className="resize-none"
+                    rows={3}
+                  />
+                </AutoSaveField>
+              </div>
+            </FormSection>
+          </div>
         </div>
+      </SettingsCard>
 
-        {/* Bio */}
-        <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
-          <AutoSaveField 
-            fieldName="bio" 
-            value={settings.bio}
-          >
-            <Textarea
-              id="bio"
-              placeholder="Tell us about yourself"
-              value={settings.bio}
-              onChange={(e) => updateField('bio', e.target.value)}
-              className="resize-none"
-              rows={3}
-            />
-          </AutoSaveField>
-          <p className="text-sm text-gray-500">
-            Write a brief bio about yourself.
-          </p>
-        </div>
-      </div>
-
-      {/* Preferences */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Preferences</h3>
-        
-        {/* Language */}
-        <div className="space-y-2">
-          <Label>Language</Label>
-          <AutoSaveField 
-            fieldName="language" 
-            value={settings.language}
-          >
-            <Select 
-              value={settings.language} 
-              onValueChange={(value) => updateField('language', value)}
+      {/* Preferences Card */}
+      <SettingsCard 
+        title="Preferences" 
+        description="Customize your experience with language, timezone, and theme settings"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Language */}
+          <div className="space-y-2">
+            <Label>Language</Label>
+            <AutoSaveField 
+              fieldName="language" 
+              value={settings.language}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Spanish</SelectItem>
-                <SelectItem value="fr">French</SelectItem>
-              </SelectContent>
-            </Select>
-          </AutoSaveField>
-        </div>
+              <Select 
+                value={settings.language} 
+                onValueChange={(value) => updateField('language', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="es">Spanish</SelectItem>
+                  <SelectItem value="fr">French</SelectItem>
+                </SelectContent>
+              </Select>
+            </AutoSaveField>
+          </div>
 
-        {/* Timezone */}
-        <div className="space-y-2">
-          <Label>Timezone</Label>
-          <AutoSaveField 
-            fieldName="timezone" 
-            value={settings.timezone}
-          >
-            <Select 
-              value={settings.timezone} 
-              onValueChange={(value) => updateField('timezone', value)}
+          {/* Timezone */}
+          <div className="space-y-2">
+            <Label>Timezone</Label>
+            <AutoSaveField 
+              fieldName="timezone" 
+              value={settings.timezone}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="UTC">UTC</SelectItem>
-                <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                <SelectItem value="America/Chicago">Central Time</SelectItem>
-                <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
-              </SelectContent>
-            </Select>
-          </AutoSaveField>
-        </div>
+              <Select 
+                value={settings.timezone} 
+                onValueChange={(value) => updateField('timezone', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UTC">UTC</SelectItem>
+                  <SelectItem value="America/New_York">Eastern Time</SelectItem>
+                  <SelectItem value="America/Chicago">Central Time</SelectItem>
+                  <SelectItem value="America/Denver">Mountain Time</SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </AutoSaveField>
+          </div>
 
-        {/* Theme */}
-        <div className="space-y-2">
-          <Label>Theme</Label>
-          <AutoSaveField 
-            fieldName="theme" 
-            value={settings.theme}
-          >
-            <Select 
-              value={settings.theme} 
-              onValueChange={(value) => updateField('theme', value)}
+          {/* Theme */}
+          <div className="space-y-2">
+            <Label>Theme</Label>
+            <AutoSaveField 
+              fieldName="theme" 
+              value={settings.theme}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-              </SelectContent>
-            </Select>
-          </AutoSaveField>
+              <Select 
+                value={settings.theme} 
+                onValueChange={(value) => updateField('theme', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+            </AutoSaveField>
+          </div>
         </div>
-      </div>
+      </SettingsCard>
 
-      {/* Sign Out Section */}
-      <div className="pt-8 border-t">
-        <Button 
-          variant="destructive" 
-          onClick={handleSignOut}
-          className="w-full"
-        >
-          Sign Out
-        </Button>
-      </div>
+      {/* Account Actions Card */}
+      <SettingsCard 
+        title="Account Actions" 
+        description="Sign out or manage your account security"
+      >
+        <div className="flex justify-start">
+          <Button 
+            variant="destructive" 
+            onClick={handleSignOut}
+            className="w-auto px-6"
+          >
+            Sign Out
+          </Button>
+        </div>
+      </SettingsCard>
     </div>
   );
 };

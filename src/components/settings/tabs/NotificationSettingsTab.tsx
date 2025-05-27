@@ -4,9 +4,10 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { AutoSaveField } from '../AutoSaveField';
+import { SettingsCard } from '../SettingsCard';
+import { FormSection } from '../FormSection';
 
 /**
  * Notification preferences structure
@@ -50,6 +51,7 @@ function isValidNotificationPreferences(data: any): data is NotificationPreferen
  * NotificationSettingsTab Component
  * 
  * Handles notification preferences with auto-saving functionality
+ * using the new card-based layout design.
  */
 export const NotificationSettingsTab: React.FC = () => {
   // Get current user
@@ -130,33 +132,34 @@ export const NotificationSettingsTab: React.FC = () => {
 
   // Page-specific notification settings configuration
   const pageSpecificSettings = [
-    { key: 'events' as const, label: 'Events' },
-    { key: 'safety' as const, label: 'Safety Updates' },
-    { key: 'care' as const, label: 'Care Requests' },
-    { key: 'goods' as const, label: 'Goods Exchange' },
-    { key: 'skills' as const, label: 'Skills Sharing' },
-    { key: 'neighbors' as const, label: 'Neighbor Activity' }
+    { key: 'events' as const, label: 'Events', description: 'New events and event updates' },
+    { key: 'safety' as const, label: 'Safety Updates', description: 'Safety alerts and community notices' },
+    { key: 'care' as const, label: 'Care Requests', description: 'New care requests and responses' },
+    { key: 'goods' as const, label: 'Goods Exchange', description: 'Available items and requests' },
+    { key: 'skills' as const, label: 'Skills Sharing', description: 'Skill offers and session requests' },
+    { key: 'neighbors' as const, label: 'Neighbor Activity', description: 'General neighbor interactions' }
   ];
 
   // Show loading state
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-16 bg-gray-200 rounded"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-32 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-48 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-32 bg-gray-200 rounded-lg"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* General notification preferences */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">General Preferences</h3>
-        
-        {/* Involved only notifications */}
+    <div className="space-y-6">
+      {/* General Preferences Card */}
+      <SettingsCard 
+        title="General Preferences" 
+        description="Control your overall notification experience"
+      >
         <AutoSaveField 
           fieldName="notification_preferences" 
           value={preferences}
@@ -175,27 +178,26 @@ export const NotificationSettingsTab: React.FC = () => {
             />
           </div>
         </AutoSaveField>
-      </div>
-
-      <Separator />
+      </SettingsCard>
       
-      {/* Page-specific notifications */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Page-Specific Notifications</h3>
-        
-        <div className="space-y-4">
-          {pageSpecificSettings.map(({ key, label }) => (
+      {/* Page-specific Notifications Card */}
+      <SettingsCard 
+        title="Page-Specific Notifications" 
+        description="Choose which types of content you want to be notified about"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {pageSpecificSettings.map(({ key, label, description }) => (
             <AutoSaveField 
               key={key}
               fieldName="notification_preferences" 
               value={preferences}
               debounceMs={0}
             >
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
+              <div className="flex items-start justify-between rounded-lg border p-4">
+                <div className="space-y-0.5 flex-1 mr-4">
                   <Label className="text-base">{label}</Label>
                   <p className="text-sm text-gray-500">
-                    Receive notifications about new {label.toLowerCase()}
+                    {description}
                   </p>
                 </div>
                 <Switch
@@ -206,54 +208,55 @@ export const NotificationSettingsTab: React.FC = () => {
             </AutoSaveField>
           ))}
         </div>
-      </div>
+      </SettingsCard>
 
-      <Separator />
-
-      {/* Community-wide notifications */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-medium">Community Notifications</h3>
-        
-        {/* All activity notifications */}
-        <AutoSaveField 
-          fieldName="notification_preferences" 
-          value={preferences}
-          debounceMs={0}
-        >
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label className="text-base">All Community Activity</Label>
-              <p className="text-sm text-gray-500">
-                Receive notifications about all new activity in your community
-              </p>
+      {/* Community Notifications Card */}
+      <SettingsCard 
+        title="Community Notifications" 
+        description="Stay informed about your neighborhood community"
+      >
+        <div className="space-y-4">
+          {/* All activity notifications */}
+          <AutoSaveField 
+            fieldName="notification_preferences" 
+            value={preferences}
+            debounceMs={0}
+          >
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">All Community Activity</Label>
+                <p className="text-sm text-gray-500">
+                  Receive notifications about all new activity in your community
+                </p>
+              </div>
+              <Switch
+                checked={preferences.all_activity}
+                onCheckedChange={(value) => updatePreference('all_activity', value)}
+              />
             </div>
-            <Switch
-              checked={preferences.all_activity}
-              onCheckedChange={(value) => updatePreference('all_activity', value)}
-            />
-          </div>
-        </AutoSaveField>
+          </AutoSaveField>
 
-        {/* New neighbor notifications */}
-        <AutoSaveField 
-          fieldName="notification_preferences" 
-          value={preferences}
-          debounceMs={0}
-        >
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label className="text-base">New Neighbor Notifications</Label>
-              <p className="text-sm text-gray-500">
-                Get notified when new neighbors join your community
-              </p>
+          {/* New neighbor notifications */}
+          <AutoSaveField 
+            fieldName="notification_preferences" 
+            value={preferences}
+            debounceMs={0}
+          >
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">New Neighbor Notifications</Label>
+                <p className="text-sm text-gray-500">
+                  Get notified when new neighbors join your community
+                </p>
+              </div>
+              <Switch
+                checked={preferences.new_neighbors}
+                onCheckedChange={(value) => updatePreference('new_neighbors', value)}
+              />
             </div>
-            <Switch
-              checked={preferences.new_neighbors}
-              onCheckedChange={(value) => updatePreference('new_neighbors', value)}
-            />
-          </div>
-        </AutoSaveField>
-      </div>
+          </AutoSaveField>
+        </div>
+      </SettingsCard>
     </div>
   );
 };
