@@ -3,7 +3,7 @@
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
  * 
- * UPDATED: Now works with simplified RLS policies - much cleaner!
+ * UPDATED: Now properly fetches profile data for actor names and avatars
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
@@ -15,11 +15,10 @@ const logger = createLogger('fetchDirectNotifications');
 /**
  * Fetch direct notifications from the dedicated notifications table
  * 
- * With our new simplified RLS, this is much simpler - just query notifications
- * and the RLS policy handles access control automatically
+ * Now includes proper profile data fetching for actor names and avatars
  * 
  * @param showArchived - Whether to include archived notifications
- * @returns Formatted array of notifications
+ * @returns Formatted array of notifications with proper profile data
  */
 export const fetchDirectNotifications = async (showArchived: boolean): Promise<BaseNotification[]> => {
   // Log the query parameters for debugging
@@ -29,10 +28,17 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // UPDATED: With simplified RLS, just query notifications directly
+    // UPDATED: Now join with profiles table to get actor profile data
     const { data: notifications, error } = await supabase
       .from('notifications')
-      .select('*')
+      .select(`
+        *,
+        profiles:actor_id (
+          id,
+          display_name,
+          avatar_url
+        )
+      `)
       .eq('is_archived', showArchived)
       .order('created_at', { ascending: false });
       
@@ -65,7 +71,7 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
 /**
  * Process raw notifications from the notifications table to match the BaseNotification format
  * 
- * @param notifications - Raw notifications from the database
+ * @param notifications - Raw notifications from the database with profile data
  * @returns Processed notifications adhering to BaseNotification interface
  */
 export const processDirectNotifications = (notifications: any[]): BaseNotification[] => {
@@ -76,15 +82,18 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
   });
 
   return notifications.map(notification => {
-    // Build a standardized context object from metadata
+    // Extract profile data from the joined profiles table
+    const profileData = notification.profiles;
+    
+    // Build a standardized context object from metadata with real profile data
     const notificationContext = {
       contextType: notification.notification_type || 'general',
-      neighborName: "A neighbor", // Default since we simplified the policies
-      avatarUrl: null, // Default since we simplified the policies
+      neighborName: profileData?.display_name || "A neighbor", // Use actual display name
+      avatarUrl: profileData?.avatar_url || null, // Use actual avatar URL
       ...(notification.metadata || {})
     };
     
-    // Return a properly formatted BaseNotification
+    // Return a properly formatted BaseNotification with real profile data
     return {
       id: notification.id,
       user_id: notification.user_id,
@@ -100,9 +109,13 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
       created_at: notification.created_at,
       updated_at: notification.updated_at || notification.created_at,
       context: notificationContext,
-      // Include additional fields for consistency with other notification types
+      // Include the actual profile data for proper display
       description: notification.description || null,
-      profiles: null // Set to null since we simplified the policies
+      profiles: profileData ? {
+        id: profileData.id,
+        display_name: profileData.display_name,
+        avatar_url: profileData.avatar_url
+      } : null
     };
   });
 };
