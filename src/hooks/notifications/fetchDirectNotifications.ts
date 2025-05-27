@@ -3,7 +3,7 @@
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
  * 
- * UPDATED: Now properly fetches profile data for actor names and avatars
+ * UPDATED: Now properly fetches profile data using manual join approach
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
@@ -15,7 +15,7 @@ const logger = createLogger('fetchDirectNotifications');
 /**
  * Fetch direct notifications from the dedicated notifications table
  * 
- * Now includes proper profile data fetching for actor names and avatars
+ * Now includes proper profile data fetching using a two-step approach
  * 
  * @param showArchived - Whether to include archived notifications
  * @returns Formatted array of notifications with proper profile data
@@ -28,17 +28,10 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // FIXED: Use LEFT JOIN syntax to get profile data without breaking the query
+    // First, fetch notifications without profile data
     const { data: notifications, error } = await supabase
       .from('notifications')
-      .select(`
-        *,
-        actor_profile:profiles!notifications_actor_id_fkey (
-          id,
-          display_name,
-          avatar_url
-        )
-      `)
+      .select('*')
       .eq('is_archived', showArchived)
       .order('created_at', { ascending: false });
       
@@ -55,8 +48,34 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
     // Log the raw notifications count
     logger.debug(`Found ${notifications?.length || 0} direct notifications`);
     
-    // Process and return the notifications
-    return processDirectNotifications(notifications || []);
+    if (!notifications || notifications.length === 0) {
+      return [];
+    }
+    
+    // Get unique actor IDs to fetch profile data
+    const actorIds = [...new Set(notifications
+      .map(n => n.actor_id)
+      .filter(id => id !== null)
+    )];
+    
+    // Fetch profile data for all actors in one query
+    let profilesMap = new Map();
+    if (actorIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .in('id', actorIds);
+        
+      if (profilesError) {
+        logger.warn('Error fetching profiles:', profilesError);
+      } else if (profiles) {
+        // Create a map for quick lookup
+        profilesMap = new Map(profiles.map(p => [p.id, p]));
+      }
+    }
+    
+    // Process and return the notifications with profile data
+    return processDirectNotifications(notifications, profilesMap);
     
   } catch (error: any) {
     // Improved error handling with detailed logging
@@ -71,19 +90,24 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
 /**
  * Process raw notifications from the notifications table to match the BaseNotification format
  * 
- * @param notifications - Raw notifications from the database with profile data
+ * @param notifications - Raw notifications from the database
+ * @param profilesMap - Map of actor IDs to their profile data
  * @returns Processed notifications adhering to BaseNotification interface
  */
-export const processDirectNotifications = (notifications: any[]): BaseNotification[] => {
+export const processDirectNotifications = (
+  notifications: any[], 
+  profilesMap: Map<string, any>
+): BaseNotification[] => {
   // Log the raw notification data we're processing
   logger.debug('Processing notifications:', {
     count: notifications.length,
-    types: notifications.map(n => n.notification_type)
+    types: notifications.map(n => n.notification_type),
+    profilesAvailable: profilesMap.size
   });
 
   return notifications.map(notification => {
-    // Extract profile data from the joined profiles table
-    const profileData = notification.actor_profile;
+    // Get profile data from the map
+    const profileData = notification.actor_id ? profilesMap.get(notification.actor_id) : null;
     
     // Build a standardized context object from metadata with real profile data
     const notificationContext = {
