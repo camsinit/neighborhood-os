@@ -28,12 +28,12 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
   });
   
   try {
-    // UPDATED: Now join with profiles table to get actor profile data
+    // FIXED: Use LEFT JOIN syntax to get profile data without breaking the query
     const { data: notifications, error } = await supabase
       .from('notifications')
       .select(`
         *,
-        profiles:actor_id (
+        actor_profile:profiles!notifications_actor_id_fkey (
           id,
           display_name,
           avatar_url
@@ -83,7 +83,7 @@ export const processDirectNotifications = (notifications: any[]): BaseNotificati
 
   return notifications.map(notification => {
     // Extract profile data from the joined profiles table
-    const profileData = notification.profiles;
+    const profileData = notification.actor_profile;
     
     // Build a standardized context object from metadata with real profile data
     const notificationContext = {
