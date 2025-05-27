@@ -24,6 +24,7 @@ import CalendarPage from './pages/CalendarPage';
 import SafetyPage from './pages/SafetyPage';
 import WaitlistAdmin from './pages/WaitlistAdmin';
 import OnboardingPage from './pages/OnboardingPage';
+import SettingsPage from './pages/SettingsPage';
 
 // Import components
 import ProtectedRoute from './components/auth/ProtectedRoute';

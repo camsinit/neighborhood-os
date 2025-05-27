@@ -8,23 +8,21 @@ import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
-// LoggingControls import is already handled inside DiagnosticsPanel
 
 /**
- * Props for the Sidebar component
+ * Props for the Sidebar component - onOpenSettings no longer needed
  */
 interface SidebarProps {
-  // Function to call when the settings button is clicked
-  onOpenSettings?: () => void;
+  onOpenSettings?: () => void; // Keep for backward compatibility but won't be used
 }
 
 /**
  * Sidebar component
  * 
  * Displays the navigation sidebar with links to different sections of the app
- * Now properly passes the onOpenSettings handler to ActionButtons
+ * Settings now handled via page navigation instead of dialog
  * 
- * @param onOpenSettings - Function to call when the settings button is clicked
+ * @param onOpenSettings - Deprecated prop, kept for backward compatibility
  */
 const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get current user
@@ -54,18 +52,14 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         {/* Divider before bottom actions */}
         <div className="my-4 h-px bg-gray-200" />
 
-        {/* Settings and Invite buttons - now properly passing onOpenSettings */}
-        <ActionButtons 
-          onOpenSettings={onOpenSettings}
-        />
+        {/* Settings and Invite buttons - settings now navigates to page */}
+        <ActionButtons />
         
-        {/* Diagnostics information panel - with reduced content */}
+        {/* Diagnostics information panel */}
         <DiagnosticsPanel 
           user={user}
           currentNeighborhood={currentNeighborhood}
         />
-        
-        {/* The LoggingControls have been moved into the DiagnosticsPanel component */}
       </nav>
     </div>
   );

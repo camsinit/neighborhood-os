@@ -1,10 +1,8 @@
 
-import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
 import { DebugDashboard } from "@/components/debug/DebugDashboard";
-import SettingsDialogWrapper from "@/components/dialog/SettingsDialogWrapper";
 
 /**
  * MainLayout component props
@@ -20,7 +18,8 @@ interface MainLayoutProps {
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
  * - Debug dashboard for development
- * - Settings dialog management
+ * 
+ * Settings are now handled as a page route instead of a dialog
  * 
  * @param children - Content to render in the main area
  */
@@ -28,22 +27,18 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   // Get the current location to determine if we're on the homepage
   const location = useLocation();
   const isHomePage = location.pathname === '/home';
-  
-  // State to manage the settings dialog visibility
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   /**
    * Handler for settings button click
-   * Opens the settings dialog when the settings button is clicked
+   * This is now deprecated since settings is a page, but kept for header compatibility
    */
   const handleOpenSettings = () => {
-    console.log("Opening settings dialog");
-    setIsSettingsOpen(true);
+    console.log("Settings handled by navigation - this shouldn't be called");
   };
 
   return (
     <div className="h-screen flex">
-      <Sidebar onOpenSettings={handleOpenSettings} />
+      <Sidebar />
       <div className="flex-1 overflow-auto">
         {/* Only render the header on the homepage */}
         {isHomePage && (
@@ -57,12 +52,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         {/* Add the debug dashboard - only shows in development */}
         <DebugDashboard />
       </div>
-      
-      {/* Settings dialog - managed at the layout level so it can be opened from anywhere */}
-      <SettingsDialogWrapper
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-      />
     </div>
   );
 };
