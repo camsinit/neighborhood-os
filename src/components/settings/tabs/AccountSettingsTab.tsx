@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,15 +124,12 @@ export const AccountSettingsTab: React.FC = () => {
         description="Manage your public profile and basic information"
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Profile Image Section */}
-          <div className="flex flex-col items-center space-y-4">
+          {/* Profile Image Section - Left Column */}
+          <div className="flex flex-col justify-start">
             <ProfileImageUpload />
-            <p className="text-xs text-gray-500 text-center">
-              Click to upload a new profile picture
-            </p>
           </div>
 
-          {/* Basic Information */}
+          {/* Basic Information - Right Column */}
           <div className="space-y-6">
             <FormSection title="Basic Information">
               {/* Display Name */}
