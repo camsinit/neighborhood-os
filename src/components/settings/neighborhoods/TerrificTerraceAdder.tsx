@@ -1,39 +1,24 @@
 
-// It's likely that this file might import from neighborhoodUtils, so let's update it:
-// Note: If the import isn't present, this update won't affect functionality
-
 /**
  * Hidden component for development that adds test user to a specific neighborhood
+ * DISABLED - No longer automatically adds users to prevent toast notifications
  */
-import React, { useEffect } from 'react';
-import { useUser } from '@supabase/auth-helpers-react';
-import { addNeighborhoodMember } from '@/contexts/neighborhood/utils';
+import React from 'react';
 
-// Define props interface
+// Define props interface for backward compatibility
 interface TerrificTerraceAdderProps {
   addUserToNeighborhood: (userId: string, neighborhoodName: string) => Promise<void>;
 }
 
 /**
- * This is a hidden utility component that helps with testing by automatically
- * adding the current user to a test neighborhood called "Terrific Terrace"
+ * This component has been disabled to prevent automatic toast notifications
+ * when users navigate to the Neighbor Profile settings tab
  */
 const TerrificTerraceAdder: React.FC<TerrificTerraceAdderProps> = ({ addUserToNeighborhood }) => {
-  const user = useUser();
-
-  // When component mounts, attempt to add the user to the test neighborhood
-  useEffect(() => {
-    if (user) {
-      // This is intentionally delayed to allow the app to initialize first
-      const timer = setTimeout(() => {
-        addUserToNeighborhood(user.id, 'Terrific Terrace');
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [user, addUserToNeighborhood]);
-
-  // This component doesn't render anything
+  // Component disabled - no longer automatically adds users to neighborhoods
+  // This prevents the "User is already a member of Terrific Terrace" toast message
+  
+  // This component doesn't render anything and doesn't perform any actions
   return null;
 };
 
