@@ -1,9 +1,10 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
-import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
+import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
 
@@ -17,6 +18,7 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * - Adding safety updates
  * 
  * Now organized into columns by module type for better usability
+ * Updated to use the same safety dialog as the Safety Page for consistency
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -115,6 +117,7 @@ const QuickActions = () => {
           </ModuleButton>)}
       </div>
     </div>;
+  
   return <div className="w-full">
       {/* Brief welcome message */}
       
@@ -126,10 +129,11 @@ const QuickActions = () => {
         <ActionColumn title="Events & Safety" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialog components */}
+      {/* Dialog components - now using the same safety dialog as the Safety Page */}
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
-      <AddSafetyUpdateDialog open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
+      <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
     </div>;
 };
+
 export default QuickActions;
