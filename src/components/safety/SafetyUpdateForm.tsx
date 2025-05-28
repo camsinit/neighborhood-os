@@ -19,7 +19,7 @@ interface SafetyUpdateFormProps {
 /**
  * Form component for creating and editing safety updates
  * Automatically detects edit mode when updateId is provided
- * Uses database triggers that prevent duplicate activities
+ * Uses cleaned-up database triggers that prevent duplicate activities
  */
 export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: SafetyUpdateFormProps) {
   // Set up the form with validation schema and default values
@@ -33,7 +33,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
     },
   });
 
-  // Use the safety update submission hook with database trigger logic
+  // Use the refactored safety update submission hook with cleaned database trigger logic
   const { submitSafetyUpdate, handleUpdate, isLoading } = useSafetyUpdateSubmit({
     onSuccess: () => {
       // Call the success callback if provided
