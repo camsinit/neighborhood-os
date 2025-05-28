@@ -108,47 +108,38 @@ export const useUserNeighborhoods = () => {
       
       console.log("[UserNeighborhoods] Fetching neighborhoods for user:", user.id);
 
-      // First check if the user created any neighborhoods directly
-      const {
-        data: createdNeighborhoods,
-        error: createdError
-      } = await supabase.from('neighborhoods').select('id, name').eq('created_by', user.id);
-      
-      if (createdError) {
-        console.warn("[UserNeighborhoods] Error checking created neighborhoods:", createdError);
+      // UPDATED: Use the new get_user_accessible_neighborhoods function
+      const { data: accessibleNeighborhoods, error: accessError } = await supabase
+        .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
+
+      if (accessError) {
+        console.warn("[UserNeighborhoods] Error getting accessible neighborhoods:", accessError);
+        throw accessError;
       }
 
-      // If user created neighborhoods, use those
-      if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-        const formattedNeighborhoods = createdNeighborhoods.map(item => ({
-          id: item.id,
-          name: item.name,
-          joined_at: new Date().toISOString() // Default value since we don't have joined_at for creators
-        }));
+      if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
+        // Extract neighborhood IDs from the new return format {neighborhood_id, access_type}
+        const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
         
-        setNeighborhoods(formattedNeighborhoods);
-        setIsLoading(false);
-        return;
-      }
+        // Get details for all accessible neighborhoods using the new RLS policy
+        const { data: neighborhoodDetails, error: detailsError } = await supabase
+          .from('neighborhoods')
+          .select('id, name, created_at')
+          .in('id', neighborhoodIds);
 
-      // Call RPC function that safely checks membership
-      // Use the function call with 'any' type annotation to bypass TypeScript checking
-      const response = await (supabase.rpc as any)('get_user_neighborhoods', {
-        user_uuid: user.id
-      });
-      
-      // Use type assertion for the RPC response
-      const { data: membershipData, error: membershipError } = response as unknown as {
-        data: Neighborhood[] | null;
-        error: Error | null;
-      };
-      
-      if (membershipError) {
-        throw membershipError;
-      }
-      
-      if (membershipData) {
-        setNeighborhoods(membershipData);
+        if (detailsError) {
+          console.warn("[UserNeighborhoods] Error getting neighborhood details:", detailsError);
+          throw detailsError;
+        }
+
+        // Transform the data to match our interface
+        const allNeighborhoods: Neighborhood[] = neighborhoodDetails?.map(n => ({
+          id: n.id,
+          name: n.name,
+          joined_at: n.created_at || new Date().toISOString()
+        })) || [];
+        
+        setNeighborhoods(allNeighborhoods);
       } else {
         setNeighborhoods([]);
       }

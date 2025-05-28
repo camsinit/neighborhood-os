@@ -2,7 +2,7 @@
 /**
  * Hook for fetching neighborhood data
  *
- * UPDATED: Now works with simplified RLS policies that only allow direct access
+ * UPDATED: Now works with the new get_user_accessible_neighborhoods function that returns both neighborhood_id and access_type
  */
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -57,7 +57,7 @@ export function useFetchNeighborhood(
 
       logger.debug("Fetching neighborhoods for user:", user.id);
 
-      // UPDATED: Use the new security definer function to get accessible neighborhoods
+      // UPDATED: Use the new security definer function with updated return type
       const { data: accessibleNeighborhoods, error: accessError } = await supabase
         .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
 
@@ -68,11 +68,14 @@ export function useFetchNeighborhood(
       }
 
       if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-        // Get the first accessible neighborhood's details
+        // Extract the neighborhood_id from the first result (the function now returns {neighborhood_id, access_type})
+        const firstNeighborhoodId = accessibleNeighborhoods[0].neighborhood_id;
+        
+        // Get the neighborhood details using the new RLS policy
         const { data: neighborhood, error: neighborhoodError } = await supabase
           .from('neighborhoods')
           .select('id, name')
-          .eq('id', accessibleNeighborhoods[0].neighborhood_id)
+          .eq('id', firstNeighborhoodId)
           .single();
 
         if (neighborhoodError) {

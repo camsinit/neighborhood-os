@@ -1269,6 +1269,7 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: {
           neighborhood_id: string
+          access_type: string
         }[]
       }
       get_user_current_neighborhood: {
