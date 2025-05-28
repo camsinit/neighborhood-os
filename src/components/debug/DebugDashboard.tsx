@@ -8,8 +8,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bug, Database, Bell, Users } from 'lucide-react';
+import { Bug, Database, Bell, Users, Activity } from 'lucide-react';
 import { RLSDiagnosticsPanel } from './RLSDiagnosticsPanel';
+import { ActivityDebugPanel } from './ActivityDebugPanel';
 import LoggingControls from './LoggingControls';
 
 export const DebugDashboard = () => {
@@ -49,8 +50,12 @@ export const DebugDashboard = () => {
         </div>
         
         <div className="p-4 overflow-y-auto max-h-[calc(90vh-80px)]">
-          <Tabs defaultValue="rls" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+          <Tabs defaultValue="activities" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="activities" className="flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Activities
+              </TabsTrigger>
               <TabsTrigger value="rls" className="flex items-center gap-2">
                 <Database className="w-4 h-4" />
                 RLS
@@ -68,6 +73,10 @@ export const DebugDashboard = () => {
                 Logging
               </TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="activities" className="mt-4">
+              <ActivityDebugPanel />
+            </TabsContent>
             
             <TabsContent value="rls" className="mt-4">
               <RLSDiagnosticsPanel />
