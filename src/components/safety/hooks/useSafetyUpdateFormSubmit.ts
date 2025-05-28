@@ -13,7 +13,7 @@ const logger = createLogger('useSafetyUpdateFormSubmit');
 
 /**
  * Custom hook for handling safety update form submissions
- * Now uses the cleaned-up database triggers that prevent duplicate activities
+ * Now relies ONLY on database triggers for activity creation - no manual activity logic
  */
 export const useSafetyUpdateFormSubmit = (
   user: User | null,
@@ -27,7 +27,7 @@ export const useSafetyUpdateFormSubmit = (
 
   /**
    * Submit form data to create or update a safety update
-   * The database triggers now handle ALL activity and notification creation automatically
+   * Database triggers handle ALL activity creation automatically
    */
   const submitSafetyUpdate = async (data: SafetyUpdateFormData) => {
     // Validate that we have the required user authentication
@@ -58,7 +58,7 @@ export const useSafetyUpdateFormSubmit = (
 
       // Handle both create and update operations
       if (mode === 'edit' && updateId) {
-        logger.debug('Updating safety update - cleaned DB triggers handle activity updates', { 
+        logger.debug('Updating safety update - database triggers handle activity updates automatically', { 
           updateId,
           title: data.title
         });
@@ -73,12 +73,12 @@ export const useSafetyUpdateFormSubmit = (
           })
           .eq('id', updateId);
       } else {
-        logger.debug('Creating safety update - cleaned DB triggers handle activity/notification creation', { 
+        logger.debug('Creating safety update - database triggers handle all activity/notification creation', { 
           title: data.title,
           neighborhoodId: neighborhoodData.id
         });
         
-        // Create new safety update - the cleaned triggers handle everything automatically
+        // Create new safety update - database triggers handle everything automatically
         response = await supabase
           .from('safety_updates')
           .insert(updateData);
@@ -97,7 +97,7 @@ export const useSafetyUpdateFormSubmit = (
       );
 
       // Trigger UI refreshes to show the new content
-      // The database triggers handle all the backend activity/notification creation
+      // Database triggers handle all the backend activity/notification creation
       refreshEvents.emit('safety-updated');
       refreshEvents.emit('activities');
 

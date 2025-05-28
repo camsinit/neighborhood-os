@@ -7,6 +7,7 @@ const logger = createLogger('eventServices');
 
 /**
  * Creates a new event in the database
+ * Database triggers handle all activity and notification creation automatically
  * 
  * @param eventData - The event data to insert
  * @param userId - The ID of the user creating the event
@@ -19,9 +20,9 @@ export const createEvent = async (
   eventTitle: string
 ): Promise<any> => {
   // Log event creation attempt
-  console.log("[eventServices] Creating event:", eventData);
+  logger.debug("Creating event with database triggers:", eventData);
 
-  // Insert the event into the database
+  // Insert the event into the database - triggers handle everything else
   const { data, error } = await supabase
     .from('events')
     .insert(eventData)
@@ -29,19 +30,21 @@ export const createEvent = async (
 
   // Handle any database errors
   if (error) {
-    console.error("[eventServices] Error creating event:", error);
+    logger.error("Error creating event:", error);
     throw error;
   }
 
-  console.log("[eventServices] Event created successfully:", data);
-  
-  // No need to call edge function - database trigger will create notifications
+  logger.info("Event created successfully - database triggers handle activities/notifications:", {
+    eventId: data?.[0]?.id,
+    title: eventTitle
+  });
   
   return data;
 };
 
 /**
  * Updates an existing event in the database
+ * Database triggers handle activity updates automatically
  * 
  * @param eventId - The ID of the event to update
  * @param eventData - The updated event data
@@ -56,9 +59,9 @@ export const updateEvent = async (
   eventTitle: string
 ): Promise<any> => {
   // Log event update attempt
-  console.log("[eventServices] Updating event:", eventId, eventData);
+  logger.debug("Updating event with database triggers:", { eventId, eventData });
 
-  // Update the event in the database
+  // Update the event in the database - triggers handle activity updates
   const { data, error } = await supabase
     .from('events')
     .update(eventData)
@@ -67,13 +70,14 @@ export const updateEvent = async (
 
   // Handle any database errors
   if (error) {
-    console.error("[eventServices] Error updating event:", error);
+    logger.error("Error updating event:", error);
     throw error;
   }
 
-  console.log("[eventServices] Event updated successfully:", data);
-  
-  // No need to call edge function - database trigger will create notifications
+  logger.info("Event updated successfully - database triggers handle activity updates:", {
+    eventId,
+    title: eventTitle
+  });
   
   return data;
 };
@@ -86,7 +90,7 @@ export const updateEvent = async (
  */
 export const deleteEvent = async (eventId: string): Promise<void> => {
   // Log event deletion attempt
-  console.log("[eventServices] Deleting event:", eventId);
+  logger.debug("Deleting event:", eventId);
 
   // Delete the event from the database
   const { error } = await supabase
@@ -96,9 +100,9 @@ export const deleteEvent = async (eventId: string): Promise<void> => {
 
   // Handle any database errors
   if (error) {
-    console.error("[eventServices] Error deleting event:", error);
+    logger.error("Error deleting event:", error);
     throw error;
   }
 
-  console.log("[eventServices] Event deleted successfully");
+  logger.info("Event deleted successfully");
 };

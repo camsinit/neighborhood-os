@@ -16,7 +16,7 @@ interface SafetyUpdateFormNewProps {
 
 /**
  * Form component for creating and editing safety updates
- * Now uses the cleaned database triggers that prevent duplicate activities
+ * Now uses database triggers that prevent duplicate activities
  */
 export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
   // Set up the form with validation schema and default values
@@ -25,12 +25,12 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Emergency", // Set Emergency as default to test the cleaned triggers
+      type: existingData?.type || "Emergency", // Set Emergency as default to test the triggers
       imageUrl: existingData?.imageUrl || "",
     },
   });
 
-  // Use the safety update submission hook with cleaned trigger logic
+  // Use the safety update submission hook with database trigger logic
   const { submitSafetyUpdate, isLoading } = useSafetyUpdateSubmit({
     onSuccess: () => {
       // Call the success callback if provided
@@ -40,9 +40,9 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
     }
   });
 
-  // Handle form submission - the cleaned triggers will handle activities/notifications
+  // Handle form submission - database triggers handle activities/notifications automatically
   const onSubmit = async (data: SafetyUpdateFormData) => {
-    console.log('[SafetyUpdateFormNew] Submitting safety update with cleaned triggers:', data);
+    console.log('[SafetyUpdateFormNew] Submitting safety update with database triggers:', data);
     await submitSafetyUpdate(data);
   };
 

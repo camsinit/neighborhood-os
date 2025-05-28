@@ -1,6 +1,6 @@
 
 import { useUser } from "@supabase/auth-helpers-react";
-import { toast } from "sonner"; // Updated import for toast
+import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { transformEventFormData, transformEventUpdateData } from "./utils/eventDataTransformer";
@@ -17,8 +17,7 @@ interface EventSubmitProps {
  * Custom hook for handling event submissions and updates
  * 
  * This hook provides functions to create and update events in the database
- * 
- * FIXED: Now prevents multiple refresh triggers when submitting events
+ * Now relies ONLY on database triggers for activity creation
  * 
  * @param onSuccess - Callback function to run after successful submission
  * @returns Object containing handleSubmit and handleUpdate functions
@@ -60,6 +59,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
   /**
    * Handles the submission of a new event
+   * Database triggers handle all activity and notification creation
    * 
    * @param formData - The form data containing event details
    * @returns The created event data or undefined if there was an error
@@ -80,7 +80,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
     try {
       // Add detailed logging before the insert operation
-      console.log("[useEventSubmit] Attempting to insert event:", {
+      console.log("[useEventSubmit] Attempting to insert event with database triggers:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         neighborhoodTimezone,
@@ -101,16 +101,16 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Log the transformed data that will be sent to the database
       console.log("[useEventSubmit] Transformed event data:", eventData);
 
-      // Create the event in the database (service now handles activity creation)
+      // Create the event in the database - triggers handle activities/notifications automatically
       const data = await createEvent(eventData, user.id, formData.title);
       
       // Log success after database operation
-      console.log("[useEventSubmit] Event created successfully:", {
+      console.log("[useEventSubmit] Event created successfully with database triggers:", {
         eventId: data?.[0]?.id,
         timestamp: new Date().toISOString()
       });
       
-      // FIXED: Using a single method to refresh events and activities
+      // Refresh UI components
       refreshEvents.emit('event-submitted');
       
       onSuccess();
@@ -127,6 +127,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
   /**
    * Handles the update of an existing event
+   * Database triggers handle activity updates automatically
    * 
    * @param eventId - The ID of the event to update
    * @param formData - The form data containing updated event details
@@ -140,7 +141,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
     try {
       // Add detailed logging before the update operation
-      console.log("[useEventSubmit] Attempting to update event:", {
+      console.log("[useEventSubmit] Attempting to update event with database triggers:", {
         eventId,
         userId: user.id,
         neighborhoodTimezone,
@@ -151,13 +152,13 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Transform the update data, using the neighborhood timezone
       const eventData = transformEventUpdateData(formData, neighborhoodTimezone);
 
-      // Update the event in the database
+      // Update the event in the database - triggers handle activity updates
       const data = await updateEvent(eventId, eventData, user.id, formData.title);
 
       // Success notification
       toast.success("Event updated successfully");
       
-      // FIXED: Using a single method to refresh events and activities
+      // Refresh UI components
       refreshEvents.emit('event-submitted');
       
       onSuccess();

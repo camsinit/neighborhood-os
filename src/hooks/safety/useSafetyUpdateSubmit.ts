@@ -22,7 +22,7 @@ interface SafetyUpdateSubmitProps {
  * 
  * This hook provides methods to create and update safety updates
  * with consistent error handling and state management.
- * Now uses the cleaned-up database triggers that prevent duplicate activities.
+ * Now relies ONLY on database triggers for activity creation.
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,8 +33,8 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
   /**
    * Create a new safety update
-   * The cleaned database triggers now automatically handle:
-   * - Creating exactly ONE activity record (no more duplicates!)
+   * Database triggers automatically handle:
+   * - Creating exactly ONE activity record
    * - Creating notifications for neighborhood members
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
@@ -54,8 +54,8 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setIsLoading(true);
       setError(null);
       
-      // Log the operation for debugging the cleaned trigger behavior
-      logger.debug("Creating safety update with cleaned triggers:", {
+      // Log the operation for debugging
+      logger.debug("Creating safety update with database triggers:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         title: formData.title,
@@ -63,7 +63,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         hasDescription: !!formData.description
       });
 
-      // Insert the safety update - the cleaned database triggers handle everything else
+      // Insert the safety update - database triggers handle everything else automatically
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -82,10 +82,10 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       }
 
       // Log successful creation
-      logger.info("Safety update created successfully with cleaned triggers:", {
+      logger.info("Safety update created successfully with database triggers:", {
         safetyUpdateId: data?.[0]?.id,
         title: formData.title,
-        note: "Cleaned database triggers handle activities and notifications automatically (no duplicates)"
+        note: "Database triggers handle activities and notifications automatically"
       });
 
       // Success handling
@@ -105,7 +105,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         props.onSuccess();
       }
       
-      logger.debug("Safety update submission completed successfully with cleaned triggers");
+      logger.debug("Safety update submission completed successfully with database triggers");
       
       return data;
     } catch (err) {
@@ -120,7 +120,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
   /**
    * Update an existing safety update
-   * The cleaned triggers handle activity updates automatically
+   * Database triggers handle activity updates automatically
    */
   const handleUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
     if (!user) {
@@ -133,14 +133,14 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Updating safety update with cleaned triggers:", {
+      logger.debug("Updating safety update with database triggers:", {
         updateId,
         userId: user.id,
         title: formData.title,
         type: formData.type
       });
 
-      // Update the safety update - cleaned triggers handle activity updates
+      // Update the safety update - database triggers handle activity updates
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -170,7 +170,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         props.onSuccess();
       }
       
-      logger.debug("Safety update update completed successfully with cleaned triggers");
+      logger.debug("Safety update update completed successfully with database triggers");
       
       return data;
     } catch (err) {
