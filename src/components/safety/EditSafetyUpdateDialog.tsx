@@ -34,6 +34,9 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
   // Only show edit button if user is the author
   if (!user || user.id !== update.author_id) return null;
 
+  // Type cast the update.type to ensure it matches our schema
+  const safetyType = update.type as "Emergency" | "Suspicious Activity" | "Infrastructure" | "Weather Alert" | "General Safety";
+
   // Pass the correct props to the SafetyUpdateForm component
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -58,9 +61,9 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
             id: update.id,
             title: update.title,
             description: update.description || "",
-            type: update.type,
+            type: safetyType,
           }}
-          onClose={() => setOpen(false)}
+          onSuccess={() => setOpen(false)}
           mode="edit"
           updateId={update.id}
         />

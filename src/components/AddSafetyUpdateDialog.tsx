@@ -19,7 +19,7 @@ const AddSafetyUpdateDialog = ({ open, onOpenChange }: AddSafetyUpdateDialogProp
       title="Share Safety Update"
       maxWidth="sm"
     >
-      <SafetyUpdateForm onClose={() => onOpenChange(false)} />
+      <SafetyUpdateForm onSuccess={() => onOpenChange(false)} />
     </UniversalDialog>
   );
 };
