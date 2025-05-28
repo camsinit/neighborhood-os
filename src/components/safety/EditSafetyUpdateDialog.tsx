@@ -58,7 +58,6 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
         </DialogHeader>
         <SafetyUpdateForm
           existingData={{
-            id: update.id,
             title: update.title,
             description: update.description || "",
             type: safetyType,
