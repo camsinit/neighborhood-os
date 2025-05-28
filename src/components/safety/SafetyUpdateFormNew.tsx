@@ -15,37 +15,48 @@ interface SafetyUpdateFormNewProps {
 }
 
 export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
+  // Set up the form with validation schema
   const form = useForm<SafetyUpdateFormData>({
     resolver: zodResolver(safetyUpdateSchema),
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Emergency", // Changed from 'Alert'
+      type: existingData?.type || "Emergency", // Set Emergency as default to ensure we test the triggers
       imageUrl: existingData?.imageUrl || "",
     },
   });
 
+  // Use the safety update submission hook
   const { submitSafetyUpdate, isLoading } = useSafetyUpdateSubmit({
     onSuccess: () => {
+      // Call the success callback if provided
       if (onSuccess) onSuccess();
+      // Reset the form after successful submission
       form.reset();
     }
   });
 
+  // Handle form submission
   const onSubmit = async (data: SafetyUpdateFormData) => {
+    console.log('[SafetyUpdateFormNew] Submitting safety update:', data);
     await submitSafetyUpdate(data);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Safety type selection - this determines the urgency and notification behavior */}
         <SafetyTypeField form={form} />
+        
+        {/* Title field - required for all safety updates */}
         <SafetyTextField
           form={form}
           name="title"
           label="Title"
           placeholder="Enter a title for your safety update"
         />
+        
+        {/* Description field - optional but recommended for context */}
         <SafetyTextField
           form={form}
           name="description"
@@ -53,7 +64,11 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
           placeholder="Provide details about the safety update"
           multiline={true}
         />
+        
+        {/* Optional image upload */}
         <ImageField form={form} />
+        
+        {/* Submit button with loading state */}
         <Button 
           type="submit" 
           disabled={isLoading} 

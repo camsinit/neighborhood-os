@@ -9,7 +9,7 @@ import { SafetyUpdateFormData } from "@/components/safety/schema/safetyUpdateSch
 import { refreshEvents } from "@/utils/refreshEvents";
 import { createLogger } from "@/utils/logger";
 
-// Create a dedicated logger
+// Create a dedicated logger for tracking submission process
 const logger = createLogger('useSafetyUpdateSubmit');
 
 // Interface for the hook properties
@@ -22,7 +22,7 @@ interface SafetyUpdateSubmitProps {
  * 
  * This hook provides methods to create and update safety updates
  * with consistent error handling and state management
- * Now using database triggers for notifications
+ * The database triggers should automatically handle notifications and activities
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,8 +33,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
   /**
    * Create a new safety update
+   * The database triggers will automatically handle:
+   * - Creating an activity record
+   * - Creating notifications for neighborhood members
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
+    // Validate user authentication
     if (!user) {
       toast.error("You must be logged in to create a safety update");
       return;
@@ -50,15 +54,16 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setIsLoading(true);
       setError(null);
       
-      // Log the operation for debugging
+      // Log the operation for debugging the trigger behavior
       logger.debug("Creating safety update:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
+        title: formData.title,
+        type: formData.type,
+        hasDescription: !!formData.description
       });
 
-      // Insert the safety update
-      // Database trigger will handle notifications and activities
+      // Insert the safety update - this should trigger the database functions
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -68,28 +73,40 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
           author_id: user.id,
           neighborhood_id: neighborhood.id
         })
-        .select();
+        .select(); // Select the inserted data to confirm it was created
 
       if (error) {
-        logger.error("Error:", error);
+        logger.error("Database error:", error);
         setError(error);
         throw error;
       }
 
+      // Log successful creation
+      logger.info("Safety update created successfully:", {
+        safetyUpdateId: data?.[0]?.id,
+        title: formData.title,
+        triggersExpected: "Database triggers should have created activity and notifications"
+      });
+
       // Success handling
       toast.success("Safety update created successfully");
-      queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       
-      // Use refreshEvents to signal update
+      // Invalidate queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      
+      // Use refreshEvents to signal update to auto-refresh components
       refreshEvents.emit('safety-updated');
       refreshEvents.emit('notification-created');
+      refreshEvents.emit('activities');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      logger.debug("Successfully created safety update - database trigger handled notifications");
+      logger.debug("Safety update submission completed successfully");
       
       return data;
     } catch (err) {
@@ -119,11 +136,11 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       logger.debug("Updating safety update:", {
         updateId,
         userId: user.id,
-        formData: { ...formData, description: formData.description?.substring(0, 20) + '...' }
+        title: formData.title,
+        type: formData.type
       });
 
       // Update the safety update
-      // Database trigger will handle notifications and activity updates
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -132,11 +149,11 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
           type: formData.type,
         })
         .eq('id', updateId)
-        .eq('author_id', user.id)
+        .eq('author_id', user.id) // Ensure user can only update their own safety updates
         .select();
 
       if (error) {
-        logger.error("Error:", error);
+        logger.error("Error updating safety update:", error);
         setError(error);
         throw error;
       }
@@ -147,14 +164,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       
       // Use refreshEvents to signal update
       refreshEvents.emit('safety-updated');
-      refreshEvents.emit('notification-created');
       
       // Call onSuccess if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      logger.debug("Successfully updated safety update - database trigger handled notifications");
+      logger.debug("Safety update update completed successfully");
       
       return data;
     } catch (err) {
