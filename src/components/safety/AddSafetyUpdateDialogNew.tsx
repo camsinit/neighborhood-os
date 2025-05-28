@@ -1,35 +1,28 @@
 
-import UniversalDialog from "@/components/ui/universal-dialog";
-import SafetyUpdateFormNew from "./SafetyUpdateFormNew";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SafetyUpdateForm from "./SafetyUpdateForm";
 
-/**
- * AddSafetyUpdateDialogNew component
- * 
- * Updated dialog for sharing safety updates in the community
- * with a cleaner interface and more specific fields
- */
-interface AddSafetyUpdateDialogNewProps {
+interface AddSafetyUpdateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogNewProps) => {
-  // Create an onSuccess handler that closes the dialog
-  const handleSuccess = () => {
-    onOpenChange(false);
-  };
-
+/**
+ * Modern dialog component for adding safety updates
+ * Uses the unified SafetyUpdateForm component with database triggers
+ */
+const AddSafetyUpdateDialogNew = ({ open, onOpenChange }: AddSafetyUpdateDialogProps) => {
   return (
-    <UniversalDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Share Safety Update"
-      description="Share important safety information with your neighbors. Add details and optionally include an image to help illustrate the situation."
-      maxWidth="sm"
-    >
-      {/* Pass onSuccess instead of onClose */}
-      <SafetyUpdateFormNew onSuccess={handleSuccess} />
-    </UniversalDialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Share Safety Update</DialogTitle>
+        </DialogHeader>
+        <SafetyUpdateForm 
+          onSuccess={() => onOpenChange(false)} 
+        />
+      </DialogContent>
+    </Dialog>
   );
 };
 

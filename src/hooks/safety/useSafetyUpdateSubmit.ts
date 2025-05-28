@@ -12,20 +12,22 @@ import { createLogger } from "@/utils/logger";
 // Create a dedicated logger for tracking submission process
 const logger = createLogger('useSafetyUpdateSubmit');
 
-// Interface for the hook properties
+// Interface for the hook properties - supports both old and new usage patterns
 interface SafetyUpdateSubmitProps {
   onSuccess?: () => void;
+  onClose?: () => void; // Added for backward compatibility
 }
 
 /**
- * Custom hook for handling safety update submissions
+ * UNIFIED Custom hook for handling safety update submissions
  * 
- * This hook provides methods to create and update safety updates
- * with consistent error handling and state management.
- * Now relies ONLY on database triggers for activity creation.
+ * This is the ONLY hook that should be used for safety update submissions.
+ * It handles both create and update operations with consistent error handling
+ * and state management. Database triggers automatically handle activity creation.
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Alias for backward compatibility
   const [error, setError] = useState<Error | null>(null);
   const user = useUser();
   const queryClient = useQueryClient();
@@ -52,6 +54,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
     try {
       setIsLoading(true);
+      setIsSubmitting(true); // Set both for compatibility
       setError(null);
       
       // Log the operation for debugging
@@ -100,9 +103,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       refreshEvents.emit('safety-updated');
       refreshEvents.emit('activities');
       
-      // Call onSuccess callback if provided
+      // Call success/close callbacks if provided
       if (props?.onSuccess) {
         props.onSuccess();
+      }
+      if (props?.onClose) {
+        props.onClose();
       }
       
       logger.debug("Safety update submission completed successfully with database triggers");
@@ -115,6 +121,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       throw err;
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -130,6 +137,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
     try {
       setIsLoading(true);
+      setIsSubmitting(true);
       setError(null);
       
       // Log the operation for debugging
@@ -165,9 +173,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       // Use refreshEvents to signal update
       refreshEvents.emit('safety-updated');
       
-      // Call onSuccess callback if provided
+      // Call success/close callbacks if provided
       if (props?.onSuccess) {
         props.onSuccess();
+      }
+      if (props?.onClose) {
+        props.onClose();
       }
       
       logger.debug("Safety update update completed successfully with database triggers");
@@ -180,11 +191,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       throw err;
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   /**
    * Unified method that works for both create and update operations
+   * Provides backward compatibility for both hook interfaces
    */
   const submitSafetyUpdate = (data: SafetyUpdateFormData & { id?: string }) => {
     if (data.id) {
@@ -194,5 +207,13 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
     }
   };
 
-  return { handleSubmit, handleUpdate, submitSafetyUpdate, isLoading, error };
+  // Return both old and new interface properties for maximum compatibility
+  return { 
+    handleSubmit, 
+    handleUpdate, 
+    submitSafetyUpdate, 
+    isLoading, 
+    isSubmitting, // Alias for backward compatibility
+    error 
+  };
 };

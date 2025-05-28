@@ -7,6 +7,10 @@ interface AddSafetyUpdateDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+/**
+ * Dialog component for adding safety updates
+ * Now uses the unified SafetyUpdateForm component
+ */
 const AddSafetyUpdateDialog = ({ open, onOpenChange }: AddSafetyUpdateDialogProps) => {
   return (
     <UniversalDialog
