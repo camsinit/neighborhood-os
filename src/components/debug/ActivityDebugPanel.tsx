@@ -1,3 +1,4 @@
+
 /**
  * Activity Debug Panel
  * 
@@ -291,7 +292,7 @@ export const ActivityDebugPanel = () => {
                     <div key={index} className="p-2 bg-white rounded border">
                       <div className="flex justify-between items-center mb-1">
                         <span className="font-medium text-sm">{group.key}</span>
-                        <Badge variant="destructive">{group.count} duplicates}</Badge>
+                        <Badge variant="destructive">{group.count} duplicates</Badge>
                       </div>
                       <div className="text-xs text-gray-600">
                         Time difference: {group.timeDifference}ms
