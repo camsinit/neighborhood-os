@@ -14,19 +14,23 @@ interface SafetyUpdateFormNewProps {
   existingData?: SafetyUpdateFormData;
 }
 
+/**
+ * Form component for creating and editing safety updates
+ * Now uses the cleaned database triggers that prevent duplicate activities
+ */
 export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
-  // Set up the form with validation schema
+  // Set up the form with validation schema and default values
   const form = useForm<SafetyUpdateFormData>({
     resolver: zodResolver(safetyUpdateSchema),
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Emergency", // Set Emergency as default to ensure we test the triggers
+      type: existingData?.type || "Emergency", // Set Emergency as default to test the cleaned triggers
       imageUrl: existingData?.imageUrl || "",
     },
   });
 
-  // Use the safety update submission hook
+  // Use the safety update submission hook with cleaned trigger logic
   const { submitSafetyUpdate, isLoading } = useSafetyUpdateSubmit({
     onSuccess: () => {
       // Call the success callback if provided
@@ -36,9 +40,9 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
     }
   });
 
-  // Handle form submission
+  // Handle form submission - the cleaned triggers will handle activities/notifications
   const onSubmit = async (data: SafetyUpdateFormData) => {
-    console.log('[SafetyUpdateFormNew] Submitting safety update:', data);
+    console.log('[SafetyUpdateFormNew] Submitting safety update with cleaned triggers:', data);
     await submitSafetyUpdate(data);
   };
 

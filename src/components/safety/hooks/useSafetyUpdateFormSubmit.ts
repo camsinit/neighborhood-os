@@ -8,12 +8,12 @@ import { Neighborhood } from '@/contexts/neighborhood/types';
 import { refreshEvents } from '@/utils/refreshEvents';
 import { createLogger } from '@/utils/logger';
 
-// Create a logger instance
+// Create a logger instance for tracking the submission process
 const logger = createLogger('useSafetyUpdateFormSubmit');
 
 /**
  * Custom hook for handling safety update form submissions
- * Uses database triggers exclusively for notifications and activities
+ * Now uses the cleaned-up database triggers that prevent duplicate activities
  */
 export const useSafetyUpdateFormSubmit = (
   user: User | null,
@@ -22,20 +22,21 @@ export const useSafetyUpdateFormSubmit = (
   mode = 'create',
   updateId: string | undefined = undefined
 ) => {
-  // Track submission state
+  // Track submission state to show loading indicators
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * Submit form data to create or update a safety update
-   * Database triggers handle ALL activity and notification creation
+   * The database triggers now handle ALL activity and notification creation automatically
    */
   const submitSafetyUpdate = async (data: SafetyUpdateFormData) => {
-    // Validate prerequisites
+    // Validate that we have the required user authentication
     if (!user) {
       toast.error("You must be logged in to create a safety update");
       return false;
     }
 
+    // Validate that we have a valid neighborhood context
     if (!neighborhoodData || !neighborhoodData.id) {
       toast.error("You must be part of a neighborhood to create a safety update");
       return false;
@@ -44,7 +45,7 @@ export const useSafetyUpdateFormSubmit = (
     setIsSubmitting(true);
 
     try {
-      // Prepare the safety update data object
+      // Prepare the safety update data object with all required fields
       const updateData = {
         title: data.title,
         description: data.description,
@@ -55,14 +56,14 @@ export const useSafetyUpdateFormSubmit = (
 
       let response;
 
-      // Update existing or create new based on mode
+      // Handle both create and update operations
       if (mode === 'edit' && updateId) {
-        logger.debug('Updating safety update - DB triggers handle activity updates', { 
+        logger.debug('Updating safety update - cleaned DB triggers handle activity updates', { 
           updateId,
           title: data.title
         });
         
-        // Update existing safety update
+        // Update existing safety update - triggers handle activity updates automatically
         response = await supabase
           .from('safety_updates')
           .update({
@@ -72,34 +73,35 @@ export const useSafetyUpdateFormSubmit = (
           })
           .eq('id', updateId);
       } else {
-        logger.debug('Creating safety update - DB triggers handle activity/notification creation', { 
+        logger.debug('Creating safety update - cleaned DB triggers handle activity/notification creation', { 
           title: data.title,
           neighborhoodId: neighborhoodData.id
         });
         
-        // Create new safety update - triggers handle everything
+        // Create new safety update - the cleaned triggers handle everything automatically
         response = await supabase
           .from('safety_updates')
           .insert(updateData);
       }
 
+      // Check for database errors
       if (response.error) {
         throw response.error;
       }
 
-      // Show success message
+      // Show success message to the user
       toast.success(
         mode === 'edit'
           ? "Safety update edited successfully"
           : "Safety update created successfully"
       );
 
-      // Trigger UI refreshes (triggers handle database-level updates)
+      // Trigger UI refreshes to show the new content
+      // The database triggers handle all the backend activity/notification creation
       refreshEvents.emit('safety-updated');
-      refreshEvents.emit('notification-created');
       refreshEvents.emit('activities');
 
-      // Close the form
+      // Close the form dialog
       onClose();
       
       return true;

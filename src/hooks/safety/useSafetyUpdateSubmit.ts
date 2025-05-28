@@ -21,8 +21,8 @@ interface SafetyUpdateSubmitProps {
  * Custom hook for handling safety update submissions
  * 
  * This hook provides methods to create and update safety updates
- * with consistent error handling and state management
- * The database triggers handle ALL activity and notification creation automatically
+ * with consistent error handling and state management.
+ * Now uses the cleaned-up database triggers that prevent duplicate activities.
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,8 +33,8 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
   /**
    * Create a new safety update
-   * The database triggers will automatically handle:
-   * - Creating exactly ONE activity record
+   * The cleaned database triggers now automatically handle:
+   * - Creating exactly ONE activity record (no more duplicates!)
    * - Creating notifications for neighborhood members
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
@@ -44,7 +44,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       return;
     }
 
-    // Check that we have a valid neighborhood
+    // Check that we have a valid neighborhood context
     if (!neighborhood || !neighborhood.id) {
       toast.error("You must be part of a neighborhood to create a safety update");
       return;
@@ -54,8 +54,8 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setIsLoading(true);
       setError(null);
       
-      // Log the operation for debugging the trigger behavior
-      logger.debug("Creating safety update:", {
+      // Log the operation for debugging the cleaned trigger behavior
+      logger.debug("Creating safety update with cleaned triggers:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         title: formData.title,
@@ -63,7 +63,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         hasDescription: !!formData.description
       });
 
-      // Insert the safety update - database triggers handle everything else
+      // Insert the safety update - the cleaned database triggers handle everything else
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -82,31 +82,30 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       }
 
       // Log successful creation
-      logger.info("Safety update created successfully:", {
+      logger.info("Safety update created successfully with cleaned triggers:", {
         safetyUpdateId: data?.[0]?.id,
         title: formData.title,
-        note: "Database triggers handle activities and notifications automatically"
+        note: "Cleaned database triggers handle activities and notifications automatically (no duplicates)"
       });
 
       // Success handling
       toast.success("Safety update created successfully");
       
-      // Invalidate queries to refresh the UI
+      // Invalidate queries to refresh the UI with the new data
       queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       // Use refreshEvents to signal update to auto-refresh components
       refreshEvents.emit('safety-updated');
-      refreshEvents.emit('notification-created');
       refreshEvents.emit('activities');
       
-      // Call onSuccess if provided
+      // Call onSuccess callback if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      logger.debug("Safety update submission completed successfully");
+      logger.debug("Safety update submission completed successfully with cleaned triggers");
       
       return data;
     } catch (err) {
@@ -121,6 +120,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
 
   /**
    * Update an existing safety update
+   * The cleaned triggers handle activity updates automatically
    */
   const handleUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
     if (!user) {
@@ -133,14 +133,14 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Updating safety update:", {
+      logger.debug("Updating safety update with cleaned triggers:", {
         updateId,
         userId: user.id,
         title: formData.title,
         type: formData.type
       });
 
-      // Update the safety update
+      // Update the safety update - cleaned triggers handle activity updates
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
@@ -165,12 +165,12 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       // Use refreshEvents to signal update
       refreshEvents.emit('safety-updated');
       
-      // Call onSuccess if provided
+      // Call onSuccess callback if provided
       if (props?.onSuccess) {
         props.onSuccess();
       }
       
-      logger.debug("Safety update update completed successfully");
+      logger.debug("Safety update update completed successfully with cleaned triggers");
       
       return data;
     } catch (err) {
