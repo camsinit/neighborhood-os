@@ -1,4 +1,3 @@
-
 /**
  * Activity Debug Panel
  * 
@@ -56,16 +55,13 @@ export const ActivityDebugPanel = () => {
       // Analyze for duplicates
       const duplicateAnalysis = analyzeForDuplicates(activities || []);
       
-      // Get trigger information
-      const triggerInfo = await getTriggerInfo();
-      
-      // Get recent database logs (if accessible)
-      const recentLogs = await getRecentDatabaseLogs();
+      // Get recent database logs (simplified approach)
+      const recentLogs = 'Database trigger analysis available via SQL queries';
 
       setDebugResults({
         totalActivities: activities?.length || 0,
         duplicateAnalysis,
-        triggerInfo,
+        triggerInfo: 'Check database triggers manually via SQL Editor',
         recentLogs,
         timestamp: new Date().toISOString()
       });
@@ -112,26 +108,6 @@ export const ActivityDebugPanel = () => {
       duplicateGroups: suspiciousPatterns,
       hasDuplicates: suspiciousPatterns.length > 0
     };
-  };
-
-  // Get database trigger information
-  const getTriggerInfo = async () => {
-    try {
-      const { data, error } = await supabase.rpc('get_trigger_info');
-      return data || 'Trigger info not available';
-    } catch (error) {
-      return `Error fetching trigger info: ${(error as Error).message}`;
-    }
-  };
-
-  // Get recent database logs (if accessible)
-  const getRecentDatabaseLogs = async () => {
-    try {
-      // This would need a custom function to access logs
-      return 'Log access not implemented yet';
-    } catch (error) {
-      return `Error fetching logs: ${(error as Error).message}`;
-    }
   };
 
   // Create a test safety update to trigger the issue
@@ -346,11 +322,9 @@ export const ActivityDebugPanel = () => {
             {/* Trigger Information */}
             <div className="p-3 bg-blue-50 rounded-lg">
               <h4 className="font-medium mb-2">Database Trigger Info</h4>
-              <pre className="text-xs text-gray-700 whitespace-pre-wrap">
-                {typeof debugResults.triggerInfo === 'string' 
-                  ? debugResults.triggerInfo 
-                  : JSON.stringify(debugResults.triggerInfo, null, 2)}
-              </pre>
+              <p className="text-sm text-gray-700">
+                Use the SQL Editor to check triggers manually. The deadlock prevented automatic trigger cleanup.
+              </p>
             </div>
           </div>
         )}
