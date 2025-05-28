@@ -22,7 +22,7 @@ interface SafetyUpdateSubmitProps {
  * 
  * This hook provides methods to create and update safety updates
  * with consistent error handling and state management
- * The database triggers should automatically handle notifications and activities
+ * The database triggers handle ALL activity and notification creation automatically
  */
 export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -34,7 +34,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
   /**
    * Create a new safety update
    * The database triggers will automatically handle:
-   * - Creating an activity record
+   * - Creating exactly ONE activity record
    * - Creating notifications for neighborhood members
    */
   const handleSubmit = async (formData: SafetyUpdateFormData) => {
@@ -63,7 +63,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
         hasDescription: !!formData.description
       });
 
-      // Insert the safety update - this should trigger the database functions
+      // Insert the safety update - database triggers handle everything else
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
@@ -73,7 +73,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
           author_id: user.id,
           neighborhood_id: neighborhood.id
         })
-        .select(); // Select the inserted data to confirm it was created
+        .select();
 
       if (error) {
         logger.error("Database error:", error);
@@ -85,7 +85,7 @@ export const useSafetyUpdateSubmit = (props?: SafetyUpdateSubmitProps) => {
       logger.info("Safety update created successfully:", {
         safetyUpdateId: data?.[0]?.id,
         title: formData.title,
-        triggersExpected: "Database triggers should have created activity and notifications"
+        note: "Database triggers handle activities and notifications automatically"
       });
 
       // Success handling

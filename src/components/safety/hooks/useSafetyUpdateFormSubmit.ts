@@ -13,7 +13,7 @@ const logger = createLogger('useSafetyUpdateFormSubmit');
 
 /**
  * Custom hook for handling safety update form submissions
- * Uses database triggers exclusively for notifications
+ * Uses database triggers exclusively for notifications and activities
  */
 export const useSafetyUpdateFormSubmit = (
   user: User | null,
@@ -27,6 +27,7 @@ export const useSafetyUpdateFormSubmit = (
 
   /**
    * Submit form data to create or update a safety update
+   * Database triggers handle ALL activity and notification creation
    */
   const submitSafetyUpdate = async (data: SafetyUpdateFormData) => {
     // Validate prerequisites
@@ -56,7 +57,7 @@ export const useSafetyUpdateFormSubmit = (
 
       // Update existing or create new based on mode
       if (mode === 'edit' && updateId) {
-        logger.debug('Updating safety update - DB trigger will handle notification', { 
+        logger.debug('Updating safety update - DB triggers handle activity updates', { 
           updateId,
           title: data.title
         });
@@ -71,12 +72,12 @@ export const useSafetyUpdateFormSubmit = (
           })
           .eq('id', updateId);
       } else {
-        logger.debug('Creating safety update - DB trigger will handle notification', { 
+        logger.debug('Creating safety update - DB triggers handle activity/notification creation', { 
           title: data.title,
           neighborhoodId: neighborhoodData.id
         });
         
-        // Create new safety update
+        // Create new safety update - triggers handle everything
         response = await supabase
           .from('safety_updates')
           .insert(updateData);
@@ -93,7 +94,7 @@ export const useSafetyUpdateFormSubmit = (
           : "Safety update created successfully"
       );
 
-      // Trigger UI refreshes
+      // Trigger UI refreshes (triggers handle database-level updates)
       refreshEvents.emit('safety-updated');
       refreshEvents.emit('notification-created');
       refreshEvents.emit('activities');
