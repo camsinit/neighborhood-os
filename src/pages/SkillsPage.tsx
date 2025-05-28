@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
+import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
 
 const logger = createLogger('SkillsPage');
 
@@ -21,6 +22,9 @@ function SkillsPage() {
   const view = searchParams.get('view') || 'offers';
   const category = searchParams.get('category') || null;
   const searchQuery = searchParams.get('q') || '';
+  
+  // Add state for the skill dialog
+  const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
   
   const highlightedSkill = useHighlightedItem('skills');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
@@ -114,9 +118,10 @@ function SkillsPage() {
                 </TabsList>
               </div>
               
-              {/* Green Add Skills button on the right */}
+              {/* Green Add Skills button with click handler */}
               <Button 
                 className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white shrink-0"
+                onClick={() => setIsSkillDialogOpen(true)}
               >
                 <PlusCircle className="h-4 w-4" />
                 <span>Add Skill</span>
@@ -135,6 +140,14 @@ function SkillsPage() {
           </Tabs>
         </div>
       </ModuleContent>
+      
+      {/* Add Skill Dialog */}
+      <AddSupportRequestDialog
+        open={isSkillDialogOpen}
+        onOpenChange={setIsSkillDialogOpen}
+        initialRequestType="offer"
+        view="skills"
+      />
     </ModuleContainer>
   );
 }
