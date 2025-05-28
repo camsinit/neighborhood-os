@@ -9,16 +9,19 @@ import { ImageField } from "./form/ImageField";
 import { safetyUpdateSchema, SafetyUpdateFormData } from "./schema/safetyUpdateSchema";
 import { useSafetyUpdateSubmit } from "@/hooks/safety/useSafetyUpdateSubmit";
 
-interface SafetyUpdateFormNewProps {
+// Updated interface to support both create and edit operations
+interface SafetyUpdateFormProps {
   onSuccess?: () => void;
   existingData?: SafetyUpdateFormData;
+  updateId?: string; // If provided, this is an edit operation
 }
 
 /**
  * Form component for creating and editing safety updates
- * Now uses database triggers that prevent duplicate activities
+ * Automatically detects edit mode when updateId is provided
+ * Uses database triggers that prevent duplicate activities
  */
-export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyUpdateFormNewProps) {
+export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: SafetyUpdateFormProps) {
   // Set up the form with validation schema and default values
   const form = useForm<SafetyUpdateFormData>({
     resolver: zodResolver(safetyUpdateSchema),
@@ -31,19 +34,28 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
   });
 
   // Use the safety update submission hook with database trigger logic
-  const { submitSafetyUpdate, isLoading } = useSafetyUpdateSubmit({
+  const { submitSafetyUpdate, handleUpdate, isLoading } = useSafetyUpdateSubmit({
     onSuccess: () => {
       // Call the success callback if provided
       if (onSuccess) onSuccess();
-      // Reset the form after successful submission
-      form.reset();
+      // Reset the form after successful submission (only for new updates)
+      if (!updateId) {
+        form.reset();
+      }
     }
   });
 
-  // Handle form submission - database triggers handle activities/notifications automatically
+  // Handle form submission - automatically choose create or update based on updateId
   const onSubmit = async (data: SafetyUpdateFormData) => {
-    console.log('[SafetyUpdateFormNew] Submitting safety update with database triggers:', data);
-    await submitSafetyUpdate(data);
+    console.log('[SafetyUpdateForm] Submitting safety update:', { isEdit: !!updateId, updateId, data });
+    
+    if (updateId) {
+      // This is an edit operation
+      await handleUpdate(updateId, data);
+    } else {
+      // This is a create operation
+      await submitSafetyUpdate(data);
+    }
   };
 
   return (
@@ -72,13 +84,16 @@ export default function SafetyUpdateFormNew({ onSuccess, existingData }: SafetyU
         {/* Optional image upload */}
         <ImageField form={form} />
         
-        {/* Submit button with loading state */}
+        {/* Submit button with loading state - text changes based on operation type */}
         <Button 
           type="submit" 
           disabled={isLoading} 
           className="w-full"
         >
-          {isLoading ? "Submitting..." : "Post Safety Update"}
+          {isLoading 
+            ? (updateId ? "Updating..." : "Submitting...") 
+            : (updateId ? "Update Safety Update" : "Post Safety Update")
+          }
         </Button>
       </form>
     </Form>

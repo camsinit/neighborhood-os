@@ -63,7 +63,6 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
             type: safetyType,
           }}
           onSuccess={() => setOpen(false)}
-          mode="edit"
           updateId={update.id}
         />
       </DialogContent>
