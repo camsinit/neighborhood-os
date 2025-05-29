@@ -3,13 +3,11 @@
  * NeighborNotificationCard.tsx
  * 
  * Specialized notification card for new neighbor announcements.
- * Modified to work directly with database-generated notifications.
+ * Now with clean language highlighting neighbor names in purple.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import NotificationCard from "./base/NotificationCard";
-import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
 import { highlightItem } from "@/utils/highlight";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +23,7 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
   // Set up navigation to go to neighbors page
   const navigate = useNavigate();
   
-  // Handle viewing neighbor profile - updated to use proper routing
+  // Handle viewing neighbor profile
   const handleViewNeighbor = async () => {
     // Navigate to the neighbors section
     navigate('/neighbors');
@@ -38,58 +36,12 @@ export const NeighborNotificationCard: React.FC<NeighborNotificationCardProps> =
     if (onDismiss) onDismiss();
   };
 
-  // Extract actor name from the notification metadata, context or profiles
-  // Added type safety by checking if properties exist before accessing them
-  const actorName = 
-    (notification.metadata && notification.metadata.neighborName) || 
-    (notification.context && notification.context.neighborName) || 
-    (notification.profiles && notification.profiles.display_name) || 
-    "A neighbor";
-  
-  // Create sentence-style title with highlighted neighbor name
-  const createSentenceTitle = () => {
-    // Action could be stored in metadata or context
-    const action = 
-      (notification.metadata && notification.metadata.action) || 
-      (notification.context && notification.context.action) || 
-      'join';
-      
-    // For join notifications, highlight the neighbor name
-    if (action === "join") {
-      return `${actorName} joined your neighborhood`;
-    } 
-    // For profile updates
-    return `${actorName} updated their profile`;
-  };
-  
-  // Create the sentence-style title
-  const sentenceTitle = createSentenceTitle();
-  
-  // Override the notification title with our sentence format if needed
-  const notificationWithSentenceTitle = {
-    ...notification,
-    title: notification.title || sentenceTitle
-  };
-
   return (
     <NotificationCard
-      notification={notificationWithSentenceTitle}
+      notification={notification}
       onAction={handleViewNeighbor}
       onDismiss={onDismiss}
-    >
-      {/* Welcome/Visit profile button */}
-      <div className="mt-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="w-full text-xs py-0 h-7"
-          onClick={handleViewNeighbor}
-        >
-          <UserPlus className="h-3.5 w-3.5 mr-1" />
-          View Profile
-        </Button>
-      </div>
-    </NotificationCard>
+    />
   );
 };
 

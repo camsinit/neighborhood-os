@@ -2,7 +2,7 @@
 /**
  * NotificationCard.tsx
  * 
- * Base notification card with space-efficient design and clean language
+ * Base notification card with clean design and timestamp in top-right corner
  */
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -31,8 +31,7 @@ export interface NotificationCardProps {
 }
 
 /**
- * The base notification card with space-efficient design
- * Now streamlined for better use of space and cleaner presentation
+ * The base notification card with clean design and timestamp preserved in corner
  */
 export const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
@@ -121,37 +120,36 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
   return (
     <Card 
       className={cn(
-        "transition-all duration-300 overflow-hidden mb-1.5 relative border-l-4", // Reduced margin-bottom
+        "transition-all duration-300 overflow-hidden mb-1.5 relative border-l-4",
         isAnimating && "transform translate-x-full opacity-0",
         borderColorClass,
         !is_read && "bg-gray-50",
         className
       )}
     >
-      {/* More compact layout with less padding */}
-      <div className="p-2" onClick={handleCardClick}> {/* Reduced padding for better space usage */}
-        {/* Timestamp in corner for better space usage */}
+      <div className="p-3 relative" onClick={handleCardClick}>
+        {/* PRESERVED: Timestamp in top-right corner as requested */}
         {showTimestamp && (
           <NotificationTimeStamp 
             date={created_at} 
             isUnread={!is_read} 
             position="corner"
-            className="absolute top-1.5 right-1.5 text-[10px]" // Made smaller and positioned tighter
+            className="absolute top-2 right-2 text-xs text-gray-500"
           />
         )}
       
-        <div className="flex gap-1.5 items-start"> {/* Reduced gap between elements */}
-          {/* Smaller avatar */}
+        <div className="flex gap-2 items-start">
+          {/* Avatar */}
           <NotificationAvatar
             url={avatarUrl}
             name={actorName}
             isUnread={!is_read}
             notificationType={notification_type}
-            size="sm" // Using small size by default
+            size="sm"
           />
           
-          {/* Content area with simple language */}
-          <div className="flex-1 min-w-0 pr-5"> {/* Right padding for timestamp */}
+          {/* Content area with clean language and highlighting */}
+          <div className="flex-1 min-w-0 pr-8"> {/* Right padding for timestamp */}
             <NotificationContent 
               title={title}
               actorName={actorName}
@@ -159,21 +157,21 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
               isUnread={!is_read}
             />
             
-            {/* Optional custom content (badges, etc.) */}
+            {/* Optional custom content (minimal additional elements only) */}
             {children && (
-              <div className="mt-0.5"> {/* Reduced margin */}
+              <div className="mt-1">
                 {children}
               </div>
             )}
             
-            {/* Compact action buttons */}
+            {/* Clean action buttons */}
             {showActions && (
-              <div className="flex justify-end gap-1 mt-1.5 pt-1 border-t border-gray-100"> {/* Tighter spacing */}
+              <div className="flex justify-end gap-1 mt-2 pt-1 border-t border-gray-100">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleView}
-                  className="h-6 text-xs text-gray-600 hover:bg-gray-50 px-1.5" // Smaller button
+                  className="h-6 text-xs text-gray-600 hover:bg-gray-50 px-2"
                 >
                   <Eye className="h-3 w-3 mr-1" />
                   View
@@ -182,7 +180,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleArchive}
-                  className="h-6 text-xs text-gray-600 hover:bg-gray-50 px-1.5" // Smaller button
+                  className="h-6 text-xs text-gray-600 hover:bg-gray-50 px-2"
                 >
                   <Archive className="h-3 w-3 mr-1" />
                   Archive

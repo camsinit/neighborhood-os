@@ -1,17 +1,17 @@
+
 /**
  * SkillSessionNotificationCard.tsx
  * 
- * Specialized notification card for skill session updates like scheduling,
- * confirmations, or feedback requests.
+ * Specialized notification card for skill session updates.
+ * Now with clean language and minimal additional elements.
  */
 import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { NotificationCard } from "./base/NotificationCard";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { highlightItem } from "@/utils/highlight";
-import { cn } from "@/lib/utils";
 
 interface SkillSessionNotificationCardProps {
   notification: BaseNotification;
@@ -27,42 +27,8 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
   const skillId = notification.context?.metadata?.skill_id || notification.content_id;
   const sessionTime = notification.context?.sessionTime ? 
     parseISO(notification.context.sessionTime) : null;
-  const skillTitle = notification.context?.skillTitle || "a skill session";
   
-  // Get actor name for descriptive text
-  const actorName = notification.context?.neighborName || 
-    notification.profiles?.display_name || "A neighbor";
-  
-  // Create sentence-style title with highlighted skill name
-  const createSentenceTitle = () => {
-    // Different sentence formats based on notification action
-    switch(notification.action_type) {
-      case "request":
-        return `${actorName} requested [[${skillTitle}]]`;
-      case "confirm":
-        return `${actorName} confirmed [[${skillTitle}]] session`;
-      case "cancel":
-        return `${actorName} cancelled [[${skillTitle}]] session`;
-      case "reschedule":
-        return `${actorName} rescheduled [[${skillTitle}]] session`;
-      case "complete":
-        return `${actorName} completed [[${skillTitle}]] session`;
-      default:
-        return `${actorName} scheduled [[${skillTitle}]]`;
-    }
-  };
-  
-  // Create the sentence-style title
-  const sentenceTitle = createSentenceTitle();
-  
-  // Override the notification title with our sentence format
-  const notificationWithSentenceTitle = {
-    ...notification,
-    title: sentenceTitle
-  };
-  
-  // Handle viewing session details - redirects to calendar if there's an event,
-  // otherwise to the skill details - fixed highlightItem calls
+  // Handle viewing session details
   const handleViewSession = async () => {
     if (eventId) {
       highlightItem('event', eventId);
@@ -75,11 +41,11 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
 
   return (
     <NotificationCard
-      notification={notificationWithSentenceTitle}
+      notification={notification}
       onAction={handleViewSession}
       onDismiss={onDismiss}
     >
-      {/* Session specific details */}
+      {/* Only show session time if available */}
       {sessionTime && (
         <div className="mt-1 text-xs text-gray-600">
           <div className="flex items-center gap-1">
@@ -89,7 +55,7 @@ export const SkillSessionNotificationCard: React.FC<SkillSessionNotificationCard
         </div>
       )}
       
-      {/* View in calendar button if there's an event */}
+      {/* View in calendar button only if there's an event */}
       {eventId && (
         <div className="mt-2">
           <Button

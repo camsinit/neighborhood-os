@@ -3,11 +3,10 @@
  * NotificationContent.tsx
  * 
  * A reusable component for rendering the content of notification items
- * with natural language formatting
+ * with natural language formatting and proper module color highlighting
  */
 import React from "react";
 import { cn } from "@/lib/utils";
-import { getNotificationTextColor } from "../utils/notificationColorUtils";
 
 interface NotificationContentProps {
   title: string;
@@ -19,10 +18,31 @@ interface NotificationContentProps {
 }
 
 /**
+ * Get the appropriate highlight color for different content types
+ * Using module theme colors for consistency
+ */
+const getHighlightColor = (contentType?: string): string => {
+  switch (contentType) {
+    case 'events':
+    case 'event':
+      return 'text-blue-600'; // Calendar blue
+    case 'skills':
+      return 'text-green-600'; // Skills green
+    case 'goods':
+      return 'text-orange-600'; // Goods orange
+    case 'safety':
+      return 'text-red-600'; // Safety red
+    case 'neighbors':
+    case 'neighbor_welcome':
+      return 'text-purple-600'; // Neighbors purple
+    default:
+      return 'text-indigo-600'; // Default
+  }
+};
+
+/**
  * Component for rendering the main content of a notification with natural language formatting
- * This component directly parses and highlights important content
- * 
- * Now updated to prevent double "neighbor name" when notification cards already process the name
+ * Now with simplified highlighting that only colors the main subject
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -32,122 +52,123 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   className,
   children
 }) => {
-  // Format the title to be more conversational
-  // Check if title already starts with actorName to avoid duplication
-  const titleAlreadyHasActor = actorName && title.startsWith(actorName);
-  const formattedTitle = !titleAlreadyHasActor && actorName ? `${actorName} ${title}` : title;
+  // Get highlight color for the content type
+  const highlightColor = getHighlightColor(contentType);
 
-  // Get text color for highlighted content based on notification type
-  const highlightColor = getNotificationTextColor(contentType);
+  // Create the full title with actor name if not already included
+  const titleAlreadyHasActor = actorName && title.toLowerCase().includes(actorName.toLowerCase());
+  const fullTitle = !titleAlreadyHasActor && actorName ? `${actorName} ${title}` : title;
 
-  // Parse title into parts to create a natural sentence with highlights
-  // But ONLY highlight the specific item name, not any other text
-  const renderNaturalSentence = (text: string, type?: string) => {
-    // For event notifications - "Person posted Event Name"
-    if (type === 'event' || type === 'calendar') {
-      const matches = text.match(/(.+?) (posted|shared|created|updated|cancelled|is hosting) (.+)/i);
-      if (matches && matches.length >= 4) {
-        return <>
-            {matches[1]} {matches[2]}{' '}
-            <span className={cn("font-medium", highlightColor)}>
-              {matches[3]}
-            </span>
-          </>;
-      }
-    }
-
-    // For safety notifications - "Person posted safety update Title"
-    if (type === 'safety') {
-      // Handle comment on safety update
-      if (text.includes("comment on")) {
-        const parts = text.split("comment on");
-        if (parts.length > 1) {
-          return <>
-            {parts[0]}commented on your safety update{' '}
-            <span className={cn("font-medium", highlightColor)}>
+  // Parse and highlight the main subject (event name, skill name, item name, etc.)
+  const renderHighlightedTitle = () => {
+    // For RSVP notifications: "Cam RSVP'd to Event Name"
+    if (title.includes("RSVP'd to")) {
+      const parts = fullTitle.split("RSVP'd to");
+      if (parts.length === 2) {
+        return (
+          <>
+            {parts[0]}RSVP'd to{' '}
+            <span className={cn("font-semibold", highlightColor)}>
               {parts[1].trim()}
             </span>
-          </>;
-        }
+          </>
+        );
       }
-      
-      // Handle regular safety alerts
-      // UPDATED: Only highlight the title, not "safety alert"
-      const matches = text.match(/(.+?) (posted|shared|reported) (?:safety alert:)?\s*(.+)/i);
-      if (matches && matches.length >= 4) {
-        return <>
-            {matches[1]} {matches[2]} safety alert{' '}
-            <span className={cn("font-medium", highlightColor)}>
-              {matches[3]}
+    }
+
+    // For "is hosting" events: "Sarah is hosting Community BBQ"
+    if (title.includes("is hosting")) {
+      const parts = fullTitle.split("is hosting");
+      if (parts.length === 2) {
+        return (
+          <>
+            {parts[0]}is hosting{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {parts[1].trim()}
             </span>
-          </>;
+          </>
+        );
       }
     }
 
-    // For goods notifications - "Person is offering Item"
-    if (type === 'goods') {
-      const matches = text.match(/(.+?) (is offering|is looking for|posted|claimed|removed) (.+)/i);
-      if (matches && matches.length >= 4) {
-        return <>
-            {matches[1]} {matches[2]}{' '}
-            <span className={cn("font-medium", highlightColor)}>
-              {matches[3]}
+    // For "shared" skills: "Mike shared Guitar lessons"
+    if (title.includes("shared")) {
+      const parts = fullTitle.split("shared");
+      if (parts.length === 2) {
+        return (
+          <>
+            {parts[0]}shared{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {parts[1].trim()}
             </span>
-          </>;
+          </>
+        );
       }
     }
 
-    // For skills notifications - natural sentences
-    if (type === 'skills') {
-      const matches = text.match(/(.+?) (requested|confirmed|completed|scheduled|cancelled|is sharing|shared) (.+)/i);
-      if (matches && matches.length >= 4) {
-        return <>
-            {matches[1]} {matches[2]}{' '}
-            <span className={cn("font-medium", highlightColor)}>
-              {matches[3]}
+    // For "is offering" goods: "Lisa is offering Desk chair"
+    if (title.includes("is offering")) {
+      const parts = fullTitle.split("is offering");
+      if (parts.length === 2) {
+        return (
+          <>
+            {parts[0]}is offering{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {parts[1].trim()}
             </span>
-          </>;
+          </>
+        );
       }
     }
 
-    // For neighbors notifications - NOW highlight just the name, not the entire phrase
-    if (type === 'neighbors' || type === 'neighbor_welcome') {
-      const matches = text.match(/(.+?) (joined|updated|added)/i);
-      if (matches && matches.length >= 3) {
-        return <>
-            <span className={cn("font-medium", highlightColor)}>
-              {matches[1]}
-            </span>{' '}
-            {matches[2]}{text.substring(matches[0].length)}
-          </>;
+    // For "reported" safety: "Tom reported Suspicious activity"
+    if (title.includes("reported")) {
+      const parts = fullTitle.split("reported");
+      if (parts.length === 2) {
+        return (
+          <>
+            {parts[0]}reported{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {parts[1].trim()}
+            </span>
+          </>
+        );
       }
     }
 
-    // Default format for any other notification types
-    // Only highlight the specific content, not the verb or action
-    const defaultMatches = text.match(/(.+?) (posted|shared|updated|created|requested|reported) (.+)/i);
-    if (defaultMatches && defaultMatches.length >= 4) {
-      return <>
-          {defaultMatches[1]} {defaultMatches[2]}{' '}
-          <span className={cn("font-medium", highlightColor)}>
-            {defaultMatches[3]}
-          </span>
-        </>;
+    // For "joined" neighbors: "Alex joined your neighborhood"
+    if (title.includes("joined your neighborhood")) {
+      const parts = fullTitle.split(" joined your neighborhood");
+      if (parts.length === 2) {
+        return (
+          <>
+            <span className={cn("font-semibold", highlightColor)}>
+              {parts[0]}
+            </span>
+            {' '}joined your neighborhood{parts[1]}
+          </>
+        );
+      }
     }
 
-    // If no pattern matches, return the text as is
-    return text;
+    // Default: return the title as-is
+    return fullTitle;
   };
   
-  return <div className={cn("flex items-center gap-2 min-w-0", className)}>
-      {/* Main notification text with natural sentence highlighting */}
-      <p className={cn("text-sm leading-tight", isUnread ? "font-medium text-gray-900" : "text-gray-800")}>
-        {renderNaturalSentence(formattedTitle, contentType)}
+  return (
+    <div className={cn("flex items-center gap-2 min-w-0", className)}>
+      {/* Main notification text with highlighting */}
+      <p className={cn(
+        "text-sm leading-tight", 
+        isUnread ? "font-medium text-gray-900" : "text-gray-800"
+      )}>
+        {renderHighlightedTitle()}
       </p>
       
       {/* Optional content like description, comment preview, etc. */}
       {children}
-    </div>;
+    </div>
+  );
 };
 
 export default NotificationContent;

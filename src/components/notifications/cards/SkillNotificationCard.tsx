@@ -3,7 +3,7 @@
  * SkillNotificationCard.tsx
  * 
  * Component for rendering skill-specific notifications
- * Uses simple language like "shared [skill]"
+ * Now with clean language highlighting skill names in green
  */
 import React from 'react';
 import { BaseNotification } from '@/hooks/notifications/types';
@@ -16,55 +16,12 @@ interface SkillNotificationCardProps {
 }
 
 /**
- * Component for rendering skill notifications with simple language
+ * Component for rendering skill notifications with clean highlighting
  */
-const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notification, onDismiss }) => {
-  // Extract context info if available
-  const context = notification.context || {};
-  
-  // Get actor name with fallback
-  const neighborName = context.neighborName || 
-    notification.profiles?.display_name || 
-    'A neighbor';
-  
-  // Create simple, clean title for the notification
-  const createSimpleTitle = () => {
-    // Extract skill name from title or context
-    const skillTitle = notification.title.replace(/^(.+?) (requested|confirmed|completed|scheduled|cancelled|is sharing|shared)\s*/i, "") || 
-      context.skillTitle || 
-      "a skill";
-    
-    // Clean up any redundant text
-    const cleanSkillTitle = skillTitle.replace(/^skill:\s*/i, "");
-    
-    // Use action type to determine the verb
-    const actionType = notification.action_type || context.contextType;
-    
-    // Create simple sentence based on action type - WITHOUT including the neighbor name
-    // (the neighbor name will be included by NotificationCard)
-    if (actionType === 'request') {
-      return `requested ${cleanSkillTitle}`;
-    } else if (actionType === 'confirm' || actionType === 'schedule') {
-      return `confirmed ${cleanSkillTitle}`;
-    } else if (actionType === 'complete') {
-      return `completed ${cleanSkillTitle}`;
-    } else if (actionType === 'cancel') {
-      return `cancelled ${cleanSkillTitle}`;
-    } else {
-      // Default to "shared" for any other action
-      return `shared ${cleanSkillTitle}`;
-    }
-  };
-  
-  // Create simple title
-  const simpleTitle = createSimpleTitle();
-  
-  // Use our simple title for the notification
-  const notificationWithSimpleTitle = {
-    ...notification,
-    title: simpleTitle
-  };
-  
+const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ 
+  notification, 
+  onDismiss 
+}) => {
   // Handle viewing the skill details
   const handleViewSkill = () => {
     if (notification.content_id) {
@@ -77,7 +34,7 @@ const SkillNotificationCard: React.FC<SkillNotificationCardProps> = ({ notificat
 
   return (
     <NotificationCard
-      notification={notificationWithSimpleTitle}
+      notification={notification}
       onAction={handleViewSkill}
       onDismiss={onDismiss}
     />
