@@ -1,13 +1,11 @@
 
 /**
- * Main NotificationItem component that delegates to the appropriate
- * specialized notification item component based on type
+ * Main NotificationItem component that now uses the universal pathway
+ * for ALL notification types - no more redundant specialized components
  */
-import { HighlightableItemType } from "@/utils/highlight";
+import React from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
-import DefaultNotificationItem from "./items/DefaultNotificationItem";
-import SkillNotificationItem from "./items/SkillNotificationItem"; // Fixed import
-import NotificationItem from "./items/NotificationItem"; // Import the minimalist notification item
+import UniversalNotificationItem from "./items/UniversalNotificationItem";
 
 interface NotificationItemProps {
   notification: BaseNotification;
@@ -15,23 +13,13 @@ interface NotificationItemProps {
 }
 
 /**
- * Router component that renders the appropriate notification item
- * using our new minimalist design
+ * Simple router component that now uses the universal notification item
+ * for all notification types, ensuring consistent formatting and behavior
  */
 const NotificationItemRouter = ({ notification, onSelect }: NotificationItemProps) => {
-  // For backward compatibility with specialized components
-  if (notification.notification_type === 'skills' && notification.context?.contextType === 'skill_request') {
-    return (
-      <SkillNotificationItem 
-        notification={notification}
-        onDismiss={onSelect || (() => {})}
-      />
-    );
-  }
-
-  // For all other notifications, use our enhanced notification item component with new design
+  // All notifications now use the universal component
   return (
-    <NotificationItem
+    <UniversalNotificationItem
       notification={notification}
       onSelect={onSelect}
     />

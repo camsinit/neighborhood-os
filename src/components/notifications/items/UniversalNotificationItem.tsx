@@ -1,9 +1,10 @@
 
 /**
- * Minimalist NotificationItem component
+ * UniversalNotificationItem.tsx
  * 
- * This component presents notifications with a clean, user-focused design
- * that prioritizes the person, action, and content with minimal space usage
+ * The single, universal component for rendering ALL notification types.
+ * This replaces all specialized notification cards and provides consistent
+ * formatting with proper subject highlighting and clean design.
  */
 import React, { useState, useRef, useEffect } from "react";
 import { BaseNotification } from "@/hooks/notifications/types";
@@ -17,18 +18,18 @@ import { getNotificationBorderColor } from "../utils/notificationColorUtils";
 import { createLogger } from "@/utils/logger";
 
 // Create logger for this component
-const logger = createLogger('NotificationItem');
+const logger = createLogger('UniversalNotificationItem');
 
-interface NotificationItemProps {
+interface UniversalNotificationItemProps {
   notification: BaseNotification;
   onSelect?: () => void;
 }
 
 /**
- * An efficient notification item component
- * Renders a notification with minimal space usage
+ * The single universal notification component that handles ALL notification types
+ * with consistent formatting, highlighting, and interactions
  */
-const NotificationItem: React.FC<NotificationItemProps> = ({
+const UniversalNotificationItem: React.FC<UniversalNotificationItemProps> = ({
   notification,
   onSelect
 }) => {
@@ -39,7 +40,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   // Log notification details for debugging
   useEffect(() => {
-    logger.debug(`Rendering notification: ${notification.id}`, {
+    logger.debug(`Rendering universal notification: ${notification.id}`, {
       type: notification.notification_type,
       title: notification.title,
       contentType: notification.content_type,
@@ -57,7 +58,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     }, 500); // Match this with animation duration
   };
 
-  // Get content type for navigation
+  // Get content type for navigation - handles all notification types
   const getContentType = (): HighlightableItemType | undefined => {
     const type = notification.notification_type;
     if (type === "event" || type === "safety" || type === "skills" || type === "goods" || type === "neighbors") {
@@ -66,17 +67,27 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     return undefined;
   };
 
-  // Get content ID
+  // Get content ID - handles different ID patterns across notification types
   const getContentId = (): string => {
     // For RSVP notifications, use the event_id from metadata if available
     if (notification.notification_type === 'event' && notification.context?.event_id) {
       return notification.context.event_id;
     }
+    
+    // For skill session notifications, prefer event_id if available
+    if (notification.context?.metadata?.event_id) {
+      return notification.context.metadata.event_id;
+    }
+    
+    // Default to content_id or notification id
     return notification.content_id || notification.id;
   };
 
-  // Get the user's name 
-  const displayName = notification.profiles?.display_name || notification.context?.neighborName || "A neighbor";
+  // Get the user's name with fallbacks for all notification types
+  const displayName = notification.profiles?.display_name || 
+                     notification.context?.neighborName || 
+                     notification.context?.actorName || 
+                     "A neighbor";
 
   // Get notification border color based on its type
   const borderColorClass = getNotificationBorderColor(notification.notification_type);
@@ -100,31 +111,31 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           duration: 0.5,
           ease: "easeInOut"
         }}
-        className="mb-2"  // Reduced margin for better space usage
+        className="mb-2"
         layout
       >
-        {/* Streamlined card with less padding and better space usage */}
+        {/* Universal card design with consistent styling */}
         <div className={`rounded-lg overflow-hidden border ${notification.is_read ? 'border-gray-100' : 'border-gray-200'} shadow-sm bg-white border-l-4 ${borderColorClass}`}>
-          <div className="relative p-3">  {/* Reduced padding */}
-            {/* Timestamp in top right, more compact */}
+          <div className="relative p-3">
+            {/* Timestamp in top right - consistent across all types */}
             <NotificationTimeStamp 
               date={notification.created_at} 
               isUnread={!notification.is_read}
-              className="absolute top-2 right-2 text-[10px]"  // Smaller timestamp
+              className="absolute top-2 right-2 text-[10px]"
             />
             
-            <div className="flex gap-2">  {/* Reduced gap */}
-              {/* Avatar with space-efficient size */}
+            <div className="flex gap-2">
+              {/* Avatar - consistent sizing and fallbacks */}
               <NotificationAvatar 
                 url={notification.profiles?.avatar_url} 
                 name={displayName} 
                 isUnread={!notification.is_read} 
                 notificationType={notification.notification_type} 
-                size="sm"  // Smaller avatar
+                size="sm"
               />
               
-              {/* Content with natural sentence format */}
-              <div className="flex flex-col flex-1 pr-6">  {/* Added right padding for timestamp */}
+              {/* Content with universal highlighting system */}
+              <div className="flex flex-col flex-1 pr-6">
                 <NotificationContent 
                   title={notification.title} 
                   actorName={displayName} 
@@ -137,7 +148,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             </div>
           </div>
           
-          {/* Compact action buttons with minimal padding */}
+          {/* Universal action buttons - same for all notification types */}
           <NotificationActions 
             id={notification.id} 
             contentType={getContentType()} 
@@ -146,7 +157,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             onDismiss={onSelect} 
             triggerSwipeAnimation={handleSwipeOut} 
             notificationType={notification.notification_type}
-            className="px-3 py-1 text-xs"  // Smaller padding, smaller text
+            className="px-3 py-1 text-xs"
           />
         </div>
       </motion.div>
@@ -154,4 +165,4 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   );
 };
 
-export default NotificationItem;
+export default UniversalNotificationItem;
