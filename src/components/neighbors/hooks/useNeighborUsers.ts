@@ -7,7 +7,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Now works with simplified RLS policies - uses view that handles access control
+ * UPDATED: Now works with the new RLS policies and security definer functions
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -33,7 +33,7 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // UPDATED: Use the view directly - it should handle access through the user's membership
+        // Use the view directly - the new RLS policies handle access control properly
         const { data: neighborsData, error } = await supabase
           .from('neighborhood_members_with_profiles')
           .select('*')

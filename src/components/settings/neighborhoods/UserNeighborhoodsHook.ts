@@ -2,6 +2,8 @@
 /**
  * Custom hook to fetch and manage neighborhood data for a user
  * This hook encapsulates all the data fetching logic for neighborhoods
+ * 
+ * UPDATED: Now works with the new security definer functions and fixed RLS policies
  */
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +31,7 @@ export const useUserNeighborhoods = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper function to add a user to a neighborhood
+  // Helper function to add a user to a neighborhood using new security functions
   const addUserToNeighborhood = async (userId: string, neighborhoodName: string) => {
     try {
       // First, find the neighborhood ID by name
@@ -47,38 +49,28 @@ export const useUserNeighborhoods = () => {
       
       const neighborhoodId = neighborhoods[0].id;
 
-      // Check if user is already a member
-      // Use the function call with 'any' type annotation to bypass TypeScript checking
-      const response = await (supabase.rpc as any)('user_is_neighborhood_member', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
+      // Check if user already has access using the new security definer function
+      const { data: hasAccess, error: accessError } = await supabase
+        .rpc('check_neighborhood_access', {
+          user_uuid: userId,
+          neighborhood_uuid: neighborhoodId
+        });
       
-      // Use type assertion for the RPC response
-      const { data: isMember, error: membershipCheckError } = response as unknown as {
-        data: boolean | null;
-        error: Error | null;
-      };
+      if (accessError) throw accessError;
       
-      if (membershipCheckError) throw membershipCheckError;
-      
-      if (isMember) {
-        toast.info(`User is already a member of "${neighborhoodName}"`);
+      if (hasAccess) {
+        toast.info(`User already has access to "${neighborhoodName}"`);
         return;
       }
 
-      // Add the user as a member using RPC function
-      // Use the function call with 'any' type annotation to bypass TypeScript checking
-      const addMemberResponse = await (supabase.rpc as any)('add_neighborhood_member', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
-      
-      // Use type assertion for the RPC response
-      const { error: addError } = addMemberResponse as unknown as {
-        data: boolean | null;
-        error: Error | null;
-      };
+      // Add the user as a member using direct insert (RLS will handle permissions)
+      const { error: addError } = await supabase
+        .from('neighborhood_members')
+        .insert({
+          user_id: userId,
+          neighborhood_id: neighborhoodId,
+          status: 'active'
+        });
       
       if (addError) throw addError;
 
@@ -95,7 +87,7 @@ export const useUserNeighborhoods = () => {
     }
   };
 
-  // Function to refresh the neighborhoods data
+  // Function to refresh the neighborhoods data using new security definer functions
   const refreshNeighborhoods = async () => {
     if (!user) {
       setIsLoading(false);
@@ -108,7 +100,7 @@ export const useUserNeighborhoods = () => {
       
       console.log("[UserNeighborhoods] Fetching neighborhoods for user:", user.id);
 
-      // UPDATED: Use the new get_user_accessible_neighborhoods function
+      // Use the new get_user_accessible_neighborhoods function
       const { data: accessibleNeighborhoods, error: accessError } = await supabase
         .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
 

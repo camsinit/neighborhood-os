@@ -14,7 +14,7 @@ interface Neighborhood {
 /**
  * Custom hook to fetch and manage a user's neighborhoods
  * 
- * UPDATED: Now works with the new get_user_accessible_neighborhoods function signature
+ * UPDATED: Now works with the new security definer functions and fixed RLS policies
  */
 export function useNeighborhoodData() {
   const user = useUser();
@@ -28,7 +28,7 @@ export function useNeighborhoodData() {
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
-  // Fetch neighborhoods data
+  // Fetch neighborhoods data using the new security definer function
   useEffect(() => {
     const fetchNeighborhoods = async () => {
       if (!user) {
@@ -42,7 +42,7 @@ export function useNeighborhoodData() {
         
         console.log("[useNeighborhoodData] Fetching neighborhoods for user:", user.id);
         
-        // UPDATED: Use the new security definer function with updated return type
+        // Use the updated security definer function with new return type
         const { data: accessibleNeighborhoods, error: accessError } = await supabase
           .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
 
@@ -52,10 +52,10 @@ export function useNeighborhoodData() {
         }
 
         if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-          // Extract neighborhood IDs from the new return format {neighborhood_id, access_type}
+          // Extract neighborhood IDs from the return format {neighborhood_id, access_type}
           const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
           
-          // Get details for all accessible neighborhoods using the new RLS policy
+          // Get details for all accessible neighborhoods - this now works with the new RLS policy
           const { data: neighborhoodDetails, error: detailsError } = await supabase
             .from('neighborhoods')
             .select('id, name, created_at')

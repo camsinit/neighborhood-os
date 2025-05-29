@@ -2,15 +2,14 @@
 /**
  * Utility functions for neighborhood membership operations
  * 
- * These functions have been updated to use security definer functions
- * to avoid the infinite recursion issues in RLS policies.
+ * UPDATED: Now uses the new security definer functions to avoid RLS recursion
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses the simple policy structure to avoid recursion
+ * Uses the new security definer function to avoid recursion
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -21,22 +20,19 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // With our simplified RLS policies, we can now directly query the table
-    // The policies will ensure users can only see their own memberships
-    const { data, error } = await supabase
-      .from('neighborhood_members')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('neighborhood_id', neighborhoodId)
-      .eq('status', 'active')
-      .maybeSingle();
+    // Use the new security definer function to check access
+    const { data: hasAccess, error } = await supabase
+      .rpc('check_neighborhood_access', {
+        user_uuid: userId,
+        neighborhood_uuid: neighborhoodId
+      });
             
     if (error) {
-      console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
+      console.error(`[NeighborhoodUtils] Error checking access for ${neighborhoodId}:`, error);
       return false;
     }
             
-    return !!data;
+    return !!hasAccess;
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in checkNeighborhoodMembership:", err);
     return false;
@@ -55,7 +51,7 @@ export async function addNeighborhoodMember(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Direct insert with our simplified RLS policies
+    // Direct insert with the new RLS policies handling permissions
     const { data, error } = await supabase
       .from('neighborhood_members')
       .insert({
@@ -90,7 +86,7 @@ export async function checkUserCreatedNeighborhood(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Direct query to neighborhoods table
+    // Direct query to neighborhoods table - new RLS policies handle this properly
     const { data, error } = await supabase
       .from('neighborhoods')
       .select('id')
