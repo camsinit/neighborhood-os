@@ -17,7 +17,7 @@ import { useState, ReactNode } from "react";
 import { useNotificationsPopoverData } from "./hooks/useNotificationsPopoverData";
 import { archiveNotification } from "@/hooks/notifications/notificationActions"; 
 import { highlightItem, type HighlightableItemType } from "@/utils/highlight";
-import { NotificationCardFactory } from "./cards/NotificationCardFactory"; // Changed from default to named import
+import NotificationItem from "./NotificationItem"; // Updated import
 
 /**
  * Props for the popover component that shows notification content
@@ -172,9 +172,9 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
           {notifications?.length ? (
             notifications.map((notification) => (
               <div key={notification.id} className="py-2">
-                <NotificationCardFactory
+                <NotificationItem
                   notification={notification}
-                  onDismiss={() => refetch()}
+                  onSelect={() => refetch()}
                 />
               </div>
             ))

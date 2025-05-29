@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BaseNotification } from '@/hooks/notifications/types';
-import { NotificationCardFactory } from '../cards/NotificationCardFactory';
+import NotificationItem from '../NotificationItem'; // Updated import
 
 export interface NotificationGroupProps {
   title: string;
@@ -25,10 +25,10 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
       </h3>
       <div className="space-y-3">
         {notifications.map((notification) => (
-          <NotificationCardFactory
+          <NotificationItem
             key={notification.id}
             notification={notification}
-            onDismiss={onClose}
+            onSelect={onClose}
           />
         ))}
       </div>

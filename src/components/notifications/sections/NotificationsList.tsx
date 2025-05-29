@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { BaseNotification } from '@/hooks/notifications/types';
-import { NotificationCardFactory } from '../cards/NotificationCardFactory';
+import NotificationItem from '../NotificationItem'; // Updated import
 import { sortNotificationsByDate } from '../utils/notificationGroupingUtils';
 
 interface NotificationsListProps {
@@ -42,7 +42,7 @@ const NotificationsList = ({
   return (
     <div className="divide-y">
       {sortedNotifications.map((notification) => (
-        <NotificationCardFactory key={notification.id} notification={notification} />
+        <NotificationItem key={notification.id} notification={notification} />
       ))}
     </div>
   );
