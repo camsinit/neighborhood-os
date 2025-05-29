@@ -42,7 +42,7 @@ const getHighlightColor = (contentType?: string): string => {
 
 /**
  * Component for rendering the main content of a notification with natural language formatting
- * Now with simplified highlighting that only colors the main subject
+ * Enhanced to handle more notification patterns and ensure highlighting works
  */
 const NotificationContent: React.FC<NotificationContentProps> = ({
   title,
@@ -59,17 +59,34 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
   const titleAlreadyHasActor = actorName && title.toLowerCase().includes(actorName.toLowerCase());
   const fullTitle = !titleAlreadyHasActor && actorName ? `${actorName} ${title}` : title;
 
-  // Parse and highlight the main subject (event name, skill name, item name, etc.)
+  // Parse and highlight the main subject with improved pattern matching
   const renderHighlightedTitle = () => {
-    // For RSVP notifications: "Cam RSVP'd to Event Name"
-    if (title.includes("RSVP'd to")) {
-      const parts = fullTitle.split("RSVP'd to");
-      if (parts.length === 2) {
+    console.log('Rendering title:', fullTitle, 'Content type:', contentType); // Debug log
+
+    // For RSVP notifications: "Cam RSVP'd to Event Name" or "RSVP'd to Event Name"
+    if (fullTitle.includes("RSVP'd to") || fullTitle.includes("RSVP'd for")) {
+      const rsvpMatch = fullTitle.match(/(.*?)(RSVP'd (?:to|for))\s+(.+)/);
+      if (rsvpMatch) {
         return (
           <>
-            {parts[0]}RSVP'd to{' '}
+            {rsvpMatch[1]}{rsvpMatch[2]}{' '}
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[1].trim()}
+              {rsvpMatch[3]}
+            </span>
+          </>
+        );
+      }
+    }
+
+    // For "New RSVP for" format: "New RSVP for Event Name"
+    if (fullTitle.includes("New RSVP for")) {
+      const newRsvpMatch = fullTitle.match(/(New RSVP for)\s+(.+)/);
+      if (newRsvpMatch) {
+        return (
+          <>
+            {newRsvpMatch[1]}{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {newRsvpMatch[2]}
             </span>
           </>
         );
@@ -77,14 +94,14 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     }
 
     // For "is hosting" events: "Sarah is hosting Community BBQ"
-    if (title.includes("is hosting")) {
-      const parts = fullTitle.split("is hosting");
-      if (parts.length === 2) {
+    if (fullTitle.includes("is hosting")) {
+      const hostingMatch = fullTitle.match(/(.*?is hosting)\s+(.+)/);
+      if (hostingMatch) {
         return (
           <>
-            {parts[0]}is hosting{' '}
+            {hostingMatch[1]}{' '}
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[1].trim()}
+              {hostingMatch[2]}
             </span>
           </>
         );
@@ -92,14 +109,14 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     }
 
     // For "shared" skills: "Mike shared Guitar lessons"
-    if (title.includes("shared")) {
-      const parts = fullTitle.split("shared");
-      if (parts.length === 2) {
+    if (fullTitle.includes("shared")) {
+      const sharedMatch = fullTitle.match(/(.*?shared)\s+(.+)/);
+      if (sharedMatch) {
         return (
           <>
-            {parts[0]}shared{' '}
+            {sharedMatch[1]}{' '}
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[1].trim()}
+              {sharedMatch[2]}
             </span>
           </>
         );
@@ -107,14 +124,14 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     }
 
     // For "is offering" goods: "Lisa is offering Desk chair"
-    if (title.includes("is offering")) {
-      const parts = fullTitle.split("is offering");
-      if (parts.length === 2) {
+    if (fullTitle.includes("is offering")) {
+      const offeringMatch = fullTitle.match(/(.*?is offering)\s+(.+)/);
+      if (offeringMatch) {
         return (
           <>
-            {parts[0]}is offering{' '}
+            {offeringMatch[1]}{' '}
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[1].trim()}
+              {offeringMatch[2]}
             </span>
           </>
         );
@@ -122,36 +139,70 @@ const NotificationContent: React.FC<NotificationContentProps> = ({
     }
 
     // For "reported" safety: "Tom reported Suspicious activity"
-    if (title.includes("reported")) {
-      const parts = fullTitle.split("reported");
-      if (parts.length === 2) {
+    if (fullTitle.includes("reported")) {
+      const reportedMatch = fullTitle.match(/(.*?reported)\s+(.+)/);
+      if (reportedMatch) {
         return (
           <>
-            {parts[0]}reported{' '}
+            {reportedMatch[1]}{' '}
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[1].trim()}
+              {reportedMatch[2]}
             </span>
           </>
         );
       }
     }
 
-    // For "joined" neighbors: "Alex joined your neighborhood"
-    if (title.includes("joined your neighborhood")) {
-      const parts = fullTitle.split(" joined your neighborhood");
-      if (parts.length === 2) {
+    // For "joined your neighborhood": "Alex joined your neighborhood"
+    if (fullTitle.includes("joined your neighborhood")) {
+      const joinedMatch = fullTitle.match(/^(.+?)\s+(joined your neighborhood.*)$/);
+      if (joinedMatch) {
         return (
           <>
             <span className={cn("font-semibold", highlightColor)}>
-              {parts[0]}
+              {joinedMatch[1]}
             </span>
-            {' '}joined your neighborhood{parts[1]}
+            {' '}{joinedMatch[2]}
           </>
         );
+      }
+    }
+
+    // For any other pattern with a colon: "Something: Content"
+    if (fullTitle.includes(":")) {
+      const colonMatch = fullTitle.match(/^(.*?):\s*(.+)$/);
+      if (colonMatch) {
+        return (
+          <>
+            {colonMatch[1]}:{' '}
+            <span className={cn("font-semibold", highlightColor)}>
+              {colonMatch[2]}
+            </span>
+          </>
+        );
+      }
+    }
+
+    // Fallback: try to highlight the last part after common action words
+    const actionWords = ['created', 'added', 'updated', 'posted', 'submitted'];
+    for (const action of actionWords) {
+      if (fullTitle.includes(action)) {
+        const actionMatch = fullTitle.match(new RegExp(`(.*?${action})\\s+(.+)`));
+        if (actionMatch) {
+          return (
+            <>
+              {actionMatch[1]}{' '}
+              <span className={cn("font-semibold", highlightColor)}>
+                {actionMatch[2]}
+              </span>
+            </>
+          );
+        }
       }
     }
 
     // Default: return the title as-is
+    console.log('No pattern matched for title:', fullTitle); // Debug log
     return fullTitle;
   };
   
