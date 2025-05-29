@@ -3,7 +3,7 @@
  * This file contains functionality to fetch direct notifications from the notifications table
  * These are notifications created by database triggers or API calls that aren't derived from content tables
  * 
- * UPDATED: Now properly fetches profile data using manual join approach
+ * UPDATED: Now uses direct profile queries instead of the dropped auth_users_view
  */
 import { supabase } from "@/integrations/supabase/client";
 import { BaseNotification } from "./types";
@@ -15,7 +15,7 @@ const logger = createLogger('fetchDirectNotifications');
 /**
  * Fetch direct notifications from the dedicated notifications table
  * 
- * Now includes proper profile data fetching using a two-step approach
+ * Now uses direct profile queries instead of the dropped security definer view
  * 
  * @param showArchived - Whether to include archived notifications
  * @returns Formatted array of notifications with proper profile data
@@ -58,7 +58,7 @@ export const fetchDirectNotifications = async (showArchived: boolean): Promise<B
       .filter(id => id !== null)
     )];
     
-    // Fetch profile data for all actors in one query
+    // Fetch profile data for all actors in one query using direct table access
     let profilesMap = new Map();
     if (actorIds.length > 0) {
       const { data: profiles, error: profilesError } = await supabase

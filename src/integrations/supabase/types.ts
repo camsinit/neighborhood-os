@@ -364,20 +364,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invitations_accepted_by_id_fkey"
-            columns: ["accepted_by_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invitations_inviter_id_fkey"
-            columns: ["inviter_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "invitations_neighborhood_id_fkey"
             columns: ["neighborhood_id"]
             isOneToOne: false
@@ -414,13 +400,6 @@ export type Database = {
             columns: ["neighborhood_id"]
             isOneToOne: false
             referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "neighborhood_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
             referencedColumns: ["id"]
           },
         ]
@@ -462,15 +441,7 @@ export type Database = {
           timezone?: string
           zip?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "neighborhoods_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -521,22 +492,7 @@ export type Database = {
           title?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -602,15 +558,7 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       safety_update_comments: {
         Row: {
@@ -1007,15 +955,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       waitlist: {
         Row: {
@@ -1040,98 +980,7 @@ export type Database = {
       }
     }
     Views: {
-      auth_users_view: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-        }
-        Relationships: []
-      }
-      debug_neighborhood_members: {
-        Row: {
-          id: string | null
-          joined_at: string | null
-          neighborhood_id: string | null
-          neighborhood_name: string | null
-          status: string | null
-          user_display_name: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "neighborhood_members_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "neighborhood_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      neighborhood_content: {
-        Row: {
-          content_id: string | null
-          content_type: string | null
-          created_at: string | null
-          description: string | null
-          neighborhood_id: string | null
-          title: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      neighborhood_members_with_profiles: {
-        Row: {
-          access_needs: string | null
-          address: string | null
-          address_visible: boolean | null
-          avatar_url: string | null
-          bio: string | null
-          display_name: string | null
-          email_visible: boolean | null
-          joined_at: string | null
-          membership_id: string | null
-          needs_visible: boolean | null
-          neighborhood_id: string | null
-          phone_number: string | null
-          phone_visible: boolean | null
-          status: string | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "neighborhood_members_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "neighborhood_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "auth_users_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       add_initial_super_admin: {

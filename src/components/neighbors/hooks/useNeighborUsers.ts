@@ -7,7 +7,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Now works with the new RLS policies and security definer functions
+ * UPDATED: Now uses direct table queries instead of the dropped security definer view
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -33,63 +33,63 @@ export const useNeighborUsers = () => {
       console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
       
       try {
-        // Use the view directly - the new RLS policies handle access control properly
-        const { data: neighborsData, error } = await supabase
-          .from('neighborhood_members_with_profiles')
-          .select('*')
+        // First, get neighborhood members using direct table query
+        const { data: membersData, error: membersError } = await supabase
+          .from('neighborhood_members')
+          .select('user_id')
           .eq('neighborhood_id', currentNeighborhood.id)
           .eq('status', 'active');
           
-        if (error) {
-          console.error("[useNeighborUsers] Error fetching neighborhood members:", error);
-          throw error;
+        if (membersError) {
+          console.error("[useNeighborUsers] Error fetching neighborhood members:", membersError);
+          throw membersError;
         }
         
-        console.log("[useNeighborUsers] Found neighbors:", {
-          memberCount: neighborsData?.length || 0,
-          neighborhoodId: currentNeighborhood.id
-        });
-        
-        // Get auth details (emails) for the users - only if we have neighbors
-        if (!neighborsData || neighborsData.length === 0) {
+        if (!membersData || membersData.length === 0) {
+          console.log("[useNeighborUsers] No members found in neighborhood");
           return [];
         }
 
-        const userIds = neighborsData.map(n => n.user_id);
+        console.log("[useNeighborUsers] Found members:", {
+          memberCount: membersData.length,
+          neighborhoodId: currentNeighborhood.id
+        });
         
-        const { data: authUsers, error: authError } = await supabase
-          .from('auth_users_view')
-          .select('id, email, created_at')
+        // Get user IDs for profile lookup
+        const userIds = membersData.map(m => m.user_id);
+        
+        // Get profiles for these users using direct table query
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url, address, phone_number, access_needs, email_visible, phone_visible, address_visible, needs_visible, bio')
           .in('id', userIds);
           
-        if (authError) {
-          console.error("[useNeighborUsers] Error fetching auth users:", authError);
-          // Continue without auth data rather than failing completely
+        if (profilesError) {
+          console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
+          throw profilesError;
         }
         
         // Transform data into expected format
-        const usersWithProfiles = neighborsData.map((neighbor: any) => {
-          const authUser = authUsers?.find((u: any) => u.id === neighbor.user_id);
-          
+        const usersWithProfiles = profilesData?.map((profile: any) => {
           return {
-            id: neighbor.user_id,
-            email: authUser?.email || 'Unknown',
-            created_at: authUser?.created_at,
+            id: profile.id,
+            email: 'Protected', // We no longer expose emails from auth.users for security
+            created_at: new Date().toISOString(), // Default timestamp
             roles: ['user'], // Default role
             profiles: {
-              display_name: neighbor.display_name || 'Neighbor',
-              avatar_url: neighbor.avatar_url,
-              address: neighbor.address,
-              phone_number: neighbor.phone_number,
-              access_needs: neighbor.access_needs,
-              email_visible: neighbor.email_visible,
-              phone_visible: neighbor.phone_visible,
-              address_visible: neighbor.address_visible,
-              needs_visible: neighbor.needs_visible,
-              bio: neighbor.bio
+              display_name: profile.display_name || 'Neighbor',
+              avatar_url: profile.avatar_url,
+              address: profile.address,
+              phone_number: profile.phone_number,
+              access_needs: profile.access_needs,
+              email_visible: profile.email_visible,
+              phone_visible: profile.phone_visible,
+              address_visible: profile.address_visible,
+              needs_visible: profile.needs_visible,
+              bio: profile.bio
             }
           };
-        });
+        }) || [];
         
         return usersWithProfiles as UserWithRole[];
       } catch (error) {
