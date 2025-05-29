@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -17,8 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { Neighborhood } from "@/contexts/neighborhood/types";
 import { 
-  fetchCreatedNeighborhoods, 
-  fetchAllNeighborhoods
+  fetchCreatedNeighborhoods
 } from "@/contexts/neighborhood/utils/neighborhoodFetchUtils";
 
 /**
@@ -187,14 +185,10 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       // Check if user has created neighborhoods - using security definer functions
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
-      // Get neighborhood details from all neighborhoods 
-      const allNeighborhoods = await fetchAllNeighborhoods();
-      
       // Log diagnostic information
       const diagnosticInfo = {
         userId: user.id,
         createdNeighborhoods: createdNeighborhoods || [],
-        availableNeighborhoods: allNeighborhoods || [],
         timestamp: new Date().toISOString()
       };
       
@@ -202,12 +196,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       
       // Show diagnostic info to user
       toast("Diagnostic Information", {
-        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods and ${Array.isArray(allNeighborhoods) ? allNeighborhoods.length : 0} total neighborhoods.`
+        description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods.`
       });
       
       // If no neighborhoods found, show a more detailed message
-      if ((!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) && 
-          (!allNeighborhoods || allNeighborhoods.length === 0)) {
+      if (!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) {
         toast.error("No neighborhood association found. You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood.");
       }
     } catch (error: any) {
