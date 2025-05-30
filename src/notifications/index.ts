@@ -1,35 +1,18 @@
 
 /**
- * Main Notifications Module Export
+ * Clean Notification System Exports
  * 
- * Single entry point for the new streamlined notification system
+ * Single entry point for the simplified notification system
  */
 
-// Main hooks
-export { useNotifications, useUnreadCount } from './hooks/useNotifications';
-export { useNotificationActions } from './hooks/useNotificationActions';
-export { useNotificationNavigation } from './hooks/useNotificationNavigation';
+// Core hooks
+export { useNotifications, useUnreadCount, useNotificationActions } from './useNotifications';
 
 // Components
-export { default as NotificationBell } from './components/NotificationBell';
-export { default as NotificationItem } from './components/NotificationItem';
-export { default as NotificationList } from './components/NotificationList';
+export { NotificationBell } from './NotificationBell';
+export { NotificationPopover } from './NotificationPopover';
+export { NotificationDrawer } from './NotificationDrawer';
+export { NotificationItem } from './NotificationItem';
 
 // Types
-export type { 
-  Notification, 
-  EnhancedNotification, 
-  NotificationFilters,
-  NotificationActionResult 
-} from './types';
-
-// Utilities
-export { 
-  enhanceNotification, 
-  getActorDisplayName, 
-  getNotificationPriority 
-} from './utils/formatters';
-export { 
-  getNavigationForContentType, 
-  canNavigateToNotification 
-} from './utils/navigationMaps';
+export type { Notification, NotificationWithProfile } from './types';
