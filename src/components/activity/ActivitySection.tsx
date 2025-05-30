@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ActivityFeed from "./ActivityFeed";
-import NotificationDrawer from "@/components/notifications/NotificationDrawer";
+import { NotificationDrawer } from "@/notifications";
 
 /**
  * Component to display the activity feed section on the homepage
