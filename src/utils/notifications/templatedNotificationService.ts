@@ -1,0 +1,200 @@
+
+/**
+ * Templated Notification Service
+ * 
+ * Enhanced notification service that uses predefined templates for consistent,
+ * natural language notifications that are personally relevant to users
+ */
+import { supabase } from "@/integrations/supabase/client";
+import { createLogger } from "@/utils/logger";
+import { refreshEvents } from "@/utils/refreshEvents";
+import { 
+  processNotificationTemplate, 
+  getNotificationTemplate,
+  type NotificationTemplate 
+} from "./notificationTemplates";
+
+// Create a dedicated logger for the templated notification service
+const logger = createLogger('templatedNotificationService');
+
+/**
+ * Interface for creating templated notifications
+ */
+export interface TemplatedNotificationParams {
+  templateId: string;           // ID of the template to use
+  recipientUserId: string;      // Who receives the notification
+  actorUserId?: string;         // Who triggered the action (optional for system notifications)
+  contentId: string;            // ID of the related content
+  variables: Record<string, string>; // Variables to substitute in template
+  metadata?: Record<string, any>;    // Additional structured data
+}
+
+/**
+ * Creates a notification using a predefined template
+ * This ensures consistent language and only creates personally relevant notifications
+ * 
+ * @param params Templated notification parameters
+ * @returns Promise resolving to created notification ID if successful
+ */
+export async function createTemplatedNotification(params: TemplatedNotificationParams): Promise<string | null> {
+  try {
+    logger.debug('Creating templated notification:', params);
+
+    // Process the template with variables
+    const processed = processNotificationTemplate(params.templateId, params.variables);
+    
+    if (!processed) {
+      logger.error(`Template processing failed for: ${params.templateId}`);
+      return null;
+    }
+
+    const { title, template } = processed;
+
+    // Use the database function for consistent handling
+    const { data, error } = await supabase
+      .rpc('create_unified_system_notification', {
+        p_user_id: params.recipientUserId,
+        p_actor_id: params.actorUserId || null,
+        p_title: title,
+        p_content_type: template.contentType,
+        p_content_id: params.contentId,
+        p_notification_type: template.notificationType,
+        p_action_type: template.actionType,
+        p_action_label: template.actionLabel,
+        p_relevance_score: template.relevanceScore,
+        p_metadata: {
+          templateId: params.templateId,
+          variables: params.variables,
+          ...params.metadata
+        }
+      });
+
+    if (error) {
+      logger.error('Error creating templated notification:', error);
+      return null;
+    }
+
+    logger.debug('Templated notification created successfully:', {
+      id: data,
+      title,
+      template: params.templateId
+    });
+    
+    // Emit event using the refresh system
+    refreshEvents.emit('notification-created');
+    
+    return data;
+  } catch (error) {
+    logger.error('Exception creating templated notification:', error);
+    return null;
+  }
+}
+
+/**
+ * Helper function to create an event RSVP notification
+ */
+export async function createEventRSVPNotification(
+  eventHostId: string,
+  rsvpUserId: string,
+  eventId: string,
+  eventTitle: string,
+  actorName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'event_rsvp',
+    recipientUserId: eventHostId,
+    actorUserId: rsvpUserId,
+    contentId: eventId,
+    variables: {
+      actor: actorName,
+      title: eventTitle
+    },
+    metadata: {
+      eventId,
+      type: 'rsvp'
+    }
+  });
+}
+
+/**
+ * Helper function to create a skill session request notification
+ */
+export async function createSkillSessionRequestNotification(
+  skillProviderId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'skill_session_request',
+    recipientUserId: skillProviderId,
+    actorUserId: requesterId,
+    contentId: skillId,
+    variables: {
+      actor: requesterName,
+      title: skillTitle
+    },
+    metadata: {
+      skillId,
+      type: 'session_request'
+    }
+  });
+}
+
+/**
+ * Helper function to create a new neighbor notification
+ */
+export async function createNeighborJoinedNotification(
+  existingNeighborId: string,
+  newNeighborId: string,
+  newNeighborName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'neighbor_joined',
+    recipientUserId: existingNeighborId,
+    actorUserId: newNeighborId,
+    contentId: newNeighborId,
+    variables: {
+      actor: newNeighborName
+    },
+    metadata: {
+      neighborId: newNeighborId,
+      type: 'welcome'
+    }
+  });
+}
+
+/**
+ * Helper function to create a safety comment notification
+ */
+export async function createSafetyCommentNotification(
+  safetyReporterId: string,
+  commenterId: string,
+  safetyUpdateId: string,
+  safetyTitle: string,
+  commenterName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'safety_comment',
+    recipientUserId: safetyReporterId,
+    actorUserId: commenterId,
+    contentId: safetyUpdateId,
+    variables: {
+      actor: commenterName,
+      title: safetyTitle
+    },
+    metadata: {
+      safetyUpdateId,
+      type: 'comment'
+    }
+  });
+}
+
+export default {
+  createTemplatedNotification,
+  createEventRSVPNotification,
+  createSkillSessionRequestNotification,
+  createNeighborJoinedNotification,
+  createSafetyCommentNotification
+};

@@ -9,10 +9,13 @@
  * - Notifications are ONLY for personally relevant content
  * - General content updates go to the activity feed only
  * - No notifications for profile updates or event updates
+ * 
+ * UPDATED: Now uses templated notifications for consistent language
  */
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
+import { createTemplatedNotification } from "./templatedNotificationService";
 
 // Create a dedicated logger for the notification service
 const logger = createLogger('notificationService');
@@ -31,6 +34,7 @@ export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 
 
 /**
  * Interface for notification creation parameters
+ * NOTE: This is now legacy - prefer using templated notifications
  */
 export interface NotificationParams {
   userId: string;              // Who receives the notification
@@ -48,12 +52,13 @@ export interface NotificationParams {
 /**
  * Creates a new notification using the database function
  * 
+ * @deprecated Use createTemplatedNotification instead for consistent language
  * @param params Notification parameters
  * @returns Promise resolving to created notification ID if successful
  */
 export async function createNotification(params: NotificationParams): Promise<string | null> {
   try {
-    logger.debug('Creating notification via database function:', params);
+    logger.debug('Creating notification via database function (legacy):', params);
 
     // Use the database function for consistent handling
     const { data, error } = await supabase
@@ -212,6 +217,7 @@ export async function getUnreadCount(): Promise<number> {
 
 export default {
   createNotification,
+  createTemplatedNotification, // Export the new templated function
   markAsRead,
   archiveNotification,
   markAllAsRead,
