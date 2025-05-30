@@ -42,7 +42,6 @@ export {
   NOTIFICATION_TEMPLATES
 } from "../../utils/notifications/notificationTemplates";
 
-export type { 
-  NotificationTemplate,
-  TemplatedNotificationParams 
-} from "../../utils/notifications/templatedNotificationService";
+// Fix: Import NotificationTemplate from the correct file and TemplatedNotificationParams from the service
+export type { NotificationTemplate } from "../../utils/notifications/notificationTemplates";
+export type { TemplatedNotificationParams } from "../../utils/notifications/templatedNotificationService";
