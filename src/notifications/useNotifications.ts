@@ -33,7 +33,7 @@ export function useNotifications() {
         .from('notifications')
         .select(`
           *,
-          profiles:actor_id(*)
+          profiles!notifications_actor_id_fkey(*)
         `)
         .eq('user_id', user.id)
         .eq('is_archived', false)
