@@ -29,7 +29,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { BaseNotification } from "@/hooks/notifications/types";
 import { markAsRead, archiveNotification } from "@/hooks/notifications/notificationActions";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { createLogger } from "@/utils/logger";
 
@@ -173,7 +173,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   notification, 
   onUpdate 
 }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   
   // Get styling based on notification type and relevance
   const colors = getNotificationColors(notification.content_type, notification.relevance_score);
@@ -191,35 +191,35 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     try {
       // Mark notification as read if it isn't already
       if (!notification.is_read) {
-        await markAsRead(notification.id);
-        if (onUpdate) onUpdate();
+        const success = await markAsRead(notification.id);
+        if (success && onUpdate) onUpdate();
       }
       
       // Navigate based on content type
       switch (notification.content_type) {
         case 'events':
         case 'event':
-          router.push('/calendar');
+          navigate('/calendar');
           break;
         case 'safety':
-          router.push('/safety');
+          navigate('/safety');
           break;
         case 'neighbors':
         case 'neighbor_welcome':
-          router.push('/neighbors');
+          navigate('/neighbors');
           break;
         case 'skills':
         case 'skill_sessions':
-          router.push('/skills');
+          navigate('/skills');
           break;
         case 'goods':
-          router.push('/goods');
+          navigate('/goods');
           break;
         case 'care':
-          router.push('/care');
+          navigate('/care');
           break;
         default:
-          router.push('/');
+          navigate('/');
       }
       
       logger.debug('Navigated to appropriate page for notification type:', notification.content_type);
@@ -237,9 +237,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     e.stopPropagation(); // Prevent triggering the main click handler
     
     try {
-      await archiveNotification(notification.id);
-      if (onUpdate) onUpdate();
-      toast.success('Notification archived');
+      const success = await archiveNotification(notification.id);
+      if (success && onUpdate) {
+        onUpdate();
+        toast.success('Notification archived');
+      } else {
+        toast.error('Failed to archive notification');
+      }
     } catch (error) {
       logger.error('Error archiving notification:', error);
       toast.error('Failed to archive notification');

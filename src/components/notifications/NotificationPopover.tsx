@@ -174,7 +174,7 @@ export const NotificationsPopover = ({ children }: NotificationsPopoverMainProps
               <div key={notification.id} className="py-2">
                 <NotificationItem
                   notification={notification}
-                  onSelect={() => refetch()}
+                  onUpdate={() => refetch()}
                 />
               </div>
             ))

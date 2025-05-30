@@ -28,7 +28,7 @@ const NotificationGroup: React.FC<NotificationGroupProps> = ({
           <NotificationItem
             key={notification.id}
             notification={notification}
-            onSelect={onClose}
+            onUpdate={onClose}
           />
         ))}
       </div>
