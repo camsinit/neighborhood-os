@@ -14,12 +14,14 @@ const logger = createLogger('useNotifications');
 
 /**
  * Hook to fetch all notifications for the current user
+ * Uses a simplified approach: fetch notifications first, then fetch profiles separately
+ * This avoids complex foreign key joins that were causing type errors
  */
 export function useNotifications() {
   return useQuery({
     queryKey: ['notifications'],
     queryFn: async (): Promise<NotificationWithProfile[]> => {
-      logger.debug('Fetching notifications');
+      logger.debug('Fetching notifications with simplified approach');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -28,25 +30,55 @@ export function useNotifications() {
         return [];
       }
 
-      // Fetch notifications with profile data in one query
-      const { data: notifications, error } = await supabase
+      // Step 1: Fetch notifications without the problematic join
+      const { data: notifications, error: notificationsError } = await supabase
         .from('notifications')
-        .select(`
-          *,
-          profiles!notifications_actor_id_fkey(*)
-        `)
+        .select('*') // Just get all notification fields
         .eq('user_id', user.id)
         .eq('is_archived', false)
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (error) {
-        logger.error('Error fetching notifications:', error);
-        throw error;
+      if (notificationsError) {
+        logger.error('Error fetching notifications:', notificationsError);
+        throw notificationsError;
       }
 
-      logger.debug(`Fetched ${notifications?.length || 0} notifications`);
-      return notifications || [];
+      if (!notifications || notifications.length === 0) {
+        logger.debug('No notifications found');
+        return [];
+      }
+
+      // Step 2: Get unique actor IDs to fetch profiles
+      const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
+      
+      let profilesMap = new Map();
+      
+      if (actorIds.length > 0) {
+        // Fetch profiles for all actors
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', actorIds);
+
+        if (profilesError) {
+          logger.warn('Error fetching profiles, continuing without profile data:', profilesError);
+        } else if (profiles) {
+          // Create a map for quick lookup
+          profiles.forEach(profile => {
+            profilesMap.set(profile.id, profile);
+          });
+        }
+      }
+
+      // Step 3: Merge notifications with profile data
+      const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
+        ...notification,
+        profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
+      }));
+
+      logger.debug(`Fetched ${notificationsWithProfiles.length} notifications with profile data`);
+      return notificationsWithProfiles;
     },
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // 1 minute
