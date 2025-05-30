@@ -191,10 +191,118 @@ export async function createSafetyCommentNotification(
   });
 }
 
+/**
+ * Helper function to create a goods response notification
+ */
+export async function createGoodsResponseNotification(
+  requesterId: string,
+  responderId: string,
+  goodsId: string,
+  goodsTitle: string,
+  responderName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'goods_response',
+    recipientUserId: requesterId,
+    actorUserId: responderId,
+    contentId: goodsId,
+    variables: {
+      actor: responderName,
+      title: goodsTitle
+    },
+    metadata: {
+      goodsId,
+      type: 'response'
+    }
+  });
+}
+
+/**
+ * Helper function to create a care response notification
+ */
+export async function createCareResponseNotification(
+  requesterId: string,
+  responderId: string,
+  careId: string,
+  careTitle: string,
+  responderName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'care_response',
+    recipientUserId: requesterId,
+    actorUserId: responderId,
+    contentId: careId,
+    variables: {
+      actor: responderName,
+      title: careTitle
+    },
+    metadata: {
+      careId,
+      type: 'response'
+    }
+  });
+}
+
+/**
+ * Helper function to create a skill session confirmation notification
+ */
+export async function createSkillSessionConfirmedNotification(
+  recipientId: string,
+  actorId: string,
+  sessionId: string,
+  skillTitle: string,
+  actorName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'skill_session_confirmed',
+    recipientUserId: recipientId,
+    actorUserId: actorId,
+    contentId: sessionId,
+    variables: {
+      actor: actorName,
+      title: skillTitle
+    },
+    metadata: {
+      sessionId,
+      type: 'confirmation'
+    }
+  });
+}
+
+/**
+ * Helper function to create a skill session cancellation notification
+ */
+export async function createSkillSessionCancelledNotification(
+  recipientId: string,
+  actorId: string,
+  sessionId: string,
+  skillTitle: string,
+  actorName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'skill_session_cancelled',
+    recipientUserId: recipientId,
+    actorUserId: actorId,
+    contentId: sessionId,
+    variables: {
+      actor: actorName,
+      title: skillTitle
+    },
+    metadata: {
+      sessionId,
+      type: 'cancellation'
+    }
+  });
+}
+
 export default {
   createTemplatedNotification,
   createEventRSVPNotification,
   createSkillSessionRequestNotification,
   createNeighborJoinedNotification,
-  createSafetyCommentNotification
+  createSafetyCommentNotification,
+  createGoodsResponseNotification,
+  createCareResponseNotification,
+  createSkillSessionConfirmedNotification,
+  createSkillSessionCancelledNotification
 };

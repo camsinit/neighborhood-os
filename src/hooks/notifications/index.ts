@@ -3,7 +3,7 @@
  * Central export point for notifications functionality
  * This file exports everything needed for working with notifications
  * 
- * UPDATED: Now includes templated notification system
+ * UPDATED: Now includes comprehensive templated notification system for all modules
  */
 
 // Export the hooks
@@ -26,15 +26,20 @@ export type { BaseNotification, SkillRequestNotification } from "./types";
 export { fetchAllNotifications } from "./fetchNotifications";
 export { fetchDirectNotifications } from "./fetchDirectNotifications";
 
-// Export templated notification system
+// Export templated notification system - all helper functions
 export { 
   createTemplatedNotification,
   createEventRSVPNotification,
   createSkillSessionRequestNotification,
   createNeighborJoinedNotification,
-  createSafetyCommentNotification
+  createSafetyCommentNotification,
+  createGoodsResponseNotification,
+  createCareResponseNotification,
+  createSkillSessionConfirmedNotification,
+  createSkillSessionCancelledNotification
 } from "../../utils/notifications/templatedNotificationService";
 
+// Export template processing functions
 export {
   processNotificationTemplate,
   getNotificationTemplate,
@@ -42,6 +47,15 @@ export {
   NOTIFICATION_TEMPLATES
 } from "../../utils/notifications/notificationTemplates";
 
-// Fix: Import NotificationTemplate from the correct file and TemplatedNotificationParams from the service
+// Export types for templated notifications
 export type { NotificationTemplate } from "../../utils/notifications/notificationTemplates";
 export type { TemplatedNotificationParams } from "../../utils/notifications/templatedNotificationService";
+
+// Export the unified notification service functions
+export {
+  createNotification,
+  markAsRead as serviceMarkAsRead,
+  archiveNotification as serviceArchiveNotification,
+  markAllAsRead as serviceMarkAllAsRead,
+  getUnreadCount
+} from "../../utils/notifications/notificationService";

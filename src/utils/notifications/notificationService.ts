@@ -15,7 +15,17 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
 import { refreshEvents } from "@/utils/refreshEvents";
-import { createTemplatedNotification } from "./templatedNotificationService";
+import { 
+  createTemplatedNotification,
+  createEventRSVPNotification,
+  createSkillSessionRequestNotification,
+  createNeighborJoinedNotification,
+  createSafetyCommentNotification,
+  createGoodsResponseNotification,
+  createCareResponseNotification,
+  createSkillSessionConfirmedNotification,
+  createSkillSessionCancelledNotification
+} from "./templatedNotificationService";
 
 // Create a dedicated logger for the notification service
 const logger = createLogger('notificationService');
@@ -216,10 +226,21 @@ export async function getUnreadCount(): Promise<number> {
 }
 
 export default {
+  // Legacy functions (deprecated)
   createNotification,
-  createTemplatedNotification, // Export the new templated function
   markAsRead,
   archiveNotification,
   markAllAsRead,
-  getUnreadCount
+  getUnreadCount,
+  
+  // New templated functions (recommended)
+  createTemplatedNotification,
+  createEventRSVPNotification,
+  createSkillSessionRequestNotification,
+  createNeighborJoinedNotification,
+  createSafetyCommentNotification,
+  createGoodsResponseNotification,
+  createCareResponseNotification,
+  createSkillSessionConfirmedNotification,
+  createSkillSessionCancelledNotification
 };
