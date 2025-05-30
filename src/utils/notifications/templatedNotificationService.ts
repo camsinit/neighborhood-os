@@ -58,8 +58,8 @@ export async function createTemplatedNotification(params: TemplatedNotificationP
         p_title: title,
         p_content_type: template.contentType,
         p_content_id: params.contentId,
-        p_notification_type: template.notificationType,
-        p_action_type: template.actionType,
+        p_notification_type: template.notificationType as any, // Type cast for enum compatibility
+        p_action_type: template.actionType as any, // Type cast for enum compatibility
         p_action_label: template.actionLabel,
         p_relevance_score: template.relevanceScore,
         p_metadata: {

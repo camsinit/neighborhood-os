@@ -33,16 +33,16 @@ export {
   createSkillSessionRequestNotification,
   createNeighborJoinedNotification,
   createSafetyCommentNotification
-} from "../utils/notifications/templatedNotificationService";
+} from "../../utils/notifications/templatedNotificationService";
 
 export {
   processNotificationTemplate,
   getNotificationTemplate,
   getAvailableTemplateIds,
   NOTIFICATION_TEMPLATES
-} from "../utils/notifications/notificationTemplates";
+} from "../../utils/notifications/notificationTemplates";
 
 export type { 
   NotificationTemplate,
   TemplatedNotificationParams 
-} from "../utils/notifications/templatedNotificationService";
+} from "../../utils/notifications/templatedNotificationService";
