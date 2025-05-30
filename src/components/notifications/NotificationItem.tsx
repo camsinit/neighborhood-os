@@ -1,4 +1,3 @@
-
 /**
  * Universal Notification Item Component
  * 
@@ -191,7 +190,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     try {
       // Mark notification as read if it isn't already
       if (!notification.is_read) {
-        const success = await markAsRead(notification.id);
+        const success = await markAsRead(notification.content_type, notification.id);
         if (success && onUpdate) onUpdate();
       }
       
