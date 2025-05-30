@@ -82,7 +82,13 @@ export function useNotifications(filters: NotificationFilters = {}) {
             ? profilesMap.get(notification.actor_id) 
             : null;
           
-          return enhanceNotification(notification, actorProfile);
+          // Ensure updated_at field exists, fall back to created_at if missing
+          const normalizedNotification = {
+            ...notification,
+            updated_at: notification.updated_at || notification.created_at
+          };
+          
+          return enhanceNotification(normalizedNotification, actorProfile);
         });
 
         logger.debug(`Processed ${enhancedNotifications.length} notifications`);
