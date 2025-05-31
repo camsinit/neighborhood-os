@@ -11,41 +11,51 @@ import { Checkbox } from "@/components/ui/checkbox";
  * to ensure both fields are provided in the correct format.
  * Also includes privacy controls for contact visibility to neighbors.
  * 
- * UPDATED: Now properly passes visibility preferences to parent component
+ * UPDATED: Now includes password field for guest onboarding
  */
 interface ContactInfoStepProps {
   email: string;
   phone: string;
+  password?: string;
   emailVisible: boolean;
   phoneVisible: boolean;
   addressVisible: boolean;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
+  onPasswordChange?: (value: string) => void;
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
   onAddressVisibleChange: (value: boolean) => void;
   onValidation?: (field: string, isValid: boolean) => void;
+  isGuestMode?: boolean;
 }
 
 export const ContactInfoStep = ({
   email,
   phone,
+  password = "",
   emailVisible,
   phoneVisible,
   addressVisible,
   onEmailChange,
   onPhoneChange,
+  onPasswordChange,
   onEmailVisibleChange,
   onPhoneVisibleChange,
   onAddressVisibleChange,
   onValidation,
+  isGuestMode = false,
 }: ContactInfoStepProps) => {
   // Track validation errors
   const [errors, setErrors] = useState({
     email: "",
     phone: "",
+    password: "",
     visibility: "",
   });
+
+  // Check if we're in guest mode (has guestOnboarding data in localStorage)
+  const isActualGuestMode = isGuestMode || !!localStorage.getItem('guestOnboarding');
 
   // Validate email format using regex and notify parent
   const validateEmail = (value: string) => {
@@ -88,6 +98,27 @@ export const ContactInfoStep = ({
     
     // Notify parent component of validation result
     onValidation?.("phone", isValid);
+    return isValid;
+  };
+
+  // Validate password for guest mode
+  const validatePassword = (value: string) => {
+    if (!isActualGuestMode) return true;
+    
+    let isValid = true;
+    
+    if (!value.trim()) {
+      setErrors(prev => ({ ...prev, password: "Password is required" }));
+      isValid = false;
+    } else if (value.length < 6) {
+      setErrors(prev => ({ ...prev, password: "Password must be at least 6 characters" }));
+      isValid = false;
+    } else {
+      setErrors(prev => ({ ...prev, password: "" }));
+    }
+    
+    // Notify parent component of validation result
+    onValidation?.("password", isValid);
     return isValid;
   };
 
@@ -138,13 +169,19 @@ export const ContactInfoStep = ({
   }, [phone]);
 
   useEffect(() => {
+    if (isActualGuestMode) {
+      validatePassword(password);
+    }
+  }, [password, isActualGuestMode]);
+
+  useEffect(() => {
     validateVisibility();
   }, [emailVisible, phoneVisible]);
 
   return (
     <div className="space-y-6">
-      {/* Email and Phone fields side by side */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Email, Phone, and Password fields */}
+      <div className="grid grid-cols-1 gap-4">
         {/* Email field */}
         <div className="space-y-2">
           <Label htmlFor="email">Email Address *</Label>
@@ -161,9 +198,35 @@ export const ContactInfoStep = ({
             <p className="text-sm text-red-500">{errors.email}</p>
           )}
           <p className="text-sm text-muted-foreground">
-            Your email will only be shared with neighborhood administrators.
+            {isActualGuestMode 
+              ? "This will be your login email address."
+              : "Your email will only be shared with neighborhood administrators."
+            }
           </p>
         </div>
+
+        {/* Password field - only for guest mode */}
+        {isActualGuestMode && (
+          <div className="space-y-2">
+            <Label htmlFor="password">Password *</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => onPasswordChange?.(e.target.value)}
+              onBlur={(e) => validatePassword(e.target.value)}
+              className={errors.password ? "border-red-500" : ""}
+              placeholder="Choose a secure password"
+              required
+            />
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password}</p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Must be at least 6 characters long.
+            </p>
+          </div>
+        )}
         
         {/* Phone field - now required */}
         <div className="space-y-2">

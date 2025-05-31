@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SurveyStepHeader } from "./SurveyStepHeader";
 import { SurveyProgress } from "./SurveyProgress";
@@ -17,6 +18,8 @@ import { Progress } from "@/components/ui/progress";
  * Includes skills survey validation to ensure users complete the mini-survey.
  * Shows a welcome screen with confetti after completion.
  * Now includes form submission progress tracking.
+ * 
+ * UPDATED: Now supports guest onboarding mode
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -24,6 +27,7 @@ interface SurveyDialogProps {
   onComplete?: (formData: any) => void;
   isTestMode?: boolean;
   submissionState?: FormSubmissionState;
+  isGuestMode?: boolean;
 }
 
 // Define the survey steps
@@ -50,7 +54,8 @@ const SurveyDialog = ({
   onOpenChange, 
   onComplete,
   isTestMode = false,
-  submissionState
+  submissionState,
+  isGuestMode = false
 }: SurveyDialogProps) => {
   // Track if survey is completed and showing welcome screen
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
@@ -123,6 +128,7 @@ const SurveyDialog = ({
   
   // Get test mode indicator for the dialog title
   const testModeIndicator = isTestMode ? " (Test Mode)" : "";
+  const guestModeIndicator = isGuestMode ? " - Create Account" : "";
   
   // Show welcome screen after survey completion
   if (showWelcomeScreen) {
@@ -152,13 +158,22 @@ const SurveyDialog = ({
           </div>
         )}
         
+        {/* Guest mode indicator */}
+        {isGuestMode && !isTestMode && (
+          <div className="bg-blue-50 border border-blue-200 rounded px-3 py-1 text-blue-700 text-sm mb-2">
+            Creating your account and joining the neighborhood
+          </div>
+        )}
+        
         {/* Submission progress overlay */}
         {submissionState?.isSubmitting && (
           <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-lg">
             <div className="text-center space-y-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Setting up your profile...</p>
+                <p className="text-sm font-medium">
+                  {isGuestMode ? "Creating your account..." : "Setting up your profile..."}
+                </p>
                 <Progress value={submissionState.progress} className="w-64" />
                 <p className="text-xs text-gray-500">{submissionState.progress}% complete</p>
               </div>
@@ -167,7 +182,7 @@ const SurveyDialog = ({
         )}
         
         {/* Survey header */}
-        <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
+        <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}${guestModeIndicator}`} />
         
         {/* Progress indicator - now includes skills mini-survey progress */}
         <SurveyProgress 
@@ -185,6 +200,7 @@ const SurveyDialog = ({
             handleValidation={handleValidation}
             onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
             onSkillsMiniSurveyProgress={handleSkillsMiniSurveyProgress}
+            isGuestMode={isGuestMode}
           />
         </div>
         

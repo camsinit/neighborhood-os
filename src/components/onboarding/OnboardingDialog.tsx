@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
+import { useGuestOnboarding } from "@/hooks/useGuestOnboarding";
 import SurveyDialog from "./survey/SurveyDialog";
 
 /**
@@ -14,7 +15,7 @@ import SurveyDialog from "./survey/SurveyDialog";
  * It wraps the survey dialog and handles the completion of onboarding.
  * Now includes form submission logic with proper data persistence.
  * 
- * UPDATED: Now handles pending invite codes after onboarding completion
+ * UPDATED: Now handles both regular and guest onboarding flows
  * 
  * When used in test mode, it bypasses the database update.
  */
@@ -33,11 +34,18 @@ const OnboardingDialog = ({
   const { toast } = useToast();
   const user = useUser();
   
-  // Get form submission hook
-  const { submitForm, submissionState } = useFormSubmission();
+  // Check if we're in guest mode
+  const isGuestMode = !!localStorage.getItem('guestOnboarding');
+  
+  // Get appropriate submission hook based on mode
+  const { submitForm, submissionState: regularSubmissionState } = useFormSubmission();
+  const { submitGuestOnboarding, submissionState: guestSubmissionState } = useGuestOnboarding();
+  
+  // Use the appropriate submission state
+  const submissionState = isGuestMode ? guestSubmissionState : regularSubmissionState;
   
   /**
-   * Handle joining neighborhood via pending invite code
+   * Handle joining neighborhood via pending invite code (for regular onboarding)
    */
   const handlePendingInviteJoin = async () => {
     const pendingInviteCode = localStorage.getItem('pendingInviteCode');
@@ -126,18 +134,27 @@ const OnboardingDialog = ({
         return;
       }
       
-      // Normal operation - submit form data
-      const success = await submitForm(formData);
+      let success = false;
+      
+      if (isGuestMode) {
+        // Guest onboarding flow - creates account and joins neighborhood
+        success = await submitGuestOnboarding(formData);
+      } else {
+        // Regular onboarding flow - updates existing user profile
+        success = await submitForm(formData);
+      }
       
       if (success) {
-        // Handle pending invite code after successful onboarding
-        await handlePendingInviteJoin();
+        if (!isGuestMode) {
+          // Handle pending invite code after successful regular onboarding
+          await handlePendingInviteJoin();
+        }
         
         // Close dialog and navigate to home
         onOpenChange(false);
         navigate("/home");
       }
-      // Error handling is done in the submitForm function
+      // Error handling is done in the submit functions
     } catch (error: any) {
       console.error("Error completing onboarding:", error);
       
@@ -157,6 +174,7 @@ const OnboardingDialog = ({
       onComplete={handleOnboardingComplete} 
       isTestMode={isTestMode}
       submissionState={submissionState}
+      isGuestMode={isGuestMode}
     />
   );
 };

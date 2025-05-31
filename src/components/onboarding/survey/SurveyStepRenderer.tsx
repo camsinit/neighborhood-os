@@ -14,7 +14,7 @@ import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
  * This component encapsulates all the step-specific logic and props passing.
  * Now tracks skills survey completion state and availability preferences for navigation validation.
  * 
- * UPDATED: Now properly handles contact visibility preferences
+ * UPDATED: Now properly handles password field for guest onboarding
  */
 interface SurveyStepRendererProps {
   currentStep: number;
@@ -23,6 +23,7 @@ interface SurveyStepRendererProps {
   handleValidation: (field: string, isValid: boolean) => void;
   onSkillsSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
   onSkillsMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
+  isGuestMode?: boolean;
 }
 
 export const SurveyStepRenderer = ({
@@ -32,6 +33,7 @@ export const SurveyStepRenderer = ({
   handleValidation,
   onSkillsSurveyStateChange,
   onSkillsMiniSurveyProgress,
+  isGuestMode = false,
 }: SurveyStepRendererProps) => {
   
   // Handle availability and time preferences changes from skills step
@@ -63,15 +65,18 @@ export const SurveyStepRenderer = ({
         <ContactInfoStep
           email={formData.email}
           phone={formData.phone}
+          password={formData.password}
           emailVisible={formData.emailVisible}
           phoneVisible={formData.phoneVisible}
           addressVisible={formData.addressVisible}
           onEmailChange={(value) => handleChange("email", value)}
           onPhoneChange={(value) => handleChange("phone", value)}
+          onPasswordChange={(value) => handleChange("password", value)}
           onEmailVisibleChange={(value) => handleChange("emailVisible", value)}
           onPhoneVisibleChange={(value) => handleChange("phoneVisible", value)}
           onAddressVisibleChange={(value) => handleChange("addressVisible", value)}
           onValidation={handleValidation}
+          isGuestMode={isGuestMode}
         />
       );
     

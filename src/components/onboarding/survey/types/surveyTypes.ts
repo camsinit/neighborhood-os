@@ -1,44 +1,29 @@
+export interface FormSubmissionState {
+  isSubmitting: boolean;
+  progress: number;
+  error: string | null;
+  success: boolean;
+}
 
 /**
- * Type definitions for the onboarding survey
- */
-
-/**
- * Main survey form data structure
- * Now includes profile image, bio, contact visibility preferences, and skill availability
+ * Survey form data interface
+ * Contains all the data collected during the onboarding survey.
+ * 
+ * UPDATED: Now includes password field for guest onboarding
  */
 export interface SurveyFormData {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  password: string; // New field for guest onboarding
   address: string;
-  skills: string[];
-  // New fields for enhanced onboarding
-  profileImage?: File;
   bio?: string;
+  profileImage?: File | null;
+  skills: string[];
+  skillAvailability?: string;
+  skillTimePreferences?: string[];
   emailVisible: boolean;
   phoneVisible: boolean;
   addressVisible: boolean;
-  skillAvailability?: string;
-  skillTimePreferences?: string[];
-}
-
-/**
- * Skill availability and time preferences data
- */
-export interface SkillAvailabilityData {
-  availability: string;
-  timePreferences: string[];
-  dayPreferences: string[];
-}
-
-/**
- * Form submission state
- */
-export interface FormSubmissionState {
-  isSubmitting: boolean;
-  progress: number;
-  error: string | null;
-  success: boolean;
 }

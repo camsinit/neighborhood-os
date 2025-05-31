@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ interface NeighborhoodPreview {
  * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
  * Shows a neighborhood preview and guides users through signup/onboarding or direct join
  * 
- * UPDATED: Now properly handles new users by directing them to signup/onboarding
+ * UPDATED: Now directs new users to guest onboarding instead of login
  */
 const JoinPage = () => {
   // Get the invite code from the URL params
@@ -171,17 +172,25 @@ const JoinPage = () => {
   };
 
   /**
-   * Handle new user signup flow
-   * Store the invite code so they can auto-join after completing onboarding
+   * Handle new user signup flow - now goes to guest onboarding
+   * Store the invite code and neighborhood data so they can auto-join after onboarding
    */
   const handleNewUserSignup = () => {
-    // Store the invite code in localStorage so we can auto-join after signup/onboarding
-    if (inviteCode) {
-      localStorage.setItem('pendingInviteCode', inviteCode);
+    // Store the invite code and neighborhood data for guest onboarding
+    if (inviteCode && neighborhood) {
+      localStorage.setItem('guestOnboarding', JSON.stringify({
+        inviteCode,
+        neighborhood: {
+          id: neighborhood.id,
+          name: neighborhood.name,
+          city: neighborhood.city,
+          state: neighborhood.state
+        }
+      }));
     }
     
-    // Navigate to login page which includes signup functionality
-    navigate('/login');
+    // Navigate directly to onboarding (guest mode)
+    navigate('/onboarding');
   };
 
   // Loading state
@@ -277,7 +286,7 @@ const JoinPage = () => {
                 {isJoining ? 'Joining...' : `Join ${neighborhood?.name}`}
               </Button>
             ) : (
-              // New user - needs to signup and complete onboarding
+              // New user - goes to guest onboarding
               <div className="space-y-2">
                 <Button 
                   onClick={handleNewUserSignup}
@@ -287,7 +296,7 @@ const JoinPage = () => {
                   Join Neighborhood
                 </Button>
                 <p className="text-xs text-gray-500 text-center">
-                  You'll create an account and complete a quick setup to join
+                  You'll set up your profile and create an account to join
                 </p>
               </div>
             )}

@@ -1,114 +1,124 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { SurveyFormData } from "../types/surveyTypes";
 
 /**
  * Custom hook for managing survey state
  * 
- * Centralizes all survey state management including form data, validation,
- * current step tracking, and step validation logic.
- * Now includes skills survey completion tracking and new profile fields.
+ * Handles form data, validation state, and navigation between steps.
+ * Now includes password field for guest onboarding flow.
  */
 export const useSurveyState = () => {
-  // Current step index
-  const [currentStep, setCurrentStep] = useState(0);
+  // Check if we're in guest mode
+  const isGuestMode = !!localStorage.getItem('guestOnboarding');
   
-  // Form data state with enhanced fields
+  // Initialize form data with default values
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
+    password: "", // New field for guest onboarding
     address: "",
-    skills: [],
-    // New fields with defaults
-    profileImage: undefined,
     bio: "",
-    emailVisible: true, // Default to visible
-    phoneVisible: false,
-    addressVisible: false,
+    profileImage: null,
+    skills: [],
     skillAvailability: "",
     skillTimePreferences: [],
+    emailVisible: true,
+    phoneVisible: false,
+    addressVisible: false,
   });
-  
-  // Field validation state - updated to include new fields
-  const [validFields, setValidFields] = useState<Record<string, boolean>>({
+
+  // Track current step in the survey
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // Track validation state for each field
+  const [validationState, setValidationState] = useState<Record<string, boolean>>({
     firstName: false,
     lastName: false,
     email: false,
     phone: false,
+    password: false,
     address: false,
-    contactVisibility: true, // Default to true since email is checked by default
-    profileImage: true, // Optional field
-    bio: true, // Optional field
-    skillAvailability: true, // Optional field
+    contactVisibility: false,
   });
-  
-  // Skills survey completion state
+
+  // Track skills survey completion state
   const [skillsSurveyState, setSkillsSurveyState] = useState({
     hasCompletedSurvey: false,
     hasSelectedSkills: false,
   });
-  
+
   // Handle form field changes
-  const handleChange = (field: keyof SurveyFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-  
-  // Handle field validation
-  const handleValidation = (field: string, isValid: boolean) => {
-    setValidFields((prev) => ({ ...prev, [field]: isValid }));
-  };
-  
+  const handleChange = useCallback((field: keyof SurveyFormData, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
+  // Handle validation state changes
+  const handleValidation = useCallback((field: string, isValid: boolean) => {
+    setValidationState(prev => ({
+      ...prev,
+      [field]: isValid,
+    }));
+  }, []);
+
   // Handle skills survey state changes
-  const handleSkillsSurveyStateChange = (hasCompleted: boolean, hasSkills: boolean) => {
-    console.log('Skills survey state change:', { hasCompleted, hasSkills });
+  const handleSkillsSurveyStateChange = useCallback((hasCompleted: boolean, hasSkills: boolean) => {
     setSkillsSurveyState({
       hasCompletedSurvey: hasCompleted,
       hasSelectedSkills: hasSkills,
     });
-  };
-  
-  // Check if current step is valid - updated to make skills completion more flexible
-  const isCurrentStepValid = () => {
+  }, []);
+
+  // Check if current step is valid
+  const isCurrentStepValid = useCallback(() => {
     switch (currentStep) {
       case 0: // Basic Info
-        return validFields.firstName && validFields.lastName;
-      case 1: // Contact Info - now includes phone and contact visibility validation
-        return validFields.email && validFields.phone && validFields.contactVisibility;
+        return validationState.firstName && validationState.lastName;
+      case 1: // Contact Info
+        const contactValid = validationState.email && validationState.phone && validationState.contactVisibility;
+        // In guest mode, also require password
+        return isGuestMode ? contactValid && validationState.password : contactValid;
       case 2: // Address
-        return validFields.address;
-      case 3: // Profile Photo - optional step
-        return true;
-      case 4: // Skills - only require completion of mini-survey (skills selection is optional)
+        return validationState.address;
+      case 3: // Profile Image
+        return true; // Optional step
+      case 4: // Skills
         return skillsSurveyState.hasCompletedSurvey;
       default:
-        return true;
+        return false;
     }
-  };
-  
-  // Handle next step
-  const handleNext = (onComplete?: () => void, totalSteps: number = 5) => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      // Complete the survey
+  }, [currentStep, validationState, skillsSurveyState, isGuestMode]);
+
+  // Navigate to next step
+  const handleNext = useCallback((onComplete?: () => void, totalSteps?: number) => {
+    const nextStep = currentStep + 1;
+    
+    if (totalSteps && nextStep >= totalSteps) {
+      // Survey is complete
       onComplete?.();
+    } else {
+      setCurrentStep(nextStep);
     }
-  };
-  
-  // Handle previous step
-  const handlePrevious = () => {
+  }, [currentStep]);
+
+  // Navigate to previous step
+  const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+      setCurrentStep(currentStep - 1);
     }
-  };
+  }, [currentStep]);
 
   return {
-    currentStep,
     formData,
-    validFields,
+    currentStep,
+    validationState,
     skillsSurveyState,
+    isGuestMode,
     handleChange,
     handleValidation,
     handleSkillsSurveyStateChange,
