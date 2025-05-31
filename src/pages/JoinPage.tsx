@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,8 @@ interface NeighborhoodPreview {
  * 
  * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
  * Shows a neighborhood preview before allowing users to join
+ * 
+ * UPDATED: Now uses the security definer function to bypass RLS issues
  */
 const JoinPage = () => {
   // Get the invite code from the URL params
@@ -39,7 +40,8 @@ const JoinPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Load neighborhood information from the invite code
+   * Load neighborhood information from the invite code using security definer function
+   * This bypasses RLS issues that prevent anonymous users from reading neighborhood data
    */
   useEffect(() => {
     const loadNeighborhoodFromInvite = async () => {
@@ -50,54 +52,46 @@ const JoinPage = () => {
       }
 
       try {
-        console.log("[JoinPage] Loading neighborhood for invite code:", inviteCode);
+        console.log("[JoinPage] Loading neighborhood using security definer function for invite code:", inviteCode);
         
-        // First, verify the invitation exists and get the neighborhood ID
-        const { data: invitation, error: inviteError } = await supabase
-          .from('invitations')
-          .select('neighborhood_id, status')
-          .eq('invite_code', inviteCode)
-          .single();
+        // Use the security definer function instead of direct table queries
+        const { data: neighborhoodData, error: functionError } = await supabase
+          .rpc('get_neighborhood_from_invite', { 
+            invite_code_param: inviteCode 
+          });
 
-        if (inviteError || !invitation) {
-          console.error("[JoinPage] Invalid invite code:", inviteError);
-          setError("This invite link is invalid or has expired.");
-          setIsLoading(false);
-          return;
-        }
-
-        // Check if invitation is still pending (not used)
-        if (invitation.status !== 'pending') {
-          setError("This invite link has already been used.");
-          setIsLoading(false);
-          return;
-        }
-
-        // Get neighborhood details
-        const { data: neighborhoodData, error: neighborhoodError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, city, state, created_at')
-          .eq('id', invitation.neighborhood_id)
-          .single();
-
-        if (neighborhoodError || !neighborhoodData) {
-          console.error("[JoinPage] Error loading neighborhood:", neighborhoodError);
+        if (functionError) {
+          console.error("[JoinPage] Security definer function error:", functionError);
           setError("Unable to load neighborhood information.");
           setIsLoading(false);
           return;
         }
 
-        // Get member count
-        const { count: memberCount } = await supabase
-          .from('neighborhood_members')
-          .select('*', { count: 'exact', head: true })
-          .eq('neighborhood_id', invitation.neighborhood_id)
-          .eq('status', 'active');
+        // Check if we got results
+        if (!neighborhoodData || neighborhoodData.length === 0) {
+          console.error("[JoinPage] No neighborhood found for invite code");
+          setError("This invite link is invalid or has expired.");
+          setIsLoading(false);
+          return;
+        }
+
+        const result = neighborhoodData[0];
+
+        // Check if invitation is still pending (not used)
+        if (result.invitation_status !== 'pending') {
+          setError("This invite link has already been used.");
+          setIsLoading(false);
+          return;
+        }
 
         // Set the neighborhood preview data
         setNeighborhood({
-          ...neighborhoodData,
-          memberCount: memberCount || 0
+          id: result.neighborhood_id,
+          name: result.neighborhood_name,
+          city: result.neighborhood_city,
+          state: result.neighborhood_state,
+          created_at: result.neighborhood_created_at,
+          memberCount: result.member_count || 0
         });
 
       } catch (error: any) {

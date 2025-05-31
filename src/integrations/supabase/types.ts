@@ -1085,6 +1085,18 @@ export type Database = {
           is_creator: boolean
         }[]
       }
+      get_neighborhood_from_invite: {
+        Args: { invite_code_param: string }
+        Returns: {
+          neighborhood_id: string
+          neighborhood_name: string
+          neighborhood_city: string
+          neighborhood_state: string
+          neighborhood_created_at: string
+          member_count: number
+          invitation_status: string
+        }[]
+      }
       get_neighborhood_members: {
         Args: { neighborhood_uuid: string }
         Returns: string[]
