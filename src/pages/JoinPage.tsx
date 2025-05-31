@@ -23,9 +23,9 @@ interface NeighborhoodPreview {
  * JoinPage Component
  * 
  * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
- * Shows a neighborhood preview before allowing users to join
+ * Shows a neighborhood preview and guides users through signup/onboarding or direct join
  * 
- * UPDATED: Now uses the security definer function to bypass RLS issues
+ * UPDATED: Now properly handles new users by directing them to signup/onboarding
  */
 const JoinPage = () => {
   // Get the invite code from the URL params
@@ -106,14 +106,11 @@ const JoinPage = () => {
   }, [inviteCode]);
 
   /**
-   * Handle joining the neighborhood
+   * Handle joining the neighborhood for existing authenticated users
    */
   const handleJoinNeighborhood = async () => {
     if (!user || !neighborhood || !inviteCode) {
-      if (!user) {
-        toast.error("Please log in to join a neighborhood.");
-        navigate('/login');
-      }
+      console.error("[JoinPage] Missing required data for joining");
       return;
     }
 
@@ -171,6 +168,20 @@ const JoinPage = () => {
     } finally {
       setIsJoining(false);
     }
+  };
+
+  /**
+   * Handle new user signup flow
+   * Store the invite code so they can auto-join after completing onboarding
+   */
+  const handleNewUserSignup = () => {
+    // Store the invite code in localStorage so we can auto-join after signup/onboarding
+    if (inviteCode) {
+      localStorage.setItem('pendingInviteCode', inviteCode);
+    }
+    
+    // Navigate to login page which includes signup functionality
+    navigate('/login');
   };
 
   // Loading state
@@ -255,6 +266,7 @@ const JoinPage = () => {
           {/* Join Button */}
           <div className="space-y-3">
             {user ? (
+              // Existing user - can join directly
               <Button 
                 onClick={handleJoinNeighborhood}
                 disabled={isJoining}
@@ -265,17 +277,18 @@ const JoinPage = () => {
                 {isJoining ? 'Joining...' : `Join ${neighborhood?.name}`}
               </Button>
             ) : (
+              // New user - needs to signup and complete onboarding
               <div className="space-y-2">
-                <p className="text-sm text-gray-600 text-center">
-                  You need to log in to join this neighborhood
-                </p>
                 <Button 
-                  onClick={() => navigate('/login')}
+                  onClick={handleNewUserSignup}
                   className="w-full"
                   size="lg"
                 >
-                  Log In to Join
+                  Join Neighborhood
                 </Button>
+                <p className="text-xs text-gray-500 text-center">
+                  You'll create an account and complete a quick setup to join
+                </p>
               </div>
             )}
           </div>
