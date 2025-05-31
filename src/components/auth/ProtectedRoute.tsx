@@ -5,6 +5,8 @@
  * Ensures routes are only accessible to authenticated users.
  * Displays a loading spinner while authentication is being checked.
  * Checks if user needs to complete onboarding and redirects accordingly.
+ * 
+ * UPDATED: Now allows unauthenticated access to onboarding page when in guest mode
  */
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import { Navigate, useLocation } from "react-router-dom";
@@ -25,6 +27,7 @@ interface ProtectedRouteProps {
  * 
  * This component checks if the user is authenticated and has necessary data
  * before allowing access to protected routes. It shows a loading state while checking.
+ * Now includes special handling for guest onboarding flow.
  * 
  * @param children - The components to render if the user is authenticated
  */
@@ -40,6 +43,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Add check for onboarding status
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  
+  // Check if we're in guest onboarding mode
+  const isGuestOnboardingMode = !!localStorage.getItem('guestOnboarding');
   
   // Check if user has completed onboarding
   useEffect(() => {
@@ -92,7 +98,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     hasUser: !!user,
     hasNeighborhood: !!currentNeighborhood,
     needsOnboarding,
-    neighborhoodError: error ? true : false
+    neighborhoodError: error ? true : false,
+    isGuestOnboardingMode
   });
 
   // Show loading spinner while checking authentication and neighborhood
@@ -111,7 +118,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // If not authenticated, redirect to login page
+  // Special case: Allow unauthenticated access to onboarding page if in guest mode
+  if (location.pathname === '/onboarding' && !user && isGuestOnboardingMode) {
+    console.log("[ProtectedRoute] Allowing unauthenticated access to onboarding (guest mode)");
+    return <>{children}</>;
+  }
+
+  // If not authenticated, redirect to login page (except for guest onboarding)
   if (!user || !session) {
     console.log("[ProtectedRoute] User not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
