@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -213,7 +212,6 @@ const OnboardingDialog = ({
       onComplete={handleOnboardingComplete} 
       isTestMode={isTestMode}
       submissionState={submissionState}
-      isGuestMode={isGuestMode}
     />
   );
 };

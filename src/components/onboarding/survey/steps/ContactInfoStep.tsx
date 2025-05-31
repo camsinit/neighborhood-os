@@ -1,10 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ContactFields } from "./contact/ContactFields";
+import { PasswordField } from "./contact/PasswordField";
+import { VisibilityToggle } from "./contact/VisibilityToggle";
 
 /**
  * Contact Information Step Component
@@ -13,6 +11,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
  * to ensure all fields are provided in the correct format.
  * Also includes privacy controls for contact visibility to neighbors.
  * 
+ * REFACTORED: Broken into smaller focused components for better maintainability
  * UPDATED: Compact layout with side-by-side fields and collapsible visibility options
  * UPDATED: Only shows validation errors after fields are touched
  */
@@ -156,40 +155,21 @@ export const ContactInfoStep = ({
     onValidation?.("contactVisibility", isValid);
     return isValid;
   };
-  
-  // Format phone number as user types
-  const formatPhoneNumber = (value: string) => {
-    // Remove non-digit characters
-    const phoneDigits = value.replace(/\D/g, '');
-    
-    // Format based on length
-    let formattedPhone = '';
-    
-    if (phoneDigits.length <= 3) {
-      formattedPhone = phoneDigits;
-    } else if (phoneDigits.length <= 6) {
-      formattedPhone = `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3)}`;
-    } else {
-      formattedPhone = `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6, 10)}`;
-    }
-    
-    return formattedPhone;
-  };
 
   // Handle field blur to mark as touched and validate
-  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleEmailBlur = () => {
     setTouched(prev => ({ ...prev, email: true }));
-    validateEmail(e.target.value);
+    validateEmail(email);
   };
 
-  const handlePhoneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handlePhoneBlur = () => {
     setTouched(prev => ({ ...prev, phone: true }));
-    validatePhone(e.target.value);
+    validatePhone(phone);
   };
 
-  const handlePasswordBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handlePasswordBlur = () => {
     setTouched(prev => ({ ...prev, password: true }));
-    validatePassword(e.target.value);
+    validatePassword(password);
   };
 
   // Handle visibility checkbox changes
@@ -218,152 +198,38 @@ export const ContactInfoStep = ({
   return (
     <div className="space-y-4">
       {/* Email and Phone side by side */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Email field */}
-        <div className="space-y-2">
-          <Label htmlFor="email">Email Address *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            onBlur={handleEmailBlur}
-            className={errors.email ? "border-red-500" : ""}
-            required
-          />
-          {errors.email && (
-            <p className="text-xs text-red-500">{errors.email}</p>
-          )}
-        </div>
-        
-        {/* Phone field */}
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number *</Label>
-          <Input
-            id="phone"
-            type="tel"
-            value={phone}
-            onChange={(e) => {
-              // Format phone number as user types
-              const formattedPhone = formatPhoneNumber(e.target.value);
-              onPhoneChange(formattedPhone);
-            }}
-            onBlur={handlePhoneBlur}
-            className={errors.phone ? "border-red-500" : ""}
-            placeholder="(123) 456-7890"
-            required
-          />
-          {errors.phone && (
-            <p className="text-xs text-red-500">{errors.phone}</p>
-          )}
-        </div>
-      </div>
+      <ContactFields
+        email={email}
+        phone={phone}
+        emailError={errors.email}
+        phoneError={errors.phone}
+        onEmailChange={onEmailChange}
+        onPhoneChange={onPhoneChange}
+        onEmailBlur={handleEmailBlur}
+        onPhoneBlur={handlePhoneBlur}
+      />
 
       {/* Password field - full width */}
-      <div className="space-y-2">
-        <Label htmlFor="password">Password *</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => onPasswordChange(e.target.value)}
-          onBlur={handlePasswordBlur}
-          className={errors.password ? "border-red-500" : ""}
-          placeholder="Choose a secure password (min 6 characters)"
-          required
-        />
-        {errors.password && (
-          <p className="text-sm text-red-500">{errors.password}</p>
-        )}
-      </div>
+      <PasswordField
+        password={password}
+        passwordError={errors.password}
+        onPasswordChange={onPasswordChange}
+        onPasswordBlur={handlePasswordBlur}
+      />
 
       {/* Contact visibility toggle */}
-      <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
-        <div 
-          className="flex items-center justify-between cursor-pointer"
-          onClick={() => setShowVisibilityOptions(!showVisibilityOptions)}
-        >
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={showVisibilityOptions}
-              onCheckedChange={setShowVisibilityOptions}
-            />
-            <Label className="text-sm font-medium cursor-pointer">
-              Configure Profile Visibility
-            </Label>
-          </div>
-          {showVisibilityOptions ? (
-            <ChevronUp className="h-4 w-4 text-gray-500" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-gray-500" />
-          )}
-        </div>
-
-        {showVisibilityOptions && (
-          <div className="space-y-3 pt-2">
-            <p className="text-xs text-muted-foreground">
-              Choose which contact information other neighbors can see. At least one must be visible.
-            </p>
-
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-email"
-                  checked={emailVisible}
-                  onCheckedChange={(checked) => {
-                    onEmailVisibleChange(checked as boolean);
-                    handleVisibilityChange();
-                  }}
-                />
-                <Label 
-                  htmlFor="show-email" 
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  Show email to neighbors
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-phone"
-                  checked={phoneVisible}
-                  onCheckedChange={(checked) => {
-                    onPhoneVisibleChange(checked as boolean);
-                    handleVisibilityChange();
-                  }}
-                />
-                <Label 
-                  htmlFor="show-phone" 
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  Show phone to neighbors
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="show-address"
-                  checked={addressVisible}
-                  onCheckedChange={(checked) => {
-                    onAddressVisibleChange(checked as boolean);
-                    handleVisibilityChange();
-                  }}
-                />
-                <Label 
-                  htmlFor="show-address" 
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  Show address to neighbors
-                </Label>
-              </div>
-            </div>
-
-            {errors.visibility && (
-              <p className="text-xs text-red-500">{errors.visibility}</p>
-            )}
-          </div>
-        )}
-      </div>
+      <VisibilityToggle
+        emailVisible={emailVisible}
+        phoneVisible={phoneVisible}
+        addressVisible={addressVisible}
+        visibilityError={errors.visibility}
+        showOptions={showVisibilityOptions}
+        onEmailVisibleChange={onEmailVisibleChange}
+        onPhoneVisibleChange={onPhoneVisibleChange}
+        onAddressVisibleChange={onAddressVisibleChange}
+        onToggleOptions={setShowVisibilityOptions}
+        onVisibilityChange={handleVisibilityChange}
+      />
     </div>
   );
 };
