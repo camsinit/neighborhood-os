@@ -8,6 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
  * 
  * Collapsible section for configuring which contact information is visible to neighbors.
  * Shows title and description always, but allows collapsing the actual checkbox options to save space.
+ * Defaults to email visibility enabled to ensure at least one contact method is visible.
  */
 interface VisibilityToggleProps {
   emailVisible: boolean;
@@ -42,7 +43,7 @@ export const VisibilityToggle = ({
           Configure Profile Visibility
         </Label>
         <p className="text-xs text-muted-foreground">
-          Choose which contact information other neighbors can see. At least one must be visible.
+          Choose which contact information other neighbors can see. Email or phone must be visible.
         </p>
       </div>
 
@@ -111,7 +112,7 @@ export const VisibilityToggle = ({
               htmlFor="show-address" 
               className="text-sm font-normal cursor-pointer"
             >
-              Show address to neighbors
+              Show address to neighbors (optional)
             </Label>
           </div>
         </div>

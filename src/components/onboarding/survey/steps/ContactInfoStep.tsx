@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ContactFields } from "./contact/ContactFields";
 import { PasswordField } from "./contact/PasswordField";
@@ -14,6 +13,7 @@ import { VisibilityToggle } from "./contact/VisibilityToggle";
  * REFACTORED: Broken into smaller focused components for better maintainability
  * UPDATED: Compact layout with side-by-side fields and collapsible visibility options
  * UPDATED: Only shows validation errors after fields are touched
+ * UPDATED: Defaults to email visibility enabled and options collapsed
  */
 interface ContactInfoStepProps {
   email: string;
@@ -62,8 +62,15 @@ export const ContactInfoStep = ({
     visibility: false,
   });
 
-  // Track visibility options toggle state
+  // Track visibility options toggle state - starts collapsed
   const [showVisibilityOptions, setShowVisibilityOptions] = useState(false);
+
+  // Initialize email visibility to true if not already set
+  useEffect(() => {
+    if (!emailVisible && !phoneVisible) {
+      onEmailVisibleChange(true);
+    }
+  }, [emailVisible, phoneVisible, onEmailVisibleChange]);
 
   // Validate email format using regex and notify parent
   const validateEmail = (value: string) => {
@@ -138,14 +145,14 @@ export const ContactInfoStep = ({
     return isValid;
   };
 
-  // Validate that at least one contact method is visible
+  // Validate that at least one contact method is visible (email or phone)
   const validateVisibility = () => {
     const isValid = emailVisible || phoneVisible;
     
     if (!isValid && touched.visibility) {
       setErrors(prev => ({ 
         ...prev, 
-        visibility: "You must make at least one contact method visible to neighbors" 
+        visibility: "You must make either email or phone visible to neighbors" 
       }));
     } else {
       setErrors(prev => ({ ...prev, visibility: "" }));
