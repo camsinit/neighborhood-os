@@ -7,9 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Copy, Mail, Send } from "lucide-react";
+import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,15 +43,12 @@ const getBaseUrl = (): string => {
 /**
  * UnifiedInviteDialog Component
  * 
- * A single, consolidated component for inviting neighbors to join your neighborhood.
- * Replaces all the previous invite components with a clean, simple interface.
+ * Simplified invite system that only generates and copies invite links.
+ * No need for neighbor information - just click and share!
  */
 const UnifiedInviteDialog = ({ open, onOpenChange }: UnifiedInviteDialogProps) => {
-  // Form state for neighbor's information
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
+  // State for tracking link generation
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   // Get required hooks for user and neighborhood context
   const user = useUser();
@@ -95,12 +90,10 @@ const UnifiedInviteDialog = ({ open, onOpenChange }: UnifiedInviteDialogProps) =
       // Copy the URL to clipboard
       await navigator.clipboard.writeText(inviteUrl);
       
-      // Show success message
+      // Show success message and close dialog
       toast.success("Invite link copied to clipboard! Share it with your neighbor.");
+      onOpenChange(false);
       
-      // Clear the form
-      setFirstName("");
-      setEmail("");
     } catch (error: any) {
       console.error("[UnifiedInviteDialog] Error generating invite:", error);
       toast.error("Failed to generate invite link. Please try again.");
@@ -110,121 +103,55 @@ const UnifiedInviteDialog = ({ open, onOpenChange }: UnifiedInviteDialogProps) =
   };
 
   /**
-   * Sends an email invitation (placeholder for Phase 2)
-   * Will be implemented with Resend integration in the next phase
-   */
-  const sendEmailInvite = async () => {
-    // Validate required fields
-    if (!firstName.trim()) {
-      toast.error("Please enter your neighbor's first name.");
-      return;
-    }
-    
-    if (!email.trim() || !email.includes('@')) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-    
-    if (!currentNeighborhood) {
-      toast.error("Unable to send invite. Please make sure you're part of a neighborhood.");
-      return;
-    }
-    
-    setIsSendingEmail(true);
-    
-    // For now, show a placeholder message
-    // This will be replaced with actual email functionality in Phase 2
-    setTimeout(() => {
-      toast.success(`Email invitation feature coming soon! For now, use the "Copy Link" button to share with ${firstName}.`);
-      setIsSendingEmail(false);
-    }, 1000);
-  };
-
-  /**
-   * Clears the form and closes the dialog
+   * Handles closing the dialog
    */
   const handleClose = () => {
-    setFirstName("");
-    setEmail("");
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>
-            Invite a Neighbor to {currentNeighborhood?.name || 'Your Neighborhood'}
+            Invite Someone to {currentNeighborhood?.name || 'Your Neighborhood'}
           </DialogTitle>
           <DialogDescription>
-            Invite someone to join your neighborhood community. You can share a link or send them an email invitation.
+            Generate a unique invite link that you can share with anyone you'd like to invite to your neighborhood.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
+        <div className="py-6">
           {/* Check if user has a neighborhood */}
           {!currentNeighborhood ? (
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
               <p className="text-sm text-yellow-800">
                 You need to be part of a neighborhood before you can invite others.
               </p>
             </div>
           ) : (
-            <>
-              {/* First Name Field */}
-              <div className="grid gap-2">
-                <Label htmlFor="firstName">Neighbor's First Name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="e.g., Sarah"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full"
-                />
+            <div className="text-center space-y-4">
+              {/* Main action button */}
+              <Button
+                onClick={generateAndCopyLink}
+                disabled={isGeneratingLink}
+                className="w-full"
+                size="lg"
+              >
+                <Copy className="mr-2 h-5 w-5" />
+                {isGeneratingLink ? "Generating Link..." : "Generate & Copy Invite Link"}
+              </Button>
+              
+              {/* Instructions */}
+              <div className="text-sm text-gray-600 space-y-2">
+                <p>
+                  Click the button above to create a unique invite link for {currentNeighborhood.name}.
+                </p>
+                <p>
+                  Share the link via text, email, or any messaging app. When someone clicks it, they'll be able to join your neighborhood directly.
+                </p>
               </div>
-
-              {/* Email Field */}
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="neighbor@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid gap-2 pt-4">
-                {/* Send Email Button (Phase 2 feature) */}
-                <Button
-                  onClick={sendEmailInvite}
-                  disabled={isSendingEmail || !firstName.trim() || !email.trim()}
-                  className="w-full"
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  {isSendingEmail ? "Sending..." : "Send Email Invitation"}
-                </Button>
-                
-                {/* Copy Link Button */}
-                <Button
-                  variant="outline"
-                  onClick={generateAndCopyLink}
-                  disabled={isGeneratingLink}
-                  className="w-full"
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  {isGeneratingLink ? "Generating..." : "Copy Invite Link"}
-                </Button>
-              </div>
-
-              {/* Helper Text */}
-              <p className="text-xs text-gray-500 mt-2">
-                The invite link will allow {firstName || 'your neighbor'} to join {currentNeighborhood.name} directly.
-              </p>
-            </>
+            </div>
           )}
         </div>
       </DialogContent>
