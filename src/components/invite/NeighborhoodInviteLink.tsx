@@ -10,6 +10,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 /**
+ * Get the correct base URL for invite links
+ * Uses production domain in production, fallback to current origin for development
+ */
+const getBaseUrl = (): string => {
+  // Check if we're in production
+  const isProduction = window.location.hostname !== 'localhost' && 
+                      window.location.hostname !== '127.0.0.1' &&
+                      !window.location.hostname.includes('lovableproject.com');
+  
+  if (isProduction) {
+    return 'https://neighborhoodos.com';
+  }
+  
+  return window.location.origin;
+};
+
+/**
  * NeighborhoodInviteLink component
  * 
  * Allows members to generate and share invite links for their neighborhood
@@ -49,10 +66,11 @@ const NeighborhoodInviteLink = () => {
         throw error;
       }
       
-      // Create the full invitation link
-      // This would typically use your app's URL
-      const baseUrl = window.location.origin;
-      const link = `${baseUrl}/join?code=${inviteCode}`;
+      // Create the full invitation link using the correct base URL
+      const baseUrl = getBaseUrl();
+      const link = `${baseUrl}/join/${inviteCode}`;
+      
+      console.log("[NeighborhoodInviteLink] Generated invite URL:", link);
       
       setInviteLink(link);
       

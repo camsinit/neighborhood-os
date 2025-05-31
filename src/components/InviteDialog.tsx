@@ -84,6 +84,23 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   }, [open, user, currentNeighborhood, isLoading, error, isGeneratingLink, loadingTooLong]);
 
   /**
+   * Get the correct base URL for invite links
+   * Uses production domain in production, fallback to current origin for development
+   */
+  const getBaseUrl = (): string => {
+    // Check if we're in production
+    const isProduction = window.location.hostname !== 'localhost' && 
+                        window.location.hostname !== '127.0.0.1' &&
+                        !window.location.hostname.includes('lovableproject.com');
+    
+    if (isProduction) {
+      return 'https://neighborhoodos.com';
+    }
+    
+    return window.location.origin;
+  };
+
+  /**
    * Generates a unique invitation link and copies it to clipboard
    */
   const generateAndCopyLink = async () => {
@@ -117,8 +134,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       // Handle database errors
       if (error) throw error;
 
-      // Create the full invitation URL
-      const inviteUrl = `${window.location.origin}/join/${inviteCode}`;
+      // Create the full invitation URL using the correct base URL
+      const baseUrl = getBaseUrl();
+      const inviteUrl = `${baseUrl}/join/${inviteCode}`;
+      
+      console.log("[InviteDialog] Generated invite URL:", inviteUrl);
       
       // Copy the URL to clipboard
       await navigator.clipboard.writeText(inviteUrl);

@@ -25,6 +25,23 @@ interface UnifiedInviteDialogProps {
 }
 
 /**
+ * Get the correct base URL for invite links
+ * Uses production domain in production, fallback to current origin for development
+ */
+const getBaseUrl = (): string => {
+  // Check if we're in production (you can customize this logic)
+  const isProduction = window.location.hostname !== 'localhost' && 
+                      window.location.hostname !== '127.0.0.1' &&
+                      !window.location.hostname.includes('lovableproject.com');
+  
+  if (isProduction) {
+    return 'https://neighborhoodos.com';
+  }
+  
+  return window.location.origin;
+};
+
+/**
  * UnifiedInviteDialog Component
  * 
  * A single, consolidated component for inviting neighbors to join your neighborhood.
@@ -43,7 +60,7 @@ const UnifiedInviteDialog = ({ open, onOpenChange }: UnifiedInviteDialogProps) =
 
   /**
    * Generates a unique invitation link and copies it to clipboard
-   * Uses the standardized URL pattern: /join/{inviteCode}
+   * Uses the correct production domain for invite URLs
    */
   const generateAndCopyLink = async () => {
     // Validate required data is present
@@ -68,8 +85,11 @@ const UnifiedInviteDialog = ({ open, onOpenChange }: UnifiedInviteDialogProps) =
 
       if (error) throw error;
 
-      // Create the standardized invitation URL: /join/{inviteCode}
-      const inviteUrl = `${window.location.origin}/join/${inviteCode}`;
+      // Create the invitation URL using the correct base URL
+      const baseUrl = getBaseUrl();
+      const inviteUrl = `${baseUrl}/join/${inviteCode}`;
+      
+      console.log("[UnifiedInviteDialog] Generated invite URL:", inviteUrl);
       
       // Copy the URL to clipboard
       await navigator.clipboard.writeText(inviteUrl);
