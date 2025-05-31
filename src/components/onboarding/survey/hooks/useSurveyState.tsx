@@ -6,19 +6,16 @@ import { SurveyFormData } from "../types/surveyTypes";
  * Custom hook for managing survey state
  * 
  * Handles form data, validation state, and navigation between steps.
- * Now includes password field for guest onboarding flow.
+ * Password field is now always required since onboarding is for new account creation.
  */
 export const useSurveyState = () => {
-  // Check if we're in guest mode
-  const isGuestMode = !!localStorage.getItem('guestOnboarding');
-  
   // Initialize form data with default values
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    password: "", // New field for guest onboarding
+    password: "", // Always required for account creation
     address: "",
     bio: "",
     profileImage: null,
@@ -39,7 +36,7 @@ export const useSurveyState = () => {
     lastName: false,
     email: false,
     phone: false,
-    password: false,
+    password: false, // Always required now
     address: false,
     contactVisibility: false,
   });
@@ -79,10 +76,8 @@ export const useSurveyState = () => {
     switch (currentStep) {
       case 0: // Basic Info
         return validationState.firstName && validationState.lastName;
-      case 1: // Contact Info
-        const contactValid = validationState.email && validationState.phone && validationState.contactVisibility;
-        // In guest mode, also require password
-        return isGuestMode ? contactValid && validationState.password : contactValid;
+      case 1: // Contact Info - now always requires password
+        return validationState.email && validationState.phone && validationState.password && validationState.contactVisibility;
       case 2: // Address
         return validationState.address;
       case 3: // Profile Image
@@ -92,7 +87,7 @@ export const useSurveyState = () => {
       default:
         return false;
     }
-  }, [currentStep, validationState, skillsSurveyState, isGuestMode]);
+  }, [currentStep, validationState, skillsSurveyState]);
 
   // Navigate to next step
   const handleNext = useCallback((onComplete?: () => void, totalSteps?: number) => {
@@ -118,7 +113,6 @@ export const useSurveyState = () => {
     currentStep,
     validationState,
     skillsSurveyState,
-    isGuestMode,
     handleChange,
     handleValidation,
     handleSkillsSurveyStateChange,

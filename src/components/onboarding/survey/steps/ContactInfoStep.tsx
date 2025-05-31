@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,34 +6,33 @@ import { Checkbox } from "@/components/ui/checkbox";
 /**
  * Contact Information Step Component
  * 
- * This step collects the user's email and phone number with validation
- * to ensure both fields are provided in the correct format.
+ * This step collects the user's email, phone number, and password with validation
+ * to ensure all fields are provided in the correct format.
  * Also includes privacy controls for contact visibility to neighbors.
  * 
- * UPDATED: Now includes password field for guest onboarding
+ * UPDATED: Password field is now always shown since onboarding is for new account creation
  * UPDATED: Only shows validation errors after fields are touched
  */
 interface ContactInfoStepProps {
   email: string;
   phone: string;
-  password?: string;
+  password: string;
   emailVisible: boolean;
   phoneVisible: boolean;
   addressVisible: boolean;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
-  onPasswordChange?: (value: string) => void;
+  onPasswordChange: (value: string) => void;
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
   onAddressVisibleChange: (value: boolean) => void;
   onValidation?: (field: string, isValid: boolean) => void;
-  isGuestMode?: boolean;
 }
 
 export const ContactInfoStep = ({
   email,
   phone,
-  password = "",
+  password,
   emailVisible,
   phoneVisible,
   addressVisible,
@@ -45,7 +43,6 @@ export const ContactInfoStep = ({
   onPhoneVisibleChange,
   onAddressVisibleChange,
   onValidation,
-  isGuestMode = false,
 }: ContactInfoStepProps) => {
   // Track validation errors
   const [errors, setErrors] = useState({
@@ -62,9 +59,6 @@ export const ContactInfoStep = ({
     password: false,
     visibility: false,
   });
-
-  // Check if we're in guest mode (has guestOnboarding data in localStorage)
-  const isActualGuestMode = isGuestMode || !!localStorage.getItem('guestOnboarding');
 
   // Validate email format using regex and notify parent
   const validateEmail = (value: string) => {
@@ -116,10 +110,8 @@ export const ContactInfoStep = ({
     return isValid;
   };
 
-  // Validate password for guest mode
+  // Validate password - now always required since this is for account creation
   const validatePassword = (value: string) => {
-    if (!isActualGuestMode) return true;
-    
     let isValid = true;
     
     if (!value.trim()) {
@@ -210,10 +202,8 @@ export const ContactInfoStep = ({
   }, [phone, touched.phone]);
 
   useEffect(() => {
-    if (isActualGuestMode) {
-      validatePassword(password);
-    }
-  }, [password, touched.password, isActualGuestMode]);
+    validatePassword(password);
+  }, [password, touched.password]);
 
   useEffect(() => {
     validateVisibility();
@@ -239,37 +229,32 @@ export const ContactInfoStep = ({
             <p className="text-sm text-red-500">{errors.email}</p>
           )}
           <p className="text-sm text-muted-foreground">
-            {isActualGuestMode 
-              ? "This will be your login email address."
-              : "Your email will only be shared with neighborhood administrators."
-            }
+            This will be your login email address.
           </p>
         </div>
 
-        {/* Password field - only for guest mode */}
-        {isActualGuestMode && (
-          <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => onPasswordChange?.(e.target.value)}
-              onBlur={handlePasswordBlur}
-              className={errors.password ? "border-red-500" : ""}
-              placeholder="Choose a secure password"
-              required
-            />
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password}</p>
-            )}
-            <p className="text-sm text-muted-foreground">
-              Must be at least 6 characters long.
-            </p>
-          </div>
-        )}
+        {/* Password field - now always shown */}
+        <div className="space-y-2">
+          <Label htmlFor="password">Password *</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => onPasswordChange(e.target.value)}
+            onBlur={handlePasswordBlur}
+            className={errors.password ? "border-red-500" : ""}
+            placeholder="Choose a secure password"
+            required
+          />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password}</p>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Must be at least 6 characters long.
+          </p>
+        </div>
         
-        {/* Phone field - now required */}
+        {/* Phone field - required */}
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number *</Label>
           <Input
