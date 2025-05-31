@@ -10,10 +10,11 @@
  */
 import { useUser, useSessionContext } from "@supabase/auth-helpers-react";
 import { Navigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useOnboardingStatus } from "./hooks/useOnboardingStatus";
+import { useGuestOnboardingMode } from "./hooks/useGuestOnboardingMode";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+import { isJoinPage, isHomePage, isOnboardingPage } from "./utils/routeChecks";
 
 /**
  * Props for the ProtectedRoute component
@@ -40,54 +41,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Get neighborhood status - using our updated neighborhood context
   const { currentNeighborhood, isLoading: isLoadingNeighborhood, error } = useNeighborhood();
   
-  // Add check for onboarding status
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  // Get onboarding status using our custom hook
+  const { isCheckingOnboarding, needsOnboarding } = useOnboardingStatus();
   
   // Check if we're in guest onboarding mode
-  const isGuestOnboardingMode = !!localStorage.getItem('guestOnboarding');
-  
-  // Check if user has completed onboarding
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      // Skip if we're already on the onboarding page
-      if (location.pathname === '/onboarding') {
-        setIsCheckingOnboarding(false);
-        return;
-      }
-      
-      // Skip if no user
-      if (!user) {
-        setIsCheckingOnboarding(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("completed_onboarding")
-          .eq("id", user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        // If onboarding isn't completed, set flag to redirect
-        setNeedsOnboarding(!data?.completed_onboarding);
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        // Default to not needing onboarding on error to avoid redirect loops
-        setNeedsOnboarding(false);
-      } finally {
-        setIsCheckingOnboarding(false);
-      }
-    };
-    
-    if (user) {
-      checkOnboardingStatus();
-    } else {
-      setIsCheckingOnboarding(false);
-    }
-  }, [user, location.pathname]);
+  const { isGuestOnboardingMode } = useGuestOnboardingMode();
 
   // Debug info - this helps us track auth and routing issues
   console.log("[ProtectedRoute] Checking route access:", {
@@ -105,21 +63,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Show loading spinner while checking authentication and neighborhood
   if (isLoadingAuth || (isLoadingNeighborhood && user) || (isCheckingOnboarding && user)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            {isLoadingAuth ? "Verifying your account..." : 
-             isCheckingOnboarding ? "Checking your profile status..." :
-             "Loading your neighborhood..."}
-          </p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        isLoadingAuth={isLoadingAuth}
+        isCheckingOnboarding={isCheckingOnboarding}
+      />
     );
   }
 
   // Special case: Allow unauthenticated access to onboarding page if in guest mode
-  if (location.pathname === '/onboarding' && !user && isGuestOnboardingMode) {
+  if (isOnboardingPage(location) && !user && isGuestOnboardingMode) {
     console.log("[ProtectedRoute] Allowing unauthenticated access to onboarding (guest mode)");
     return <>{children}</>;
   }
@@ -132,18 +84,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   // If user needs to complete onboarding, redirect to onboarding page
   // Don't redirect if we're already on the onboarding page to avoid loops
-  if (needsOnboarding && location.pathname !== '/onboarding') {
+  if (needsOnboarding && !isOnboardingPage(location)) {
     console.log("[ProtectedRoute] User needs to complete onboarding, redirecting");
     return <Navigate to="/onboarding" replace />;
   }
   
   // Handle special cases for join pages to avoid infinite loops
-  const isJoinPage = location.pathname === '/join' || location.pathname.startsWith('/join/');
-  const isHomePage = location.pathname === '/home'; // Simplified home page check
+  const isJoin = isJoinPage(location);
+  const isHome = isHomePage(location);
   
   // If user has no neighborhood and trying to access a page that requires one,
   // redirect to join page - except for the join page itself and home page to avoid loops
-  if (!currentNeighborhood && !isJoinPage && !isHomePage) {
+  if (!currentNeighborhood && !isJoin && !isHome) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
     return <Navigate to="/join" replace />;
   }
