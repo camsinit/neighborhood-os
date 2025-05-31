@@ -3,6 +3,7 @@
  * Universal Notification Item Component
  * 
  * Handles all notification types with smart navigation integration
+ * Now includes theme-based color highlighting for content and borders
  */
 import React from 'react';
 import { Card } from '@/components/ui/card';
@@ -16,11 +17,32 @@ import { NotificationWithProfile } from './types';
 import { useNotificationActions } from './useNotifications';
 import { navigateAndHighlight } from '@/utils/highlight/navigateAndHighlight';
 import { HighlightableItemType } from '@/utils/highlight/types';
+import { highlightTitleContent } from '@/utils/highlight/titleHighlighting';
+import { getModuleThemeColor } from '@/theme/moduleTheme';
 
 interface NotificationItemProps {
   notification: NotificationWithProfile;
   variant?: 'popover' | 'drawer';
 }
+
+// Map content types to module theme colors for highlighting
+const getThemeColor = (contentType: string): string => {
+  switch (contentType) {
+    case 'events':
+      return getModuleThemeColor('calendar');
+    case 'safety':
+      return getModuleThemeColor('safety');
+    case 'skills':
+    case 'skill_sessions':
+      return getModuleThemeColor('skills');
+    case 'goods':
+      return getModuleThemeColor('goods');
+    case 'neighbors':
+      return getModuleThemeColor('neighbors');
+    default:
+      return '#6E59A5'; // Default purple
+  }
+};
 
 // Map content types to highlight types for smart navigation
 const getHighlightType = (contentType: string): HighlightableItemType | null => {
@@ -71,6 +93,9 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   // Format time ago
   const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true });
 
+  // Get theme color for this notification's content type
+  const themeColor = getThemeColor(notification.content_type);
+
   // Handle view action with smart navigation
   const handleView = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -114,10 +139,13 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   return (
     <Card 
       className={`
-        p-3 transition-all duration-200 hover:shadow-md cursor-pointer
+        p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4
         ${!notification.is_read ? 'bg-blue-50 border-blue-200' : 'bg-white'}
         ${variant === 'popover' ? 'mb-2' : 'mb-3'}
       `}
+      style={{
+        borderLeftColor: themeColor
+      }}
       onClick={handleView}
     >
       <div className="flex items-start space-x-3">
@@ -131,10 +159,10 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
         
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Title - Using template from backend directly */}
-          <p className={`text-sm leading-tight ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
-            {notification.title}
-          </p>
+          {/* Title - Using template from backend with color highlighting */}
+          <div className={`text-sm leading-tight ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
+            {highlightTitleContent(notification.title, notification.content_type)}
+          </div>
           
           {/* Time */}
           <p className="text-xs text-gray-500 mt-1">
