@@ -46,6 +46,7 @@ export const useFormSubmission = () => {
     console.log("[useFormSubmission] Starting submission process");
     console.log("[useFormSubmission] Current user:", user ? `${user.id} (${user.email})` : 'null');
     console.log("[useFormSubmission] Form data email:", formData.email);
+    console.log("[useFormSubmission] Skills to save:", formData.skills);
 
     // Reset submission state
     setSubmissionState({
@@ -77,6 +78,13 @@ export const useFormSubmission = () => {
       // Step 2: Get user's neighborhood (20%)
       setSubmissionState(prev => ({ ...prev, progress: 20 }));
       const neighborhoodId = await getUserNeighborhoodId(userId);
+      
+      if (!neighborhoodId) {
+        console.error("[useFormSubmission] No neighborhood found for user");
+        throw new Error('Could not find user neighborhood. Please join a neighborhood first.');
+      }
+
+      console.log("[useFormSubmission] Found neighborhood:", neighborhoodId);
 
       // Step 3: Upload profile image if provided (50%)
       setSubmissionState(prev => ({ ...prev, progress: 50 }));
@@ -91,14 +99,29 @@ export const useFormSubmission = () => {
 
       // Step 5: Save skills if any are selected (90%)
       setSubmissionState(prev => ({ ...prev, progress: 90 }));
-      if (formData.skills.length > 0) {
-        await saveSkills(
-          formData.skills,
-          userId,
-          formData.skillAvailability,
-          formData.skillTimePreferences,
-          neighborhoodId
-        );
+      if (formData.skills && formData.skills.length > 0) {
+        console.log("[useFormSubmission] Saving skills:", formData.skills);
+        try {
+          await saveSkills(
+            formData.skills,
+            userId,
+            formData.skillAvailability,
+            formData.skillTimePreferences,
+            neighborhoodId
+          );
+          console.log("[useFormSubmission] Skills saved successfully");
+        } catch (skillError) {
+          console.error("[useFormSubmission] Error saving skills:", skillError);
+          // Don't fail the entire submission for skills errors
+          // but log it and show a warning
+          toast({
+            title: "Profile Created",
+            description: "Your profile was created but there was an issue saving your skills. You can add them later in the Skills section.",
+            variant: "default",
+          });
+        }
+      } else {
+        console.log("[useFormSubmission] No skills to save");
       }
 
       // Step 6: Complete (100%)
