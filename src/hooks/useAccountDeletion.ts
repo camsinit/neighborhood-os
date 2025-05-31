@@ -6,6 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 /**
+ * Interface for the database function response
+ */
+interface DeleteAccountResponse {
+  success: boolean;
+  error?: string;
+  message?: string;
+  deletion_log?: Record<string, number>;
+}
+
+/**
  * Hook for handling complete account deletion
  * 
  * This hook provides functionality to safely delete a user's account
@@ -44,12 +54,15 @@ export const useAccountDeletion = () => {
         throw new Error(error.message);
       }
 
-      if (!data?.success) {
-        console.error("[useAccountDeletion] Deletion failed:", data?.error);
-        throw new Error(data?.error || "Account deletion failed");
+      // Type the response properly
+      const response = data as DeleteAccountResponse;
+
+      if (!response?.success) {
+        console.error("[useAccountDeletion] Deletion failed:", response?.error);
+        throw new Error(response?.error || "Account deletion failed");
       }
 
-      console.log("[useAccountDeletion] Database deletion successful:", data.deletion_log);
+      console.log("[useAccountDeletion] Database deletion successful:", response.deletion_log);
 
       // Sign out the user from Supabase Auth
       // Note: We don't delete from auth.users as that's managed by Supabase
