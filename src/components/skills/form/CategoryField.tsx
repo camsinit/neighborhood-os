@@ -15,10 +15,11 @@ import { SkillCategory } from "../types/skillTypes";
 interface CategoryFieldProps {
   value: SkillCategory | undefined;
   onChange: (value: SkillCategory) => void;
+  error?: string;
 }
 
 // Component for selecting a skill category
-const CategoryField = ({ value, onChange }: CategoryFieldProps) => {
+const CategoryField = ({ value, onChange, error }: CategoryFieldProps) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="category">Skill Category</Label>
@@ -27,7 +28,7 @@ const CategoryField = ({ value, onChange }: CategoryFieldProps) => {
         onValueChange={(value: SkillCategory) => onChange(value)}
         required
       >
-        <SelectTrigger>
+        <SelectTrigger className={error ? "border-red-500" : ""}>
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
         <SelectContent>
@@ -38,6 +39,9 @@ const CategoryField = ({ value, onChange }: CategoryFieldProps) => {
           <SelectItem value="wellness">Wellness</SelectItem>
         </SelectContent>
       </Select>
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
     </div>
   );
 };

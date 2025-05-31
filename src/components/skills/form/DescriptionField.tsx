@@ -9,10 +9,11 @@ interface DescriptionFieldProps {
   mode: 'offer' | 'request';
   value: string | undefined;
   onChange: (value: string) => void;
+  error?: string;
 }
 
 // Component for entering the skill description
-const DescriptionField = ({ mode, value, onChange }: DescriptionFieldProps) => {
+const DescriptionField = ({ mode, value, onChange, error }: DescriptionFieldProps) => {
   const placeholder = mode === 'offer' 
     ? 'Share your expertise and how you can help others learn'
     : 'Share what you hope to learn and achieve';
@@ -30,7 +31,11 @@ const DescriptionField = ({ mode, value, onChange }: DescriptionFieldProps) => {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required
+        className={error ? "border-red-500" : ""}
       />
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
     </div>
   );
 };

@@ -23,28 +23,36 @@ export const useGoodsFormHandlers = (
       // Use the multiple file upload handler for offer forms (which allow multiple images)
       if (isOfferForm && e.target.files && e.target.files.length > 0) {
         // If multiple files are selected, use processMultipleFileUploads
-        const imageUrls = await processMultipleFileUploads(e, userId);
-        if (imageUrls.length > 0) {
+        const result = await processMultipleFileUploads(e, userId);
+        if (result.imageUrls.length > 0) {
           setItemFormData(prev => ({
             ...prev,
-            images: [...(prev.images || []), ...imageUrls]
+            images: [...(prev.images || []), ...result.imageUrls]
           }));
+        }
+        // Show error if there was one
+        if (result.error) {
+          toast.error(result.error);
         }
       } else {
         // For single file uploads (or request forms)
-        const imageUrl = await processFileUpload(e, userId);
-        if (imageUrl) {
+        const result = await processFileUpload(e, userId);
+        if (result.imageUrl) {
           if (isOfferForm) {
             setItemFormData(prev => ({
               ...prev,
-              images: [...(prev.images || []), imageUrl]
+              images: [...(prev.images || []), result.imageUrl]
             }));
           } else {
             setRequestFormData(prev => ({
               ...prev,
-              image: imageUrl
+              image: result.imageUrl
             }));
           }
+        }
+        // Show error if there was one
+        if (result.error) {
+          toast.error(result.error);
         }
       }
     } finally {

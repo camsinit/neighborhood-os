@@ -11,10 +11,11 @@ interface TitleFieldProps {
   value: string | undefined;
   onChange: (value: string) => void;
   duplicateWarning: string | null;
+  error?: string;
 }
 
 // Component for entering the skill title
-const TitleField = ({ mode, value, onChange, duplicateWarning }: TitleFieldProps) => {
+const TitleField = ({ mode, value, onChange, duplicateWarning, error }: TitleFieldProps) => {
   const placeholder = mode === 'offer' 
     ? 'e.g., Python Programming, Guitar Lessons' 
     : 'e.g., Learn Python, Guitar Basics';
@@ -33,7 +34,11 @@ const TitleField = ({ mode, value, onChange, duplicateWarning }: TitleFieldProps
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required
+          className={error ? "border-red-500" : ""}
         />
+        {error && (
+          <p className="text-sm text-red-600">{error}</p>
+        )}
         {duplicateWarning && (
           <div className="flex items-center gap-2 text-yellow-600 text-sm">
             <AlertCircle className="h-4 w-4" />
