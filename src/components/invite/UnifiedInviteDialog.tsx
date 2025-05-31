@@ -128,9 +128,7 @@ const UnifiedInviteDialog = ({
               
               {/* Instructions */}
               <div className="text-sm text-gray-600 space-y-2">
-                <p>
-                  Click the button above to create a unique invite link for {currentNeighborhood.name}.
-                </p>
+                
                 
               </div>
             </div>}
