@@ -14,6 +14,8 @@ import SurveyDialog from "./survey/SurveyDialog";
  * It wraps the survey dialog and handles the completion of onboarding.
  * Now includes form submission logic with proper data persistence.
  * 
+ * UPDATED: Now handles pending invite codes after onboarding completion
+ * 
  * When used in test mode, it bypasses the database update.
  */
 interface OnboardingDialogProps {
@@ -33,6 +35,80 @@ const OnboardingDialog = ({
   
   // Get form submission hook
   const { submitForm, submissionState } = useFormSubmission();
+  
+  /**
+   * Handle joining neighborhood via pending invite code
+   */
+  const handlePendingInviteJoin = async () => {
+    const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+    
+    if (!pendingInviteCode || !user?.id) {
+      return;
+    }
+
+    try {
+      // Get neighborhood info from invite code
+      const { data: neighborhoodData, error: functionError } = await supabase
+        .rpc('get_neighborhood_from_invite', { 
+          invite_code_param: pendingInviteCode 
+        });
+
+      if (functionError || !neighborhoodData || neighborhoodData.length === 0) {
+        console.error("Invalid or expired invite code");
+        localStorage.removeItem('pendingInviteCode');
+        return;
+      }
+
+      const result = neighborhoodData[0];
+      
+      // Check if invitation is still pending
+      if (result.invitation_status !== 'pending') {
+        localStorage.removeItem('pendingInviteCode');
+        return;
+      }
+
+      // Add user as a neighborhood member
+      const { error: memberError } = await supabase
+        .from('neighborhood_members')
+        .insert({
+          user_id: user.id,
+          neighborhood_id: result.neighborhood_id,
+          status: 'active'
+        });
+
+      if (memberError) {
+        console.error("Error joining neighborhood:", memberError);
+        return;
+      }
+
+      // Mark invitation as accepted
+      const { error: inviteError } = await supabase
+        .from('invitations')
+        .update({
+          status: 'accepted',
+          accepted_by_id: user.id,
+          accepted_at: new Date().toISOString()
+        })
+        .eq('invite_code', pendingInviteCode);
+
+      if (inviteError) {
+        console.warn("Failed to update invitation status:", inviteError);
+      }
+
+      // Clean up stored invite code
+      localStorage.removeItem('pendingInviteCode');
+      
+      // Show success message
+      toast({
+        title: "Welcome!",
+        description: `You've successfully joined ${result.neighborhood_name}!`,
+      });
+
+    } catch (error: any) {
+      console.error("Error processing pending invite:", error);
+      localStorage.removeItem('pendingInviteCode');
+    }
+  };
   
   // Handle completion of onboarding - now expects formData parameter
   const handleOnboardingComplete = async (formData: any) => {
@@ -54,6 +130,9 @@ const OnboardingDialog = ({
       const success = await submitForm(formData);
       
       if (success) {
+        // Handle pending invite code after successful onboarding
+        await handlePendingInviteJoin();
+        
         // Close dialog and navigate to home
         onOpenChange(false);
         navigate("/home");

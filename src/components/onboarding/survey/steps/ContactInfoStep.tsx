@@ -10,20 +10,34 @@ import { Checkbox } from "@/components/ui/checkbox";
  * This step collects the user's email and phone number with validation
  * to ensure both fields are provided in the correct format.
  * Also includes privacy controls for contact visibility to neighbors.
+ * 
+ * UPDATED: Now properly passes visibility preferences to parent component
  */
 interface ContactInfoStepProps {
   email: string;
   phone: string;
+  emailVisible: boolean;
+  phoneVisible: boolean;
+  addressVisible: boolean;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
+  onEmailVisibleChange: (value: boolean) => void;
+  onPhoneVisibleChange: (value: boolean) => void;
+  onAddressVisibleChange: (value: boolean) => void;
   onValidation?: (field: string, isValid: boolean) => void;
 }
 
 export const ContactInfoStep = ({
   email,
   phone,
+  emailVisible,
+  phoneVisible,
+  addressVisible,
   onEmailChange,
   onPhoneChange,
+  onEmailVisibleChange,
+  onPhoneVisibleChange,
+  onAddressVisibleChange,
   onValidation,
 }: ContactInfoStepProps) => {
   // Track validation errors
@@ -31,12 +45,6 @@ export const ContactInfoStep = ({
     email: "",
     phone: "",
     visibility: "",
-  });
-
-  // Track contact visibility preferences
-  const [contactVisibility, setContactVisibility] = useState({
-    showEmail: true,
-    showPhone: false,
   });
 
   // Validate email format using regex and notify parent
@@ -85,7 +93,7 @@ export const ContactInfoStep = ({
 
   // Validate that at least one contact method is visible
   const validateVisibility = () => {
-    const isValid = contactVisibility.showEmail || contactVisibility.showPhone;
+    const isValid = emailVisible || phoneVisible;
     
     if (!isValid) {
       setErrors(prev => ({ 
@@ -120,14 +128,6 @@ export const ContactInfoStep = ({
     return formattedPhone;
   };
 
-  // Handle visibility checkbox changes
-  const handleVisibilityChange = (field: 'showEmail' | 'showPhone', checked: boolean) => {
-    setContactVisibility(prev => ({
-      ...prev,
-      [field]: checked
-    }));
-  };
-
   // Run validation on mount and whenever values change
   useEffect(() => {
     validateEmail(email);
@@ -139,7 +139,7 @@ export const ContactInfoStep = ({
 
   useEffect(() => {
     validateVisibility();
-  }, [contactVisibility]);
+  }, [emailVisible, phoneVisible]);
 
   return (
     <div className="space-y-6">
@@ -205,8 +205,8 @@ export const ContactInfoStep = ({
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-email"
-              checked={contactVisibility.showEmail}
-              onCheckedChange={(checked) => handleVisibilityChange('showEmail', checked as boolean)}
+              checked={emailVisible}
+              onCheckedChange={(checked) => onEmailVisibleChange(checked as boolean)}
             />
             <Label 
               htmlFor="show-email" 
@@ -219,14 +219,28 @@ export const ContactInfoStep = ({
           <div className="flex items-center space-x-2">
             <Checkbox
               id="show-phone"
-              checked={contactVisibility.showPhone}
-              onCheckedChange={(checked) => handleVisibilityChange('showPhone', checked as boolean)}
+              checked={phoneVisible}
+              onCheckedChange={(checked) => onPhoneVisibleChange(checked as boolean)}
             />
             <Label 
               htmlFor="show-phone" 
               className="text-sm font-normal cursor-pointer"
             >
               Show phone number to neighbors
+            </Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="show-address"
+              checked={addressVisible}
+              onCheckedChange={(checked) => onAddressVisibleChange(checked as boolean)}
+            />
+            <Label 
+              htmlFor="show-address" 
+              className="text-sm font-normal cursor-pointer"
+            >
+              Show address to neighbors
             </Label>
           </div>
         </div>

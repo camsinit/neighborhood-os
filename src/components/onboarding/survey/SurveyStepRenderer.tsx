@@ -13,6 +13,8 @@ import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
  * Handles rendering the appropriate step component based on the current step index.
  * This component encapsulates all the step-specific logic and props passing.
  * Now tracks skills survey completion state and availability preferences for navigation validation.
+ * 
+ * UPDATED: Now properly handles contact visibility preferences
  */
 interface SurveyStepRendererProps {
   currentStep: number;
@@ -61,8 +63,14 @@ export const SurveyStepRenderer = ({
         <ContactInfoStep
           email={formData.email}
           phone={formData.phone}
+          emailVisible={formData.emailVisible}
+          phoneVisible={formData.phoneVisible}
+          addressVisible={formData.addressVisible}
           onEmailChange={(value) => handleChange("email", value)}
           onPhoneChange={(value) => handleChange("phone", value)}
+          onEmailVisibleChange={(value) => handleChange("emailVisible", value)}
+          onPhoneVisibleChange={(value) => handleChange("phoneVisible", value)}
+          onAddressVisibleChange={(value) => handleChange("addressVisible", value)}
           onValidation={handleValidation}
         />
       );
