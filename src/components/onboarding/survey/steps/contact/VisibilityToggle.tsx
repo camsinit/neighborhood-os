@@ -1,14 +1,14 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * VisibilityToggle Component
  * 
  * Collapsible section for configuring which contact information is visible to neighbors.
- * Uses a toggle to show/hide the visibility options with validation.
+ * Uses a clickable header to show/hide the visibility options with validation.
+ * The options are always required - this just collapses them to save space.
  */
 interface VisibilityToggleProps {
   emailVisible: boolean;
@@ -38,18 +38,12 @@ export const VisibilityToggle = ({
   return (
     <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
       <div 
-        className="flex items-center justify-between cursor-pointer"
+        className="flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded p-2 transition-colors"
         onClick={() => onToggleOptions(!showOptions)}
       >
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={showOptions}
-            onCheckedChange={onToggleOptions}
-          />
-          <Label className="text-sm font-medium cursor-pointer">
-            Configure Profile Visibility
-          </Label>
-        </div>
+        <Label className="text-sm font-medium cursor-pointer">
+          Configure Profile Visibility
+        </Label>
         {showOptions ? (
           <ChevronUp className="h-4 w-4 text-gray-500" />
         ) : (
