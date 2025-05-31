@@ -1,7 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 /**
  * Contact Information Step Component
@@ -10,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
  * to ensure all fields are provided in the correct format.
  * Also includes privacy controls for contact visibility to neighbors.
  * 
- * UPDATED: Password field is now always shown since onboarding is for new account creation
+ * UPDATED: Compact layout with side-by-side fields and collapsible visibility options
  * UPDATED: Only shows validation errors after fields are touched
  */
 interface ContactInfoStepProps {
@@ -59,6 +62,9 @@ export const ContactInfoStep = ({
     password: false,
     visibility: false,
   });
+
+  // Track visibility options toggle state
+  const [showVisibilityOptions, setShowVisibilityOptions] = useState(false);
 
   // Validate email format using regex and notify parent
   const validateEmail = (value: string) => {
@@ -210,9 +216,9 @@ export const ContactInfoStep = ({
   }, [emailVisible, phoneVisible, touched.visibility]);
 
   return (
-    <div className="space-y-6">
-      {/* Email, Phone, and Password fields */}
-      <div className="grid grid-cols-1 gap-4">
+    <div className="space-y-4">
+      {/* Email and Phone side by side */}
+      <div className="grid grid-cols-2 gap-3">
         {/* Email field */}
         <div className="space-y-2">
           <Label htmlFor="email">Email Address *</Label>
@@ -226,35 +232,11 @@ export const ContactInfoStep = ({
             required
           />
           {errors.email && (
-            <p className="text-sm text-red-500">{errors.email}</p>
+            <p className="text-xs text-red-500">{errors.email}</p>
           )}
-          <p className="text-sm text-muted-foreground">
-            This will be your login email address.
-          </p>
-        </div>
-
-        {/* Password field - now always shown */}
-        <div className="space-y-2">
-          <Label htmlFor="password">Password *</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            onBlur={handlePasswordBlur}
-            className={errors.password ? "border-red-500" : ""}
-            placeholder="Choose a secure password"
-            required
-          />
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password}</p>
-          )}
-          <p className="text-sm text-muted-foreground">
-            Must be at least 6 characters long.
-          </p>
         </div>
         
-        {/* Phone field - required */}
+        {/* Phone field */}
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number *</Label>
           <Input
@@ -272,79 +254,114 @@ export const ContactInfoStep = ({
             required
           />
           {errors.phone && (
-            <p className="text-sm text-red-500">{errors.phone}</p>
+            <p className="text-xs text-red-500">{errors.phone}</p>
           )}
-          <p className="text-sm text-muted-foreground">
-            Required. Only visible to neighborhood administrators in case of emergency.
-          </p>
         </div>
       </div>
 
-      {/* Contact visibility preferences */}
-      <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-        <div>
-          <h3 className="font-medium text-sm mb-2">Neighbor Profile Visibility</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            Choose which contact information other neighbors can see on your public profile. 
-            You must make at least one contact method visible.
-          </p>
+      {/* Password field - full width */}
+      <div className="space-y-2">
+        <Label htmlFor="password">Password *</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+          onBlur={handlePasswordBlur}
+          className={errors.password ? "border-red-500" : ""}
+          placeholder="Choose a secure password (min 6 characters)"
+          required
+        />
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password}</p>
+        )}
+      </div>
+
+      {/* Contact visibility toggle */}
+      <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
+        <div 
+          className="flex items-center justify-between cursor-pointer"
+          onClick={() => setShowVisibilityOptions(!showVisibilityOptions)}
+        >
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={showVisibilityOptions}
+              onCheckedChange={setShowVisibilityOptions}
+            />
+            <Label className="text-sm font-medium cursor-pointer">
+              Configure Profile Visibility
+            </Label>
+          </div>
+          {showVisibilityOptions ? (
+            <ChevronUp className="h-4 w-4 text-gray-500" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-gray-500" />
+          )}
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-email"
-              checked={emailVisible}
-              onCheckedChange={(checked) => {
-                onEmailVisibleChange(checked as boolean);
-                handleVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-email" 
-              className="text-sm font-normal cursor-pointer"
-            >
-              Show email address to neighbors
-            </Label>
-          </div>
+        {showVisibilityOptions && (
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              Choose which contact information other neighbors can see. At least one must be visible.
+            </p>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-phone"
-              checked={phoneVisible}
-              onCheckedChange={(checked) => {
-                onPhoneVisibleChange(checked as boolean);
-                handleVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-phone" 
-              className="text-sm font-normal cursor-pointer"
-            >
-              Show phone number to neighbors
-            </Label>
-          </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-email"
+                  checked={emailVisible}
+                  onCheckedChange={(checked) => {
+                    onEmailVisibleChange(checked as boolean);
+                    handleVisibilityChange();
+                  }}
+                />
+                <Label 
+                  htmlFor="show-email" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Show email to neighbors
+                </Label>
+              </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-address"
-              checked={addressVisible}
-              onCheckedChange={(checked) => {
-                onAddressVisibleChange(checked as boolean);
-                handleVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-address" 
-              className="text-sm font-normal cursor-pointer"
-            >
-              Show address to neighbors
-            </Label>
-          </div>
-        </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-phone"
+                  checked={phoneVisible}
+                  onCheckedChange={(checked) => {
+                    onPhoneVisibleChange(checked as boolean);
+                    handleVisibilityChange();
+                  }}
+                />
+                <Label 
+                  htmlFor="show-phone" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Show phone to neighbors
+                </Label>
+              </div>
 
-        {errors.visibility && (
-          <p className="text-sm text-red-500">{errors.visibility}</p>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="show-address"
+                  checked={addressVisible}
+                  onCheckedChange={(checked) => {
+                    onAddressVisibleChange(checked as boolean);
+                    handleVisibilityChange();
+                  }}
+                />
+                <Label 
+                  htmlFor="show-address" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Show address to neighbors
+                </Label>
+              </div>
+            </div>
+
+            {errors.visibility && (
+              <p className="text-xs text-red-500">{errors.visibility}</p>
+            )}
+          </div>
         )}
       </div>
     </div>
