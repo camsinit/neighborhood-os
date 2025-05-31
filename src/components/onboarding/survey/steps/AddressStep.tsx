@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
  * 
  * This step collects the user's home address with validation
  * to ensure an address is provided.
+ * UPDATED: Only shows validation errors after field is touched
  */
 interface AddressStepProps {
   address: string;
@@ -23,10 +24,13 @@ export const AddressStep = ({
   // Track validation error
   const [error, setError] = useState("");
 
+  // Track if field has been touched by the user to prevent immediate error display
+  const [touched, setTouched] = useState(false);
+
   // Validate address and notify parent
   const validateAddress = (value: string) => {
     const isValid = value.trim().length > 0;
-    if (!isValid) {
+    if (!isValid && touched) {
       setError("Address is required");
     } else {
       setError("");
@@ -37,10 +41,16 @@ export const AddressStep = ({
     return isValid;
   };
 
-  // Run validation on mount and whenever value changes
+  // Handle field blur to mark as touched and validate
+  const handleAddressBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(true);
+    validateAddress(e.target.value);
+  };
+
+  // Run validation when value changes (but only show errors if touched)
   useEffect(() => {
     validateAddress(address);
-  }, [address]);
+  }, [address, touched]);
 
   return (
     <div className="space-y-4">
@@ -50,7 +60,7 @@ export const AddressStep = ({
           id="address"
           value={address}
           onChange={(e) => onAddressChange(e.target.value)}
-          onBlur={(e) => validateAddress(e.target.value)}
+          onBlur={handleAddressBlur}
           className={error ? "border-red-500" : ""}
           required
         />

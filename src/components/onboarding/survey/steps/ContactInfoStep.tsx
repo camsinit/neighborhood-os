@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
  * Also includes privacy controls for contact visibility to neighbors.
  * 
  * UPDATED: Now includes password field for guest onboarding
+ * UPDATED: Only shows validation errors after fields are touched
  */
 interface ContactInfoStepProps {
   email: string;
@@ -54,6 +55,14 @@ export const ContactInfoStep = ({
     visibility: "",
   });
 
+  // Track if fields have been touched by the user to prevent immediate error display
+  const [touched, setTouched] = useState({
+    email: false,
+    phone: false,
+    password: false,
+    visibility: false,
+  });
+
   // Check if we're in guest mode (has guestOnboarding data in localStorage)
   const isActualGuestMode = isGuestMode || !!localStorage.getItem('guestOnboarding');
 
@@ -63,10 +72,14 @@ export const ContactInfoStep = ({
     let isValid = true;
     
     if (!value.trim()) {
-      setErrors(prev => ({ ...prev, email: "Email is required" }));
+      if (touched.email) {
+        setErrors(prev => ({ ...prev, email: "Email is required" }));
+      }
       isValid = false;
     } else if (!emailRegex.test(value)) {
-      setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
+      if (touched.email) {
+        setErrors(prev => ({ ...prev, email: "Please enter a valid email address" }));
+      }
       isValid = false;
     } else {
       setErrors(prev => ({ ...prev, email: "" }));
@@ -82,14 +95,16 @@ export const ContactInfoStep = ({
     let isValid = true;
     
     if (!value.trim()) {
-      setErrors(prev => ({ ...prev, phone: "Phone number is required" }));
+      if (touched.phone) {
+        setErrors(prev => ({ ...prev, phone: "Phone number is required" }));
+      }
       isValid = false;
     } else {
       // Simple phone validation - at least 10 digits
       const phoneDigits = value.replace(/\D/g, '');
       isValid = phoneDigits.length >= 10;
       
-      if (!isValid) {
+      if (!isValid && touched.phone) {
         setErrors(prev => ({ ...prev, phone: "Please enter a valid phone number (at least 10 digits)" }));
       } else {
         setErrors(prev => ({ ...prev, phone: "" }));
@@ -108,10 +123,14 @@ export const ContactInfoStep = ({
     let isValid = true;
     
     if (!value.trim()) {
-      setErrors(prev => ({ ...prev, password: "Password is required" }));
+      if (touched.password) {
+        setErrors(prev => ({ ...prev, password: "Password is required" }));
+      }
       isValid = false;
     } else if (value.length < 6) {
-      setErrors(prev => ({ ...prev, password: "Password must be at least 6 characters" }));
+      if (touched.password) {
+        setErrors(prev => ({ ...prev, password: "Password must be at least 6 characters" }));
+      }
       isValid = false;
     } else {
       setErrors(prev => ({ ...prev, password: "" }));
@@ -126,7 +145,7 @@ export const ContactInfoStep = ({
   const validateVisibility = () => {
     const isValid = emailVisible || phoneVisible;
     
-    if (!isValid) {
+    if (!isValid && touched.visibility) {
       setErrors(prev => ({ 
         ...prev, 
         visibility: "You must make at least one contact method visible to neighbors" 
@@ -159,24 +178,46 @@ export const ContactInfoStep = ({
     return formattedPhone;
   };
 
-  // Run validation on mount and whenever values change
+  // Handle field blur to mark as touched and validate
+  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, email: true }));
+    validateEmail(e.target.value);
+  };
+
+  const handlePhoneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, phone: true }));
+    validatePhone(e.target.value);
+  };
+
+  const handlePasswordBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, password: true }));
+    validatePassword(e.target.value);
+  };
+
+  // Handle visibility checkbox changes
+  const handleVisibilityChange = () => {
+    setTouched(prev => ({ ...prev, visibility: true }));
+    setTimeout(() => validateVisibility(), 0); // Use setTimeout to ensure state is updated
+  };
+
+  // Run validation when values change (but only show errors if touched)
   useEffect(() => {
     validateEmail(email);
-  }, [email]);
+  }, [email, touched.email]);
 
   useEffect(() => {
     validatePhone(phone);
-  }, [phone]);
+  }, [phone, touched.phone]);
 
   useEffect(() => {
     if (isActualGuestMode) {
       validatePassword(password);
     }
-  }, [password, isActualGuestMode]);
+  }, [password, touched.password, isActualGuestMode]);
 
   useEffect(() => {
     validateVisibility();
-  }, [emailVisible, phoneVisible]);
+  }, [emailVisible, phoneVisible, touched.visibility]);
 
   return (
     <div className="space-y-6">
@@ -190,7 +231,7 @@ export const ContactInfoStep = ({
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            onBlur={(e) => validateEmail(e.target.value)}
+            onBlur={handleEmailBlur}
             className={errors.email ? "border-red-500" : ""}
             required
           />
@@ -214,7 +255,7 @@ export const ContactInfoStep = ({
               type="password"
               value={password}
               onChange={(e) => onPasswordChange?.(e.target.value)}
-              onBlur={(e) => validatePassword(e.target.value)}
+              onBlur={handlePasswordBlur}
               className={errors.password ? "border-red-500" : ""}
               placeholder="Choose a secure password"
               required
@@ -240,7 +281,7 @@ export const ContactInfoStep = ({
               const formattedPhone = formatPhoneNumber(e.target.value);
               onPhoneChange(formattedPhone);
             }}
-            onBlur={(e) => validatePhone(e.target.value)}
+            onBlur={handlePhoneBlur}
             className={errors.phone ? "border-red-500" : ""}
             placeholder="(123) 456-7890"
             required
@@ -269,7 +310,10 @@ export const ContactInfoStep = ({
             <Checkbox
               id="show-email"
               checked={emailVisible}
-              onCheckedChange={(checked) => onEmailVisibleChange(checked as boolean)}
+              onCheckedChange={(checked) => {
+                onEmailVisibleChange(checked as boolean);
+                handleVisibilityChange();
+              }}
             />
             <Label 
               htmlFor="show-email" 
@@ -283,7 +327,10 @@ export const ContactInfoStep = ({
             <Checkbox
               id="show-phone"
               checked={phoneVisible}
-              onCheckedChange={(checked) => onPhoneVisibleChange(checked as boolean)}
+              onCheckedChange={(checked) => {
+                onPhoneVisibleChange(checked as boolean);
+                handleVisibilityChange();
+              }}
             />
             <Label 
               htmlFor="show-phone" 
@@ -297,7 +344,10 @@ export const ContactInfoStep = ({
             <Checkbox
               id="show-address"
               checked={addressVisible}
-              onCheckedChange={(checked) => onAddressVisibleChange(checked as boolean)}
+              onCheckedChange={(checked) => {
+                onAddressVisibleChange(checked as boolean);
+                handleVisibilityChange();
+              }}
             />
             <Label 
               htmlFor="show-address" 
