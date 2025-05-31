@@ -78,7 +78,7 @@ export const VisibilityToggle = ({
         <div className="flex items-center space-x-2">
           <Checkbox
             checked={emailVisible || phoneVisible || addressVisible}
-            readOnly
+            disabled
             className="pointer-events-none"
           />
           <span className="text-sm font-normal text-gray-700">
