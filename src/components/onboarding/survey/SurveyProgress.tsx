@@ -4,6 +4,7 @@
  * 
  * Displays the progress bar and step indicator for the multi-step survey.
  * Now properly accounts for the skills mini-survey progress within the skills step.
+ * UPDATED: Progress now starts at 0% on first step and reaches 100% when skills survey is completed.
  */
 interface SurveyProgressProps {
   currentStep: number;
@@ -24,11 +25,13 @@ export const SurveyProgress = ({
   
   /**
    * Calculate the actual progress percentage including skills mini-survey
+   * Updated to start at 0% and reach 100% when skills survey is completed
    */
   const calculateProgress = () => {
     // If we're not on the skills step (step 4), use normal calculation
     if (currentStep !== 4) {
-      return ((currentStep + 1) / totalSteps) * 100;
+      // Changed from (currentStep + 1) to currentStep to start at 0%
+      return (currentStep / totalSteps) * 100;
     }
     
     // If we're on the skills step, factor in mini-survey progress
@@ -50,7 +53,7 @@ export const SurveyProgress = ({
     }
     
     // Fallback to normal calculation
-    return ((currentStep + 1) / totalSteps) * 100;
+    return (currentStep / totalSteps) * 100;
   };
   
   const progress = calculateProgress();
