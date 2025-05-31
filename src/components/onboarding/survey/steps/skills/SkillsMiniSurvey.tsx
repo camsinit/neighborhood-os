@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ArrowLeft, ArrowRight, X, Plus, Clock, Check } from "lucide-react";
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
+import { SelectedSkillsOverlay } from "./SelectedSkillsOverlay";
 
 /**
  * Skills Mini-Survey Component (Enhanced with Required Availability)
@@ -15,6 +16,7 @@ import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
  * This component creates a condensed mini-survey experience within the Skills & Interests step,
  * optimized for better space utilization and visibility of all UI elements.
  * Now includes required availability and time preferences after skill selection.
+ * Updated with collapsible skills overlay for better UX.
  */
 
 interface SelectedSkill {
@@ -202,7 +204,7 @@ export const SkillsMiniSurvey = ({
   };
 
   /**
-   * Remove a skill from selections (used in summary view)
+   * Remove a skill from selections (used by overlay component)
    */
   const removeSkill = (skillName: string) => {
     const updatedSkills = skillsWithDetails.filter(skill => skill.name !== skillName);
@@ -356,6 +358,12 @@ export const SkillsMiniSurvey = ({
   if (isOnAvailability) {
     return (
       <div className="space-y-6">
+        {/* Selected skills overlay */}
+        <SelectedSkillsOverlay 
+          selectedSkills={skillsWithDetails}
+          onRemoveSkill={removeSkill}
+        />
+
         {/* Header */}
         <div className="text-center space-y-1">
           <div className="flex items-center justify-center gap-2">
@@ -443,6 +451,12 @@ export const SkillsMiniSurvey = ({
 
   return (
     <div className="space-y-4">
+      {/* Selected skills overlay - only show on category steps */}
+      <SelectedSkillsOverlay 
+        selectedSkills={skillsWithDetails}
+        onRemoveSkill={removeSkill}
+      />
+
       {/* Condensed category header */}
       <div className="text-center space-y-1">
         <h3 className="text-base font-semibold">{currentCategory?.title}</h3>
