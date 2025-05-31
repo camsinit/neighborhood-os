@@ -54,12 +54,19 @@ export const useAccountDeletion = () => {
         throw new Error(error.message);
       }
 
-      // Type the response properly
-      const response = data as DeleteAccountResponse;
+      // Safely convert the response to our expected type
+      // First check if data exists and is an object
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        console.error("[useAccountDeletion] Invalid response format:", data);
+        throw new Error("Invalid response from deletion function");
+      }
 
-      if (!response?.success) {
-        console.error("[useAccountDeletion] Deletion failed:", response?.error);
-        throw new Error(response?.error || "Account deletion failed");
+      // Type guard to ensure the response has the expected structure
+      const response = data as unknown as DeleteAccountResponse;
+
+      if (!response.success) {
+        console.error("[useAccountDeletion] Deletion failed:", response.error);
+        throw new Error(response.error || "Account deletion failed");
       }
 
       console.log("[useAccountDeletion] Database deletion successful:", response.deletion_log);
