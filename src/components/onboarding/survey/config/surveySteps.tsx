@@ -1,3 +1,4 @@
+
 import { User, Mail, Home, Wrench, Heart, Shield } from "lucide-react";
 import { BasicInfoStep } from "../steps/BasicInfoStep";
 import { ContactInfoStep } from "../steps/ContactInfoStep";
@@ -34,16 +35,18 @@ export const getSurveySteps = (formData: SurveyFormData, setFormData: (data: Sur
   {
     title: "Contact Information",
     icon: Mail,
-    description: "Your contact details help us keep you informed about community events and updates.",
+    description: "Your contact details and password for your new account.",
     component: (
       <ContactInfoStep
         email={formData.email}
         phone={formData.phone}
+        password={formData.password}
         emailVisible={formData.emailVisible}
         phoneVisible={formData.phoneVisible}
         addressVisible={formData.addressVisible}
         onEmailChange={(value) => setFormData({ ...formData, email: value })}
         onPhoneChange={(value) => setFormData({ ...formData, phone: value })}
+        onPasswordChange={(value) => setFormData({ ...formData, password: value })}
         onEmailVisibleChange={(value) => setFormData({ ...formData, emailVisible: value })}
         onPhoneVisibleChange={(value) => setFormData({ ...formData, phoneVisible: value })}
         onAddressVisibleChange={(value) => setFormData({ ...formData, addressVisible: value })}
