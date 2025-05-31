@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,7 @@ import { AutoSaveField } from '../AutoSaveField';
 import { ProfileImageUpload } from '../ProfileImageUpload';
 import { SettingsCard } from '../SettingsCard';
 import { FormSection } from '../FormSection';
+import { DangerZone } from '../DangerZone';
 
 /**
  * Account settings data structure
@@ -25,7 +25,8 @@ interface AccountSettings {
  * AccountSettingsTab Component
  * 
  * Handles account-related settings with auto-saving functionality
- * using the new card-based layout design.
+ * using the new card-based layout design. Now includes a Danger Zone
+ * for account deletion.
  */
 export const AccountSettingsTab: React.FC = () => {
   // Get current user and navigation
@@ -174,6 +175,15 @@ export const AccountSettingsTab: React.FC = () => {
             Sign Out
           </Button>
         </div>
+      </SettingsCard>
+
+      {/* Danger Zone Card */}
+      <SettingsCard 
+        title="Danger Zone" 
+        description="Irreversible and destructive actions"
+        className="border-red-200"
+      >
+        <DangerZone />
       </SettingsCard>
     </div>
   );

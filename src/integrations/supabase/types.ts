@@ -1041,6 +1041,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_user_account: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
       find_matching_skill_providers: {
         Args: { p_skill_id: string }
         Returns: {
