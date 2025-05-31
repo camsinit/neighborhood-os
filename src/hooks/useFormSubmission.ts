@@ -7,14 +7,17 @@ import { SurveyFormData, FormSubmissionState } from "@/components/onboarding/sur
 import { SKILL_CATEGORIES } from "@/components/onboarding/survey/steps/skills/skillCategories";
 
 /**
- * Hook for handling onboarding form submission
+ * Hook for handling unified onboarding form submission
  * 
  * Manages the complete submission process including:
- * - Profile data updates
+ * - Account creation (if user doesn't exist)
+ * - Profile data updates/creation
  * - Profile image upload to Supabase storage
  * - Skills storage in skills_exchange table
  * - Setting completed_onboarding flag
  * - Error handling and retry logic
+ * 
+ * UPDATED: Now handles account creation for new users in onboarding flow
  */
 export const useFormSubmission = () => {
   const user = useUser();
@@ -29,15 +32,48 @@ export const useFormSubmission = () => {
   });
 
   /**
+   * Create user account if they don't have one
+   */
+  const createUserAccount = async (formData: SurveyFormData): Promise<string | null> => {
+    if (!formData.email || !formData.password) {
+      throw new Error('Email and password are required for account creation');
+    }
+
+    try {
+      console.log("[useFormSubmission] Creating user account for:", formData.email);
+      
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: `${formData.firstName} ${formData.lastName}`.trim()
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('Failed to create user account');
+
+      console.log("[useFormSubmission] User account created successfully:", authData.user.id);
+      return authData.user.id;
+    } catch (error) {
+      console.error('[useFormSubmission] Error creating user account:', error);
+      throw new Error('Failed to create user account');
+    }
+  };
+
+  /**
    * Upload profile image to Supabase storage
    */
-  const uploadProfileImage = async (imageFile: File): Promise<string | null> => {
-    if (!user?.id || !imageFile) return null;
+  const uploadProfileImage = async (imageFile: File, userId: string): Promise<string | null> => {
+    if (!imageFile) return null;
 
     try {
       // Generate unique filename with user ID
       const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
       // Upload to avatars bucket
@@ -91,11 +127,12 @@ export const useFormSubmission = () => {
    */
   const saveSkills = async (
     skills: string[], 
+    userId: string,
     availability?: string, 
     timePreferences?: string[],
     neighborhoodId?: string
   ) => {
-    if (!user?.id || skills.length === 0) return;
+    if (skills.length === 0) return;
 
     try {
       // Parse and prepare skills data
@@ -108,7 +145,7 @@ export const useFormSubmission = () => {
           description: details || null,
           skill_category: skillCategory,
           request_type: 'offer',
-          user_id: user.id,
+          user_id: userId,
           neighborhood_id: neighborhoodId,
           availability: availability || null,
           time_preferences: timePreferences || null,
@@ -130,14 +167,12 @@ export const useFormSubmission = () => {
   };
 
   /**
-   * Update user profile in profiles table
+   * Create or update user profile in profiles table
    */
-  const updateProfile = async (formData: SurveyFormData, avatarUrl?: string) => {
-    if (!user?.id) throw new Error('User not authenticated');
-
+  const upsertProfile = async (formData: SurveyFormData, userId: string, avatarUrl?: string) => {
     try {
       const profileData = {
-        id: user.id, // Include the required id field
+        id: userId,
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
         bio: formData.bio || null,
         phone_number: formData.phone || null,
@@ -150,7 +185,9 @@ export const useFormSubmission = () => {
         completed_onboarding: true,
       };
 
-      // Use upsert with proper conflict resolution
+      console.log("[useFormSubmission] Upserting profile for user:", userId);
+
+      // Use upsert to handle both insert and update scenarios
       const { error } = await supabase
         .from('profiles')
         .upsert(profileData, { 
@@ -159,24 +196,24 @@ export const useFormSubmission = () => {
         });
 
       if (error) throw error;
+      
+      console.log("[useFormSubmission] Profile upserted successfully");
     } catch (error) {
-      console.error('Error updating profile:', error);
-      throw new Error('Failed to update profile');
+      console.error('Error upserting profile:', error);
+      throw new Error('Failed to create/update profile');
     }
   };
 
   /**
    * Get user's current neighborhood ID
    */
-  const getUserNeighborhoodId = async (): Promise<string | null> => {
-    if (!user?.id) return null;
-
+  const getUserNeighborhoodId = async (userId: string): Promise<string | null> => {
     try {
       // Check if user is a member of any neighborhood
       const { data: membership, error: membershipError } = await supabase
         .from('neighborhood_members')
         .select('neighborhood_id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('status', 'active')
         .single();
 
@@ -188,7 +225,7 @@ export const useFormSubmission = () => {
       const { data: neighborhood, error: neighborhoodError } = await supabase
         .from('neighborhoods')
         .select('id')
-        .eq('created_by', user.id)
+        .eq('created_by', userId)
         .single();
 
       if (!neighborhoodError && neighborhood) {
@@ -203,17 +240,12 @@ export const useFormSubmission = () => {
   };
 
   /**
-   * Main submission function
+   * Main submission function - now handles both account creation and profile setup
    */
   const submitForm = async (formData: SurveyFormData): Promise<boolean> => {
-    if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to complete onboarding.",
-        variant: "destructive",
-      });
-      return false;
-    }
+    console.log("[useFormSubmission] Starting submission process");
+    console.log("[useFormSubmission] Current user:", user ? `${user.id} (${user.email})` : 'null');
+    console.log("[useFormSubmission] Form data email:", formData.email);
 
     // Reset submission state
     setSubmissionState({
@@ -224,33 +256,52 @@ export const useFormSubmission = () => {
     });
 
     try {
-      // Step 1: Get user's neighborhood (10%)
-      setSubmissionState(prev => ({ ...prev, progress: 10 }));
-      const neighborhoodId = await getUserNeighborhoodId();
+      let userId: string;
 
-      // Step 2: Upload profile image if provided (30%)
-      setSubmissionState(prev => ({ ...prev, progress: 30 }));
-      let avatarUrl: string | null = null;
-      if (formData.profileImage) {
-        avatarUrl = await uploadProfileImage(formData.profileImage);
+      // Step 1: Ensure we have a user account (10%)
+      setSubmissionState(prev => ({ ...prev, progress: 10 }));
+      
+      if (!user?.id) {
+        console.log("[useFormSubmission] No existing user, creating account");
+        // Create new user account
+        const newUserId = await createUserAccount(formData);
+        if (!newUserId) {
+          throw new Error('Failed to create user account');
+        }
+        userId = newUserId;
+      } else {
+        console.log("[useFormSubmission] Using existing user:", user.id);
+        userId = user.id;
       }
 
-      // Step 3: Update user profile (60%)
-      setSubmissionState(prev => ({ ...prev, progress: 60 }));
-      await updateProfile(formData, avatarUrl);
+      // Step 2: Get user's neighborhood (20%)
+      setSubmissionState(prev => ({ ...prev, progress: 20 }));
+      const neighborhoodId = await getUserNeighborhoodId(userId);
 
-      // Step 4: Save skills if any are selected (90%)
+      // Step 3: Upload profile image if provided (50%)
+      setSubmissionState(prev => ({ ...prev, progress: 50 }));
+      let avatarUrl: string | null = null;
+      if (formData.profileImage) {
+        avatarUrl = await uploadProfileImage(formData.profileImage, userId);
+      }
+
+      // Step 4: Create/update user profile (70%)
+      setSubmissionState(prev => ({ ...prev, progress: 70 }));
+      await upsertProfile(formData, userId, avatarUrl);
+
+      // Step 5: Save skills if any are selected (90%)
       setSubmissionState(prev => ({ ...prev, progress: 90 }));
       if (formData.skills.length > 0) {
         await saveSkills(
           formData.skills,
+          userId,
           formData.skillAvailability,
           formData.skillTimePreferences,
           neighborhoodId
         );
       }
 
-      // Step 5: Complete (100%)
+      // Step 6: Complete (100%)
       setSubmissionState({
         isSubmitting: false,
         progress: 100,
@@ -260,7 +311,7 @@ export const useFormSubmission = () => {
 
       toast({
         title: "Welcome to the neighborhood!",
-        description: "Your profile has been created successfully.",
+        description: "Your account and profile have been created successfully.",
       });
 
       return true;

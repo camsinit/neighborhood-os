@@ -5,7 +5,7 @@
  * This page handles the user onboarding flow, guiding them through 
  * a series of steps to complete their profile setup.
  * 
- * UPDATED: Now supports guest onboarding mode for unauthenticated users
+ * UPDATED: Simplified to unified onboarding flow for new users
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -18,39 +18,33 @@ const OnboardingPage = () => {
   // Track whether onboarding is needed or already completed
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isGuestMode, setIsGuestMode] = useState(false);
   
   // Get the current user
   const user = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Check onboarding status for both guest and regular users
+  // Check onboarding status
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       console.log("[OnboardingPage] Checking onboarding status");
       console.log("[OnboardingPage] User:", user ? `${user.id} (${user.email})` : 'null');
       
-      // First check if we're in guest mode
-      const guestData = localStorage.getItem('guestOnboarding');
-      const isGuest = !!guestData;
+      // Check if we have any stored invite or onboarding context
+      const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+      console.log("[OnboardingPage] Pending invite code:", pendingInviteCode);
       
-      console.log("[OnboardingPage] Guest mode:", isGuest);
-      console.log("[OnboardingPage] Guest data:", guestData);
-      
-      setIsGuestMode(isGuest);
-      
-      // If we're in guest mode, allow onboarding without authentication
-      if (isGuest) {
-        console.log("[OnboardingPage] Guest mode detected - allowing onboarding");
+      // If no user but we have a pending invite, allow onboarding for account creation
+      if (!user?.id && pendingInviteCode) {
+        console.log("[OnboardingPage] No user but pending invite - allowing onboarding for account creation");
         setNeedsOnboarding(true);
         setLoading(false);
         return;
       }
       
-      // Regular flow - check if user is authenticated
+      // If no user and no pending invite, redirect to login
       if (!user?.id) {
-        console.log("[OnboardingPage] No user and not in guest mode - redirecting to login");
+        console.log("[OnboardingPage] No user and no pending context - redirecting to login");
         navigate("/login");
         return;
       }
@@ -63,12 +57,13 @@ const OnboardingPage = () => {
           .from("profiles")
           .select("completed_onboarding")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
         
-        if (error) throw error;
-        
-        // If onboarding is complete, redirect to home
-        if (data?.completed_onboarding) {
+        if (error) {
+          console.error("[OnboardingPage] Error checking profile:", error);
+          // If profile doesn't exist, user needs onboarding
+          setNeedsOnboarding(true);
+        } else if (data?.completed_onboarding) {
           console.log("[OnboardingPage] User has completed onboarding - redirecting to home");
           setNeedsOnboarding(false);
           navigate("/home");
@@ -98,7 +93,7 @@ const OnboardingPage = () => {
       <div className="flex items-center justify-center h-screen">
         <div className="animate-pulse text-center">
           <p className="text-lg text-gray-600">
-            {isGuestMode ? "Setting up your account..." : "Setting up your profile..."}
+            Setting up your profile...
           </p>
         </div>
       </div>
@@ -107,7 +102,6 @@ const OnboardingPage = () => {
   
   // Display onboarding dialog
   console.log("[OnboardingPage] Rendering onboarding dialog");
-  console.log("[OnboardingPage] Guest mode:", isGuestMode);
   console.log("[OnboardingPage] Needs onboarding:", needsOnboarding);
   
   return (
@@ -115,13 +109,7 @@ const OnboardingPage = () => {
       open={needsOnboarding} 
       onOpenChange={(open) => {
         if (!open) {
-          // If closing dialog, navigate based on mode
-          if (isGuestMode) {
-            // For guest mode, they should be logged in after completion
-            navigate("/home");
-          } else {
-            navigate("/home");
-          }
+          navigate("/home");
         }
       }}
     />

@@ -1,10 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
-import { useGuestOnboarding } from "@/hooks/useGuestOnboarding";
 import SurveyDialog from "./survey/SurveyDialog";
 
 /**
@@ -12,9 +12,9 @@ import SurveyDialog from "./survey/SurveyDialog";
  * 
  * A dialog that displays when a user needs to complete onboarding.
  * It wraps the survey dialog and handles the completion of onboarding.
- * Now includes form submission logic with proper data persistence.
+ * Now uses a unified onboarding flow that assumes new users without accounts.
  * 
- * UPDATED: Now handles both regular and guest onboarding flows with comprehensive logging
+ * UPDATED: Simplified to single onboarding flow - no guest mode logic
  * 
  * When used in test mode, it bypasses the database update.
  */
@@ -33,33 +33,24 @@ const OnboardingDialog = ({
   const { toast } = useToast();
   const user = useUser();
   
-  // Check if we're in guest mode
-  const isGuestMode = !!localStorage.getItem('guestOnboarding');
-  
   console.log("[OnboardingDialog] Component initialized");
-  console.log("[OnboardingDialog] Guest mode:", isGuestMode);
   console.log("[OnboardingDialog] Test mode:", isTestMode);
   console.log("[OnboardingDialog] User:", user ? `${user.id} (${user.email})` : 'null');
-  console.log("[OnboardingDialog] Guest data in localStorage:", localStorage.getItem('guestOnboarding'));
   
-  // Get appropriate submission hook based on mode
-  const { submitForm, submissionState: regularSubmissionState } = useFormSubmission();
-  const { submitGuestOnboarding, submissionState: guestSubmissionState } = useGuestOnboarding();
-  
-  // Use the appropriate submission state
-  const submissionState = isGuestMode ? guestSubmissionState : regularSubmissionState;
+  // Use the unified submission hook
+  const { submitForm, submissionState } = useFormSubmission();
   
   /**
-   * Handle joining neighborhood via pending invite code (for regular onboarding)
+   * Handle joining neighborhood via pending invite code
    */
-  const handlePendingInviteJoin = async () => {
+  const handlePendingInviteJoin = async (userId: string) => {
     const pendingInviteCode = localStorage.getItem('pendingInviteCode');
     
     console.log("[OnboardingDialog] handlePendingInviteJoin called");
     console.log("[OnboardingDialog] Pending invite code:", pendingInviteCode);
-    console.log("[OnboardingDialog] User ID:", user?.id);
+    console.log("[OnboardingDialog] User ID:", userId);
     
-    if (!pendingInviteCode || !user?.id) {
+    if (!pendingInviteCode || !userId) {
       console.log("[OnboardingDialog] No pending invite code or user, skipping join");
       return;
     }
@@ -95,7 +86,7 @@ const OnboardingDialog = ({
       const { error: memberError } = await supabase
         .from('neighborhood_members')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           neighborhood_id: result.neighborhood_id,
           status: 'active'
         });
@@ -112,7 +103,7 @@ const OnboardingDialog = ({
         .from('invitations')
         .update({
           status: 'accepted',
-          accepted_by_id: user.id,
+          accepted_by_id: userId,
           accepted_at: new Date().toISOString()
         })
         .eq('invite_code', pendingInviteCode);
@@ -141,7 +132,6 @@ const OnboardingDialog = ({
   const handleOnboardingComplete = async (formData: any) => {
     console.log("[OnboardingDialog] handleOnboardingComplete called");
     console.log("[OnboardingDialog] Form data:", formData);
-    console.log("[OnboardingDialog] Guest mode:", isGuestMode);
     console.log("[OnboardingDialog] Test mode:", isTestMode);
     
     try {
@@ -160,25 +150,19 @@ const OnboardingDialog = ({
         return;
       }
       
-      let success = false;
-      
-      if (isGuestMode) {
-        console.log("[OnboardingDialog] Starting guest onboarding submission");
-        // Guest onboarding flow - creates account and joins neighborhood
-        success = await submitGuestOnboarding(formData);
-        console.log("[OnboardingDialog] Guest onboarding result:", success);
-      } else {
-        console.log("[OnboardingDialog] Starting regular onboarding submission");
-        // Regular onboarding flow - updates existing user profile
-        success = await submitForm(formData);
-        console.log("[OnboardingDialog] Regular onboarding result:", success);
-      }
+      console.log("[OnboardingDialog] Starting unified onboarding submission");
+      // Unified onboarding flow - creates account and sets up profile
+      const success = await submitForm(formData);
+      console.log("[OnboardingDialog] Unified onboarding result:", success);
       
       if (success) {
-        if (!isGuestMode) {
-          console.log("[OnboardingDialog] Handling pending invite join for regular user");
-          // Handle pending invite code after successful regular onboarding
-          await handlePendingInviteJoin();
+        // Get the current user after successful submission
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        
+        if (currentUser) {
+          console.log("[OnboardingDialog] Handling pending invite join for new user");
+          // Handle pending invite code after successful onboarding
+          await handlePendingInviteJoin(currentUser.id);
         }
         
         console.log("[OnboardingDialog] Onboarding completed successfully, navigating to home");
@@ -187,7 +171,7 @@ const OnboardingDialog = ({
         onOpenChange(false);
         navigate("/home");
       }
-      // Error handling is done in the submit functions
+      // Error handling is done in the submit function
     } catch (error: any) {
       console.error("[OnboardingDialog] Error completing onboarding:", error);
       
