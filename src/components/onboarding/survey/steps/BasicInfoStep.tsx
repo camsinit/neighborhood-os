@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
  * 
  * This step collects the user's first and last name
  * with validation to ensure both fields are provided.
+ * 
+ * UPDATED: Validation errors only show after user interaction, not on initial load
  */
 interface BasicInfoStepProps {
   firstName: string;
@@ -30,10 +32,16 @@ export const BasicInfoStep = ({
     lastName: "",
   });
 
+  // Track whether fields have been touched by the user
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+  });
+
   // Validate first name and notify parent
-  const validateFirstName = (value: string) => {
+  const validateFirstName = (value: string, showError: boolean = false) => {
     const isValid = value.trim().length > 0;
-    if (!isValid) {
+    if (!isValid && showError) {
       setErrors(prev => ({ ...prev, firstName: "First name is required" }));
     } else {
       setErrors(prev => ({ ...prev, firstName: "" }));
@@ -44,9 +52,9 @@ export const BasicInfoStep = ({
   };
 
   // Validate last name and notify parent
-  const validateLastName = (value: string) => {
+  const validateLastName = (value: string, showError: boolean = false) => {
     const isValid = value.trim().length > 0;
-    if (!isValid) {
+    if (!isValid && showError) {
       setErrors(prev => ({ ...prev, lastName: "Last name is required" }));
     } else {
       setErrors(prev => ({ ...prev, lastName: "" }));
@@ -56,14 +64,26 @@ export const BasicInfoStep = ({
     return isValid;
   };
 
-  // Run validation on mount and whenever values change
+  // Run validation on mount and whenever values change (but don't show errors until touched)
   useEffect(() => {
-    validateFirstName(firstName);
-  }, [firstName]);
+    validateFirstName(firstName, touched.firstName);
+  }, [firstName, touched.firstName]);
 
   useEffect(() => {
-    validateLastName(lastName);
-  }, [lastName]);
+    validateLastName(lastName, touched.lastName);
+  }, [lastName, touched.lastName]);
+
+  // Handle first name blur (when user leaves the field)
+  const handleFirstNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, firstName: true }));
+    validateFirstName(e.target.value, true);
+  };
+
+  // Handle last name blur (when user leaves the field)
+  const handleLastNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, lastName: true }));
+    validateLastName(e.target.value, true);
+  };
 
   return (
     <div className="space-y-4">
@@ -74,11 +94,11 @@ export const BasicInfoStep = ({
             id="firstName"
             value={firstName}
             onChange={(e) => onFirstNameChange(e.target.value)}
-            onBlur={(e) => validateFirstName(e.target.value)}
+            onBlur={handleFirstNameBlur}
             required
-            className={errors.firstName ? "border-red-500" : ""}
+            className={errors.firstName && touched.firstName ? "border-red-500" : ""}
           />
-          {errors.firstName && (
+          {errors.firstName && touched.firstName && (
             <p className="text-sm text-red-500">{errors.firstName}</p>
           )}
         </div>
@@ -88,11 +108,11 @@ export const BasicInfoStep = ({
             id="lastName"
             value={lastName}
             onChange={(e) => onLastNameChange(e.target.value)}
-            onBlur={(e) => validateLastName(e.target.value)}
+            onBlur={handleLastNameBlur}
             required
-            className={errors.lastName ? "border-red-500" : ""}
+            className={errors.lastName && touched.lastName ? "border-red-500" : ""}
           />
-          {errors.lastName && (
+          {errors.lastName && touched.lastName && (
             <p className="text-sm text-red-500">{errors.lastName}</p>
           )}
         </div>

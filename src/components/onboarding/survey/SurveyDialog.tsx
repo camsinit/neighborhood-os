@@ -19,7 +19,7 @@ import { Progress } from "@/components/ui/progress";
  * Shows a welcome screen with confetti after completion.
  * Now includes form submission progress tracking.
  * 
- * UPDATED: Now supports guest onboarding mode
+ * UPDATED: Now supports guest onboarding mode and has gradient background like landing page
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -103,27 +103,20 @@ const SurveyDialog = ({
     onOpenChange(false);
   };
   
-  // Handle dialog close request
+  // Handle dialog close request - prevent closing during onboarding
   const handleCloseRequest = (open: boolean) => {
+    // Don't allow closing during submission or onboarding flow
+    if (submissionState?.isSubmitting || !open) {
+      return;
+    }
+    
     // If test mode, allow closing without warning
     if (isTestMode) {
       onOpenChange(open);
       return;
     }
     
-    // Don't allow closing during submission
-    if (submissionState?.isSubmitting) {
-      return;
-    }
-    
-    // In normal mode, show warning if trying to close
-    if (!open) {
-      // TODO: Add confirmation dialog before closing
-      // For now, just close the dialog
-      onOpenChange(open);
-    } else {
-      onOpenChange(open);
-    }
+    onOpenChange(open);
   };
   
   // Get test mode indicator for the dialog title
@@ -133,8 +126,27 @@ const SurveyDialog = ({
   // Show welcome screen after survey completion
   if (showWelcomeScreen) {
     return (
+      <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <Dialog open={open} onOpenChange={handleCloseRequest}>
+          <DialogContent className="sm:max-w-[500px] border-0 shadow-2xl" hideCloseButton>
+            {/* Test mode indicator */}
+            {isTestMode && (
+              <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
+                Test Mode - No changes will be saved to your profile
+              </div>
+            )}
+            
+            <WelcomeScreen onGetStarted={handleFinalComplete} />
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Dialog open={open} onOpenChange={handleCloseRequest}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] border-0 shadow-2xl" hideCloseButton>
           {/* Test mode indicator */}
           {isTestMode && (
             <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
@@ -142,82 +154,67 @@ const SurveyDialog = ({
             </div>
           )}
           
-          <WelcomeScreen onGetStarted={handleFinalComplete} />
-        </DialogContent>
-      </Dialog>
-    );
-  }
-  
-  return (
-    <Dialog open={open} onOpenChange={handleCloseRequest}>
-      <DialogContent className="sm:max-w-[500px]">
-        {/* Test mode indicator */}
-        {isTestMode && (
-          <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
-            Test Mode - No changes will be saved to your profile
-          </div>
-        )}
-        
-        {/* Guest mode indicator */}
-        {isGuestMode && !isTestMode && (
-          <div className="bg-blue-50 border border-blue-200 rounded px-3 py-1 text-blue-700 text-sm mb-2">
-            Creating your account and joining the neighborhood
-          </div>
-        )}
-        
-        {/* Submission progress overlay */}
-        {submissionState?.isSubmitting && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-lg">
-            <div className="text-center space-y-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  {isGuestMode ? "Creating your account..." : "Setting up your profile..."}
-                </p>
-                <Progress value={submissionState.progress} className="w-64" />
-                <p className="text-xs text-gray-500">{submissionState.progress}% complete</p>
+          {/* Guest mode indicator */}
+          {isGuestMode && !isTestMode && (
+            <div className="bg-blue-50 border border-blue-200 rounded px-3 py-1 text-blue-700 text-sm mb-2">
+              Creating your account and joining the neighborhood
+            </div>
+          )}
+          
+          {/* Submission progress overlay */}
+          {submissionState?.isSubmitting && (
+            <div className="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 rounded-lg">
+              <div className="text-center space-y-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {isGuestMode ? "Creating your account..." : "Setting up your profile..."}
+                  </p>
+                  <Progress value={submissionState.progress} className="w-64" />
+                  <p className="text-xs text-gray-500">{submissionState.progress}% complete</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        
-        {/* Survey header */}
-        <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}${guestModeIndicator}`} />
-        
-        {/* Progress indicator - now includes skills mini-survey progress */}
-        <SurveyProgress 
-          currentStep={currentStep} 
-          totalSteps={steps.length}
-          skillsSurveyProgress={currentStep === 4 ? skillsMiniSurveyProgress : undefined}
-        />
-        
-        {/* Current step component */}
-        <div className="py-4">
-          <SurveyStepRenderer
-            currentStep={currentStep}
-            formData={formData}
-            handleChange={handleChange}
-            handleValidation={handleValidation}
-            onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
-            onSkillsMiniSurveyProgress={handleSkillsMiniSurveyProgress}
-            isGuestMode={isGuestMode}
+          )}
+          
+          {/* Survey header */}
+          <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}${guestModeIndicator}`} />
+          
+          {/* Progress indicator - now includes skills mini-survey progress */}
+          <SurveyProgress 
+            currentStep={currentStep} 
+            totalSteps={steps.length}
+            skillsSurveyProgress={currentStep === 4 ? skillsMiniSurveyProgress : undefined}
           />
-        </div>
-        
-        {/* Navigation buttons */}
-        <SurveyNavigation
-          currentStep={currentStep}
-          totalSteps={steps.length}
-          isCurrentStepValid={isCurrentStepValid()}
-          onPrevious={handlePrevious}
-          onNext={() => handleNext(handleSurveyComplete, steps.length)}
-          isSkillsStep={currentStep === 4}
-          hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
-          hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
-          disabled={submissionState?.isSubmitting}
-        />
-      </DialogContent>
-    </Dialog>
+          
+          {/* Current step component */}
+          <div className="py-4">
+            <SurveyStepRenderer
+              currentStep={currentStep}
+              formData={formData}
+              handleChange={handleChange}
+              handleValidation={handleValidation}
+              onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
+              onSkillsMiniSurveyProgress={handleSkillsMiniSurveyProgress}
+              isGuestMode={isGuestMode}
+            />
+          </div>
+          
+          {/* Navigation buttons */}
+          <SurveyNavigation
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            isCurrentStepValid={isCurrentStepValid()}
+            onPrevious={handlePrevious}
+            onNext={() => handleNext(handleSurveyComplete, steps.length)}
+            isSkillsStep={currentStep === 4}
+            hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
+            hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
+            disabled={submissionState?.isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
