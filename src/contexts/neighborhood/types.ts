@@ -15,9 +15,10 @@ export interface Neighborhood {
 // Define the context type
 export interface NeighborhoodContextType {
   currentNeighborhood: Neighborhood | null;
+  userNeighborhoods: Neighborhood[]; // Added back userNeighborhoods array
   isLoading: boolean;
   error: Error | null;
-  // Removed isCoreContributor and allNeighborhoods
   setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void;
+  switchNeighborhood: (neighborhoodId: string) => void; // Added back switchNeighborhood function
   refreshNeighborhoodData: () => void;
 }

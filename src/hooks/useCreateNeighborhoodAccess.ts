@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const useCreateNeighborhoodAccess = () => {
   const user = useUser();
-  const { userNeighborhoods } = useNeighborhood();
+  const { userNeighborhoods } = useNeighborhood(); // Use the correct context property
   
   // Query user roles to check for super_admin access
   const { data: userRoles = [] } = useQuery({

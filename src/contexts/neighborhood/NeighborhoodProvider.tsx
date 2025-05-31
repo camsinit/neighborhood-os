@@ -14,9 +14,11 @@ import { useUser } from '@supabase/auth-helpers-react';
 // Create the context with a default value
 const NeighborhoodContext = createContext<NeighborhoodContextType>({
   currentNeighborhood: null,
+  userNeighborhoods: [], // Added default empty array
   isLoading: true,
   error: null,
   setCurrentNeighborhood: () => {},
+  switchNeighborhood: () => {}, // Added default function
   refreshNeighborhoodData: () => {},
 });
 
@@ -39,19 +41,23 @@ export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({
   
   // Initialize the neighborhood data hook
   const { 
-    currentNeighborhood, 
+    currentNeighborhood,
+    userNeighborhoods, // Get userNeighborhoods from the hook
     isLoading, 
     error,
     setCurrentNeighborhood,
+    switchNeighborhood, // Get switchNeighborhood function from the hook
     refreshNeighborhoodData,
   } = useNeighborhoodData(user);
 
-  // Create the context value with the simplified data model
+  // Create the context value with the updated data model
   const contextValue: NeighborhoodContextType = {
     currentNeighborhood,
+    userNeighborhoods, // Include userNeighborhoods in context
     isLoading,
     error,
     setCurrentNeighborhood,
+    switchNeighborhood, // Include switchNeighborhood in context
     refreshNeighborhoodData,
   };
 
@@ -61,4 +67,3 @@ export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({
     </NeighborhoodContext.Provider>
   );
 };
-
