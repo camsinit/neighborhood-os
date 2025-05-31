@@ -1,20 +1,20 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, ArrowRight, X, Plus, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, X, Plus, Clock, Check } from "lucide-react";
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
 
 /**
- * Skills Mini-Survey Component (Enhanced with Availability)
+ * Skills Mini-Survey Component (Enhanced with Required Availability)
  * 
  * This component creates a condensed mini-survey experience within the Skills & Interests step,
  * optimized for better space utilization and visibility of all UI elements.
- * Now includes an availability and time preferences step after skill selection.
+ * Now includes required availability and time preferences after skill selection.
  */
 
 interface SelectedSkill {
@@ -51,7 +51,7 @@ export const SkillsMiniSurvey = ({
   // Track if user has completed the mini-survey (reached the summary step)
   const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
   
-  // Availability and time preferences state
+  // Availability and time preferences state (now required)
   const [availability, setAvailability] = useState('');
   const [timePreferences, setTimePreferences] = useState<string[]>([]);
   
@@ -76,6 +76,14 @@ export const SkillsMiniSurvey = ({
   const isOnAvailability = currentStep === categoryKeys.length;
   const isOnSummary = currentStep === categoryKeys.length + 1;
 
+  // Day availability options
+  const dayOptions = [
+    'Weekdays only',
+    'Weekends only', 
+    'Both weekdays and weekends',
+    'Flexible schedule'
+  ];
+
   // Time preference options
   const timeOptions = [
     'Early morning (6-9 AM)',
@@ -83,8 +91,7 @@ export const SkillsMiniSurvey = ({
     'Afternoon (12-5 PM)',
     'Evening (5-8 PM)',
     'Late evening (8-11 PM)',
-    'Weekends only',
-    'Flexible schedule'
+    'Available anytime'
   ];
 
   // Update survey completion state whenever currentStep changes
@@ -211,6 +218,17 @@ export const SkillsMiniSurvey = ({
   };
 
   /**
+   * Handle day availability selection
+   */
+  const handleDayAvailabilityChange = (day: string, checked: boolean) => {
+    if (checked) {
+      setAvailability(day);
+    } else {
+      setAvailability('');
+    }
+  };
+
+  /**
    * Handle time preference selection
    */
   const handleTimePreferenceChange = (time: string, checked: boolean) => {
@@ -237,6 +255,13 @@ export const SkillsMiniSurvey = ({
     if (isOnAvailability || isOnSummary) return null;
     const categoryKey = categoryKeys[currentStep];
     return SKILL_CATEGORIES[categoryKey as keyof typeof SKILL_CATEGORIES];
+  };
+
+  /**
+   * Check if availability step is valid (both day and time selections required)
+   */
+  const isAvailabilityStepValid = () => {
+    return availability.length > 0 && timePreferences.length > 0;
   };
 
   /**
@@ -297,9 +322,9 @@ export const SkillsMiniSurvey = ({
             {(availability || timePreferences.length > 0) && (
               <div className="mt-3 p-2 bg-gray-50 rounded text-xs">
                 <p className="font-medium">Availability:</p>
-                {availability && <p>{availability}</p>}
+                {availability && <p>Days: {availability}</p>}
                 {timePreferences.length > 0 && (
-                  <p>Time preferences: {timePreferences.join(', ')}</p>
+                  <p>Times: {timePreferences.join(', ')}</p>
                 )}
               </div>
             )}
@@ -327,53 +352,70 @@ export const SkillsMiniSurvey = ({
     );
   }
 
-  // Availability step content
+  // Availability step content (now required)
   if (isOnAvailability) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-1">
           <div className="flex items-center justify-center gap-2">
             <Clock className="h-4 w-4 text-blue-600" />
-            <h3 className="text-base font-semibold">Availability & Time Preferences</h3>
+            <h3 className="text-base font-semibold">Availability & Time Preferences *</h3>
           </div>
           <p className="text-xs text-muted-foreground">
             {skillsWithDetails.length > 0 
               ? `Set your availability for offering your ${skillsWithDetails.length} selected skills.`
-              : "Set your general availability for offering skills (you can skip this if you haven't selected any skills)."
+              : "Set your general availability for offering skills."
             }
           </p>
         </div>
 
-        {/* General availability input */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">General Availability</Label>
-          <Textarea
-            placeholder="e.g., Weekday evenings, Weekend mornings, Flexible schedule..."
-            value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
-            className="h-20 text-sm"
-          />
+        {/* Day availability selection (required) */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">When are you generally available? *</Label>
+          <div className="grid grid-cols-1 gap-3">
+            {dayOptions.map((day) => (
+              <div key={day} className="flex items-center space-x-3">
+                <Checkbox
+                  id={day}
+                  checked={availability === day}
+                  onCheckedChange={(checked) => handleDayAvailabilityChange(day, checked as boolean)}
+                />
+                <Label htmlFor={day} className="text-sm cursor-pointer flex-1">
+                  {day}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Time preferences */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Preferred Times (optional)</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+        {/* Time preferences (required) */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">What times generally work best? (Select at least one) *</Label>
+          <div className="grid grid-cols-1 gap-3">
             {timeOptions.map((time) => (
-              <div key={time} className="flex items-center space-x-2">
+              <div key={time} className="flex items-center space-x-3">
                 <Checkbox
                   id={time}
                   checked={timePreferences.includes(time)}
                   onCheckedChange={(checked) => handleTimePreferenceChange(time, checked as boolean)}
                 />
-                <Label htmlFor={time} className="text-xs cursor-pointer">
+                <Label htmlFor={time} className="text-sm cursor-pointer flex-1">
                   {time}
                 </Label>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Validation message */}
+        {(!availability || timePreferences.length === 0) && (
+          <div className="text-center">
+            <p className="text-xs text-red-500">
+              Please select both day availability and time preferences to continue
+            </p>
+          </div>
+        )}
 
         {/* Navigation */}
         <div className="flex justify-between items-center pt-2">
@@ -386,7 +428,7 @@ export const SkillsMiniSurvey = ({
             Step {currentStep + 1} of {totalSteps}
           </div>
           
-          <Button onClick={handleNext} size="sm">
+          <Button onClick={handleNext} size="sm" disabled={!isAvailabilityStepValid()}>
             Summary
             <ArrowRight className="ml-1 h-3 w-3" />
           </Button>
@@ -457,7 +499,7 @@ export const SkillsMiniSurvey = ({
               className="h-8 text-xs"
             />
             <Button onClick={handleCustomSkillAdd} disabled={!customSkillInput.trim()} size="sm" className="h-8 px-2">
-              Add
+              <Check className="h-3 w-3 text-white" />
             </Button>
             <Button variant="outline" onClick={() => {
               setShowCustomInput(false);

@@ -9,8 +9,8 @@ import { useUser } from "@supabase/auth-helpers-react";
  * Profile Image Step Component
  * 
  * Allows users to select a profile photo for onboarding.
- * Captures the file for later upload during form submission instead of immediate upload.
- * This prevents orphaned images if user abandons onboarding.
+ * Profile image is now REQUIRED for onboarding completion.
+ * Captures the file for later upload during form submission.
  */
 
 interface ProfileImageStepProps {
@@ -78,9 +78,9 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold mb-2">Add a Profile Photo</h3>
+        <h3 className="text-lg font-semibold mb-2">Add a Profile Photo *</h3>
         <p className="text-sm text-muted-foreground">
-          Adding a profile photo helps neighbors recognize you and builds community trust.
+          A profile photo is required to help neighbors recognize you and build community trust.
         </p>
       </div>
 
@@ -172,10 +172,10 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
           )}
         </div>
 
-        {/* Skip option */}
+        {/* Required indicator */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">
-            You can skip this step and add a photo later from your profile settings.
+          <p className="text-xs text-red-500">
+            * Profile photo is required to complete onboarding
           </p>
         </div>
       </div>
