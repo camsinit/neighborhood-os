@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,16 +13,18 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
  * Uses production domain in production, fallback to current origin for development
  */
 const getBaseUrl = (): string => {
-  // Check if we're in production
-  const isProduction = window.location.hostname !== 'localhost' && 
-                      window.location.hostname !== '127.0.0.1' &&
-                      !window.location.hostname.includes('lovableproject.com');
+  // Check if we're in development/preview environment
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname.includes('lovableproject.com');
   
-  if (isProduction) {
-    return 'https://neighborhoodos.com';
+  // If we're in development/preview, use the current origin for testing
+  if (isDevelopment) {
+    return window.location.origin;
   }
   
-  return window.location.origin;
+  // Otherwise, we're in production - use the production domain
+  return 'https://neighborhoodos.com';
 };
 
 /**
