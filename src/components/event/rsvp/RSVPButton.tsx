@@ -17,6 +17,7 @@ const logger = createLogger('RSVPButton');
  * 
  * This component handles both adding and removing RSVPs for events,
  * and visually indicates the current RSVP status.
+ * Reduced toast notifications - only shows critical errors and success for non-obvious actions
  * 
  * @param eventId - The ID of the event to RSVP to
  * @param neighborhoodId - The ID of the neighborhood the event belongs to
@@ -53,6 +54,7 @@ const RSVPButton = ({
    * Toggles between adding and removing an RSVP
    */
   const toggleRSVP = async () => {
+    // Critical validation that requires user notification
     if (!user) {
       toast.error("Please log in to RSVP for this event");
       return;
@@ -73,13 +75,13 @@ const RSVPButton = ({
       if (hasRSVPed) {
         // Remove RSVP
         await rsvpService.removeRSVP(eventId, user.id, opTxnId);
-        toast.success("You've removed your RSVP");
         setHasRSVPed(false);
+        // Success is indicated by button state change - no toast needed
       } else {
         // Add RSVP
         await rsvpService.addRSVP(eventId, user.id, eventNeighborhoodId, opTxnId);
-        toast.success("You've successfully RSVP'd to this event");
         setHasRSVPed(true);
+        // Success is indicated by button state change - no toast needed
       }
     } catch (error: any) {
       // Enhanced error logging with context
@@ -93,6 +95,7 @@ const RSVPButton = ({
         }
       });
       
+      // Only show toast for actual errors
       toast.error(`Failed to update RSVP: ${error.message}`);
     } finally {
       logger.debug(`${COMPONENT_ID}: [${opTxnId}] Completed toggleRSVP operation, isLoading -> false`);

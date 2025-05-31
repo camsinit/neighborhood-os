@@ -21,51 +21,46 @@ const AuthForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  // Removed isSignUp state since we're directing users to waitlist instead
+  const [error, setError] = useState(""); // Inline error instead of toast
   
   // Hook for programmatic navigation
   const navigate = useNavigate();
   
-  // Toast hook for displaying notifications
+  // Toast hook for displaying notifications - only for critical errors
   const { toast } = useToast();
 
-  // Listen for auth state changes - we're using the supabase client directly here
-  // to ensure we're not depending on the context which might not be initialized properly
+  // Listen for auth state changes
   useEffect(() => {
     console.log("[AuthForm] Setting up auth state change listener");
     
-    // Guard against supabase being undefined
     if (!supabase || !supabase.auth) {
       console.error("[AuthForm] Supabase client or auth is not available");
       return;
     }
     
-    // Subscribe to authentication state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
-      // When user is signed in, navigate to the dashboard
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         console.log("[AuthForm] Valid session detected, navigating to dashboard");
         navigate("/dashboard", { replace: true });
       }
     });
 
-    // Clean up the subscription when the component unmounts
     return () => {
       console.log("[AuthForm] Cleaning up auth state change listener");
       subscription?.unsubscribe?.();
     };
-  }, [navigate]); // Only re-run if navigate changes
+  }, [navigate]);
   
   // Form submission handler for login only
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
     setIsLoading(true);
     console.log("[AuthForm] Starting authentication process");
 
     try {
-      // Signin process
       console.log("[AuthForm] Attempting signin");
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -75,33 +70,19 @@ const AuthForm = () => {
       if (error) {
         console.error("[AuthForm] Signin error:", error);
         if (error.message.includes('credentials')) {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password",
-            variant: "destructive",
-          });
+          setError("Invalid email or password. Please check your credentials and try again.");
         } else {
-          throw error;
+          setError(error.message);
         }
         return;
       }
 
       console.log("[AuthForm] Signin successful", { user: data.user?.id });
+      // No success toast needed - navigation indicates success
       
-      // Show success toast
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in",
-      });
-      
-      // No need to navigate here as the auth state change listener will handle that
     } catch (error: any) {
       console.error("[AuthForm] Authentication error:", error);
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       console.log("[AuthForm] Completing authentication process");
       setIsLoading(false);
@@ -110,11 +91,9 @@ const AuthForm = () => {
 
   // Function to handle redirecting to homepage/waitlist
   const handleWaitlistRedirect = () => {
-    // Navigate to the homepage where the waitlist form is located
     navigate("/", { replace: true });
   };
 
-  // Render the authentication form with updated styling
   return (
     <div className={cn(
       "mt-8 py-8 px-4 sm:rounded-lg sm:px-10", 
@@ -123,6 +102,13 @@ const AuthForm = () => {
       "relative z-10"
     )}>
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Show inline error message instead of toast */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+        
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email address

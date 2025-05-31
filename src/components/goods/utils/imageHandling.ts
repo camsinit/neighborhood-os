@@ -5,20 +5,20 @@ import { toast } from "sonner";
 
 /**
  * Upload an image file and get the URL
+ * Only shows toast for critical errors, not for success
  * 
  * @param file The file to upload
  * @param userId The ID of the user uploading the file
  * @returns The URL of the uploaded image, or null if upload failed
  */
 export const handleImageUpload = async (file: File, userId: string | undefined) => {
-  // Check if user is logged in
+  // Critical validation that requires user notification
   if (!userId) {
     toast.error("You must be logged in to upload images");
     return null;
   }
   
   try {
-    // Use the existing uploadImage function from imageUpload.ts
     const imageUrl = await uploadImage(file, userId);
     return imageUrl;
   } catch (error) {
@@ -30,68 +30,64 @@ export const handleImageUpload = async (file: File, userId: string | undefined) 
 
 /**
  * Process a file input change event for image uploads
+ * Returns validation errors for inline display instead of toasts
  * 
  * @param e The change event from the file input
  * @param userId The ID of the user uploading the file
- * @returns The URL of the uploaded image, or null if upload failed
+ * @returns Object with imageUrl and optional error message
  */
 export const processFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, userId: string | undefined) => {
-  // Get the first file from the input
   const file = e.target.files?.[0];
-  if (!file) return null;
+  if (!file) return { imageUrl: null, error: null };
   
-  // Basic validation
+  // Return validation error instead of showing toast
   if (!file.type.startsWith('image/')) {
-    toast.error(`File "${file.name}" is not an image`);
-    return null;
+    return { 
+      imageUrl: null, 
+      error: `File "${file.name}" is not an image. Please select an image file.` 
+    };
   }
   
-  // Show a toast notification to indicate upload has started
-  const loadingToast = toast.loading("Uploading image...");
+  // Upload the image without showing loading toast
+  const imageUrl = await handleImageUpload(file, userId);
   
-  // Upload the image
-  const result = await handleImageUpload(file, userId);
-  
-  // Dismiss the loading toast and show success or failure
-  toast.dismiss(loadingToast);
-  // Don't show the "Image uploaded successfully" toast - we'll only show one final success message
-  // when the entire form is submitted
-  
-  return result;
+  return { imageUrl, error: null };
 };
 
 /**
  * Process multiple file uploads
+ * Returns results with any validation errors for inline display
  * 
  * @param e The change event from the file input
  * @param userId The ID of the user uploading the files
- * @returns Array of uploaded image URLs, or empty array if uploads failed
+ * @returns Object with uploaded URLs and any error messages
  */
 export const processMultipleFileUploads = async (e: React.ChangeEvent<HTMLInputElement>, userId: string | undefined) => {
   const files = e.target.files;
-  if (!files || files.length === 0) return [];
+  if (!files || files.length === 0) return { imageUrls: [], error: null };
   
   // Filter for image files only
   const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+  const nonImageFiles = Array.from(files).filter(file => !file.type.startsWith('image/'));
   
   if (imageFiles.length === 0) {
-    toast.error("Please select image files only");
-    return [];
+    return { 
+      imageUrls: [], 
+      error: "Please select image files only" 
+    };
   }
   
-  // Show a loading toast with the number of files
-  const loadingToast = toast.loading(`Uploading ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}...`);
-  
-  // Upload all images in parallel
+  // Upload all images in parallel without loading toast
   const uploadPromises = imageFiles.map(file => handleImageUpload(file, userId));
   const results = await Promise.all(uploadPromises);
   
-  // Dismiss the loading toast and show success
-  toast.dismiss(loadingToast);
-  // Don't show success message for image uploads - we'll only show one final success message
-  // when the entire form is submitted
-  
   // Filter out any null results (failed uploads)
-  return results.filter(url => url !== null) as string[];
+  const successfulUrls = results.filter(url => url !== null) as string[];
+  
+  // Return results with optional warning about non-image files
+  const error = nonImageFiles.length > 0 
+    ? `${nonImageFiles.length} non-image file(s) were skipped`
+    : null;
+  
+  return { imageUrls: successfulUrls, error };
 };
-

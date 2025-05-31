@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Mail, RefreshCw } from "lucide-react";
-import { toast } from "sonner"; // Updated import for toast
+import { toast } from "sonner";
 import { useState, useEffect } from "react"; 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,13 +26,14 @@ import {
  * This component allows existing neighborhood members to invite others.
  * It generates unique invite codes tied to both the neighborhood and the inviter.
  * Core contributor functionality has been removed.
+ * Reduced toast notifications to essential errors only.
  */
 const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   // State for the email input and link generation process
   const [email, setEmail] = useState("");
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
-  // New state to detect stuck loading state
   const [loadingTooLong, setLoadingTooLong] = useState(false);
+  const [emailError, setEmailError] = useState(""); // Inline error for email validation
   
   // Get required hooks
   const user = useUser();
@@ -39,28 +41,25 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     currentNeighborhood, 
     isLoading, 
     error, 
-    refreshNeighborhoodData // Get the refresh function 
+    refreshNeighborhoodData
   } = useNeighborhood();
 
   // Use effect to detect if we're stuck in a loading state for too long
   useEffect(() => {
-    // Only start timer if dialog is open and we're loading
     if (open && isLoading) {
       console.log("[InviteDialog] Starting loading timeout detection");
       
-      // Set a timeout to detect if loading takes too long
       const timeoutId = setTimeout(() => {
         if (isLoading) {
           console.log("[InviteDialog] Loading timeout triggered - loading took too long");
           setLoadingTooLong(true);
         }
-      }, 3000); // 3 seconds is a reasonable time for data to load
+      }, 3000);
       
       return () => {
         clearTimeout(timeoutId);
       };
     } else if (!isLoading) {
-      // Reset the loading too long flag when we're no longer loading
       setLoadingTooLong(false);
     }
   }, [open, isLoading]);
@@ -104,13 +103,12 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
   /**
    * Generates a unique invitation link and copies it to clipboard
+   * Only shows toast for critical errors and success (since clipboard action isn't obvious)
    */
   const generateAndCopyLink = async () => {
-    // Validate required data is present
     if (!user || !currentNeighborhood) {
       console.log("[InviteDialog] Cannot generate link:", { user: !!user, currentNeighborhood });
       
-      // Show error message if no neighborhood
       if (!currentNeighborhood) {
         toast.error("No neighborhood available. You need to be part of a neighborhood to invite others.");
         return;
@@ -118,62 +116,60 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       return;
     }
     
-    // Start the link generation process
     setIsGeneratingLink(true);
     try {
-      // Generate a unique UUID for the invite
       const inviteCode = crypto.randomUUID();
       
       console.log("[InviteDialog] Generating invite for neighborhood:", currentNeighborhood.id);
       
-      // Create a new invitation record in the database
       const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
         inviter_id: user.id,
         neighborhood_id: currentNeighborhood.id,
       });
 
-      // Handle database errors
       if (error) throw error;
 
-      // Create the full invitation URL using the correct base URL
       const baseUrl = getBaseUrl();
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
       
       console.log("[InviteDialog] Generated invite URL:", inviteUrl);
       
-      // Copy the URL to clipboard
       await navigator.clipboard.writeText(inviteUrl);
       
-      // Show success message
+      // Success toast is needed here because clipboard action isn't visually obvious
       toast.success("Invite link copied! You can now share this link with your neighbor.");
     } catch (error: any) {
-      // Log and handle any errors
       console.error("[InviteDialog] Error generating invite:", error);
       toast.error("Error generating invite link: " + error.message);
     } finally {
-      // End the generation process
       setIsGeneratingLink(false);
     }
   };
 
   /**
-   * Sends an email invitation (placeholder for future implementation)
+   * Validates email and shows placeholder message
+   * Uses inline error instead of toast for validation
    */
   const sendEmailInvite = async () => {
-    // Validate email input is not empty
+    setEmailError(""); // Clear previous errors
+    
     if (!email.trim()) {
-      toast.error("Email required. Please enter an email address.");
+      setEmailError("Email address is required");
       return;
     }
     
-    // Validate neighborhood exists
+    if (!email.includes('@')) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+    
     if (!currentNeighborhood) {
       toast.error("No neighborhood available. You need to be part of a neighborhood to invite others.");
       return;
     }
     
-    // Show a message that this feature is coming soon
+    // Show placeholder message - no loading toast needed
     toast.success("Coming soon! Email invitations will be implemented with Resend.");
     setEmail("");
   };
@@ -184,8 +180,9 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   const handleRefreshData = () => {
     console.log("[InviteDialog] Manually refreshing neighborhood data");
     refreshNeighborhoodData();
-    setLoadingTooLong(false); // Reset our loading timeout detection
+    setLoadingTooLong(false);
     
+    // Brief informational toast for this action
     toast("Refreshing neighborhood data", {
       description: "Please wait while we reconnect to your neighborhood..."
     });
@@ -204,10 +201,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     try {
       console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
       
-      // Check if user has created neighborhoods - using security definer functions
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
-      // Log diagnostic information
       const diagnosticInfo = {
         userId: user.id,
         createdNeighborhoods: createdNeighborhoods || [],
@@ -216,12 +211,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       
       console.log("[Diagnostics] Results:", diagnosticInfo);
       
-      // Show diagnostic info to user
+      // Brief informational toast
       toast("Diagnostic Information", {
         description: `Found ${Array.isArray(createdNeighborhoods) ? createdNeighborhoods.length : 0} created neighborhoods.`
       });
       
-      // If no neighborhoods found, show a more detailed message
       if (!createdNeighborhoods || (Array.isArray(createdNeighborhoods) && createdNeighborhoods.length === 0)) {
         toast.error("No neighborhood association found. You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood.");
       }
@@ -231,7 +225,6 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     }
   };
 
-  // Calculate if we're in a stuck loading state (loading for too long)
   const isStuckLoading = isLoading && open && loadingTooLong;
 
   return (
@@ -331,12 +324,20 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
                     type="email"
                     placeholder="neighbor@example.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) setEmailError(""); // Clear error when typing
+                    }}
+                    className={emailError ? "border-red-300" : ""}
                   />
                   <Button onClick={sendEmailInvite} size="icon">
                     <Mail className="h-4 w-4" />
                   </Button>
                 </div>
+                {/* Show inline error for email validation */}
+                {emailError && (
+                  <p className="text-sm text-red-600">{emailError}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label>Share invite link</Label>

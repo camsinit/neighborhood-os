@@ -29,6 +29,7 @@ export const useGoodsFormSubmit = (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Critical validation that requires toast notification
     if (!userId) {
       toast.error("You must be logged in to submit a goods request");
       return;
@@ -56,9 +57,12 @@ export const useGoodsFormSubmit = (
       if (success) {
         queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
         onClose();
+        // Success is indicated by the form closing and data refreshing - no toast needed
       }
     } catch (error) {
       console.error('Error submitting goods form:', error);
+      // Only show toast for unexpected errors
+      toast.error("Failed to submit request. Please try again.");
     }
   };
   

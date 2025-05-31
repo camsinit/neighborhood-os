@@ -1,3 +1,4 @@
+
 // This is the main skill form component that uses smaller, focused components
 // to create a form for offering or requesting skills
 
@@ -21,66 +22,64 @@ import TimePreferenceField from "./form/TimePreferenceField";
  * The main SkillForm component that allows users to offer or request skills
  * 
  * This component has been refactored to use smaller, focused components
- * for each part of the form.
+ * for each part of the form. Reduced toast notifications to essential only.
  */
 const SkillForm = ({ onClose, mode }: SkillFormProps) => {
-  // State to store form data
+  // State to store form data and validation errors
   const [formData, setFormData] = useState<SkillFormData>({
     category: 'technology',
     timePreference: [],
   });
   
+  const [errors, setErrors] = useState<{
+    category?: string;
+    title?: string;
+    description?: string;
+  }>({});
+  
   // Custom hooks for toast and skill submission
   const { toast } = useToast();
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
-      // Show success toast with notification about matching
-      toast({
-        title: mode === 'offer' 
-          ? "Skill offered successfully" 
-          : "Skill requested successfully",
-        description: mode === 'offer' 
-          ? "Your neighbors with matching skill requests will be notified" 
-          : "Your neighbors with matching skill offers will be notified",
-      });
-      
-      // Add a slight delay before closing to make sure everything gets refreshed
-      setTimeout(() => {
-        onClose();
-      }, 300);
+      // Success is indicated by form closing and data refreshing - no toast needed
+      onClose();
     }
   });
 
   // Check for duplicate skills
   const { data: duplicates, isLoading: checkingDuplicates } = useSkillDuplicateCheck(formData, mode);
 
-  // Show warning if duplicates are found
-  const duplicateWarning = duplicates && duplicates.length > 0 
-    ? `Similar ${mode === 'offer' ? 'offerings' : 'requests'} exist in this category` 
-    : null;
+  /**
+   * Validate form data and return any errors
+   */
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!formData.category) {
+      newErrors.category = "Please select a skill category";
+    }
+    
+    if (!formData.title?.trim()) {
+      newErrors.title = "Skill title is required";
+    }
+    
+    if (!formData.description?.trim()) {
+      newErrors.description = "Skill description is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   /**
-   * Handle form submission
+   * Handle form submission with inline validation
    */
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.category) {
-      toast({
-        title: "Category required",
-        description: "Please select a skill category",
-        variant: "destructive"
-      });
+    // Validate form and show inline errors
+    if (!validateForm()) {
       return;
-    }
-
-    // If duplicates exist, show a warning toast but still allow submission
-    if (duplicates && duplicates.length > 0) {
-      toast({
-        title: "Similar skills exist",
-        description: "You can still submit, but consider checking existing skills first",
-        variant: "destructive"
-      });
     }
 
     console.log("[SkillForm] Submitting form:", { formData, mode });
@@ -91,6 +90,12 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       console.log("[SkillForm] Form submitted successfully");
     } catch (error) {
       console.error("[SkillForm] Error submitting form:", error);
+      // Only show toast for unexpected errors
+      toast({
+        title: "Failed to submit skill",
+        description: "Please try again",
+        variant: "destructive"
+      });
     }
   };
 
@@ -108,10 +113,14 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   };
 
   /**
-   * Update any form field value
+   * Update any form field value and clear related errors
    */
   const updateField = <K extends keyof SkillFormData>(field: K, value: SkillFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   return (
@@ -119,22 +128,28 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
       {/* Category selection field */}
       <CategoryField 
         value={formData.category} 
-        onChange={(value) => updateField('category', value)} 
+        onChange={(value) => updateField('category', value)}
+        error={errors.category}
       />
 
-      {/* Title input field with duplicate warning */}
+      {/* Title input field with duplicate warning and inline error */}
       <TitleField 
         mode={mode} 
         value={formData.title} 
         onChange={(value) => updateField('title', value)}
-        duplicateWarning={duplicateWarning}
+        duplicateWarning={duplicates && duplicates.length > 0 
+          ? `Similar ${mode === 'offer' ? 'offerings' : 'requests'} exist in this category` 
+          : null
+        }
+        error={errors.title}
       />
 
-      {/* Description textarea */}
+      {/* Description textarea with inline error */}
       <DescriptionField 
         mode={mode} 
         value={formData.description} 
         onChange={(value) => updateField('description', value)}
+        error={errors.description}
       />
 
       {/* Only show availability options for skill offers */}

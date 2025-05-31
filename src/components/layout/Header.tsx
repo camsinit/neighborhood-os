@@ -24,6 +24,8 @@ interface HeaderProps {
  * - Quick Actions title (now moved from HomePage)
  * - Notifications button
  * - User profile dropdown
+ * 
+ * Reduced toast notifications - only shows critical errors
  */
 const Header = ({
   onOpenSettings
@@ -50,14 +52,13 @@ const Header = ({
 
   /**
    * Handle signing out the user
+   * Only shows toast for errors, success is indicated by navigation
    */
   const handleSignOut = async () => {
     try {
       await supabaseClient.auth.signOut();
       navigate("/login");
-      toast({
-        title: "Signed out successfully"
-      });
+      // Success is indicated by navigation - no toast needed
     } catch (error) {
       toast({
         title: "Error signing out",
