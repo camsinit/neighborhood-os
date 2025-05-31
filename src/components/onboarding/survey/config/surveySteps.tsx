@@ -39,8 +39,14 @@ export const getSurveySteps = (formData: SurveyFormData, setFormData: (data: Sur
       <ContactInfoStep
         email={formData.email}
         phone={formData.phone}
+        emailVisible={formData.emailVisible}
+        phoneVisible={formData.phoneVisible}
+        addressVisible={formData.addressVisible}
         onEmailChange={(value) => setFormData({ ...formData, email: value })}
         onPhoneChange={(value) => setFormData({ ...formData, phone: value })}
+        onEmailVisibleChange={(value) => setFormData({ ...formData, emailVisible: value })}
+        onPhoneVisibleChange={(value) => setFormData({ ...formData, phoneVisible: value })}
+        onAddressVisibleChange={(value) => setFormData({ ...formData, addressVisible: value })}
       />
     ),
   },
