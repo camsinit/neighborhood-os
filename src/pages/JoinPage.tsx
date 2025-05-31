@@ -26,7 +26,7 @@ interface NeighborhoodPreview {
  * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
  * Shows a neighborhood preview and guides users through signup/onboarding or direct join
  * 
- * UPDATED: Now directs new users to guest onboarding instead of login
+ * UPDATED: Now properly routes new users to onboarding with comprehensive logging
  */
 const JoinPage = () => {
   // Get the invite code from the URL params
@@ -46,7 +46,12 @@ const JoinPage = () => {
    */
   useEffect(() => {
     const loadNeighborhoodFromInvite = async () => {
+      console.log("[JoinPage] Starting neighborhood load process");
+      console.log("[JoinPage] Invite code from URL:", inviteCode);
+      console.log("[JoinPage] Current user:", user ? `${user.id} (${user.email})` : 'null');
+      
       if (!inviteCode) {
+        console.error("[JoinPage] No invite code found in URL");
         setError("Invalid invite link - no invite code found.");
         setIsLoading(false);
         return;
@@ -77,23 +82,28 @@ const JoinPage = () => {
         }
 
         const result = neighborhoodData[0];
+        console.log("[JoinPage] Neighborhood data loaded:", result);
 
         // Check if invitation is still pending (not used)
         if (result.invitation_status !== 'pending') {
+          console.error("[JoinPage] Invitation status is not pending:", result.invitation_status);
           setError("This invite link has already been used.");
           setIsLoading(false);
           return;
         }
 
         // Set the neighborhood preview data
-        setNeighborhood({
+        const neighborhoodPreview = {
           id: result.neighborhood_id,
           name: result.neighborhood_name,
           city: result.neighborhood_city,
           state: result.neighborhood_state,
           created_at: result.neighborhood_created_at,
           memberCount: result.member_count || 0
-        });
+        };
+        
+        console.log("[JoinPage] Setting neighborhood preview:", neighborhoodPreview);
+        setNeighborhood(neighborhoodPreview);
 
       } catch (error: any) {
         console.error("[JoinPage] Unexpected error:", error);
@@ -104,19 +114,30 @@ const JoinPage = () => {
     };
 
     loadNeighborhoodFromInvite();
-  }, [inviteCode]);
+  }, [inviteCode, user]);
 
   /**
    * Handle joining the neighborhood for existing authenticated users
    */
   const handleJoinNeighborhood = async () => {
+    console.log("[JoinPage] handleJoinNeighborhood called");
+    console.log("[JoinPage] User:", user ? `${user.id} (${user.email})` : 'null');
+    console.log("[JoinPage] Neighborhood:", neighborhood?.id);
+    console.log("[JoinPage] Invite code:", inviteCode);
+    
     if (!user || !neighborhood || !inviteCode) {
-      console.error("[JoinPage] Missing required data for joining");
+      console.error("[JoinPage] Missing required data for joining", {
+        hasUser: !!user,
+        hasNeighborhood: !!neighborhood,
+        hasInviteCode: !!inviteCode
+      });
       return;
     }
 
     setIsJoining(true);
     try {
+      console.log("[JoinPage] Checking if user is already a member");
+      
       // Check if user is already a member
       const { data: existingMember } = await supabase
         .from('neighborhood_members')
@@ -126,11 +147,14 @@ const JoinPage = () => {
         .single();
 
       if (existingMember) {
+        console.log("[JoinPage] User is already a member");
         toast.success("You're already a member of this neighborhood!");
         navigate('/');
         return;
       }
 
+      console.log("[JoinPage] Adding user as neighborhood member");
+      
       // Add user as a neighborhood member
       const { error: memberError } = await supabase
         .from('neighborhood_members')
@@ -144,6 +168,8 @@ const JoinPage = () => {
         throw memberError;
       }
 
+      console.log("[JoinPage] Marking invitation as accepted");
+      
       // Mark the invitation as accepted
       const { error: inviteError } = await supabase
         .from('invitations')
@@ -160,6 +186,7 @@ const JoinPage = () => {
       }
 
       // Success!
+      console.log("[JoinPage] Successfully joined neighborhood");
       toast.success(`Welcome to ${neighborhood.name}!`);
       navigate('/');
 
@@ -172,13 +199,17 @@ const JoinPage = () => {
   };
 
   /**
-   * Handle new user signup flow - now goes to guest onboarding
+   * Handle new user signup flow - now goes DIRECTLY to onboarding
    * Store the invite code and neighborhood data so they can auto-join after onboarding
    */
   const handleNewUserSignup = () => {
+    console.log("[JoinPage] handleNewUserSignup called");
+    console.log("[JoinPage] Invite code:", inviteCode);
+    console.log("[JoinPage] Neighborhood:", neighborhood);
+    
     // Store the invite code and neighborhood data for guest onboarding
     if (inviteCode && neighborhood) {
-      localStorage.setItem('guestOnboarding', JSON.stringify({
+      const guestData = {
         inviteCode,
         neighborhood: {
           id: neighborhood.id,
@@ -186,15 +217,25 @@ const JoinPage = () => {
           city: neighborhood.city,
           state: neighborhood.state
         }
-      }));
+      };
+      
+      console.log("[JoinPage] Storing guest onboarding data:", guestData);
+      localStorage.setItem('guestOnboarding', JSON.stringify(guestData));
+    } else {
+      console.error("[JoinPage] Missing data for guest onboarding", {
+        hasInviteCode: !!inviteCode,
+        hasNeighborhood: !!neighborhood
+      });
     }
     
-    // Navigate directly to onboarding (guest mode)
+    // Navigate directly to onboarding (guest mode) - THIS IS THE KEY FIX
+    console.log("[JoinPage] Navigating to /onboarding");
     navigate('/onboarding');
   };
 
   // Loading state
   if (isLoading) {
+    console.log("[JoinPage] Rendering loading state");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -211,6 +252,7 @@ const JoinPage = () => {
 
   // Error state
   if (error) {
+    console.log("[JoinPage] Rendering error state:", error);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -230,6 +272,10 @@ const JoinPage = () => {
   }
 
   // Main join page content
+  console.log("[JoinPage] Rendering main content");
+  console.log("[JoinPage] User is authenticated:", !!user);
+  console.log("[JoinPage] Neighborhood:", neighborhood?.name);
+  
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
