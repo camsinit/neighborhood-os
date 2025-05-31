@@ -30,10 +30,16 @@ export const BasicInfoStep = ({
     lastName: "",
   });
 
+  // Track if fields have been touched by the user to prevent immediate error display
+  const [touched, setTouched] = useState({
+    firstName: false,
+    lastName: false,
+  });
+
   // Validate first name and notify parent
   const validateFirstName = (value: string) => {
     const isValid = value.trim().length > 0;
-    if (!isValid) {
+    if (!isValid && touched.firstName) {
       setErrors(prev => ({ ...prev, firstName: "First name is required" }));
     } else {
       setErrors(prev => ({ ...prev, firstName: "" }));
@@ -46,7 +52,7 @@ export const BasicInfoStep = ({
   // Validate last name and notify parent
   const validateLastName = (value: string) => {
     const isValid = value.trim().length > 0;
-    if (!isValid) {
+    if (!isValid && touched.lastName) {
       setErrors(prev => ({ ...prev, lastName: "Last name is required" }));
     } else {
       setErrors(prev => ({ ...prev, lastName: "" }));
@@ -56,14 +62,25 @@ export const BasicInfoStep = ({
     return isValid;
   };
 
-  // Run validation on mount and whenever values change
+  // Handle field blur to mark as touched and validate
+  const handleFirstNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, firstName: true }));
+    validateFirstName(e.target.value);
+  };
+
+  const handleLastNameBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(prev => ({ ...prev, lastName: true }));
+    validateLastName(e.target.value);
+  };
+
+  // Run validation when values change (but only show errors if touched)
   useEffect(() => {
     validateFirstName(firstName);
-  }, [firstName]);
+  }, [firstName, touched.firstName]);
 
   useEffect(() => {
     validateLastName(lastName);
-  }, [lastName]);
+  }, [lastName, touched.lastName]);
 
   return (
     <div className="space-y-4">
@@ -74,7 +91,7 @@ export const BasicInfoStep = ({
             id="firstName"
             value={firstName}
             onChange={(e) => onFirstNameChange(e.target.value)}
-            onBlur={(e) => validateFirstName(e.target.value)}
+            onBlur={handleFirstNameBlur}
             required
             className={errors.firstName ? "border-red-500" : ""}
           />
@@ -88,7 +105,7 @@ export const BasicInfoStep = ({
             id="lastName"
             value={lastName}
             onChange={(e) => onLastNameChange(e.target.value)}
-            onBlur={(e) => validateLastName(e.target.value)}
+            onBlur={handleLastNameBlur}
             required
             className={errors.lastName ? "border-red-500" : ""}
           />

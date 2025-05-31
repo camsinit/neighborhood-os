@@ -19,7 +19,7 @@ import { Progress } from "@/components/ui/progress";
  * Shows a welcome screen with confetti after completion.
  * Now includes form submission progress tracking.
  * 
- * UPDATED: Now supports guest onboarding mode
+ * UPDATED: Now supports guest onboarding mode and hides close button
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -134,7 +134,7 @@ const SurveyDialog = ({
   if (showWelcomeScreen) {
     return (
       <Dialog open={open} onOpenChange={handleCloseRequest}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" hideCloseButton>
           {/* Test mode indicator */}
           {isTestMode && (
             <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
@@ -150,7 +150,7 @@ const SurveyDialog = ({
   
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" hideCloseButton>
         {/* Test mode indicator */}
         {isTestMode && (
           <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
