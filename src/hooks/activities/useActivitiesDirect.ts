@@ -3,7 +3,7 @@
  * useActivitiesDirect.ts
  * 
  * Simplified hook for fetching neighborhood activities using React Query
- * Directly queries the database without complex transformations
+ * Updated to work with simplified RLS policies - no complex functions needed
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,7 @@ export interface Activity {
 
 /**
  * Simple function to fetch activities directly from the database
+ * Now uses simple queries that work with our simplified RLS policies
  */
 const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
   logger.debug(`Fetching activities, limit=${limit}`);
@@ -49,18 +50,20 @@ const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
   }
   
   // First get the list of neighborhood IDs the user has access to
-  const { data: neighborhoods, error: neighborhoodError } = await supabase
-    .rpc('get_user_neighborhoods_simple', {
-      user_uuid: user.id
-    });
+  // Using simple query since RLS policies now allow reading memberships
+  const { data: memberships, error: membershipError } = await supabase
+    .from('neighborhood_members')
+    .select('neighborhood_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active');
     
-  if (neighborhoodError) {
-    logger.error('Error fetching user neighborhoods:', neighborhoodError);
-    throw neighborhoodError;
+  if (membershipError) {
+    logger.error('Error fetching user neighborhood memberships:', membershipError);
+    throw membershipError;
   }
   
   // Extract the neighborhood IDs
-  const neighborhoodIds = neighborhoods.map((n: any) => n.id);
+  const neighborhoodIds = memberships?.map(m => m.neighborhood_id) || [];
   
   if (neighborhoodIds.length === 0) {
     logger.debug('User has no neighborhoods, returning empty activities array');

@@ -2,7 +2,7 @@
 /**
  * Main neighborhood data hook
  * 
- * This hook has been simplified to remove core contributor functionality.
+ * Updated to work with simplified RLS policies - no complex functions needed
  */
 import { User } from '@supabase/supabase-js';
 import { useNeighborhoodStatus } from './hooks/useNeighborhoodStatus';
@@ -16,8 +16,7 @@ import { toast } from 'sonner';
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
- * 
- * This simplified version removes core contributor functionality
+ * Updated to use simple queries that work with our simplified RLS policies
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -35,33 +34,25 @@ export function useNeighborhoodData(user: User | null) {
     handleFetchError
   } = statusHook;
   
-  // State for user neighborhoods
+  // State for neighborhoods
+  const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
   const [userNeighborhoods, setUserNeighborhoods] = useState<Neighborhood[]>([]);
   
   // Wait for auth to stabilize
   const isAuthStable = useAuthStabilizer(user);
-  
-  // Initialize neighborhood data fetching - simplified version
-  const neighborhoodHook = useFetchNeighborhood(
-    isAuthStable ? user : null,
-    fetchAttempts,
-    { startFetch, completeFetch, handleFetchError, setIsLoading }
-  );
-  const {
-    currentNeighborhood,
-    setCurrentNeighborhood,
-    fetchNeighborhood
-  } = neighborhoodHook;
 
-  // Function to fetch user's neighborhoods
+  // Function to fetch user's neighborhoods using simple queries
   const fetchUserNeighborhoods = useCallback(async () => {
     if (!user?.id) {
       setUserNeighborhoods([]);
+      setCurrentNeighborhood(null);
       return;
     }
 
     try {
-      // Fetch all neighborhoods the user is a member of
+      setIsLoading(true);
+      
+      // Fetch all neighborhoods the user is a member of using simple query
       const { data: memberData, error: memberError } = await supabase
         .from('neighborhood_members')
         .select(`
@@ -77,6 +68,7 @@ export function useNeighborhoodData(user: User | null) {
 
       if (memberError) {
         console.error('Error fetching user neighborhoods:', memberError);
+        setError(memberError);
         return;
       }
 
@@ -86,10 +78,20 @@ export function useNeighborhoodData(user: User | null) {
         .filter(Boolean) as Neighborhood[];
 
       setUserNeighborhoods(neighborhoods || []);
+      
+      // Set the first neighborhood as current if none is set
+      if (neighborhoods && neighborhoods.length > 0 && !currentNeighborhood) {
+        setCurrentNeighborhood(neighborhoods[0]);
+      }
+      
+      setError(null);
     } catch (error) {
       console.error('Error in fetchUserNeighborhoods:', error);
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, currentNeighborhood, setIsLoading, setError]);
 
   // Function to switch to a different neighborhood
   const switchNeighborhood = useCallback(async (neighborhoodId: string) => {
@@ -98,9 +100,9 @@ export function useNeighborhoodData(user: User | null) {
       setCurrentNeighborhood(targetNeighborhood);
       toast.success(`Switched to ${targetNeighborhood.name}`);
     }
-  }, [userNeighborhoods, setCurrentNeighborhood]);
+  }, [userNeighborhoods]);
   
-  // Set up monitoring and safety timeouts - removed core contributor parameters
+  // Set up monitoring and safety timeouts
   useNeighborhoodMonitor({
     currentNeighborhood,
     isLoading,
@@ -113,22 +115,19 @@ export function useNeighborhoodData(user: User | null) {
 
   // Main effect to fetch neighborhood data
   useEffect(() => {
-    // Call the fetch function when the user/fetchAttempts changes
-    // and auth state is stable
     if (isAuthStable) {
-      fetchNeighborhood();
       fetchUserNeighborhoods();
     }
-  }, [isAuthStable, user, fetchAttempts, fetchNeighborhood, fetchUserNeighborhoods]);
+  }, [isAuthStable, fetchUserNeighborhoods]);
 
   // Return updated state and functions
   return { 
     currentNeighborhood,
-    userNeighborhoods, // Include userNeighborhoods in return
+    userNeighborhoods,
     isLoading, 
     error,
     setCurrentNeighborhood,
-    switchNeighborhood, // Include switchNeighborhood function
-    refreshNeighborhoodData
+    switchNeighborhood,
+    refreshNeighborhoodData: fetchUserNeighborhoods
   };
 }
