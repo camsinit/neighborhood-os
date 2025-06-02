@@ -1,3 +1,4 @@
+
 import { Settings, Home, ChevronDown, Plus } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +13,8 @@ import { NotificationDrawer } from "@/notifications";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { useCreateNeighborhoodAccess } from "@/hooks/useCreateNeighborhoodAccess";
 import { CreateNeighborhoodDialog } from "@/components/neighborhoods/CreateNeighborhoodDialog";
-import { toast } from 'sonner';
+// Import toast directly from sonner for success messages
+import { toast as sonnerToast } from 'sonner';
 
 /**
  * Header component props
@@ -125,7 +127,7 @@ const Header = ({
                         key={neighborhood.id}
                         onClick={() => {
                           switchNeighborhood(neighborhood.id);
-                          toast.success(`Switched to ${neighborhood.name}`);
+                          sonnerToast.success(`Switched to ${neighborhood.name}`);
                         }}
                         className="cursor-pointer"
                       >
