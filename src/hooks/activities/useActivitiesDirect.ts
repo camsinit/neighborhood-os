@@ -3,7 +3,7 @@
  * useActivitiesDirect.ts
  * 
  * Simplified hook for fetching neighborhood activities using React Query
- * UPDATED: Now uses the new simplified helper function
+ * Directly queries the database without complex transformations
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,16 +48,21 @@ const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
     return [];
   }
   
-  // Use the new simplified helper function to get neighborhood IDs
-  const { data: neighborhoodIds, error: neighborhoodError } = await supabase
-    .rpc('get_user_neighborhood_ids', { user_uuid: user.id });
+  // First get the list of neighborhood IDs the user has access to
+  const { data: neighborhoods, error: neighborhoodError } = await supabase
+    .rpc('get_user_neighborhoods_simple', {
+      user_uuid: user.id
+    });
     
   if (neighborhoodError) {
     logger.error('Error fetching user neighborhoods:', neighborhoodError);
     throw neighborhoodError;
   }
   
-  if (!neighborhoodIds || neighborhoodIds.length === 0) {
+  // Extract the neighborhood IDs
+  const neighborhoodIds = neighborhoods.map((n: any) => n.id);
+  
+  if (neighborhoodIds.length === 0) {
     logger.debug('User has no neighborhoods, returning empty activities array');
     return [];
   }

@@ -2,7 +2,7 @@
 /**
  * Main neighborhood data hook
  * 
- * UPDATED: Now uses the new simplified helper function
+ * This hook has been simplified to remove core contributor functionality.
  */
 import { User } from '@supabase/supabase-js';
 import { useNeighborhoodStatus } from './hooks/useNeighborhoodStatus';
@@ -13,13 +13,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { Neighborhood } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { createLogger } from '@/utils/logger';
-
-const logger = createLogger('useNeighborhoodData');
 
 /**
  * Custom hook that handles fetching and managing neighborhood data
- * UPDATED: Now uses the new simplified helper function
+ * 
+ * This simplified version removes core contributor functionality
  * 
  * @param user - The current authenticated user
  * @returns Object containing neighborhood data and loading state
@@ -43,7 +41,7 @@ export function useNeighborhoodData(user: User | null) {
   // Wait for auth to stabilize
   const isAuthStable = useAuthStabilizer(user);
   
-  // Initialize neighborhood data fetching
+  // Initialize neighborhood data fetching - simplified version
   const neighborhoodHook = useFetchNeighborhood(
     isAuthStable ? user : null,
     fetchAttempts,
@@ -55,9 +53,7 @@ export function useNeighborhoodData(user: User | null) {
     fetchNeighborhood
   } = neighborhoodHook;
 
-  /**
-   * Function to fetch user's neighborhoods using the new helper function
-   */
+  // Function to fetch user's neighborhoods
   const fetchUserNeighborhoods = useCallback(async () => {
     if (!user?.id) {
       setUserNeighborhoods([]);
@@ -65,43 +61,33 @@ export function useNeighborhoodData(user: User | null) {
     }
 
     try {
-      logger.debug('Fetching user neighborhoods for:', user.id);
+      // Fetch all neighborhoods the user is a member of
+      const { data: memberData, error: memberError } = await supabase
+        .from('neighborhood_members')
+        .select(`
+          neighborhood_id,
+          neighborhoods:neighborhood_id (
+            id,
+            name,
+            created_by
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'active');
 
-      // Use the new simplified helper function
-      const { data: neighborhoodIds, error: idsError } = await supabase
-        .rpc('get_user_neighborhood_ids', { user_uuid: user.id });
-
-      if (idsError) {
-        logger.error('Error fetching neighborhood IDs:', idsError);
+      if (memberError) {
+        console.error('Error fetching user neighborhoods:', memberError);
         return;
       }
 
-      if (neighborhoodIds && neighborhoodIds.length > 0) {
-        // Get details for all neighborhoods
-        const { data: neighborhoodDetails, error: detailsError } = await supabase
-          .from('neighborhoods')
-          .select('id, name, created_by')
-          .in('id', neighborhoodIds);
+      // Extract neighborhood data from the join
+      const neighborhoods = memberData
+        ?.map(member => member.neighborhoods)
+        .filter(Boolean) as Neighborhood[];
 
-        if (detailsError) {
-          logger.error('Error fetching neighborhood details:', detailsError);
-          return;
-        }
-
-        const neighborhoods: Neighborhood[] = neighborhoodDetails?.map(n => ({
-          id: n.id,
-          name: n.name,
-          created_by: n.created_by
-        })) || [];
-
-        logger.debug('Successfully fetched user neighborhoods:', neighborhoods);
-        setUserNeighborhoods(neighborhoods);
-      } else {
-        logger.debug('No neighborhoods found for user');
-        setUserNeighborhoods([]);
-      }
+      setUserNeighborhoods(neighborhoods || []);
     } catch (error) {
-      logger.error('Error in fetchUserNeighborhoods:', error);
+      console.error('Error in fetchUserNeighborhoods:', error);
     }
   }, [user?.id]);
 
@@ -114,7 +100,7 @@ export function useNeighborhoodData(user: User | null) {
     }
   }, [userNeighborhoods, setCurrentNeighborhood]);
   
-  // Set up monitoring and safety timeouts
+  // Set up monitoring and safety timeouts - removed core contributor parameters
   useNeighborhoodMonitor({
     currentNeighborhood,
     isLoading,
@@ -127,7 +113,7 @@ export function useNeighborhoodData(user: User | null) {
 
   // Main effect to fetch neighborhood data
   useEffect(() => {
-    // Call the fetch functions when the user/fetchAttempts changes
+    // Call the fetch function when the user/fetchAttempts changes
     // and auth state is stable
     if (isAuthStable) {
       fetchNeighborhood();
@@ -138,11 +124,11 @@ export function useNeighborhoodData(user: User | null) {
   // Return updated state and functions
   return { 
     currentNeighborhood,
-    userNeighborhoods,
+    userNeighborhoods, // Include userNeighborhoods in return
     isLoading, 
     error,
     setCurrentNeighborhood,
-    switchNeighborhood,
+    switchNeighborhood, // Include switchNeighborhood function
     refreshNeighborhoodData
   };
 }

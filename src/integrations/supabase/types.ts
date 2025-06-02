@@ -996,7 +996,9 @@ export type Database = {
         Returns: undefined
       }
       check_neighborhood_access: {
-        Args: { neighborhood_id: string }
+        Args:
+          | { neighborhood_id: string }
+          | { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
       check_neighborhood_limit: {
@@ -1128,13 +1130,16 @@ export type Database = {
           needs_visible: boolean
         }[]
       }
+      get_user_accessible_neighborhoods: {
+        Args: { user_uuid: string }
+        Returns: {
+          neighborhood_id: string
+          access_type: string
+        }[]
+      }
       get_user_current_neighborhood: {
         Args: { user_uuid: string }
         Returns: string
-      }
-      get_user_neighborhood_ids: {
-        Args: { user_uuid: string }
-        Returns: string[]
       }
       get_user_neighborhood_memberships: {
         Args: { user_uuid: string }
@@ -1151,6 +1156,13 @@ export type Database = {
           id: string
           name: string
           joined_at: string
+        }[]
+      }
+      get_user_neighborhoods_simple: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          name: string
         }[]
       }
       is_super_admin: {
