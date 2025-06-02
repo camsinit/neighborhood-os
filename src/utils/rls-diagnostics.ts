@@ -139,7 +139,7 @@ export const runFullRLSDiagnostics = async () => {
 };
 
 /**
- * Test specific neighborhood access using simplified approach
+ * Test specific neighborhood access
  */
 export const testNeighborhoodAccess = async (neighborhoodId: string) => {
   logger.info(`Testing neighborhood access for: ${neighborhoodId}`);
@@ -180,19 +180,19 @@ export const testNeighborhoodAccess = async (neighborhoodId: string) => {
     membershipData: membershipResult.data
   });
 
-  // Test the simplified helper function
+  // Test security definer function
   try {
-    const { data: neighborhoodIds, error: funcError } = await supabase
-      .rpc('get_user_neighborhood_ids', { user_uuid: user.id });
+    const { data: hasAccess, error: funcError } = await supabase
+      .rpc('check_neighborhood_access', {
+        user_uuid: user.id,
+        neighborhood_uuid: neighborhoodId
+      });
 
-    const hasAccess = neighborhoodIds && neighborhoodIds.includes(neighborhoodId);
-
-    logger.info('Helper function test', {
+    logger.info('Security definer function test', {
       neighborhoodId,
       userId: user.id,
       hasAccess,
-      error: funcError?.message,
-      allNeighborhoodIds: neighborhoodIds
+      error: funcError?.message
     });
 
     return {
@@ -208,7 +208,7 @@ export const testNeighborhoodAccess = async (neighborhoodId: string) => {
     };
 
   } catch (error: any) {
-    logger.error('Helper function failed', {
+    logger.error('Security definer function failed', {
       error: error.message,
       neighborhoodId,
       userId: user.id
@@ -216,7 +216,7 @@ export const testNeighborhoodAccess = async (neighborhoodId: string) => {
 
     return {
       hasAccess: false,
-      reason: 'Helper function failed',
+      reason: 'Security function failed',
       error: error.message
     };
   }
