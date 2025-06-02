@@ -14,7 +14,7 @@ interface Neighborhood {
 /**
  * Custom hook to fetch and manage a user's neighborhoods
  * 
- * UPDATED: Now works with the new security definer functions and fixed RLS policies
+ * UPDATED: Now uses the new simplified helper function
  */
 export function useNeighborhoodData() {
   const user = useUser();
@@ -28,7 +28,7 @@ export function useNeighborhoodData() {
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
-  // Fetch neighborhoods data using the new security definer function
+  // Fetch neighborhoods data using the new simplified helper function
   useEffect(() => {
     const fetchNeighborhoods = async () => {
       if (!user) {
@@ -42,20 +42,17 @@ export function useNeighborhoodData() {
         
         console.log("[useNeighborhoodData] Fetching neighborhoods for user:", user.id);
         
-        // Use the updated security definer function with new return type
-        const { data: accessibleNeighborhoods, error: accessError } = await supabase
-          .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
+        // Use the new simplified helper function
+        const { data: neighborhoodIds, error: idsError } = await supabase
+          .rpc('get_user_neighborhood_ids', { user_uuid: user.id });
 
-        if (accessError) {
-          console.warn("[useNeighborhoodData] Error getting accessible neighborhoods:", accessError);
-          throw accessError;
+        if (idsError) {
+          console.warn("[useNeighborhoodData] Error getting neighborhood IDs:", idsError);
+          throw idsError;
         }
 
-        if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-          // Extract neighborhood IDs from the return format {neighborhood_id, access_type}
-          const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
-          
-          // Get details for all accessible neighborhoods - this now works with the new RLS policy
+        if (neighborhoodIds && neighborhoodIds.length > 0) {
+          // Get details for all accessible neighborhoods
           const { data: neighborhoodDetails, error: detailsError } = await supabase
             .from('neighborhoods')
             .select('id, name, created_at')

@@ -10,7 +10,7 @@ const logger = createLogger('useNeighborUsers');
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Uses simplified queries to avoid RLS recursion issues
+ * UPDATED: Now uses the new simplified RLS policies and helper function
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -35,7 +35,7 @@ export const useNeighborUsers = () => {
       logger.debug('Fetching users for neighborhood:', currentNeighborhood.id);
       
       try {
-        // Step 1: Get neighborhood members using simple query (no recursion)
+        // Step 1: Get neighborhood members using the new simple RLS policies
         const { data: membersData, error: membersError } = await supabase
           .from('neighborhood_members')
           .select('user_id')
@@ -60,7 +60,7 @@ export const useNeighborUsers = () => {
         // Step 2: Get user IDs for profile lookup
         const userIds = membersData.map(m => m.user_id);
         
-        // Step 3: Get profiles for these users using simple query (no recursion)
+        // Step 3: Get profiles for these users using the simple RLS policies
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, display_name, avatar_url, address, phone_number, access_needs, email_visible, phone_visible, address_visible, needs_visible, bio')

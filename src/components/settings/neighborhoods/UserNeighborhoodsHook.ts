@@ -2,7 +2,7 @@
 /**
  * Custom hook to fetch and manage neighborhood data for a user
  * 
- * UPDATED: Uses simplified queries to avoid RLS recursion issues
+ * UPDATED: Now uses the new simplified helper function
  */
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,7 @@ export interface Neighborhood {
 
 /**
  * Custom hook that fetches neighborhoods for the current user
- * UPDATED: Uses simple, direct queries that won't cause RLS recursion
+ * UPDATED: Now uses the new simplified helper function
  * 
  * @returns Object containing neighborhoods data, loading state, and error information
  */
@@ -93,7 +93,7 @@ export const useUserNeighborhoods = () => {
     }
   };
 
-  // Function to refresh the neighborhoods data using simple queries
+  // Function to refresh the neighborhoods data using the new helper function
   const refreshNeighborhoods = async () => {
     if (!user) {
       setIsLoading(false);
@@ -106,40 +106,21 @@ export const useUserNeighborhoods = () => {
       
       logger.debug('Fetching neighborhoods for user:', user.id);
 
-      // Step 1: Get memberships using simple query (no recursion)
-      const { data: memberships, error: membershipError } = await supabase
-        .from('neighborhood_members')
-        .select('neighborhood_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active');
+      // Use the new simplified helper function
+      const { data: neighborhoodIds, error: idsError } = await supabase
+        .rpc('get_user_neighborhood_ids', { user_uuid: user.id });
 
-      if (membershipError) {
-        logger.error('Error fetching memberships:', membershipError);
-        throw membershipError;
+      if (idsError) {
+        logger.error('Error fetching neighborhood IDs:', idsError);
+        throw idsError;
       }
 
-      // Step 2: Get created neighborhoods using simple query (no recursion)
-      const { data: createdNeighborhoods, error: createdError } = await supabase
-        .from('neighborhoods')
-        .select('id, name, created_at')
-        .eq('created_by', user.id);
-
-      if (createdError) {
-        logger.error('Error fetching created neighborhoods:', createdError);
-        throw createdError;
-      }
-
-      // Step 3: Combine membership and created neighborhood IDs
-      const membershipIds = memberships?.map(m => m.neighborhood_id) || [];
-      const createdIds = createdNeighborhoods?.map(n => n.id) || [];
-      const allNeighborhoodIds = [...new Set([...membershipIds, ...createdIds])];
-
-      if (allNeighborhoodIds.length > 0) {
-        // Step 4: Get details for all neighborhoods using simple query (no recursion)
+      if (neighborhoodIds && neighborhoodIds.length > 0) {
+        // Get details for all neighborhoods
         const { data: neighborhoodDetails, error: detailsError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_at')
-          .in('id', allNeighborhoodIds);
+          .in('id', neighborhoodIds);
 
         if (detailsError) {
           logger.error('Error fetching neighborhood details:', detailsError);
