@@ -2,7 +2,7 @@
 /**
  * Hook for fetching neighborhood data
  *
- * UPDATED: Now works with the new security definer functions and fixed RLS policies
+ * UPDATED: Now uses direct queries instead of removed security definer functions
  */
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -37,7 +37,7 @@ export function useFetchNeighborhood(
 ) {
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
 
-  // The main fetch function that retrieves neighborhood data using new security definer functions
+  // The main fetch function that retrieves neighborhood data using direct queries
   const fetchNeighborhood = useCallback(async () => {
     // Skip if no user is logged in
     if (!user) {
@@ -57,39 +57,56 @@ export function useFetchNeighborhood(
 
       logger.debug("Fetching neighborhoods for user:", user.id);
 
-      // Use the updated security definer function
-      const { data: accessibleNeighborhoods, error: accessError } = await supabase
-        .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
+      // First, check if user created any neighborhoods
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from('neighborhoods')
+        .select('id, name, created_by')
+        .eq('created_by', user.id)
+        .limit(1);
 
-      if (accessError) {
-        logger.warn("Error getting accessible neighborhoods:", accessError);
-        handleFetchError(accessError, startTime);
+      if (createdError) {
+        logger.warn("Error getting created neighborhoods:", createdError);
+        handleFetchError(createdError, startTime);
         return;
       }
 
-      if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-        // Extract the neighborhood_id from the first result
-        const firstNeighborhoodId = accessibleNeighborhoods[0].neighborhood_id;
-        
-        // Get the neighborhood details using the new RLS policy
-        const { data: neighborhood, error: neighborhoodError } = await supabase
-          .from('neighborhoods')
-          .select('id, name')
-          .eq('id', firstNeighborhoodId)
-          .single();
+      // If user created a neighborhood, use that
+      if (createdNeighborhoods && createdNeighborhoods.length > 0) {
+        const neighborhood = createdNeighborhoods[0] as Neighborhood;
+        logger.debug("Found created neighborhood:", neighborhood.name);
+        setCurrentNeighborhood(neighborhood);
+        completeFetch(startTime);
+        return;
+      }
 
-        if (neighborhoodError) {
-          logger.warn("Error getting neighborhood details:", neighborhoodError);
-          handleFetchError(neighborhoodError, startTime);
-          return;
-        }
+      // If no created neighborhoods, check membership
+      const { data: membershipData, error: membershipError } = await supabase
+        .from('neighborhood_members')
+        .select(`
+          neighborhood_id,
+          neighborhoods:neighborhood_id (
+            id,
+            name,
+            created_by
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .limit(1);
 
-        if (neighborhood) {
-          logger.debug("Found neighborhood:", neighborhood.name);
-          setCurrentNeighborhood(neighborhood as Neighborhood);
-          completeFetch(startTime);
-          return;
-        }
+      if (membershipError) {
+        logger.warn("Error getting neighborhood memberships:", membershipError);
+        handleFetchError(membershipError, startTime);
+        return;
+      }
+
+      // If user is a member of a neighborhood, use that
+      if (membershipData && membershipData.length > 0 && membershipData[0].neighborhoods) {
+        const neighborhood = membershipData[0].neighborhoods as Neighborhood;
+        logger.debug("Found membership neighborhood:", neighborhood.name);
+        setCurrentNeighborhood(neighborhood);
+        completeFetch(startTime);
+        return;
       }
       
       logger.debug("No neighborhoods found (attempt " + fetchAttempts + ")");

@@ -53,7 +53,7 @@ export function useNeighborhoodData(user: User | null) {
     fetchNeighborhood
   } = neighborhoodHook;
 
-  // Function to fetch user's neighborhoods
+  // Function to fetch user's neighborhoods using direct queries
   const fetchUserNeighborhoods = useCallback(async () => {
     if (!user?.id) {
       setUserNeighborhoods([]);
@@ -61,7 +61,18 @@ export function useNeighborhoodData(user: User | null) {
     }
 
     try {
-      // Fetch all neighborhoods the user is a member of
+      // First, get neighborhoods the user created
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from('neighborhoods')
+        .select('id, name, created_by')
+        .eq('created_by', user.id);
+
+      if (createdError) {
+        console.error('Error fetching created neighborhoods:', createdError);
+        return;
+      }
+
+      // Then, get neighborhoods the user is a member of
       const { data: memberData, error: memberError } = await supabase
         .from('neighborhood_members')
         .select(`
@@ -80,12 +91,18 @@ export function useNeighborhoodData(user: User | null) {
         return;
       }
 
-      // Extract neighborhood data from the join
-      const neighborhoods = memberData
-        ?.map(member => member.neighborhoods)
-        .filter(Boolean) as Neighborhood[];
+      // Combine created neighborhoods and member neighborhoods
+      const allNeighborhoods: Neighborhood[] = [
+        ...(createdNeighborhoods || []),
+        ...(memberData?.map(member => member.neighborhoods).filter(Boolean) || [])
+      ];
 
-      setUserNeighborhoods(neighborhoods || []);
+      // Remove duplicates based on id
+      const uniqueNeighborhoods = allNeighborhoods.filter((neighborhood, index, self) =>
+        index === self.findIndex(n => n.id === neighborhood.id)
+      );
+
+      setUserNeighborhoods(uniqueNeighborhoods);
     } catch (error) {
       console.error('Error in fetchUserNeighborhoods:', error);
     }

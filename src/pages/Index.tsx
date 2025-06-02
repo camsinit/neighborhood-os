@@ -118,10 +118,11 @@ const Index = () => {
       return;
     }
     
-    // If there was an error loading neighborhood data or no neighborhood, redirect to join page
+    // If there was an error loading neighborhood data or no neighborhood, redirect to home anyway
+    // Let the home page handle the "no neighborhood" state instead of forcing join page
     if (user && (!currentNeighborhood || error)) {
-      console.log("[Index] User authenticated but no neighborhood or error, redirecting to join page:", error);
-      navigate("/join", { replace: true });
+      console.log("[Index] User authenticated but no neighborhood, redirecting to home page to handle gracefully");
+      navigate("/home", { replace: true });
       return;
     }
   }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, needsOnboarding, isCheckingOnboarding]);
@@ -175,7 +176,7 @@ const Index = () => {
           {error && (
             <p className="text-amber-600 text-sm mt-4">
               Note: Having trouble connecting to neighborhood data. 
-              Redirecting you to join a neighborhood.
+              Taking you to home page where you can join a neighborhood.
             </p>
           )}
         </div>
