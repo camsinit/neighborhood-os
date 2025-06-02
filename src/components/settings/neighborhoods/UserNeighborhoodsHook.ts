@@ -1,14 +1,16 @@
 
 /**
  * Custom hook to fetch and manage neighborhood data for a user
- * This hook encapsulates all the data fetching logic for neighborhoods
  * 
- * UPDATED: Now works with the new security definer functions and fixed RLS policies
+ * UPDATED: Uses simplified queries to avoid RLS recursion issues
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
+import { createLogger } from "@/utils/logger";
+
+const logger = createLogger('UserNeighborhoodsHook');
 
 // Define the Neighborhood interface for type safety
 export interface Neighborhood {
@@ -19,7 +21,8 @@ export interface Neighborhood {
 
 /**
  * Custom hook that fetches neighborhoods for the current user
- * Handles all API calls and state management related to neighborhoods
+ * UPDATED: Uses simple, direct queries that won't cause RLS recursion
+ * 
  * @returns Object containing neighborhoods data, loading state, and error information
  */
 export const useUserNeighborhoods = () => {
@@ -31,14 +34,15 @@ export const useUserNeighborhoods = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper function to add a user to a neighborhood using new security functions
+  // Helper function to add a user to a neighborhood using simple queries
   const addUserToNeighborhood = async (userId: string, neighborhoodName: string) => {
     try {
-      // First, find the neighborhood ID by name
-      const {
-        data: neighborhoods,
-        error: neighborhoodError
-      } = await supabase.from('neighborhoods').select('id').eq('name', neighborhoodName).limit(1);
+      // Step 1: Find the neighborhood ID by name using simple query
+      const { data: neighborhoods, error: neighborhoodError } = await supabase
+        .from('neighborhoods')
+        .select('id')
+        .eq('name', neighborhoodName)
+        .limit(1);
       
       if (neighborhoodError) throw neighborhoodError;
       
@@ -49,21 +53,23 @@ export const useUserNeighborhoods = () => {
       
       const neighborhoodId = neighborhoods[0].id;
 
-      // Check if user already has access using the new security definer function
-      const { data: hasAccess, error: accessError } = await supabase
-        .rpc('check_neighborhood_access', {
-          user_uuid: userId,
-          neighborhood_uuid: neighborhoodId
-        });
+      // Step 2: Check if user already has access using simple query
+      const { data: existingMembership, error: membershipError } = await supabase
+        .from('neighborhood_members')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('neighborhood_id', neighborhoodId)
+        .eq('status', 'active')
+        .limit(1);
       
-      if (accessError) throw accessError;
+      if (membershipError) throw membershipError;
       
-      if (hasAccess) {
+      if (existingMembership && existingMembership.length > 0) {
         toast.info(`User already has access to "${neighborhoodName}"`);
         return;
       }
 
-      // Add the user as a member using direct insert (RLS will handle permissions)
+      // Step 3: Add the user as a member using simple insert
       const { error: addError } = await supabase
         .from('neighborhood_members')
         .insert({
@@ -82,12 +88,12 @@ export const useUserNeighborhoods = () => {
         refreshNeighborhoods();
       }
     } catch (err) {
-      console.error("[UserNeighborhoods] Error adding user to neighborhood:", err);
+      logger.error('Error adding user to neighborhood:', err);
       toast.error("Failed to add user to neighborhood");
     }
   };
 
-  // Function to refresh the neighborhoods data using new security definer functions
+  // Function to refresh the neighborhoods data using simple queries
   const refreshNeighborhoods = async () => {
     if (!user) {
       setIsLoading(false);
@@ -98,29 +104,45 @@ export const useUserNeighborhoods = () => {
       setIsLoading(true);
       setError(null);
       
-      console.log("[UserNeighborhoods] Fetching neighborhoods for user:", user.id);
+      logger.debug('Fetching neighborhoods for user:', user.id);
 
-      // Use the new get_user_accessible_neighborhoods function
-      const { data: accessibleNeighborhoods, error: accessError } = await supabase
-        .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
+      // Step 1: Get memberships using simple query (no recursion)
+      const { data: memberships, error: membershipError } = await supabase
+        .from('neighborhood_members')
+        .select('neighborhood_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
 
-      if (accessError) {
-        console.warn("[UserNeighborhoods] Error getting accessible neighborhoods:", accessError);
-        throw accessError;
+      if (membershipError) {
+        logger.error('Error fetching memberships:', membershipError);
+        throw membershipError;
       }
 
-      if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-        // Extract neighborhood IDs from the new return format {neighborhood_id, access_type}
-        const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
-        
-        // Get details for all accessible neighborhoods using the new RLS policy
+      // Step 2: Get created neighborhoods using simple query (no recursion)
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from('neighborhoods')
+        .select('id, name, created_at')
+        .eq('created_by', user.id);
+
+      if (createdError) {
+        logger.error('Error fetching created neighborhoods:', createdError);
+        throw createdError;
+      }
+
+      // Step 3: Combine membership and created neighborhood IDs
+      const membershipIds = memberships?.map(m => m.neighborhood_id) || [];
+      const createdIds = createdNeighborhoods?.map(n => n.id) || [];
+      const allNeighborhoodIds = [...new Set([...membershipIds, ...createdIds])];
+
+      if (allNeighborhoodIds.length > 0) {
+        // Step 4: Get details for all neighborhoods using simple query (no recursion)
         const { data: neighborhoodDetails, error: detailsError } = await supabase
           .from('neighborhoods')
           .select('id, name, created_at')
-          .in('id', neighborhoodIds);
+          .in('id', allNeighborhoodIds);
 
         if (detailsError) {
-          console.warn("[UserNeighborhoods] Error getting neighborhood details:", detailsError);
+          logger.error('Error fetching neighborhood details:', detailsError);
           throw detailsError;
         }
 
@@ -131,12 +153,14 @@ export const useUserNeighborhoods = () => {
           joined_at: n.created_at || new Date().toISOString()
         })) || [];
         
+        logger.debug('Successfully fetched neighborhoods:', allNeighborhoods);
         setNeighborhoods(allNeighborhoods);
       } else {
+        logger.debug('No neighborhoods found for user');
         setNeighborhoods([]);
       }
     } catch (err: any) {
-      console.error("[UserNeighborhoods] Error fetching neighborhoods:", err);
+      logger.error('Error fetching neighborhoods:', err);
       setError(err instanceof Error ? err.message : "Failed to load your neighborhoods");
       toast.error("Failed to load your neighborhoods");
     } finally {

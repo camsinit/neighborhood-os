@@ -3,21 +3,23 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
 import { useNeighborhood } from "@/contexts/neighborhood";
+import { createLogger } from "@/utils/logger";
+
+const logger = createLogger('useNeighborUsers');
 
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Now uses direct table queries instead of the dropped security definer view
+ * UPDATED: Uses simplified queries to avoid RLS recursion issues
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
   const { currentNeighborhood } = useNeighborhood();
 
   // Log initial neighborhood context for debugging
-  console.log("[useNeighborUsers] Starting hook with neighborhood:", {
+  logger.debug('Starting hook with neighborhood:', {
     neighborhoodId: currentNeighborhood?.id,
-    neighborhoodName: currentNeighborhood?.name,
-    timestamp: new Date().toISOString()
+    neighborhoodName: currentNeighborhood?.name
   });
 
   return useQuery({
@@ -26,14 +28,14 @@ export const useNeighborUsers = () => {
     queryFn: async () => {
       // If no neighborhood found, return empty array
       if (!currentNeighborhood?.id) {
-        console.log("[useNeighborUsers] No neighborhood found, returning empty array");
+        logger.debug('No neighborhood found, returning empty array');
         return [];
       }
 
-      console.log("[useNeighborUsers] Fetching users for neighborhood:", currentNeighborhood.id);
+      logger.debug('Fetching users for neighborhood:', currentNeighborhood.id);
       
       try {
-        // First, get neighborhood members using direct table query
+        // Step 1: Get neighborhood members using simple query (no recursion)
         const { data: membersData, error: membersError } = await supabase
           .from('neighborhood_members')
           .select('user_id')
@@ -41,35 +43,35 @@ export const useNeighborUsers = () => {
           .eq('status', 'active');
           
         if (membersError) {
-          console.error("[useNeighborUsers] Error fetching neighborhood members:", membersError);
+          logger.error('Error fetching neighborhood members:', membersError);
           throw membersError;
         }
         
         if (!membersData || membersData.length === 0) {
-          console.log("[useNeighborUsers] No members found in neighborhood");
+          logger.debug('No members found in neighborhood');
           return [];
         }
 
-        console.log("[useNeighborUsers] Found members:", {
+        logger.debug('Found members:', {
           memberCount: membersData.length,
           neighborhoodId: currentNeighborhood.id
         });
         
-        // Get user IDs for profile lookup
+        // Step 2: Get user IDs for profile lookup
         const userIds = membersData.map(m => m.user_id);
         
-        // Get profiles for these users using direct table query
+        // Step 3: Get profiles for these users using simple query (no recursion)
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, display_name, avatar_url, address, phone_number, access_needs, email_visible, phone_visible, address_visible, needs_visible, bio')
           .in('id', userIds);
           
         if (profilesError) {
-          console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
+          logger.error('Error fetching profiles:', profilesError);
           throw profilesError;
         }
         
-        // Transform data into expected format
+        // Step 4: Transform data into expected format
         const usersWithProfiles = profilesData?.map((profile: any) => {
           return {
             id: profile.id,
@@ -91,13 +93,17 @@ export const useNeighborUsers = () => {
           };
         }) || [];
         
+        logger.debug('Successfully transformed user data:', {
+          userCount: usersWithProfiles.length
+        });
+        
         return usersWithProfiles as UserWithRole[];
       } catch (error) {
-        console.error("[useNeighborUsers] Error in data fetching:", error);
+        logger.error('Error in data fetching:', error);
         throw error;
       }
     },
-    // Always enable the query
+    // Only enable the query when we have a neighborhood
     enabled: !!currentNeighborhood?.id
   });
 };

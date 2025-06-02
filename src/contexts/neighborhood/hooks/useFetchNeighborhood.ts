@@ -1,115 +1,120 @@
 
 /**
- * Hook for fetching neighborhood data
- *
- * UPDATED: Now works with the new security definer functions and fixed RLS policies
+ * Simplified neighborhood fetching hook
+ * 
+ * This version uses simple, direct queries to avoid RLS recursion issues
+ * Works with the new simplified RLS policies
  */
 import { useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { Neighborhood } from '../types';
 import { supabase } from '@/integrations/supabase/client';
+import { Neighborhood } from '../types';
 import { createLogger } from '@/utils/logger';
 
-const logger = createLogger('FetchNeighborhood');
+const logger = createLogger('useFetchNeighborhood');
+
+interface FetchNeighborhoodOptions {
+  startFetch: () => void;
+  completeFetch: (neighborhood: Neighborhood | null) => void;
+  handleFetchError: (error: Error) => void;
+  setIsLoading: (loading: boolean) => void;
+}
 
 /**
- * Custom hook that focuses on fetching neighborhood data
- * 
- * @param user - The current authenticated user
- * @param fetchAttempts - Counter that triggers new fetch attempts
- * @param statusFunctions - Functions to update loading/error status
- * @returns Object containing neighborhood data
+ * Custom hook for fetching neighborhood data
+ * UPDATED: Uses simplified queries to avoid RLS recursion
  */
 export function useFetchNeighborhood(
   user: User | null,
   fetchAttempts: number,
-  { 
-    startFetch, 
-    completeFetch, 
-    handleFetchError,
-    setIsLoading
-  }: {
-    startFetch: () => number;
-    completeFetch: (startTime: number) => void;
-    handleFetchError: (err: any, startTime?: number) => void;
-    setIsLoading: (isLoading: boolean) => void;
-  }
+  options: FetchNeighborhoodOptions
 ) {
+  const { startFetch, completeFetch, handleFetchError, setIsLoading } = options;
+  
+  // State for the current neighborhood
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
 
-  // The main fetch function that retrieves neighborhood data using new security definer functions
+  /**
+   * Main function to fetch neighborhood data
+   * Uses simple queries that work with our new RLS policies
+   */
   const fetchNeighborhood = useCallback(async () => {
-    // Skip if no user is logged in
-    if (!user) {
-      setIsLoading(false);
+    if (!user?.id) {
+      logger.debug('No user found, skipping neighborhood fetch');
+      setCurrentNeighborhood(null);
       return;
     }
 
-    // Start timing and tracking the fetch operation
-    const startTime = startFetch();
-    
     try {
-      // If we already have a current neighborhood, we're done
-      if (currentNeighborhood) {
-        completeFetch(startTime);
-        return;
+      startFetch();
+      setIsLoading(true);
+      
+      logger.debug('Fetching neighborhoods for user:', user.id);
+
+      // Step 1: Get user's memberships - this query is simple and won't cause recursion
+      const { data: memberships, error: membershipError } = await supabase
+        .from('neighborhood_members')
+        .select('neighborhood_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      if (membershipError) {
+        throw new Error(`Failed to fetch memberships: ${membershipError.message}`);
       }
 
-      logger.debug("Fetching neighborhoods for user:", user.id);
+      // Step 2: Get neighborhoods created by the user - also simple query
+      const { data: createdNeighborhoods, error: createdError } = await supabase
+        .from('neighborhoods')
+        .select('id, name, created_by')
+        .eq('created_by', user.id);
 
-      // Use the updated security definer function
-      const { data: accessibleNeighborhoods, error: accessError } = await supabase
-        .rpc('get_user_accessible_neighborhoods', { user_uuid: user.id });
-
-      if (accessError) {
-        logger.warn("Error getting accessible neighborhoods:", accessError);
-        handleFetchError(accessError, startTime);
-        return;
+      if (createdError) {
+        throw new Error(`Failed to fetch created neighborhoods: ${createdError.message}`);
       }
 
-      if (accessibleNeighborhoods && accessibleNeighborhoods.length > 0) {
-        // Extract the neighborhood_id from the first result
-        const firstNeighborhoodId = accessibleNeighborhoods[0].neighborhood_id;
-        
-        // Get the neighborhood details using the new RLS policy
-        const { data: neighborhood, error: neighborhoodError } = await supabase
+      // Step 3: Combine membership and created neighborhood IDs
+      const membershipIds = memberships?.map(m => m.neighborhood_id) || [];
+      const createdIds = createdNeighborhoods?.map(n => n.id) || [];
+      const allNeighborhoodIds = [...new Set([...membershipIds, ...createdIds])];
+
+      logger.debug('Found neighborhood IDs:', allNeighborhoodIds);
+
+      // Step 4: If we have neighborhoods, get the first one as current
+      if (allNeighborhoodIds.length > 0) {
+        // Get full neighborhood details for the first neighborhood
+        const { data: neighborhoodDetails, error: detailsError } = await supabase
           .from('neighborhoods')
-          .select('id, name')
-          .eq('id', firstNeighborhoodId)
+          .select('id, name, created_by')
+          .eq('id', allNeighborhoodIds[0])
           .single();
 
-        if (neighborhoodError) {
-          logger.warn("Error getting neighborhood details:", neighborhoodError);
-          handleFetchError(neighborhoodError, startTime);
-          return;
+        if (detailsError) {
+          throw new Error(`Failed to fetch neighborhood details: ${detailsError.message}`);
         }
 
-        if (neighborhood) {
-          logger.debug("Found neighborhood:", neighborhood.name);
-          setCurrentNeighborhood(neighborhood as Neighborhood);
-          completeFetch(startTime);
-          return;
-        }
+        const neighborhood: Neighborhood = {
+          id: neighborhoodDetails.id,
+          name: neighborhoodDetails.name,
+          created_by: neighborhoodDetails.created_by
+        };
+
+        logger.debug('Successfully fetched neighborhood:', neighborhood);
+        setCurrentNeighborhood(neighborhood);
+        completeFetch(neighborhood);
+      } else {
+        logger.debug('No neighborhoods found for user');
+        setCurrentNeighborhood(null);
+        completeFetch(null);
       }
-      
-      logger.debug("No neighborhoods found (attempt " + fetchAttempts + ")");
+
+    } catch (error) {
+      logger.error('Error fetching neighborhood:', error);
+      handleFetchError(error instanceof Error ? error : new Error('Unknown error'));
       setCurrentNeighborhood(null);
-      completeFetch(startTime);
-      
-    } catch (err) {
-      // Handle unexpected errors
-      handleFetchError(err, startTime);
-      setCurrentNeighborhood(null);
+    } finally {
+      setIsLoading(false);
     }
-  }, [
-    user, 
-    fetchAttempts, 
-    currentNeighborhood,
-    startFetch,
-    completeFetch,
-    handleFetchError,
-    setIsLoading
-  ]);
+  }, [user?.id, startFetch, completeFetch, handleFetchError, setIsLoading]);
 
   return {
     currentNeighborhood,
