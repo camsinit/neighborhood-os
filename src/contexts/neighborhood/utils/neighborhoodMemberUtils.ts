@@ -2,14 +2,14 @@
 /**
  * Utility functions for neighborhood membership operations
  * 
- * UPDATED: Now uses the new security definer functions to avoid RLS recursion
+ * UPDATED: Now uses simplified RLS policies and direct table queries
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses the new security definer function to avoid recursion
+ * Uses direct table queries with simplified RLS policies
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -20,19 +20,21 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Use the new security definer function to check access
-    const { data: hasAccess, error } = await supabase
-      .rpc('check_neighborhood_access', {
-        user_uuid: userId,
-        neighborhood_uuid: neighborhoodId
-      });
+    // Direct query to check membership - RLS will handle access control
+    const { data, error } = await supabase
+      .from('neighborhood_members')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active')
+      .limit(1);
             
     if (error) {
-      console.error(`[NeighborhoodUtils] Error checking access for ${neighborhoodId}:`, error);
+      console.error(`[NeighborhoodUtils] Error checking membership for ${neighborhoodId}:`, error);
       return false;
     }
             
-    return !!hasAccess;
+    return !!(data && data.length > 0);
   } catch (err) {
     console.error("[NeighborhoodUtils] Error in checkNeighborhoodMembership:", err);
     return false;
