@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { createLogger } from '@/utils/logger';
+import { Neighborhood } from '../types';
 
 const logger = createLogger('NeighborhoodStatus');
 
@@ -51,18 +52,19 @@ export function useNeighborhoodStatus() {
   }, [fetchAttempts]);
 
   // Function to handle successful fetch completion
-  const completeFetch = useCallback((startTime: number) => {
+  // FIXED: Updated to match the expected signature in useFetchNeighborhood
+  const completeFetch = useCallback((neighborhood: Neighborhood | null) => {
     setIsLoading(false);
     
     // Calculate and log fetch duration for performance monitoring
-    if (startTime) {
-      const duration = Date.now() - startTime;
+    if (fetchStartTime) {
+      const duration = Date.now() - fetchStartTime;
       logger.debug(`Fetch completed successfully (duration: ${duration}ms)`);
     }
-  }, []);
+  }, [fetchStartTime]);
 
   // Function to handle fetch errors
-  const handleFetchError = useCallback((err: any, startTime?: number) => {
+  const handleFetchError = useCallback((err: any) => {
     // Handle unexpected errors
     logger.error("Error fetching neighborhood:", {
       error: err,
@@ -77,14 +79,14 @@ export function useNeighborhoodStatus() {
     setIsLoading(false);
     
     // Calculate fetch duration for performance logging
-    if (startTime) {
-      const duration = Date.now() - startTime;
+    if (fetchStartTime) {
+      const duration = Date.now() - fetchStartTime;
       logger.debug(`Fetch failed with error (duration: ${duration}ms)`);
     }
 
     // Increment retry count for backoff calculation
     setRetryCount(prev => prev + 1);
-  }, [fetchAttempts]);
+  }, [fetchAttempts, fetchStartTime]);
 
   // Effect for auto-retrying with exponential backoff
   useEffect(() => {
