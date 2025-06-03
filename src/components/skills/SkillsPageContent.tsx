@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, ArrowLeft } from 'lucide-react';
 import SkillsList from '@/components/skills/SkillsList';
 import SkillsFilter from '@/components/skills/SkillsFilter';
 import SearchInput from '@/components/ui/search-input';
@@ -72,6 +72,11 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
     }
   };
 
+  // Helper function to format category name for display
+  const getCategoryDisplayName = (categoryName: SkillCategory) => {
+    return categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+  };
+
   // Determine which view to show based on URL state
   const showCategoryGrid = !category && !searchQuery && view === 'offers';
   const showCategoryView = category && !searchQuery;
@@ -100,7 +105,22 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
       {/* Show category view when a category is selected */}
       {showCategoryView && (
         <div className="space-y-6">
-          <div className="flex justify-end">
+          {/* Header with back button, title, and add skill button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleBackToCategories}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Categories
+              </Button>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {getCategoryDisplayName(getTypedCategory(category)!)} Skills
+              </h2>
+            </div>
+            
             <Button 
               className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white shrink-0"
               onClick={() => setIsSkillDialogOpen(true)}
