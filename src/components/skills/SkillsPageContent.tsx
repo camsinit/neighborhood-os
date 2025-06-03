@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { SkillCategory } from './types/skillTypes';
-import CategorySelector from './components/CategorySelector';
 import CategorySkillsView from './views/CategorySkillsView';
 import SkillCategoryGrid from './SkillCategoryGrid';
 import SkillsPageNavigation from './SkillsPageNavigation';
+import SkillsList from './SkillsList';
 
 interface SkillsPageContentProps {
   view: string;
@@ -45,7 +45,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
         />
       )}
 
-      {/* Main category grid view - when no category is selected */}
+      {/* Main view - when no category is selected */}
       {!category && (
         <>
           {/* Show the navigation header with search, tabs, and action buttons */}
@@ -59,8 +59,27 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
             setIsSkillDialogOpen={setIsSkillDialogOpen}
           />
 
-          {/* Main category grid */}
-          <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
+          {/* Show different content based on the selected view */}
+          {view === 'offers' && !searchQuery && (
+            <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
+          )}
+          
+          {view === 'requests' && (
+            <SkillsList showRequests={true} searchQuery={searchQuery} />
+          )}
+          
+          {view === 'mine' && (
+            <SkillsList showMine={true} searchQuery={searchQuery} />
+          )}
+          
+          {/* Show search results when there's a search query */}
+          {searchQuery && (
+            <SkillsList 
+              showRequests={view === 'requests'} 
+              showMine={view === 'mine'} 
+              searchQuery={searchQuery} 
+            />
+          )}
         </>
       )}
     </div>
