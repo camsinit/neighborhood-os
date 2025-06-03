@@ -180,7 +180,7 @@ export const testNeighborhoodAccess = async (neighborhoodId: string) => {
     membershipData: membershipResult.data
   });
 
-  // Test security definer function
+  // Test security definer function with correct parameter names
   try {
     const { data: hasAccess, error: funcError } = await supabase
       .rpc('check_neighborhood_access', {

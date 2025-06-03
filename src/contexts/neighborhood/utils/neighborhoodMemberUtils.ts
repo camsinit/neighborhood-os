@@ -2,14 +2,14 @@
 /**
  * Utility functions for neighborhood membership operations
  * 
- * UPDATED: Now uses the new security definer functions to avoid RLS recursion
+ * UPDATED: Now uses the correct parameter names for security definer functions
  */
 
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Utility function to check if a user is a member of a specific neighborhood
- * Uses the new security definer function to avoid recursion
+ * Uses the security definer function with correct parameter names
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood to check
@@ -20,7 +20,7 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Use the new security definer function to check access
+    // Use the security definer function with correct parameter names
     const { data: hasAccess, error } = await supabase
       .rpc('check_neighborhood_access', {
         user_uuid: userId,

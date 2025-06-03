@@ -48,21 +48,39 @@ const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
     return [];
   }
   
-  // First get the list of neighborhood IDs the user has access to
-  const { data: neighborhoods, error: neighborhoodError } = await supabase
-    .rpc('get_user_neighborhoods_simple', {
-      user_uuid: user.id
-    });
+  // Get neighborhoods the user created
+  const { data: createdNeighborhoods, error: createdError } = await supabase
+    .from('neighborhoods')
+    .select('id')
+    .eq('created_by', user.id);
     
-  if (neighborhoodError) {
-    logger.error('Error fetching user neighborhoods:', neighborhoodError);
-    throw neighborhoodError;
+  if (createdError) {
+    logger.error('Error fetching created neighborhoods:', createdError);
+    throw createdError;
   }
   
-  // Extract the neighborhood IDs
-  const neighborhoodIds = neighborhoods.map((n: any) => n.id);
+  // Get neighborhoods the user is a member of
+  const { data: memberData, error: memberError } = await supabase
+    .from('neighborhood_members')
+    .select('neighborhood_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active');
+    
+  if (memberError) {
+    logger.error('Error fetching member neighborhoods:', memberError);
+    throw memberError;
+  }
   
-  if (neighborhoodIds.length === 0) {
+  // Combine neighborhood IDs
+  const neighborhoodIds = [
+    ...(createdNeighborhoods?.map(n => n.id) || []),
+    ...(memberData?.map(m => m.neighborhood_id) || [])
+  ];
+  
+  // Remove duplicates
+  const uniqueNeighborhoodIds = [...new Set(neighborhoodIds)];
+  
+  if (uniqueNeighborhoodIds.length === 0) {
     logger.debug('User has no neighborhoods, returning empty activities array');
     return [];
   }
@@ -77,7 +95,7 @@ const fetchActivities = async (limit: number = 20): Promise<Activity[]> => {
         avatar_url
       )
     `)
-    .in('neighborhood_id', neighborhoodIds)
+    .in('neighborhood_id', uniqueNeighborhoodIds)
     .order('created_at', { ascending: false })
     .limit(limit);
     

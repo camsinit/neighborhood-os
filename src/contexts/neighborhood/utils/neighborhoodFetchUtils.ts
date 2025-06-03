@@ -2,7 +2,7 @@
 /**
  * Neighborhood fetching utilities
  * 
- * UPDATED: Now works with the new security definer functions and fixed RLS policies
+ * UPDATED: Now uses direct queries instead of removed security definer functions
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Neighborhood } from "../types";
@@ -47,9 +47,7 @@ export const fetchCreatedNeighborhoods = async (userId: string): Promise<{
 };
 
 /**
- * Fetch all neighborhoods accessible to the current user
- * 
- * Uses the new security definer function to get user-accessible neighborhoods
+ * Fetch all neighborhoods accessible to the current user using direct queries
  * 
  * @returns Array of neighborhoods accessible to the user
  */
@@ -63,36 +61,50 @@ export const fetchAccessibleNeighborhoods = async (): Promise<Neighborhood[]> =>
       return [];
     }
 
-    // Use the new security definer function
-    const { data: accessibleNeighborhoods, error } = await supabase
-      .rpc("get_user_accessible_neighborhoods", { user_uuid: user.id });
-    
-    if (error) {
-      console.error("[fetchAccessibleNeighborhoods] Error:", error.message);
-      return [];
-    }
-    
-    if (!accessibleNeighborhoods || accessibleNeighborhoods.length === 0) {
-      console.log("[fetchAccessibleNeighborhoods] No accessible neighborhoods found");
-      return [];
-    }
-
-    // Extract neighborhood IDs and get full details
-    const neighborhoodIds = accessibleNeighborhoods.map(n => n.neighborhood_id);
-    
-    const { data: neighborhoodDetails, error: detailsError } = await supabase
+    // First, get neighborhoods the user created
+    const { data: createdNeighborhoods, error: createdError } = await supabase
       .from('neighborhoods')
       .select('id, name, created_by')
-      .in('id', neighborhoodIds);
-
-    if (detailsError) {
-      console.error("[fetchAccessibleNeighborhoods] Error getting details:", detailsError);
+      .eq('created_by', user.id);
+    
+    if (createdError) {
+      console.error("[fetchAccessibleNeighborhoods] Error getting created neighborhoods:", createdError);
       return [];
     }
+
+    // Then, get neighborhoods the user is a member of
+    const { data: memberData, error: memberError } = await supabase
+      .from('neighborhood_members')
+      .select(`
+        neighborhood_id,
+        neighborhoods:neighborhood_id (
+          id,
+          name,
+          created_by
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('status', 'active');
+
+    if (memberError) {
+      console.error("[fetchAccessibleNeighborhoods] Error getting member neighborhoods:", memberError);
+      return [];
+    }
+
+    // Combine created neighborhoods and member neighborhoods
+    const allNeighborhoods: Neighborhood[] = [
+      ...(createdNeighborhoods || []),
+      ...(memberData?.map(member => member.neighborhoods).filter(Boolean) || [])
+    ];
+
+    // Remove duplicates based on id
+    const uniqueNeighborhoods = allNeighborhoods.filter((neighborhood, index, self) =>
+      index === self.findIndex(n => n.id === neighborhood.id)
+    );
     
-    console.log(`[fetchAccessibleNeighborhoods] Found ${neighborhoodDetails?.length || 0} accessible neighborhoods`);
+    console.log(`[fetchAccessibleNeighborhoods] Found ${uniqueNeighborhoods.length} accessible neighborhoods`);
     
-    return neighborhoodDetails as Neighborhood[];
+    return uniqueNeighborhoods as Neighborhood[];
   } catch (error) {
     console.error("[fetchAccessibleNeighborhoods] Unexpected error:", error);
     return [];
@@ -100,25 +112,29 @@ export const fetchAccessibleNeighborhoods = async (): Promise<Neighborhood[]> =>
 };
 
 /**
- * Fetch members of a specific neighborhood using the new security definer function
+ * Fetch members of a specific neighborhood using direct query
  * 
  * @param neighborhoodId - The ID of the neighborhood to get members for
  * @returns Array of user IDs who are members of the neighborhood
  */
 export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<string[]> => {
   try {
-    // Use the new security definer function
+    // Use direct query to get neighborhood members
     const { data, error } = await supabase
-      .rpc("get_neighborhood_members_direct", { neighborhood_uuid: neighborhoodId });
+      .from('neighborhood_members')
+      .select('user_id')
+      .eq('neighborhood_id', neighborhoodId)
+      .eq('status', 'active');
     
     if (error) {
       console.error("[fetchNeighborhoodMembers] Error:", error.message);
       return [];
     }
     
-    console.log(`[fetchNeighborhoodMembers] Found ${data?.length || 0} members for neighborhood ${neighborhoodId}`);
+    const memberIds = data?.map(member => member.user_id) || [];
+    console.log(`[fetchNeighborhoodMembers] Found ${memberIds.length} members for neighborhood ${neighborhoodId}`);
     
-    return data || [];
+    return memberIds;
   } catch (error) {
     console.error("[fetchNeighborhoodMembers] Unexpected error:", error);
     return [];
@@ -126,7 +142,7 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
 };
 
 /**
- * Check if a user has access to a specific neighborhood using new security function
+ * Check if a user has access to a specific neighborhood using security function
  * 
  * @param userId - The ID of the user to check
  * @param neighborhoodId - The ID of the neighborhood 
