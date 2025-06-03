@@ -7,7 +7,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 /**
  * Hook to fetch all skills and group them by category for preview display
  * This provides the data needed for the category grid view
- * Now uses the 6 standardized onboarding categories
+ * Now uses the 6 standardized onboarding categories and separates offers from requests
  */
 export const useSkillsPreview = () => {
   const user = useUser();
@@ -50,9 +50,10 @@ export const useSkillsPreview = () => {
       skills?.forEach(skill => {
         const category = skill.skill_category as SkillCategory;
         if (groupedSkills[category]) {
+          // Properly separate offers from requests
           if (skill.request_type === 'offer') {
             groupedSkills[category].offers.push(skill.title);
-          } else {
+          } else if (skill.request_type === 'need') {
             groupedSkills[category].requests.push(skill.title);
           }
         }

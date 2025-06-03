@@ -19,13 +19,14 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
 
-  // This maps categories to their appropriate colors (same as SkillOfferCard)
+  // Updated to use the new standardized 6 categories
   const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
-    creative: {bg: 'bg-[#FDE1D3]', text: 'text-[#F97316]'},
-    trade: {bg: 'bg-[#E5DEFF]', text: 'text-[#8B5CF6]'},
     technology: {bg: 'bg-[#D3E4FD]', text: 'text-[#221F26]'},
-    education: {bg: 'bg-[#F2FCE2]', text: 'text-emerald-600'},
-    wellness: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
+    emergency: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
+    professional: {bg: 'bg-[#E5DEFF]', text: 'text-[#8B5CF6]'},
+    maintenance: {bg: 'bg-[#FDE1D3]', text: 'text-[#F97316]'},
+    care: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
+    education: {bg: 'bg-[#F2FCE2]', text: 'text-emerald-600'}
   };
 
   // Get the category colors from our map, fallback to technology if not found

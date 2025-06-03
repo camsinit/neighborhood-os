@@ -2,11 +2,12 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkillCategory } from './types/skillTypes';
-import { Brain, Shield, Briefcase, Wrench, Heart, GraduationCap } from 'lucide-react';
+import { Brain, Shield, Briefcase, Wrench, Heart, GraduationCap, Plus } from 'lucide-react';
 
 /**
  * Individual category card that displays a skill category with preview of available skills
  * Now uses the 6 standardized onboarding categories with consistent white styling
+ * Reduced to 2/3 height and only shows skill offers (not requests) in preview
  */
 
 // Category configuration with standardized onboarding categories and icons
@@ -54,41 +55,47 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
   const config = categoryConfig[category];
   const Icon = config.icon;
   
-  // Combine offers and requests for preview, limit to 4 items
-  const allSkills = [...skillsData.offers, ...skillsData.requests];
-  const previewSkills = allSkills.slice(0, 4);
-  const hasMoreSkills = allSkills.length > 4;
-  const isEmpty = allSkills.length === 0;
+  // Only show offers in the preview, limit to 3 items for the reduced height
+  const previewSkills = skillsData.offers.slice(0, 3);
+  const hasMoreSkills = skillsData.offers.length > 3;
+  const isEmpty = skillsData.offers.length === 0;
   
   return (
     <Card 
-      className="bg-white border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow h-64 flex flex-col"
+      className={`bg-white border cursor-pointer transition-all duration-200 h-44 flex flex-col ${
+        isEmpty 
+          ? 'border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50/30' 
+          : 'border-gray-200 hover:shadow-lg hover:border-gray-300'
+      }`}
       onClick={() => onClick(category)}
     >
       {/* Main content area with skills preview at the top */}
       <CardContent className="flex-1 p-4 pb-0">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-gray-500 text-sm mb-2">
-              No skills shared yet
+            <div className="mb-3 p-3 rounded-full bg-green-100">
+              <Plus className="h-6 w-6 text-green-600" />
+            </div>
+            <p className="text-gray-700 text-sm font-medium mb-1">
+              Add your first skill
             </p>
-            <p className="text-gray-400 text-xs">
-              Tap to add the first skill
+            <p className="text-gray-500 text-xs">
+              Tap to share what you can help with
             </p>
           </div>
         ) : (
           <div className="space-y-2">
-            <ul className="space-y-2">
+            <ul className="space-y-1.5">
               {previewSkills.map((skill, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-start">
-                  <span className="mr-2 text-gray-400">•</span>
+                  <span className="mr-2 text-gray-400 mt-0.5">•</span>
                   <span className="line-clamp-1">{skill}</span>
                 </li>
               ))}
             </ul>
             {hasMoreSkills && (
-              <p className="text-xs text-gray-400 mt-3">
-                and {allSkills.length - 4} more...
+              <p className="text-xs text-gray-400 mt-2">
+                and {skillsData.offers.length - 3} more...
               </p>
             )}
           </div>
@@ -96,9 +103,9 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
       </CardContent>
       
       {/* Title section at bottom with icon next to title */}
-      <CardHeader className="bg-white border-t border-gray-100 p-4 mt-auto rounded-b-lg">
-        <CardTitle className="text-lg font-semibold text-gray-800 text-center flex items-center justify-center gap-2">
-          <Icon className="h-5 w-5 text-gray-600" />
+      <CardHeader className="bg-white border-t border-gray-100 p-3 mt-auto rounded-b-lg">
+        <CardTitle className="text-base font-semibold text-gray-800 text-center flex items-center justify-center gap-2">
+          <Icon className="h-4 w-4 text-gray-600" />
           {config.displayName}
         </CardTitle>
       </CardHeader>

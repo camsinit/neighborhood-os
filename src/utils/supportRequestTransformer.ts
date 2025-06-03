@@ -3,7 +3,7 @@ import { SkillCategory } from "@/components/skills/types/skillTypes";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 
 const isValidSkillCategory = (category: string | null | undefined): category is SkillCategory => {
-  const validCategories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
+  const validCategories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
   return !!category && validCategories.includes(category as SkillCategory);
 };
 
