@@ -1,3 +1,4 @@
+
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,15 @@ import { ProfileFormValues } from "./types";
 import { SkillCategory } from "../skills/types/skillTypes";
 import { Button } from "@/components/ui/button";
 import { UserNeighborhoods } from "./UserNeighborhoods";
+
 export const NeighborTab = ({
   form
 }: {
   form: UseFormReturn<ProfileFormValues>;
 }) => {
-  const skillCategories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
+  // Updated to use the 6 standardized skill categories
+  const skillCategories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
+  
   return <div className="space-y-6">
       {/* Neighborhoods Section - New section added */}
       <div className="space-y-4">
