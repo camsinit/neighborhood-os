@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ArrowLeft, Users, Plus } from 'lucide-react';
+import { PlusCircle, ArrowLeft, Users } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CategorySkillsList from './CategorySkillsList';
 import SkillsPageSelector from '@/components/skills/SkillsPageSelector';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
@@ -14,7 +15,7 @@ import { useUser } from '@supabase/auth-helpers-react';
  * 
  * This component shows the skills list for a selected category with
  * navigation controls and the ability to add new skills.
- * Now includes the skills page selector for empty categories.
+ * Now uses a popover for the skills selector instead of a dialog.
  */
 interface CategorySkillsViewProps {
   category: string;
@@ -30,7 +31,7 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
   setIsSkillDialogOpen
 }) => {
   const user = useUser();
-  const [showSkillSelector, setShowSkillSelector] = useState(false);
+  const [skillsSelectorOpen, setSkillsSelectorOpen] = useState(false);
 
   // Helper function to format category name for display
   const getCategoryDisplayName = (categoryName: SkillCategory) => {
@@ -78,38 +79,8 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
   // Handle skill added callback
   const handleSkillAdded = () => {
     refetchSkillsCheck(); // Refresh the check
-    setShowSkillSelector(false); // Hide selector
+    setSkillsSelectorOpen(false); // Close popover
   };
-
-  // Show skill selector view
-  if (showSkillSelector) {
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSkillSelector(false)}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to {getCategoryDisplayName(typedCategory)} Skills
-            </Button>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Add {getCategoryDisplayName(typedCategory)} Skills
-            </h2>
-          </div>
-        </div>
-        
-        {/* Skills selector component */}
-        <SkillsPageSelector
-          selectedCategory={typedCategory}
-          onSkillAdded={handleSkillAdded}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -130,24 +101,26 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Add guided skill selection button */}
-          <Button 
-            variant="outline"
-            className="whitespace-nowrap flex items-center gap-1.5 border-green-500 text-green-600 hover:bg-green-50"
-            onClick={() => setShowSkillSelector(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Browse & Add Skills</span>
-          </Button>
-          
-          {/* Original add skill button */}
-          <Button 
-            className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white shrink-0"
-            onClick={() => setIsSkillDialogOpen(true)}
-          >
-            <PlusCircle className="h-4 w-4" />
-            <span>Add Custom Skill</span>
-          </Button>
+          {/* Updated add skill button with popover */}
+          <Popover open={skillsSelectorOpen} onOpenChange={setSkillsSelectorOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white shrink-0"
+              >
+                <PlusCircle className="h-4 w-4" />
+                <span>Add Skill</span>
+              </Button>
+            </PopoverTrigger>
+            
+            <PopoverContent className="w-[500px] p-0 max-h-[600px] overflow-y-auto" sideOffset={5}>
+              <div className="p-4">
+                <SkillsPageSelector
+                  selectedCategory={typedCategory}
+                  onSkillAdded={handleSkillAdded}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       
@@ -173,21 +146,25 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
             </p>
           </div>
           <div className="flex justify-center gap-3">
-            <Button 
-              onClick={() => setShowSkillSelector(true)}
-              className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Browse & Add Skills
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => setIsSkillDialogOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Add Custom Skill
-            </Button>
+            <Popover open={skillsSelectorOpen} onOpenChange={setSkillsSelectorOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Add Skills
+                </Button>
+              </PopoverTrigger>
+              
+              <PopoverContent className="w-[500px] p-0 max-h-[600px] overflow-y-auto" sideOffset={5}>
+                <div className="p-4">
+                  <SkillsPageSelector
+                    selectedCategory={typedCategory}
+                    onSkillAdded={handleSkillAdded}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       ) : (
