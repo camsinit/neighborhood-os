@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,10 +11,14 @@ import { SkillCategory, SkillRequestType } from './types/skillTypes';
 /**
  * Simplified skills list that displays skills in compact list format
  * Now uses the same list components as the category sections for consistency
+ * 
+ * Fixed filtering logic:
+ * - "Requests" tab: Shows skill requests from OTHER neighbors (not your own)
+ * - "My Skills" tab: Shows only YOUR skill offers (things you're offering to help with)
  */
 interface SimplifiedSkillsListProps {
-  showRequests?: boolean; // Show skill requests (needs) instead of offers
-  showMine?: boolean; // Show only current user's skills
+  showRequests?: boolean; // Show skill requests (needs) from other neighbors
+  showMine?: boolean; // Show only current user's skill offers
   selectedCategory?: string;
   searchQuery?: string;
 }
@@ -60,16 +65,20 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
         .eq('neighborhood_id', userNeighborhood.neighborhood_id)
         .eq('is_archived', false);
 
-      // Filter by request type
+      // Apply filtering logic based on the view
       if (showRequests) {
-        query = query.eq('request_type', 'request');
-      } else if (!showMine) {
+        // Requests tab: Show skill requests from OTHER neighbors (exclude current user's requests)
+        query = query
+          .eq('request_type', 'request')
+          .neq('user_id', user.id);
+      } else if (showMine) {
+        // My Skills tab: Show only current user's skill OFFERS (things they're offering to help with)
+        query = query
+          .eq('request_type', 'offer')
+          .eq('user_id', user.id);
+      } else {
+        // Default offers view: Show all skill offers from everyone
         query = query.eq('request_type', 'offer');
-      }
-
-      // Filter by user for "My Skills"
-      if (showMine) {
-        query = query.eq('user_id', user.id);
       }
 
       // Filter by category
@@ -111,10 +120,11 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
   }
 
   if (!skills || skills.length === 0) {
+    // Updated empty messages to be more specific
     const emptyMessage = showMine 
-      ? "You haven't shared any skills yet"
+      ? "You haven't offered any skills yet. Use the 'Add Skill' button to share what you can help with!"
       : showRequests 
-        ? "No skill requests found"
+        ? "No skill requests from neighbors right now"
         : "No skill offers found";
 
     return (
