@@ -128,23 +128,27 @@ function SkillsPage() {
                   />
                   <SkillsFilter />
                   
-                  {/* Tabs now hug the right side of the filter button */}
+                  {/* Tabs wrapped properly */}
                   <div className="ml-auto hidden sm:block">
-                    <TabsList>
-                      <TabsTrigger value="offers">Offers</TabsTrigger>
-                      <TabsTrigger value="requests">Requests</TabsTrigger>
-                      <TabsTrigger value="mine">My Skills</TabsTrigger>
-                    </TabsList>
+                    <Tabs value={view} onValueChange={handleTabChange}>
+                      <TabsList>
+                        <TabsTrigger value="offers">Offers</TabsTrigger>
+                        <TabsTrigger value="requests">Requests</TabsTrigger>
+                        <TabsTrigger value="mine">My Skills</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
                   </div>
                 </div>
                 
                 {/* Show tabs on mobile below search/filter */}
                 <div className="sm:hidden w-full">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="offers" className="flex-1" onClick={() => handleTabChange('offers')}>Offers</TabsTrigger>
-                    <TabsTrigger value="requests" className="flex-1" onClick={() => handleTabChange('requests')}>Requests</TabsTrigger>
-                    <TabsTrigger value="mine" className="flex-1" onClick={() => handleTabChange('mine')}>My Skills</TabsTrigger>
-                  </TabsList>
+                  <Tabs value={view} onValueChange={handleTabChange}>
+                    <TabsList className="w-full">
+                      <TabsTrigger value="offers" className="flex-1">Offers</TabsTrigger>
+                      <TabsTrigger value="requests" className="flex-1">Requests</TabsTrigger>
+                      <TabsTrigger value="mine" className="flex-1">My Skills</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
                 
                 {/* Green Add Skills button with click handler */}
