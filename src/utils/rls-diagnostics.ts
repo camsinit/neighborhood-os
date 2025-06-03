@@ -1,4 +1,3 @@
-
 /**
  * RLS Diagnostics Utility
  * 
@@ -180,11 +179,10 @@ export const testNeighborhoodAccess = async (neighborhoodId: string) => {
     membershipData: membershipResult.data
   });
 
-  // Test security definer function with correct parameter names
+  // Test security definer function with correct parameter names - fixed to only pass neighborhood_uuid
   try {
     const { data: hasAccess, error: funcError } = await supabase
       .rpc('check_neighborhood_access', {
-        user_uuid: user.id,
         neighborhood_uuid: neighborhoodId
       });
 

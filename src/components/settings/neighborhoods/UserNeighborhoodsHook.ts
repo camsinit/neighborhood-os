@@ -1,4 +1,3 @@
-
 /**
  * Custom hook to fetch and manage neighborhood data for a user
  * This hook encapsulates all the data fetching logic for neighborhoods
@@ -49,10 +48,9 @@ export const useUserNeighborhoods = () => {
       
       const neighborhoodId = neighborhoods[0].id;
 
-      // Check if user already has access using direct query
+      // Check if user already has access using direct query - fixed parameter names
       const { data: hasAccess, error: accessError } = await supabase
         .rpc('check_neighborhood_access', {
-          user_uuid: userId,
           neighborhood_uuid: neighborhoodId
         });
       

@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for neighborhood membership operations
  * 
@@ -11,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
  * Utility function to check if a user is a member of a specific neighborhood
  * Uses the security definer function with correct parameter names
  * 
- * @param userId - The ID of the user to check
+ * @param userId - The ID of the user to check (not used - function uses auth.uid() internally)
  * @param neighborhoodId - The ID of the neighborhood to check
  * @returns Promise that resolves to true if the user is a member, false otherwise
  */
@@ -20,10 +19,9 @@ export async function checkNeighborhoodMembership(
   neighborhoodId: string
 ): Promise<boolean> {
   try {
-    // Use the security definer function with correct parameter names
+    // Fixed: Only pass neighborhood_uuid parameter since function uses auth.uid() internally
     const { data: hasAccess, error } = await supabase
       .rpc('check_neighborhood_access', {
-        user_uuid: userId,
         neighborhood_uuid: neighborhoodId
       });
             
