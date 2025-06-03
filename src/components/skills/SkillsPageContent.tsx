@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { SkillCategory } from './types/skillTypes';
 import CategorySelector from './components/CategorySelector';
 import CategorySkillsView from './views/CategorySkillsView';
-import SkillsListView from './views/SkillsListView';
 
 interface SkillsPageContentProps {
   view: string;
@@ -38,7 +38,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
         <CategorySkillsView 
           category={getTypedCategory(category)!} 
           onBack={handleBackToCategories}
-          onAddSkill={() => setIsSkillDialogOpen(true)} // Pass the add skill handler
+          onAddSkill={() => setIsSkillDialogOpen(true)}
         />
       )}
 
@@ -47,18 +47,6 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
         <CategorySelector
           onCategorySelect={handleCategoryClick}
           selectedSkillsCount={0}
-        />
-      )}
-
-      {/* Main skills list view - when a category is not selected */}
-      {!category && (
-        <SkillsListView
-          view={view}
-          searchQuery={searchQuery}
-          searchParams={searchParams}
-          searchInputRef={searchInputRef}
-          handleTabChange={handleTabChange}
-          setSearchParams={setSearchParams}
         />
       )}
     </div>
