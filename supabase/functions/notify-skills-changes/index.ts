@@ -12,17 +12,21 @@ import {
 const logger = createLogger('notify-skills-changes');
 
 interface SkillRequest {
-  action: 'request' | 'update';
+  action: 'request' | 'confirm' | 'cancel' | 'reschedule' | 'complete' | 'update';
   skillId: string;
   skillTitle: string;
-  providerId?: string;
+  providerId: string;
   requesterId: string;
+  sessionId?: string;
+  sessionTime?: string;
   requestData?: any;
+  eventId?: string;
 }
 
 /**
  * Edge Function to handle skills exchange notifications
- * This function creates notifications when skills are requested or updated
+ * This function creates notifications when skills are requested, confirmed,
+ * canceled, rescheduled, or completed
  */
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -43,11 +47,14 @@ const handler = async (req: Request): Promise<Response> => {
       skillTitle, 
       providerId, 
       requesterId,
-      requestData
+      sessionId,
+      sessionTime,
+      requestData,
+      eventId
     } = await req.json() as SkillRequest;
 
     logger.info(`Processing ${action} notification for skill: ${skillTitle}`);
-    logger.info(`Requester: ${requesterId}${providerId ? `, Provider: ${providerId}` : ''}`);
+    logger.info(`Provider: ${providerId}, Requester: ${requesterId}`);
 
     // Get requester profile information for richer notifications
     let requesterProfile = null;
@@ -59,11 +66,22 @@ const handler = async (req: Request): Promise<Response> => {
         .single();
       requesterProfile = requesterData;
     }
+    
+    // Get provider profile information for richer notifications
+    let providerProfile = null;
+    if (providerId) {
+      const { data: providerData } = await supabaseClient
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('id', providerId)
+        .single();
+      providerProfile = providerData;
+    }
 
     // Different actions require different notifications
     switch (action) {
       case 'request':
-        // Create notifications for skill providers about the new request
+        // Create a notification for the provider about the new request
         await createSkillRequestNotification(
           supabaseClient,
           providerId,
@@ -71,7 +89,66 @@ const handler = async (req: Request): Promise<Response> => {
           skillId,
           skillTitle,
           requesterProfile,
+          sessionId,
           requestData
+        );
+        break;
+      
+      case 'confirm':
+        // Create notifications for both provider and requester about confirmation
+        await createSkillConfirmationNotifications(
+          supabaseClient,
+          providerId,
+          requesterId,
+          skillId,
+          skillTitle,
+          requesterProfile,
+          providerProfile,
+          sessionId,
+          sessionTime,
+          eventId
+        );
+        break;
+        
+      case 'cancel':
+        // Create notification about cancellation
+        await createSkillCancellationNotification(
+          supabaseClient,
+          providerId,
+          requesterId,
+          skillId,
+          skillTitle,
+          requesterProfile,
+          sessionId,
+          sessionTime
+        );
+        break;
+        
+      case 'reschedule':
+        // Create notifications about rescheduling
+        await createSkillRescheduleNotification(
+          supabaseClient,
+          providerId,
+          requesterId,
+          skillId,
+          skillTitle,
+          requesterProfile,
+          providerProfile,
+          sessionId,
+          sessionTime
+        );
+        break;
+        
+      case 'complete':
+        // Create notifications for session completion
+        await createSkillCompletionNotification(
+          supabaseClient,
+          providerId,
+          requesterId,
+          skillId,
+          skillTitle,
+          requesterProfile,
+          sessionId
         );
         break;
         
@@ -79,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
         // Handle updates to skill listings
         await createSkillUpdateNotification(
           supabaseClient,
-          requesterId, // The person who updated the skill
+          providerId,
           skillId,
           skillTitle
         );
@@ -105,57 +182,31 @@ const handler = async (req: Request): Promise<Response> => {
  */
 async function createSkillRequestNotification(
   supabaseClient: any,
-  providerId: string | undefined,
+  providerId: string,
   requesterId: string,
   skillId: string,
   skillTitle: string,
   requesterProfile: any,
+  sessionId?: string,
   requestData?: any
 ) {
-  logger.info(`Creating skill request notification`);
+  logger.info(`Creating skill request notification for provider: ${providerId}`);
   
-  // If no specific provider, notify all neighbors who have offered similar skills
-  if (!providerId) {
-    // Get the skill category to find matching providers
-    const { data: skillData } = await supabaseClient
-      .from('skills_exchange')
-      .select('skill_category, neighborhood_id')
-      .eq('id', skillId)
-      .single();
-      
-    if (!skillData) {
-      logger.error('Skill not found for notification');
-      return;
-    }
-    
-    // Find all providers in the same neighborhood who offer similar skills
-    const { data: providers } = await supabaseClient
-      .from('skills_exchange')
-      .select('user_id')
-      .eq('neighborhood_id', skillData.neighborhood_id)
-      .eq('skill_category', skillData.skill_category)
-      .eq('request_type', 'offer')
-      .eq('is_archived', false)
-      .neq('user_id', requesterId); // Don't notify the requester
-      
-    if (!providers || providers.length === 0) {
-      logger.info('No matching providers found for notification');
-      return;
-    }
-    
-    // Create notifications for all matching providers
-    const notifications = providers.map((provider: any) => ({
-      user_id: provider.user_id,
+  const { error } = await supabaseClient
+    .from('notifications')
+    .insert({
+      user_id: providerId,
       actor_id: requesterId,
-      title: `New skill request: ${skillTitle}`,
-      content_type: 'skills_exchange',
-      content_id: skillId,
+      title: `New request for your skill: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
       notification_type: 'skills',
-      action_type: 'contact',
-      action_label: 'Share Contact',
-      relevance_score: 3, // High relevance: direct skill match
+      action_type: 'request',
+      action_label: 'View Request',
+      relevance_score: 4, // High relevance: direct action needed
       metadata: { 
         skillId,
+        sessionId,
         requesterId,
         skillTitle,
         neighborName: requesterProfile?.display_name || "A neighbor",
@@ -164,51 +215,229 @@ async function createSkillRequestNotification(
         actionRequired: true,
         skillRequestData: requestData
       }
-    }));
-    
-    const { error } = await supabaseClient
-      .from('notifications')
-      .insert(notifications);
+    });
 
-    if (error) {
-      logger.error('Error creating skill request notifications:', error);
-      throw error;
-    }
-    
-    logger.info(`Successfully created skill request notifications for ${notifications.length} providers`);
-  } else {
-    // Notify specific provider
-    const { error } = await supabaseClient
-      .from('notifications')
-      .insert({
-        user_id: providerId,
-        actor_id: requesterId,
-        title: `New request for your skill: ${skillTitle}`,
-        content_type: 'skills_exchange',
-        content_id: skillId,
-        notification_type: 'skills',
-        action_type: 'contact',
-        action_label: 'Share Contact',
-        relevance_score: 4, // High relevance: direct action needed
-        metadata: { 
-          skillId,
-          requesterId,
-          skillTitle,
-          neighborName: requesterProfile?.display_name || "A neighbor",
-          avatarUrl: requesterProfile?.avatar_url,
-          contextType: 'skill_request',
-          actionRequired: true,
-          skillRequestData: requestData
-        }
-      });
-
-    if (error) {
-      logger.error('Error creating skill request notification:', error);
-      throw error;
-    }
-    
-    logger.info(`Successfully created skill request notification for: ${skillTitle}`);
+  if (error) {
+    logger.error('Error creating skill request notification:', error);
+    throw error;
   }
+  
+  logger.info(`Successfully created skill request notification for: ${skillTitle}`);
+}
+
+/**
+ * Creates notifications for both users when a skill session is confirmed
+ */
+async function createSkillConfirmationNotifications(
+  supabaseClient: any,
+  providerId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterProfile: any,
+  providerProfile: any,
+  sessionId?: string,
+  sessionTime?: string,
+  eventId?: string
+) {
+  logger.info(`Creating skill confirmation notifications`);
+  
+  // Create notifications for both provider and requester
+  const notifications = [
+    {
+      user_id: providerId,
+      actor_id: requesterId,
+      title: `Skill session confirmed: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
+      notification_type: 'skills',
+      action_type: 'confirm',
+      action_label: 'View Session',
+      relevance_score: 3, // Important: confirmed session
+      metadata: { 
+        skillId,
+        sessionId,
+        eventId,
+        skillTitle,
+        sessionTime,
+        neighborName: requesterProfile?.display_name || "A neighbor",
+        avatarUrl: requesterProfile?.avatar_url,
+        contextType: 'skill_session'
+      }
+    },
+    {
+      user_id: requesterId,
+      actor_id: providerId,
+      title: `Skill session confirmed: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
+      notification_type: 'skills',
+      action_type: 'confirm',
+      action_label: 'View Session',
+      relevance_score: 3, // Important: confirmed session
+      metadata: { 
+        skillId,
+        sessionId,
+        eventId,
+        skillTitle,
+        sessionTime,
+        neighborName: providerProfile?.display_name || "A neighbor",
+        avatarUrl: providerProfile?.avatar_url,
+        contextType: 'skill_session'
+      }
+    }
+  ];
+
+  const { error } = await supabaseClient
+    .from('notifications')
+    .insert(notifications);
+
+  if (error) {
+    logger.error('[notify-skills-changes] Error creating confirmation notifications:', error);
+    throw error;
+  }
+  
+  logger.info(`Successfully created confirmation notifications for: ${skillTitle}`);
+}
+
+/**
+ * Creates notification when a skill session is cancelled
+ */
+async function createSkillCancellationNotification(
+  supabaseClient: any,
+  providerId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterProfile: any,
+  sessionId?: string,
+  sessionTime?: string
+) {
+  logger.info(`Creating skill cancellation notification`);
+
+  // Notify the other party about the cancellation (assuming requester cancelled)
+  const { error } = await supabaseClient
+    .from('notifications')
+    .insert({
+      user_id: providerId, // Notify the provider
+      actor_id: requesterId,
+      title: `Skill session cancelled: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
+      notification_type: 'skills',
+      action_type: 'cancel',
+      action_label: 'View Details',
+      relevance_score: 3,
+      metadata: { 
+        skillId,
+        sessionId,
+        skillTitle,
+        sessionTime,
+        neighborName: requesterProfile?.display_name || "A neighbor",
+        avatarUrl: requesterProfile?.avatar_url,
+        contextType: 'skill_session'
+      }
+    });
+
+  if (error) {
+    logger.error('[notify-skills-changes] Error creating cancellation notification:', error);
+    throw error;
+  }
+  
+  logger.info(`Successfully created cancellation notification for: ${skillTitle}`);
+}
+
+/**
+ * Creates notifications when a skill session is rescheduled
+ */
+async function createSkillRescheduleNotification(
+  supabaseClient: any,
+  providerId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterProfile: any,
+  providerProfile: any,
+  sessionId?: string,
+  sessionTime?: string
+) {
+  logger.info(`Creating skill reschedule notification`);
+
+  // Assuming requester rescheduled, notify provider
+  const { error } = await supabaseClient
+    .from('notifications')
+    .insert({
+      user_id: providerId,
+      actor_id: requesterId,
+      title: `Skill session rescheduled: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
+      notification_type: 'skills',
+      action_type: 'reschedule',
+      action_label: 'View Details',
+      relevance_score: 3,
+      metadata: { 
+        skillId,
+        sessionId,
+        skillTitle,
+        sessionTime,
+        neighborName: requesterProfile?.display_name || "A neighbor",
+        avatarUrl: requesterProfile?.avatar_url,
+        contextType: 'skill_session'
+      }
+    });
+
+  if (error) {
+    logger.error('[notify-skills-changes] Error creating reschedule notification:', error);
+    throw error;
+  }
+  
+  logger.info(`Successfully created reschedule notification for: ${skillTitle}`);
+}
+
+/**
+ * Creates notifications when a skill session is completed
+ */
+async function createSkillCompletionNotification(
+  supabaseClient: any,
+  providerId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterProfile: any,
+  sessionId?: string
+) {
+  logger.info(`Creating skill completion notification`);
+
+  // Notify both parties that the session was completed
+  const { error } = await supabaseClient
+    .from('notifications')
+    .insert({
+      user_id: providerId,
+      actor_id: requesterId,
+      title: `Skill session completed: ${skillTitle}`,
+      content_type: 'skill_sessions',
+      content_id: sessionId || skillId,
+      notification_type: 'skills',
+      action_type: 'complete',
+      action_label: 'View Details',
+      relevance_score: 2, // Lower priority as it's informational
+      metadata: { 
+        skillId,
+        sessionId,
+        skillTitle,
+        neighborName: requesterProfile?.display_name || "A neighbor",
+        avatarUrl: requesterProfile?.avatar_url,
+        contextType: 'skill_session'
+      }
+    });
+
+  if (error) {
+    logger.error('[notify-skills-changes] Error creating completion notification:', error);
+    throw error;
+  }
+  
+  logger.info(`Successfully created completion notification for: ${skillTitle}`);
 }
 
 /**
@@ -216,18 +445,59 @@ async function createSkillRequestNotification(
  */
 async function createSkillUpdateNotification(
   supabaseClient: any,
-  updaterId: string,
+  providerId: string,
   skillId: string,
   skillTitle: string
 ) {
   logger.info(`Processing skill update notification`);
   
-  // For skill updates, we can create a general activity notification
-  // but don't need to spam all neighbors - keep it simple
-  logger.info(`Skill updated: ${skillTitle} by user: ${updaterId}`);
+  // Find interested users (those who've interacted with this skill)
+  const { data: sessions, error: sessionsError } = await supabaseClient
+    .from('skill_sessions')
+    .select('requester_id')
+    .eq('skill_id', skillId)
+    .neq('requester_id', providerId);
   
-  // Could potentially notify interested users here, but for now
-  // we'll keep it simple and just log the update
+  if (sessionsError) {
+    logger.error('[notify-skills-changes] Error fetching related sessions:', sessionsError);
+    throw sessionsError;
+  }
+  
+  // Get unique requester IDs
+  const interestedUsers = [...new Set(sessions.map((session: any) => session.requester_id))];
+  
+  // Create notifications for interested users
+  if (interestedUsers.length > 0) {
+    const notifications = interestedUsers.map((userId: string) => ({
+      user_id: userId,
+      actor_id: providerId,
+      title: `Skill updated: ${skillTitle}`,
+      content_type: 'skills_exchange',
+      content_id: skillId,
+      notification_type: 'skills',
+      action_type: 'update',
+      action_label: 'View Skill',
+      relevance_score: 2, // Medium priority as it's an update
+      metadata: { 
+        skillId,
+        skillTitle,
+        contextType: 'skill_update'
+      }
+    }));
+    
+    const { error } = await supabaseClient
+      .from('notifications')
+      .insert(notifications);
+
+    if (error) {
+      logger.error('[notify-skills-changes] Error creating update notifications:', error);
+      throw error;
+    }
+    
+    logger.info(`Created update notifications for ${notifications.length} user(s)`);
+  } else {
+    logger.info('[notify-skills-changes] No interested users found for update notification');
+  }
 }
 
 // Attach the handler to Deno's serve function
