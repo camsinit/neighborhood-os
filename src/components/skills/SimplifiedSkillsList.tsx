@@ -6,6 +6,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
 import { useSimpleSkillInteractions } from '@/hooks/skills/useSimpleSkillInteractions';
 import { Loader2 } from 'lucide-react';
+import { SkillCategory } from './types/skillTypes';
 
 /**
  * Simplified skills list that displays skills in compact list format
@@ -129,7 +130,11 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
       {skills.map((skill) => (
         <SkillCard
           key={skill.id}
-          skill={skill}
+          skill={{
+            ...skill,
+            // Cast skill_category from string to SkillCategory type to satisfy TypeScript
+            skill_category: skill.skill_category as SkillCategory
+          }}
           type={showRequests ? 'request' : 'offer'}
         />
       ))}
