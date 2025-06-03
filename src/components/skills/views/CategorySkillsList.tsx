@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,16 +125,9 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
   };
 
   /**
-   * Handle delete skill - deletes skill from database with confirmation
+   * Handle delete skill - deletes skill from database automatically without confirmation
    */
   const handleDeleteSkill = async (skillId: string, skillTitle: string) => {
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${skillTitle}"? This action cannot be undone.`
-    );
-    
-    if (!confirmed) return;
-
     const success = await deleteSkill(skillId, skillTitle);
     if (success) {
       // Refetch the skills data to update the UI
