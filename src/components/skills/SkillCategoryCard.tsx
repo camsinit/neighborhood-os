@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkillCategory } from './types/skillTypes';
@@ -48,13 +47,14 @@ const categoryConfig: Record<SkillCategory, {
     iconColor: 'text-emerald-600'
   }
 };
-
 interface SkillCategoryCardProps {
   category: SkillCategory;
-  skillsData: { offers: string[], requests: string[] };
+  skillsData: {
+    offers: string[];
+    requests: string[];
+  };
   onClick: (category: SkillCategory) => void;
 }
-
 const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
   category,
   skillsData,
@@ -62,52 +62,33 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
 }) => {
   const config = categoryConfig[category];
   const Icon = config.icon;
-  
+
   // Only show offers in the preview, limit to 3 items for the reduced height
   const previewSkills = skillsData.offers.slice(0, 3);
   const hasMoreSkills = skillsData.offers.length > 3;
   const isEmpty = skillsData.offers.length === 0;
-  
-  return (
-    <Card 
-      className={`bg-white border cursor-pointer transition-all duration-200 h-44 flex flex-col ${
-        isEmpty 
-          ? 'border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50/30' 
-          : 'border-gray-200 hover:shadow-lg hover:border-gray-300'
-      }`}
-      onClick={() => onClick(category)}
-    >
+  return <Card className={`bg-white border cursor-pointer transition-all duration-200 h-44 flex flex-col ${isEmpty ? 'border-2 border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50/30' : 'border-gray-200 hover:shadow-lg hover:border-gray-300'}`} onClick={() => onClick(category)}>
       {/* Main content area with skills preview at the top */}
       <CardContent className="flex-1 p-4 pb-0">
-        {isEmpty ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
+        {isEmpty ? <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="mb-3 p-3 rounded-full bg-green-100">
               <Plus className="h-6 w-6 text-green-600" />
             </div>
             <p className="text-gray-700 text-sm font-medium mb-1">
               Add your first skill
             </p>
-            <p className="text-gray-500 text-xs">
-              Tap to share what you can help with
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
+            
+          </div> : <div className="space-y-2">
             <ul className="space-y-1.5">
-              {previewSkills.map((skill, index) => (
-                <li key={index} className="text-sm text-gray-700 flex items-start">
+              {previewSkills.map((skill, index) => <li key={index} className="text-sm text-gray-700 flex items-start">
                   <span className="mr-2 text-gray-400 mt-0.5">•</span>
                   <span className="line-clamp-1">{skill}</span>
-                </li>
-              ))}
+                </li>)}
             </ul>
-            {hasMoreSkills && (
-              <p className="text-xs text-gray-400 mt-2">
+            {hasMoreSkills && <p className="text-xs text-gray-400 mt-2">
                 and {skillsData.offers.length - 3} more...
-              </p>
-            )}
-          </div>
-        )}
+              </p>}
+          </div>}
       </CardContent>
       
       {/* Title section at bottom with icon next to title - left aligned */}
@@ -117,8 +98,6 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
           {config.displayName}
         </CardTitle>
       </CardHeader>
-    </Card>
-  );
+    </Card>;
 };
-
 export default SkillCategoryCard;
