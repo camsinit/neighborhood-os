@@ -1,3 +1,4 @@
+
 /**
  * Neighborhood fetching utilities
  * 
@@ -149,10 +150,10 @@ export const fetchNeighborhoodMembers = async (neighborhoodId: string): Promise<
  */
 export const checkNeighborhoodAccess = async (userId: string, neighborhoodId: string): Promise<boolean> => {
   try {
-    // Fixed: Only pass neighborhood_uuid parameter since function uses auth.uid() internally
+    // Fixed: Only pass neighborhood_id parameter since function uses auth.uid() internally
     const { data: hasAccess, error } = await supabase
       .rpc('check_neighborhood_access', {
-        neighborhood_uuid: neighborhoodId
+        neighborhood_id: neighborhoodId
       });
     
     if (error) {
