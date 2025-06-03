@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
 import { useSimpleSkillInteractions } from '@/hooks/skills/useSimpleSkillInteractions';
 import { Loader2 } from 'lucide-react';
-import { SkillCategory } from './types/skillTypes';
+import { SkillCategory, SkillRequestType } from './types/skillTypes';
 
 /**
  * Simplified skills list that displays skills in compact list format
@@ -133,7 +132,9 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
           skill={{
             ...skill,
             // Cast skill_category from string to SkillCategory type to satisfy TypeScript
-            skill_category: skill.skill_category as SkillCategory
+            skill_category: skill.skill_category as SkillCategory,
+            // Cast request_type from string to SkillRequestType type to satisfy TypeScript
+            request_type: skill.request_type as SkillRequestType
           }}
           type={showRequests ? 'request' : 'offer'}
         />
