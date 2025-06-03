@@ -1,4 +1,3 @@
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -23,7 +22,6 @@ interface VisibilityToggleProps {
   onToggleOptions: (show: boolean) => void;
   onVisibilityChange: () => void;
 }
-
 export const VisibilityToggle = ({
   emailVisible,
   phoneVisible,
@@ -34,7 +32,7 @@ export const VisibilityToggle = ({
   onPhoneVisibleChange,
   onAddressVisibleChange,
   onToggleOptions,
-  onVisibilityChange,
+  onVisibilityChange
 }: VisibilityToggleProps) => {
   // Helper function to get the currently selected default option text
   const getSelectedOptionText = () => {
@@ -56,102 +54,59 @@ export const VisibilityToggle = ({
       return "Select contact visibility options";
     }
   };
-
-  return (
-    <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
+  return <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
       {/* Always visible title and description */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">
-          Configure Profile Visibility
-        </Label>
-        <p className="text-xs text-muted-foreground">
-          Choose which contact information other neighbors can see. Email or phone must be visible.
-        </p>
+        <Label className="text-sm font-medium">Preferred Communication</Label>
+        <p className="text-xs text-muted-foreground">Choose how you want neighbors to contact you.</p>
       </div>
 
       {/* Collapsible options header - now shows selected option */}
-      <div 
-        className="flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded p-2 transition-colors"
-        onClick={() => onToggleOptions(!showOptions)}
-      >
+      <div className="flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded p-2 transition-colors" onClick={() => onToggleOptions(!showOptions)}>
         {/* Display current selection with checkbox styling to match dropdown */}
         <div className="flex items-center space-x-2">
-          <Checkbox
-            checked={emailVisible || phoneVisible || addressVisible}
-            disabled
-            className="pointer-events-none"
-          />
+          <Checkbox checked={emailVisible || phoneVisible || addressVisible} disabled className="pointer-events-none" />
           <span className="text-sm font-normal text-gray-700">
             {getSelectedOptionText()}
           </span>
         </div>
-        {showOptions ? (
-          <ChevronUp className="h-4 w-4 text-gray-500" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-gray-500" />
-        )}
+        {showOptions ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
       </div>
 
       {/* Collapsible checkbox options */}
-      {showOptions && (
-        <div className="space-y-2 pt-1">
+      {showOptions && <div className="space-y-2 pt-1">
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-email"
-              checked={emailVisible}
-              onCheckedChange={(checked) => {
-                onEmailVisibleChange(checked as boolean);
-                onVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-email" 
-              className="text-sm font-normal cursor-pointer"
-            >
+            <Checkbox id="show-email" checked={emailVisible} onCheckedChange={checked => {
+          onEmailVisibleChange(checked as boolean);
+          onVisibilityChange();
+        }} />
+            <Label htmlFor="show-email" className="text-sm font-normal cursor-pointer">
               Show email to neighbors
             </Label>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-phone"
-              checked={phoneVisible}
-              onCheckedChange={(checked) => {
-                onPhoneVisibleChange(checked as boolean);
-                onVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-phone" 
-              className="text-sm font-normal cursor-pointer"
-            >
+            <Checkbox id="show-phone" checked={phoneVisible} onCheckedChange={checked => {
+          onPhoneVisibleChange(checked as boolean);
+          onVisibilityChange();
+        }} />
+            <Label htmlFor="show-phone" className="text-sm font-normal cursor-pointer">
               Show phone to neighbors
             </Label>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox
-              id="show-address"
-              checked={addressVisible}
-              onCheckedChange={(checked) => {
-                onAddressVisibleChange(checked as boolean);
-                onVisibilityChange();
-              }}
-            />
-            <Label 
-              htmlFor="show-address" 
-              className="text-sm font-normal cursor-pointer"
-            >
+            <Checkbox id="show-address" checked={addressVisible} onCheckedChange={checked => {
+          onAddressVisibleChange(checked as boolean);
+          onVisibilityChange();
+        }} />
+            <Label htmlFor="show-address" className="text-sm font-normal cursor-pointer">
               Show address to neighbors (optional)
             </Label>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Error message - always visible when there's an error */}
-      {visibilityError && (
-        <p className="text-xs text-red-500">{visibilityError}</p>
-      )}
-    </div>
-  );
+      {visibilityError && <p className="text-xs text-red-500">{visibilityError}</p>}
+    </div>;
 };
