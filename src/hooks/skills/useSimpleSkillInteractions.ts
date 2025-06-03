@@ -59,7 +59,7 @@ export const useSimpleSkillInteractions = () => {
       // Store the contact info locally for display
       setShownContacts(prev => new Set(prev).add(skillId));
 
-      // Create a simple notification for the skill owner
+      // Create a simple notification for the skill owner using valid action_type
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
@@ -69,7 +69,7 @@ export const useSimpleSkillInteractions = () => {
           content_type: 'skills',
           content_id: skillId,
           notification_type: 'skills',
-          action_type: 'contact',
+          action_type: 'view', // Changed from 'contact' to 'view' which is a valid enum value
           action_label: 'View Interest',
           relevance_score: 3,
           metadata: {

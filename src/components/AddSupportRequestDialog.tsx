@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,8 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
-
-// ... keep existing code (schema definitions and categories) the same ...
 
 /**
  * Form schema for creating support requests
@@ -113,7 +112,6 @@ const AddSupportRequestDialog: React.FC<AddSupportRequestDialogProps> = ({
       }
 
       // Determine which table to insert into and prepare data
-      let tableName: string;
       let insertData: any = {
         title: values.title,
         description: values.description,
@@ -126,30 +124,47 @@ const AddSupportRequestDialog: React.FC<AddSupportRequestDialogProps> = ({
       };
 
       if (values.category === 'skills') {
-        tableName = 'skills_exchange';
         insertData.skill_category = values.skillCategory || 'Other';
+        
+        // Insert into skills_exchange table
+        const { error } = await supabase
+          .from('skills_exchange')
+          .insert(insertData);
+
+        if (error) throw error;
       } else if (values.category === 'care') {
-        tableName = 'care_requests';
         insertData.care_category = values.careCategory || 'Other';
         insertData.support_type = 'care';
         insertData.valid_until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
+        
+        // Insert into care_requests table
+        const { error } = await supabase
+          .from('care_requests')
+          .insert(insertData);
+
+        if (error) throw error;
       } else if (values.category === 'goods') {
-        tableName = 'goods_exchange';
         insertData.goods_category = values.goodsCategory || 'Other';
         insertData.category = 'goods';
         insertData.valid_until = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
+        
+        // Insert into goods_exchange table
+        const { error } = await supabase
+          .from('goods_exchange')
+          .insert(insertData);
+
+        if (error) throw error;
       } else {
         // Default to skills for any other category
-        tableName = 'skills_exchange';
         insertData.skill_category = 'Other';
+        
+        // Insert into skills_exchange table
+        const { error } = await supabase
+          .from('skills_exchange')
+          .insert(insertData);
+
+        if (error) throw error;
       }
-
-      // Insert the request
-      const { error } = await supabase
-        .from(tableName)
-        .insert(insertData);
-
-      if (error) throw error;
 
       // Success!
       toast.success(`${values.category} ${values.requestType} created successfully!`);

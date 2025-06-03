@@ -3,9 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
-import { FinalizeDateDialog } from '../FinalizeDateDialog';
 import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
-import SkillContributionDialog from '../SkillContributionDialog';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -15,10 +13,10 @@ interface SkillRequestCardProps {
  * SkillRequestCard - Displays a skill request in a card format matching SkillOfferCard
  * 
  * This component has been updated to match the formatting of SkillOfferCard for consistency.
+ * Removed complex scheduling components and simplified to basic interaction.
  */
 const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // State for managing dialogs
-  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
 
   // This maps categories to their appropriate colors (same as SkillOfferCard)
@@ -57,7 +55,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Contribute button that shows on hover */}
+      {/* Offer Help button that shows on hover */}
       <Button 
         variant="outline" 
         onClick={(e) => {
@@ -68,24 +66,6 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
       >
         Offer Help
       </Button>
-
-      {/* Only show scheduling button if status is pending_scheduling */}
-      {skill.status === 'pending_scheduling' && (
-        <FinalizeDateDialog
-          sessionId={skill.id}
-          open={isScheduleDialogOpen}
-          onOpenChange={setIsScheduleDialogOpen}
-        />
-      )}
-
-      {/* Contribution dialog */}
-      <SkillContributionDialog
-        open={isContributeDialogOpen}
-        onOpenChange={setIsContributeDialogOpen}
-        skillRequestId={skill.id}
-        requestTitle={skill.title}
-        requesterId={skill.user_id}
-      />
     </div>
   );
 };

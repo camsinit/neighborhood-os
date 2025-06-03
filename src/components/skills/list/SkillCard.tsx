@@ -4,7 +4,6 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skill, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
-import SkillSessionRequestDialog from '../SkillSessionRequestDialog';
 import SkillRequestCard from './SkillRequestCard';
 import SkillOfferCard from './SkillOfferCard';
 import SkillDetailsContent from './SkillDetailsContent';
@@ -28,7 +27,6 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   
   // State variables for dialogs
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   
   // Custom hook for skill operations
   const { deleteSkill, isLoading: isDeleting } = useSkillUpdate();
@@ -46,7 +44,6 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
 
   // For skill requests, we render the request card component
   if (type === 'request') {
-    // We no longer pass onContribute to SkillRequestCard since it handles its own dialog
     return (
       <SkillRequestCard
         skill={skill}
@@ -62,7 +59,7 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
         isOwner={isOwner}
         onDelete={handleDeleteSkill}
         isDeleting={isDeleting}
-        onRequestSkill={() => setIsRequestDialogOpen(true)}
+        onRequestSkill={() => {}} // No longer using request skill functionality
         onClick={() => setIsDetailsOpen(true)}
       />
 
@@ -78,22 +75,10 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
             isOwner={isOwner}
             onDelete={handleDeleteSkill}
             isDeleting={isDeleting}
-            onRequestSkill={() => {
-              setIsDetailsOpen(false);
-              setIsRequestDialogOpen(true);
-            }}
+            onRequestSkill={() => {}} // No longer using request skill functionality
           />
         </DialogContent>
       </Dialog>
-
-      {/* Skill request dialog */}
-      <SkillSessionRequestDialog
-        open={isRequestDialogOpen}
-        onOpenChange={setIsRequestDialogOpen}
-        skillId={skill.id}
-        skillTitle={skill.title}
-        providerId={skill.user_id}
-      />
     </>
   );
 };

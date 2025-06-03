@@ -26,7 +26,7 @@ const QuickActions = () => {
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
-  const [requestView, setRequestView] = useState<string | undefined>();
+  const [requestView, setRequestView] = useState<'skills' | 'care' | 'goods' | 'general'>('general');
 
   // Goods/Items actions (orange theme)
   const goodsActions = [{
@@ -119,9 +119,6 @@ const QuickActions = () => {
     </div>;
   
   return <div className="w-full">
-      {/* Brief welcome message */}
-      
-
       {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-6">
         <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />
