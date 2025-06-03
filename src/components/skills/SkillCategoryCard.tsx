@@ -6,7 +6,7 @@ import { Brain, Palette, Wrench, GraduationCap, Heart } from 'lucide-react';
 
 /**
  * Individual category card that displays a skill category with preview of available skills
- * Now uses consistent white styling with title at bottom
+ * Now uses consistent white styling with title at bottom and icon next to title
  */
 
 // Category configuration with consistent styling and icons
@@ -54,20 +54,24 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
   const allSkills = [...skillsData.offers, ...skillsData.requests];
   const previewSkills = allSkills.slice(0, 4);
   const hasMoreSkills = allSkills.length > 4;
+  const isEmpty = allSkills.length === 0;
   
   return (
     <Card 
       className="bg-white border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow h-64 flex flex-col"
       onClick={() => onClick(category)}
     >
-      {/* Main content area with skills preview */}
+      {/* Main content area with skills preview at the top */}
       <CardContent className="flex-1 p-4 pb-0">
-        <div className="flex items-center gap-2 mb-4">
-          <Icon className="h-5 w-5 text-gray-600" />
-        </div>
-        
-        {allSkills.length === 0 ? (
-          <p className="text-gray-400 text-sm italic">No skills available yet</p>
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <p className="text-gray-500 text-sm mb-2">
+              No skills shared yet
+            </p>
+            <p className="text-gray-400 text-xs">
+              Tap to add the first skill
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
             <ul className="space-y-2">
@@ -87,9 +91,10 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
         )}
       </CardContent>
       
-      {/* Title section at bottom with white background */}
+      {/* Title section at bottom with icon next to title */}
       <CardHeader className="bg-white border-t border-gray-100 p-4 mt-auto rounded-b-lg">
-        <CardTitle className="text-lg font-semibold text-gray-800 text-center">
+        <CardTitle className="text-lg font-semibold text-gray-800 text-center flex items-center justify-center gap-2">
+          <Icon className="h-5 w-5 text-gray-600" />
           {config.displayName}
         </CardTitle>
       </CardHeader>

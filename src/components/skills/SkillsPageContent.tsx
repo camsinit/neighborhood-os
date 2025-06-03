@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ import SearchInput from '@/components/ui/search-input';
 import SkillCategoryGrid from '@/components/skills/SkillCategoryGrid';
 import SkillCategoryView from '@/components/skills/SkillCategoryView';
 import SkillsPageNavigation from '@/components/skills/SkillsPageNavigation';
+import CategorySkillsDialog from '@/components/skills/CategorySkillsDialog';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 
 /**
@@ -44,6 +45,33 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
   setSearchParams,
   setIsSkillDialogOpen
 }) => {
+  // State for the category skills dialog
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<SkillCategory | null>(null);
+
+  // Handle category click - check if empty and show appropriate action
+  const handleCategoryClickWithEmptyCheck = async (selectedCategory: SkillCategory) => {
+    // We'll need to check if the category has skills
+    // For now, let's assume we'll handle this by checking in the click handler
+    // If empty, show the dialog, otherwise navigate to category view
+    
+    // TODO: Add logic to check if category is empty
+    // For now, we'll just navigate to the category view
+    handleCategoryClick(selectedCategory);
+  };
+
+  // Handle skills selection from the category dialog
+  const handleSkillsSelected = async (skills: string[]) => {
+    // TODO: Add logic to save the selected skills
+    // This would typically involve calling a mutation to save the skills
+    console.log('Selected skills:', skills, 'for category:', selectedCategory);
+    
+    // After saving, navigate to the category view
+    if (selectedCategory) {
+      handleCategoryClick(selectedCategory);
+    }
+  };
+
   // Determine which view to show based on URL state
   const showCategoryGrid = !category && !searchQuery && view === 'offers';
   const showCategoryView = category && !searchQuery;
@@ -65,7 +93,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
             setIsSkillDialogOpen={setIsSkillDialogOpen}
           />
           
-          <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
+          <SkillCategoryGrid onCategoryClick={handleCategoryClickWithEmptyCheck} />
         </div>
       )}
       
@@ -160,6 +188,14 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
           </TabsContent>
         </Tabs>
       )}
+      
+      {/* Category Skills Selection Dialog */}
+      <CategorySkillsDialog
+        open={isCategoryDialogOpen}
+        onOpenChange={setIsCategoryDialogOpen}
+        category={selectedCategory || 'technology'}
+        onSkillsSelected={handleSkillsSelected}
+      />
     </>
   );
 };
