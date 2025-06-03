@@ -5,13 +5,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle, MessageSquare } from 'lucide-react';
 import SearchInput from '@/components/ui/search-input';
 import SkillsFilter from '@/components/skills/SkillsFilter';
+import SimpleSkillRequestPopover from './SimpleSkillRequestPopover';
 
 /**
  * SkillsPageNavigation - Navigation controls for the Skills page
  * 
  * This component handles search, filter, tabs, and the add/request skill buttons.
  * It's been extracted from the main SkillsPage for better organization.
- * Now includes both "Add Skill" and "Request Skill" buttons with green styling for active tabs.
+ * Now uses the SimpleSkillRequestPopover for skill requests.
  */
 interface SkillsPageNavigationProps {
   view: string;
@@ -32,12 +33,6 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
   setSearchParams,
   setIsSkillDialogOpen
 }) => {
-  // Handler for opening skill request dialog
-  const handleRequestSkill = () => {
-    // Open the dialog in request mode - we'll pass a parameter to indicate request type
-    setIsSkillDialogOpen(true);
-  };
-
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
       {/* Search and filter section on left */}
@@ -111,17 +106,18 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         </Tabs>
       </div>
       
-      {/* Action buttons section - Add Skill and Request Skill */}
+      {/* Action buttons section - Add Skill and Request Skill with new popover */}
       <div className="flex gap-2 shrink-0">
-        {/* Request Skill button */}
-        <Button 
-          variant="outline"
-          className="whitespace-nowrap flex items-center gap-1.5 border-green-500 text-green-600 hover:bg-green-50"
-          onClick={handleRequestSkill}
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span>Request Skill</span>
-        </Button>
+        {/* Request Skill button with simple popover */}
+        <SimpleSkillRequestPopover>
+          <Button 
+            variant="outline"
+            className="whitespace-nowrap flex items-center gap-1.5 border-green-500 text-green-600 hover:bg-green-50"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span>Request Skill</span>
+          </Button>
+        </SimpleSkillRequestPopover>
         
         {/* Add Skill button */}
         <Button 

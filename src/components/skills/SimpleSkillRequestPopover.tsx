@@ -1,0 +1,188 @@
+
+import React, { useState } from 'react';
+import { useUser } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { SkillCategory } from './types/skillTypes';
+
+/**
+ * SimpleSkillRequestPopover - Basic skill request form in a popover
+ * 
+ * This component provides a simple interface for neighbors to request skills
+ * with just a skill title (2-5 words) and category selection.
+ */
+interface SimpleSkillRequestPopoverProps {
+  children: React.ReactNode;
+}
+
+// Available skill categories for selection
+const SKILL_CATEGORIES: { value: SkillCategory; label: string }[] = [
+  { value: 'technology', label: 'Technology' },
+  { value: 'emergency', label: 'Emergency' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'care', label: 'Care' },
+  { value: 'education', label: 'Education' }
+];
+
+const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ children }) => {
+  const user = useUser();
+  const [open, setOpen] = useState(false);
+  const [skillTitle, setSkillTitle] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle form submission to create a skill request
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!skillTitle.trim()) {
+      toast.error('Please enter a skill title');
+      return;
+    }
+
+    if (!selectedCategory) {
+      toast.error('Please select a category');
+      return;
+    }
+
+    // Validate skill title length (2-5 words)
+    const wordCount = skillTitle.trim().split(/\s+/).length;
+    if (wordCount < 2 || wordCount > 5) {
+      toast.error('Skill title should be 2-5 words');
+      return;
+    }
+
+    if (!user) {
+      toast.error('Please log in to request skills');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get user's neighborhood
+      const { data: userNeighborhood, error: neighborhoodError } = await supabase
+        .from('neighborhood_members')
+        .select('neighborhood_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (neighborhoodError || !userNeighborhood) {
+        toast.error('Unable to find your neighborhood');
+        return;
+      }
+
+      // Create the skill request in the database
+      const { error: insertError } = await supabase
+        .from('skills_exchange')
+        .insert({
+          user_id: user.id,
+          neighborhood_id: userNeighborhood.neighborhood_id,
+          title: skillTitle.trim(),
+          skill_category: selectedCategory as SkillCategory,
+          request_type: 'request',
+          description: `Looking for help with ${skillTitle.trim()}`,
+          valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+        });
+
+      if (insertError) {
+        console.error('Error creating skill request:', insertError);
+        toast.error('Failed to create skill request. Please try again.');
+        return;
+      }
+
+      // Success - reset form and close popover
+      toast.success('Skill request created successfully!');
+      setSkillTitle('');
+      setSelectedCategory('');
+      setOpen(false);
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        {children}
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-4" align="start">
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-2">Request a Skill</h3>
+            <p className="text-sm text-gray-600">
+              Ask your neighbors for help with something specific.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Skill title input field */}
+            <div className="space-y-2">
+              <Label htmlFor="skill-title">What do you need help with?</Label>
+              <Input
+                id="skill-title"
+                value={skillTitle}
+                onChange={(e) => setSkillTitle(e.target.value)}
+                placeholder="e.g., Computer repair, Garden help"
+                maxLength={50}
+              />
+              <p className="text-xs text-gray-500">
+                Keep it short: 2-5 words describing what you need
+              </p>
+            </div>
+
+            {/* Category selection dropdown */}
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SKILL_CATEGORIES.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Form action buttons */}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-green-500 hover:bg-green-600 text-white"
+              >
+                {isSubmitting ? 'Creating...' : 'Request Skill'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export default SimpleSkillRequestPopover;
