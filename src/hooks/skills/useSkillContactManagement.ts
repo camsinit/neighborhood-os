@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createTemplatedNotification } from '@/utils/notifications/templatedNotificationService';
 
 /**
  * Hook for managing skill contact interactions
@@ -68,33 +69,33 @@ export const useSkillContactManagement = () => {
         return;
       }
 
-      // Create notifications for all providers
-      const notifications = skillProviders.map(provider => ({
-        user_id: provider.user_id,
-        actor_id: user.id,
-        title: `Someone is interested in your ${skillTitle} skill`,
-        content_type: 'skills',
-        content_id: provider.user_id,
-        notification_type: 'skills',
-        action_type: 'view',
-        action_label: 'View Interest',
-        relevance_score: 3,
-        metadata: {
-          skillTitle,
-          skillCategory,
-          contextType: 'skill_interest_request',
-          interestedUserId: user.id
-        }
-      }));
+      // Get requester's display name for the notification
+      const { data: requesterProfile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
 
-      const { error: notificationError } = await supabase
-        .from('notifications')
-        .insert(notifications);
+      const requesterName = requesterProfile?.display_name || 'A neighbor';
 
-      if (notificationError) {
-        console.error('Error creating notifications:', notificationError);
-        toast.error('Failed to notify skill providers');
-        return;
+      // Create notifications for all providers using the templated service
+      for (const provider of skillProviders) {
+        await createTemplatedNotification({
+          templateId: 'skill_interest_request',
+          recipientUserId: provider.user_id,
+          actorUserId: user.id,
+          contentId: provider.user_id,
+          variables: {
+            actor: requesterName,
+            title: skillTitle
+          },
+          metadata: {
+            skillTitle,
+            skillCategory,
+            contextType: 'skill_interest_request',
+            interestedUserId: user.id
+          }
+        });
       }
 
       // Mark skill as requested locally
