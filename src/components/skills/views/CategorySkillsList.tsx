@@ -1,20 +1,25 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, MessageSquare } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
+import SkillContactPopover from '@/components/skills/SkillContactPopover';
 
 /**
  * CategorySkillsList - Simple list format for skills in a category
  * 
  * This component displays skills as a simple list with skill names on the left
  * and profile images (or stacks for multiple offers) on the right.
+ * Now includes hover-to-reveal "Request" button functionality.
  */
 interface CategorySkillsListProps {
   selectedCategory: SkillCategory;
 }
+
 const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
   selectedCategory
 }) => {
@@ -71,6 +76,7 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
     },
     enabled: !!user && !!selectedCategory
   });
+
   if (isLoading) {
     return <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -87,8 +93,9 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
         <p>No skills found in this category</p>
       </div>;
   }
+
   return <div className="space-y-2">
-      {skillsData.map((skillGroup, index) => <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white transition-colors">
+      {skillsData.map((skillGroup, index) => <div key={index} className="group relative flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white transition-all duration-200">
           {/* Skill title on the left */}
           <div className="flex-1">
             <h3 className="font-medium text-gray-900">{skillGroup.title}</h3>
@@ -97,12 +104,28 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
               </p>}
           </div>
           
+          {/* Request button that appears on hover - positioned between title and profiles */}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4">
+            <SkillContactPopover
+              skillTitle={skillGroup.title}
+              skillCategory={selectedCategory}
+            >
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Request
+              </Button>
+            </SkillContactPopover>
+          </div>
+          
           {/* Profile images on the right */}
           <div className="flex items-center">
             {skillGroup.profiles.length === 1 ?
         // Single profile
         <div className="flex items-center gap-2">
-                
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={skillGroup.profiles[0].avatar_url || undefined} />
                   <AvatarFallback className="text-xs">
@@ -130,4 +153,5 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
         </div>)}
     </div>;
 };
+
 export default CategorySkillsList;

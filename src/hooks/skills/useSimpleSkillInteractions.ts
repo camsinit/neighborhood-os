@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 /**
  * Hook for handling simple skill interactions - showing/hiding contact info
  * Replaces the complex scheduling system with direct contact sharing
+ * Enhanced to work with the new skill request popover system
  */
 export const useSimpleSkillInteractions = () => {
   const [shownContacts, setShownContacts] = useState<Set<string>>(new Set());
@@ -16,6 +17,7 @@ export const useSimpleSkillInteractions = () => {
   /**
    * Show interest in a skill and reveal contact information
    * This replaces the old "Request Session" functionality
+   * Now works with individual skill providers from the contact popover
    */
   const showInterest = async (skillId: string, skillOwnerId: string, skillTitle: string) => {
     if (!user) {
@@ -44,12 +46,15 @@ export const useSimpleSkillInteractions = () => {
       // Build contact info based on visibility preferences
       const contactInfo: any = {};
       
-      if (ownerProfile.email_visible && authUser?.email) {
-        contactInfo.email = authUser.email;
-      }
-      
+      // Priority: phone > email > generic contact
       if (ownerProfile.phone_visible && ownerProfile.phone_number) {
         contactInfo.phone = ownerProfile.phone_number;
+        contactInfo.preferred = 'phone';
+      } else if (ownerProfile.email_visible && authUser?.email) {
+        contactInfo.email = authUser.email;
+        contactInfo.preferred = 'email';
+      } else {
+        contactInfo.preferred = 'app';
       }
       
       if (ownerProfile.address_visible && ownerProfile.address) {
@@ -59,7 +64,7 @@ export const useSimpleSkillInteractions = () => {
       // Store the contact info locally for display
       setShownContacts(prev => new Set(prev).add(skillId));
 
-      // Create a simple notification for the skill owner using valid action_type
+      // Create a simple notification for the skill owner
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
@@ -69,14 +74,15 @@ export const useSimpleSkillInteractions = () => {
           content_type: 'skills',
           content_id: skillId,
           notification_type: 'skills',
-          action_type: 'view', // Changed from 'contact' to 'view' which is a valid enum value
+          action_type: 'view',
           action_label: 'View Interest',
           relevance_score: 3,
           metadata: {
             skillId,
             skillTitle,
             contextType: 'skill_interest',
-            interestedUserId: user.id
+            interestedUserId: user.id,
+            contactMethod: contactInfo.preferred
           }
         });
 
