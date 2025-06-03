@@ -8,36 +8,44 @@ import { Brain, Shield, Briefcase, Wrench, Heart, GraduationCap, Plus } from 'lu
  * Individual category card that displays a skill category with preview of available skills
  * Now uses the 6 standardized onboarding categories with consistent white styling
  * Reduced to 2/3 height and only shows skill offers (not requests) in preview
+ * Left-aligned titles and icons with unique colors for each category
  */
 
-// Category configuration with standardized onboarding categories and icons
+// Category configuration with standardized onboarding categories, icons, and unique colors
 const categoryConfig: Record<SkillCategory, {
   icon: React.ElementType;
   displayName: string;
+  iconColor: string;
 }> = {
   technology: {
     icon: Brain,
-    displayName: 'Technology'
+    displayName: 'Technology',
+    iconColor: 'text-blue-600'
   },
   emergency: {
     icon: Shield,
-    displayName: 'Emergency & Safety'
+    displayName: 'Emergency & Safety',
+    iconColor: 'text-red-600'
   },
   professional: {
     icon: Briefcase,
-    displayName: 'Professional Services'
+    displayName: 'Professional Services',
+    iconColor: 'text-purple-600'
   },
   maintenance: {
     icon: Wrench,
-    displayName: 'Home & Maintenance'
+    displayName: 'Home & Maintenance',
+    iconColor: 'text-orange-600'
   },
   care: {
     icon: Heart,
-    displayName: 'Care & Support'
+    displayName: 'Care & Support',
+    iconColor: 'text-pink-600'
   },
   education: {
     icon: GraduationCap,
-    displayName: 'Education & Arts'
+    displayName: 'Education & Arts',
+    iconColor: 'text-emerald-600'
   }
 };
 
@@ -102,10 +110,10 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
         )}
       </CardContent>
       
-      {/* Title section at bottom with icon next to title */}
+      {/* Title section at bottom with icon next to title - left aligned */}
       <CardHeader className="bg-white border-t border-gray-100 p-3 mt-auto rounded-b-lg">
-        <CardTitle className="text-base font-semibold text-gray-800 text-center flex items-center justify-center gap-2">
-          <Icon className="h-4 w-4 text-gray-600" />
+        <CardTitle className="text-base font-semibold text-gray-800 flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${config.iconColor}`} />
           {config.displayName}
         </CardTitle>
       </CardHeader>
