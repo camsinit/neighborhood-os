@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +9,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 import SkillContactPopover from '@/components/skills/SkillContactPopover';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -35,6 +35,10 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<{ id: string; title: string } | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  
+  // State for delete confirmation popover
+  const [deletePopoverOpen, setDeletePopoverOpen] = useState(false);
+  const [skillToDelete, setSkillToDelete] = useState<{ id: string; title: string } | null>(null);
 
   // Fetch skills grouped by title to stack profiles for the same skill
   const {
@@ -126,21 +130,35 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
   };
 
   /**
-   * Handle delete skill - deletes skill from database with confirmation
+   * Handle opening delete confirmation popover
    */
-  const handleDeleteSkill = async (skillId: string, skillTitle: string) => {
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${skillTitle}"? This action cannot be undone.`
-    );
-    
-    if (!confirmed) return;
+  const handleOpenDeleteConfirmation = (skillId: string, skillTitle: string) => {
+    setSkillToDelete({ id: skillId, title: skillTitle });
+    setDeletePopoverOpen(true);
+  };
 
-    const success = await deleteSkill(skillId, skillTitle);
+  /**
+   * Handle confirmed delete skill - deletes skill from database
+   */
+  const handleConfirmDelete = async () => {
+    if (!skillToDelete) return;
+
+    const success = await deleteSkill(skillToDelete.id, skillToDelete.title);
     if (success) {
+      // Close the popover and reset state
+      setDeletePopoverOpen(false);
+      setSkillToDelete(null);
       // Refetch the skills data to update the UI
       refetch();
     }
+  };
+
+  /**
+   * Handle cancel delete - closes popover without deleting
+   */
+  const handleCancelDelete = () => {
+    setDeletePopoverOpen(false);
+    setSkillToDelete(null);
   };
 
   if (isLoading) {
@@ -189,15 +207,56 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0 border-red-500 text-red-600 hover:bg-red-50"
-                    onClick={() => handleDeleteSkill(skillGroup.userSkillId, skillGroup.title)}
-                    disabled={isUpdating}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  
+                  {/* Delete button with popover confirmation */}
+                  <Popover open={deletePopoverOpen} onOpenChange={setDeletePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 border-red-500 text-red-600 hover:bg-red-50"
+                        onClick={() => handleOpenDeleteConfirmation(skillGroup.userSkillId, skillGroup.title)}
+                        disabled={isUpdating}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80" align="end">
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-900">Delete Skill</h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Are you sure you want to delete "{skillToDelete?.title}"? This action cannot be undone.
+                          </p>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelDelete}
+                            disabled={isUpdating}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleConfirmDelete}
+                            disabled={isUpdating}
+                          >
+                            {isUpdating ? (
+                              <>
+                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ) : (
                 // Show request button for others' skills
