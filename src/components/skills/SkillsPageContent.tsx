@@ -3,6 +3,7 @@ import React from 'react';
 import { SkillCategory } from './types/skillTypes';
 import CategorySelector from './components/CategorySelector';
 import CategorySkillsView from './views/CategorySkillsView';
+import SkillCategoryGrid from './SkillCategoryGrid';
 
 interface SkillsPageContentProps {
   view: string;
@@ -42,12 +43,9 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
         />
       )}
 
-      {/* Category selection - when no category is selected */}
-      {!category && view === 'offers' && (
-        <CategorySelector
-          onCategorySelect={handleCategoryClick}
-          selectedSkillsCount={0}
-        />
+      {/* Main category grid view - when no category is selected */}
+      {!category && (
+        <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
       )}
     </div>
   );
