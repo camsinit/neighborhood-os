@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import SkillsPageSelector from './SkillsPageSelector';
+import { useQueryClient } from '@tanstack/react-query';
+import { refreshEvents } from '@/utils/refreshEvents';
 
 /**
  * AddSkillPopover - Unified popover for adding skills across the application
@@ -16,6 +18,7 @@ import SkillsPageSelector from './SkillsPageSelector';
  * 2. General: When opened from main view, shows category selection first
  * 
  * All skill additions are handled by the SkillsPageSelector component.
+ * Enhanced with immediate UI refresh when skills are added.
  */
 interface AddSkillPopoverProps {
   open: boolean;
@@ -23,14 +26,28 @@ interface AddSkillPopoverProps {
   selectedCategory?: SkillCategory; // If provided, opens directly to that category
   onSkillAdded?: () => void; // Optional callback when skills are added
 }
+
 const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
   open,
   onOpenChange,
   selectedCategory,
   onSkillAdded
 }) => {
-  // Handle skill addition success
+  // Get query client for manual cache invalidation
+  const queryClient = useQueryClient();
+
+  // Handle skill addition success with enhanced refresh
   const handleSkillAdded = () => {
+    // Immediately invalidate all skills-related queries to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+    queryClient.invalidateQueries({ queryKey: ['category-skills-list'] });
+    queryClient.invalidateQueries({ queryKey: ['simplified-skills'] });
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+    
+    // Dispatch refresh events for any components listening
+    refreshEvents.emit('skills-updated');
+    refreshEvents.emit('activities-updated');
+    
     // Call optional callback
     if (onSkillAdded) {
       onSkillAdded();
@@ -39,8 +56,18 @@ const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
     // They can close it manually when done
   };
 
-  // Handle submit button click - closes the dialog and saves changes
+  // Handle submit button click - closes the dialog and ensures final refresh
   const handleSubmit = () => {
+    // Perform a final comprehensive refresh before closing
+    queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
+    queryClient.invalidateQueries({ queryKey: ['category-skills-list'] });
+    queryClient.invalidateQueries({ queryKey: ['simplified-skills'] });
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+    
+    // Dispatch refresh events
+    refreshEvents.emit('skills-updated');
+    refreshEvents.emit('activities-updated');
+    
     // Close the dialog when user clicks Submit
     onOpenChange(false);
     
