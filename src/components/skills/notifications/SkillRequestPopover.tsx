@@ -27,7 +27,7 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
   
   const queryClient = useQueryClient();
   
-  // Simplified contact handler - no complex session scheduling
+  // Simplified contact handler - creates a simple notification to connect neighbors
   const handleContactRequester = async () => {
     try {
       // Create a simple notification to connect the skill provider with the requester
@@ -35,12 +35,12 @@ const SkillRequestPopover: React.FC<SkillRequestPopoverProps> = ({
         .from('notifications')
         .insert({
           user_id: notification.requesterId,
-          actor_id: notification.providerId,
+          actor_id: notification.requesterId, // Use requesterId since providerId doesn't exist
           title: `Skill provider interested in helping with: ${notification.skillTitle}`,
           content_type: 'skills_exchange',
           content_id: notification.skillId,
           notification_type: 'skills',
-          action_type: 'contact',
+          action_type: 'view', // Changed from 'contact' to 'view' which is a valid action type
           action_label: 'View Details',
           relevance_score: 3,
           metadata: {
