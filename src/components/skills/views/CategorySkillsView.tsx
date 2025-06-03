@@ -1,49 +1,45 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
-import SkillsList from '@/components/skills/SkillsList';
-import { useSkillsStore } from '@/stores/skillsStore';
+import SimplifiedSkillsList from '@/components/skills/SimplifiedSkillsList';
 
 interface CategorySkillsViewProps {
-  category: SkillCategory;
-  onBack: () => void;
-  onAddSkill: () => void;
+  category: string | null;
+  getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
+  handleBackToCategories: () => void;
+  setIsSkillDialogOpen: (open: boolean) => void;
 }
 
 const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
   category,
-  onBack,
-  onAddSkill
+  getTypedCategory,
+  handleBackToCategories,
+  setIsSkillDialogOpen
 }) => {
-  const { setCategory } = useSkillsStore();
+  const typedCategory = getTypedCategory(category);
 
-  useEffect(() => {
-    // Set the category in the store when the component mounts
-    setCategory(category);
-
-    // Cleanup function to reset the category when the component unmounts
-    return () => {
-      setCategory(undefined);
-    };
-  }, [category, setCategory]);
-
-  const handleAddSkill = () => {
-    onAddSkill();
-  };
-
-  if (!category) {
+  if (!typedCategory) {
     return <div>No category selected.</div>;
   }
 
+  const handleAddSkill = () => {
+    setIsSkillDialogOpen(true);
+  };
+
   return (
     <div>
-      <Button variant="ghost" onClick={onBack} className="mb-4">
+      <Button variant="ghost" onClick={handleBackToCategories} className="mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Categories
       </Button>
-      <h2 className="text-2xl font-bold mb-4">{category} Skills</h2>
-      <SkillsList onAddSkill={handleAddSkill} />
+      <h2 className="text-2xl font-bold mb-4">{typedCategory} Skills</h2>
+      <SimplifiedSkillsList
+        showRequests={false}
+        selectedCategory={typedCategory}
+        searchQuery=""
+      />
     </div>
   );
 };
