@@ -4,6 +4,7 @@ import { SkillCategory } from './types/skillTypes';
 import CategorySelector from './components/CategorySelector';
 import CategorySkillsView from './views/CategorySkillsView';
 import SkillCategoryGrid from './SkillCategoryGrid';
+import SkillsPageNavigation from './SkillsPageNavigation';
 
 interface SkillsPageContentProps {
   view: string;
@@ -34,6 +35,17 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
 }) => {
   return (
     <div className="space-y-6">
+      {/* Always show the navigation header with search, tabs, and action buttons */}
+      <SkillsPageNavigation
+        view={view}
+        searchQuery={searchQuery}
+        searchParams={searchParams}
+        searchInputRef={searchInputRef}
+        handleTabChange={handleTabChange}
+        setSearchParams={setSearchParams}
+        setIsSkillDialogOpen={setIsSkillDialogOpen}
+      />
+
       {/* Category view - when a specific category is selected */}
       {category && (
         <CategorySkillsView 
