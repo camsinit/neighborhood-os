@@ -15,7 +15,7 @@ import { useUser } from '@supabase/auth-helpers-react';
  * 
  * This component shows the skills list for a selected category with
  * navigation controls and the ability to add new skills.
- * Now uses a popover for the skills selector instead of a dialog.
+ * Now uses a popover for the skills selector that matches the CategorySkillsDialog styling.
  */
 interface CategorySkillsViewProps {
   category: string;
@@ -101,7 +101,7 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Updated add skill button with popover */}
+          {/* Updated add skill button with popover that matches CategorySkillsDialog styling */}
           <Popover open={skillsSelectorOpen} onOpenChange={setSkillsSelectorOpen}>
             <PopoverTrigger asChild>
               <Button 
@@ -112,8 +112,12 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
               </Button>
             </PopoverTrigger>
             
-            <PopoverContent className="w-[500px] p-0 max-h-[600px] overflow-y-auto" sideOffset={5}>
-              <div className="p-4">
+            {/* Popover content styled to match CategorySkillsDialog */}
+            <PopoverContent 
+              className="max-w-md max-h-[80vh] overflow-hidden flex flex-col p-0" 
+              sideOffset={5}
+            >
+              <div className="p-6">
                 <SkillsPageSelector
                   selectedCategory={typedCategory}
                   onSkillAdded={handleSkillAdded}
@@ -156,8 +160,12 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
                 </Button>
               </PopoverTrigger>
               
-              <PopoverContent className="w-[500px] p-0 max-h-[600px] overflow-y-auto" sideOffset={5}>
-                <div className="p-4">
+              {/* Popover content styled to match CategorySkillsDialog */}
+              <PopoverContent 
+                className="max-w-md max-h-[80vh] overflow-hidden flex flex-col p-0" 
+                sideOffset={5}
+              >
+                <div className="p-6">
                   <SkillsPageSelector
                     selectedCategory={typedCategory}
                     onSkillAdded={handleSkillAdded}
