@@ -2,8 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, ArrowLeft } from 'lucide-react';
-import SkillCategoryView from '@/components/skills/SkillCategoryView';
-import SkillsList from '@/components/skills/SkillsList';
+import CategorySkillsList from './CategorySkillsList';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 
 /**
@@ -11,6 +10,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
  * 
  * This component shows the skills list for a selected category with
  * navigation controls and the ability to add new skills.
+ * Now uses a simple list format instead of card format.
  */
 interface CategorySkillsViewProps {
   category: string;
@@ -63,12 +63,8 @@ const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
         </Button>
       </div>
       
-      {/* Use SkillsList in list format instead of the grid-based SkillCategoryView */}
-      <SkillsList
-        showRequests={false}
-        selectedCategory={typedCategory}
-        searchQuery=""
-      />
+      {/* Use the new list format for category skills */}
+      <CategorySkillsList selectedCategory={typedCategory} />
     </div>
   );
 };
