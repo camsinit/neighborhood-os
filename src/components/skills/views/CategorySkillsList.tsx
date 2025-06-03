@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Loader2, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare, Edit, Trash } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import SkillContactPopover from '@/components/skills/SkillContactPopover';
 
@@ -14,7 +14,7 @@ import SkillContactPopover from '@/components/skills/SkillContactPopover';
  * 
  * This component displays skills as a simple list with skill names on the left
  * and profile images (or stacks for multiple offers) on the right.
- * Now includes hover-to-reveal "Request" button functionality.
+ * Shows edit/delete buttons for user's own skills, request button for others.
  */
 interface CategorySkillsListProps {
   selectedCategory: SkillCategory;
@@ -61,7 +61,8 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
           acc[title] = {
             title: skill.title,
             profiles: [],
-            skillIds: []
+            skillIds: [],
+            userOwnsSkill: false
           };
         }
         acc[title].profiles.push({
@@ -70,12 +71,31 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
           user_id: skill.user_id
         });
         acc[title].skillIds.push(skill.id);
+        
+        // Check if current user owns any skill in this group
+        if (skill.user_id === user.id) {
+          acc[title].userOwnsSkill = true;
+          acc[title].userSkillId = skill.id; // Store the user's skill ID for edit/delete
+        }
+        
         return acc;
       }, {} as Record<string, any>);
       return Object.values(grouped || {});
     },
     enabled: !!user && !!selectedCategory
   });
+
+  // Handle edit skill
+  const handleEditSkill = (skillId: string) => {
+    // TODO: Implement edit functionality
+    console.log('Edit skill:', skillId);
+  };
+
+  // Handle delete skill
+  const handleDeleteSkill = async (skillId: string) => {
+    // TODO: Implement delete functionality
+    console.log('Delete skill:', skillId);
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center py-8">
@@ -104,21 +124,44 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
               </p>}
           </div>
           
-          {/* Request button that appears on hover - positioned between title and profiles */}
+          {/* Action buttons that appear on hover - positioned between title and profiles */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4">
-            <SkillContactPopover
-              skillTitle={skillGroup.title}
-              skillCategory={selectedCategory}
-            >
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
+            {skillGroup.userOwnsSkill ? (
+              // Show edit/delete buttons for user's own skills
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 w-8 p-0"
+                  onClick={() => handleEditSkill(skillGroup.userSkillId)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 w-8 p-0 border-red-500 text-red-600 hover:bg-red-50"
+                  onClick={() => handleDeleteSkill(skillGroup.userSkillId)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              // Show request button for others' skills
+              <SkillContactPopover
+                skillTitle={skillGroup.title}
+                skillCategory={selectedCategory}
               >
-                <MessageSquare className="h-4 w-4" />
-                Request
-              </Button>
-            </SkillContactPopover>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Request
+                </Button>
+              </SkillContactPopover>
+            )}
           </div>
           
           {/* Profile images on the right */}
