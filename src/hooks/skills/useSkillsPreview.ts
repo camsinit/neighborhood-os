@@ -7,6 +7,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 /**
  * Hook to fetch all skills and group them by category for preview display
  * This provides the data needed for the category grid view
+ * Now uses the 6 standardized onboarding categories
  */
 export const useSkillsPreview = () => {
   const user = useUser();
@@ -36,13 +37,14 @@ export const useSkillsPreview = () => {
 
       if (error) throw error;
 
-      // Group skills by category
+      // Group skills by category - now including all 6 standardized categories
       const groupedSkills: Record<SkillCategory, { offers: string[], requests: string[] }> = {
         technology: { offers: [], requests: [] },
-        creative: { offers: [], requests: [] },
-        trade: { offers: [], requests: [] },
-        education: { offers: [], requests: [] },
-        wellness: { offers: [], requests: [] }
+        emergency: { offers: [], requests: [] },
+        professional: { offers: [], requests: [] },
+        maintenance: { offers: [], requests: [] },
+        care: { offers: [], requests: [] },
+        education: { offers: [], requests: [] }
       };
 
       skills?.forEach(skill => {

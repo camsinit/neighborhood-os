@@ -2,14 +2,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SkillCategory } from './types/skillTypes';
-import { Brain, Palette, Wrench, GraduationCap, Heart } from 'lucide-react';
+import { Brain, Shield, Briefcase, Wrench, Heart, GraduationCap } from 'lucide-react';
 
 /**
  * Individual category card that displays a skill category with preview of available skills
- * Now uses consistent white styling with title at bottom and icon next to title
+ * Now uses the 6 standardized onboarding categories with consistent white styling
  */
 
-// Category configuration with consistent styling and icons
+// Category configuration with standardized onboarding categories and icons
 const categoryConfig: Record<SkillCategory, {
   icon: React.ElementType;
   displayName: string;
@@ -18,21 +18,25 @@ const categoryConfig: Record<SkillCategory, {
     icon: Brain,
     displayName: 'Technology'
   },
-  creative: {
-    icon: Palette,
-    displayName: 'Creative'
+  emergency: {
+    icon: Shield,
+    displayName: 'Emergency & Safety'
   },
-  trade: {
+  professional: {
+    icon: Briefcase,
+    displayName: 'Professional Services'
+  },
+  maintenance: {
     icon: Wrench,
-    displayName: 'Trade & Repair'
+    displayName: 'Home & Maintenance'
+  },
+  care: {
+    icon: Heart,
+    displayName: 'Care & Support'
   },
   education: {
     icon: GraduationCap,
-    displayName: 'Education'
-  },
-  wellness: {
-    icon: Heart,
-    displayName: 'Wellness'
+    displayName: 'Education & Arts'
   }
 };
 

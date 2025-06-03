@@ -9,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 /**
  * Grid component that displays all skill categories with previews of available skills
  * Uses a responsive grid layout and handles loading states
- * Now includes logic to detect empty categories and show skill selection dialog
+ * Now uses the 6 standardized onboarding categories
  */
 
 interface SkillCategoryGridProps {
@@ -21,8 +21,8 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [selectedEmptyCategory, setSelectedEmptyCategory] = useState<SkillCategory | null>(null);
 
-  // All available skill categories
-  const categories: SkillCategory[] = ['technology', 'creative', 'trade', 'education', 'wellness'];
+  // All available skill categories - now using the 6 standardized onboarding categories
+  const categories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
 
   // Handle category card click - check if empty
   const handleCategoryCardClick = (category: SkillCategory) => {

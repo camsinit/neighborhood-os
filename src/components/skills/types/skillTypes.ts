@@ -1,6 +1,6 @@
 
-// Define the skill category type
-export type SkillCategory = 'technology' | 'creative' | 'trade' | 'education' | 'wellness';
+// Define the skill category type - now matching onboarding categories exactly
+export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'maintenance' | 'care' | 'education';
 
 // Define valid request types
 export type SkillRequestType = 'offer' | 'need';

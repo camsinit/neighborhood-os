@@ -4,19 +4,41 @@ import { SKILL_CATEGORIES } from "@/components/onboarding/survey/steps/skills/sk
 
 /**
  * Hook for managing user skills during onboarding
+ * Now uses standardized category mapping to ensure consistency
  */
 export const useSkillsManagement = () => {
   /**
-   * Determine skill category for a given skill name
+   * Map onboarding category keys to the standardized SkillCategory type
+   * This ensures consistency between onboarding and the main skills page
+   */
+  const mapToStandardCategory = (onboardingCategory: string): string => {
+    const categoryMapping: Record<string, string> = {
+      'technology': 'technology',
+      'emergency': 'emergency', 
+      'professional': 'professional',
+      'maintenance': 'maintenance',
+      'care': 'care',
+      'education': 'education',
+      // Fallback mappings for any legacy categories
+      'creative': 'education', // Map old creative to education & arts
+      'trade': 'maintenance',  // Map old trade to maintenance
+      'wellness': 'care'       // Map old wellness to care
+    };
+    
+    return categoryMapping[onboardingCategory] || 'professional'; // Default fallback
+  };
+
+  /**
+   * Determine skill category for a given skill name using standardized categories
    */
   const getSkillCategory = (skillName: string): string => {
     for (const [categoryKey, categoryData] of Object.entries(SKILL_CATEGORIES)) {
       if (categoryData.skills.includes(skillName)) {
-        return categoryKey;
+        return mapToStandardCategory(categoryKey);
       }
     }
     // Default category if not found
-    return 'general';
+    return 'professional';
   };
 
   /**
@@ -31,7 +53,7 @@ export const useSkillsManagement = () => {
   };
 
   /**
-   * Save skills to skills_exchange table
+   * Save skills to skills_exchange table with standardized categories
    */
   const saveSkills = async (
     skills: string[], 
@@ -61,10 +83,12 @@ export const useSkillsManagement = () => {
       console.log('Availability:', availability);
       console.log('Time preferences:', timePreferences);
 
-      // Parse and prepare skills data with proper validation
+      // Parse and prepare skills data with proper validation and standardized categories
       const skillsData = skills.map(skillString => {
         const { name, details } = parseSkill(skillString);
         const skillCategory = getSkillCategory(name);
+        
+        console.log(`Mapping skill "${name}" to category "${skillCategory}"`);
         
         // Create the skill record with all required fields
         return {
