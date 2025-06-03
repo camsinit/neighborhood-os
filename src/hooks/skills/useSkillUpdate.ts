@@ -75,8 +75,7 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
   };
 
   /**
-   * Deletes a skill and ensures activities are properly handled
-   * Also checks for existing skill sessions and handles errors gracefully
+   * Deletes a skill - simplified version without session checking
    * 
    * @param skillId - The ID of the skill to delete
    * @param skillTitle - The title of the skill being deleted (for notifications)
@@ -95,13 +94,7 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       const result = await skillsService.deleteSkill(skillId, skillTitle, user.id);
       
       if (result.error) {
-        // Check for specific foreign key constraint error
-        if (result.error.code === '23503' && result.error.details?.includes('skill_sessions')) {
-          toast.error("Cannot delete this skill because it has active skill sessions. Please cancel those sessions first.");
-          return false;
-        }
-        
-        // Generic error handling
+        // Generic error handling without session-specific checks
         throw new Error(result.error.message || 'Failed to delete skill');
       }
 
