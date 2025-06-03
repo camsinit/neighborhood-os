@@ -1,45 +1,57 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { SkillCategory } from '@/components/skills/types/skillTypes';
-import SimplifiedSkillsList from '@/components/skills/SimplifiedSkillsList';
+import { ArrowLeft, Plus } from 'lucide-react';
+import { SkillCategory } from '../types/skillTypes';
+import CategorySkillsList from './CategorySkillsList';
+import { SKILL_CATEGORIES } from '@/components/onboarding/survey/steps/skills/skillCategories';
 
+/**
+ * CategorySkillsView - Component that displays skills within a specific category
+ * 
+ * This component shows:
+ * - A header with back button, category title, and add skill button
+ * - The CategorySkillsList component which handles all the skill display logic
+ */
 interface CategorySkillsViewProps {
-  category: string | null;
-  getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
-  handleBackToCategories: () => void;
-  setIsSkillDialogOpen: (open: boolean) => void;
+  category: SkillCategory;
+  onBack: () => void;
+  onAddSkill: () => void; // Add skill callback
 }
 
-const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({
-  category,
-  getTypedCategory,
-  handleBackToCategories,
-  setIsSkillDialogOpen
+const CategorySkillsView: React.FC<CategorySkillsViewProps> = ({ 
+  category, 
+  onBack,
+  onAddSkill 
 }) => {
-  const typedCategory = getTypedCategory(category);
-
-  if (!typedCategory) {
-    return <div>No category selected.</div>;
-  }
-
-  const handleAddSkill = () => {
-    setIsSkillDialogOpen(true);
-  };
+  // Get the category display title
+  const categoryTitle = SKILL_CATEGORIES[category]?.title || category;
 
   return (
-    <div>
-      <Button variant="ghost" onClick={handleBackToCategories} className="mb-4">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Categories
-      </Button>
-      <h2 className="text-2xl font-bold mb-4">{typedCategory} Skills</h2>
-      <SimplifiedSkillsList
-        showRequests={false}
-        selectedCategory={typedCategory}
-        searchQuery=""
-      />
+    <div className="space-y-6">
+      {/* Header with back button, title, and add skill button */}
+      <div className="flex items-center justify-between">
+        {/* Back button */}
+        <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Categories
+        </Button>
+        
+        {/* Category title */}
+        <h2 className="text-2xl font-bold">{categoryTitle} Skills</h2>
+        
+        {/* Add skill button */}
+        <Button 
+          onClick={onAddSkill}
+          className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Skill
+        </Button>
+      </div>
+
+      {/* Skills list - this component handles all the edit/delete functionality */}
+      <CategorySkillsList selectedCategory={category} />
     </div>
   );
 };
