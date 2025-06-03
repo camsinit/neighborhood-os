@@ -6,50 +6,32 @@ import { Brain, Palette, Wrench, GraduationCap, Heart } from 'lucide-react';
 
 /**
  * Individual category card that displays a skill category with preview of available skills
- * Each category has a unique green shade and shows bullet points of actual skills
+ * Now uses consistent white styling with title at bottom
  */
 
-// Category configuration with unique green shades and icons
+// Category configuration with consistent styling and icons
 const categoryConfig: Record<SkillCategory, {
   icon: React.ElementType;
-  bgColor: string;
-  borderColor: string;
-  iconColor: string;
   displayName: string;
 }> = {
   technology: {
     icon: Brain,
-    bgColor: 'bg-emerald-50',
-    borderColor: 'border-emerald-200',
-    iconColor: 'text-emerald-600',
     displayName: 'Technology'
   },
   creative: {
     icon: Palette,
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    iconColor: 'text-green-600',
     displayName: 'Creative'
   },
   trade: {
     icon: Wrench,
-    bgColor: 'bg-lime-50',
-    borderColor: 'border-lime-200',
-    iconColor: 'text-lime-600',
     displayName: 'Trade & Repair'
   },
   education: {
     icon: GraduationCap,
-    bgColor: 'bg-teal-50',
-    borderColor: 'border-teal-200',
-    iconColor: 'text-teal-600',
     displayName: 'Education'
   },
   wellness: {
     icon: Heart,
-    bgColor: 'bg-cyan-50',
-    borderColor: 'border-cyan-200',
-    iconColor: 'text-cyan-600',
     displayName: 'Wellness'
   }
 };
@@ -75,37 +57,42 @@ const SkillCategoryCard: React.FC<SkillCategoryCardProps> = ({
   
   return (
     <Card 
-      className={`${config.bgColor} ${config.borderColor} border-2 cursor-pointer hover:shadow-md transition-shadow`}
+      className="bg-white border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow h-64 flex flex-col"
       onClick={() => onClick(category)}
     >
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 ${config.iconColor}`} />
-          <span className="text-gray-800">{config.displayName}</span>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
+      {/* Main content area with skills preview */}
+      <CardContent className="flex-1 p-4 pb-0">
+        <div className="flex items-center gap-2 mb-4">
+          <Icon className="h-5 w-5 text-gray-600" />
+        </div>
+        
         {allSkills.length === 0 ? (
-          <p className="text-gray-500 text-sm italic">No skills available yet</p>
+          <p className="text-gray-400 text-sm italic">No skills available yet</p>
         ) : (
-          <div className="space-y-1">
-            <ul className="space-y-1">
+          <div className="space-y-2">
+            <ul className="space-y-2">
               {previewSkills.map((skill, index) => (
                 <li key={index} className="text-sm text-gray-700 flex items-start">
-                  <span className="mr-2">•</span>
+                  <span className="mr-2 text-gray-400">•</span>
                   <span className="line-clamp-1">{skill}</span>
                 </li>
               ))}
             </ul>
             {hasMoreSkills && (
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-gray-400 mt-3">
                 and {allSkills.length - 4} more...
               </p>
             )}
           </div>
         )}
       </CardContent>
+      
+      {/* Title section at bottom with white background */}
+      <CardHeader className="bg-white border-t border-gray-100 p-4 mt-auto rounded-b-lg">
+        <CardTitle className="text-lg font-semibold text-gray-800 text-center">
+          {config.displayName}
+        </CardTitle>
+      </CardHeader>
     </Card>
   );
 };
