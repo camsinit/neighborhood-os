@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
-import SimpleSkillCard from './SimpleSkillCard';
+import SkillCard from './list/SkillCard';
 import { useSimpleSkillInteractions } from '@/hooks/skills/useSimpleSkillInteractions';
 import { Loader2 } from 'lucide-react';
 
 /**
- * Simplified skills list that shows skills without complex scheduling
- * Users can express interest and get contact info directly
+ * Simplified skills list that displays skills in compact list format
+ * Now uses the same list components as the category sections for consistency
  */
 interface SimplifiedSkillsListProps {
   showRequests?: boolean; // Show skill requests (needs) instead of offers
@@ -25,8 +25,6 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
   searchQuery = ''
 }) => {
   const user = useUser();
-  const { showInterest, hideContact, isContactShown, isLoading: interactionLoading } = useSimpleSkillInteractions();
-  const [contactInfoMap, setContactInfoMap] = useState<Map<string, any>>(new Map());
 
   // Fetch skills with user profiles
   const { data: skills, isLoading, error } = useQuery({
@@ -64,7 +62,7 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
 
       // Filter by request type
       if (showRequests) {
-        query = query.eq('request_type', 'need');
+        query = query.eq('request_type', 'request');
       } else if (!showMine) {
         query = query.eq('request_type', 'offer');
       }
@@ -94,24 +92,6 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
     },
     enabled: !!user
   });
-
-  // Handle showing interest in a skill
-  const handleShowInterest = async (skillId: string, skillOwnerId: string, skillTitle: string) => {
-    const contactInfo = await showInterest(skillId, skillOwnerId, skillTitle);
-    if (contactInfo) {
-      setContactInfoMap(prev => new Map(prev).set(skillId, contactInfo));
-    }
-  };
-
-  // Handle hiding contact info
-  const handleHideContact = (skillId: string) => {
-    hideContact(skillId);
-    setContactInfoMap(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(skillId);
-      return newMap;
-    });
-  };
 
   if (isLoading) {
     return (
@@ -145,23 +125,12 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-2">
       {skills.map((skill) => (
-        <SimpleSkillCard
+        <SkillCard
           key={skill.id}
-          id={skill.id}
-          title={skill.title}
-          description={skill.description}
-          skillCategory={skill.skill_category}
-          requestType={skill.request_type as 'offer' | 'need'}
-          userName={skill.profiles?.display_name || 'Anonymous'}
-          userAvatar={skill.profiles?.avatar_url}
-          createdAt={skill.created_at}
-          showContactInfo={isContactShown(skill.id)}
-          contactInfo={contactInfoMap.get(skill.id)}
-          onShowInterest={() => handleShowInterest(skill.id, skill.user_id, skill.title)}
-          onHideContact={() => handleHideContact(skill.id)}
-          isOwnSkill={skill.user_id === user?.id}
+          skill={skill}
+          type={showRequests ? 'request' : 'offer'}
         />
       ))}
     </div>
