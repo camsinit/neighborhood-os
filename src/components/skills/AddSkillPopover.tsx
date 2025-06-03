@@ -20,7 +20,6 @@ interface AddSkillPopoverProps {
   selectedCategory?: SkillCategory; // If provided, opens directly to that category
   onSkillAdded?: () => void; // Optional callback when skills are added
 }
-
 const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
   open,
   onOpenChange,
@@ -45,23 +44,16 @@ const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
     }
     return 'Add Skills to Share';
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{getTitle()}</DialogTitle>
+          
         </DialogHeader>
         
         {/* Use the enhanced SkillsPageSelector */}
-        <SkillsPageSelector
-          selectedCategory={selectedCategory}
-          onSkillAdded={handleSkillAdded}
-          multiCategoryMode={!selectedCategory} // Enable multi-category mode when no specific category
-        />
+        <SkillsPageSelector selectedCategory={selectedCategory} onSkillAdded={handleSkillAdded} multiCategoryMode={!selectedCategory} // Enable multi-category mode when no specific category
+      />
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default AddSkillPopover;
