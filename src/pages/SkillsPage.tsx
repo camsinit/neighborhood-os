@@ -6,18 +6,17 @@ import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
-import AddSupportRequestDialog from '@/components/AddSupportRequestDialog';
 import SkillsPageHeader from '@/components/skills/SkillsPageHeader';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
+import AddSkillPopover from '@/components/skills/AddSkillPopover';
 
 const logger = createLogger('SkillsPage');
 
 /**
  * SkillsPage - Main page component for the Skills Exchange
  * 
- * This component has been refactored to use smaller, focused components
- * for better maintainability. It manages the overall state and URL routing
- * while delegating rendering to specialized components.
+ * This component has been refactored to use the new unified AddSkillPopover
+ * for better maintainability and consistency across the application.
  */
 function SkillsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,7 +24,7 @@ function SkillsPage() {
   const category = searchParams.get('category') || null;
   const searchQuery = searchParams.get('q') || '';
   
-  // Add state for the skill dialog
+  // State for the unified skill dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
   
   const highlightedSkill = useHighlightedItem('skills');
@@ -83,6 +82,12 @@ function SkillsPage() {
     return categoryString as SkillCategory;
   };
   
+  // Handle skill addition success
+  const handleSkillAdded = () => {
+    // Could add any additional logic here if needed
+    logger.info('Skill added successfully from main page');
+  };
+  
   return (
     <>
       <SkillsPageHeader>
@@ -101,12 +106,12 @@ function SkillsPage() {
         />
       </SkillsPageHeader>
       
-      {/* Add Skill Dialog */}
-      <AddSupportRequestDialog
+      {/* Unified Add Skill Popover */}
+      <AddSkillPopover
         open={isSkillDialogOpen}
         onOpenChange={setIsSkillDialogOpen}
-        initialRequestType="offer"
-        view="skills"
+        selectedCategory={getTypedCategory(category)} // Auto-populate with current category if viewing one
+        onSkillAdded={handleSkillAdded}
       />
     </>
   );

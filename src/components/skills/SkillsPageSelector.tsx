@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { X, Plus, Check } from 'lucide-react';
+import { X, Plus, Check, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from '@/components/onboarding/survey/steps/skills/skillCategories';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
@@ -13,28 +13,42 @@ import { useSkillsExchange } from '@/hooks/skills/useSkillsExchange';
 import { toast } from 'sonner';
 
 /**
- * SkillsPageSelector - Adapted from onboarding for skills page
+ * Enhanced SkillsPageSelector - Now supports both single and multi-category modes
  * 
- * This component provides a guided skill selection experience similar to onboarding
- * but optimized for the skills page. Users can browse pre-defined skills by category
- * and easily add custom skills. All skills are immediately saved to the database.
+ * This component provides a guided skill selection experience that can work in:
+ * 1. Single category mode (when opened from a specific category view)
+ * 2. Multi-category mode (when opened from the main skills page)
+ * 
+ * In multi-category mode, users first select a category, then see skills for that category.
+ * All skills are immediately saved to the database when selected.
  */
 interface SkillsPageSelectorProps {
-  selectedCategory: SkillCategory;
+  selectedCategory?: SkillCategory; // Optional - if provided, single category mode
   onSkillAdded: () => void; // Callback when a skill is successfully added
+  multiCategoryMode?: boolean; // Enable category selection first
 }
 
 interface SelectedSkill {
   name: string;
   details?: string;
+  category: SkillCategory;
 }
 
 const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   selectedCategory,
-  onSkillAdded
+  onSkillAdded,
+  multiCategoryMode = false
 }) => {
   // Track selected skills for this session
   const [selectedSkills, setSelectedSkills] = useState<SelectedSkill[]>([]);
+  
+  // Multi-category mode state
+  const [currentCategory, setCurrentCategory] = useState<SkillCategory | null>(
+    selectedCategory || null
+  );
+  const [showCategorySelection, setShowCategorySelection] = useState(
+    multiCategoryMode && !selectedCategory
+  );
   
   // Custom skill input state
   const [customSkillInput, setCustomSkillInput] = useState('');
@@ -58,19 +72,50 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
     }
   });
 
-  // Get skills for the selected category
-  const categorySkills = SKILL_CATEGORIES[selectedCategory]?.skills || [];
-  const categoryTitle = SKILL_CATEGORIES[selectedCategory]?.title || selectedCategory;
+  // Get available categories for multi-category mode
+  const availableCategories = Object.entries(SKILL_CATEGORIES).map(([key, value]) => ({
+    key: key as SkillCategory,
+    title: value.title,
+    description: value.description || `${value.title} related skills`
+  }));
+
+  // Get skills for the current category
+  const categorySkills = currentCategory ? SKILL_CATEGORIES[currentCategory]?.skills || [] : [];
+  const categoryTitle = currentCategory ? SKILL_CATEGORIES[currentCategory]?.title || currentCategory : '';
+
+  /**
+   * Handle category selection in multi-category mode
+   */
+  const handleCategorySelect = (category: SkillCategory) => {
+    setCurrentCategory(category);
+    setShowCategorySelection(false);
+  };
+
+  /**
+   * Go back to category selection
+   */
+  const handleBackToCategories = () => {
+    setCurrentCategory(null);
+    setShowCategorySelection(true);
+    setShowCustomInput(false);
+    setCustomSkillInput('');
+  };
 
   /**
    * Handle skill selection toggle
    */
   const handleSkillSelect = async (skillName: string) => {
-    const isSelected = selectedSkills.some(skill => skill.name === skillName);
+    if (!currentCategory) return;
+    
+    const isSelected = selectedSkills.some(skill => 
+      skill.name === skillName && skill.category === currentCategory
+    );
     
     if (isSelected) {
       // Remove skill from local selection
-      setSelectedSkills(prev => prev.filter(skill => skill.name !== skillName));
+      setSelectedSkills(prev => prev.filter(skill => 
+        !(skill.name === skillName && skill.category === currentCategory)
+      ));
     } else {
       // Check if this skill requires additional details
       if (SPECIAL_SKILLS[skillName as keyof typeof SPECIAL_SKILLS]) {
@@ -84,12 +129,15 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
         try {
           await handleSubmit({
             title: skillName,
-            category: selectedCategory,
+            category: currentCategory,
             description: `${skillName} skill`
           }, 'offer');
           
           // Add to local selection for UI feedback
-          setSelectedSkills(prev => [...prev, { name: skillName }]);
+          setSelectedSkills(prev => [...prev, { 
+            name: skillName, 
+            category: currentCategory 
+          }]);
         } catch (error) {
           console.error('Error adding skill:', error);
           toast.error('Failed to add skill. Please try again.');
@@ -102,18 +150,19 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
    * Handle special skill dialog confirmation
    */
   const handleSpecialSkillConfirm = async () => {
-    if (specialSkillDialog.skillName && specialSkillDialog.details.trim()) {
+    if (specialSkillDialog.skillName && specialSkillDialog.details.trim() && currentCategory) {
       try {
         await handleSubmit({
           title: specialSkillDialog.skillName,
-          category: selectedCategory,
+          category: currentCategory,
           description: specialSkillDialog.details.trim()
         }, 'offer');
         
         // Add to local selection
         setSelectedSkills(prev => [...prev, { 
           name: specialSkillDialog.skillName, 
-          details: specialSkillDialog.details.trim() 
+          details: specialSkillDialog.details.trim(),
+          category: currentCategory
         }]);
         
         toast.success('Skill added successfully!');
@@ -129,16 +178,19 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
    * Handle custom skill addition
    */
   const handleCustomSkillAdd = async () => {
-    if (customSkillInput.trim()) {
+    if (customSkillInput.trim() && currentCategory) {
       try {
         await handleSubmit({
           title: customSkillInput.trim(),
-          category: selectedCategory,
+          category: currentCategory,
           description: `Custom ${customSkillInput.trim()} skill`
         }, 'offer');
         
         // Add to local selection
-        setSelectedSkills(prev => [...prev, { name: customSkillInput.trim() }]);
+        setSelectedSkills(prev => [...prev, { 
+          name: customSkillInput.trim(),
+          category: currentCategory
+        }]);
         setCustomSkillInput('');
         setShowCustomInput(false);
         
@@ -153,49 +205,134 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   /**
    * Remove a skill from local selection (visual feedback only)
    */
-  const removeSkill = (skillName: string) => {
-    setSelectedSkills(prev => prev.filter(skill => skill.name !== skillName));
+  const removeSkill = (skillName: string, category: SkillCategory) => {
+    setSelectedSkills(prev => prev.filter(skill => 
+      !(skill.name === skillName && skill.category === category)
+    ));
   };
 
   /**
    * Check if a skill is currently selected
    */
   const isSkillSelected = (skillName: string) => {
-    return selectedSkills.some(skill => skill.name === skillName);
+    return selectedSkills.some(skill => 
+      skill.name === skillName && skill.category === currentCategory
+    );
   };
 
+  // Render category selection view
+  if (showCategorySelection) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h3 className="text-lg font-semibold">Choose a Skill Category</h3>
+          <p className="text-sm text-muted-foreground">
+            Select a category to see available skills you can offer to your neighbors.
+          </p>
+        </div>
+
+        {/* Category grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+          {availableCategories.map((category) => (
+            <div
+              key={category.key}
+              className="p-4 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 hover:border-green-500"
+              onClick={() => handleCategorySelect(category.key)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm">{category.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {category.description}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Session summary */}
+        {selectedSkills.length > 0 && (
+          <div className="space-y-2 border-t pt-4">
+            <div className="text-center">
+              <Badge variant="secondary" className="text-xs px-2 py-1">
+                {selectedSkills.length} skills added this session
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {selectedSkills.map((skill, index) => (
+                <Badge key={index} variant="outline" className="flex items-center gap-1 text-xs">
+                  <span className="truncate max-w-[100px]">
+                    {skill.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({SKILL_CATEGORIES[skill.category]?.title})
+                  </span>
+                  <button
+                    onClick={() => removeSkill(skill.name, skill.category)}
+                    className="ml-1 hover:bg-red-500 hover:text-white rounded-full p-0.5"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Render skill selection view (existing functionality)
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold">Add {categoryTitle} Skills</h3>
-        <p className="text-sm text-muted-foreground">
-          Select skills you can offer to your neighbors or add your own custom skills.
-        </p>
+      {/* Header with back button for multi-category mode */}
+      <div className="space-y-2">
+        {multiCategoryMode && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToCategories}
+            className="mb-2 text-sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Categories
+          </Button>
+        )}
+        <div className="text-center">
+          <h3 className="text-lg font-semibold">Add {categoryTitle} Skills</h3>
+          <p className="text-sm text-muted-foreground">
+            Select skills you can offer to your neighbors or add your own custom skills.
+          </p>
+        </div>
       </div>
 
       {/* Selected skills display */}
-      {selectedSkills.length > 0 && (
+      {selectedSkills.filter(skill => skill.category === currentCategory).length > 0 && (
         <div className="space-y-2">
           <div className="text-center">
             <Badge variant="secondary" className="text-xs px-2 py-1">
-              {selectedSkills.length} skills added this session
+              {selectedSkills.filter(skill => skill.category === currentCategory).length} skills added from this category
             </Badge>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {selectedSkills.map((skill, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs">
-                <span className="truncate max-w-[120px]">
-                  {skill.details ? `${skill.name}: ${skill.details}` : skill.name}
-                </span>
-                <button
-                  onClick={() => removeSkill(skill.name)}
-                  className="ml-1 hover:bg-red-500 hover:text-white rounded-full p-0.5"
-                >
-                  <X className="h-2.5 w-2.5" />
-                </button>
-              </Badge>
-            ))}
+            {selectedSkills
+              .filter(skill => skill.category === currentCategory)
+              .map((skill, index) => (
+                <Badge key={index} variant="secondary" className="flex items-center gap-1 text-xs">
+                  <span className="truncate max-w-[120px]">
+                    {skill.details ? `${skill.name}: ${skill.details}` : skill.name}
+                  </span>
+                  <button
+                    onClick={() => removeSkill(skill.name, skill.category)}
+                    className="ml-1 hover:bg-red-500 hover:text-white rounded-full p-0.5"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </Badge>
+              ))}
           </div>
         </div>
       )}
