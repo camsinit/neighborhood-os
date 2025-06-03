@@ -35,18 +35,8 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      {/* Always show the navigation header with search, tabs, and action buttons */}
-      <SkillsPageNavigation
-        view={view}
-        searchQuery={searchQuery}
-        searchParams={searchParams}
-        searchInputRef={searchInputRef}
-        handleTabChange={handleTabChange}
-        setSearchParams={setSearchParams}
-        setIsSkillDialogOpen={setIsSkillDialogOpen}
-      />
-
       {/* Category view - when a specific category is selected */}
+      {/* This view has its own header with back button, title, and add skill button */}
       {category && (
         <CategorySkillsView 
           category={getTypedCategory(category)!} 
@@ -57,7 +47,21 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
 
       {/* Main category grid view - when no category is selected */}
       {!category && (
-        <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
+        <>
+          {/* Show the navigation header with search, tabs, and action buttons */}
+          <SkillsPageNavigation
+            view={view}
+            searchQuery={searchQuery}
+            searchParams={searchParams}
+            searchInputRef={searchInputRef}
+            handleTabChange={handleTabChange}
+            setSearchParams={setSearchParams}
+            setIsSkillDialogOpen={setIsSkillDialogOpen}
+          />
+
+          {/* Main category grid */}
+          <SkillCategoryGrid onCategoryClick={handleCategoryClick} />
+        </>
       )}
     </div>
   );
