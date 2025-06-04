@@ -24,7 +24,7 @@ export const useSurveyState = () => {
     hasSelectedSkills: false,
   });
   
-  // Form data state with proper initialization
+  // Form data state with proper initialization (removed bio, skillAvailability, skillTimePreferences)
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
@@ -32,14 +32,11 @@ export const useSurveyState = () => {
     phone: "",
     password: "",
     address: "",
-    bio: "",
     skills: [],
     emailVisible: true,
     phoneVisible: false,
     addressVisible: false,
-    profileImage: null, // Required now
-    skillAvailability: "",
-    skillTimePreferences: [],
+    profileImage: null,
   });
   
   // Validation state for each step

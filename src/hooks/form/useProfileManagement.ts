@@ -14,7 +14,6 @@ export const useProfileManagement = () => {
       const profileData = {
         id: userId,
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        bio: formData.bio || null,
         phone_number: formData.phone || null,
         address: formData.address || null,
         avatar_url: avatarUrl || null,
