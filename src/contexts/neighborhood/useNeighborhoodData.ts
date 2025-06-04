@@ -60,6 +60,11 @@ export function useNeighborhoodData(user: User | null) {
       return;
     }
 
+    // Add debugging for the problematic user
+    if (user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      console.log('[DEBUG - User 74bf...] fetchUserNeighborhoods called');
+    }
+
     try {
       // First, get neighborhoods the user created
       const { data: createdNeighborhoods, error: createdError } = await supabase
@@ -102,20 +107,42 @@ export function useNeighborhoodData(user: User | null) {
         index === self.findIndex(n => n.id === neighborhood.id)
       );
 
+      // Add debugging for the problematic user
+      if (user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] fetchUserNeighborhoods results:', {
+          createdNeighborhoods,
+          memberData,
+          allNeighborhoods,
+          uniqueNeighborhoods,
+          currentNeighborhood,
+          timestamp: new Date().toISOString()
+        });
+      }
+
       setUserNeighborhoods(uniqueNeighborhoods);
     } catch (error) {
       console.error('Error in fetchUserNeighborhoods:', error);
     }
-  }, [user?.id]);
+  }, [user?.id, currentNeighborhood]);
 
   // Function to switch to a different neighborhood
   const switchNeighborhood = useCallback(async (neighborhoodId: string) => {
     const targetNeighborhood = userNeighborhoods.find(n => n.id === neighborhoodId);
     if (targetNeighborhood) {
+      // Add debugging for the problematic user
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] switchNeighborhood called:', {
+          targetNeighborhoodId: neighborhoodId,
+          targetNeighborhood,
+          previousNeighborhood: currentNeighborhood,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       setCurrentNeighborhood(targetNeighborhood);
       toast.success(`Switched to ${targetNeighborhood.name}`);
     }
-  }, [userNeighborhoods, setCurrentNeighborhood]);
+  }, [userNeighborhoods, setCurrentNeighborhood, currentNeighborhood, user?.id]);
   
   // Set up monitoring and safety timeouts - removed core contributor parameters
   useNeighborhoodMonitor({

@@ -34,6 +34,23 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
   // Use the standardized neighborhood hook instead of manual fetching
   const neighborhood = useCurrentNeighborhood();
 
+  // Add debugging for the problematic user
+  useEffect(() => {
+    if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      console.log('[DEBUG - User 74bf...] SimplifiedSkillsList props and context:', {
+        userId: user.id,
+        showRequests,
+        showMine,
+        selectedCategory,
+        searchQuery,
+        neighborhood: neighborhood,
+        neighborhoodId: neighborhood?.id,
+        neighborhoodName: neighborhood?.name,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [user?.id, showRequests, showMine, selectedCategory, searchQuery, neighborhood]);
+
   // Fetch skills with user profiles using proper neighborhood filtering
   const { data: skills, isLoading, error } = useQuery({
     // Include neighborhood_id in query key for proper cache isolation
@@ -47,7 +64,23 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
       // Check if we have a neighborhood selected
       if (!neighborhood?.id) {
         console.log('[SimplifiedSkillsList] No neighborhood selected, returning empty array');
+        if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+          console.log('[DEBUG - User 74bf...] No neighborhood in query function');
+        }
         return [];
+      }
+
+      // Add debugging for the problematic user before the query
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] About to execute skills query:', {
+          neighborhoodId: neighborhood.id,
+          neighborhoodName: neighborhood.name,
+          showRequests,
+          showMine,
+          selectedCategory,
+          searchQuery,
+          timestamp: new Date().toISOString()
+        });
       }
 
       console.log('[SimplifiedSkillsList] Fetching skills for neighborhood:', {
@@ -115,7 +148,21 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
           neighborhoodId: neighborhood.id,
           timestamp: new Date().toISOString()
         });
+        if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+          console.error('[DEBUG - User 74bf...] Query error:', error);
+        }
         throw error;
+      }
+
+      // Add debugging for the problematic user after the query
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] Query results:', {
+          count: data?.length || 0,
+          skills: data,
+          neighborhoodId: neighborhood.id,
+          neighborhoodName: neighborhood.name,
+          timestamp: new Date().toISOString()
+        });
       }
 
       console.log('[SimplifiedSkillsList] Successfully fetched skills:', {
@@ -130,6 +177,18 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
     // Only run the query if we have both user and neighborhood
     enabled: !!user && !!neighborhood?.id
   });
+
+  // Add debugging for the final rendered state
+  useEffect(() => {
+    if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      console.log('[DEBUG - User 74bf...] Final render state:', {
+        isLoading,
+        error: error?.message,
+        skillsCount: skills?.length || 0,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [user?.id, isLoading, error, skills]);
 
   if (isLoading) {
     return (
