@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { SkillCategory } from './types/skillTypes';
+import { SKILL_CATEGORIES } from '@/components/onboarding/survey/steps/skills/skillCategories';
 
 /**
  * SimpleSkillRequestPopover - Basic skill request form in a dialog
@@ -17,20 +18,18 @@ import { SkillCategory } from './types/skillTypes';
  * with just a skill title (2-5 words) and category selection.
  * 
  * Updated to use Dialog instead of Popover for better UX consistency with Add Skill dialog.
+ * Now uses the standardized skill categories from the onboarding system.
  */
 interface SimpleSkillRequestPopoverProps {
   children: React.ReactNode;
 }
 
-// Available skill categories for selection
-const SKILL_CATEGORIES: { value: SkillCategory; label: string }[] = [
-  { value: 'technology', label: 'Technology' },
-  { value: 'emergency', label: 'Emergency' },
-  { value: 'professional', label: 'Professional' },
-  { value: 'maintenance', label: 'Maintenance' },
-  { value: 'care', label: 'Care' },
-  { value: 'education', label: 'Education' }
-];
+// Generate skill categories from the onboarding system instead of hardcoded list
+const SKILL_CATEGORY_OPTIONS: { value: SkillCategory; label: string }[] = 
+  Object.entries(SKILL_CATEGORIES).map(([key, categoryData]) => ({
+    value: key as SkillCategory,
+    label: categoryData.title
+  }));
 
 const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ children }) => {
   const user = useUser();
@@ -146,7 +145,7 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
               </p>
             </div>
 
-            {/* Category selection dropdown with higher z-index */}
+            {/* Category selection dropdown using standardized categories */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -154,7 +153,7 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent className="z-[200]">
-                  {SKILL_CATEGORIES.map((category) => (
+                  {SKILL_CATEGORY_OPTIONS.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
                     </SelectItem>
