@@ -1,128 +1,135 @@
+import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import AddEventDialog from "./AddEventDialog";
+import AddSupportRequestDialog from "./AddSupportRequestDialog";
+import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
+import ModuleButton from "./ui/module-button";
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 /**
- * QuickActions component
+ * QuickActions component displays common actions for users to interact with the community.
  * 
- * Displays quick action buttons for common neighborhood activities
- * UPDATED: Added logging to debug neighborhood switching issues
+ * This includes:
+ * - Adding events
+ * - Sharing or requesting items (goods)
+ * - Sharing or requesting skills
+ * - Adding safety updates
+ * 
+ * Now organized into columns by module type for better usability
+ * Updated to use the same safety dialog as the Safety Page for consistency
  */
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Calendar, Users, Package, Shield, Heart, Plus, MessageSquare } from "lucide-react";
-import AddEventDialog from "./AddEventDialog";
-import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
-import AddSupportRequestDialog from "./AddSupportRequestDialog";
-import UnifiedInviteDialog from "./invite/UnifiedInviteDialog";
-import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-
 const QuickActions = () => {
-  // State for controlling which dialog is open
-  const [showEventDialog, setShowEventDialog] = useState(false);
-  const [showSafetyDialog, setShowSafetyDialog] = useState(false);
-  const [showSupportDialog, setShowSupportDialog] = useState(false);
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  // State for controlling various dialogs
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
+  const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  const [requestView, setRequestView] = useState<'skills' | 'care' | 'goods' | 'general'>('general');
+
+  // Goods/Items actions (orange theme)
+  const goodsActions = [{
+    icon: Package,
+    label: "Share an item",
+    onClick: () => {
+      setInitialRequestType("offer");
+      setRequestView('goods');
+      setIsAddRequestOpen(true);
+    },
+    moduleTheme: 'goods' as const
+  }, {
+    icon: Package,
+    label: "Request an item",
+    onClick: () => {
+      setInitialRequestType("need");
+      setRequestView('goods');
+      setIsAddRequestOpen(true);
+    },
+    moduleTheme: 'goods' as const
+  }];
+
+  // Skills actions (green theme)
+  const skillsActions = [{
+    icon: Wrench,
+    label: "Share a skill",
+    onClick: () => {
+      setInitialRequestType("offer");
+      setRequestView('skills');
+      setIsAddRequestOpen(true);
+    },
+    moduleTheme: 'skills' as const
+  }, {
+    icon: HelpCircle,
+    label: "Request a skill",
+    onClick: () => {
+      setInitialRequestType("need");
+      setRequestView('skills');
+      setIsAddRequestOpen(true);
+    },
+    moduleTheme: 'skills' as const
+  }];
+
+  // Events & Safety actions (blue and red themes)
+  const otherActions = [{
+    icon: Calendar,
+    label: "Add Event",
+    onClick: () => setIsAddEventOpen(true),
+    moduleTheme: 'calendar' as const
+  }, {
+    icon: AlertTriangle,
+    label: "Add Safety Update",
+    onClick: () => setIsSafetyUpdateOpen(true),
+    moduleTheme: 'safety' as const
+  }];
+
+  /**
+   * ActionColumn component for displaying a column of actions with a header
+   * This helps organize actions by their module type
+   */
+  const ActionColumn = ({
+    title,
+    actions,
+    moduleType
+  }: {
+    title: string;
+    actions: Array<{
+      icon: any;
+      label: string;
+      onClick: () => void;
+      moduleTheme: "goods" | "skills" | "calendar" | "safety";
+    }>;
+    moduleType: "goods" | "skills" | "calendar" | "safety";
+  }) => <div className="flex flex-col gap-2">
+      {/* Column heading with colored accent - using primary (fully saturated) color for border */}
+      <h3 className="text-sm font-semibold mb-2 pb-1 border-b-2" style={{
+      borderColor: moduleThemeColors[moduleType].primary
+    }}>
+        {title}
+      </h3>
+      
+      {/* Actions in this column with enhanced styling but less saturated colors */}
+      <div className="space-y-3">
+        {actions.map(action => <ModuleButton key={action.label} moduleTheme={action.moduleTheme} variant="pastel" // Keeping pastel variant for buttons
+      className="w-full justify-start shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]" onClick={action.onClick}>
+            <action.icon className="h-5 w-5 mr-2" />
+            <span className="text-sm font-medium">{action.label}</span>
+          </ModuleButton>)}
+      </div>
+    </div>;
   
-  // Get current neighborhood for debugging
-  const currentNeighborhood = useCurrentNeighborhood();
-  
-  // Log current neighborhood for debugging
-  console.log("[QuickActions] Current neighborhood:", {
-    id: currentNeighborhood?.id,
-    name: currentNeighborhood?.name
-  });
-
-  // Handle adding new events - placeholder function since we're not modifying event functionality
-  const handleAddEvent = (event: any) => {
-    console.log("[QuickActions] New event added:", event);
-    // The event will be automatically refetched due to React Query invalidation
-  };
-
-  return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {/* Create Event button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-blue-50 hover:border-blue-200"
-          onClick={() => setShowEventDialog(true)}
-        >
-          <Calendar className="h-6 w-6 text-blue-600" />
-          <span className="text-sm font-medium">Create Event</span>
-        </Button>
-
-        {/* Invite Neighbors button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-purple-50 hover:border-purple-200"
-          onClick={() => setShowInviteDialog(true)}
-        >
-          <Users className="h-6 w-6 text-purple-600" />
-          <span className="text-sm font-medium">Invite Neighbors</span>
-        </Button>
-
-        {/* Share Goods button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-green-50 hover:border-green-200"
-          onClick={() => window.location.href = '/goods'}
-        >
-          <Package className="h-6 w-6 text-green-600" />
-          <span className="text-sm font-medium">Share Goods</span>
-        </Button>
-
-        {/* Safety Update button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-red-50 hover:border-red-200"
-          onClick={() => setShowSafetyDialog(true)}
-        >
-          <Shield className="h-6 w-6 text-red-600" />
-          <span className="text-sm font-medium">Safety Update</span>
-        </Button>
-
-        {/* Request Support button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-orange-50 hover:border-orange-200"
-          onClick={() => setShowSupportDialog(true)}
-        >
-          <Heart className="h-6 w-6 text-orange-600" />
-          <span className="text-sm font-medium">Request Support</span>
-        </Button>
-
-        {/* Share Skills button */}
-        <Button
-          variant="outline"
-          className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-teal-50 hover:border-teal-200"
-          onClick={() => window.location.href = '/skills'}
-        >
-          <MessageSquare className="h-6 w-6 text-teal-600" />
-          <span className="text-sm font-medium">Share Skills</span>
-        </Button>
+  return <div className="w-full">
+      {/* Three-column grid for organized actions */}
+      <div className="grid grid-cols-3 gap-6">
+        <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />
+        <ActionColumn title="Skills" actions={skillsActions} moduleType="skills" />
+        <ActionColumn title="Events & Safety" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialogs */}
-      <AddEventDialog 
-        open={showEventDialog} 
-        onOpenChange={setShowEventDialog}
-        onAddEvent={handleAddEvent}
-      />
-      
-      <AddSafetyUpdateDialog 
-        open={showSafetyDialog} 
-        onOpenChange={setShowSafetyDialog} 
-      />
-      
-      <AddSupportRequestDialog 
-        open={showSupportDialog} 
-        onOpenChange={setShowSupportDialog} 
-      />
-      
-      <UnifiedInviteDialog 
-        open={showInviteDialog} 
-        onOpenChange={setShowInviteDialog} 
-      />
-    </>
-  );
+      {/* Dialog components - now using the same safety dialog as the Safety Page */}
+      <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
+      <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
+      <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
+    </div>;
 };
 
 export default QuickActions;

@@ -1,82 +1,107 @@
 
 /**
- * Service for fetching neighborhood activities
- * 
- * UPDATED: Now uses current neighborhood from context instead of hardcoded ID
+ * This file contains the core service function to fetch activities
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "./types";
-import { syncActivityTitles } from "./titleSyncService";
-import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { fetchContentTitles } from "./contentUtils";
+import { isContentDeleted, normalizeMetadata } from "./metadataUtils";
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this service
+const logger = createLogger('activityService');
 
 /**
- * Fetches activities for the current neighborhood
+ * Fetches recent activities from the database
  * 
- * UPDATED: Now gets neighborhood ID from context instead of being hardcoded
+ * This has been optimized to fetch up-to-date titles from related content tables
+ * and properly handle deleted content references
  */
 export const fetchActivities = async (): Promise<Activity[]> => {
-  console.log("[fetchActivities] Starting to fetch activities");
+  logger.debug('Fetching activities');
   
-  // Get the current neighborhood ID from the global state
-  // Note: This is a bit of a hack since we can't use hooks in a regular function
-  // We'll need to pass the neighborhood ID as a parameter instead
-  
-  // For now, let's get it from localStorage as a fallback
-  // This should be refactored to pass neighborhoodId as a parameter
-  const storedNeighborhood = localStorage.getItem('currentNeighborhood');
-  let neighborhoodId: string | null = null;
-  
-  if (storedNeighborhood) {
-    try {
-      const neighborhood = JSON.parse(storedNeighborhood);
-      neighborhoodId = neighborhood.id;
-    } catch (error) {
-      console.error("[fetchActivities] Error parsing stored neighborhood:", error);
-    }
-  }
-  
-  if (!neighborhoodId) {
-    console.log("[fetchActivities] No neighborhood ID available, returning empty array");
-    return [];
-  }
+  // Fetch activities with profile information
+  const { data: activitiesData, error } = await supabase
+    .from('activities')
+    .select(`
+      id,
+      actor_id,
+      activity_type,
+      content_id,
+      content_type,
+      title,
+      created_at,
+      metadata,
+      neighborhood_id,
+      profiles:actor_id (
+        display_name,
+        avatar_url
+      )
+    `)
+    .order('created_at', { ascending: false })
+    .limit(20);
 
-  console.log("[fetchActivities] Fetching activities for neighborhood:", neighborhoodId);
-
-  try {
-    // Fetch activities from the database for the specific neighborhood
-    const { data: activities, error } = await supabase
-      .from('activities')
-      .select(`
-        *,
-        profiles!activities_actor_id_fkey (
-          display_name,
-          avatar_url
-        )
-      `)
-      .eq('neighborhood_id', neighborhoodId) // Filter by current neighborhood
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) {
-      console.error("[fetchActivities] Database error:", error);
-      throw error;
-    }
-
-    if (!activities || activities.length === 0) {
-      console.log("[fetchActivities] No activities found for neighborhood");
-      return [];
-    }
-
-    console.log("[fetchActivities] Raw activities fetched:", activities.length);
-
-    // Sync titles with actual content
-    const activitiesWithSyncedTitles = await syncActivityTitles(activities);
-    
-    console.log("[fetchActivities] Activities after title sync:", activitiesWithSyncedTitles.length);
-    return activitiesWithSyncedTitles;
-    
-  } catch (error) {
-    console.error("[fetchActivities] Error fetching activities:", error);
+  if (error) {
+    logger.error('Error fetching activities:', error);
     throw error;
   }
+
+  logger.debug(`Fetched ${activitiesData.length} activities`);
+
+  // Group content IDs by their content type for efficient batch fetching
+  // Skip any items that are already marked as deleted in metadata
+  const contentIdsByType: Record<string, string[]> = {};
+  
+  activitiesData.forEach(activity => {
+    // Skip if activity is already marked as deleted
+    if (isContentDeleted(activity.metadata)) return;
+    
+    const contentType = activity.content_type;
+    if (!contentIdsByType[contentType]) {
+      contentIdsByType[contentType] = [];
+    }
+    contentIdsByType[contentType].push(activity.content_id);
+  });
+  
+  // Fetch current titles for all content that hasn't been deleted
+  const updatedTitlesMap = await fetchContentTitles(contentIdsByType);
+  
+  logger.debug(`Fetched ${updatedTitlesMap.size} current content titles`);
+  
+  // Process activities and use updated titles where available
+  const activities = activitiesData.map(activity => {
+    // Ensure metadata is an object we can work with
+    const metadata = normalizeMetadata(activity.metadata);
+    
+    // If we have an updated title for this content, use it
+    if (updatedTitlesMap.has(activity.content_id)) {
+      return {
+        ...activity,
+        metadata: metadata, // Ensure we have the correct metadata type
+        title: updatedTitlesMap.get(activity.content_id)!
+      } as Activity;
+    } else if (!isContentDeleted(metadata) && !updatedTitlesMap.has(activity.content_id)) {
+      // If we didn't get a title AND the content wasn't explicitly marked as deleted,
+      // it probably means the content was deleted without proper cleanup
+      logger.info(`Content not found for activity ${activity.id}, marking as implicitly deleted`);
+      
+      // Mark it as implicitly deleted
+      return {
+        ...activity,
+        metadata: {
+          ...metadata,
+          deleted: true,
+          original_title: activity.title
+        }
+      } as Activity;
+    }
+    
+    // Otherwise use the title as stored in the activities table
+    return {
+      ...activity,
+      metadata: metadata
+    } as Activity;
+  });
+
+  return activities as Activity[];
 };
