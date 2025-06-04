@@ -7,19 +7,22 @@ import { useAccountCreation } from "./form/useAccountCreation";
 import { useProfileImageUpload } from "./form/useProfileImageUpload";
 import { useSkillsManagement } from "./form/useSkillsManagement";
 import { useProfileManagement } from "./form/useProfileManagement";
+import { supabase } from "@/integrations/supabase/client";
+import { toast as sonnerToast } from "sonner";
 
 /**
- * Hook for handling unified onboarding form submission (Simplified - No Availability)
+ * Hook for handling unified onboarding form submission
  * 
  * Orchestrates the complete submission process including:
  * - Account creation (if user doesn't exist)
+ * - Processing any pending neighborhood invitation
  * - Profile data updates/creation
  * - Profile image upload to Supabase storage
- * - Skills storage in skills_exchange table (without availability)
+ * - Skills storage in skills_exchange table
  * - Setting completed_onboarding flag
  * - Error handling and retry logic
  * 
- * UPDATED: Removed availability handling - onboarding no longer collects availability preferences
+ * UPDATED: Now processes pending invites BEFORE checking neighborhood or creating profile
  */
 export const useFormSubmission = () => {
   const user = useUser();
@@ -40,7 +43,89 @@ export const useFormSubmission = () => {
   });
 
   /**
-   * Main submission function - now uses composed hooks for better organization
+   * Process a pending invite code from localStorage and add the user to the neighborhood
+   * 
+   * @param userId The ID of the user to add to the neighborhood
+   * @returns The neighborhood ID if successful, null if no pending invite or error
+   */
+  const processPendingInvite = async (userId: string): Promise<string | null> => {
+    try {
+      // Check if there's a pending invite code in localStorage
+      const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+      
+      if (!pendingInviteCode) {
+        console.log("[useFormSubmission] No pending invite code found in localStorage");
+        return null;
+      }
+      
+      console.log("[useFormSubmission] Found pending invite code:", pendingInviteCode);
+      
+      // Get the neighborhood information from the invite code
+      const { data: inviteData, error: inviteError } = await supabase
+        .rpc('get_neighborhood_from_invite', { 
+          invite_code_param: pendingInviteCode 
+        });
+
+      if (inviteError || !inviteData || inviteData.length === 0) {
+        console.error("[useFormSubmission] Invalid or expired invite code:", inviteError || "No data returned");
+        toast({
+          title: "Invalid Invite",
+          description: "The invite link you used is invalid or has expired.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      const neighborhoodId = inviteData[0].neighborhood_id;
+      console.log("[useFormSubmission] Found neighborhood from invite:", neighborhoodId);
+      
+      // Add the user as a member of the neighborhood
+      const { error: memberError } = await supabase
+        .from('neighborhood_members')
+        .insert({
+          user_id: userId,
+          neighborhood_id: neighborhoodId,
+          status: 'active'
+        });
+
+      if (memberError) {
+        console.error("[useFormSubmission] Error adding user to neighborhood:", memberError);
+        toast({
+          title: "Couldn't Join Neighborhood",
+          description: "There was an issue joining the neighborhood. Please try again.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      // Mark the invitation as accepted
+      const { error: updateError } = await supabase
+        .from('invitations')
+        .update({
+          status: 'accepted',
+          accepted_by_id: userId,
+          accepted_at: new Date().toISOString()
+        })
+        .eq('invite_code', pendingInviteCode);
+
+      if (updateError) {
+        console.warn("[useFormSubmission] Error updating invitation status:", updateError);
+        // Don't fail for this error since the user is already added to the neighborhood
+      }
+
+      // Clear the pending invite from localStorage since it's been processed
+      localStorage.removeItem('pendingInviteCode');
+      
+      console.log("[useFormSubmission] Successfully processed invite and joined neighborhood:", neighborhoodId);
+      return neighborhoodId;
+    } catch (error) {
+      console.error("[useFormSubmission] Error processing pending invite:", error);
+      return null;
+    }
+  };
+
+  /**
+   * Main submission function - now processes pending invites first
    */
   const submitForm = async (formData: SurveyFormData): Promise<boolean> => {
     console.log("[useFormSubmission] Starting submission process");
@@ -75,9 +160,15 @@ export const useFormSubmission = () => {
         userId = user.id;
       }
 
-      // Step 2: Get user's neighborhood (20%)
+      // Step 2: Process any pending invite and join neighborhood (20%)
       setSubmissionState(prev => ({ ...prev, progress: 20 }));
-      const neighborhoodId = await getUserNeighborhoodId(userId);
+      let neighborhoodId = await processPendingInvite(userId);
+      
+      // If no pending invite was processed, check if the user is already in a neighborhood
+      if (!neighborhoodId) {
+        console.log("[useFormSubmission] No invite processed, checking for existing neighborhood");
+        neighborhoodId = await getUserNeighborhoodId(userId);
+      }
       
       if (!neighborhoodId) {
         console.error("[useFormSubmission] No neighborhood found for user");
@@ -88,7 +179,7 @@ export const useFormSubmission = () => {
 
       // Step 3: Upload profile image if provided (50%)
       setSubmissionState(prev => ({ ...prev, progress: 50 }));
-      let avatarUrl: string | null = null;
+      let avatarUrl: string | undefined;
       if (formData.profileImage) {
         avatarUrl = await uploadProfileImage(formData.profileImage, userId);
       }
@@ -97,7 +188,7 @@ export const useFormSubmission = () => {
       setSubmissionState(prev => ({ ...prev, progress: 70 }));
       await upsertProfile(formData, userId, avatarUrl);
 
-      // Step 5: Save skills if any are selected (90%) - no availability
+      // Step 5: Save skills if any are selected (90%)
       setSubmissionState(prev => ({ ...prev, progress: 90 }));
       if (formData.skills && formData.skills.length > 0) {
         console.log("[useFormSubmission] Saving skills:", formData.skills);
@@ -130,8 +221,7 @@ export const useFormSubmission = () => {
         success: true,
       });
 
-      toast({
-        title: "Welcome to the neighborhood!",
+      sonnerToast.success("Welcome to the neighborhood!", {
         description: "Your account and profile have been created successfully.",
       });
 
@@ -148,10 +238,8 @@ export const useFormSubmission = () => {
         success: false,
       });
 
-      toast({
-        title: "Setup Failed",
+      sonnerToast.error("Setup Failed", {
         description: errorMessage,
-        variant: "destructive",
       });
 
       return false;

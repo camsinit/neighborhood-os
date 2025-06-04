@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ interface NeighborhoodPreview {
  * Handles the standardized join flow using the URL pattern: /join/{inviteCode}
  * Shows a neighborhood preview and guides users through signup/onboarding or direct join
  * 
- * UPDATED: Now properly routes new users to onboarding with comprehensive logging
+ * UPDATED: Now properly stores invite code and routes new users to onboarding with better logging
  */
 const JoinPage = () => {
   // Get the invite code from the URL params
@@ -83,7 +84,7 @@ const JoinPage = () => {
         const result = neighborhoodData[0];
         console.log("[JoinPage] Neighborhood data loaded:", result);
 
-        // Check if invitation is still pending (not used)
+        // Check if invitation is still pending
         if (result.invitation_status !== 'pending') {
           console.error("[JoinPage] Invitation status is not pending:", result.invitation_status);
           setError("This invite link has already been used.");
@@ -103,11 +104,11 @@ const JoinPage = () => {
         
         console.log("[JoinPage] Setting neighborhood preview:", neighborhoodPreview);
         setNeighborhood(neighborhoodPreview);
+        setIsLoading(false);
 
       } catch (error: any) {
         console.error("[JoinPage] Unexpected error:", error);
         setError("An unexpected error occurred. Please try again.");
-      } finally {
         setIsLoading(false);
       }
     };
@@ -198,13 +199,12 @@ const JoinPage = () => {
   };
 
   /**
-   * Handle new user signup flow - FIXED to store invite code and go to onboarding
-   * Store the invite code so they can auto-join after creating account and completing onboarding
+   * Handle new user signup flow - Store invite code and go to onboarding
    */
   const handleNewUserSignup = () => {
     console.log("[JoinPage] handleNewUserSignup called");
     console.log("[JoinPage] Invite code:", inviteCode);
-    console.log("[JoinPage] Neighborhood:", neighborhood);
+    console.log("[JoinPage] Neighborhood:", neighborhood?.name);
     
     // Store the invite code for the onboarding process to pick up
     if (inviteCode) {

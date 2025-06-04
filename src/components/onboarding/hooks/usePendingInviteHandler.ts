@@ -1,100 +1,42 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from "react";
 
 /**
- * Hook for handling pending invite codes during onboarding
+ * Hook to detect and handle pending invitations during onboarding
+ * 
+ * UPDATED: Now just checks for pending invite code but doesn't process it
+ * The actual processing happens during form submission in useFormSubmission.ts
  */
 export const usePendingInviteHandler = () => {
-  const { toast } = useToast();
+  const [hasPendingInvite, setHasPendingInvite] = useState(false);
+  const [pendingInviteCode, setPendingInviteCode] = useState<string | null>(null);
 
-  /**
-   * Handle joining neighborhood via pending invite code
-   */
-  const handlePendingInviteJoin = async (userId: string) => {
-    const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+  // Check for pending invite code in localStorage
+  useEffect(() => {
+    const savedInviteCode = localStorage.getItem('pendingInviteCode');
     
-    console.log("[usePendingInviteHandler] handlePendingInviteJoin called");
-    console.log("[usePendingInviteHandler] Pending invite code:", pendingInviteCode);
-    console.log("[usePendingInviteHandler] User ID:", userId);
-    
-    if (!pendingInviteCode || !userId) {
-      console.log("[usePendingInviteHandler] No pending invite code or user, skipping join");
-      return;
+    if (savedInviteCode) {
+      console.log("[usePendingInviteHandler] Found pending invite code:", savedInviteCode);
+      setHasPendingInvite(true);
+      setPendingInviteCode(savedInviteCode);
+    } else {
+      console.log("[usePendingInviteHandler] No pending invite code found");
+      setHasPendingInvite(false);
+      setPendingInviteCode(null);
     }
+  }, []);
 
-    try {
-      console.log("[usePendingInviteHandler] Getting neighborhood from invite code");
-      
-      // Get neighborhood info from invite code
-      const { data: neighborhoodData, error: functionError } = await supabase
-        .rpc('get_neighborhood_from_invite', { 
-          invite_code_param: pendingInviteCode 
-        });
-
-      if (functionError || !neighborhoodData || neighborhoodData.length === 0) {
-        console.error("[usePendingInviteHandler] Invalid or expired invite code", functionError);
-        localStorage.removeItem('pendingInviteCode');
-        return;
-      }
-
-      const result = neighborhoodData[0];
-      console.log("[usePendingInviteHandler] Neighborhood data:", result);
-      
-      // Check if invitation is still pending
-      if (result.invitation_status !== 'pending') {
-        console.log("[usePendingInviteHandler] Invitation no longer pending:", result.invitation_status);
-        localStorage.removeItem('pendingInviteCode');
-        return;
-      }
-
-      console.log("[usePendingInviteHandler] Adding user to neighborhood");
-      
-      // Add user as a neighborhood member
-      const { error: memberError } = await supabase
-        .from('neighborhood_members')
-        .insert({
-          user_id: userId,
-          neighborhood_id: result.neighborhood_id,
-          status: 'active'
-        });
-
-      if (memberError) {
-        console.error("[usePendingInviteHandler] Error joining neighborhood:", memberError);
-        return;
-      }
-
-      console.log("[usePendingInviteHandler] Marking invitation as accepted");
-      
-      // Mark invitation as accepted
-      const { error: inviteError } = await supabase
-        .from('invitations')
-        .update({
-          status: 'accepted',
-          accepted_by_id: userId,
-          accepted_at: new Date().toISOString()
-        })
-        .eq('invite_code', pendingInviteCode);
-
-      if (inviteError) {
-        console.warn("[usePendingInviteHandler] Failed to update invitation status:", inviteError);
-      }
-
-      // Clean up stored invite code
-      localStorage.removeItem('pendingInviteCode');
-      console.log("[usePendingInviteHandler] Successfully joined neighborhood via invite");
-      
-      // Show success message
-      toast({
-        title: "Welcome!",
-        description: `You've successfully joined ${result.neighborhood_name}!`,
-      });
-
-    } catch (error: any) {
-      console.error("[usePendingInviteHandler] Error processing pending invite:", error);
-      localStorage.removeItem('pendingInviteCode');
-    }
+  // Clear invite code from state and localStorage
+  const clearPendingInvite = () => {
+    console.log("[usePendingInviteHandler] Clearing pending invite code");
+    localStorage.removeItem('pendingInviteCode');
+    setHasPendingInvite(false);
+    setPendingInviteCode(null);
   };
 
-  return { handlePendingInviteJoin };
+  return {
+    hasPendingInvite,
+    pendingInviteCode,
+    clearPendingInvite
+  };
 };
