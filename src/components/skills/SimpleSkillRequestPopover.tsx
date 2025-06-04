@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,10 +11,12 @@ import { toast } from 'sonner';
 import { SkillCategory } from './types/skillTypes';
 
 /**
- * SimpleSkillRequestPopover - Basic skill request form in a popover
+ * SimpleSkillRequestPopover - Basic skill request form in a dialog
  * 
  * This component provides a simple interface for neighbors to request skills
  * with just a skill title (2-5 words) and category selection.
+ * 
+ * Updated to use Dialog instead of Popover for better UX consistency with Add Skill dialog.
  */
 interface SimpleSkillRequestPopoverProps {
   children: React.ReactNode;
@@ -99,7 +101,7 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
         return;
       }
 
-      // Success - reset form and close popover
+      // Success - reset form and close dialog
       toast.success('Skill request created successfully!');
       setSkillTitle('');
       setSelectedCategory('');
@@ -114,18 +116,19 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {children}
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="start">
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Request a Skill</DialogTitle>
+        </DialogHeader>
+
         <div className="space-y-4">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Request a Skill</h3>
-            <p className="text-sm text-gray-600">
-              Ask your neighbors for help with something specific.
-            </p>
-          </div>
+          <p className="text-sm text-gray-600">
+            Ask your neighbors for help with something specific.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Skill title input field */}
@@ -143,14 +146,14 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
               </p>
             </div>
 
-            {/* Category selection dropdown */}
+            {/* Category selection dropdown with higher z-index */}
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[200]">
                   {SKILL_CATEGORIES.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
@@ -180,8 +183,8 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
             </div>
           </form>
         </div>
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   );
 };
 
