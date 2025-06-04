@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { SKILL_CATEGORIES } from "@/components/onboarding/survey/steps/skills/skillCategories";
 
 /**
- * Hook for managing user skills during onboarding
+ * Hook for managing user skills during onboarding (Simplified - No Availability)
  * Now uses standardized category mapping to ensure consistency
+ * UPDATED: Removed availability and time preferences from onboarding skills
  */
 export const useSkillsManagement = () => {
   /**
@@ -54,12 +55,11 @@ export const useSkillsManagement = () => {
 
   /**
    * Save skills to skills_exchange table with standardized categories
+   * UPDATED: Removed availability and time preferences - onboarding skills have no availability
    */
   const saveSkills = async (
     skills: string[], 
     userId: string,
-    availability?: string, 
-    timePreferences?: string[],
     neighborhoodId?: string
   ) => {
     // Exit early if no skills to save
@@ -80,8 +80,6 @@ export const useSkillsManagement = () => {
     try {
       console.log('Saving skills for user:', userId, 'in neighborhood:', neighborhoodId);
       console.log('Skills to save:', skills);
-      console.log('Availability:', availability);
-      console.log('Time preferences:', timePreferences);
 
       // Parse and prepare skills data with proper validation and standardized categories
       const skillsData = skills.map(skillString => {
@@ -90,7 +88,7 @@ export const useSkillsManagement = () => {
         
         console.log(`Mapping skill "${name}" to category "${skillCategory}"`);
         
-        // Create the skill record with all required fields
+        // Create the skill record with all required fields (no availability from onboarding)
         return {
           title: name,
           description: details || null,
@@ -98,8 +96,8 @@ export const useSkillsManagement = () => {
           request_type: 'offer', // Default to offer for onboarding skills
           user_id: userId,
           neighborhood_id: neighborhoodId,
-          availability: availability || null,
-          time_preferences: timePreferences || null,
+          availability: null, // No availability collected during onboarding
+          time_preferences: null, // No time preferences collected during onboarding
           valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
           is_archived: false,
         };

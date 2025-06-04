@@ -9,17 +9,17 @@ import { useSkillsManagement } from "./form/useSkillsManagement";
 import { useProfileManagement } from "./form/useProfileManagement";
 
 /**
- * Hook for handling unified onboarding form submission
+ * Hook for handling unified onboarding form submission (Simplified - No Availability)
  * 
  * Orchestrates the complete submission process including:
  * - Account creation (if user doesn't exist)
  * - Profile data updates/creation
  * - Profile image upload to Supabase storage
- * - Skills storage in skills_exchange table
+ * - Skills storage in skills_exchange table (without availability)
  * - Setting completed_onboarding flag
  * - Error handling and retry logic
  * 
- * REFACTORED: Now uses smaller, focused hooks for each concern
+ * UPDATED: Removed availability handling - onboarding no longer collects availability preferences
  */
 export const useFormSubmission = () => {
   const user = useUser();
@@ -97,7 +97,7 @@ export const useFormSubmission = () => {
       setSubmissionState(prev => ({ ...prev, progress: 70 }));
       await upsertProfile(formData, userId, avatarUrl);
 
-      // Step 5: Save skills if any are selected (90%)
+      // Step 5: Save skills if any are selected (90%) - no availability
       setSubmissionState(prev => ({ ...prev, progress: 90 }));
       if (formData.skills && formData.skills.length > 0) {
         console.log("[useFormSubmission] Saving skills:", formData.skills);
@@ -105,8 +105,6 @@ export const useFormSubmission = () => {
           await saveSkills(
             formData.skills,
             userId,
-            formData.skillAvailability,
-            formData.skillTimePreferences,
             neighborhoodId
           );
           console.log("[useFormSubmission] Skills saved successfully");

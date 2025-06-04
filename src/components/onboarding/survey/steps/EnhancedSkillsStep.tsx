@@ -2,42 +2,42 @@
 import { SkillsMiniSurvey } from "./skills/SkillsMiniSurvey";
 
 /**
- * Enhanced Skills Selection Step Component
+ * Enhanced Skills Step Component (Simplified - No Availability)
  * 
- * This component now uses a mini-survey approach where users progress
- * through each skill category one at a time, then set availability preferences,
- * with a summary at the end. It tracks completion state and selected skills 
- * for navigation validation.
+ * This component renders the skills selection step in the onboarding survey.
+ * It uses the SkillsMiniSurvey component to provide a comprehensive skills selection experience.
+ * 
+ * UPDATED: Removed availability and time preferences - onboarding now only collects skills.
  */
 interface EnhancedSkillsStepProps {
   selectedSkills: string[];
   onSkillsChange: (skills: string[]) => void;
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
   onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
-  onAvailabilityChange?: (availability: string, timePreferences: string[]) => void;
 }
 
-export const EnhancedSkillsStep = ({
-  selectedSkills,
-  onSkillsChange,
+export const EnhancedSkillsStep = ({ 
+  selectedSkills, 
+  onSkillsChange, 
   onSurveyStateChange,
-  onMiniSurveyProgress,
-  onAvailabilityChange
+  onMiniSurveyProgress
 }: EnhancedSkillsStepProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Introduction text */}
       <div className="text-center space-y-2">
-        {/* This section was left intentionally minimal based on the original file */}
+        <h3 className="text-lg font-semibold">Skills & Interests</h3>
+        <p className="text-sm text-muted-foreground">
+          Let your neighbors know what skills you have to offer. You can always add more later.
+        </p>
       </div>
 
-      {/* Mini-survey component with availability handling */}
-      <SkillsMiniSurvey 
-        selectedSkills={selectedSkills} 
-        onSkillsChange={onSkillsChange} 
+      {/* Skills mini-survey component */}
+      <SkillsMiniSurvey
+        selectedSkills={selectedSkills}
+        onSkillsChange={onSkillsChange}
         onSurveyStateChange={onSurveyStateChange}
         onMiniSurveyProgress={onMiniSurveyProgress}
-        onAvailabilityChange={onAvailabilityChange}
       />
     </div>
   );

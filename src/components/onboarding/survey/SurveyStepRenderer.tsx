@@ -12,9 +12,9 @@ import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
  * 
  * Handles rendering the appropriate step component based on the current step index.
  * This component encapsulates all the step-specific logic and props passing.
- * Now tracks skills survey completion state and availability preferences for navigation validation.
+ * Now tracks skills survey completion state for navigation validation.
  * 
- * UPDATED: Removed guest mode logic - all onboarding users create new accounts
+ * UPDATED: Removed availability handling - onboarding no longer collects availability preferences
  */
 interface SurveyStepRendererProps {
   currentStep: number;
@@ -34,12 +34,6 @@ export const SurveyStepRenderer = ({
   onSkillsMiniSurveyProgress,
 }: SurveyStepRendererProps) => {
   
-  // Handle availability and time preferences changes from skills step
-  const handleAvailabilityChange = (availability: string, timePreferences: string[]) => {
-    handleChange("skillAvailability", availability);
-    handleChange("skillTimePreferences", timePreferences);
-  };
-
   // Handle profile image change
   const handleProfileImageChange = (file: File | null) => {
     handleChange("profileImage", file);
@@ -100,7 +94,6 @@ export const SurveyStepRenderer = ({
           onSkillsChange={(value) => handleChange("skills", value)}
           onSurveyStateChange={onSkillsSurveyStateChange}
           onMiniSurveyProgress={onSkillsMiniSurveyProgress}
-          onAvailabilityChange={handleAvailabilityChange}
         />
       );
     

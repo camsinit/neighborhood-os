@@ -6,17 +6,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ArrowLeft, ArrowRight, X, Plus, Clock, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, X, Plus, Check } from "lucide-react";
 import { SKILL_CATEGORIES, SPECIAL_SKILLS } from "./skillCategories";
 import { SelectedSkillsOverlay } from "./SelectedSkillsOverlay";
 
 /**
- * Skills Mini-Survey Component (Enhanced with Required Availability)
+ * Skills Mini-Survey Component (Simplified - No Availability)
  * 
  * This component creates a condensed mini-survey experience within the Skills & Interests step,
  * optimized for better space utilization and visibility of all UI elements.
- * Now includes required availability and time preferences after skill selection.
- * Updated with collapsible skills overlay for better UX.
+ * UPDATED: Removed availability and time preferences - onboarding now only collects skills.
  */
 
 interface SelectedSkill {
@@ -29,15 +28,13 @@ interface SkillsMiniSurveyProps {
   onSkillsChange: (skills: string[]) => void;
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
   onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
-  onAvailabilityChange?: (availability: string, timePreferences: string[]) => void;
 }
 
 export const SkillsMiniSurvey = ({ 
   selectedSkills, 
   onSkillsChange, 
   onSurveyStateChange,
-  onMiniSurveyProgress,
-  onAvailabilityChange
+  onMiniSurveyProgress
 }: SkillsMiniSurveyProps) => {
   // Convert selectedSkills prop to internal format for easier manipulation
   const [skillsWithDetails, setSkillsWithDetails] = useState<SelectedSkill[]>(() => {
@@ -47,15 +44,11 @@ export const SkillsMiniSurvey = ({
     });
   });
 
-  // Current category step (0-5: categories, 6: availability, 7: summary)
+  // Current category step (0-5: categories, 6: summary)
   const [currentStep, setCurrentStep] = useState(0);
   
   // Track if user has completed the mini-survey (reached the summary step)
   const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
-  
-  // Availability and time preferences state (now required)
-  const [availability, setAvailability] = useState('');
-  const [timePreferences, setTimePreferences] = useState<string[]>([]);
   
   // Dialog state for special skills that require additional details
   const [specialSkillDialog, setSpecialSkillDialog] = useState<{
@@ -72,29 +65,10 @@ export const SkillsMiniSurvey = ({
   const [customSkillInput, setCustomSkillInput] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  // Calculate total steps and current position
+  // Calculate total steps and current position (removed availability step)
   const categoryKeys = Object.keys(SKILL_CATEGORIES);
-  const totalSteps = categoryKeys.length + 2; // categories + availability + summary
-  const isOnAvailability = currentStep === categoryKeys.length;
-  const isOnSummary = currentStep === categoryKeys.length + 1;
-
-  // Day availability options
-  const dayOptions = [
-    'Weekdays only',
-    'Weekends only', 
-    'Both weekdays and weekends',
-    'Flexible schedule'
-  ];
-
-  // Time preference options
-  const timeOptions = [
-    'Early morning (6-9 AM)',
-    'Morning (9 AM-12 PM)', 
-    'Afternoon (12-5 PM)',
-    'Evening (5-8 PM)',
-    'Late evening (8-11 PM)',
-    'Available anytime'
-  ];
+  const totalSteps = categoryKeys.length + 1; // categories + summary (no availability)
+  const isOnSummary = currentStep === categoryKeys.length;
 
   // Update survey completion state whenever currentStep changes
   useEffect(() => {
@@ -123,13 +97,6 @@ export const SkillsMiniSurvey = ({
       onMiniSurveyProgress(currentStep, totalSteps, hasCompletedSurvey);
     }
   }, [currentStep, totalSteps, hasCompletedSurvey, onMiniSurveyProgress]);
-
-  // Notify parent of availability changes
-  useEffect(() => {
-    if (onAvailabilityChange) {
-      onAvailabilityChange(availability, timePreferences);
-    }
-  }, [availability, timePreferences, onAvailabilityChange]);
 
   /**
    * Update parent component with formatted skills array
@@ -220,32 +187,10 @@ export const SkillsMiniSurvey = ({
   };
 
   /**
-   * Handle day availability selection
-   */
-  const handleDayAvailabilityChange = (day: string, checked: boolean) => {
-    if (checked) {
-      setAvailability(day);
-    } else {
-      setAvailability('');
-    }
-  };
-
-  /**
-   * Handle time preference selection
-   */
-  const handleTimePreferenceChange = (time: string, checked: boolean) => {
-    if (checked) {
-      setTimePreferences(prev => [...prev, time]);
-    } else {
-      setTimePreferences(prev => prev.filter(t => t !== time));
-    }
-  };
-
-  /**
    * Get skills for current category step
    */
   const getCurrentCategorySkills = () => {
-    if (isOnAvailability || isOnSummary) return [];
+    if (isOnSummary) return [];
     const categoryKey = categoryKeys[currentStep];
     return SKILL_CATEGORIES[categoryKey as keyof typeof SKILL_CATEGORIES]?.skills || [];
   };
@@ -254,16 +199,9 @@ export const SkillsMiniSurvey = ({
    * Get current category information
    */
   const getCurrentCategory = () => {
-    if (isOnAvailability || isOnSummary) return null;
+    if (isOnSummary) return null;
     const categoryKey = categoryKeys[currentStep];
     return SKILL_CATEGORIES[categoryKey as keyof typeof SKILL_CATEGORIES];
-  };
-
-  /**
-   * Check if availability step is valid (both day and time selections required)
-   */
-  const isAvailabilityStepValid = () => {
-    return availability.length > 0 && timePreferences.length > 0;
   };
 
   /**
@@ -291,7 +229,7 @@ export const SkillsMiniSurvey = ({
         <div className="text-center space-y-1">
           <h3 className="text-lg font-semibold">Skills Summary</h3>
           <p className="text-xs text-muted-foreground">
-            Review your selected skills and availability. You can go back to make changes or continue to complete the onboarding.
+            Review your selected skills. You can go back to make changes or continue to complete the onboarding.
           </p>
         </div>
 
@@ -319,17 +257,6 @@ export const SkillsMiniSurvey = ({
                 </Badge>
               ))}
             </div>
-            
-            {/* Show availability if set */}
-            {(availability || timePreferences.length > 0) && (
-              <div className="mt-3 p-2 bg-gray-50 rounded text-xs">
-                <p className="font-medium">Availability:</p>
-                {availability && <p>Days: {availability}</p>}
-                {timePreferences.length > 0 && (
-                  <p>Times: {timePreferences.join(', ')}</p>
-                )}
-              </div>
-            )}
           </div>
         ) : (
           <div className="text-center py-4">
@@ -349,97 +276,6 @@ export const SkillsMiniSurvey = ({
             Step {currentStep + 1} of {totalSteps} - Complete!
           </div>
           <div className="w-16" /> {/* Spacer for layout balance */}
-        </div>
-      </div>
-    );
-  }
-
-  // Availability step content (now required)
-  if (isOnAvailability) {
-    return (
-      <div className="space-y-6">
-        {/* Selected skills overlay */}
-        <SelectedSkillsOverlay 
-          selectedSkills={skillsWithDetails}
-          onRemoveSkill={removeSkill}
-        />
-
-        {/* Header */}
-        <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2">
-            <Clock className="h-4 w-4 text-blue-600" />
-            <h3 className="text-base font-semibold">Availability & Time Preferences *</h3>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {skillsWithDetails.length > 0 
-              ? `Set your availability for offering your ${skillsWithDetails.length} selected skills.`
-              : "Set your general availability for offering skills."
-            }
-          </p>
-        </div>
-
-        {/* Day availability selection (required) */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">When are you generally available? *</Label>
-          <div className="grid grid-cols-1 gap-3">
-            {dayOptions.map((day) => (
-              <div key={day} className="flex items-center space-x-3">
-                <Checkbox
-                  id={day}
-                  checked={availability === day}
-                  onCheckedChange={(checked) => handleDayAvailabilityChange(day, checked as boolean)}
-                />
-                <Label htmlFor={day} className="text-sm cursor-pointer flex-1">
-                  {day}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Time preferences (required) */}
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">What times generally work best? (Select at least one) *</Label>
-          <div className="grid grid-cols-1 gap-3">
-            {timeOptions.map((time) => (
-              <div key={time} className="flex items-center space-x-3">
-                <Checkbox
-                  id={time}
-                  checked={timePreferences.includes(time)}
-                  onCheckedChange={(checked) => handleTimePreferenceChange(time, checked as boolean)}
-                />
-                <Label htmlFor={time} className="text-sm cursor-pointer flex-1">
-                  {time}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Validation message */}
-        {(!availability || timePreferences.length === 0) && (
-          <div className="text-center">
-            <p className="text-xs text-red-500">
-              Please select both day availability and time preferences to continue
-            </p>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center pt-2">
-          <Button variant="outline" onClick={handlePrevious} size="sm">
-            <ArrowLeft className="mr-1 h-3 w-3" />
-            Back
-          </Button>
-          
-          <div className="text-xs text-muted-foreground">
-            Step {currentStep + 1} of {totalSteps}
-          </div>
-          
-          <Button onClick={handleNext} size="sm" disabled={!isAvailabilityStepValid()}>
-            Summary
-            <ArrowRight className="ml-1 h-3 w-3" />
-          </Button>
         </div>
       </div>
     );
@@ -542,7 +378,7 @@ export const SkillsMiniSurvey = ({
         </div>
         
         <Button onClick={handleNext} size="sm">
-          {currentStep < categoryKeys.length - 1 ? 'Next' : 'Availability'}
+          {currentStep < categoryKeys.length - 1 ? 'Next' : 'Summary'}
           <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
       </div>
