@@ -1,33 +1,57 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 /**
  * This hook fetches all goods exchange items from the database
+ * Now properly filtered by current neighborhood
  * 
  * It's specific to the Goods page and doesn't interact with the support_requests table
  * or any other page's data.
  */
 export const useGoodsExchange = () => {
+  // Get the current neighborhood context
+  const neighborhood = useCurrentNeighborhood();
+
   return useQuery({
-    // Use a dedicated query key just for goods exchange
-    queryKey: ["goods-exchange"],
+    // Include neighborhood_id in query key for proper cache isolation
+    queryKey: ["goods-exchange", neighborhood?.id],
     queryFn: async () => {
-      console.log("Fetching goods exchange items from goods_exchange table");
+      console.log("Fetching goods exchange items from goods_exchange table", {
+        neighborhoodId: neighborhood?.id,
+        neighborhoodName: neighborhood?.name,
+        timestamp: new Date().toISOString()
+      });
       
-      // Get goods items from the goods_exchange table
+      // If no neighborhood is selected, return empty array
+      if (!neighborhood?.id) {
+        console.log("No neighborhood selected for goods exchange, returning empty array");
+        return [];
+      }
+      
+      // Get goods items from the goods_exchange table filtered by current neighborhood
       const { data: goodsData, error: goodsError } = await supabase
         .from("goods_exchange")
         .select('*')
+        .eq('neighborhood_id', neighborhood.id) // Filter by current neighborhood
         .order("created_at", { ascending: false });
 
       // If there's an error fetching goods data, log it and throw
       if (goodsError) {
-        console.error("Error fetching goods exchange items:", goodsError);
+        console.error("Error fetching goods exchange items:", {
+          error: goodsError,
+          neighborhoodId: neighborhood.id,
+          timestamp: new Date().toISOString()
+        });
         throw goodsError;
       }
 
-      console.log("Fetched goods exchange items:", goodsData ? goodsData.length : 0, "items");
+      console.log("Fetched goods exchange items:", {
+        count: goodsData ? goodsData.length : 0,
+        neighborhoodId: neighborhood.id,
+        neighborhoodName: neighborhood.name
+      });
       
       // Now, if we have goods data, let's get the user profiles for each item
       let goodsWithProfiles = [];
@@ -116,5 +140,7 @@ export const useGoodsExchange = () => {
       
       return goodsWithProfiles;
     },
+    // Only run the query if we have a neighborhood
+    enabled: !!neighborhood?.id,
   });
 };

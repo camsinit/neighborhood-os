@@ -1,6 +1,7 @@
 
 /**
  * This file contains the core service function to fetch activities
+ * Now properly filtered by neighborhood
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "./types";
@@ -13,14 +14,24 @@ const logger = createLogger('activityService');
 
 /**
  * Fetches recent activities from the database
+ * Now properly filtered by current neighborhood
  * 
  * This has been optimized to fetch up-to-date titles from related content tables
  * and properly handle deleted content references
  */
-export const fetchActivities = async (): Promise<Activity[]> => {
-  logger.debug('Fetching activities');
+export const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[]> => {
+  logger.debug('Fetching activities', {
+    neighborhoodId,
+    timestamp: new Date().toISOString()
+  });
   
-  // Fetch activities with profile information
+  // If no neighborhood is selected, return empty array
+  if (!neighborhoodId) {
+    logger.debug('No neighborhood selected, returning empty array');
+    return [];
+  }
+  
+  // Fetch activities with profile information filtered by neighborhood
   const { data: activitiesData, error } = await supabase
     .from('activities')
     .select(`
@@ -38,15 +49,20 @@ export const fetchActivities = async (): Promise<Activity[]> => {
         avatar_url
       )
     `)
+    .eq('neighborhood_id', neighborhoodId) // Filter by current neighborhood
     .order('created_at', { ascending: false })
     .limit(20);
 
   if (error) {
-    logger.error('Error fetching activities:', error);
+    logger.error('Error fetching activities:', {
+      error,
+      neighborhoodId,
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
 
-  logger.debug(`Fetched ${activitiesData.length} activities`);
+  logger.debug(`Fetched ${activitiesData.length} activities for neighborhood ${neighborhoodId}`);
 
   // Group content IDs by their content type for efficient batch fetching
   // Skip any items that are already marked as deleted in metadata
