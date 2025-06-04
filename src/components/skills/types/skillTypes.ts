@@ -1,16 +1,15 @@
-
 // Define the skill category type - now matching onboarding categories exactly
 export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'maintenance' | 'care' | 'education';
 
-// Define valid request types
-export type SkillRequestType = 'offer' | 'need';
+// Define valid request types - updated to use 'request' instead of 'need'
+export type SkillRequestType = 'offer' | 'request';
 
 /**
  * Utility function to check if a value is a valid request type
  * This helps with type safety when working with data from the database
  */
 export function isValidRequestType(value: any): value is SkillRequestType {
-  return value === 'offer' || value === 'need';
+  return value === 'offer' || value === 'request';
 }
 
 // Base skill interface that matches the database schema
