@@ -28,7 +28,7 @@ export default defineConfig(({ mode }) => ({
   // Optimize build to prevent development tools from being included
   build: {
     sourcemap: false, // Disable sourcemaps to prevent debugging tool interference
-    minify: 'terser',
+    minify: true, // Use default minifier instead of terser
     rollupOptions: {
       output: {
         manualChunks: undefined, // Let Vite handle chunking automatically

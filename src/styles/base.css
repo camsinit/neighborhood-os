@@ -1,9 +1,10 @@
-/* Base styling to match chat aesthetic */
-@tailwind base;
-@tailwind utilities;
 
 /* Import Inter font for consistent typography */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Base styling to match chat aesthetic */
+@tailwind base;
+@tailwind utilities;
 
 /* Base styling to match chat aesthetic */
 @layer base {
