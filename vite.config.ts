@@ -9,6 +9,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Add CORS configuration to prevent issues
+    cors: {
+      origin: true,
+      credentials: true
+    },
+    // Improve error handling
+    hmr: {
+      overlay: false // Disable error overlay that might cause loops
+    }
   },
   plugins: [
     react(),
@@ -35,4 +44,8 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  // Add error handling for development
+  optimizeDeps: {
+    exclude: ['@lovable/tagger'] // Exclude tagger from optimization to prevent issues
+  }
 }));
