@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -199,37 +198,24 @@ const JoinPage = () => {
   };
 
   /**
-   * Handle new user signup flow - now goes DIRECTLY to onboarding
-   * Store the invite code and neighborhood data so they can auto-join after onboarding
+   * Handle new user signup flow - FIXED to store invite code and go to onboarding
+   * Store the invite code so they can auto-join after creating account and completing onboarding
    */
   const handleNewUserSignup = () => {
     console.log("[JoinPage] handleNewUserSignup called");
     console.log("[JoinPage] Invite code:", inviteCode);
     console.log("[JoinPage] Neighborhood:", neighborhood);
     
-    // Store the invite code and neighborhood data for guest onboarding
-    if (inviteCode && neighborhood) {
-      const guestData = {
-        inviteCode,
-        neighborhood: {
-          id: neighborhood.id,
-          name: neighborhood.name,
-          city: neighborhood.city,
-          state: neighborhood.state
-        }
-      };
-      
-      console.log("[JoinPage] Storing guest onboarding data:", guestData);
-      localStorage.setItem('guestOnboarding', JSON.stringify(guestData));
+    // Store the invite code for the onboarding process to pick up
+    if (inviteCode) {
+      console.log("[JoinPage] Storing pending invite code for onboarding:", inviteCode);
+      localStorage.setItem('pendingInviteCode', inviteCode);
     } else {
-      console.error("[JoinPage] Missing data for guest onboarding", {
-        hasInviteCode: !!inviteCode,
-        hasNeighborhood: !!neighborhood
-      });
+      console.error("[JoinPage] Missing invite code for guest onboarding");
     }
     
-    // Navigate directly to onboarding (guest mode) - THIS IS THE KEY FIX
-    console.log("[JoinPage] Navigating to /onboarding");
+    // Navigate directly to onboarding where they can create account and complete profile
+    console.log("[JoinPage] Navigating to /onboarding for guest signup flow");
     navigate('/onboarding');
   };
 
@@ -332,7 +318,7 @@ const JoinPage = () => {
                 {isJoining ? 'Joining...' : `Join ${neighborhood?.name}`}
               </Button>
             ) : (
-              // New user - goes to guest onboarding
+              // New user - goes to guest onboarding (FIXED)
               <div className="space-y-2">
                 <Button 
                   onClick={handleNewUserSignup}
@@ -342,7 +328,7 @@ const JoinPage = () => {
                   Join Neighborhood
                 </Button>
                 <p className="text-xs text-gray-500 text-center">
-                  You'll set up your profile and create an account to join
+                  You'll create an account and set up your profile to join
                 </p>
               </div>
             )}
