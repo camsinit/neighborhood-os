@@ -7,10 +7,11 @@ import SkillCard from './list/SkillCard';
 import { useSimpleSkillInteractions } from '@/hooks/skills/useSimpleSkillInteractions';
 import { Loader2 } from 'lucide-react';
 import { SkillCategory, SkillRequestType } from './types/skillTypes';
+import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 
 /**
  * Simplified skills list that displays skills in compact list format
- * Now uses the same list components as the category sections for consistency
+ * Now uses the same neighborhood filtering approach as other components
  * 
  * Fixed filtering logic:
  * - "Requests" tab: Shows skill requests from OTHER neighbors (not your own)
@@ -30,24 +31,36 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
   searchQuery = ''
 }) => {
   const user = useUser();
+  // Use the standardized neighborhood hook instead of manual fetching
+  const neighborhood = useCurrentNeighborhood();
 
-  // Fetch skills with user profiles
+  // Fetch skills with user profiles using proper neighborhood filtering
   const { data: skills, isLoading, error } = useQuery({
-    queryKey: ['simplified-skills', showRequests, showMine, selectedCategory, searchQuery, user?.id],
+    // Include neighborhood_id in query key for proper cache isolation
+    queryKey: ['simplified-skills', showRequests, showMine, selectedCategory, searchQuery, user?.id, neighborhood?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log('[SimplifiedSkillsList] No user, returning empty array');
+        return [];
+      }
 
-      // Get user's neighborhood
-      const { data: userNeighborhood } = await supabase
-        .from('neighborhood_members')
-        .select('neighborhood_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+      // Check if we have a neighborhood selected
+      if (!neighborhood?.id) {
+        console.log('[SimplifiedSkillsList] No neighborhood selected, returning empty array');
+        return [];
+      }
 
-      if (!userNeighborhood) return [];
+      console.log('[SimplifiedSkillsList] Fetching skills for neighborhood:', {
+        neighborhoodId: neighborhood.id,
+        neighborhoodName: neighborhood.name,
+        showRequests,
+        showMine,
+        selectedCategory,
+        searchQuery,
+        timestamp: new Date().toISOString()
+      });
 
-      // Build query
+      // Build query with neighborhood filtering
       let query = supabase
         .from('skills_exchange')
         .select(`
@@ -62,7 +75,7 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
             address
           )
         `)
-        .eq('neighborhood_id', userNeighborhood.neighborhood_id)
+        .eq('neighborhood_id', neighborhood.id) // Filter by current neighborhood
         .eq('is_archived', false);
 
       // Apply filtering logic based on the view
@@ -96,10 +109,26 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        console.error('[SimplifiedSkillsList] Error fetching skills:', {
+          error,
+          neighborhoodId: neighborhood.id,
+          timestamp: new Date().toISOString()
+        });
+        throw error;
+      }
+
+      console.log('[SimplifiedSkillsList] Successfully fetched skills:', {
+        count: data?.length || 0,
+        neighborhoodId: neighborhood.id,
+        neighborhoodName: neighborhood.name,
+        timestamp: new Date().toISOString()
+      });
+
       return data || [];
     },
-    enabled: !!user
+    // Only run the query if we have both user and neighborhood
+    enabled: !!user && !!neighborhood?.id
   });
 
   if (isLoading) {
