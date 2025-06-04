@@ -156,7 +156,7 @@ function App() {
               {/* Catch-all route - redirect to landing page */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            <Toaster position="top-center" />
+            <Toaster position="bottom-center" />
           </Router>
         </NeighborhoodProvider>
       </SessionContextProvider>
