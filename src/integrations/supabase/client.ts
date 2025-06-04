@@ -42,11 +42,11 @@ if (!supabase || !supabase.auth || !supabase.rpc) {
   console.error("Supabase client initialization failed. Check your environment variables and network connection.");
 }
 
-// Check auth state changes - log only important events
+// Reduce auth state change logging to only critical events to minimize console noise
 supabase.auth.onAuthStateChange((event, session) => {
-  // Only log significant auth events
-  if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED' || event === 'PASSWORD_RECOVERY') {
-    logger.info("Auth state changed:", {
+  // Only log critical auth events, not routine checks
+  if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+    logger.info("Critical auth state change:", {
       event,
       hasSession: !!session,
       userId: session?.user?.id,

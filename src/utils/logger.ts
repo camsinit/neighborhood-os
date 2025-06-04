@@ -1,6 +1,7 @@
 
 /**
  * Logging utility for consistent logging across the application
+ * Updated to reduce console noise and prevent development tool interference
  */
 
 // Log levels
@@ -10,17 +11,19 @@ export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 interface LoggerConfig {
   minLevel: LogLevel;
   debugMode: boolean;
+  enableDevTools: boolean; // New flag to control development tools
 }
 
-// Default configuration
+// Default configuration - more conservative to prevent console spam
 const config: LoggerConfig = {
-  minLevel: 'info',
-  debugMode: process.env.NODE_ENV === 'development'
+  minLevel: 'warn', // Changed from 'info' to 'warn' to reduce noise
+  debugMode: process.env.NODE_ENV === 'development',
+  enableDevTools: false // Disable development tools by default
 };
 
 // Log level priority
 const LOG_LEVEL_PRIORITY = {
-  trace: 0,  // Added trace as the lowest level
+  trace: 0,
   debug: 1,
   info: 2,
   warn: 3,
@@ -35,6 +38,9 @@ const LOG_LEVEL_PRIORITY = {
  */
 export function createLogger(moduleName: string) {
   const shouldLog = (level: LogLevel): boolean => {
+    // Don't log if development tools are disabled and it's a debug/trace message
+    if (!config.enableDevTools && (level === 'debug' || level === 'trace')) return false;
+    
     if (!config.debugMode && (level === 'debug' || level === 'trace')) return false;
     return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[config.minLevel];
   };
@@ -46,19 +52,19 @@ export function createLogger(moduleName: string) {
   return {
     /**
      * Log a trace message (lowest level, most detailed debugging)
-     * Only shown in development when trace level is enabled
+     * Only shown when explicitly enabled
      */
     trace: (message: string, ...args: any[]): void => {
-      if (shouldLog('trace')) {
+      if (shouldLog('trace') && config.enableDevTools) {
         console.debug(`TRACE: ${formatMessage(message)}`, ...args);
       }
     },
 
     /**
-     * Log a debug message (only in development)
+     * Log a debug message (only in development with dev tools enabled)
      */
     debug: (message: string, ...args: any[]): void => {
-      if (shouldLog('debug')) {
+      if (shouldLog('debug') && config.enableDevTools) {
         console.debug(formatMessage(message), ...args);
       }
     },
@@ -108,6 +114,15 @@ export function setLogLevel(level: LogLevel): void {
  */
 export function setDebugMode(enabled: boolean): void {
   config.debugMode = enabled;
+}
+
+/**
+ * Enable or disable development tools
+ * 
+ * @param enabled Whether development tools should be enabled
+ */
+export function setDevToolsEnabled(enabled: boolean): void {
+  config.enableDevTools = enabled;
 }
 
 // Create a default application logger
