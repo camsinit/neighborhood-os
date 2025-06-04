@@ -11,7 +11,7 @@ import { Calendar, Users, Package, Shield, Heart, Plus, MessageSquare } from "lu
 import AddEventDialog from "./AddEventDialog";
 import AddSafetyUpdateDialog from "./AddSafetyUpdateDialog";
 import AddSupportRequestDialog from "./AddSupportRequestDialog";
-import { UnifiedInviteDialog } from "./invite/UnifiedInviteDialog";
+import UnifiedInviteDialog from "./invite/UnifiedInviteDialog";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 
 const QuickActions = () => {
@@ -29,6 +29,12 @@ const QuickActions = () => {
     id: currentNeighborhood?.id,
     name: currentNeighborhood?.name
   });
+
+  // Handle adding new events - placeholder function since we're not modifying event functionality
+  const handleAddEvent = (event: any) => {
+    console.log("[QuickActions] New event added:", event);
+    // The event will be automatically refetched due to React Query invalidation
+  };
 
   return (
     <>
@@ -97,7 +103,8 @@ const QuickActions = () => {
       {/* Dialogs */}
       <AddEventDialog 
         open={showEventDialog} 
-        onOpenChange={setShowEventDialog} 
+        onOpenChange={setShowEventDialog}
+        onAddEvent={handleAddEvent}
       />
       
       <AddSafetyUpdateDialog 
