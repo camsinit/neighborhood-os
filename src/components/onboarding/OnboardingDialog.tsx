@@ -14,7 +14,7 @@ import SurveyDialog from "./survey/SurveyDialog";
  * It wraps the survey dialog and handles the completion of onboarding.
  * Now uses a unified onboarding flow that assumes new users without accounts.
  * 
- * REFACTORED: Simplified by extracting invite handling logic to a separate hook
+ * UPDATED: No longer handles invite processing - now done in useFormSubmission
  */
 interface OnboardingDialogProps {
   open: boolean;
@@ -35,9 +35,10 @@ const OnboardingDialog = ({
   console.log("[OnboardingDialog] Test mode:", isTestMode);
   console.log("[OnboardingDialog] User:", user ? `${user.id} (${user.email})` : 'null');
   
-  // Use the unified submission hook and invite handler
+  // Use the unified submission hook
+  // Note: We no longer need to handle pending invites here as it's now done in useFormSubmission
   const { submitForm, submissionState } = useFormSubmission();
-  const { handlePendingInviteJoin } = usePendingInviteHandler();
+  const { clearPendingInvite } = usePendingInviteHandler();
   
   // Handle completion of onboarding - now expects formData parameter
   const handleOnboardingComplete = async (formData: any) => {
@@ -67,16 +68,13 @@ const OnboardingDialog = ({
       console.log("[OnboardingDialog] Unified onboarding result:", success);
       
       if (success) {
-        // Get the current user after successful submission
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        
-        if (currentUser) {
-          console.log("[OnboardingDialog] Handling pending invite join for new user");
-          // Handle pending invite code after successful onboarding
-          await handlePendingInviteJoin(currentUser.id);
-        }
-        
         console.log("[OnboardingDialog] Onboarding completed successfully, navigating to home");
+        
+        // We don't need to handle invitation processing here anymore since
+        // it's now handled in the useFormSubmission hook
+        
+        // Clear the pending invite from localStorage since it's been processed
+        clearPendingInvite();
         
         // Close dialog and navigate to home
         onOpenChange(false);
