@@ -70,10 +70,10 @@ export const useSkillsPreview = () => {
       skills?.forEach(skill => {
         const category = skill.skill_category as SkillCategory;
         if (groupedSkills[category]) {
-          // Properly separate offers from requests - use 'need' for requests
+          // Properly separate offers from requests
           if (skill.request_type === 'offer') {
             groupedSkills[category].offers.push(skill.title);
-          } else if (skill.request_type === 'need') { // Fixed: Use 'need' for requests
+          } else if (skill.request_type === 'need') {
             groupedSkills[category].requests.push(skill.title);
           }
         }

@@ -39,7 +39,6 @@ export interface TransformedSkill {
 }
 
 export const transformSkill = (request: any): TransformedSkill => {
-  // Fixed: Use 'need' instead of 'request' to match database schema
   const type = request.request_type === 'need' ? "Needs Help" : "Offering Help";
   const colors = type === "Needs Help" 
     ? {
