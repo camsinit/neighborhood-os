@@ -114,8 +114,9 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
       // Apply filtering logic based on the view
       if (showRequests) {
         // Requests tab: Show skill requests from OTHER neighbors (exclude current user's requests)
+        // Fixed: Use 'need' instead of 'request' to match database schema
         query = query
-          .eq('request_type', 'request')
+          .eq('request_type', 'need')
           .neq('user_id', user.id);
       } else if (showMine) {
         // My Skills tab: Show only current user's skill OFFERS (things they're offering to help with)
