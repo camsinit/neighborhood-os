@@ -11,8 +11,15 @@ import Login from "./pages/Login";
 import OnboardingPage from "./pages/OnboardingPage";
 import SettingsPage from "./pages/SettingsPage";
 import JoinPage from "./pages/JoinPage";
+import HomePage from "./pages/HomePage";
+import CalendarPage from "./pages/CalendarPage";
+import SkillsPage from "./pages/SkillsPage";
+import GoodsPage from "./pages/GoodsPage";
+import SafetyPage from "./pages/SafetyPage";
+import NeighborsPage from "./pages/NeighborsPage";
 import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import "./App.css";
 
@@ -54,10 +61,70 @@ const App = () => {
                   <Route path="/onboarding" element={<OnboardingPage />} />
                   <Route path="/join" element={<JoinPage />} />
                   <Route
-                    path="/*"
+                    path="/"
                     element={
                       <ProtectedRoute>
                         <Index />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/home"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <HomePage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/calendar"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <CalendarPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/skills"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <SkillsPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/goods"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <GoodsPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/safety"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <SafetyPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/neighbors"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <NeighborsPage />
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
