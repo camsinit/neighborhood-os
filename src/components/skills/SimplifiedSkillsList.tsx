@@ -13,12 +13,12 @@ import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
  * Simplified skills list that displays skills in compact list format
  * Now uses the same neighborhood filtering approach as other components
  * 
- * Fixed filtering logic:
- * - "Requests" tab: Shows skill requests from OTHER neighbors (not your own)
+ * Updated filtering logic:
+ * - "Requests" tab: Shows ALL skill requests in the neighborhood (including your own)
  * - "My Skills" tab: Shows only YOUR skill offers (things you're offering to help with)
  */
 interface SimplifiedSkillsListProps {
-  showRequests?: boolean; // Show skill requests (needs) from other neighbors
+  showRequests?: boolean; // Show skill requests (needs) from all neighbors
   showMine?: boolean; // Show only current user's skill offers
   selectedCategory?: string;
   searchQuery?: string;
@@ -113,11 +113,9 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
 
       // Apply filtering logic based on the view
       if (showRequests) {
-        // Requests tab: Show skill requests from OTHER neighbors (exclude current user's requests)
-        // Fixed: filter for 'need' instead of 'request'
-        query = query
-          .eq('request_type', 'need')
-          .neq('user_id', user.id);
+        // Requests tab: Show ALL skill requests in the neighborhood (including user's own)
+        // This makes it easier for users to see what requests exist and avoid duplicates
+        query = query.eq('request_type', 'need');
       } else if (showMine) {
         // My Skills tab: Show only current user's skill OFFERS (things they're offering to help with)
         query = query
@@ -213,7 +211,7 @@ const SimplifiedSkillsList: React.FC<SimplifiedSkillsListProps> = ({
     const emptyMessage = showMine 
       ? "You haven't offered any skills yet. Use the 'Add Skill' button to share what you can help with!"
       : showRequests 
-        ? "No skill requests from neighbors right now"
+        ? "No skill requests in your neighborhood yet. Be the first to request help!"
         : "No skill offers found";
 
     return (
