@@ -16,7 +16,7 @@ export const useSkillDuplicateCheck = (formData: Partial<SkillFormData>, mode: '
         .select('id, title')
         .ilike('title', `%${formData.title}%`) // Case-insensitive search
         .eq('skill_category', formData.category)
-        .eq('request_type', mode === 'offer' ? 'offer' : 'need');
+        .eq('request_type', mode === 'offer' ? 'offer' : 'need'); // Fixed: use 'need' not 'request'
 
       if (error) throw error;
       return data;

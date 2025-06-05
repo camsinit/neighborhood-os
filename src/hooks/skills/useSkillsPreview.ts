@@ -73,7 +73,7 @@ export const useSkillsPreview = () => {
           // Properly separate offers from requests
           if (skill.request_type === 'offer') {
             groupedSkills[category].offers.push(skill.title);
-          } else if (skill.request_type === 'need') {
+          } else if (skill.request_type === 'need') { // Fixed: check for 'need' not 'request'
             groupedSkills[category].requests.push(skill.title);
           }
         }

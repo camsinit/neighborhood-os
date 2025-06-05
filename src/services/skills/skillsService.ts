@@ -72,11 +72,11 @@ export const createSkill = async (
   });
 
   // Create the insert data object with all fields explicitly defined
-  // FIXED: Use 'request' instead of 'need' for request_type
+  // Use 'need' instead of 'request' to match database constraint
   const insertData = {
     title: formData.title,
     description: formData.description || null,
-    request_type: mode === 'offer' ? 'offer' : 'request', // Fixed this line
+    request_type: mode === 'offer' ? 'offer' : 'need', // Fixed: use 'need' not 'request'
     user_id: userId,
     neighborhood_id: neighborhoodId,
     skill_category: formData.category,

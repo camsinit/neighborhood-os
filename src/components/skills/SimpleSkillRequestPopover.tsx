@@ -82,7 +82,7 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
       }
 
       // Create the skill request in the database
-      // FIXED: Use 'request' instead of 'need' for request_type
+      // Fixed: Use 'need' instead of 'request' to match database constraint
       const { error: insertError } = await supabase
         .from('skills_exchange')
         .insert({
@@ -90,7 +90,7 @@ const SimpleSkillRequestPopover: React.FC<SimpleSkillRequestPopoverProps> = ({ c
           neighborhood_id: userNeighborhood.neighborhood_id,
           title: skillTitle.trim(),
           skill_category: selectedCategory as SkillCategory,
-          request_type: 'request', // Fixed this line
+          request_type: 'need', // Fixed: use 'need' not 'request'
           description: `Looking for help with ${skillTitle.trim()}`,
           valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
         });
