@@ -911,6 +911,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      check_user_neighborhood_count: {
+        Args: { user_uuid: string }
+        Returns: number
+      }
       check_user_role: {
         Args: {
           user_id: string

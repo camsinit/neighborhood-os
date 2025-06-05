@@ -1,8 +1,9 @@
+
 /**
  * Header Component
  * 
  * Main navigation header with user menu and notifications
- * Updated to use the new simplified notification system
+ * UPDATED: Removed neighborhood switching - shows single neighborhood as static text
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User, Home, Plus, ChevronDown } from 'lucide-react';
+import { LogOut, Settings, User, Home, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNeighborhood } from '@/contexts/neighborhood';
 // Import from the new notification system
@@ -29,7 +30,7 @@ import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeigh
 const Header = () => {
   const navigate = useNavigate();
   const user = useUser();
-  const { currentNeighborhood, userNeighborhoods, switchNeighborhood } = useNeighborhood();
+  const { currentNeighborhood } = useNeighborhood(); // Simplified - no switching
   const { hasAccess: canCreateNeighborhood } = useCreateNeighborhoodAccess();
   
   // State for create neighborhood dialog
@@ -55,64 +56,28 @@ const Header = () => {
       <header className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center h-16">
-            {/* Logo/Brand with Neighborhood Switcher */}
+            {/* Logo/Brand with Static Neighborhood Display */}
             <div className="flex items-center">
-              {/* Neighborhood Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-xl font-bold text-gray-900 hover:text-blue-600 flex items-center"
-                  >
-                    <Home className="h-6 w-6 mr-2" />
+              <div className="flex items-center">
+                <Home className="h-6 w-6 mr-2 text-blue-600" />
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-gray-900">
                     {currentNeighborhood?.name || 'Neighborhood'}
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  {/* Current Neighborhood */}
-                  {currentNeighborhood && (
-                    <>
-                      <div className="px-2 py-1.5 text-sm font-medium text-gray-900">
-                        Current: {currentNeighborhood.name}
-                      </div>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  
-                  {/* Other Neighborhoods */}
-                  {userNeighborhoods && userNeighborhoods.length > 0 && (
-                    <>
-                      <div className="px-2 py-1.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Switch to
-                      </div>
-                      {userNeighborhoods
-                        .filter(n => n.id !== currentNeighborhood?.id)
-                        .map((neighborhood) => (
-                          <DropdownMenuItem
-                            key={neighborhood.id}
-                            onClick={() => switchNeighborhood(neighborhood.id)}
-                            className="cursor-pointer"
-                          >
-                            {neighborhood.name}
-                          </DropdownMenuItem>
-                        ))}
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  
-                  {/* Create New Neighborhood Option (Conditional) */}
-                  {canCreateNeighborhood && (
-                    <DropdownMenuItem
+                  </span>
+                  {/* Show create option if user has access and no neighborhood */}
+                  {canCreateNeighborhood && !currentNeighborhood && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setShowCreateDialog(true)}
-                      className="cursor-pointer text-blue-600 hover:text-blue-700"
+                      className="text-xs text-blue-600 hover:text-blue-700 p-0 h-auto font-normal"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create new neighborhood
-                    </DropdownMenuItem>
+                      <Plus className="h-3 w-3 mr-1" />
+                      Create neighborhood
+                    </Button>
                   )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </div>
+              </div>
             </div>
 
             {/* Right side - Notifications and User Menu */}

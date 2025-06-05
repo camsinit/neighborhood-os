@@ -2,7 +2,8 @@
 /**
  * Neighborhood context types
  * 
- * This file has been simplified to remove core contributor functionality.
+ * Simplified to support only single neighborhood per user.
+ * Removed multiple neighborhood functionality.
  */
 
 // Define the Neighborhood type
@@ -12,13 +13,11 @@ export interface Neighborhood {
   created_by?: string; // Added created_by for compatibility with existing code
 }
 
-// Define the context type
+// Define the simplified context type - single neighborhood only
 export interface NeighborhoodContextType {
   currentNeighborhood: Neighborhood | null;
-  userNeighborhoods: Neighborhood[]; // Added back userNeighborhoods array
   isLoading: boolean;
   error: Error | null;
   setCurrentNeighborhood: (neighborhood: Neighborhood | null) => void;
-  switchNeighborhood: (neighborhoodId: string) => void; // Added back switchNeighborhood function
   refreshNeighborhoodData: () => void;
 }

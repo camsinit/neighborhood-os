@@ -1,5 +1,5 @@
 
-import { Settings, Home, ChevronDown, Plus } from "lucide-react";
+import { Settings, Home, Plus } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -29,11 +29,11 @@ interface HeaderProps {
  * 
  * Displays the top navigation bar with:
  * - Quick Actions title
- * - Neighborhood dropdown (new addition)
+ * - Static neighborhood display (no switching)
  * - Notifications button
  * - User profile dropdown
  * 
- * Reduced toast notifications - only shows critical errors
+ * UPDATED: Removed neighborhood switching functionality
  */
 const Header = ({
   onOpenSettings
@@ -47,8 +47,8 @@ const Header = ({
   // Get the toast function for showing notifications
   const { toast } = useToast();
   
-  // Get neighborhood context data
-  const { currentNeighborhood, userNeighborhoods, switchNeighborhood } = useNeighborhood();
+  // Get neighborhood context data - simplified
+  const { currentNeighborhood } = useNeighborhood();
   const { hasAccess: canCreateNeighborhood } = useCreateNeighborhoodAccess();
   
   // State for create neighborhood dialog
@@ -89,67 +89,26 @@ const Header = ({
         {/* Left side - Quick Actions title */}
         <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
         
-        {/* Right side - neighborhood dropdown, notifications and profile */}
+        {/* Right side - static neighborhood display, notifications and profile */}
         <div className="flex items-center gap-2">
-          {/* Neighborhood Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          {/* Static Neighborhood Display */}
+          <div className="flex items-center text-sm font-medium text-gray-900">
+            <Home className="h-4 w-4 mr-2" />
+            <span>{currentNeighborhood?.name || 'Neighborhood'}</span>
+            
+            {/* Show create option if user has access and no neighborhood */}
+            {canCreateNeighborhood && !currentNeighborhood && (
               <Button
                 variant="ghost"
-                className="text-sm font-medium text-gray-900 hover:text-blue-600 flex items-center"
+                size="sm"
+                onClick={() => setShowCreateDialog(true)}
+                className="ml-2 text-blue-600 hover:text-blue-700"
               >
-                <Home className="h-4 w-4 mr-2" />
-                {currentNeighborhood?.name || 'Neighborhood'}
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <Plus className="h-4 w-4 mr-1" />
+                Create
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {/* Current Neighborhood */}
-              {currentNeighborhood && (
-                <>
-                  <div className="px-2 py-1.5 text-sm font-medium text-gray-900">
-                    Current: {currentNeighborhood.name}
-                  </div>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              
-              {/* Other Neighborhoods */}
-              {userNeighborhoods && userNeighborhoods.length > 0 && (
-                <>
-                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    Switch to
-                  </div>
-                  {userNeighborhoods
-                    .filter(n => n.id !== currentNeighborhood?.id)
-                    .map((neighborhood) => (
-                      <DropdownMenuItem
-                        key={neighborhood.id}
-                        onClick={() => {
-                          switchNeighborhood(neighborhood.id);
-                          sonnerToast.success(`Switched to ${neighborhood.name}`);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        {neighborhood.name}
-                      </DropdownMenuItem>
-                    ))}
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              
-              {/* Create New Neighborhood Option (Conditional) */}
-              {canCreateNeighborhood && (
-                <DropdownMenuItem
-                  onClick={() => setShowCreateDialog(true)}
-                  className="cursor-pointer text-blue-600 hover:text-blue-700"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create new neighborhood
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            )}
+          </div>
           
           {/* Add the enhanced notification button */}
           <NotificationDrawer />

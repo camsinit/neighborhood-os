@@ -8,14 +8,14 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Hook to determine if the current user has access to create neighborhoods
  * 
- * Access is granted to users who:
- * - Are part of multiple neighborhoods (>1)
- * - Have the specific user ID: 74bf3085-8275-4eb2-a721-8c8e91b3d3d8
+ * UPDATED: Access is now granted only to users who:
+ * - Have NO existing neighborhood (neither created nor joined)
+ * - Have the specific user ID: 74bf3085-8275-4eb2-a721-8c8e91b3d3d8 (for testing)
  * - Have the 'super_admin' role
  */
 export const useCreateNeighborhoodAccess = () => {
   const user = useUser();
-  const { userNeighborhoods } = useNeighborhood(); // Use the correct context property
+  const { currentNeighborhood } = useNeighborhood(); // Use simplified context
   
   // Query user roles to check for super_admin access
   const { data: userRoles = [] } = useQuery({
@@ -42,17 +42,18 @@ export const useCreateNeighborhoodAccess = () => {
   const hasAccess = useMemo(() => {
     if (!user?.id) return false;
     
-    // Check if user is the specific authorized user
+    // Check if user is the specific authorized user (for testing)
     const isSpecialUser = user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8';
-    
-    // Check if user is part of multiple neighborhoods
-    const hasMultipleNeighborhoods = userNeighborhoods && userNeighborhoods.length > 1;
     
     // Check if user has super_admin role
     const isSuperAdmin = userRoles.includes('super_admin');
     
-    return isSpecialUser || hasMultipleNeighborhoods || isSuperAdmin;
-  }, [user?.id, userNeighborhoods, userRoles]);
+    // Check if user has NO existing neighborhood (the main condition)
+    const hasNoNeighborhood = !currentNeighborhood;
+    
+    // User can create if they're special, super admin, OR have no neighborhood
+    return isSpecialUser || isSuperAdmin || hasNoNeighborhood;
+  }, [user?.id, currentNeighborhood, userRoles]);
 
   return {
     hasAccess,
