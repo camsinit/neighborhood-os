@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -136,7 +135,9 @@ const App = () => {
                     path="/settings"
                     element={
                       <ProtectedRoute>
-                        <SettingsPage />
+                        <MainLayout>
+                          <SettingsPage />
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -145,7 +146,9 @@ const App = () => {
                     element={
                       <ProtectedRoute>
                         <SuperAdminRoute>
-                          <DebugPage />
+                          <MainLayout>
+                            <DebugPage />
+                          </MainLayout>
                         </SuperAdminRoute>
                       </ProtectedRoute>
                     }
