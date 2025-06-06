@@ -14,7 +14,7 @@ export interface SkillProvider {
   email_visible: boolean;
   phone_visible: boolean;
   phone_number: string | null;
-  email: string | null; // Will be null since we can't easily access auth.users.email
+  email: string | null;
   preferredContactMethod: 'phone' | 'email' | 'app';
   contactValue: string | null;
 }
@@ -22,7 +22,7 @@ export interface SkillProvider {
 /**
  * Custom hook to fetch skill providers for a specific skill
  * This hook handles all the complex logic for determining contact preferences
- * and fetching the actual contact information (phone) they want to share
+ * and fetching the actual contact information they want to share
  */
 export const useSkillProviders = (skillTitle: string, skillCategory: string) => {
   const user = useUser();
@@ -74,6 +74,29 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
         let contactValue: string | null = null;
+        let userEmail: string | null = null;
+
+        // For email contacts, we need to fetch the actual email from auth.users
+        if (profile.email_visible) {
+          try {
+            // Get the user's email from the auth.users table via a direct query
+            const { data: authUser, error: emailError } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', skill.user_id)
+              .single();
+
+            if (!emailError && authUser) {
+              // Use the admin client to get user email (this requires proper RLS policies)
+              const { data: userData } = await supabase.auth.admin.getUserById(skill.user_id);
+              if (userData?.user?.email) {
+                userEmail = userData.user.email;
+              }
+            }
+          } catch (error) {
+            console.log('Could not fetch email for user:', skill.user_id);
+          }
+        }
 
         // Determine preferred contact method and set contact value
         // Priority: phone first (if visible and available), then email (if visible), then app
@@ -83,9 +106,8 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         } 
         else if (profile.email_visible) {
           preferredContactMethod = 'email';
-          // For email, we can't easily access the actual email from auth.users
-          // So we'll indicate email is the preferred method but show a message
-          contactValue = 'Contact via email (email address will be shared)';
+          // Use the actual email if we were able to fetch it, otherwise fall back to a message
+          contactValue = userEmail || 'Email contact available';
         }
 
         processedProviders.push({
@@ -95,7 +117,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
           email_visible: profile.email_visible,
           phone_visible: profile.phone_visible,
           phone_number: profile.phone_number,
-          email: null, // We can't easily get this from auth.users
+          email: userEmail,
           preferredContactMethod,
           contactValue
         });
