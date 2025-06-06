@@ -4,7 +4,7 @@
  */
 
 // Define activity types for better type safety
-// ENHANCED: Added 'neighbor_joined' to support new neighbor welcome activities
+// ENHANCED: Removed old skill session types as they're no longer used
 export type ActivityType = 
   | 'event_created' 
   | 'event_rsvp' 
@@ -13,7 +13,7 @@ export type ActivityType =
   | 'good_shared' 
   | 'good_requested' 
   | 'safety_update'
-  | 'neighbor_joined'; // Added this new activity type
+  | 'neighbor_joined';
 
 // Define valid content tables for type safety
 export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange';
