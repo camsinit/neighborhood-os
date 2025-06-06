@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -58,9 +59,8 @@ const App = () => {
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
-                  {/* Updated to capture invite code parameter */}
+                  {/* Join routes moved outside ProtectedRoute to allow unauthenticated access */}
                   <Route path="/join/:inviteCode" element={<JoinPage />} />
-                  {/* Keep the base join route for backwards compatibility */}
                   <Route path="/join" element={<JoinPage />} />
                   <Route
                     path="/"
