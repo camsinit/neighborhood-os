@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -11,13 +11,13 @@ import { toast } from 'sonner';
 import { createTemplatedNotification } from '@/utils/notifications/templatedNotificationService';
 
 /**
- * SkillContactPopover - Shows all providers of a skill with their preferred contact method
+ * SkillContactPopover - Simplified skill request interface
  * 
- * This component creates a popover that displays neighbors who offer a specific skill
- * along with their single preferred contact method (phone > email > generic contact).
- * Respects privacy settings from user onboarding.
+ * Shows providers with a single "Contact" button that:
+ * 1. Reveals the provider's preferred contact method to the requester
+ * 2. Sends a notification to the provider with the requester's contact info
  * 
- * UPDATED: Now uses the new templated notification system for consistent messaging
+ * UPDATED: Simplified UI with description and single contact action
  */
 interface SkillContactPopoverProps {
   skillTitle: string;
@@ -45,6 +45,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   onContactReveal
 }) => {
   const user = useUser();
+  const [revealedContacts, setRevealedContacts] = useState<Set<string>>(new Set());
 
   // Fetch all providers of this skill with their contact preferences
   const { data: providers, isLoading, error } = useQuery({
@@ -124,29 +125,44 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
     enabled: !!user
   });
 
-  // Handle contact reveal and create notification using the new templated system
+  // Handle contact reveal and create notification with requester's contact info
   const handleContactReveal = async (provider: SkillProvider) => {
     if (!user) return;
 
     try {
-      // Get the current user's display name for the notification
-      const { data: currentUserProfile } = await supabase
+      // Get the current user's profile and contact preferences
+      const { data: requesterProfile } = await supabase
         .from('profiles')
-        .select('display_name')
+        .select('display_name, phone_visible, phone_number, email_visible')
         .eq('id', user.id)
         .single();
 
-      const actorName = currentUserProfile?.display_name || 'A neighbor';
+      const requesterName = requesterProfile?.display_name || 'A neighbor';
 
-      // Create notification using the new templated system
-      // This ensures proper actor name display and module-specific styling
+      // Determine requester's preferred contact method
+      let requesterContactMethod = 'app';
+      let requesterContactValue = null;
+
+      if (requesterProfile?.phone_visible && requesterProfile?.phone_number) {
+        requesterContactMethod = 'phone';
+        requesterContactValue = requesterProfile.phone_number;
+      } else if (requesterProfile?.email_visible) {
+        // Get requester's email
+        const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
+        if (authUser.user?.email) {
+          requesterContactMethod = 'email';
+          requesterContactValue = authUser.user.email;
+        }
+      }
+
+      // Create notification using the templated system with requester's contact info
       await createTemplatedNotification({
         templateId: 'skill_session_request',
         recipientUserId: provider.user_id,
         actorUserId: user.id,
-        contentId: provider.user_id, // Using provider's user_id as content_id for consistency
+        contentId: provider.user_id,
         variables: {
-          actor: actorName,
+          actor: requesterName,
           title: skillTitle
         },
         metadata: {
@@ -154,44 +170,53 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
           skillCategory,
           contextType: 'skill_interest_request',
           interestedUserId: user.id,
-          requestedContact: provider.preferredContactMethod
+          requesterContactMethod,
+          requesterContactValue,
+          requesterName
         }
       });
+
+      // Mark this contact as revealed
+      setRevealedContacts(prev => new Set(prev).add(provider.user_id));
 
       // Call optional callback
       if (onContactReveal) {
         onContactReveal(provider.user_id, skillTitle);
       }
 
-      toast.success('Interest shown! The neighbor has been notified.');
+      toast.success('Contact info revealed! The neighbor has been notified.');
     } catch (error) {
       console.error('Error handling contact reveal:', error);
-      toast.error('Failed to show interest. Please try again.');
+      toast.error('Failed to reveal contact. Please try again.');
     }
   };
 
-  // Render contact method icon and value
+  // Render contact method icon and value (only after revelation)
   const renderContactMethod = (provider: SkillProvider) => {
+    if (!revealedContacts.has(provider.user_id)) {
+      return null; // Don't show contact info until revealed
+    }
+
     switch (provider.preferredContactMethod) {
       case 'phone':
         return (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
             <Phone className="h-4 w-4" />
             <span>{provider.contactValue}</span>
           </div>
         );
       case 'email':
         return (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
             <Mail className="h-4 w-4" />
             <span>{provider.contactValue}</span>
           </div>
         );
       default:
         return (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
             <MessageCircle className="h-4 w-4" />
-            <span>Contact via app</span>
+            <span>Contact via app notifications</span>
           </div>
         );
     }
@@ -204,9 +229,13 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <div className="p-4">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            Neighbors offering: {skillTitle}
+          <h3 className="font-semibold text-gray-900 mb-2">
+            Request help with: {skillTitle}
           </h3>
+          
+          <p className="text-sm text-gray-600 mb-4">
+            Click "Contact" to reveal their contact info and let them know you need help.
+          </p>
           
           {isLoading && (
             <div className="flex items-center justify-center py-4">
@@ -232,29 +261,35 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
               {providers.map((provider) => (
                 <div
                   key={provider.user_id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-gray-300 bg-white transition-colors"
+                  className="p-3 rounded-lg border border-gray-200 bg-white"
                 >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={provider.avatar_url || undefined} />
-                      <AvatarFallback className="text-sm">
-                        {provider.display_name?.[0] || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {provider.display_name || 'Anonymous'}
-                      </p>
-                      {renderContactMethod(provider)}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={provider.avatar_url || undefined} />
+                        <AvatarFallback className="text-sm">
+                          {provider.display_name?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {provider.display_name || 'Anonymous'}
+                        </p>
+                      </div>
                     </div>
+                    
+                    {!revealedContacts.has(provider.user_id) && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleContactReveal(provider)}
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                      >
+                        Contact
+                      </Button>
+                    )}
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleContactReveal(provider)}
-                    className="bg-green-500 hover:bg-green-600 text-white"
-                  >
-                    Contact
-                  </Button>
+                  
+                  {renderContactMethod(provider)}
                 </div>
               ))}
             </div>
