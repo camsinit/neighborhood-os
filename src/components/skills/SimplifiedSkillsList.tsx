@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 import SkillCard from './list/SkillCard';
-import { useSimpleSkillInteractions } from '@/hooks/skills/useSimpleSkillInteractions';
 import { Loader2 } from 'lucide-react';
 import { SkillCategory, SkillRequestType } from './types/skillTypes';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
