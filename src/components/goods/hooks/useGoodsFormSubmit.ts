@@ -1,10 +1,11 @@
 
-// This hook handles form submission
+// This hook handles form submission with improved query invalidation
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { submitGoodsForm } from "../utils/formSubmission";
 import { GoodsItemFormData, GoodsRequestFormData } from "@/components/support/types/formTypes";
 import { useEffect } from "react";
+import { refreshEvents } from '@/utils/refreshEvents';
 
 export const useGoodsFormSubmit = (
   isOfferForm: boolean,
@@ -55,7 +56,15 @@ export const useGoodsFormSubmit = (
       );
       
       if (success) {
+        // Invalidate all goods and activity-related queries for immediate UI updates
         queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
+        queryClient.invalidateQueries({ queryKey: ['goods-preview'] });
+        
+        // Trigger refresh events for any components listening
+        refreshEvents.goods();
+        refreshEvents.activities();
+        
         onClose();
         // Success is indicated by the form closing and data refreshing - no toast needed
       }

@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +8,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS, getInvalidationKeys } from '@/utils/queryKeys';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -18,6 +20,8 @@ interface SkillRequestCardProps {
  * This component has been updated to show different actions based on ownership:
  * - For the skill owner: Shows edit and delete icons (on hover)
  * - For other users: Shows "Offer Help" button (on hover)
+ * 
+ * Updated to use centralized query key constants for consistent invalidation.
  */
 const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // Get current user to check ownership
@@ -26,14 +30,15 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
 
-  // Hook for skill operations (delete functionality) with success callback
+  // Hook for skill operations (delete functionality) with success callback using centralized keys
   const queryClient = useQueryClient();
   const { deleteSkill, isLoading: isDeleting } = useSkillUpdate({
     onSuccess: () => {
-      // Invalidate all skills-related queries to ensure UI updates immediately
-      queryClient.invalidateQueries({ queryKey: ['simplified-skills'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      queryClient.invalidateQueries({ queryKey: ['skills-preview'] });
+      // Invalidate all skills-related queries using centralized constants
+      const invalidationKeys = getInvalidationKeys('SKILLS');
+      invalidationKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      });
     }
   });
 

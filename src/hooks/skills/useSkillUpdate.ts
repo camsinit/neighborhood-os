@@ -1,6 +1,7 @@
 
 /**
  * Hook to handle updating a skill and ensuring activities are updated too
+ * Updated to use centralized query key constants for consistency
  */
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import * as skillsService from "@/services/skills/skillsService";
 import { toast } from "sonner";
 import { refreshEvents } from "@/utils/refreshEvents";
+import { QUERY_KEYS, getInvalidationKeys } from "@/utils/queryKeys";
 
 // Define the options interface for configuration
 interface SkillUpdateOptions {
@@ -48,15 +50,18 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       // Using the skillsService to update the skill
       await skillsService.updateSkill(skillId, { title: newTitle }, user.id);
 
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      // Invalidate all skills and activity-related queries using centralized keys
+      const invalidationKeys = getInvalidationKeys('SKILLS');
+      invalidationKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      });
 
       // Dispatch custom event for any component that's listening
       window.dispatchEvent(new Event('skill-update-submitted'));
       
       // Add refresh event for activities feed using our central system
       refreshEvents.skills();
+      refreshEvents.activities();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {
@@ -98,9 +103,11 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
         throw new Error(result.error.message || 'Failed to delete skill');
       }
 
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      // Invalidate all skills and activity-related queries using centralized keys
+      const invalidationKeys = getInvalidationKeys('SKILLS');
+      invalidationKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      });
 
       // Dispatch custom event for any component that's listening
       window.dispatchEvent(new CustomEvent('skill-deleted', {
@@ -109,6 +116,7 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       
       // Add refresh event for activities feed using our central system
       refreshEvents.skills();
+      refreshEvents.activities();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {

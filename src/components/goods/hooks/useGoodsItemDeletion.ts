@@ -4,6 +4,7 @@
  * 
  * This hook encapsulates the logic for deleting goods items and
  * notifying the activity feed about the deletion.
+ * Updated to include activity query invalidation for immediate UI updates.
  */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { useUser } from "@supabase/auth-helpers-react";
+import { refreshEvents } from '@/utils/refreshEvents';
 
 export const useGoodsItemDeletion = (onRefresh: () => void) => {
   // Get the current user for permission checks
@@ -26,7 +28,7 @@ export const useGoodsItemDeletion = (onRefresh: () => void) => {
    * This function:
    * 1. Deletes the item from the database
    * 2. Calls the edge function to update the activity feed
-   * 3. Refreshes the goods data
+   * 3. Refreshes the goods data and invalidates all related queries
    */
   const handleDeleteGoodsItem = async (item: GoodsExchangeItem) => {
     try {
@@ -74,9 +76,19 @@ export const useGoodsItemDeletion = (onRefresh: () => void) => {
         // Don't show an error to the user since the item was already deleted
       }
 
-      // Success! Refresh the data
+      // Success! Refresh the data and invalidate all related queries for immediate UI updates
       toast.success("Item deleted successfully");
+      
+      // Invalidate all goods and activity-related queries to ensure immediate UI updates
       queryClient.invalidateQueries({ queryKey: ["goods-exchange"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["goods-preview"] });
+      
+      // Trigger refresh events for any components listening
+      refreshEvents.goods();
+      refreshEvents.activities();
+      
+      // Call the legacy refresh callback
       onRefresh();
     } catch (error) {
       console.error("Error in delete operation:", error);
