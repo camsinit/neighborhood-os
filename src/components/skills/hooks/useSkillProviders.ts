@@ -14,6 +14,7 @@ export interface SkillProvider {
   email_visible: boolean;
   phone_visible: boolean;
   phone_number: string | null;
+  email: string | null; // Added to store the actual email address
   preferredContactMethod: 'phone' | 'email' | 'app';
   contactValue: string | null;
 }
@@ -21,6 +22,7 @@ export interface SkillProvider {
 /**
  * Custom hook to fetch skill providers for a specific skill
  * This hook handles all the complex logic for determining contact preferences
+ * and fetching the actual contact information (email/phone) they want to share
  */
 export const useSkillProviders = (skillTitle: string, skillCategory: string) => {
   const user = useUser();
@@ -41,8 +43,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
       if (!userNeighborhood) return [];
 
-      // Fetch skill providers with their contact preferences
-      // Note: We can't directly join auth.users, so we'll handle email separately
+      // Fetch skill providers with their contact preferences and profile info
       const { data: skills, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -73,18 +74,25 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
         let contactValue: string | null = null;
+        let email: string | null = null;
 
-        // Check if phone is visible and available first (prioritize phone)
+        // If email is visible, fetch the actual email address from auth.users
+        if (profile.email_visible) {
+          // Use RPC function to safely get email (you may need to create this RPC)
+          const { data: emailData } = await supabase
+            .rpc('get_user_email', { target_user_id: skill.user_id });
+          email = emailData;
+        }
+
+        // Determine preferred contact method and set contact value
+        // Priority: phone first (if visible and available), then email (if visible), then app
         if (profile.phone_visible && profile.phone_number) {
           preferredContactMethod = 'phone';
           contactValue = profile.phone_number;
         } 
-        // If phone not available, check email visibility
-        else if (profile.email_visible) {
+        else if (profile.email_visible && email) {
           preferredContactMethod = 'email';
-          // We'll use a placeholder since we can't directly access auth.users.email
-          // In a real implementation, you'd need a separate call or RPC function
-          contactValue = 'Available via email';
+          contactValue = email;
         }
 
         processedProviders.push({
@@ -94,6 +102,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
           email_visible: profile.email_visible,
           phone_visible: profile.phone_visible,
           phone_number: profile.phone_number,
+          email: email,
           preferredContactMethod,
           contactValue
         });
