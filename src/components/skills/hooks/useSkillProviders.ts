@@ -44,6 +44,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
       if (!userNeighborhood) return [];
 
       // Fetch skill providers with their contact preferences and profile info
+      // We can get email directly from auth.users through a join
       const { data: skills, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -65,6 +66,27 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
       if (error) throw error;
 
+      // Get emails for users who have email_visible = true
+      const userIds = skills?.map(skill => skill.user_id) || [];
+      const { data: userEmails } = await supabase
+        .from('neighborhood_members')
+        .select(`
+          user_id,
+          profiles!inner(email_visible),
+          auth_users:user_id(email)
+        `)
+        .in('user_id', userIds)
+        .eq('neighborhood_id', userNeighborhood.neighborhood_id)
+        .eq('profiles.email_visible', true);
+
+      // Create a map of user_id to email for quick lookup
+      const emailMap = new Map<string, string>();
+      userEmails?.forEach(item => {
+        if (item.auth_users?.email) {
+          emailMap.set(item.user_id, item.auth_users.email);
+        }
+      });
+
       // Process providers and determine preferred contact method
       const processedProviders: SkillProvider[] = [];
       
@@ -74,29 +96,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
         let contactValue: string | null = null;
-        let userEmail: string | null = null;
-
-        // For email contacts, we need to fetch the actual email from auth.users
-        if (profile.email_visible) {
-          try {
-            // Get the user's email from the auth.users table via a direct query
-            const { data: authUser, error: emailError } = await supabase
-              .from('profiles')
-              .select('id')
-              .eq('id', skill.user_id)
-              .single();
-
-            if (!emailError && authUser) {
-              // Use the admin client to get user email (this requires proper RLS policies)
-              const { data: userData } = await supabase.auth.admin.getUserById(skill.user_id);
-              if (userData?.user?.email) {
-                userEmail = userData.user.email;
-              }
-            }
-          } catch (error) {
-            console.log('Could not fetch email for user:', skill.user_id);
-          }
-        }
+        const userEmail = emailMap.get(skill.user_id) || null;
 
         // Determine preferred contact method and set contact value
         // Priority: phone first (if visible and available), then email (if visible), then app
@@ -106,7 +106,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         } 
         else if (profile.email_visible) {
           preferredContactMethod = 'email';
-          // Use the actual email if we were able to fetch it, otherwise fall back to a message
+          // Use the actual email if we have it, otherwise fall back to a message
           contactValue = userEmail || 'Email contact available';
         }
 
