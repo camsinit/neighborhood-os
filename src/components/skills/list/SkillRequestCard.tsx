@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
+import { Edit, Trash2 } from 'lucide-react';
+import { useUser } from '@supabase/auth-helpers-react';
 import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
+import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -12,12 +15,35 @@ interface SkillRequestCardProps {
 /**
  * SkillRequestCard - Displays a skill request in a card format matching SkillOfferCard
  * 
- * This component has been updated to match the formatting of SkillOfferCard for consistency.
- * Removed complex scheduling components and simplified to basic interaction.
+ * This component has been updated to show different actions based on ownership:
+ * - For the skill owner: Shows edit and delete icons
+ * - For other users: Shows "Offer Help" button
  */
 const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
+  // Get current user to check ownership
+  const currentUser = useUser();
+  
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
+
+  // Hook for skill operations (delete functionality)
+  const { deleteSkill, isLoading: isDeleting } = useSkillUpdate();
+
+  // Check if current user owns this skill request
+  const isOwner = currentUser?.id === skill.user_id;
+
+  // Handle skill deletion
+  const handleDeleteSkill = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await deleteSkill(skill.id, skill.title);
+  };
+
+  // Handle edit action (placeholder for now)
+  const handleEditSkill = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement edit functionality
+    console.log('Edit skill:', skill.title);
+  };
 
   // Updated to use the new standardized 6 categories
   const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
@@ -36,7 +62,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
     <div 
       data-skill-id={skill.id}
       className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
-      onClick={() => setIsContributeDialogOpen(true)}
+      onClick={() => !isOwner && setIsContributeDialogOpen(true)}
     >
       {/* User profile and skill title */}
       <div className="flex items-center gap-3 flex-grow">
@@ -56,17 +82,42 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Offer Help button that shows on hover */}
-      <Button 
-        variant="outline" 
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsContributeDialogOpen(true);
-        }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
-      >
-        Offer Help
-      </Button>
+      {/* Conditional action buttons based on ownership */}
+      {isOwner ? (
+        // Owner sees edit and delete icons
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleEditSkill}
+            className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-0"
+            disabled={isDeleting}
+          >
+            <Edit size={14} />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleDeleteSkill}
+            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white border-0"
+            disabled={isDeleting}
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+      ) : (
+        // Non-owners see the "Offer Help" button
+        <Button 
+          variant="outline" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsContributeDialogOpen(true);
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+        >
+          Offer Help
+        </Button>
+      )}
     </div>
   );
 };
