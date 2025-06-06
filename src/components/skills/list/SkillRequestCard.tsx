@@ -16,8 +16,8 @@ interface SkillRequestCardProps {
  * SkillRequestCard - Displays a skill request in a card format matching SkillOfferCard
  * 
  * This component has been updated to show different actions based on ownership:
- * - For the skill owner: Shows edit and delete icons
- * - For other users: Shows "Offer Help" button
+ * - For the skill owner: Shows edit and delete icons (on hover)
+ * - For other users: Shows "Offer Help" button (on hover)
  */
 const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   // Get current user to check ownership
@@ -82,9 +82,9 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Conditional action buttons based on ownership */}
+      {/* Conditional action buttons based on ownership - all hidden by default, shown on hover */}
       {isOwner ? (
-        // Owner sees edit and delete icons
+        // Owner sees edit and delete icons that appear on hover
         <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
           <Button 
             variant="outline" 
@@ -106,7 +106,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
           </Button>
         </div>
       ) : (
-        // Non-owners see the "Offer Help" button
+        // Non-owners see the "Offer Help" button that appears on hover
         <Button 
           variant="outline" 
           onClick={(e) => {
