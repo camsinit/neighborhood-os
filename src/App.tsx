@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,7 @@ import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import SuperAdminRoute from "@/components/auth/SuperAdminRoute";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -135,6 +135,16 @@ const App = () => {
                     element={
                       <ProtectedRoute>
                         <SettingsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/debug"
+                    element={
+                      <ProtectedRoute>
+                        <SuperAdminRoute>
+                          <DebugPage />
+                        </SuperAdminRoute>
                       </ProtectedRoute>
                     }
                   />
