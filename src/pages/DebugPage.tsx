@@ -8,10 +8,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bug, Database, Bell, Users, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Bug, Database, Bell, Users, Activity, TestTube } from 'lucide-react';
 import { RLSDiagnosticsPanel } from '@/components/debug/RLSDiagnosticsPanel';
 import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
+import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
+import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import MainLayout from '@/components/layout/MainLayout';
 
 /**
@@ -21,9 +24,14 @@ import MainLayout from '@/components/layout/MainLayout';
  * - Activity debugging and duplicate detection
  * - RLS policy diagnostics
  * - Logging controls
+ * - Onboarding testing
  * - Future: Notifications and Users debugging
  */
 const DebugPage = () => {
+  // State for onboarding testing dialogs
+  const [showOnboardingTest, setShowOnboardingTest] = useState(false);
+  const [showSurveyTest, setShowSurveyTest] = useState(false);
+
   return (
     <MainLayout>
       <div className="container mx-auto p-6 max-w-7xl">
@@ -40,7 +48,7 @@ const DebugPage = () => {
         
         {/* Main Debug Interface */}
         <Tabs defaultValue="activities" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="activities" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Activities
@@ -48,6 +56,10 @@ const DebugPage = () => {
             <TabsTrigger value="rls" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               RLS Policies
+            </TabsTrigger>
+            <TabsTrigger value="testing" className="flex items-center gap-2">
+              <TestTube className="w-4 h-4" />
+              Testing
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
@@ -71,6 +83,44 @@ const DebugPage = () => {
           {/* RLS Diagnostics Tab */}
           <TabsContent value="rls" className="mt-4">
             <RLSDiagnosticsPanel />
+          </TabsContent>
+          
+          {/* Testing Tab - Onboarding and other testing tools */}
+          <TabsContent value="testing" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TestTube className="w-5 h-5" />
+                  Testing Tools
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Onboarding Flow Testing</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Test the onboarding and survey flows in isolation without affecting user data.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowOnboardingTest(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="w-4 h-4" />
+                      Test Onboarding Flow
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowSurveyTest(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="w-4 h-4" />
+                      Test Survey Flow
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           {/* Notifications Debug Tab - Placeholder for future implementation */}
@@ -132,6 +182,24 @@ const DebugPage = () => {
             <LoggingControls />
           </TabsContent>
         </Tabs>
+        
+        {/* Testing Dialogs - Only render when needed */}
+        <OnboardingDialog 
+          open={showOnboardingTest} 
+          onOpenChange={(open) => {
+            setShowOnboardingTest(open);
+            if (!open) {
+              setShowSurveyTest(true);
+            }
+          }}
+          isTestMode={true} // Mark this as test mode to prevent data modification
+        />
+        
+        <SurveyDialog
+          open={showSurveyTest}
+          onOpenChange={setShowSurveyTest}
+          isTestMode={true} // Mark this as test mode to prevent data modification
+        />
       </div>
     </MainLayout>
   );

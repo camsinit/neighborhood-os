@@ -2,7 +2,7 @@
 import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
-import { DebugDashboard } from "@/components/debug/DebugDashboard";
+import DebugVisibilityToggle from "@/components/debug/DebugVisibilityToggle";
 
 /**
  * MainLayout component props
@@ -17,7 +17,7 @@ interface MainLayoutProps {
  * Provides the primary layout structure for the application with:
  * - Sidebar navigation on the left
  * - Main content area with conditional header (only on homepage) on the right
- * - Debug dashboard for development
+ * - Debug visibility toggle for development
  * 
  * Settings are now handled as a page route instead of a dialog
  * 
@@ -49,8 +49,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children}
         </main>
         
-        {/* Add the debug dashboard - only shows in development */}
-        <DebugDashboard />
+        {/* Add the debug visibility toggle - only shows in development and to super admins */}
+        <DebugVisibilityToggle />
       </div>
     </div>
   );
