@@ -4,6 +4,7 @@
  * 
  * Handles all notification types with smart navigation integration
  * Now includes theme-based color highlighting for content and borders
+ * ENHANCED: Removed close button and improved title highlighting
  */
 import React from 'react';
 import { Card } from '@/components/ui/card';
@@ -195,7 +196,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
           )}
         </div>
         
-        {/* Unread indicator */}
+        {/* Unread indicator - REMOVED close button */}
         {!notification.is_read && (
           <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></div>
         )}

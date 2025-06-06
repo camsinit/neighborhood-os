@@ -4,6 +4,8 @@
  * 
  * This file defines all notification templates with natural language phrases
  * that are personally relevant to specific users
+ * 
+ * ENHANCED: Fixed templates to properly use actor names instead of "Someone"
  */
 
 export interface NotificationTemplate {
@@ -20,6 +22,7 @@ export interface NotificationTemplate {
 /**
  * All notification templates using natural, conversational language
  * Only includes notifications that are personally relevant to the recipient
+ * FIXED: Updated templates to use {{actor}} for proper name display
  */
 export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
   // Events Module
@@ -48,13 +51,13 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
   // Skills Module  
   skill_session_request: {
     id: 'skill_session_request',
-    template: '{{actor}} wants to learn {{title}} from you',
+    template: '{{actor}} is interested in your {{title}} skill',
     contentType: 'skills',
     notificationType: 'skills',
     actionType: 'respond',
-    actionLabel: 'Respond',
+    actionLabel: 'View Interest',
     relevanceScore: 3, // High - direct request
-    description: 'When someone requests a session with you for a skill you offer'
+    description: 'When someone is interested in a skill you offer'
   },
 
   skill_session_confirmed: {
