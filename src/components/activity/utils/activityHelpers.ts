@@ -1,9 +1,10 @@
 
-import { Calendar, Book, Package, Heart, Shield } from "lucide-react";
+import { Calendar, Book, Package, Heart, Shield, UserPlus } from "lucide-react";
 
 /**
  * Color mapping for different activity types
  * Used for visual distinction in the activity feed
+ * ENHANCED: Added neighbor_joined activity type
  */
 export const getActivityColor = (type: string): string => {
   switch (type) {
@@ -22,6 +23,8 @@ export const getActivityColor = (type: string): string => {
       return '#22C55E'; // Care green
     case 'safety_update':
       return '#EA384C'; // Safety red
+    case 'neighbor_joined':
+      return '#10B981'; // Welcome green
     default:
       return '#8E9196'; // Default gray
   }
@@ -30,6 +33,7 @@ export const getActivityColor = (type: string): string => {
 /**
  * Icon mapping for different activity types
  * Provides a visual indicator for each activity type
+ * ENHANCED: Added neighbor_joined activity type
  */
 export const getActivityIcon = (type: string) => {
   switch (type) {
@@ -48,6 +52,8 @@ export const getActivityIcon = (type: string) => {
       return Heart;
     case 'safety_update':
       return Shield;
+    case 'neighbor_joined':
+      return UserPlus;
     default:
       return null;
   }
@@ -56,6 +62,7 @@ export const getActivityIcon = (type: string) => {
 /**
  * Background color mapping for different activity types
  * Used for hover effects
+ * ENHANCED: Added neighbor_joined activity type
  */
 export const getActivityBackground = (type: string) => {
   switch (type) {
@@ -73,6 +80,8 @@ export const getActivityBackground = (type: string) => {
       return 'hover:bg-[#F2FCE2]/50';
     case 'safety_update':
       return 'hover:bg-[#FDE1D3]/50';
+    case 'neighbor_joined':
+      return 'hover:bg-[#D1FAE5]/50';
     default:
       return 'hover:bg-gray-50';
   }
@@ -81,6 +90,7 @@ export const getActivityBackground = (type: string) => {
 /**
  * Enhanced contextual descriptions for activity types
  * Provides more specific information for each activity
+ * ENHANCED: Added neighbor_joined activity type
  */
 export const getActivityContext = (type: string): string => {
   switch (type) {
@@ -104,6 +114,8 @@ export const getActivityContext = (type: string): string => {
       return "Help has been provided";
     case 'safety_update':
       return "New safety update posted";
+    case 'neighbor_joined':
+      return "A new neighbor has joined the community";
     default:
       return "New activity in the neighborhood";
   }
@@ -111,6 +123,7 @@ export const getActivityContext = (type: string): string => {
 
 /**
  * Action button configuration for different activity types
+ * ENHANCED: Added neighbor_joined activity type
  */
 export const getActionButton = (activity: any) => {
   switch (activity.activity_type) {
@@ -146,6 +159,12 @@ export const getActionButton = (activity: any) => {
       return {
         label: "Read More",
         icon: Shield,
+        variant: "outline" as const,
+      };
+    case 'neighbor_joined':
+      return {
+        label: "Welcome",
+        icon: UserPlus,
         variant: "outline" as const,
       };
     default:
