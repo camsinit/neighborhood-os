@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -95,16 +94,21 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
         let contactValue: string | null = null;
 
-        // Priority: phone > email > app
+        // Check if phone is visible and available
         if (profile.phone_visible && profile.phone_number) {
           preferredContactMethod = 'phone';
           contactValue = profile.phone_number;
         } else if (profile.email_visible) {
           // Fetch email from auth.users if email is visible
-          const { data: authUser } = await supabase.auth.admin.getUserById(skill.user_id);
-          if (authUser.user?.email) {
-            preferredContactMethod = 'email';
-            contactValue = authUser.user.email;
+          try {
+            const { data: authUser } = await supabase.auth.admin.getUserById(skill.user_id);
+            if (authUser.user?.email) {
+              preferredContactMethod = 'email';
+              contactValue = authUser.user.email;
+            }
+          } catch (error) {
+            console.error('Error fetching user email:', error);
+            // Fall back to app notifications if we can't get email
           }
         }
 
@@ -148,10 +152,14 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
         requesterContactValue = requesterProfile.phone_number;
       } else if (requesterProfile?.email_visible) {
         // Get requester's email
-        const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
-        if (authUser.user?.email) {
-          requesterContactMethod = 'email';
-          requesterContactValue = authUser.user.email;
+        try {
+          const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
+          if (authUser.user?.email) {
+            requesterContactMethod = 'email';
+            requesterContactValue = authUser.user.email;
+          }
+        } catch (error) {
+          console.error('Error fetching requester email:', error);
         }
       }
 
@@ -191,12 +199,13 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
     }
   };
 
-  // Render contact method icon and value (only after revelation)
+  // Render contact method icon and value (always show after revelation)
   const renderContactMethod = (provider: SkillProvider) => {
     if (!revealedContacts.has(provider.user_id)) {
       return null; // Don't show contact info until revealed
     }
 
+    // Always show the actual contact method that was determined
     switch (provider.preferredContactMethod) {
       case 'phone':
         return (
@@ -213,6 +222,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
           </div>
         );
       default:
+        // This should rarely happen now, but keep as fallback
         return (
           <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
             <MessageCircle className="h-4 w-4" />
