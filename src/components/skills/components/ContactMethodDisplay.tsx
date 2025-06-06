@@ -13,7 +13,7 @@ interface ContactMethodDisplayProps {
 
 /**
  * Component that displays the exact contact method for a skill provider
- * Shows their actual email address or phone number based on their preference
+ * Shows their actual phone number or indicates email contact method
  */
 export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({ 
   provider, 
@@ -38,7 +38,7 @@ export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({
       return (
         <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
           <Mail className="h-4 w-4" />
-          <span>{provider.email}</span>
+          <span>{provider.contactValue}</span>
         </div>
       );
     
