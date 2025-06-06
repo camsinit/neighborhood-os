@@ -4,6 +4,8 @@
  * 
  * This utility helps bridge database operations with the UI refresh system
  * When database changes occur, it emits events that components can listen for
+ * 
+ * ENHANCED: Added specific support for neighbor join events
  */
 import { createLogger } from '@/utils/logger';
 import { refreshEvents } from './refreshEvents';
@@ -40,6 +42,12 @@ export const emitDatabaseEvent = (
   if (eventEmitter) {
     // Emit the event using the new emit method
     refreshEvents.emit(eventEmitter as any);
+    
+    // For neighbor events, also emit activities update since neighbor joins create activities
+    if (contentType === 'neighbor' && operation === 'create') {
+      logger.debug('Neighbor join detected - also refreshing activities');
+      refreshEvents.emit('activities');
+    }
   } else {
     logger.warn(`No event emitter found for content type: ${contentType}`);
   }
@@ -63,8 +71,26 @@ export const refreshActivities = () => {
   refreshEvents.emit('activities');
 };
 
+/**
+ * NEW: Helper specifically for neighbor join events
+ * This ensures both the neighbor list and activity feed are updated
+ */
+export const emitNeighborJoinEvent = (userId: string) => {
+  logger.debug(`Emitting neighbor join event for user: ${userId}`);
+  
+  // Refresh the neighbors list
+  refreshEvents.emit('neighbors');
+  
+  // Refresh activities since neighbor joins create activity entries
+  refreshEvents.emit('activities');
+  
+  // Also refresh notifications since neighbor joins create notifications
+  refreshEvents.emit('notifications');
+};
+
 export default {
   emitDatabaseEvent,
   refreshNotifications,
-  refreshActivities
+  refreshActivities,
+  emitNeighborJoinEvent
 };
