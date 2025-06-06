@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Phone, Mail, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { createTemplatedNotification } from '@/utils/notifications/templatedNotificationService';
 
 /**
  * SkillContactPopover - Simplified skill request interface
@@ -62,7 +62,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
 
       if (!userNeighborhood) return [];
 
-      // Fetch skill providers with their contact preferences
+      // Fetch skill providers with their contact preferences and email
       const { data: skills, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -73,6 +73,9 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
             email_visible,
             phone_visible,
             phone_number
+          ),
+          auth_users:user_id (
+            email
           )
         `)
         .eq('neighborhood_id', userNeighborhood.neighborhood_id)
@@ -89,6 +92,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
       
       for (const skill of skills || []) {
         const profile = skill.profiles;
+        const authUser = skill.auth_users;
         if (!profile) continue;
 
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
@@ -98,18 +102,9 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
         if (profile.phone_visible && profile.phone_number) {
           preferredContactMethod = 'phone';
           contactValue = profile.phone_number;
-        } else if (profile.email_visible) {
-          // Fetch email from auth.users if email is visible
-          try {
-            const { data: authUser } = await supabase.auth.admin.getUserById(skill.user_id);
-            if (authUser.user?.email) {
-              preferredContactMethod = 'email';
-              contactValue = authUser.user.email;
-            }
-          } catch (error) {
-            console.error('Error fetching user email:', error);
-            // Fall back to app notifications if we can't get email
-          }
+        } else if (profile.email_visible && authUser?.email) {
+          preferredContactMethod = 'email';
+          contactValue = authUser.email;
         }
 
         processedProviders.push({
@@ -119,6 +114,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
           email_visible: profile.email_visible,
           phone_visible: profile.phone_visible,
           phone_number: profile.phone_number,
+          email: authUser?.email,
           preferredContactMethod,
           contactValue
         });
@@ -141,6 +137,10 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
         .eq('id', user.id)
         .single();
 
+      // Get current user's email
+      const { data: currentUserData } = await supabase.auth.getUser();
+      const requesterEmail = currentUserData?.user?.email;
+
       const requesterName = requesterProfile?.display_name || 'A neighbor';
 
       // Determine requester's preferred contact method
@@ -150,39 +150,39 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
       if (requesterProfile?.phone_visible && requesterProfile?.phone_number) {
         requesterContactMethod = 'phone';
         requesterContactValue = requesterProfile.phone_number;
-      } else if (requesterProfile?.email_visible) {
-        // Get requester's email
-        try {
-          const { data: authUser } = await supabase.auth.admin.getUserById(user.id);
-          if (authUser.user?.email) {
-            requesterContactMethod = 'email';
-            requesterContactValue = authUser.user.email;
-          }
-        } catch (error) {
-          console.error('Error fetching requester email:', error);
-        }
+      } else if (requesterProfile?.email_visible && requesterEmail) {
+        requesterContactMethod = 'email';
+        requesterContactValue = requesterEmail;
       }
 
-      // Create notification using the templated system with requester's contact info
-      await createTemplatedNotification({
-        templateId: 'skill_session_request',
-        recipientUserId: provider.user_id,
-        actorUserId: user.id,
-        contentId: provider.user_id,
-        variables: {
-          actor: requesterName,
-          title: skillTitle
-        },
-        metadata: {
-          skillTitle,
-          skillCategory,
-          contextType: 'skill_interest_request',
-          interestedUserId: user.id,
-          requesterContactMethod,
-          requesterContactValue,
-          requesterName
-        }
-      });
+      // Create notification using the unified notification system
+      const { error: notificationError } = await supabase
+        .rpc('create_unified_system_notification', {
+          p_user_id: provider.user_id,
+          p_actor_id: user.id,
+          p_title: `${requesterName} is interested in your ${skillTitle} skill`,
+          p_content_type: 'skills',
+          p_content_id: provider.user_id,
+          p_notification_type: 'skills',
+          p_action_type: 'respond',
+          p_action_label: 'View Interest',
+          p_relevance_score: 3,
+          p_metadata: {
+            skillTitle,
+            skillCategory,
+            contextType: 'skill_interest_request',
+            interestedUserId: user.id,
+            requesterContactMethod,
+            requesterContactValue,
+            requesterName
+          }
+        });
+
+      if (notificationError) {
+        console.error('Error creating notification:', notificationError);
+        toast.error('Failed to notify the neighbor. Please try again.');
+        return;
+      }
 
       // Mark this contact as revealed
       setRevealedContacts(prev => new Set(prev).add(provider.user_id));
