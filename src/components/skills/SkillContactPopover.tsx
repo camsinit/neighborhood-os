@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Phone, Mail, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { createTemplatedNotification } from '@/utils/notifications/templatedNotificationService';
 
 /**
  * SkillContactPopover - Shows all providers of a skill with their preferred contact method
@@ -15,6 +16,8 @@ import { toast } from 'sonner';
  * This component creates a popover that displays neighbors who offer a specific skill
  * along with their single preferred contact method (phone > email > generic contact).
  * Respects privacy settings from user onboarding.
+ * 
+ * UPDATED: Now uses the new templated notification system for consistent messaging
  */
 interface SkillContactPopoverProps {
   skillTitle: string;
@@ -121,36 +124,39 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
     enabled: !!user
   });
 
-  // Handle contact reveal and create notification
+  // Handle contact reveal and create notification using the new templated system
   const handleContactReveal = async (provider: SkillProvider) => {
     if (!user) return;
 
     try {
-      // Create notification for the skill provider
-      const { error: notificationError } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: provider.user_id,
-          actor_id: user.id,
-          title: `Someone is interested in your ${skillTitle} skill`,
-          content_type: 'skills',
-          content_id: provider.user_id, // Using provider's user_id as content_id
-          notification_type: 'skills',
-          action_type: 'view',
-          action_label: 'View Interest',
-          relevance_score: 3,
-          metadata: {
-            skillTitle,
-            skillCategory,
-            contextType: 'skill_interest_request',
-            interestedUserId: user.id,
-            requestedContact: provider.preferredContactMethod
-          }
-        });
+      // Get the current user's display name for the notification
+      const { data: currentUserProfile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
 
-      if (notificationError) {
-        console.error('Error creating notification:', notificationError);
-      }
+      const actorName = currentUserProfile?.display_name || 'A neighbor';
+
+      // Create notification using the new templated system
+      // This ensures proper actor name display and module-specific styling
+      await createTemplatedNotification({
+        templateId: 'skill_session_request',
+        recipientUserId: provider.user_id,
+        actorUserId: user.id,
+        contentId: provider.user_id, // Using provider's user_id as content_id for consistency
+        variables: {
+          actor: actorName,
+          title: skillTitle
+        },
+        metadata: {
+          skillTitle,
+          skillCategory,
+          contextType: 'skill_interest_request',
+          interestedUserId: user.id,
+          requestedContact: provider.preferredContactMethod
+        }
+      });
 
       // Call optional callback
       if (onContactReveal) {
