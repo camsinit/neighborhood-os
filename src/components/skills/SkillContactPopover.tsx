@@ -1,11 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Loader2 } from 'lucide-react';
 import { useSkillProviders } from './hooks/useSkillProviders';
 import { ProviderCard } from './components/ProviderCard';
-import { ContactNotificationService } from './services/contactNotificationService';
 
 /**
  * Props for the SkillContactPopover component
@@ -20,11 +19,8 @@ interface SkillContactPopoverProps {
 /**
  * SkillContactPopover - Simplified skill request interface
  * 
- * Shows providers with a single "Contact" button that:
- * 1. Reveals the provider's preferred contact method to the requester
- * 2. Sends a notification to the provider with the requester's contact info
- * 
- * REFACTORED: Split into smaller, focused components for better maintainability
+ * Shows providers with their contact information immediately visible
+ * No longer requires a separate "Contact" button - info is shown right away
  */
 const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   skillTitle,
@@ -33,35 +29,9 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   onContactReveal
 }) => {
   const user = useUser();
-  const [revealedContacts, setRevealedContacts] = useState<Set<string>>(new Set());
 
   // Use our custom hook to fetch skill providers
   const { data: providers, isLoading, error } = useSkillProviders(skillTitle, skillCategory);
-
-  /**
-   * Handles when a user clicks the "Contact" button for a provider
-   * Reveals contact info and sends notification
-   */
-  const handleContactReveal = async (provider: any) => {
-    if (!user) return;
-
-    // Use our service to handle the contact reveal logic
-    const success = await ContactNotificationService.handleContactReveal(
-      provider, 
-      skillTitle, 
-      user.id
-    );
-
-    if (success) {
-      // Mark this contact as revealed locally
-      setRevealedContacts(prev => new Set(prev).add(provider.user_id));
-
-      // Call optional callback
-      if (onContactReveal) {
-        onContactReveal(provider.user_id, skillTitle);
-      }
-    }
-  };
 
   return (
     <Popover>
@@ -75,7 +45,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
           </h3>
           
           <p className="text-sm text-gray-600 mb-4">
-            Click "Contact" to reveal their contact info and let them know you need help.
+            Here are neighbors who can help with this skill:
           </p>
           
           {/* Loading state */}
@@ -100,15 +70,15 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
             </div>
           )}
           
-          {/* Providers list */}
+          {/* Providers list - contact info is shown immediately */}
           {providers && providers.length > 0 && (
             <div className="space-y-3">
               {providers.map((provider) => (
                 <ProviderCard
                   key={provider.user_id}
                   provider={provider}
-                  isContactRevealed={revealedContacts.has(provider.user_id)}
-                  onContactReveal={handleContactReveal}
+                  isContactRevealed={true} // Always show contact info immediately
+                  onContactReveal={() => {}} // No longer needed since info is always shown
                 />
               ))}
             </div>

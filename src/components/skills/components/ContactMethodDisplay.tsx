@@ -14,6 +14,7 @@ interface ContactMethodDisplayProps {
 /**
  * Component that displays the exact contact method for a skill provider
  * Shows their actual phone number or indicates email contact method
+ * Now always shows contact info when isRevealed is true (no conditional hiding)
  */
 export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({ 
   provider, 
