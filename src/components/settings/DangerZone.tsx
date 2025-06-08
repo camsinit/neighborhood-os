@@ -22,6 +22,9 @@ import { useAccountDeletion } from "@/hooks/useAccountDeletion";
  * 
  * Provides dangerous account actions like account deletion with proper
  * warnings and confirmation steps to prevent accidental data loss.
+ * 
+ * Updated to work with the fixed account deletion system that properly
+ * handles only existing database tables.
  */
 export const DangerZone: React.FC = () => {
   const user = useUser();
@@ -92,7 +95,7 @@ export const DangerZone: React.FC = () => {
           <li>Remove all your posts, events, safety updates, and skill offerings</li>
           <li>Delete your neighborhood memberships and created neighborhoods</li>
           <li>Remove all your notifications and activity history</li>
-          <li>Cancel any pending skill sessions or requests</li>
+          <li>Cancel any pending skill offers or requests</li>
         </ul>
         <p className="text-sm text-red-800 mt-3 font-medium">
           This action cannot be undone.

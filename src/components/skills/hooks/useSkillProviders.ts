@@ -6,6 +6,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 /**
  * Interface defining the structure of a skill provider
  * This helps us maintain type safety when working with provider data
+ * Simplified to work with the basic skills_exchange system only
  */
 export interface SkillProvider {
   user_id: string;
@@ -23,6 +24,8 @@ export interface SkillProvider {
  * Custom hook to fetch skill providers for a specific skill
  * This hook handles all the complex logic for determining contact preferences
  * and fetching the actual contact information they want to share
+ * 
+ * Updated to work only with the skills_exchange table (no skill sessions)
  */
 export const useSkillProviders = (skillTitle: string, skillCategory: string) => {
   const user = useUser();
@@ -44,6 +47,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
       if (!userNeighborhood) return [];
 
       // Fetch skill providers with their contact preferences and profile info
+      // Only from the skills_exchange table (simplified approach)
       const { data: skills, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -65,9 +69,6 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
       if (error) throw error;
 
-      // For users with email_visible = true, we'll use a server function to get their emails
-      // For now, we'll create a simple solution using the profile data we have access to
-      
       // Process providers and determine preferred contact method
       const processedProviders: SkillProvider[] = [];
       
@@ -78,13 +79,11 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         let preferredContactMethod: 'phone' | 'email' | 'app' = 'app';
         let contactValue: string | null = null;
         
-        // For email, we'll use the current user's email as a placeholder
-        // In a real implementation, you'd want to create a server function to safely get user emails
+        // For email visibility, we'll use a placeholder since we can't access user emails directly
         let userEmail: string | null = null;
         if (profile.email_visible) {
-          // We'll use the authenticated user's email as a demo
-          // In production, you'd create a server function to get the actual user's email
-          userEmail = user.email || 'Email available via contact';
+          // In a real implementation, you'd create a server function to safely get user emails
+          userEmail = 'Contact via email (available)';
         }
 
         // Determine preferred contact method and set contact value
@@ -95,7 +94,6 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         } 
         else if (profile.email_visible) {
           preferredContactMethod = 'email';
-          // Use a placeholder for now - in production this would come from a server function
           contactValue = userEmail || 'Email contact available';
         }
 

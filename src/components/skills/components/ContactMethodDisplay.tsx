@@ -15,6 +15,8 @@ interface ContactMethodDisplayProps {
  * Component that displays the exact contact method for a skill provider
  * Shows their actual phone number or email address based on their preference
  * Always shows contact info when isRevealed is true
+ * 
+ * Simplified to work with the basic skills exchange system only
  */
 export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({ 
   provider, 
