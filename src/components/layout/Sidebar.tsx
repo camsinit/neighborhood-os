@@ -1,10 +1,7 @@
 
 /**
- * IMPORTANT: This file has been refactored into smaller components
- * Now it just imports and re-exports the main Sidebar component from 
- * the new sidebar directory.
+ * Main Sidebar export
+ * Direct export of the Sidebar component from the sidebar directory
  */
 
-import Sidebar from './sidebar';
-
-export default Sidebar;
+export { default } from './sidebar/Sidebar';
