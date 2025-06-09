@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Loader2, Mail, Clock, Heart } from 'lucide-react';
 import { useSkillProviders } from './hooks/useSkillProviders';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ interface SkillContactPopoverProps {
  * 
  * This component provides clear guidance on how to respectfully reach out to neighbors
  * and makes the interaction feel more personal and community-oriented.
+ * Updated to use Dialog instead of Popover for centered display.
  */
 const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   skillTitle,
@@ -29,6 +30,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   onContactReveal
 }) => {
   const user = useUser();
+  const [open, setOpen] = useState(false);
 
   // Use our custom hook to fetch skill providers
   const { data: providers, isLoading, error } = useSkillProviders(skillTitle, skillCategory);
@@ -49,12 +51,12 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         {children}
-      </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="start">
-        <div className="p-6">
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <div className="p-2">
           {/* Header with clear, friendly messaging */}
           <div className="space-y-2 mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -163,26 +165,11 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
                   </div>
                 </div>
               ))}
-
-              {/* Footer with community guidelines */}
-              <div className="mt-6 pt-4 border-t border-gray-100">
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-gray-700">
-                    💝 Tips for reaching out:
-                  </h5>
-                  <ul className="text-xs text-gray-600 space-y-1 leading-relaxed">
-                    <li>• Be specific about what help you need</li>
-                    <li>• Suggest a few time options that work for you</li>
-                    <li>• Offer to bring coffee or a small thank you</li>
-                    <li>• Be understanding if they can't help right now</li>
-                  </ul>
-                </div>
-              </div>
             </div>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   );
 };
 
