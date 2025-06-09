@@ -2,12 +2,15 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GoodsItemFormData, GoodsRequestFormData } from "@/components/support/types/formTypes";
+import { emitGoodsCreationEvent, refreshActivities } from "@/utils/databaseEventEmitter";
 
 /**
  * Submits or updates a goods form (either offer or request)
  * 
  * This function handles both creating new goods items and updating existing ones
  * based on whether an itemId is provided.
+ * 
+ * ENHANCED: Added proper activity feed refresh events when new items are created
  */
 export const submitGoodsForm = async (
   isOfferForm: boolean,
@@ -54,6 +57,9 @@ export const submitGoodsForm = async (
         if (error) throw error;
         result = data;
         toast.success('Item updated successfully!');
+        
+        // For updates, only refresh activities (no new activity created)
+        refreshActivities();
       } else {
         // Create new item
         const { data, error } = await supabase
@@ -64,6 +70,11 @@ export const submitGoodsForm = async (
         if (error) throw error;
         result = data;
         toast.success('Item offered successfully!');
+        
+        // For new items, emit creation event to refresh both goods and activities
+        if (result && result[0]) {
+          emitGoodsCreationEvent(result[0].id);
+        }
       }
 
       console.log(itemId ? 'Updated goods offer:' : 'Created goods offer:', result);
@@ -89,6 +100,9 @@ export const submitGoodsForm = async (
         if (error) throw error;
         result = data;
         toast.success('Request updated successfully!');
+        
+        // For updates, only refresh activities (no new activity created)
+        refreshActivities();
       } else {
         // Create new request
         const { data, error } = await supabase
@@ -99,6 +113,11 @@ export const submitGoodsForm = async (
         if (error) throw error;
         result = data;
         toast.success('Request submitted successfully!');
+        
+        // For new requests, emit creation event to refresh both goods and activities
+        if (result && result[0]) {
+          emitGoodsCreationEvent(result[0].id);
+        }
       }
 
       console.log(itemId ? 'Updated goods request:' : 'Created goods request:', result);

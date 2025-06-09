@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Activity, useActivities } from "@/utils/queries/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner"; // Updated import to use Sonner directly
+import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ const logger = createLogger('ActivityFeed');
  * Now with load more button and initial limit of 4 items
  * Also listens for events to auto-refresh the feed when new content is added
  * 
- * ENHANCED: Added debugging for neighbor join activities specifically
+ * ENHANCED: Added debugging for neighbor join activities and goods activities specifically
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
@@ -34,17 +34,22 @@ const ActivityFeed = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  // Enhanced logging for debugging neighbor join activities
+  // Enhanced logging for debugging neighbor join and goods activities
   useEffect(() => {
     logger.info("Component mounted, listening for activity updates");
 
-    // Log if we have data with specific focus on neighbor activities
+    // Log if we have data with specific focus on neighbor and goods activities
     if (activities) {
       logger.info(`Activities loaded: ${activities.length}`);
       
       // Debug: Log neighbor join activities specifically
       const neighborJoinActivities = activities.filter(activity => 
         activity.activity_type === 'neighbor_joined'
+      );
+      
+      // Debug: Log goods activities specifically
+      const goodsActivities = activities.filter(activity => 
+        activity.activity_type === 'good_shared' || activity.activity_type === 'good_requested'
       );
       
       if (neighborJoinActivities.length > 0) {
@@ -57,7 +62,21 @@ const ActivityFeed = () => {
           }))
         );
       } else {
-        logger.warn("No neighbor join activities found in current feed");
+        logger.debug("No neighbor join activities found in current feed");
+      }
+      
+      if (goodsActivities.length > 0) {
+        logger.info(`Found ${goodsActivities.length} goods activities:`, 
+          goodsActivities.map(a => ({ 
+            id: a.id, 
+            title: a.title, 
+            activity_type: a.activity_type,
+            created_at: a.created_at,
+            actor_id: a.actor_id 
+          }))
+        );
+      } else {
+        logger.debug("No goods activities found in current feed");
       }
     }
 
@@ -70,22 +89,22 @@ const ActivityFeed = () => {
   }, [activities?.length, refetch]);
 
   // Use our centralized auto-refresh hook to listen for ALL activity types
-  // This ensures the feed refreshes for skills, events, safety updates, etc.
-  // ENHANCED: Added 'neighbor-joined' event specifically
+  // This ensures the feed refreshes for skills, events, safety updates, goods, and neighbors
+  // ENHANCED: Added 'neighbor-joined' and 'goods-updated' events specifically
   useAutoRefresh(['activities'], [
     'activities-updated', 
     'event-rsvp-updated', 
     'event-submitted', 
     'event-deleted', 
     'safety-updated', 
-    'goods-updated', 
+    'goods-updated',    // For goods creation/updates
     'skills-updated',
-    'neighbor-joined' // Added this to catch neighbor join events
+    'neighbor-joined'   // For neighbor join events
   ]);
 
   // Manual refresh handler with enhanced logging
   const handleManualRefresh = () => {
-    logger.debug("Manual refresh triggered - checking for new neighbor activities");
+    logger.debug("Manual refresh triggered - checking for new neighbor and goods activities");
     refetch();
     setLastRefresh(new Date());
     toast(`Feed refreshed - Last updated: ${new Date().toLocaleTimeString()}`);

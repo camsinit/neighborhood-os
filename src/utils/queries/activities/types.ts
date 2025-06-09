@@ -1,31 +1,58 @@
 
 /**
- * This file contains type definitions for activities
+ * Activity-related type definitions
+ * Updated to include neighbor_joined activity type
  */
 
-// Define activity types for better type safety
-// ENHANCED: Removed old skill session types as they're no longer used
+// Define the activity types that can appear in the activity feed
 export type ActivityType = 
-  | 'event_created' 
-  | 'event_rsvp' 
-  | 'skill_offered' 
-  | 'skill_requested' 
-  | 'good_shared' 
-  | 'good_requested' 
+  | 'event_created'
+  | 'event_rsvp'
   | 'safety_update'
-  | 'neighbor_joined';
+  | 'good_shared'      // For goods offers/freebies
+  | 'good_requested'   // For goods requests
+  | 'skill_offered'
+  | 'skill_requested'
+  | 'care_offered'
+  | 'care_requested'
+  | 'neighbor_joined'  // NEW: For when neighbors join
+  | 'profile_updated'; // For profile updates
 
-// Define valid content tables for type safety
-export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange';
-
-// Define the shape of metadata to ensure type safety
+// Activity metadata can vary by activity type
 export interface ActivityMetadata {
+  // Common fields
   deleted?: boolean;
   original_title?: string;
+  
+  // Event-specific metadata
+  description?: string;
+  
+  // Neighbor-specific metadata
+  neighborName?: string;
+  action?: string;
+  updatedFields?: string[];
+  
+  // Skill-specific metadata
+  category?: string;
+  request_type?: string;
+  
+  // Safety-specific metadata
+  type?: string;
+  safetyType?: string;
+  
+  // Goods-specific metadata
+  goods_category?: string;
+  urgency?: string;
+  
+  // Template-related metadata (for notifications)
+  templateId?: string;
+  variables?: Record<string, any>;
+  
+  // Additional context
   [key: string]: any;
 }
 
-// Main Activity interface
+// Main activity interface
 export interface Activity {
   id: string;
   actor_id: string;
@@ -34,9 +61,11 @@ export interface Activity {
   content_type: string;
   title: string;
   created_at: string;
-  metadata?: ActivityMetadata;
+  neighborhood_id: string | null;
+  metadata: ActivityMetadata | null;
+  is_public: boolean | null;
   profiles: {
-    display_name: string;
-    avatar_url: string;
+    display_name: string | null;
+    avatar_url: string | null;
   };
 }

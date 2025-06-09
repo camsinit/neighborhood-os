@@ -5,7 +5,7 @@
  * This utility helps bridge database operations with the UI refresh system
  * When database changes occur, it emits events that components can listen for
  * 
- * ENHANCED: Added specific support for neighbor join events
+ * ENHANCED: Added specific support for neighbor join events and improved goods support
  */
 import { createLogger } from '@/utils/logger';
 import { refreshEvents } from './refreshEvents';
@@ -33,7 +33,7 @@ export const emitDatabaseEvent = (
     'skills': 'skills',
     'notification': 'notifications',
     'activity': 'activities',
-    'neighbor': 'neighbors' // Changed from 'neighbor-users' to 'neighbors' to match refreshEvents types
+    'neighbor': 'neighbors'
   };
   
   // Get the corresponding event emitter function
@@ -46,6 +46,12 @@ export const emitDatabaseEvent = (
     // For neighbor events, also emit activities update since neighbor joins create activities
     if (contentType === 'neighbor' && operation === 'create') {
       logger.debug('Neighbor join detected - also refreshing activities');
+      refreshEvents.emit('activities');
+    }
+    
+    // For goods events, also emit activities update since goods creation creates activities
+    if (contentType === 'goods' && operation === 'create') {
+      logger.debug('Goods creation detected - also refreshing activities');
       refreshEvents.emit('activities');
     }
   } else {
@@ -72,7 +78,7 @@ export const refreshActivities = () => {
 };
 
 /**
- * NEW: Helper specifically for neighbor join events
+ * Helper specifically for neighbor join events
  * This ensures both the neighbor list and activity feed are updated
  */
 export const emitNeighborJoinEvent = (userId: string) => {
@@ -88,9 +94,24 @@ export const emitNeighborJoinEvent = (userId: string) => {
   refreshEvents.emit('notifications');
 };
 
+/**
+ * NEW: Helper specifically for goods creation events
+ * This ensures both the goods list and activity feed are updated
+ */
+export const emitGoodsCreationEvent = (itemId: string) => {
+  logger.debug(`Emitting goods creation event for item: ${itemId}`);
+  
+  // Refresh the goods list
+  refreshEvents.emit('goods');
+  
+  // Refresh activities since goods creation creates activity entries
+  refreshEvents.emit('activities');
+};
+
 export default {
   emitDatabaseEvent,
   refreshNotifications,
   refreshActivities,
-  emitNeighborJoinEvent
+  emitNeighborJoinEvent,
+  emitGoodsCreationEvent
 };

@@ -1,200 +1,147 @@
 
-import { Calendar, Book, Package, Heart, Shield, UserPlus } from "lucide-react";
+import { 
+  Calendar, 
+  Shield, 
+  Package, 
+  Users, 
+  Wrench, 
+  Heart,
+  UserPlus,
+  Gift
+} from "lucide-react";
+import { ActivityType } from "@/utils/queries/useActivities";
 
 /**
- * Color mapping for different activity types
- * Used for visual distinction in the activity feed
- * ENHANCED: Added neighbor_joined activity type
+ * Helper functions for activity display
+ * Updated to include neighbor_joined and improved goods activity support
  */
-export const getActivityColor = (type: string): string => {
-  switch (type) {
-    case 'event_created':
-    case 'event_rsvp':
-      return '#0EA5E9'; // Calendar blue
-    case 'skill_offered':
-    case 'skill_requested':
-      return '#9b87f5'; // Skills purple
-    case 'good_shared':
-    case 'good_requested':
-      return '#F97316'; // Goods orange
-    case 'care_offered':
-    case 'care_requested':
-    case 'care_completed':
-      return '#22C55E'; // Care green
-    case 'safety_update':
-      return '#EA384C'; // Safety red
-    case 'neighbor_joined':
-      return '#10B981'; // Welcome green
-    default:
-      return '#8E9196'; // Default gray
-  }
-};
 
 /**
- * Icon mapping for different activity types
- * Provides a visual indicator for each activity type
- * ENHANCED: Added neighbor_joined activity type
+ * Gets the appropriate icon for each activity type
+ * Now includes support for neighbor_joined and improved goods icons
  */
-export const getActivityIcon = (type: string) => {
-  switch (type) {
+export const getActivityIcon = (activityType: ActivityType | string) => {
+  switch (activityType) {
+    // Event activities
     case 'event_created':
     case 'event_rsvp':
       return Calendar;
-    case 'skill_offered':
-    case 'skill_requested':
-      return Book;
-    case 'good_shared':
-    case 'good_requested':
-      return Package;
-    case 'care_offered':
-    case 'care_requested':
-    case 'care_completed':
-      return Heart;
+      
+    // Safety activities
     case 'safety_update':
       return Shield;
+      
+    // Goods activities - improved icon mapping
+    case 'good_shared':
+      return Gift; // Use Gift icon for shared items (freebies)
+    case 'good_requested':
+      return Package; // Use Package icon for requested items
+      
+    // Skills activities
+    case 'skill_offered':
+    case 'skill_requested':
+      return Wrench;
+      
+    // Care activities
+    case 'care_offered':
+    case 'care_requested':
+      return Heart;
+      
+    // Neighbor activities - NEW
     case 'neighbor_joined':
       return UserPlus;
+    case 'profile_updated':
+      return Users;
+      
     default:
-      return null;
+      return Users; // Default fallback icon
   }
 };
 
 /**
- * Background color mapping for different activity types
- * Used for hover effects
- * ENHANCED: Added neighbor_joined activity type
+ * Gets the appropriate color for each activity type
+ * Updated to include neighbor activities and improved goods colors
  */
-export const getActivityBackground = (type: string) => {
-  switch (type) {
+export const getActivityColor = (activityType: ActivityType | string): string => {
+  switch (activityType) {
+    // Event activities
     case 'event_created':
     case 'event_rsvp':
-      return 'hover:bg-[#D3E4FD]/50';
-    case 'skill_offered':
-    case 'skill_requested':
-      return 'hover:bg-[#E5DEFF]/50';
+      return '#3b82f6'; // Blue
+      
+    // Safety activities
+    case 'safety_update':
+      return '#ef4444'; // Red
+      
+    // Goods activities - improved color scheme
     case 'good_shared':
+      return '#10b981'; // Green for shared items (positive action)
     case 'good_requested':
-      return 'hover:bg-[#FEF7CD]/50';
+      return '#f59e0b'; // Amber for requested items (need)
+      
+    // Skills activities
+    case 'skill_offered':
+      return '#8b5cf6'; // Purple
+    case 'skill_requested':
+      return '#a855f7'; // Purple variant
+      
+    // Care activities
     case 'care_offered':
     case 'care_requested':
-      return 'hover:bg-[#F2FCE2]/50';
-    case 'safety_update':
-      return 'hover:bg-[#FDE1D3]/50';
+      return '#ec4899'; // Pink
+      
+    // Neighbor activities - NEW
     case 'neighbor_joined':
-      return 'hover:bg-[#D1FAE5]/50';
+      return '#059669'; // Emerald green (welcoming)
+    case 'profile_updated':
+      return '#6366f1'; // Indigo
+      
     default:
-      return 'hover:bg-gray-50';
+      return '#6b7280'; // Gray fallback
   }
 };
 
 /**
- * Enhanced contextual descriptions for activity types
- * Provides more specific information for each activity
- * ENHANCED: Added neighbor_joined activity type
+ * Gets a human-readable description for activity types
+ * Updated to include neighbor activities and improved goods descriptions
  */
-export const getActivityContext = (type: string): string => {
-  switch (type) {
+export const getActivityDescription = (activityType: ActivityType | string): string => {
+  switch (activityType) {
+    // Event activities
     case 'event_created':
-      return "New event added to the calendar";
+      return 'created an event';
     case 'event_rsvp':
-      return "New event RSVP received";
-    case 'skill_offered':
-      return "A neighbor is offering to share their skills";
-    case 'skill_requested':
-      return "A neighbor is looking for help with a skill";
-    case 'good_shared':
-      return "New item shared with the community";
-    case 'good_requested':
-      return "New item request posted";
-    case 'care_offered':
-      return "New care offering available";
-    case 'care_requested':
-      return "A neighbor needs help";
-    case 'care_completed':
-      return "Help has been provided";
+      return 'RSVP\'d to an event';
+      
+    // Safety activities
     case 'safety_update':
-      return "New safety update posted";
-    case 'neighbor_joined':
-      return "A new neighbor has joined the community";
-    default:
-      return "New activity in the neighborhood";
-  }
-};
-
-/**
- * Action button configuration for different activity types
- * ENHANCED: Added neighbor_joined activity type
- */
-export const getActionButton = (activity: any) => {
-  switch (activity.activity_type) {
-    case 'event_created':
-    case 'event_rsvp':
-      return {
-        label: "View Event",
-        icon: Calendar,
-        variant: "outline" as const,
-      };
-    case 'skill_offered':
-    case 'skill_requested':
-      return {
-        label: activity.activity_type === 'skill_offered' ? "Learn More" : "Help Out",
-        icon: Book,
-        variant: "outline" as const,
-      };
+      return 'shared a safety update';
+      
+    // Goods activities - improved descriptions
     case 'good_shared':
+      return 'shared an item';
     case 'good_requested':
-      return {
-        label: "View Item",
-        icon: Package,
-        variant: "outline" as const,
-      };
+      return 'requested an item';
+      
+    // Skills activities
+    case 'skill_offered':
+      return 'offered a skill';
+    case 'skill_requested':
+      return 'requested help with a skill';
+      
+    // Care activities
     case 'care_offered':
+      return 'offered care assistance';
     case 'care_requested':
-      return {
-        label: activity.activity_type === 'care_offered' ? "Request Help" : "Offer Help",
-        icon: Heart,
-        variant: "outline" as const,
-      };
-    case 'safety_update':
-      return {
-        label: "Read More",
-        icon: Shield,
-        variant: "outline" as const,
-      };
+      return 'requested care assistance';
+      
+    // Neighbor activities - NEW
     case 'neighbor_joined':
-      return {
-        label: "Welcome",
-        icon: UserPlus,
-        variant: "outline" as const,
-      };
+      return 'joined the neighborhood';
+    case 'profile_updated':
+      return 'updated their profile';
+      
     default:
-      return null;
+      return 'performed an action';
   }
-};
-
-/**
- * Extract description from activity metadata
- */
-export const getActivityDescription = (metadata: any) => {
-  if (!metadata) return null;
-  if (typeof metadata === 'object' && metadata !== null && 'description' in metadata) {
-    return metadata.description as string;
-  }
-  return null;
-};
-
-/**
- * Get a more descriptive title for skill activities
- */
-export const getSkillActivityTitle = (activity: any) => {
-  const baseTitle = activity.title || "Skill Exchange";
-  const type = activity.activity_type;
-  
-  if (type === 'skill_offered') {
-    return `Skill Offering: ${baseTitle}`;
-  } else if (type === 'skill_requested') {
-    return `Skill Request: ${baseTitle}`;
-  }
-  
-  return baseTitle;
 };
