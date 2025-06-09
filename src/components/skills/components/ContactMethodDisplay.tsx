@@ -33,7 +33,7 @@ export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({
       return (
         <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
           <Phone className="h-4 w-4" />
-          <span>{provider.phone_number}</span>
+          <span>{provider.user_profiles?.phone_number}</span>
         </div>
       );
     
@@ -41,7 +41,7 @@ export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({
       return (
         <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
           <Mail className="h-4 w-4" />
-          <span>{provider.email}</span>
+          <span>{provider.user_profiles?.email}</span>
         </div>
       );
     

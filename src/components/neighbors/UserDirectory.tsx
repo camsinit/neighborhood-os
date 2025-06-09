@@ -14,24 +14,21 @@ import { NeighborhoodError } from "./components/NeighborhoodError";
 import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
-import { NeighborhoodHeader } from "./components/NeighborhoodHeader";
+import { NeighborsHeader } from "./components/NeighborsHeader";
 
 /**
  * UserDirectory Component
  * 
  * This is the main component that displays a directory of users in the neighborhood.
  * It handles loading, error states, and rendering the appropriate UI based on the data.
- * 
- * @param searchQuery - Optional search query to filter users
+ * Updated to include search functionality with header.
  */
-interface UserDirectoryProps {
-  searchQuery?: string;
-}
-export const UserDirectory = ({
-  searchQuery = ""
-}: UserDirectoryProps) => {
+export const UserDirectory = () => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
+  
+  // State for search functionality
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Get neighborhood context to show appropriate messages
   const {
@@ -84,7 +81,12 @@ export const UserDirectory = ({
   };
 
   // Filter users based on search query
-  const filteredUsers = users?.filter(user => searchQuery === "" || user.profiles?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) || user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || user.profiles?.bio?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredUsers = users?.filter(user => 
+    searchQuery === "" || 
+    user.profiles?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    user.profiles?.bio?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Add debugging for search results
   useEffect(() => {
@@ -126,6 +128,12 @@ export const UserDirectory = ({
   
   return (
     <div className="p-6">
+      {/* Search header */}
+      <NeighborsHeader 
+        onSearchChange={setSearchQuery}
+        totalCount={filteredUsers?.length || 0}
+      />
+
       {/* Grid of neighbor cards */}
       <UserGrid users={filteredUsers || []} onUserSelect={setSelectedUser} />
 

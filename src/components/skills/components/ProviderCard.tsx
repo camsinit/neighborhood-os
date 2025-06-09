@@ -27,14 +27,14 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
       {/* Provider basic info section */}
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={provider.avatar_url || undefined} />
+          <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
           <AvatarFallback className="text-sm">
-            {provider.display_name?.[0] || '?'}
+            {provider.user_profiles?.display_name?.[0] || '?'}
           </AvatarFallback>
         </Avatar>
         <div>
           <p className="font-medium text-gray-900">
-            {provider.display_name || 'Anonymous'}
+            {provider.user_profiles?.display_name || 'Anonymous'}
           </p>
         </div>
       </div>
