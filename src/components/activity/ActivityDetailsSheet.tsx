@@ -44,7 +44,7 @@ const ActivityDetailsSheet = ({ activity, open, onOpenChange }: ActivityDetailsS
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              {activity ? getActivityDescription(activity.metadata) : "No additional details available."}
+              {activity ? getActivityDescription(activity.activity_type) : "No additional details available."}
             </p>
           )}
         </div>

@@ -18,6 +18,9 @@ export type ActivityType =
   | 'neighbor_joined'  // NEW: For when neighbors join
   | 'profile_updated'; // For profile updates
 
+// Define valid content table names for type safety
+export type ContentTable = 'events' | 'safety_updates' | 'skills_exchange' | 'goods_exchange';
+
 // Activity metadata can vary by activity type
 export interface ActivityMetadata {
   // Common fields

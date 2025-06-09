@@ -1104,6 +1104,7 @@ export type Database = {
         | "care_offered"
         | "care_requested"
         | "safety_update"
+        | "neighbor_joined"
       invitation_status: "pending" | "accepted" | "expired" | "deleted"
       notification_action_type:
         | "rsvp"
@@ -1247,6 +1248,7 @@ export const Constants = {
         "care_offered",
         "care_requested",
         "safety_update",
+        "neighbor_joined",
       ],
       invitation_status: ["pending", "accepted", "expired", "deleted"],
       notification_action_type: [

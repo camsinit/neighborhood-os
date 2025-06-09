@@ -20,24 +20,34 @@ export const fetchTitlesForType = async (
   // Skip if no IDs to fetch
   if (ids.length === 0) return;
   
-  // All these tables have the same structure for id and title columns
-  // so we can use a generic query with type safety
-  const { data, error } = await supabase
-    .from(tableName)
-    .select('id, title')
-    .in('id', ids);
-    
-  if (error) {
-    console.error(`Error fetching ${tableName} titles:`, error);
-    return;
-  }
-  
-  // Add titles to our map
-  data?.forEach(item => {
-    if (item.id && item.title) {
-      titleMap.set(item.id, item.title);
+  try {
+    // All these tables have the same structure for id and title columns
+    // so we can use a generic query with type safety
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('id, title')
+      .in('id', ids);
+      
+    if (error) {
+      console.error(`Error fetching ${tableName} titles:`, error);
+      return;
     }
-  });
+    
+    // Add titles to our map - ensure data exists and has the expected structure
+    if (data && Array.isArray(data)) {
+      data.forEach(item => {
+        // Type guard to ensure item has the expected properties
+        if (item && typeof item === 'object' && 'id' in item && 'title' in item) {
+          const record = item as { id: string; title: string };
+          if (record.id && record.title) {
+            titleMap.set(record.id, record.title);
+          }
+        }
+      });
+    }
+  } catch (err) {
+    console.error(`Unexpected error fetching ${tableName} titles:`, err);
+  }
 };
 
 /**
