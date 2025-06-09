@@ -1,7 +1,8 @@
 
 import { GoodsExchangeItem } from '@/types/localTypes';
-import AddItemRequestDialog from "@/components/AddSupportRequestDialog";
 import ItemRequestDialog from "@/components/items/dialogs/ItemRequestDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import GoodsForm from "./GoodsForm";
 
 /**
  * Props interface for the GoodsDialogs component
@@ -19,9 +20,11 @@ interface GoodsDialogsProps {
 /**
  * GoodsDialogs component
  * 
- * This component manages all the dialogs used on the Items page:
- * - Dialog for adding new items (offers or requests)
+ * This component manages all the dialogs used on the Goods page:
+ * - Dialog for adding new items using the proper GoodsForm (offers or requests)
  * - Dialog for viewing the details of an existing item
+ * 
+ * Updated to use the dedicated GoodsForm instead of the generic AddSupportRequestDialog
  */
 const GoodsDialogs = ({
   isAddRequestOpen,
@@ -30,15 +33,27 @@ const GoodsDialogs = ({
   onSelectedRequestChange,
   initialRequestType
 }: GoodsDialogsProps) => {
+  // Determine the dialog title based on the request type
+  const getDialogTitle = () => {
+    if (!initialRequestType) return "Add Item";
+    return initialRequestType === "offer" ? "Offer an Item" : "Request an Item";
+  };
+
   return (
     <>
-      {/* Dialog for adding new items */}
-      <AddItemRequestDialog 
-        open={isAddRequestOpen}
-        onOpenChange={onAddRequestOpenChange}
-        initialRequestType={initialRequestType}
-        view="goods" // Updated to use 'goods' instead of 'items'
-      />
+      {/* Dialog for adding new items using the dedicated GoodsForm */}
+      <Dialog open={isAddRequestOpen} onOpenChange={onAddRequestOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{getDialogTitle()}</DialogTitle>
+          </DialogHeader>
+          <GoodsForm 
+            onClose={() => onAddRequestOpenChange(false)}
+            initialRequestType={initialRequestType}
+            mode="create"
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Dialog for viewing item details */}
       <ItemRequestDialog

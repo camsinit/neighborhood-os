@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 import GoodsSections from './GoodsSections';
-import GoodsPageHeader from './GoodsPageHeader';
 import GoodsDialogs from './GoodsDialogs';
 import { Tabs } from "@/components/ui/tabs";
 
@@ -11,6 +10,8 @@ import { Tabs } from "@/components/ui/tabs";
  * 
  * This is the main container for the Goods Exchange page, structured similarly
  * to the Skills page for consistency across modules.
+ * 
+ * Updated to use the dedicated goods form instead of the generic support request dialog.
  */
 const GoodsPageContainer = () => {
   // State management for filters and views
@@ -20,7 +21,7 @@ const GoodsPageContainer = () => {
   const [showAvailable, setShowAvailable] = useState(true);
   const [activeTab, setActiveTab] = useState("offers");
   
-  // Dialog state management
+  // Dialog state management - now using proper goods-specific dialogs
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [initialRequestType, setInitialRequestType] = useState(null);
@@ -28,7 +29,7 @@ const GoodsPageContainer = () => {
   // Fetch goods data
   const { data: goodsData, isLoading, refetch } = useGoodsExchange();
 
-  // Action handlers
+  // Action handlers for the new goods-specific form
   const handleAddItem = () => {
     setInitialRequestType('offer');
     setIsAddRequestOpen(true);
@@ -64,7 +65,7 @@ const GoodsPageContainer = () => {
         />
       </Tabs>
 
-      {/* Dialogs */}
+      {/* Updated dialogs using the proper goods-specific forms */}
       <GoodsDialogs 
         isAddRequestOpen={isAddRequestOpen}
         selectedRequest={selectedRequest}
