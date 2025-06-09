@@ -56,6 +56,27 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
     }
   };
 
+  // Check if any contact information is available
+  // We need to check both the visibility flags AND if the actual data exists
+  const hasEmail = user.profiles?.email_visible && user.profiles?.email;
+  const hasPhone = user.profiles?.phone_visible && user.profiles?.phone_number;
+  const hasAddress = user.profiles?.address_visible && user.profiles?.address;
+  const hasAnyContact = hasEmail || hasPhone || hasAddress;
+
+  console.log("[NeighborProfileDialog] Contact info debug:", {
+    userId: user.id,
+    hasEmail,
+    hasPhone,
+    hasAddress,
+    hasAnyContact,
+    email: user.profiles?.email,
+    emailVisible: user.profiles?.email_visible,
+    phone: user.profiles?.phone_number,
+    phoneVisible: user.profiles?.phone_visible,
+    address: user.profiles?.address,
+    addressVisible: user.profiles?.address_visible
+  });
+
   return (
     <>
       <Dialog open={!!user} onOpenChange={onClose}>
@@ -92,7 +113,6 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                 <h2 className="text-xl font-semibold">
                   {user.profiles?.display_name || 'Neighbor'}
                 </h2>
-                {/* Remove the hardcoded email display from here */}
               </div>
             </div>
 
@@ -109,7 +129,7 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
               <h3 className="text-sm font-medium text-gray-500">Contact Information</h3>
               <div className="space-y-2">
                 {/* Show actual email address when email_visible is true and email exists */}
-                {user.profiles?.email_visible && user.profiles?.email && (
+                {hasEmail && (
                   <div className="flex items-center space-x-2 text-sm">
                     <Mail className="h-4 w-4 text-gray-500" />
                     <span>{user.profiles.email}</span>
@@ -117,7 +137,7 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                 )}
                 
                 {/* Show phone number when phone_visible is true and phone exists */}
-                {user.profiles?.phone_visible && user.profiles?.phone_number && (
+                {hasPhone && (
                   <div className="flex items-center space-x-2 text-sm">
                     <Phone className="h-4 w-4 text-gray-500" />
                     <span>{user.profiles.phone_number}</span>
@@ -125,7 +145,7 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                 )}
                 
                 {/* Show address when address_visible is true and address exists */}
-                {user.profiles?.address_visible && user.profiles?.address && (
+                {hasAddress && (
                   <div className="flex items-center space-x-2 text-sm">
                     <MapPin className="h-4 w-4 text-gray-500" />
                     <span>{user.profiles.address}</span>
@@ -133,9 +153,7 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                 )}
 
                 {/* Show message if no contact info is shared */}
-                {!((user.profiles?.email_visible && user.profiles?.email) ||
-                   (user.profiles?.phone_visible && user.profiles?.phone_number) ||
-                   (user.profiles?.address_visible && user.profiles?.address)) && (
+                {!hasAnyContact && (
                   <p className="text-sm text-gray-500 italic">
                     This neighbor hasn't shared contact information yet.
                   </p>
