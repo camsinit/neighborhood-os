@@ -81,9 +81,9 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Enhanced skill selection handler with detailed logging
+   * Enhanced skill selection handler with detailed logging and category validation
    */
-  const handleSkillSelection = (skillName: string) => {
+  const handleSkillSelection = async (skillName: string) => {
     console.log('🎯 Skill selection initiated:', {
       skillName,
       currentCategory,
@@ -91,12 +91,16 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
     });
 
     if (!currentCategory) {
-      console.error('❌ Cannot select skill without category');
+      console.error('❌ Cannot select skill without category - currentCategory is null');
       return;
     }
 
-    // Call the hook's skill select handler
-    handleSkillSelect(skillName, currentCategory);
+    // Call the hook's skill select handler with validated category
+    try {
+      await handleSkillSelect(skillName, currentCategory);
+    } catch (error) {
+      console.error('❌ Error in skill selection handler:', error);
+    }
   };
 
   // Render category selection view
@@ -145,7 +149,13 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
       {/* Custom skill input */}
       <CustomSkillInput
         categoryTitle={categoryTitle}
-        onAddCustomSkill={(skillName) => handleCustomSkillAdd(skillName, currentCategory!)}
+        onAddCustomSkill={(skillName) => {
+          if (currentCategory) {
+            handleCustomSkillAdd(skillName, currentCategory);
+          } else {
+            console.error('❌ Cannot add custom skill without category');
+          }
+        }}
       />
 
       {/* Special skill details dialog */}
@@ -156,7 +166,13 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
         onDetailsChange={(details) => 
           setSpecialSkillDialog(prev => ({ ...prev, details }))
         }
-        onConfirm={() => handleSpecialSkillConfirm(currentCategory!)}
+        onConfirm={() => {
+          if (currentCategory) {
+            handleSpecialSkillConfirm(currentCategory);
+          } else {
+            console.error('❌ Cannot confirm special skill without category');
+          }
+        }}
         onCancel={() => 
           setSpecialSkillDialog({ isOpen: false, skillName: '', details: '' })
         }

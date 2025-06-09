@@ -50,6 +50,7 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
     
     if (!currentCategory) {
       console.error('❌ No category provided for skill selection');
+      toast.error('Category is required to add a skill');
       return;
     }
     
@@ -76,36 +77,44 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       });
     } else {
       // Submit skill immediately to database
-      try {
-        console.log('💾 Submitting regular skill to database:', { 
-          skillName, 
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        
-        await handleSubmit({
-          title: skillName,
-          category: currentCategory,
-          description: `${skillName} skill in ${currentCategory}`
-        }, 'offer');
-        
-        // Add to local selection for UI feedback
-        setSelectedSkills(prev => [...prev, { 
-          name: skillName, 
-          category: currentCategory 
-        }]);
-        
-        console.log('✅ Regular skill submitted successfully:', skillName);
-        toast.success(`${skillName} skill added successfully!`);
-      } catch (error) {
-        console.error('❌ Error adding regular skill:', {
-          error: error instanceof Error ? error.message : error,
-          skillName,
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        toast.error('Failed to add skill. Please try again.');
-      }
+      await submitRegularSkill(skillName, currentCategory);
+    }
+  };
+
+  /**
+   * Submit a regular skill to the database
+   */
+  const submitRegularSkill = async (skillName: string, currentCategory: SkillCategory) => {
+    try {
+      console.log('💾 Submitting regular skill to database:', { 
+        skillName, 
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Use the skills exchange hook to submit to database
+      await handleSubmit({
+        title: skillName,
+        category: currentCategory,
+        description: `${skillName} skill in ${currentCategory}`
+      }, 'offer');
+      
+      // Add to local selection for UI feedback only after successful submission
+      setSelectedSkills(prev => [...prev, { 
+        name: skillName, 
+        category: currentCategory 
+      }]);
+      
+      console.log('✅ Regular skill submitted successfully:', skillName);
+      toast.success(`${skillName} skill added successfully!`);
+    } catch (error) {
+      console.error('❌ Error adding regular skill:', {
+        error: error instanceof Error ? error.message : error,
+        skillName,
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      toast.error(`Failed to add ${skillName}. Please try again.`);
     }
   };
 
@@ -119,46 +128,50 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       category: currentCategory
     });
 
-    if (specialSkillDialog.skillName && specialSkillDialog.details.trim() && currentCategory) {
-      try {
-        console.log('💾 Submitting special skill to database:', { 
-          skillName: specialSkillDialog.skillName, 
-          details: specialSkillDialog.details,
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        
-        await handleSubmit({
-          title: specialSkillDialog.skillName,
-          category: currentCategory,
-          description: specialSkillDialog.details.trim()
-        }, 'offer');
-        
-        // Add to local selection for UI feedback
-        setSelectedSkills(prev => [...prev, { 
-          name: specialSkillDialog.skillName, 
-          details: specialSkillDialog.details.trim(),
-          category: currentCategory
-        }]);
-        
-        console.log('✅ Special skill submitted successfully:', specialSkillDialog.skillName);
-        toast.success(`${specialSkillDialog.skillName} skill added successfully!`);
-      } catch (error) {
-        console.error('❌ Error adding special skill:', {
-          error: error instanceof Error ? error.message : error,
-          skillName: specialSkillDialog.skillName,
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        toast.error('Failed to add skill. Please try again.');
-      }
-    } else {
+    if (!specialSkillDialog.skillName || !specialSkillDialog.details.trim() || !currentCategory) {
       console.warn('⚠️ Special skill confirmation called with missing data:', {
         hasSkillName: !!specialSkillDialog.skillName,
         hasDetails: !!specialSkillDialog.details.trim(),
         hasCategory: !!currentCategory
       });
+      toast.error('Please provide details for this skill');
+      return;
     }
+
+    try {
+      console.log('💾 Submitting special skill to database:', { 
+        skillName: specialSkillDialog.skillName, 
+        details: specialSkillDialog.details,
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      
+      await handleSubmit({
+        title: specialSkillDialog.skillName,
+        category: currentCategory,
+        description: specialSkillDialog.details.trim()
+      }, 'offer');
+      
+      // Add to local selection for UI feedback only after successful submission
+      setSelectedSkills(prev => [...prev, { 
+        name: specialSkillDialog.skillName, 
+        details: specialSkillDialog.details.trim(),
+        category: currentCategory
+      }]);
+      
+      console.log('✅ Special skill submitted successfully:', specialSkillDialog.skillName);
+      toast.success(`${specialSkillDialog.skillName} skill added successfully!`);
+    } catch (error) {
+      console.error('❌ Error adding special skill:', {
+        error: error instanceof Error ? error.message : error,
+        skillName: specialSkillDialog.skillName,
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      toast.error(`Failed to add ${specialSkillDialog.skillName}. Please try again.`);
+    }
+    
+    // Close the dialog
     setSpecialSkillDialog({ isOpen: false, skillName: '', details: '' });
   };
 
@@ -168,42 +181,44 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
   const handleCustomSkillAdd = async (skillName: string, currentCategory: SkillCategory) => {
     console.log('🔄 handleCustomSkillAdd called with:', { skillName, currentCategory });
 
-    if (currentCategory && skillName.trim()) {
-      try {
-        console.log('💾 Submitting custom skill to database:', { 
-          skillName, 
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        
-        await handleSubmit({
-          title: skillName.trim(),
-          category: currentCategory,
-          description: `Custom ${skillName.trim()} skill in ${currentCategory}`
-        }, 'offer');
-        
-        // Add to local selection for UI feedback
-        setSelectedSkills(prev => [...prev, { 
-          name: skillName.trim(),
-          category: currentCategory
-        }]);
-        
-        console.log('✅ Custom skill submitted successfully:', skillName.trim());
-        toast.success(`${skillName.trim()} skill added successfully!`);
-      } catch (error) {
-        console.error('❌ Error adding custom skill:', {
-          error: error instanceof Error ? error.message : error,
-          skillName,
-          category: currentCategory,
-          timestamp: new Date().toISOString()
-        });
-        toast.error('Failed to add custom skill. Please try again.');
-      }
-    } else {
+    if (!currentCategory || !skillName.trim()) {
       console.warn('⚠️ Custom skill add called with invalid data:', {
         hasSkillName: !!skillName?.trim(),
         hasCategory: !!currentCategory
       });
+      toast.error('Please provide a skill name');
+      return;
+    }
+
+    try {
+      console.log('💾 Submitting custom skill to database:', { 
+        skillName, 
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      
+      await handleSubmit({
+        title: skillName.trim(),
+        category: currentCategory,
+        description: `Custom ${skillName.trim()} skill in ${currentCategory}`
+      }, 'offer');
+      
+      // Add to local selection for UI feedback only after successful submission
+      setSelectedSkills(prev => [...prev, { 
+        name: skillName.trim(),
+        category: currentCategory
+      }]);
+      
+      console.log('✅ Custom skill submitted successfully:', skillName.trim());
+      toast.success(`${skillName.trim()} skill added successfully!`);
+    } catch (error) {
+      console.error('❌ Error adding custom skill:', {
+        error: error instanceof Error ? error.message : error,
+        skillName,
+        category: currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      toast.error(`Failed to add ${skillName}. Please try again.`);
     }
   };
 
