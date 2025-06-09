@@ -7,6 +7,7 @@ import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
 import AvailableGoodsCard from './cards/AvailableGoodsCard';
+import { useUser } from '@supabase/auth-helpers-react';
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -21,11 +22,28 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   isDeletingItem = false,
   onRefetch
 }) => {
+  // Get current user to check ownership
+  const user = useUser();
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
 
+  // Function to check if current user owns the item
+  const isOwner = (item: GoodsExchangeItem) => {
+    return user?.id === item.user_id;
+  };
+
   const handleEdit = (item: GoodsExchangeItem) => {
-    setItemToEdit(item);
+    // Only allow editing if user owns the item
+    if (isOwner(item)) {
+      setItemToEdit(item);
+    }
+  };
+
+  const handleDelete = (item: GoodsExchangeItem) => {
+    // Only allow deletion if user owns the item
+    if (isOwner(item) && onDeleteItem) {
+      onDeleteItem(item);
+    }
   };
 
   const handleCloseEdit = () => {
@@ -46,9 +64,11 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                 <AvailableGoodsCard
                   item={item}
                   onEdit={() => handleEdit(item)}
-                  onDelete={() => onDeleteItem?.(item)}
+                  onDelete={() => handleDelete(item)}
                   isDeletingItem={isDeletingItem}
                   onClick={() => setOpenPopoverId(item.id)}
+                  // Pass ownership status to the card component
+                  isOwner={isOwner(item)}
                 />
               </div>
             </PopoverTrigger>
@@ -59,6 +79,8 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                 onDeleteItem={onDeleteItem}
                 isDeletingItem={isDeletingItem}
                 onEdit={() => handleEdit(item)}
+                // Pass ownership status to the detail card
+                isOwner={isOwner(item)}
               />
             </PopoverContent>
           </Popover>

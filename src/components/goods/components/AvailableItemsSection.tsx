@@ -10,10 +10,12 @@ import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from '../GoodsForm';
 import { useToast } from "@/hooks/use-toast";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { useUser } from '@supabase/auth-helpers-react';
+import { Edit, Trash2 } from 'lucide-react';
 
 /**
  * This component displays a section of available items with edit/delete functionality
- * for authorized users (item owners)
+ * for authorized users (item owners only)
  */
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -30,12 +32,41 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   isDeletingItem = false,
   onRefetch
 }) => {
+  // Get current user to check ownership
+  const user = useUser();
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
   const { toast } = useToast();
 
+  // Function to check if current user owns the item
+  const isOwner = (item: GoodsExchangeItem) => {
+    return user?.id === item.user_id;
+  };
+
   const handleEdit = (item: GoodsExchangeItem) => {
-    setItemToEdit(item);
+    // Only allow editing if user owns the item
+    if (isOwner(item)) {
+      setItemToEdit(item);
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "You can only edit your own items.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = (item: GoodsExchangeItem) => {
+    // Only allow deletion if user owns the item
+    if (isOwner(item) && onDeleteItem) {
+      onDeleteItem(item);
+    } else {
+      toast({
+        title: "Access Denied", 
+        description: "You can only delete your own items.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCloseEdit = () => {
@@ -81,33 +112,37 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                     </div>
                   </div>
                   
-                  {/* Edit and Delete buttons for owner */}
-                  <div className="flex gap-2 ml-4">
-                    <Button 
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(item);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    {onDeleteItem && (
+                  {/* Edit and Delete buttons for owner only */}
+                  {isOwner(item) && (
+                    <div className="flex gap-2 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button 
                         variant="ghost"
                         size="sm"
-                        className="text-red-600"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteItem(item);
+                          handleEdit(item);
                         }}
-                        disabled={isDeletingItem}
                       >
-                        Delete
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
                       </Button>
-                    )}
-                  </div>
+                      {onDeleteItem && (
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item);
+                          }}
+                          disabled={isDeletingItem}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </PopoverTrigger>
@@ -119,6 +154,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                 onDeleteItem={onDeleteItem}
                 isDeletingItem={isDeletingItem}
                 onEdit={() => handleEdit(item)}
+                isOwner={isOwner(item)}
               />
             </PopoverContent>
           </Popover>

@@ -1,112 +1,133 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useUser } from "@supabase/auth-helpers-react";
+import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { createContactEmailLink } from '../utils/contactUtils';
-import { format } from 'date-fns';
-import { CalendarDays } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Trash2, MessageCircle, Calendar, MapPin } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface RequestDetailCardProps {
   request: GoodsExchangeItem;
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
-  onEdit?: () => void;
+  onEdit: () => void;
+  isOwner?: boolean; // New prop to determine ownership
 }
 
 /**
- * RequestDetailCard - Shows detailed information about a goods item in a card
- * including title, description, owner, and action buttons based on user permissions
+ * RequestDetailCard - Detailed view of a goods exchange item
+ * 
+ * Updated to only show edit/delete buttons to the item owner.
+ * This ensures users can only modify their own posts.
  */
-const RequestDetailCard = ({
+const RequestDetailCard: React.FC<RequestDetailCardProps> = ({
   request,
   onDeleteItem,
-  isDeletingItem,
-  onEdit
-}: RequestDetailCardProps) => {
-  const currentUser = useUser();
-  const isOwner = currentUser && currentUser.id === request.user_id;
-  
-  const formattedDate = request.valid_until 
-    ? format(new Date(request.valid_until), 'MMMM d, yyyy')
-    : null;
+  isDeletingItem = false,
+  onEdit,
+  isOwner = false // Default to false for safety
+}) => {
+  const isUrgent = request.urgency === 'high';
   
   return (
-    <Card className="border-0 shadow-none relative">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{request.title}</CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        {formattedDate && (
-          <div className="text-sm text-gray-600 flex items-center gap-1.5 mb-3">
-            <CalendarDays className="h-4 w-4" />
-            <span>Need by {formattedDate}</span>
+    <div className="p-4 space-y-4">
+      {/* Header with user info */}
+      <div className="flex items-start gap-3">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={request.profiles?.avatar_url || undefined} />
+          <AvatarFallback>
+            {request.profiles?.display_name?.[0] || '?'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900">{request.title}</h3>
+          <p className="text-sm text-gray-500">
+            {request.profiles?.display_name || 'Anonymous'}
+          </p>
+        </div>
+        {isUrgent && (
+          <Badge variant="destructive" className="text-xs">
+            Urgent
+          </Badge>
+        )}
+      </div>
+
+      {/* Description */}
+      {request.description && (
+        <div>
+          <p className="text-sm text-gray-700">{request.description}</p>
+        </div>
+      )}
+
+      {/* Image if available */}
+      {(request.image_url || (request.images && request.images.length > 0)) && (
+        <div className="rounded-lg overflow-hidden">
+          <img 
+            src={request.image_url || request.images?.[0]} 
+            alt={request.title}
+            className="w-full h-48 object-cover"
+          />
+        </div>
+      )}
+
+      {/* Metadata */}
+      <div className="space-y-2 text-xs text-gray-500">
+        <div className="flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          <span>Posted {formatDistanceToNow(new Date(request.created_at))} ago</span>
+        </div>
+        
+        {request.goods_category && (
+          <div className="flex items-center gap-1">
+            <Badge variant="outline" className="text-xs">
+              {request.goods_category.charAt(0).toUpperCase() + request.goods_category.slice(1)}
+            </Badge>
           </div>
         )}
+      </div>
+
+      <Separator />
+
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        {/* Contact button - always visible for others' items */}
+        {!isOwner && (
+          <Button size="sm" className="flex-1">
+            <MessageCircle className="h-4 w-4 mr-1" />
+            Contact
+          </Button>
+        )}
         
-        <p>{request.description}</p>
-        
-        <div className="mt-4">
-          <h5 className="text-sm font-semibold mb-1">Posted by:</h5>
-          {request.user_id ? (
-            <Link 
-              to={`/neighbors?user=${request.user_id}`}
-              className="text-sm text-primary hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {request.profiles?.display_name || "Anonymous"}
-            </Link>
-          ) : (
-            <span className="text-sm">{request.profiles?.display_name || "Anonymous"}</span>
-          )}
-        </div>
-        
-        <div className="flex gap-2 mt-4">
-          {isOwner ? (
-            <>
-              {onEdit && (
-                <Button 
-                  variant="secondary" 
-                  className="flex-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                >
-                  Edit
-                </Button>
-              )}
-              {onDeleteItem && (
-                <Button 
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteItem(request);
-                  }}
-                  disabled={isDeletingItem}
-                >
-                  Delete
-                </Button>
-              )}
-            </>
-          ) : (
+        {/* Edit and delete buttons - only visible for owner */}
+        {isOwner && (
+          <>
             <Button 
-              variant="default" 
-              className="w-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(createContactEmailLink(request), '_blank');
-              }}
+              variant="outline" 
+              size="sm" 
+              onClick={onEdit}
+              className="flex-1"
             >
-              Contact
+              <Edit className="h-4 w-4 mr-1" />
+              Edit
             </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {onDeleteItem && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onDeleteItem(request)}
+                disabled={isDeletingItem}
+                className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                {isDeletingItem ? 'Deleting...' : 'Delete'}
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
