@@ -17,9 +17,9 @@ interface SkillContactPopoverProps {
 }
 
 /**
- * SkillContactPopover - Redesigned for a more natural, conversational experience
+ * SkillContactPopover - Shows available neighbors who can help with a specific skill
  * 
- * This component now provides clear guidance on how to respectfully reach out to neighbors
+ * This component provides clear guidance on how to respectfully reach out to neighbors
  * and makes the interaction feel more personal and community-oriented.
  */
 const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
@@ -55,14 +55,13 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
       </PopoverTrigger>
       <PopoverContent className="w-96 p-0" align="start">
         <div className="p-6">
-          {/* Header with more personal messaging */}
+          {/* Header with clear, friendly messaging */}
           <div className="space-y-2 mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
-              Need help with {skillTitle.toLowerCase()}?
+              Get help with {skillTitle.toLowerCase()}
             </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Great news! Your neighbors below have offered to help with this. 
-              When reaching out, be specific about what you need and flexible with timing.
+              Here are your neighbors who can help with this skill.
             </p>
           </div>
           
@@ -99,7 +98,7 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
             </div>
           )}
           
-          {/* Providers list with better design */}
+          {/* Providers list with simple, clean design */}
           {providers && providers.length > 0 && (
             <div className="space-y-4">
               {providers.map((provider) => (

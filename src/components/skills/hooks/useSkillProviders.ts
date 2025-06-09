@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -6,16 +5,20 @@ import { useUser } from '@supabase/auth-helpers-react';
 /**
  * Interface defining the structure of a skill provider
  * This helps us maintain type safety when working with provider data
- * Updated to include actual email addresses when visible
+ * Updated to match the actual database structure returned from the query
  */
 export interface SkillProvider {
   user_id: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  email_visible: boolean;
-  phone_visible: boolean;
-  phone_number: string | null;
-  email: string | null; // Now contains actual email when visible
+  skill_description?: string | null;
+  time_preferences?: string[] | null;
+  user_profiles?: {
+    display_name: string | null;
+    avatar_url: string | null;
+    email_visible: boolean;
+    phone_visible: boolean;
+    phone_number: string | null;
+    email?: string | null; // This comes from the secure function
+  } | null;
   preferredContactMethod: 'phone' | 'email' | 'app';
   contactValue: string | null;
 }
@@ -51,6 +54,8 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         .from('skills_exchange')
         .select(`
           user_id,
+          description,
+          time_preferences,
           profiles:user_id (
             display_name,
             avatar_url,
@@ -111,14 +116,17 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
           contactValue = actualEmail;
         }
 
+        // Create the user_profiles object with the email included
+        const userProfiles = {
+          ...profile,
+          email: actualEmail
+        };
+
         processedProviders.push({
           user_id: skill.user_id,
-          display_name: profile.display_name,
-          avatar_url: profile.avatar_url,
-          email_visible: profile.email_visible,
-          phone_visible: profile.phone_visible,
-          phone_number: profile.phone_number,
-          email: actualEmail, // Now contains actual email when visible
+          skill_description: skill.description,
+          time_preferences: skill.time_preferences,
+          user_profiles: userProfiles,
           preferredContactMethod,
           contactValue
         });

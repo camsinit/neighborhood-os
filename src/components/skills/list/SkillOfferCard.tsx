@@ -3,12 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
+import SkillContactPopover from '../SkillContactPopover';
 
 /**
  * SkillOfferCard - The compact card showing an offered skill
  * 
  * This appears in the list of available skills with actions
  * appropriate based on whether you're the owner or not.
+ * Updated to use SkillContactPopover for the request functionality.
  */
 interface SkillOfferCardProps {
   skill: SkillWithProfile;
@@ -37,13 +39,6 @@ const SkillOfferCard = ({
   onRequestSkill,
   onClick 
 }: SkillOfferCardProps) => {
-  // This function handles the request button click
-  // We stop propagation to prevent the card onClick
-  const handleRequestClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onRequestSkill();
-  };
-
   // Get the category colors from our map, fallback to technology if not found
   const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
 
@@ -71,15 +66,24 @@ const SkillOfferCard = ({
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Request button that shows on hover */}
+      {/* Request button that shows on hover - now wrapped in SkillContactPopover */}
       {!isOwner && (
-        <Button 
-          variant="outline" 
-          onClick={handleRequestClick}
-          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
-        >
-          Request Skill
-        </Button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2">
+          <SkillContactPopover
+            skillTitle={skill.title}
+            skillCategory={skill.skill_category}
+          >
+            <Button 
+              variant="outline" 
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click from triggering
+              }}
+              className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+            >
+              Request Skill
+            </Button>
+          </SkillContactPopover>
+        </div>
       )}
     </div>
   );
