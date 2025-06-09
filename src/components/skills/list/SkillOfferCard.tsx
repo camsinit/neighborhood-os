@@ -11,6 +11,7 @@ import SkillContactPopover from '../SkillContactPopover';
  * This appears in the list of available skills with actions
  * appropriate based on whether you're the owner or not.
  * Updated to use SkillContactPopover for the request functionality.
+ * Now uses the same styling as the Add Skill button for consistency.
  */
 interface SkillOfferCardProps {
   skill: SkillWithProfile;
@@ -66,7 +67,7 @@ const SkillOfferCard = ({
         {skill.skill_category.charAt(0).toUpperCase() + skill.skill_category.slice(1)}
       </Badge>
       
-      {/* Request button that shows on hover - now wrapped in SkillContactPopover */}
+      {/* Request button that shows on hover - now styled to match Add Skill button */}
       {!isOwner && (
         <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2">
           <SkillContactPopover
@@ -78,7 +79,7 @@ const SkillOfferCard = ({
               onClick={(e) => {
                 e.stopPropagation(); // Prevent card click from triggering
               }}
-              className="bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+              className="bg-green-500 hover:bg-green-600 text-white border-0"
             >
               Request Skill
             </Button>
