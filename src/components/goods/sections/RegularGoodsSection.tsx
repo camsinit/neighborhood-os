@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import GoodsRequestsSection from '../GoodsRequestsSection';
+import GoodsRequestCard from '../GoodsRequestCard';
 import EmptyState from "@/components/ui/empty-state";
 import { PackageSearch } from "lucide-react";
 
@@ -18,8 +18,7 @@ interface RegularGoodsSectionProps {
 /**
  * RegularGoodsSection - Section for displaying regular (non-urgent) goods requests
  * 
- * This component handles the display of regular goods requests in a grid layout
- * and shows an empty state when no requests are available.
+ * Updated to display requests in a grid with fixed-size cards that open popovers when clicked.
  */
 const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   requests,
@@ -30,17 +29,9 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   showRequests,
   onRequestItem
 }) => {
-  if (!showRequests) return null;
-
-  return (
-    <div className="space-y-4">
-      {requests.length > 0 ? (
-        <GoodsRequestsSection
-          requests={requests}
-          onDeleteItem={onDeleteItem}
-          isDeletingItem={isDeletingItem}
-        />
-      ) : urgentRequests.length === 0 ? (
+  if (!showRequests || requests.length === 0) {
+    if (urgentRequests.length === 0) {
+      return (
         <EmptyState
           icon={PackageSearch}
           title="No Requests Yet"
@@ -48,7 +39,28 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
           actionLabel="Request an Item"
           onAction={onRequestItem}
         />
-      ) : null}
+      );
+    }
+    return null;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-900">Item Requests</h3>
+      
+      {/* Grid layout with fixed-size cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-start">
+        {requests.map((request) => (
+          <GoodsRequestCard
+            key={request.id}
+            request={request}
+            isOpen={false}
+            onOpenChange={() => {}}
+            onDeleteItem={onDeleteItem}
+            isDeletingItem={isDeletingItem}
+          />
+        ))}
+      </div>
     </div>
   );
 };

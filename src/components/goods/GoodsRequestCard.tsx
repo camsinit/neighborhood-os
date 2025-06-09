@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import RequestDetailCard from './components/RequestDetailCard';
@@ -17,18 +17,17 @@ interface GoodsRequestCardProps {
 /**
  * GoodsRequestCard - Card component for goods requests
  * 
- * Updated to use the new marketplace-style RequestGoodsCard component
- * and include ownership checking and proper prop passing.
+ * Updated to use fixed-size cards with popover functionality.
+ * The popover shows detailed information about the request when clicked.
  */
 const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   request,
-  isOpen,
-  onOpenChange,
   onDeleteItem,
   isDeletingItem = false
 }) => {
   // Get current user to check ownership
   const user = useUser();
+  const [isOpen, setIsOpen] = useState(false);
   
   // Function to check if current user owns the item
   const isOwner = user?.id === request.user_id;
@@ -42,12 +41,12 @@ const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={onOpenChange}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <div className="w-full">
           <RequestGoodsCard
             request={request}
-            onSelect={() => onOpenChange(true)}
+            onSelect={() => setIsOpen(true)}
           />
         </div>
       </PopoverTrigger>
