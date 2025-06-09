@@ -69,11 +69,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               <div>
                 <AvailableGoodsCard
                   item={item}
-                  onEdit={() => handleEdit(item)}
-                  onDelete={() => handleDelete(item)}
-                  isDeletingItem={isDeletingItem}
                   onClick={() => setOpenPopoverId(item.id)}
-                  isOwner={isOwner(item)}
                 />
               </div>
             </PopoverTrigger>
