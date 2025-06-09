@@ -21,8 +21,7 @@ import SelectedSkillsDisplay from './components/SelectedSkillsDisplay';
  * 1. Single category mode (when opened from a specific category view)
  * 2. Multi-category mode (when opened from the main skills page)
  * 
- * In multi-category mode, users first select a category, then see skills for that category.
- * All skills are immediately saved to the database when selected.
+ * FIXED: Skills are now properly submitted to database when selected
  */
 interface SkillsPageSelectorProps {
   selectedCategory?: SkillCategory; // Optional - if provided, single category mode
@@ -41,7 +40,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   onSkillAdded,
   multiCategoryMode = false
 }) => {
-  // Track selected skills for this session
+  // Track selected skills for this session (for UI feedback only)
   const [selectedSkills, setSelectedSkills] = useState<SelectedSkill[]>([]);
   
   // Multi-category mode state
@@ -66,7 +65,8 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   // Hook for submitting skills to database
   const { handleSubmit } = useSkillsExchange({
     onSuccess: () => {
-      onSkillAdded();
+      console.log('Skill successfully added to database');
+      onSkillAdded(); // Notify parent component
     }
   });
 
@@ -91,7 +91,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Handle skill selection toggle
+   * Handle skill selection toggle - FIXED to properly submit to database
    */
   const handleSkillSelect = async (skillName: string) => {
     if (!currentCategory) return;
@@ -101,60 +101,71 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
     );
     
     if (isSelected) {
-      // Remove skill from local selection
+      // Remove skill from local UI selection (Note: this doesn't delete from database)
       setSelectedSkills(prev => prev.filter(skill => 
         !(skill.name === skillName && skill.category === currentCategory)
       ));
+      return;
+    }
+
+    // Check if this skill requires additional details
+    if (SPECIAL_SKILLS[skillName as keyof typeof SPECIAL_SKILLS]) {
+      setSpecialSkillDialog({
+        isOpen: true,
+        skillName,
+        details: ''
+      });
     } else {
-      // Check if this skill requires additional details
-      if (SPECIAL_SKILLS[skillName as keyof typeof SPECIAL_SKILLS]) {
-        setSpecialSkillDialog({
-          isOpen: true,
-          skillName,
-          details: ''
-        });
-      } else {
-        // Add skill immediately to database
-        try {
-          await handleSubmit({
-            title: skillName,
-            category: currentCategory,
-            description: `${skillName} skill`
-          }, 'offer');
-          
-          // Add to local selection for UI feedback
-          setSelectedSkills(prev => [...prev, { 
-            name: skillName, 
-            category: currentCategory 
-          }]);
-        } catch (error) {
-          console.error('Error adding skill:', error);
-          toast.error('Failed to add skill. Please try again.');
-        }
+      // Submit skill immediately to database
+      try {
+        console.log('Submitting skill to database:', { skillName, category: currentCategory });
+        
+        await handleSubmit({
+          title: skillName,
+          category: currentCategory,
+          description: `${skillName} skill in ${currentCategory}`
+        }, 'offer');
+        
+        // Add to local selection for UI feedback
+        setSelectedSkills(prev => [...prev, { 
+          name: skillName, 
+          category: currentCategory 
+        }]);
+        
+        toast.success(`${skillName} skill added successfully!`);
+      } catch (error) {
+        console.error('Error adding skill:', error);
+        toast.error('Failed to add skill. Please try again.');
       }
     }
   };
 
   /**
-   * Handle special skill dialog confirmation
+   * Handle special skill dialog confirmation - FIXED to properly submit
    */
   const handleSpecialSkillConfirm = async () => {
     if (specialSkillDialog.skillName && specialSkillDialog.details.trim() && currentCategory) {
       try {
+        console.log('Submitting special skill to database:', { 
+          skillName: specialSkillDialog.skillName, 
+          details: specialSkillDialog.details,
+          category: currentCategory 
+        });
+        
         await handleSubmit({
           title: specialSkillDialog.skillName,
           category: currentCategory,
           description: specialSkillDialog.details.trim()
         }, 'offer');
         
-        // Add to local selection
+        // Add to local selection for UI feedback
         setSelectedSkills(prev => [...prev, { 
           name: specialSkillDialog.skillName, 
           details: specialSkillDialog.details.trim(),
           category: currentCategory
         }]);
         
-        toast.success('Skill added successfully!');
+        toast.success(`${specialSkillDialog.skillName} skill added successfully!`);
       } catch (error) {
         console.error('Error adding special skill:', error);
         toast.error('Failed to add skill. Please try again.');
@@ -164,24 +175,26 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Handle custom skill addition
+   * Handle custom skill addition - FIXED to properly submit
    */
   const handleCustomSkillAdd = async (skillName: string) => {
-    if (currentCategory) {
+    if (currentCategory && skillName.trim()) {
       try {
+        console.log('Submitting custom skill to database:', { skillName, category: currentCategory });
+        
         await handleSubmit({
-          title: skillName,
+          title: skillName.trim(),
           category: currentCategory,
-          description: `Custom ${skillName} skill`
+          description: `Custom ${skillName.trim()} skill in ${currentCategory}`
         }, 'offer');
         
-        // Add to local selection
+        // Add to local selection for UI feedback
         setSelectedSkills(prev => [...prev, { 
-          name: skillName,
+          name: skillName.trim(),
           category: currentCategory
         }]);
         
-        toast.success('Custom skill added successfully!');
+        toast.success(`${skillName.trim()} skill added successfully!`);
       } catch (error) {
         console.error('Error adding custom skill:', error);
         toast.error('Failed to add custom skill. Please try again.');
@@ -190,7 +203,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Remove a skill from local selection (visual feedback only)
+   * Remove a skill from local selection (visual feedback only - doesn't delete from database)
    */
   const removeSkill = (skillName: string, category: SkillCategory) => {
     setSelectedSkills(prev => prev.filter(skill => 
@@ -199,7 +212,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Get selected skill names for current category
+   * Get selected skill names for current category (for UI display)
    */
   const getSelectedSkillNames = () => {
     return selectedSkills
@@ -245,7 +258,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
         <div className="text-center">
           <h3 className="text-lg font-semibold">Add {categoryTitle} Skills</h3>
           <p className="text-sm text-muted-foreground">
-            Select skills you can offer to your neighbors or add your own custom skills.
+            Select skills you can offer to your neighbors. Skills will be added immediately when selected.
           </p>
         </div>
       </div>
