@@ -19,6 +19,13 @@ interface GoodsSearchBarProps {
   onRefetch: () => void;
 }
 
+/**
+ * GoodsSearchBar - Search and navigation component for the goods exchange
+ * 
+ * This component provides search functionality, tab navigation between offers and requests,
+ * and action buttons for creating new requests or offers. The buttons now use a brighter
+ * orange color (orange-500) for better contrast with white text.
+ */
 const GoodsSearchBar = ({
   searchQuery,
   onSearchChange,
@@ -35,6 +42,7 @@ const GoodsSearchBar = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
+          {/* Search input with magnifying glass icon */}
           <div className="relative w-[180px]">
             <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             <Input 
@@ -46,6 +54,7 @@ const GoodsSearchBar = ({
             />
           </div>
 
+          {/* Tab navigation for switching between Available and Requests */}
           <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList>
               <TabsTrigger value="offers">Available</TabsTrigger>
@@ -54,22 +63,24 @@ const GoodsSearchBar = ({
           </Tabs>
         </div>
         
+        {/* Action buttons with brighter orange background for better contrast */}
         <div className="flex gap-2">
           <Button 
             onClick={onRequestItem} 
-            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             Request
           </Button>
           <Button 
             onClick={onOfferItem} 
-            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             Offer
           </Button>
         </div>
       </div>
 
+      {/* Conditional rendering of available items section */}
       {activeTab === 'offers' && (
         <AvailableItemsSection
           goodsItems={goodsItems}
