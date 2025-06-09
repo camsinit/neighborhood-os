@@ -79,7 +79,7 @@ const SkillOfferCard = ({
               onClick={(e) => {
                 e.stopPropagation(); // Prevent card click from triggering
               }}
-              className="bg-green-500 hover:bg-green-600 text-white border-0"
+              className="bg-green-500 hover:bg-green-600 text-white border-0 font-medium"
             >
               Request Skill
             </Button>
