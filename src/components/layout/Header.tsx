@@ -6,8 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { NotificationDrawer } from "@/notifications";
 import { useNeighborhood } from "@/contexts/neighborhood";
@@ -30,9 +28,8 @@ interface HeaderProps {
  * Displays the top navigation bar with:
  * - Quick Actions title
  * - Notifications button
- * - User profile dropdown
  * 
- * UPDATED: Removed neighborhood name display
+ * UPDATED: Removed neighborhood name display and profile dropdown
  */
 const Header = ({
   onOpenSettings
@@ -52,34 +49,6 @@ const Header = ({
   
   // State for create neighborhood dialog
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-
-  // Query the profile data for the current user
-  const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', user.id).single();
-      return data;
-    },
-    enabled: !!user?.id // Only run the query when user is available
-  });
-
-  /**
-   * Handle signing out the user
-   * Only shows toast for errors, success is indicated by navigation
-   */
-  const handleSignOut = async () => {
-    try {
-      await supabaseClient.auth.signOut();
-      navigate("/login");
-      // Success is indicated by navigation - no toast needed
-    } catch (error) {
-      toast({
-        title: "Error signing out",
-        variant: "destructive"
-      });
-    }
-  };
 
   return (
     <>
@@ -103,48 +72,10 @@ const Header = ({
           )}
         </div>
         
-        {/* Right side - notifications and profile */}
+        {/* Right side - only notifications now */}
         <div className="flex items-center gap-2">
           {/* Add the enhanced notification button */}
           <NotificationDrawer />
-          
-          {/* User profile dropdown menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center space-x-2 hover:bg-gray-100 rounded-md p-1 transition-colors">
-                {/* User avatar */}
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.display_name || 'User'} />
-                  <AvatarFallback>
-                    {profile?.display_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                {/* Display name (only show on larger screens) */}
-                <span className="text-sm font-medium hidden md:inline-block">
-                  {profile?.display_name || user?.email?.split('@')[0] || 'User'}
-                </span>
-              </button>
-            </DropdownMenuTrigger>
-            
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {/* Settings option */}
-              <DropdownMenuItem onClick={onOpenSettings} className="cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              
-              {/* Sign out option */}
-              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </header>
 
