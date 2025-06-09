@@ -1,44 +1,11 @@
 
-// This component handles category selection for goods form using a button group
-import { useState } from "react";
+// This component handles category selection for goods form using a dropdown select
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
-import { ChevronDown, ChevronUp } from "lucide-react"; 
 
-// Import category names and icons from Lucide
+// Import category names from constants
 import { CATEGORY_NAMES } from "../utils/goodsConstants";
-import { 
-  Sofa, 
-  Wrench, 
-  Laptop, 
-  Utensils, 
-  Shirt, 
-  BookOpen, 
-  Gamepad, 
-  Bike, 
-  Flower2, 
-  Apple, 
-  Home, 
-  Package 
-} from "lucide-react";
-
-// Map categories to their respective icons
-const categoryIcons = {
-  furniture: Sofa,
-  tools: Wrench,
-  electronics: Laptop,
-  kitchen: Utensils,
-  clothing: Shirt,
-  books: BookOpen,
-  toys: Gamepad,
-  sports: Bike,
-  garden: Flower2,
-  produce: Apple,
-  household: Home,
-  other: Package
-};
 
 // Component props definition
 interface CategorySelectionProps {
@@ -46,68 +13,34 @@ interface CategorySelectionProps {
   onChange: (category: GoodsItemCategory) => void;
 }
 
+/**
+ * CategorySelection component for Goods form
+ * 
+ * This component renders a dropdown select for choosing item categories
+ * with all available categories in a simple dropdown menu.
+ */
 const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
-  // State to track whether all categories are visible
-  const [showAllCategories, setShowAllCategories] = useState(false);
-
-  // Get all category entries
-  const allCategories = Object.entries(CATEGORY_NAMES);
-  
-  // Calculate how many categories to show initially (6 categories in 2 rows of 3)
-  const initialCategories = 6;
-  
-  // Get the categories to display based on showAllCategories state
-  const displayedCategories = showAllCategories 
-    ? allCategories 
-    : allCategories.slice(0, initialCategories);
-
   // If no category is selected, default to 'furniture'
   const selectedCategory = category || "furniture";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <Label htmlFor="category">Item Category</Label>
-      <ToggleGroup 
-        type="single" 
+      <Select 
         value={selectedCategory}  
-        onValueChange={(value) => value && onChange(value as GoodsItemCategory)}
-        className="flex flex-wrap gap-4 max-w-[800px]"
+        onValueChange={(value) => onChange(value as GoodsItemCategory)}
       >
-        {displayedCategories.map(([value, label]) => {
-          const IconComponent = categoryIcons[value as keyof typeof categoryIcons];
-          return (
-            <ToggleGroupItem
-              key={value}
-              value={value}
-              aria-label={label}
-              className="flex-1 min-w-[140px] items-center gap-2 px-4 py-3 rounded-full border border-gray-200 
-                bg-blue-50/80 text-gray-700 hover:bg-blue-100/80 transition-colors
-                data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
-            >
-              <IconComponent className="h-4 w-4" />
-              <span>{label}</span>
-            </ToggleGroupItem>
-          );
-        })}
-      </ToggleGroup>
-      
-      {/* View all categories button */}
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setShowAllCategories(!showAllCategories)}
-        className="w-full mt-2"
-      >
-        {showAllCategories ? (
-          <>
-            Show Less Categories <ChevronUp className="ml-2 h-4 w-4" />
-          </>
-        ) : (
-          <>
-            View All Categories <ChevronDown className="ml-2 h-4 w-4" />
-          </>
-        )}
-      </Button>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select a category" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(CATEGORY_NAMES).map(([value, label]) => (
+            <SelectItem key={value} value={value}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

@@ -26,6 +26,8 @@ import { useGoodsForm } from "./hooks/useGoodsForm";
  * For requests, it collects:
  * - Title, description
  * - Urgency level
+ * 
+ * Updated with narrower width and shorter text fields for better UX.
  */
 const GoodsForm = ({ 
   onClose, 
@@ -60,71 +62,73 @@ const GoodsForm = ({
       : "Request an Item";
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Category Selection - always show for offers or when forcing default display */}
-      {(isOfferForm || forceDefaultDisplay) && (
-        <CategorySelection 
-          category={selectedCategory}
-          onChange={handleCategoryChange}
+    <div className="max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Category Selection - always show for offers or when forcing default display */}
+        {(isOfferForm || forceDefaultDisplay) && (
+          <CategorySelection 
+            category={selectedCategory}
+            onChange={handleCategoryChange}
+          />
+        )}
+        
+        {/* Title Field */}
+        <TitleField 
+          mode={isOfferForm ? 'offer' : 'request'}
+          value={isOfferForm ? itemFormData.title : requestFormData.title}
+          onChange={handleTitleChange}
         />
-      )}
-      
-      {/* Title Field */}
-      <TitleField 
-        mode={isOfferForm ? 'offer' : 'request'}
-        value={isOfferForm ? itemFormData.title : requestFormData.title}
-        onChange={handleTitleChange}
-      />
-      
-      {/* Description Field */}
-      <DescriptionField 
-        mode={isOfferForm ? 'offer' : 'request'}
-        value={isOfferForm ? itemFormData.description : requestFormData.description}
-        onChange={handleDescriptionChange}
-      />
-      
-      {/* Available Days (offers only) */}
-      {isOfferForm && (
-        <AvailabilityField 
-          availableDays={itemFormData.availableDays || 30}
-          onChange={(days) => {
-            setItemFormData(prev => ({ ...prev, availableDays: days }));
-          }}
+        
+        {/* Description Field */}
+        <DescriptionField 
+          mode={isOfferForm ? 'offer' : 'request'}
+          value={isOfferForm ? itemFormData.description : requestFormData.description}
+          onChange={handleDescriptionChange}
         />
-      )}
-      
-      {/* Urgency (requests only) */}
-      {!isOfferForm && !forceDefaultDisplay && (
-        <UrgencyField 
-          urgency={requestFormData.urgency!}
-          onChange={(urgency) => {
-            setRequestFormData(prev => ({ ...prev, urgency }));
-          }}
-        />
-      )}
-      
-      {/* Image Upload Area - always show for offers or when forcing default display */}
-      {(isOfferForm || forceDefaultDisplay) && (
-        <ImageDropzone 
-          isOfferForm={isOfferForm}
-          images={itemFormData.images}
-          image={requestFormData.image}
-          onAddImage={handleAddImage}
-          onRemoveImage={handleRemoveImage}
-          uploading={uploading}
-        />
-      )}
-      
-      {/* Form Submission Buttons */}
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={uploading}>
-          {mode === 'edit' ? 'Update' : 'Submit'}
-        </Button>
-      </DialogFooter>
-    </form>
+        
+        {/* Available Days (offers only) */}
+        {isOfferForm && (
+          <AvailabilityField 
+            availableDays={itemFormData.availableDays || 30}
+            onChange={(days) => {
+              setItemFormData(prev => ({ ...prev, availableDays: days }));
+            }}
+          />
+        )}
+        
+        {/* Urgency (requests only) */}
+        {!isOfferForm && !forceDefaultDisplay && (
+          <UrgencyField 
+            urgency={requestFormData.urgency!}
+            onChange={(urgency) => {
+              setRequestFormData(prev => ({ ...prev, urgency }));
+            }}
+          />
+        )}
+        
+        {/* Image Upload Area - always show for offers or when forcing default display */}
+        {(isOfferForm || forceDefaultDisplay) && (
+          <ImageDropzone 
+            isOfferForm={isOfferForm}
+            images={itemFormData.images}
+            image={requestFormData.image}
+            onAddImage={handleAddImage}
+            onRemoveImage={handleRemoveImage}
+            uploading={uploading}
+          />
+        )}
+        
+        {/* Form Submission Buttons */}
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={uploading}>
+            {mode === 'edit' ? 'Update' : 'Submit'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </div>
   );
 };
 

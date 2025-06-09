@@ -16,6 +16,7 @@ interface TitleFieldProps {
  * 
  * This component renders a text input for entering item titles
  * with different placeholder text based on whether it's an offer or request.
+ * Updated with shorter width for better UX.
  */
 const TitleField = ({ mode, value, onChange }: TitleFieldProps) => {
   // Define placeholder text based on mode
@@ -37,6 +38,7 @@ const TitleField = ({ mode, value, onChange }: TitleFieldProps) => {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required
+        className="w-full max-w-sm"
       />
     </div>
   );

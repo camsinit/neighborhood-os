@@ -16,6 +16,7 @@ interface DescriptionFieldProps {
  * 
  * This component renders a textarea for entering item descriptions
  * with different placeholder text based on whether it's an offer or request.
+ * Updated with shorter width for better UX.
  */
 const DescriptionField = ({ mode, value, onChange }: DescriptionFieldProps) => {
   // Define placeholder text based on mode
@@ -37,7 +38,7 @@ const DescriptionField = ({ mode, value, onChange }: DescriptionFieldProps) => {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required
-        className="min-h-[100px]"
+        className="min-h-[100px] w-full max-w-sm"
       />
     </div>
   );
