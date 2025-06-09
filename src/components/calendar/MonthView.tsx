@@ -63,7 +63,7 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
   };
 
   return (
-    <div>
+    <div className="p-2">
       {/* Day names header - Added to ensure day names are displayed */}
       <div className="grid grid-cols-7 mb-1">
         {weekDays.map((day, index) => (
@@ -73,8 +73,8 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
         ))}
       </div>
       
-      {/* Calendar grid with days */}
-      <div className="grid grid-cols-7 h-full">
+      {/* Calendar grid with days - Added padding to prevent corner clipping */}
+      <div className="grid grid-cols-7 h-full border border-gray-200 rounded-lg overflow-hidden">
         {days.map((day) => (
           <DayCell
             key={day.toISOString()}

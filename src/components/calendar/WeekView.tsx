@@ -49,7 +49,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 p-2">
       {/* Day names header - Now using the actual dates for formatting */}
       <div className="grid grid-cols-7">
         {weekDates.map((date, i) => (
@@ -59,7 +59,7 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
         ))}
       </div>
 
-      {/* Calendar grid */}
+      {/* Calendar grid - Added padding to prevent corner clipping */}
       <div className="grid grid-cols-7 border border-gray-200 rounded-lg overflow-hidden">
         {weekDates.map((date, i) => (
           <DayCell
