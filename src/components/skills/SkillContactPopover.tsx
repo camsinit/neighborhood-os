@@ -111,16 +111,16 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
                   <div className="flex items-start space-x-3 mb-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium text-primary">
-                        {provider.profiles?.display_name?.charAt(0)?.toUpperCase() || '?'}
+                        {provider.user_profiles?.display_name?.charAt(0)?.toUpperCase() || '?'}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {provider.profiles?.display_name || 'Neighbor'}
+                        {provider.user_profiles?.display_name || 'Neighbor'}
                       </h4>
-                      {provider.description && (
+                      {provider.skill_description && (
                         <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                          "{provider.description}"
+                          "{provider.skill_description}"
                         </p>
                       )}
                     </div>
@@ -129,18 +129,18 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
                   {/* Contact information and guidance */}
                   <div className="space-y-3">
                     {/* Contact method */}
-                    {provider.profiles?.email && (
+                    {provider.user_profiles?.email && (
                       <div className="flex items-center space-x-2 text-xs text-gray-600">
                         <Mail className="h-3 w-3" />
-                        <span>{provider.profiles.email}</span>
+                        <span>{provider.user_profiles.email}</span>
                       </div>
                     )}
 
                     {/* Time preference hint */}
-                    {provider.time_preference && (
+                    {provider.time_preferences && provider.time_preferences.length > 0 && (
                       <div className="flex items-center space-x-2 text-xs text-gray-600">
                         <Clock className="h-3 w-3" />
-                        <span>Prefers {provider.time_preference.toLowerCase()} times</span>
+                        <span>Prefers {provider.time_preferences.join(', ').toLowerCase()} times</span>
                       </div>
                     )}
 
@@ -150,10 +150,10 @@ const SkillContactPopover: React.FC<SkillContactPopoverProps> = ({
                         size="sm"
                         className="w-full text-xs"
                         onClick={() => {
-                          if (provider.profiles?.email) {
+                          if (provider.user_profiles?.email) {
                             window.open(createEmailLink(
-                              provider.profiles.email, 
-                              provider.profiles.display_name || 'Neighbor'
+                              provider.user_profiles.email, 
+                              provider.user_profiles.display_name || 'Neighbor'
                             ), '_blank');
                           }
                         }}
