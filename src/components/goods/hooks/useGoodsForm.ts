@@ -11,8 +11,10 @@ import { toast } from "sonner";
 export const useGoodsForm = ({ 
   onClose, 
   initialValues, 
-  initialRequestType 
-}: Pick<GoodsFormProps, 'onClose' | 'initialValues' | 'initialRequestType'>) => {
+  initialRequestType,
+  mode = 'create', // Add mode parameter
+  requestId // Add requestId parameter (this will be the itemId for edit mode)
+}: Pick<GoodsFormProps, 'onClose' | 'initialValues' | 'initialRequestType' | 'mode' | 'requestId'>) => {
   // Get the current user and neighborhood
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
@@ -60,7 +62,9 @@ export const useGoodsForm = ({
     requestFormData,
     user?.id,
     neighborhood?.id,
-    onClose
+    onClose,
+    mode, // Pass mode to submit hook
+    requestId // Pass requestId as itemId for edit mode
   );
   
   return {

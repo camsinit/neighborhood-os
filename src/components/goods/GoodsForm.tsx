@@ -28,6 +28,7 @@ import { useGoodsForm } from "./hooks/useGoodsForm";
  * - Urgency level
  * 
  * Updated with compact spacing and reduced empty space.
+ * Now properly handles edit mode to update existing items instead of creating new ones.
  */
 const GoodsForm = ({ 
   onClose, 
@@ -38,6 +39,7 @@ const GoodsForm = ({
   forceDefaultDisplay = false // Added this prop to force consistent display
 }: GoodsFormProps & { forceDefaultDisplay?: boolean }) => {
   // Use our custom hook to manage the form state and handlers
+  // Now passing mode and requestId for proper edit functionality
   const {
     itemFormData,
     requestFormData,
@@ -52,7 +54,13 @@ const GoodsForm = ({
     handleSubmit,
     setItemFormData,
     setRequestFormData
-  } = useGoodsForm({ onClose, initialValues, initialRequestType });
+  } = useGoodsForm({ 
+    onClose, 
+    initialValues, 
+    initialRequestType,
+    mode, // Pass mode to hook
+    requestId // Pass requestId to hook
+  });
   
   // Set title based on form mode (create or edit) and request type (offer or need)
   const formTitle = mode === 'edit' 

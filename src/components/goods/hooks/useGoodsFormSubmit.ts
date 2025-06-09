@@ -13,7 +13,9 @@ export const useGoodsFormSubmit = (
   requestFormData: Partial<GoodsRequestFormData>,
   userId: string | undefined,
   neighborhoodId: string | undefined,
-  onClose: () => void
+  onClose: () => void,
+  mode: 'create' | 'edit' = 'create', // Add mode parameter
+  itemId?: string // Add itemId parameter for edit mode
 ) => {
   const queryClient = useQueryClient();
   
@@ -41,8 +43,17 @@ export const useGoodsFormSubmit = (
       console.error("Missing neighborhood ID in form submission", {
         userId,
         neighborhoodId,
-        formType: isOfferForm ? "offer" : "request"
+        formType: isOfferForm ? "offer" : "request",
+        mode,
+        itemId
       });
+      return;
+    }
+    
+    // Validate itemId for edit mode
+    if (mode === 'edit' && !itemId) {
+      toast.error("Cannot update item: missing item ID");
+      console.error("Edit mode requires itemId", { mode, itemId });
       return;
     }
     
@@ -52,7 +63,8 @@ export const useGoodsFormSubmit = (
         itemFormData,
         requestFormData,
         userId,
-        neighborhoodId
+        neighborhoodId,
+        mode === 'edit' ? itemId : undefined // Pass itemId only in edit mode
       );
       
       if (success) {
@@ -71,7 +83,7 @@ export const useGoodsFormSubmit = (
     } catch (error) {
       console.error('Error submitting goods form:', error);
       // Only show toast for unexpected errors
-      toast.error("Failed to submit request. Please try again.");
+      toast.error(`Failed to ${mode === 'edit' ? 'update' : 'submit'} ${isOfferForm ? 'offer' : 'request'}. Please try again.`);
     }
   };
   
