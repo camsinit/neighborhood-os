@@ -11,8 +11,8 @@ interface AvailableGoodsCardProps {
 /**
  * AvailableGoodsCard - Compact card component for available goods items
  * 
- * Fixed to maintain consistent compact sizing regardless of window width
- * and includes text truncation for long titles to prevent multi-line headers.
+ * Updated to use a more compact height (h-48 instead of h-64) to minimize
+ * empty space while maintaining all necessary content visibility.
  */
 const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
   item,
@@ -20,11 +20,11 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
 }) => {
   return (
     <div 
-      className="w-64 h-64 flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm transition-all duration-200"
+      className="w-64 h-48 flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm transition-all duration-200"
       onClick={onClick}
     >
-      {/* Image section at the top - fixed height */}
-      <div className="w-full h-32 flex-shrink-0 bg-gray-100">
+      {/* Image section at the top - reduced height */}
+      <div className="w-full h-24 flex-shrink-0 bg-gray-100">
         {(item.image_url || (item.images && item.images.length > 0)) ? (
           <img 
             src={item.image_url || item.images?.[0]} 
@@ -38,7 +38,7 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
         )}
       </div>
       
-      {/* Content section - fixed layout */}
+      {/* Content section - more compact */}
       <div className="flex-1 flex flex-col justify-between p-3">
         {/* Main content */}
         <div className="flex-1">
@@ -57,7 +57,7 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
           
           {/* Description preview - limited to 2 lines */}
           {item.description && (
-            <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+            <p className="text-xs text-gray-600 line-clamp-2">
               {item.description}
             </p>
           )}
