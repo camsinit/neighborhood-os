@@ -19,8 +19,7 @@ interface AvailableItemsSectionProps {
 /**
  * AvailableItemsSection - Section for displaying available goods items
  * 
- * Updated to display items in a grid with fixed-size cards that don't grow with window size.
- * Each card opens a popover when clicked to show full details.
+ * Updated to display items in a 3-column grid layout with square cards
  */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
@@ -58,8 +57,8 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   
   return (
     <div className="w-full">
-      {/* Grid layout with fixed-size cards that don't grow */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 justify-items-start">
+      {/* Grid layout with 3 columns for square cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {goodsItems.map((item) => (
           <Popover 
             key={item.id}

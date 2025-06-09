@@ -11,8 +11,9 @@ interface AvailableGoodsCardProps {
 /**
  * AvailableGoodsCard - Card component for available goods items
  * 
- * Updated to display as a fixed-size square card that doesn't grow with window size.
- * Cards maintain consistent dimensions regardless of screen size for better visual consistency.
+ * Updated to display as a square card for 3-column grid layout
+ * with image at top, title with profile picture, and description preview.
+ * Edit/delete buttons are removed and only available in the popover.
  */
 const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
   item,
@@ -20,10 +21,10 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
 }) => {
   return (
     <div 
-      className="w-64 h-64 flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm flex-shrink-0"
+      className="w-full aspect-square flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm"
       onClick={onClick}
     >
-      {/* Image section at the top - fixed height */}
+      {/* Image section at the top */}
       <div className="w-full h-32 flex-shrink-0 bg-gray-100">
         {(item.image_url || (item.images && item.images.length > 0)) ? (
           <img 
@@ -38,8 +39,8 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
         )}
       </div>
       
-      {/* Content section - fixed height */}
-      <div className="flex-1 flex flex-col justify-between p-3 h-32">
+      {/* Content section */}
+      <div className="flex-1 flex flex-col justify-between p-3">
         {/* Main content */}
         <div className="flex-1">
           {/* Title with profile picture */}
