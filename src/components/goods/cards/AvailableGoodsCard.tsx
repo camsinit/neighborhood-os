@@ -17,8 +17,9 @@ interface AvailableGoodsCardProps {
 /**
  * AvailableGoodsCard - Card component for available goods items
  * 
- * Now includes proper ownership checking to only show edit/delete buttons
- * to the item owner. This prevents unauthorized editing of other users' posts.
+ * Updated to show title prominently, description preview, and user profile image
+ * in a layout similar to marketplace listings. Only shows edit/delete buttons
+ * to the item owner to prevent unauthorized editing.
  */
 const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
   item,
@@ -30,67 +31,80 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
 }) => {
   return (
     <div 
-      className="w-full flex items-stretch rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
+      className="w-full flex rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group overflow-hidden"
       onClick={onClick}
     >
-      {/* Image preview on the left */}
+      {/* Image section on the left */}
       {(item.image_url || (item.images && item.images.length > 0)) && (
-        <div className="w-32 h-full flex-shrink-0">
+        <div className="w-48 h-32 flex-shrink-0">
           <img 
             src={item.image_url || item.images?.[0]} 
             alt={item.title}
-            className="h-full w-full object-cover rounded-l-lg"
+            className="h-full w-full object-cover"
           />
         </div>
       )}
       
       {/* Content section */}
-      <div className="flex-grow flex items-center p-4">
-        <div className="flex items-center gap-3 flex-grow">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={item.profiles?.avatar_url || undefined} />
-            <AvatarFallback>
-              {item.profiles?.display_name?.[0] || '?'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <h4 className="font-medium text-gray-900">{item.title}</h4>
-            <p className="text-sm text-gray-500 line-clamp-1">
+      <div className="flex-grow flex flex-col justify-between p-4">
+        {/* Main content */}
+        <div className="flex-grow">
+          {/* Title - prominently displayed */}
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+            {item.title}
+          </h3>
+          
+          {/* Description preview */}
+          {item.description && (
+            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
               {item.description}
             </p>
-          </div>
+          )}
         </div>
         
-        {/* Edit and Delete buttons - only show for item owner */}
-        {isOwner && (
-          <div className="flex gap-2 ml-4">
-            <Button 
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              className="text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              disabled={isDeletingItem}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Delete
-            </Button>
+        {/* Bottom section with user info and location */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={item.profiles?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs">
+                {item.profiles?.display_name?.[0] || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm text-gray-500">
+              {item.profiles?.display_name || 'Anonymous'}
+            </span>
           </div>
-        )}
+          
+          {/* Edit and Delete buttons - only show for item owner */}
+          {isOwner && (
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="h-8 px-2"
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-red-600 h-8 px-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                disabled={isDeletingItem}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

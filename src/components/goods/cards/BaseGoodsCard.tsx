@@ -9,6 +9,12 @@ interface BaseGoodsCardProps {
   onClick?: () => void;
 }
 
+/**
+ * BaseGoodsCard - Base component for goods cards
+ * 
+ * Updated to provide a taller layout that accommodates the new marketplace-style design
+ * with prominent titles, description previews, and user profile information
+ */
 const BaseGoodsCard: React.FC<BaseGoodsCardProps> = ({
   children,
   className,
@@ -18,8 +24,8 @@ const BaseGoodsCard: React.FC<BaseGoodsCardProps> = ({
     <div 
       onClick={onClick}
       className={cn(
-        // Set fixed height to ensure consistency across all cards
-        "w-full h-24 flex items-stretch rounded-lg border border-gray-200",
+        // Updated height to accommodate the new layout with title, description, and user info
+        "w-full h-32 flex rounded-lg border border-gray-200",
         "hover:border-gray-300 bg-white cursor-pointer transition-colors shadow-sm",
         "relative overflow-hidden",
         className
@@ -31,4 +37,3 @@ const BaseGoodsCard: React.FC<BaseGoodsCardProps> = ({
 };
 
 export default BaseGoodsCard;
-
