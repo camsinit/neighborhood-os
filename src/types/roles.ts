@@ -1,21 +1,24 @@
 
-export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'user';
-
+/**
+ * Extended user interface that includes role information
+ * This is used throughout the app when we need both user data and their roles
+ */
 export interface UserWithRole {
   id: string;
-  email?: string;
+  email: string;
   created_at: string;
+  roles: string[];
   profiles?: {
-    display_name: string | null;
-    avatar_url: string | null;
-    address: string | null;
-    phone_number: string | null;
-    access_needs: string | null;
+    display_name: string;
+    avatar_url: string;
+    address: string;
+    phone_number: string;
+    access_needs: string;
     email_visible: boolean;
     phone_visible: boolean;
     address_visible: boolean;
     needs_visible: boolean;
-    bio: string | null;
-  };
-  roles: UserRole[];
+    bio: string;
+    email?: string; // Add email field here too
+  } | null;
 }
