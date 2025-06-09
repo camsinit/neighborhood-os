@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import RequestDetailCard from './components/RequestDetailCard';
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
@@ -19,7 +19,8 @@ interface AvailableItemsSectionProps {
 /**
  * AvailableItemsSection - Section for displaying available goods items
  * 
- * Updated to display items in a 3-column grid layout with square cards
+ * Updated to display items in a grid with fixed-width compact cards
+ * and use a centered modal dialog instead of a side popover for better focus.
  */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
@@ -29,7 +30,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
 }) => {
   // Get current user to check ownership
   const user = useUser();
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<GoodsExchangeItem | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
 
   // Function to check if current user owns the item
@@ -40,6 +41,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   const handleEdit = (item: GoodsExchangeItem) => {
     // Only allow editing if user owns the item
     if (isOwner(item)) {
+      setSelectedItem(null); // Close the detail dialog first
       setItemToEdit(item);
     }
   };
@@ -48,6 +50,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
     // Only allow deletion if user owns the item
     if (isOwner(item) && onDeleteItem) {
       onDeleteItem(item);
+      setSelectedItem(null); // Close the dialog after deletion
     }
   };
 
@@ -57,35 +60,31 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   
   return (
     <div className="w-full">
-      {/* Grid layout with 3 columns for square cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid layout with fixed-width cards that wrap naturally */}
+      <div className="flex flex-wrap gap-4 justify-start">
         {goodsItems.map((item) => (
-          <Popover 
+          <AvailableGoodsCard
             key={item.id}
-            open={openPopoverId === item.id}
-            onOpenChange={(open) => setOpenPopoverId(open ? item.id : null)}
-          >
-            <PopoverTrigger asChild>
-              <div>
-                <AvailableGoodsCard
-                  item={item}
-                  onClick={() => setOpenPopoverId(item.id)}
-                />
-              </div>
-            </PopoverTrigger>
-            
-            <PopoverContent className="w-[300px] p-0" sideOffset={5}>
-              <RequestDetailCard
-                request={item}
-                onDeleteItem={onDeleteItem}
-                isDeletingItem={isDeletingItem}
-                onEdit={() => handleEdit(item)}
-                isOwner={isOwner(item)}
-              />
-            </PopoverContent>
-          </Popover>
+            item={item}
+            onClick={() => setSelectedItem(item)}
+          />
         ))}
       </div>
+
+      {/* Centered modal dialog with grayed background for item details */}
+      <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
+        <DialogContent className="max-w-md p-0 bg-white">
+          {selectedItem && (
+            <RequestDetailCard
+              request={selectedItem}
+              onDeleteItem={onDeleteItem}
+              isDeletingItem={isDeletingItem}
+              onEdit={() => handleEdit(selectedItem)}
+              isOwner={isOwner(selectedItem)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <UniversalDialog
         open={!!itemToEdit}

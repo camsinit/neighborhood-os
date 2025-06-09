@@ -1,9 +1,12 @@
 
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import GoodsRequestsSection from '../GoodsRequestsSection';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import RequestDetailCard from '../components/RequestDetailCard';
+import RequestGoodsCard from '../cards/RequestGoodsCard';
 import EmptyState from "@/components/ui/empty-state";
 import { PackageSearch } from "lucide-react";
+import { useUser } from '@supabase/auth-helpers-react';
 
 interface RegularGoodsSectionProps {
   requests: GoodsExchangeItem[];
@@ -13,13 +16,15 @@ interface RegularGoodsSectionProps {
   isDeletingItem?: boolean;
   showRequests: boolean;
   onRequestItem: () => void;
+  selectedRequest: GoodsExchangeItem | null;
+  onSelectedRequestChange: (request: GoodsExchangeItem | null) => void;
 }
 
 /**
  * RegularGoodsSection - Section for displaying regular (non-urgent) goods requests
  * 
- * This component handles the display of regular goods requests in a grid layout
- * and shows an empty state when no requests are available.
+ * Updated to use a centered modal dialog and maintain compact card sizing
+ * with flex-wrap layout for better responsive behavior.
  */
 const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   requests,
@@ -28,18 +33,58 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   onDeleteItem,
   isDeletingItem = false,
   showRequests,
-  onRequestItem
+  onRequestItem,
+  selectedRequest,
+  onSelectedRequestChange
 }) => {
+  // Get current user to check ownership
+  const user = useUser();
+
+  // Function to check if current user owns the item
+  const isOwner = (item: GoodsExchangeItem) => {
+    return user?.id === item.user_id;
+  };
+
+  // Handle edit function - only allow if user owns the item
+  const handleEdit = (item: GoodsExchangeItem) => {
+    if (isOwner(item)) {
+      // Edit functionality would be handled by parent component
+      console.log('Edit requested for item:', item.id);
+    }
+  };
+
   if (!showRequests) return null;
 
   return (
     <div className="space-y-4">
       {requests.length > 0 ? (
-        <GoodsRequestsSection
-          requests={requests}
-          onDeleteItem={onDeleteItem}
-          isDeletingItem={isDeletingItem}
-        />
+        <>
+          {/* Grid layout with fixed-width cards that wrap naturally */}
+          <div className="flex flex-wrap gap-4 justify-start">
+            {requests.map((request) => (
+              <RequestGoodsCard
+                key={request.id}
+                request={request}
+                onSelect={() => onSelectedRequestChange(request)}
+              />
+            ))}
+          </div>
+
+          {/* Centered modal dialog with grayed background for request details */}
+          <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && onSelectedRequestChange(null)}>
+            <DialogContent className="max-w-md p-0 bg-white">
+              {selectedRequest && (
+                <RequestDetailCard
+                  request={selectedRequest}
+                  onDeleteItem={onDeleteItem}
+                  isDeletingItem={isDeletingItem}
+                  onEdit={() => handleEdit(selectedRequest)}
+                  isOwner={isOwner(selectedRequest)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        </>
       ) : urgentRequests.length === 0 ? (
         <EmptyState
           icon={PackageSearch}

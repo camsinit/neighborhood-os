@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { filterBySearch } from './utils/sectionHelpers';
 import { getUrgencyClass, getUrgencyLabel } from './utils/urgencyHelpers';
@@ -43,6 +43,9 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   activeTab,
   onTabChange
 }) => {
+  // State for managing which request is selected for the modal dialog
+  const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
+
   const {
     handleDeleteGoodsItem,
     isDeletingItem
@@ -72,7 +75,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
         onRefetch={onRefresh}
       />
 
-      {/* Needs tab content - reset to minimal styling */}
+      {/* Needs tab content */}
       <TabsContent value="needs" className="w-full">
         {requests.length === 0 && urgentRequests.length === 0 ? (
           <EmptyState
@@ -86,7 +89,7 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
           <>
             <UrgentGoodsSection 
               urgentRequests={urgentRequests}
-              onRequestSelect={onRequestSelect}
+              onRequestSelect={setSelectedRequest}
               getUrgencyClass={getUrgencyClass}
               getUrgencyLabel={getUrgencyLabel}
               showUrgent={showUrgent}
@@ -94,11 +97,13 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
             <RegularGoodsSection 
               requests={requests}
               urgentRequests={urgentRequests}
-              onRequestSelect={onRequestSelect}
+              onRequestSelect={setSelectedRequest}
               onDeleteItem={handleDeleteGoodsItem}
               isDeletingItem={isDeletingItem}
               showRequests={showRequests}
               onRequestItem={onRequestItem}
+              selectedRequest={selectedRequest}
+              onSelectedRequestChange={setSelectedRequest}
             />
           </>
         )}
