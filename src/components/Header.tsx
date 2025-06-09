@@ -4,6 +4,7 @@
  * 
  * Main navigation header with user menu and notifications
  * UPDATED: Removed neighborhood switching - shows single neighborhood as static text
+ * UPDATED: Replaced gear icon with user profile image in dropdown menu
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut, Settings, User, Home, Plus } from 'lucide-react';
+import { LogOut, User, Home, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNeighborhood } from '@/contexts/neighborhood';
 // Import from the new notification system
@@ -26,6 +27,8 @@ import { NotificationPopover } from '@/notifications';
 // Import the new neighborhood creation functionality
 import { useCreateNeighborhoodAccess } from '@/hooks/useCreateNeighborhoodAccess';
 import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeighborhoodDialog';
+// Import query hook to get user profile data
+import { useQuery } from '@tanstack/react-query';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -35,6 +38,21 @@ const Header = () => {
   
   // State for create neighborhood dialog
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  // Query to get user profile data for the avatar
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url, display_name')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id
+  });
 
   // Handle user logout
   const handleLogout = async () => {
@@ -85,13 +103,13 @@ const Header = () => {
               {/* Notifications using the new system */}
               <NotificationPopover />
 
-              {/* User Menu */}
+              {/* User Menu with profile image instead of gear icon */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage 
-                        src={user?.user_metadata?.avatar_url} 
+                        src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
                         alt={displayName} 
                       />
                       <AvatarFallback>
@@ -111,7 +129,16 @@ const Header = () => {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    <Settings className="mr-2 h-4 w-4" />
+                    {/* Use profile image instead of Settings icon, maintaining same dimensions */}
+                    <Avatar className="mr-2 h-4 w-4">
+                      <AvatarImage 
+                        src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
+                        alt={displayName} 
+                      />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
                     Profile Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

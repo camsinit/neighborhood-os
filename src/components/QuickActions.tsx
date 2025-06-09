@@ -1,3 +1,4 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -6,18 +7,21 @@ import AddSupportRequestDialog from "./AddSupportRequestDialog";
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
+// Import the proper goods dialogs and form
+import GoodsDialogs from "./goods/GoodsDialogs";
 
 /**
  * QuickActions component displays common actions for users to interact with the community.
  * 
  * This includes:
  * - Adding events
- * - Sharing or requesting items (goods)
+ * - Sharing or requesting items (goods) - now using proper goods forms
  * - Sharing or requesting skills
  * - Adding safety updates
  * 
  * Now organized into columns by module type for better usability
  * Updated to use the same safety dialog as the Safety Page for consistency
+ * Updated to use proper goods forms instead of generic support request forms
  */
 const QuickActions = () => {
   // State for controlling various dialogs
@@ -27,23 +31,25 @@ const QuickActions = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<'skills' | 'care' | 'goods' | 'general'>('general');
 
-  // Goods/Items actions (orange theme)
+  // New state for goods dialogs (using proper goods forms)
+  const [isGoodsDialogOpen, setIsGoodsDialogOpen] = useState(false);
+  const [goodsRequestType, setGoodsRequestType] = useState<"need" | "offer" | null>(null);
+
+  // Goods/Items actions (orange theme) - now using proper goods forms
   const goodsActions = [{
     icon: Package,
     label: "Share an item",
     onClick: () => {
-      setInitialRequestType("offer");
-      setRequestView('goods');
-      setIsAddRequestOpen(true);
+      setGoodsRequestType("offer");
+      setIsGoodsDialogOpen(true);
     },
     moduleTheme: 'goods' as const
   }, {
     icon: Package,
     label: "Request an item",
     onClick: () => {
-      setInitialRequestType("need");
-      setRequestView('goods');
-      setIsAddRequestOpen(true);
+      setGoodsRequestType("need");
+      setIsGoodsDialogOpen(true);
     },
     moduleTheme: 'goods' as const
   }];
@@ -125,10 +131,19 @@ const QuickActions = () => {
         <ActionColumn title="Events & Safety" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialog components - now using the same safety dialog as the Safety Page */}
+      {/* Dialog components - now using proper goods dialogs for items */}
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
       <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
+      
+      {/* Proper goods dialogs for items */}
+      <GoodsDialogs 
+        isAddRequestOpen={isGoodsDialogOpen}
+        selectedRequest={null}
+        onAddRequestOpenChange={setIsGoodsDialogOpen}
+        onSelectedRequestChange={() => {}}
+        initialRequestType={goodsRequestType}
+      />
     </div>;
 };
 
