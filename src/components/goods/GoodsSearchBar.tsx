@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
@@ -34,17 +35,15 @@ const GoodsSearchBar = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="relative w-[180px]">
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <Input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchQuery} 
-                onChange={e => onSearchChange(e.target.value)} 
-                className="pl-10" 
-              />
-            </div>
+          <div className="relative w-[180px]">
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <Input 
+              type="text" 
+              placeholder="Search..." 
+              value={searchQuery} 
+              onChange={e => onSearchChange(e.target.value)} 
+              className="pl-10" 
+            />
           </div>
 
           <Tabs value={activeTab} onValueChange={onTabChange}>
@@ -58,13 +57,13 @@ const GoodsSearchBar = ({
         <div className="flex gap-2">
           <Button 
             onClick={onRequestItem} 
-            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
+            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-white"
           >
             Request
           </Button>
           <Button 
             onClick={onOfferItem} 
-            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-gray-900"
+            className="bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 text-white"
           >
             Offer
           </Button>
