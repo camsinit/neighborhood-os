@@ -13,6 +13,7 @@ import SimpleSkillRequestPopover from './SimpleSkillRequestPopover';
  * This component handles search, filter, tabs, and the add/request skill buttons.
  * It's been extracted from the main SkillsPage for better organization.
  * Now uses the SimpleSkillRequestPopover for skill requests.
+ * Updated Request Skill button to match the Add Skill button's green styling.
  */
 interface SkillsPageNavigationProps {
   view: string;
@@ -106,13 +107,12 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         </Tabs>
       </div>
       
-      {/* Action buttons section - Add Skill and Request Skill with new popover */}
+      {/* Action buttons section - Both buttons now use matching green styling */}
       <div className="flex gap-2 shrink-0">
-        {/* Request Skill button with simple popover */}
+        {/* Request Skill button with green styling to match Add Skill button */}
         <SimpleSkillRequestPopover>
           <Button 
-            variant="outline"
-            className="whitespace-nowrap flex items-center gap-1.5 border-green-500 text-green-600 hover:bg-green-50"
+            className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
           >
             <MessageSquare className="h-4 w-4" />
             <span>Request Skill</span>
