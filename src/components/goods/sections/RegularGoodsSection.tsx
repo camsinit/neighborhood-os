@@ -25,6 +25,7 @@ interface RegularGoodsSectionProps {
  * 
  * Updated to use a centered modal dialog and maintain compact card sizing
  * with flex-wrap layout for better responsive behavior.
+ * Now properly closes dialog when item is deleted.
  */
 const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
   requests,
@@ -53,6 +54,15 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
     }
   };
 
+  // Enhanced delete handler that closes the dialog after deletion
+  const handleDelete = async (item: GoodsExchangeItem) => {
+    if (onDeleteItem) {
+      await onDeleteItem(item);
+      // Close the dialog after successful deletion
+      onSelectedRequestChange(null);
+    }
+  };
+
   if (!showRequests) return null;
 
   return (
@@ -76,7 +86,7 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
               {selectedRequest && (
                 <RequestDetailCard
                   request={selectedRequest}
-                  onDeleteItem={onDeleteItem}
+                  onDeleteItem={handleDelete}
                   isDeletingItem={isDeletingItem}
                   onEdit={() => handleEdit(selectedRequest)}
                   isOwner={isOwner(selectedRequest)}

@@ -4,7 +4,8 @@
  * 
  * This hook encapsulates the logic for deleting goods items and
  * notifying the activity feed about the deletion.
- * Updated to include activity query invalidation for immediate UI updates.
+ * Updated to include activity query invalidation for immediate UI updates
+ * and proper state cleanup to close any open dialogs/popovers.
  */
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,7 +15,7 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 import { useUser } from "@supabase/auth-helpers-react";
 import { refreshEvents } from '@/utils/refreshEvents';
 
-export const useGoodsItemDeletion = (onRefresh: () => void) => {
+export const useGoodsItemDeletion = (onRefresh: () => void, onItemDeleted?: () => void) => {
   // Get the current user for permission checks
   const currentUser = useUser();
   const queryClient = useQueryClient();
@@ -29,6 +30,7 @@ export const useGoodsItemDeletion = (onRefresh: () => void) => {
    * 1. Deletes the item from the database
    * 2. Calls the edge function to update the activity feed
    * 3. Refreshes the goods data and invalidates all related queries
+   * 4. Closes any open dialogs/popovers by calling onItemDeleted callback
    */
   const handleDeleteGoodsItem = async (item: GoodsExchangeItem) => {
     try {
@@ -90,6 +92,11 @@ export const useGoodsItemDeletion = (onRefresh: () => void) => {
       
       // Call the legacy refresh callback
       onRefresh();
+      
+      // Close any open dialogs/popovers by calling the callback
+      if (onItemDeleted) {
+        onItemDeleted();
+      }
     } catch (error) {
       console.error("Error in delete operation:", error);
       toast.error("An error occurred while deleting the item");

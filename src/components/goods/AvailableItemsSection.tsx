@@ -21,6 +21,7 @@ interface AvailableItemsSectionProps {
  * 
  * Updated to display items in a grid with fixed-width compact cards
  * and use a centered modal dialog instead of a side popover for better focus.
+ * Now properly closes dialog when item is deleted.
  */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
@@ -46,11 +47,13 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
     }
   };
 
-  const handleDelete = (item: GoodsExchangeItem) => {
+  // Enhanced delete handler that closes the dialog after deletion
+  const handleDelete = async (item: GoodsExchangeItem) => {
     // Only allow deletion if user owns the item
     if (isOwner(item) && onDeleteItem) {
-      onDeleteItem(item);
-      setSelectedItem(null); // Close the dialog after deletion
+      await onDeleteItem(item);
+      // Close the dialog after successful deletion
+      setSelectedItem(null);
     }
   };
 
@@ -77,7 +80,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
           {selectedItem && (
             <RequestDetailCard
               request={selectedItem}
-              onDeleteItem={onDeleteItem}
+              onDeleteItem={handleDelete}
               isDeletingItem={isDeletingItem}
               onEdit={() => handleEdit(selectedItem)}
               isOwner={isOwner(selectedItem)}

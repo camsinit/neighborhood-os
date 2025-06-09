@@ -46,10 +46,11 @@ const GoodsSections: React.FC<GoodsSectionsProps> = ({
   // State for managing which request is selected for the modal dialog
   const [selectedRequest, setSelectedRequest] = useState<GoodsExchangeItem | null>(null);
 
+  // Enhanced deletion hook with callback to close dialogs
   const {
     handleDeleteGoodsItem,
     isDeletingItem
-  } = useGoodsItemDeletion(onRefresh);
+  } = useGoodsItemDeletion(onRefresh, () => setSelectedRequest(null));
 
   const filteredGoods = filterBySearch(goodsData || [], searchQuery);
   const urgentRequests = filteredGoods.filter(item => item.request_type === 'need' && item.urgency === 'high');
