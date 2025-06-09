@@ -16,7 +16,7 @@ interface ContactMethodDisplayProps {
  * Shows their actual phone number or email address based on their preference
  * Always shows contact info when isRevealed is true
  * 
- * Simplified to work with the basic skills exchange system only
+ * Updated to display actual email addresses when available
  */
 export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({ 
   provider, 
@@ -41,7 +41,7 @@ export const ContactMethodDisplay: React.FC<ContactMethodDisplayProps> = ({
       return (
         <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 p-2 bg-green-50 rounded">
           <Mail className="h-4 w-4" />
-          <span>{provider.email || provider.contactValue}</span>
+          <span>{provider.email}</span>
         </div>
       );
     

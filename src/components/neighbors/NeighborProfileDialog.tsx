@@ -3,7 +3,7 @@ import { UserWithRole } from "@/types/roles";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Phone, UserMinus } from "lucide-react";
+import { User, MapPin, Phone, Mail, UserMinus } from "lucide-react";
 import { useState } from "react";
 import { useSuperAdminAccess } from "@/hooks/useSuperAdminAccess";
 import { useRemoveNeighbor } from "./hooks/useRemoveNeighbor";
@@ -28,6 +28,7 @@ interface NeighborProfileDialogProps {
  * 
  * Displays a neighbor's profile information in a dialog.
  * For super-admins, includes the ability to remove the neighbor from the neighborhood.
+ * Updated to show actual contact information based on visibility preferences.
  */
 export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogProps) => {
   // State for the removal confirmation dialog
@@ -91,7 +92,7 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                 <h2 className="text-xl font-semibold">
                   {user.profiles?.display_name || 'Neighbor'}
                 </h2>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                {/* Remove the hardcoded email display from here */}
               </div>
             </div>
 
@@ -107,6 +108,15 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-500">Contact Information</h3>
               <div className="space-y-2">
+                {/* Show actual email address when email_visible is true and email exists */}
+                {user.profiles?.email_visible && user.profiles?.email && (
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <span>{user.profiles.email}</span>
+                  </div>
+                )}
+                
+                {/* Show phone number when phone_visible is true and phone exists */}
                 {user.profiles?.phone_visible && user.profiles?.phone_number && (
                   <div className="flex items-center space-x-2 text-sm">
                     <Phone className="h-4 w-4 text-gray-500" />
@@ -114,11 +124,21 @@ export const NeighborProfileDialog = ({ user, onClose }: NeighborProfileDialogPr
                   </div>
                 )}
                 
+                {/* Show address when address_visible is true and address exists */}
                 {user.profiles?.address_visible && user.profiles?.address && (
                   <div className="flex items-center space-x-2 text-sm">
                     <MapPin className="h-4 w-4 text-gray-500" />
                     <span>{user.profiles.address}</span>
                   </div>
+                )}
+
+                {/* Show message if no contact info is shared */}
+                {!((user.profiles?.email_visible && user.profiles?.email) ||
+                   (user.profiles?.phone_visible && user.profiles?.phone_number) ||
+                   (user.profiles?.address_visible && user.profiles?.address)) && (
+                  <p className="text-sm text-gray-500 italic">
+                    This neighbor hasn't shared contact information yet.
+                  </p>
                 )}
               </div>
             </div>

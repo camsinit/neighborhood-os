@@ -2,12 +2,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithRole } from "@/types/roles";
-import { useNeighborhood } from "@/contexts/neighborhood";
+import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 
 /**
  * Custom hook that fetches users in the current neighborhood
  * 
- * UPDATED: Now uses direct table queries instead of the dropped security definer view
+ * UPDATED: Now fetches real email addresses for users who have email_visible = true
+ * using the secure get_neighborhood_user_emails function
  */
 export const useNeighborUsers = () => {
   // Get the current neighborhood from context
@@ -68,12 +69,35 @@ export const useNeighborUsers = () => {
           console.error("[useNeighborUsers] Error fetching profiles:", profilesError);
           throw profilesError;
         }
+
+        // Fetch visible email addresses using our secure function
+        const { data: emailsData, error: emailsError } = await supabase
+          .rpc('get_neighborhood_user_emails', {
+            target_neighborhood_id: currentNeighborhood.id
+          });
+
+        if (emailsError) {
+          console.error("[useNeighborUsers] Error fetching emails:", emailsError);
+          // Continue without emails rather than failing completely
+        }
+
+        // Create a map of user_id to email for easy lookup
+        const emailMap = new Map<string, string>();
+        if (emailsData) {
+          emailsData.forEach((emailEntry: any) => {
+            emailMap.set(emailEntry.user_id, emailEntry.email);
+          });
+        }
         
-        // Transform data into expected format
+        // Transform data into expected format with real email addresses when visible
         const usersWithProfiles = profilesData?.map((profile: any) => {
+          // Get the actual email if the user has email_visible = true
+          const actualEmail = emailMap.get(profile.id);
+          
           return {
             id: profile.id,
-            email: 'Protected', // We no longer expose emails from auth.users for security
+            // Show actual email if available and visible, otherwise show a placeholder
+            email: actualEmail || (profile.email_visible ? 'Email contact available' : 'Email not shared'),
             created_at: new Date().toISOString(), // Default timestamp
             roles: ['user'], // Default role
             profiles: {
@@ -86,7 +110,9 @@ export const useNeighborUsers = () => {
               phone_visible: profile.phone_visible,
               address_visible: profile.address_visible,
               needs_visible: profile.needs_visible,
-              bio: profile.bio
+              bio: profile.bio,
+              // Store the actual email in the profile for contact display
+              email: actualEmail
             }
           };
         }) || [];

@@ -2,13 +2,19 @@
 import { UserWithRole } from "@/types/roles";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, MapPin } from "lucide-react";
+import { User, MapPin, Mail, Phone } from "lucide-react";
 
 interface NeighborCardProps {
   user: UserWithRole;
   onClick: () => void;
 }
 
+/**
+ * NeighborCard Component
+ * 
+ * Displays a neighbor's basic information in a card format.
+ * Updated to show contact icons when contact info is available instead of hardcoded email.
+ */
 export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
   return (
     <Card 
@@ -32,10 +38,20 @@ export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
               {user.profiles?.display_name || 'Neighbor'}
             </h3>
             
-            {/* Always show email since it's required */}
-            <p className="text-sm text-gray-500 truncate max-w-[150px]">{user.email}</p>
+            {/* Show contact availability icons instead of hardcoded email */}
+            <div className="flex justify-center gap-2 items-center">
+              {user.profiles?.email_visible && user.profiles?.email && (
+                <Mail className="h-3 w-3 text-gray-500" />
+              )}
+              {user.profiles?.phone_visible && user.profiles?.phone_number && (
+                <Phone className="h-3 w-3 text-gray-500" />
+              )}
+              {user.profiles?.address_visible && user.profiles?.address && (
+                <MapPin className="h-3 w-3 text-gray-500" />
+              )}
+            </div>
 
-            {/* Only show address if user has allowed it */}
+            {/* Show address if user has allowed it */}
             {user.profiles?.address_visible && user.profiles?.address && (
               <div className="flex items-center justify-center text-xs text-gray-600">
                 <MapPin className="h-3 w-3 mr-1" />

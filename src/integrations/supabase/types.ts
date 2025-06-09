@@ -1020,6 +1020,13 @@ export type Database = {
           needs_visible: boolean
         }[]
       }
+      get_neighborhood_user_emails: {
+        Args: { target_neighborhood_id: string }
+        Returns: {
+          user_id: string
+          email: string
+        }[]
+      }
       get_user_current_neighborhood: {
         Args: { user_uuid: string }
         Returns: string
