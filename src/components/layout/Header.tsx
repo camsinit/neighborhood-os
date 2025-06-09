@@ -29,11 +29,10 @@ interface HeaderProps {
  * 
  * Displays the top navigation bar with:
  * - Quick Actions title
- * - Static neighborhood display (no switching)
  * - Notifications button
  * - User profile dropdown
  * 
- * UPDATED: Removed neighborhood switching functionality
+ * UPDATED: Removed neighborhood name display
  */
 const Header = ({
   onOpenSettings
@@ -47,7 +46,7 @@ const Header = ({
   // Get the toast function for showing notifications
   const { toast } = useToast();
   
-  // Get neighborhood context data - simplified
+  // Get neighborhood context data for create neighborhood functionality
   const { currentNeighborhood } = useNeighborhood();
   const { hasAccess: canCreateNeighborhood } = useCreateNeighborhoodAccess();
   
@@ -86,30 +85,26 @@ const Header = ({
     <>
       {/* Removed the 'border-b' class from the header to remove the bottom border stroke */}
       <header className="h-16 px-4 flex items-center justify-between">
-        {/* Left side - Quick Actions title */}
-        <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
-        
-        {/* Right side - static neighborhood display, notifications and profile */}
-        <div className="flex items-center gap-2">
-          {/* Static Neighborhood Display */}
-          <div className="flex items-center text-sm font-medium text-gray-900">
-            <Home className="h-4 w-4 mr-2" />
-            <span>{currentNeighborhood?.name || 'Neighborhood'}</span>
-            
-            {/* Show create option if user has access and no neighborhood */}
-            {canCreateNeighborhood && !currentNeighborhood && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCreateDialog(true)}
-                className="ml-2 text-blue-600 hover:text-blue-700"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Create
-              </Button>
-            )}
-          </div>
+        {/* Left side - Quick Actions title and create neighborhood option if applicable */}
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
           
+          {/* Show create neighborhood option if user has access and no neighborhood */}
+          {canCreateNeighborhood && !currentNeighborhood && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCreateDialog(true)}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create neighborhood
+            </Button>
+          )}
+        </div>
+        
+        {/* Right side - notifications and profile */}
+        <div className="flex items-center gap-2">
           {/* Add the enhanced notification button */}
           <NotificationDrawer />
           
