@@ -57,6 +57,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
    * Handle category selection in multi-category mode
    */
   const handleCategorySelect = (category: SkillCategory) => {
+    console.log('📂 Category selected:', category);
     setCurrentCategory(category);
     setShowCategorySelection(false);
   };
@@ -65,6 +66,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
    * Go back to category selection
    */
   const handleBackToCategories = () => {
+    console.log('⬅️ Going back to category selection');
     setCurrentCategory(null);
     setShowCategorySelection(true);
   };
@@ -76,6 +78,25 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
     return selectedSkills
       .filter(skill => skill.category === currentCategory)
       .map(skill => skill.name);
+  };
+
+  /**
+   * Enhanced skill selection handler with detailed logging
+   */
+  const handleSkillSelection = (skillName: string) => {
+    console.log('🎯 Skill selection initiated:', {
+      skillName,
+      currentCategory,
+      timestamp: new Date().toISOString()
+    });
+
+    if (!currentCategory) {
+      console.error('❌ Cannot select skill without category');
+      return;
+    }
+
+    // Call the hook's skill select handler
+    handleSkillSelect(skillName, currentCategory);
   };
 
   // Render category selection view
@@ -118,7 +139,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
       <SkillGrid
         skills={categorySkills}
         selectedSkills={getSelectedSkillNames()}
-        onSkillSelect={(skillName) => handleSkillSelect(skillName, currentCategory!)}
+        onSkillSelect={handleSkillSelection} // Use the enhanced handler
       />
 
       {/* Custom skill input */}
