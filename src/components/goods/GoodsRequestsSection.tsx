@@ -12,27 +12,29 @@ interface GoodsRequestsSectionProps {
 /**
  * GoodsRequestsSection - Section for displaying goods requests
  * 
- * Updated to display requests in a 3-column grid layout with square cards
+ * Updated to display requests using the new GoodsRequestCard interface
+ * which handles its own modal dialog state internally.
  */
 const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
   requests,
   onDeleteItem,
   isDeletingItem = false
 }) => {
-  const [openRequestId, setOpenRequestId] = useState<string | null>(null);
+  // Handler for when a request is selected - this will be passed to the card
+  const handleRequestSelect = (request: GoodsExchangeItem) => {
+    // The card will handle opening its own modal dialog
+    console.log('Request selected:', request.id);
+  };
 
   return (
     <div className="w-full">
-      {/* Grid layout with 3 columns for square cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid layout with fixed-width cards that wrap naturally */}
+      <div className="flex flex-wrap gap-4 justify-start">
         {requests.map((request) => (
           <GoodsRequestCard
             key={request.id}
             request={request}
-            isOpen={openRequestId === request.id}
-            onOpenChange={(open) => setOpenRequestId(open ? request.id : null)}
-            onDeleteItem={onDeleteItem}
-            isDeletingItem={isDeletingItem}
+            onSelect={handleRequestSelect}
           />
         ))}
       </div>
