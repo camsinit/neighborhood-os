@@ -19,8 +19,7 @@ interface AvailableItemsSectionProps {
 /**
  * AvailableItemsSection - Section for displaying available goods items
  * 
- * Updated to use the new marketplace-style AvailableGoodsCard component
- * with proper ownership checking and edit/delete functionality.
+ * Updated to display items in a 3-column grid layout with square cards
  */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
@@ -58,7 +57,8 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   
   return (
     <div className="w-full">
-      <div className="space-y-4">
+      {/* Grid layout with 3 columns for square cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {goodsItems.map((item) => (
           <Popover 
             key={item.id}

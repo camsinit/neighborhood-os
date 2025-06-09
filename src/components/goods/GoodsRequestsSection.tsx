@@ -4,45 +4,38 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 import GoodsRequestCard from './GoodsRequestCard';
 
 interface GoodsRequestsSectionProps {
-  goodsRequests: GoodsExchangeItem[];
-  urgentRequests: GoodsExchangeItem[];
-  onRequestSelect: React.Dispatch<React.SetStateAction<GoodsExchangeItem | null>>;
+  requests: GoodsExchangeItem[];
   onDeleteItem?: (item: GoodsExchangeItem) => Promise<void>;
   isDeletingItem?: boolean;
 }
 
-const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({ 
-  goodsRequests, 
-  urgentRequests,
-  onRequestSelect,
+/**
+ * GoodsRequestsSection - Section for displaying goods requests
+ * 
+ * Updated to display requests in a 3-column grid layout with square cards
+ */
+const GoodsRequestsSection: React.FC<GoodsRequestsSectionProps> = ({
+  requests,
   onDeleteItem,
   isDeletingItem = false
 }) => {
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  
-  // Filter out regular requests by excluding urgent ones
-  const regularRequests = goodsRequests.filter(
-    req => !urgentRequests.some(urgentReq => urgentReq.id === req.id)
-  );
-  
-  if (regularRequests.length === 0) {
-    return null;
-  }
+  const [openRequestId, setOpenRequestId] = useState<string | null>(null);
 
   return (
-    <div className="space-y-4">
-      {regularRequests.map((request) => (
-        <GoodsRequestCard
-          key={request.id}
-          request={request}
-          isOpen={openPopoverId === request.id}
-          onOpenChange={(open) => {
-            setOpenPopoverId(open ? request.id : null);
-          }}
-          onDeleteItem={onDeleteItem}
-          isDeletingItem={isDeletingItem}
-        />
-      ))}
+    <div className="w-full">
+      {/* Grid layout with 3 columns for square cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {requests.map((request) => (
+          <GoodsRequestCard
+            key={request.id}
+            request={request}
+            isOpen={openRequestId === request.id}
+            onOpenChange={(open) => setOpenRequestId(open ? request.id : null)}
+            onDeleteItem={onDeleteItem}
+            isDeletingItem={isDeletingItem}
+          />
+        ))}
+      </div>
     </div>
   );
 };
