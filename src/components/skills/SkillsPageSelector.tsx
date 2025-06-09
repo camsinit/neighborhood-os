@@ -9,6 +9,7 @@ import SelectedSkillsDisplay from './components/SelectedSkillsDisplay';
 import SkillsPageHeader from './components/SkillsPageHeader';
 import SpecialSkillDialog from './components/SpecialSkillDialog';
 import { useSkillSelection } from './hooks/useSkillSelection';
+import { toast } from 'sonner';
 
 /**
  * Enhanced SkillsPageSelector - Now supports both single and multi-category modes
@@ -81,25 +82,35 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * Enhanced skill selection handler with detailed logging and category validation
+   * SIMPLIFIED skill selection handler with proper error handling
    */
   const handleSkillSelection = async (skillName: string) => {
-    console.log('🎯 Skill selection initiated:', {
+    console.log('🎯 [SkillsPageSelector] Skill selection initiated:', {
       skillName,
       currentCategory,
       timestamp: new Date().toISOString()
     });
 
+    // Early validation - must have category
     if (!currentCategory) {
-      console.error('❌ Cannot select skill without category - currentCategory is null');
+      console.error('❌ [SkillsPageSelector] Cannot select skill - no current category');
+      toast.error('Please select a category first');
       return;
     }
 
-    // Call the hook's skill select handler with validated category
     try {
+      // Call the hook's skill select handler and wait for it to complete
+      console.log('🔄 [SkillsPageSelector] Calling handleSkillSelect...');
       await handleSkillSelect(skillName, currentCategory);
+      console.log('✅ [SkillsPageSelector] handleSkillSelect completed successfully');
     } catch (error) {
-      console.error('❌ Error in skill selection handler:', error);
+      console.error('❌ [SkillsPageSelector] Error in handleSkillSelect:', {
+        error: error instanceof Error ? error.message : error,
+        skillName,
+        currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      toast.error(`Failed to add skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -143,7 +154,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
       <SkillGrid
         skills={categorySkills}
         selectedSkills={getSelectedSkillNames()}
-        onSkillSelect={handleSkillSelection} // Use the enhanced handler
+        onSkillSelect={handleSkillSelection} // Use the simplified handler
       />
 
       {/* Custom skill input */}
@@ -154,6 +165,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
             handleCustomSkillAdd(skillName, currentCategory);
           } else {
             console.error('❌ Cannot add custom skill without category');
+            toast.error('Please select a category first');
           }
         }}
       />
@@ -171,6 +183,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
             handleSpecialSkillConfirm(currentCategory);
           } else {
             console.error('❌ Cannot confirm special skill without category');
+            toast.error('Please select a category first');
           }
         }}
         onCancel={() => 
