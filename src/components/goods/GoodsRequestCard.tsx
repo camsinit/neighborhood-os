@@ -17,8 +17,8 @@ interface GoodsRequestCardProps {
 /**
  * GoodsRequestCard - Card component for goods requests
  * 
- * Updated to include ownership checking and proper prop passing
- * to ensure only owners can edit their items.
+ * Updated to use the new marketplace-style RequestGoodsCard component
+ * and include ownership checking and proper prop passing.
  */
 const GoodsRequestCard: React.FC<GoodsRequestCardProps> = ({
   request,

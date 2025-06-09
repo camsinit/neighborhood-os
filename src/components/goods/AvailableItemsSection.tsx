@@ -16,6 +16,12 @@ interface AvailableItemsSectionProps {
   onRefetch: () => void;
 }
 
+/**
+ * AvailableItemsSection - Section for displaying available goods items
+ * 
+ * Updated to use the new marketplace-style AvailableGoodsCard component
+ * with proper ownership checking and edit/delete functionality.
+ */
 const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   goodsItems,
   onDeleteItem,
@@ -67,7 +73,6 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                   onDelete={() => handleDelete(item)}
                   isDeletingItem={isDeletingItem}
                   onClick={() => setOpenPopoverId(item.id)}
-                  // Pass ownership status to the card component
                   isOwner={isOwner(item)}
                 />
               </div>
@@ -79,7 +84,6 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
                 onDeleteItem={onDeleteItem}
                 isDeletingItem={isDeletingItem}
                 onEdit={() => handleEdit(item)}
-                // Pass ownership status to the detail card
                 isOwner={isOwner(item)}
               />
             </PopoverContent>
