@@ -21,7 +21,7 @@ import { NeighborsHeader } from "./components/NeighborsHeader";
  * 
  * This is the main component that displays a directory of users in the neighborhood.
  * It handles loading, error states, and rendering the appropriate UI based on the data.
- * Updated to include search functionality with header.
+ * Updated to include search functionality with header and match safety updates layout.
  */
 export const UserDirectory = () => {
   // State to track which user's profile is being viewed
@@ -127,7 +127,7 @@ export const UserDirectory = () => {
   }
   
   return (
-    <div className="p-6">
+    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
       {/* Search header */}
       <NeighborsHeader 
         onSearchChange={setSearchQuery}

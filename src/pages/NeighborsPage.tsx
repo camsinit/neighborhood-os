@@ -12,7 +12,7 @@ import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
  * 
  * Displays the neighbors directory with proper module styling
  * and supports highlighting neighbors from deep links.
- * Now uses the unified invite dialog system.
+ * Now uses the unified invite dialog system and matches safety page margins.
  */
 function NeighborsPage() {
   // State for route parameters and highlighting
@@ -46,9 +46,8 @@ function NeighborsPage() {
       </div>
       
       <ModuleContent>
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
-          <UserDirectory />
-        </div>
+        {/* Remove the bg-white wrapper to match safety updates structure */}
+        <UserDirectory />
       </ModuleContent>
 
       {/* The unified invite dialog */}
