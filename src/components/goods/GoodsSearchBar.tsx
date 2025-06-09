@@ -1,7 +1,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Package, Gift } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AvailableItemsSection from './AvailableItemsSection';
 import { GoodsExchangeItem } from '@/types/localTypes';
@@ -24,7 +24,7 @@ interface GoodsSearchBarProps {
  * 
  * This component provides search functionality, tab navigation between offers and requests,
  * and action buttons for creating new requests or offers. The buttons now use a brighter
- * orange color (orange-500) for better contrast with white text.
+ * orange color (orange-500) for better contrast with white text and include icons.
  */
 const GoodsSearchBar = ({
   searchQuery,
@@ -63,18 +63,20 @@ const GoodsSearchBar = ({
           </Tabs>
         </div>
         
-        {/* Action buttons with brighter orange background for better contrast */}
+        {/* Action buttons with brighter orange background and icons */}
         <div className="flex gap-2">
           <Button 
             onClick={onRequestItem} 
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1.5"
           >
+            <Package className="h-4 w-4" />
             Request
           </Button>
           <Button 
             onClick={onOfferItem} 
-            className="bg-orange-500 hover:bg-orange-600 text-white"
+            className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-1.5"
           >
+            <Gift className="h-4 w-4" />
             Offer
           </Button>
         </div>
