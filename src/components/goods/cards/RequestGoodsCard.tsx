@@ -14,7 +14,7 @@ interface RequestGoodsCardProps {
  * RequestGoodsCard - Card component for goods requests
  * 
  * Updated to display as a square card for 3-column grid layout
- * with image at top, title, description preview, and user info at bottom
+ * with image at top, title with profile picture, description preview, and need-by date
  */
 const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
   request,
@@ -49,10 +49,18 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
       <div className="flex-1 flex flex-col justify-between p-3">
         {/* Main content */}
         <div className="flex-1">
-          {/* Title - prominently displayed */}
-          <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2">
-            {request.title}
-          </h3>
+          {/* Title with profile picture */}
+          <div className="flex items-center gap-2 mb-2">
+            <Avatar className="h-4 w-4 flex-shrink-0">
+              <AvatarImage src={request.profiles?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs">
+                {request.profiles?.display_name?.[0] || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+              {request.title}
+            </h3>
+          </div>
           
           {/* Description preview */}
           {request.description && (
@@ -62,20 +70,8 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
           )}
         </div>
         
-        {/* Bottom section with user info and need-by date */}
-        <div className="flex flex-col gap-2 mt-auto">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-5 w-5 flex-shrink-0">
-              <AvatarImage src={request.profiles?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs">
-                {request.profiles?.display_name?.[0] || '?'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-gray-500 truncate">
-              {request.profiles?.display_name || 'Anonymous'}
-            </span>
-          </div>
-
+        {/* Bottom section with need-by date */}
+        <div className="mt-auto">
           {/* Need By Date */}
           {formattedDate && (
             <div className="flex items-center gap-1 text-xs text-gray-600">

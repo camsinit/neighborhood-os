@@ -18,7 +18,7 @@ interface AvailableGoodsCardProps {
  * AvailableGoodsCard - Card component for available goods items
  * 
  * Updated to display as a square card for 3-column grid layout
- * with image at top, title, description preview, and user info at bottom
+ * with image at top, title with profile picture, description preview, and action buttons
  */
 const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
   item,
@@ -52,10 +52,18 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
       <div className="flex-1 flex flex-col justify-between p-3">
         {/* Main content */}
         <div className="flex-1">
-          {/* Title - prominently displayed */}
-          <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2">
-            {item.title}
-          </h3>
+          {/* Title with profile picture */}
+          <div className="flex items-center gap-2 mb-2">
+            <Avatar className="h-4 w-4 flex-shrink-0">
+              <AvatarImage src={item.profiles?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs">
+                {item.profiles?.display_name?.[0] || '?'}
+              </AvatarFallback>
+            </Avatar>
+            <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+              {item.title}
+            </h3>
+          </div>
           
           {/* Description preview */}
           {item.description && (
@@ -65,23 +73,11 @@ const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
           )}
         </div>
         
-        {/* Bottom section with user info */}
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Avatar className="h-5 w-5 flex-shrink-0">
-              <AvatarImage src={item.profiles?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs">
-                {item.profiles?.display_name?.[0] || '?'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-gray-500 truncate">
-              {item.profiles?.display_name || 'Anonymous'}
-            </span>
-          </div>
-          
+        {/* Bottom section with action buttons */}
+        <div className="flex justify-end mt-auto">
           {/* Edit and Delete buttons - only show for item owner */}
           {isOwner && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button 
                 variant="ghost"
                 size="sm"
