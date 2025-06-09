@@ -27,7 +27,7 @@ import { useGoodsForm } from "./hooks/useGoodsForm";
  * - Title, description
  * - Urgency level
  * 
- * Updated with narrower width and shorter text fields for better UX.
+ * Updated with compact spacing and reduced empty space.
  */
 const GoodsForm = ({ 
   onClose, 
@@ -62,8 +62,8 @@ const GoodsForm = ({
       : "Request an Item";
   
   return (
-    <div className="max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="w-full max-w-sm mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Category Selection - always show for offers or when forcing default display */}
         {(isOfferForm || forceDefaultDisplay) && (
           <CategorySelection 
@@ -119,7 +119,7 @@ const GoodsForm = ({
         )}
         
         {/* Form Submission Buttons */}
-        <DialogFooter>
+        <DialogFooter className="pt-2">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>

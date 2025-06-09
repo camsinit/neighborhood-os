@@ -18,13 +18,14 @@ interface CategorySelectionProps {
  * 
  * This component renders a dropdown select for choosing item categories
  * with all available categories in a simple dropdown menu.
+ * Updated with compact spacing.
  */
 const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
   // If no category is selected, default to 'furniture'
   const selectedCategory = category || "furniture";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <Label htmlFor="category">Item Category</Label>
       <Select 
         value={selectedCategory}  
