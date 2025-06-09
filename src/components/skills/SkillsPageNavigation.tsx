@@ -13,7 +13,7 @@ import SimpleSkillRequestPopover from './SimpleSkillRequestPopover';
  * This component handles search, filter, tabs, and the add/request skill buttons.
  * It's been extracted from the main SkillsPage for better organization.
  * Now uses the SimpleSkillRequestPopover for skill requests.
- * Updated Request Skill button to match the Add Skill button's green styling.
+ * Updated to use standard tabs styling like Freebies.
  */
 interface SkillsPageNavigationProps {
   view: string;
@@ -54,62 +54,32 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         />
         <SkillsFilter />
         
-        {/* Tabs wrapped properly with green styling for active tabs */}
+        {/* Tabs using standard styling like Freebies */}
         <div className="ml-auto hidden sm:block">
           <Tabs value={view} onValueChange={handleTabChange}>
-            <TabsList className="bg-gray-100">
-              <TabsTrigger 
-                value="offers"
-                className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
-              >
-                Offers
-              </TabsTrigger>
-              <TabsTrigger 
-                value="requests"
-                className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
-              >
-                Requests
-              </TabsTrigger>
-              <TabsTrigger 
-                value="mine"
-                className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
-              >
-                My Skills
-              </TabsTrigger>
+            <TabsList>
+              <TabsTrigger value="offers">Offers</TabsTrigger>
+              <TabsTrigger value="requests">Requests</TabsTrigger>
+              <TabsTrigger value="mine">My Skills</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
       
-      {/* Show tabs on mobile below search/filter with green styling */}
+      {/* Show tabs on mobile below search/filter using standard styling */}
       <div className="sm:hidden w-full">
         <Tabs value={view} onValueChange={handleTabChange}>
-          <TabsList className="w-full bg-gray-100">
-            <TabsTrigger 
-              value="offers" 
-              className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white"
-            >
-              Offers
-            </TabsTrigger>
-            <TabsTrigger 
-              value="requests" 
-              className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white"
-            >
-              Requests
-            </TabsTrigger>
-            <TabsTrigger 
-              value="mine" 
-              className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white"
-            >
-              My Skills
-            </TabsTrigger>
+          <TabsList className="w-full">
+            <TabsTrigger value="offers" className="flex-1">Offers</TabsTrigger>
+            <TabsTrigger value="requests" className="flex-1">Requests</TabsTrigger>
+            <TabsTrigger value="mine" className="flex-1">My Skills</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
       
-      {/* Action buttons section - Both buttons now use matching green styling */}
+      {/* Action buttons section */}
       <div className="flex gap-2 shrink-0">
-        {/* Request Skill button with green styling to match Add Skill button */}
+        {/* Request Skill button */}
         <SimpleSkillRequestPopover>
           <Button 
             className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"

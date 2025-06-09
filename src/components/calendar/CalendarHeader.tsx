@@ -6,7 +6,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CalendarHeaderProps {
   view: 'week' | 'month';
@@ -77,54 +77,41 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     return parts[parts.length - 1].replace('_', ' ');
   };
   
-  return <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+  return (
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
       <div className="flex items-center space-x-2">
         <CalendarIcon className="h-5 w-5 text-blue-500" />
         <h2 className="text-xl font-semibold flex flex-col sm:flex-row sm:items-center gap-1">
           <span>{formattedDate}</span>
-          
         </h2>
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {/* Navigation buttons with improved styling */}
-        <div className="flex rounded-md shadow-sm">
-          <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleToday}>
-            Today
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleNextWeek}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* Navigation buttons with consistent height - removed shadow wrapper */}
+        <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleToday}>
+          Today
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleNextWeek}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
         
-        {/* View toggle with enhanced styling for active/inactive states */}
-        <ToggleGroup 
-          type="single" 
-          value={view} 
-          onValueChange={(value) => value && setView(value as 'week' | 'month')} 
-          className="rounded-md overflow-hidden border shadow-sm"
-        >
-          <ToggleGroupItem 
-            value="week" 
-            className={`px-3 py-1.5 text-sm transition-colors ${view === 'week' ? 'bg-blue-500 text-white font-medium' : 'bg-white hover:bg-gray-50'}`}
-          >
-            Week
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="month" 
-            className={`px-3 py-1.5 text-sm transition-colors ${view === 'month' ? 'bg-blue-500 text-white font-medium' : 'bg-white hover:bg-gray-50'}`}
-          >
-            Month
-          </ToggleGroupItem>
-        </ToggleGroup>
+        {/* View toggle using standard Tabs component like in Freebies */}
+        <Tabs value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')}>
+          <TabsList>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="month">Month</TabsTrigger>
+          </TabsList>
+        </Tabs>
         
         <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
           <Plus className="h-4 w-4 mr-1" /> Add Event
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CalendarHeader;
