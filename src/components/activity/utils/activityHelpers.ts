@@ -1,4 +1,3 @@
-
 import { 
   Calendar, 
   Shield, 
@@ -10,10 +9,12 @@ import {
   Gift
 } from "lucide-react";
 import { ActivityType } from "@/utils/queries/useActivities";
+import { getModuleThemeColor } from "@/theme/moduleTheme";
 
 /**
  * Helper functions for activity display
  * Updated to include neighbor_joined and improved goods activity support
+ * Now uses proper module theme colors for consistency
  */
 
 /**
@@ -60,41 +61,38 @@ export const getActivityIcon = (activityType: ActivityType | string) => {
 
 /**
  * Gets the appropriate color for each activity type
- * Updated to include neighbor activities and improved goods colors
+ * Updated to use module theme colors for consistency across the app
  */
 export const getActivityColor = (activityType: ActivityType | string): string => {
   switch (activityType) {
-    // Event activities
+    // Event activities - use calendar theme color
     case 'event_created':
     case 'event_rsvp':
-      return '#3b82f6'; // Blue
+      return getModuleThemeColor('calendar', 'primary');
       
-    // Safety activities
+    // Safety activities - use safety theme color
     case 'safety_update':
-      return '#ef4444'; // Red
+      return getModuleThemeColor('safety', 'primary');
       
-    // Goods activities - improved color scheme
+    // Goods activities - use goods theme color (orange)
     case 'good_shared':
-      return '#10b981'; // Green for shared items (positive action)
     case 'good_requested':
-      return '#f59e0b'; // Amber for requested items (need)
+      return getModuleThemeColor('goods', 'primary');
       
-    // Skills activities
+    // Skills activities - use skills theme color
     case 'skill_offered':
-      return '#8b5cf6'; // Purple
     case 'skill_requested':
-      return '#a855f7'; // Purple variant
+      return getModuleThemeColor('skills', 'primary');
       
-    // Care activities
+    // Care activities - keep pink for now (no specific module)
     case 'care_offered':
     case 'care_requested':
       return '#ec4899'; // Pink
       
-    // Neighbor activities - NEW
+    // Neighbor activities - use neighbors theme color
     case 'neighbor_joined':
-      return '#059669'; // Emerald green (welcoming)
     case 'profile_updated':
-      return '#6366f1'; // Indigo
+      return getModuleThemeColor('neighbors', 'primary');
       
     default:
       return '#6b7280'; // Gray fallback
