@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Calendar, Brain, Gift, Info, Users, Grid3X3 } from 'lucide-react';
+import { Calendar, Brain, Gift, Info, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -54,13 +54,6 @@ const FeatureNavigation = () => {
       icon: Users,
       activeColor: 'text-purple-600',
       hoverColor: 'hover:text-purple-600'
-    },
-    {
-      path: '/modules',
-      label: 'Modules',
-      icon: Grid3X3,
-      activeColor: 'text-gray-900', // Black for universal page
-      hoverColor: 'hover:text-gray-900'
     }
   ];
 
@@ -77,11 +70,14 @@ const FeatureNavigation = () => {
             className={cn(
               "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
               isActive
-                ? `bg-gray-100 ${item.activeColor}`
-                : `text-gray-600 hover:bg-gray-50 ${item.hoverColor}`
+                ? `bg-gray-100 text-gray-900`
+                : `text-gray-900 hover:bg-gray-50 ${item.hoverColor}`
             )}
           >
-            <Icon className="h-5 w-5 flex-shrink-0" />
+            <Icon className={cn(
+              "h-5 w-5 flex-shrink-0",
+              isActive ? item.activeColor : item.activeColor
+            )} />
             {item.label}
           </NavLink>
         );

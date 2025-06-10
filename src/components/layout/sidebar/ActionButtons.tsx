@@ -1,5 +1,5 @@
 
-import { UserPlus, Bug } from "lucide-react";
+import { UserPlus, Bug, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
@@ -20,9 +20,8 @@ interface ActionButtonsProps {
 /**
  * ActionButtons component
  * 
- * Displays the settings, invite, and debug buttons at the bottom of the sidebar
- * Now includes a Debug button for Super Admins only, positioned under Invite Neighbor
- * Updated to exactly match the font size and spacing of main navigation items
+ * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
+ * Now includes Modules navigation and maintains consistent styling with main navigation
  * UPDATED: Settings button now uses user profile image instead of gear icon
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
@@ -57,6 +56,14 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User';
   
   /**
+   * Handle modules button click - navigate to modules page
+   */
+  const handleModulesClick = () => {
+    console.log('[ActionButtons] Navigating to modules page');
+    navigate('/modules');
+  };
+
+  /**
    * Handle settings button click - navigate to settings page
    */
   const handleSettingsClick = () => {
@@ -74,13 +81,23 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-1">
+      {/* Modules button - matches main navigation styling */}
+      <Button
+        variant="ghost"
+        className="w-full justify-start gap-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-gray-900"
+        onClick={handleModulesClick}
+      >
+        <Grid3X3 className="h-5 w-5 text-gray-900" />
+        Modules
+      </Button>
+
       {/* Settings button - now uses profile image instead of gear icon */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
+        className="w-full justify-start gap-3 text-sm font-medium text-gray-900 hover:bg-gray-50"
         onClick={handleSettingsClick}
       >
-        {/* User profile image with same dimensions as the previous gear icon */}
+        {/* User profile image with same dimensions as other icons */}
         <Avatar className="h-5 w-5">
           <AvatarImage 
             src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
@@ -93,10 +110,10 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Settings
       </Button>
       
-      {/* Invite button - now exactly matches main navigation styling */}
+      {/* Invite button - matches main navigation styling */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-base font-medium"
+        className="w-full justify-start gap-3 text-sm font-medium text-gray-900 hover:bg-gray-50"
         onClick={() => setIsInviteOpen(true)}
       >
         <UserPlus className="h-5 w-5" />
@@ -107,7 +124,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {isSuperAdmin && (
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="w-full justify-start gap-3 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
           onClick={handleDebugClick}
         >
           <Bug className="h-5 w-5" />
