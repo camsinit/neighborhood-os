@@ -126,9 +126,9 @@ const QuickActions = () => {
   return <div className="w-full">
       {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-6">
-        <ActionColumn title="Items" actions={goodsActions} moduleType="goods" />
-        <ActionColumn title="Skills" actions={skillsActions} moduleType="skills" />
-        <ActionColumn title="Events & Safety" actions={otherActions} moduleType="calendar" />
+        <ActionColumn title="Freebies" actions={goodsActions} moduleType="goods" />
+        <ActionColumn title="Skill Sharing" actions={skillsActions} moduleType="skills" />
+        <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
       {/* Dialog components - now using proper goods dialogs for items */}
