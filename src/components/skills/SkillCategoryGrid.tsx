@@ -5,11 +5,15 @@ import { useSkillsPreview } from '@/hooks/skills/useSkillsPreview';
 import SkillCategoryCard from './SkillCategoryCard';
 import CategorySkillsDialog from './CategorySkillsDialog';
 import { Loader2 } from 'lucide-react';
+import { useSkillsExchange } from '@/hooks/skills/useSkillsExchange';
+import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
+import { toast } from 'sonner';
 
 /**
  * Grid component that displays all skill categories with previews of available skills
  * Uses a responsive grid layout and handles loading states
  * Now uses the 6 standardized onboarding categories
+ * FIXED: Now properly submits selected skills to the database
  */
 
 interface SkillCategoryGridProps {
@@ -20,6 +24,19 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
   const { data: skillsData, isLoading, error } = useSkillsPreview();
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [selectedEmptyCategory, setSelectedEmptyCategory] = useState<SkillCategory | null>(null);
+  const [isSubmittingSkills, setIsSubmittingSkills] = useState(false);
+  
+  // Get the current neighborhood context
+  const neighborhood = useCurrentNeighborhood();
+  
+  // Hook for submitting skills to database - this was missing!
+  const { handleSubmit } = useSkillsExchange({
+    onSuccess: () => {
+      console.log('✅ Skill successfully added to database');
+      // Refresh the skills data after successful submission
+      // The useSkillsPreview hook should automatically refetch
+    }
+  });
 
   // All available skill categories - now using the 6 standardized onboarding categories
   const categories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
@@ -39,14 +56,64 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
     }
   };
 
-  // Handle skills selection from the category dialog
+  // FIXED: Handle skills selection from the category dialog - now actually submits to database
   const handleSkillsSelected = async (skills: string[]) => {
-    // TODO: Add logic to save the selected skills to the database
-    console.log('Selected skills:', skills, 'for category:', selectedEmptyCategory);
-    
-    // After saving skills, navigate to the category view
-    if (selectedEmptyCategory) {
-      onCategoryClick(selectedEmptyCategory);
+    // Validate we have everything we need
+    if (!selectedEmptyCategory || !neighborhood?.id || skills.length === 0) {
+      console.error('❌ Missing required data for skill submission:', {
+        category: selectedEmptyCategory,
+        neighborhoodId: neighborhood?.id,
+        skillsCount: skills.length
+      });
+      toast.error('Unable to add skills. Please try again.');
+      return;
+    }
+
+    console.log('🎯 Starting to submit selected skills:', {
+      skills,
+      category: selectedEmptyCategory,
+      neighborhoodId: neighborhood.id
+    });
+
+    setIsSubmittingSkills(true);
+
+    try {
+      // Submit each selected skill individually using the existing submission system
+      for (const skillName of skills) {
+        console.log(`📤 Submitting skill: ${skillName} in category: ${selectedEmptyCategory}`);
+        
+        // Create form data for this skill
+        const skillFormData = {
+          title: skillName,
+          category: selectedEmptyCategory,
+          description: `${skillName} skill in ${selectedEmptyCategory}`
+        };
+
+        // Submit the skill as an offer using the existing hook
+        await handleSubmit(skillFormData, 'offer');
+        
+        console.log(`✅ Successfully submitted: ${skillName}`);
+      }
+
+      // Show success message
+      toast.success(`Successfully added ${skills.length} skill${skills.length > 1 ? 's' : ''} to ${selectedEmptyCategory}!`);
+      
+      // Close the dialog
+      setIsCategoryDialogOpen(false);
+      
+      // Wait a moment for the database to update, then navigate to the category view
+      setTimeout(() => {
+        if (selectedEmptyCategory) {
+          onCategoryClick(selectedEmptyCategory);
+        }
+      }, 1000);
+      
+    } catch (error) {
+      console.error('❌ Error submitting skills:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to add skills: ${errorMessage}`);
+    } finally {
+      setIsSubmittingSkills(false);
     }
   };
 
@@ -80,12 +147,13 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
         ))}
       </div>
       
-      {/* Category Skills Selection Dialog */}
+      {/* Category Skills Selection Dialog - now properly connected to submission system */}
       <CategorySkillsDialog
         open={isCategoryDialogOpen}
         onOpenChange={setIsCategoryDialogOpen}
         category={selectedEmptyCategory || 'technology'}
         onSkillsSelected={handleSkillsSelected}
+        isSubmitting={isSubmittingSkills}
       />
     </>
   );

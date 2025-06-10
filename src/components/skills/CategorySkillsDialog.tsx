@@ -4,12 +4,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 import { SkillCategory } from './types/skillTypes';
 import { SKILL_CATEGORIES } from '@/components/onboarding/survey/steps/skills/skillCategories';
 
 /**
  * Dialog that shows available skills for a specific category
  * Allows users to select which skills they want to add when a category is empty
+ * ENHANCED: Now supports loading state during skill submission
  */
 
 interface CategorySkillsDialogProps {
@@ -17,13 +19,15 @@ interface CategorySkillsDialogProps {
   onOpenChange: (open: boolean) => void;
   category: SkillCategory;
   onSkillsSelected: (skills: string[]) => void;
+  isSubmitting?: boolean; // New prop to show loading state
 }
 
 const CategorySkillsDialog: React.FC<CategorySkillsDialogProps> = ({
   open,
   onOpenChange,
   category,
-  onSkillsSelected
+  onSkillsSelected,
+  isSubmitting = false
 }) => {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   
@@ -43,14 +47,15 @@ const CategorySkillsDialog: React.FC<CategorySkillsDialogProps> = ({
   // Handle form submission
   const handleSubmit = () => {
     onSkillsSelected(selectedSkills);
-    setSelectedSkills([]);
-    onOpenChange(false);
+    // Don't reset state immediately - let parent handle it after successful submission
   };
   
   // Handle dialog close
   const handleClose = () => {
-    setSelectedSkills([]);
-    onOpenChange(false);
+    if (!isSubmitting) { // Prevent closing while submitting
+      setSelectedSkills([]);
+      onOpenChange(false);
+    }
   };
   
   return (
@@ -73,10 +78,11 @@ const CategorySkillsDialog: React.FC<CategorySkillsDialogProps> = ({
                 id={skill}
                 checked={selectedSkills.includes(skill)}
                 onCheckedChange={(checked) => handleSkillToggle(skill, checked as boolean)}
+                disabled={isSubmitting} // Disable during submission
               />
               <Label 
                 htmlFor={skill} 
-                className="text-sm cursor-pointer flex-1"
+                className={`text-sm cursor-pointer flex-1 ${isSubmitting ? 'opacity-50' : ''}`}
               >
                 {skill}
               </Label>
@@ -84,21 +90,29 @@ const CategorySkillsDialog: React.FC<CategorySkillsDialogProps> = ({
           ))}
         </div>
         
-        {/* Action buttons */}
+        {/* Action buttons with loading state */}
         <div className="flex gap-2 pt-4 border-t">
           <Button 
             variant="outline" 
             onClick={handleClose}
             className="flex-1"
+            disabled={isSubmitting} // Disable during submission
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={selectedSkills.length === 0}
+            disabled={selectedSkills.length === 0 || isSubmitting}
             className="flex-1 bg-green-500 hover:bg-green-600 text-white"
           >
-            Add {selectedSkills.length} Skill{selectedSkills.length !== 1 ? 's' : ''}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Adding...
+              </>
+            ) : (
+              `Add ${selectedSkills.length} Skill${selectedSkills.length !== 1 ? 's' : ''}`
+            )}
           </Button>
         </div>
       </DialogContent>
