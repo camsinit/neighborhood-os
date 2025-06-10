@@ -1,8 +1,7 @@
-
 import React from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import ModuleCard from '@/components/modules/ModuleCard';
-import { Shield, Building, Clock, Wrench, Wallet, Phone } from 'lucide-react';
+import { AlertTriangle, Building, Clock, Wrench, Wallet, Phone } from 'lucide-react';
 
 /**
  * ModulesPage Component
@@ -19,7 +18,7 @@ const modules = [
     name: 'Emergency Prep',
     tagline: 'Ready for Anything',
     description: 'A neighborhood-wide emergency preparedness module that helps everyone get prepared for your unique local hazards.',
-    icon: Shield,
+    icon: AlertTriangle, // Changed from Shield to AlertTriangle for better emergency representation
     accentColor: 'red',
     status: 'coming-soon'
   },
