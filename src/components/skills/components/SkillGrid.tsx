@@ -7,7 +7,7 @@ import { SPECIAL_SKILLS } from '@/components/onboarding/survey/steps/skills/skil
 /**
  * SkillGrid - Component for displaying and selecting skills in a grid layout
  * Handles skill selection with checkboxes and special skill indicators
- * FIXED: Added debugging to ensure proper event handling
+ * ENHANCED: Improved event handling and error reporting for skill selection
  */
 interface SkillGridProps {
   skills: string[];
@@ -25,22 +25,47 @@ const SkillGrid: React.FC<SkillGridProps> = ({
   };
 
   /**
-   * Handle skill click with debugging
+   * Handle skill click with comprehensive debugging and error handling
    */
-  const handleSkillClick = (skillName: string) => {
-    console.log('🎯 [SkillGrid] Skill clicked:', {
+  const handleSkillClick = async (skillName: string) => {
+    const logPrefix = '🎯 [SkillGrid]';
+    
+    console.log(`${logPrefix} Skill clicked:`, {
       skillName,
       isSelected: isSkillSelected(skillName),
       hasOnSkillSelect: !!onSkillSelect,
+      onSkillSelectType: typeof onSkillSelect,
       timestamp: new Date().toISOString()
     });
 
     // Ensure we have the handler before calling it
-    if (onSkillSelect) {
-      console.log('📞 [SkillGrid] Calling onSkillSelect handler for:', skillName);
-      onSkillSelect(skillName);
-    } else {
-      console.error('❌ [SkillGrid] onSkillSelect handler is missing!');
+    if (!onSkillSelect) {
+      console.error(`❌ ${logPrefix} onSkillSelect handler is missing!`);
+      return;
+    }
+
+    if (typeof onSkillSelect !== 'function') {
+      console.error(`❌ ${logPrefix} onSkillSelect is not a function:`, typeof onSkillSelect);
+      return;
+    }
+
+    try {
+      console.log(`📞 ${logPrefix} Calling onSkillSelect handler for:`, skillName);
+      
+      // Call the handler and wait for it to complete
+      const result = await onSkillSelect(skillName);
+      
+      console.log(`✅ ${logPrefix} onSkillSelect completed for ${skillName}:`, result);
+    } catch (error) {
+      console.error(`❌ ${logPrefix} Error in onSkillSelect for ${skillName}:`, {
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } : error,
+        skillName,
+        timestamp: new Date().toISOString()
+      });
     }
   };
 

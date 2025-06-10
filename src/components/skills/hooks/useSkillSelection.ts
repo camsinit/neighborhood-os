@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import { SPECIAL_SKILLS } from '@/components/onboarding/survey/steps/skills/skillCategories';
@@ -9,7 +8,7 @@ import { toast } from 'sonner';
 /**
  * Hook for managing skill selection logic
  * Handles adding skills to database and local state management
- * FIXED: Added comprehensive debugging and proper async/await handling
+ * FIXED: Enhanced error handling and debugging for skill submission issues
  */
 interface SelectedSkill {
   name: string;
@@ -48,29 +47,32 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
   });
 
   /**
-   * MAIN ENTRY POINT - skill selection handler with comprehensive debugging
+   * MAIN ENTRY POINT - skill selection handler with enhanced debugging and validation
    */
   const handleSkillSelect = async (skillName: string, currentCategory: SkillCategory) => {
-    console.log('🔄 [useSkillSelection] handleSkillSelect ENTRY POINT:', { 
+    const logPrefix = `🎯 [useSkillSelection] User ${neighborhood?.id?.substring(0, 8)}`;
+    
+    console.log(`${logPrefix} handleSkillSelect ENTRY POINT:`, { 
       skillName, 
       currentCategory,
       neighborhoodId: neighborhood?.id,
       neighborhoodName: neighborhood?.name,
+      hasHandleSubmit: !!handleSubmit,
       timestamp: new Date().toISOString()
     });
     
-    // STEP 1: Validate inputs early
+    // STEP 1: Validate inputs early with detailed logging
     if (!skillName || !currentCategory) {
       const errorMsg = 'Missing required data for skill selection';
-      console.error('❌ [useSkillSelection] VALIDATION FAILED:', { skillName, currentCategory });
+      console.error(`❌ ${logPrefix} VALIDATION FAILED:`, { skillName, currentCategory });
       toast.error(errorMsg);
       throw new Error(errorMsg);
     }
 
-    // STEP 2: Validate neighborhood context
+    // STEP 2: Validate neighborhood context with enhanced logging
     if (!neighborhood?.id) {
       const errorMsg = 'No neighborhood selected - cannot add skill';
-      console.error('❌ [useSkillSelection] NEIGHBORHOOD VALIDATION FAILED:', { 
+      console.error(`❌ ${logPrefix} NEIGHBORHOOD VALIDATION FAILED:`, { 
         neighborhood,
         hasNeighborhood: !!neighborhood,
         neighborhoodId: neighborhood?.id
@@ -79,15 +81,15 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       throw new Error(errorMsg);
     }
 
-    console.log('✅ [useSkillSelection] All validations passed');
+    console.log(`✅ ${logPrefix} All validations passed`);
     
-    // STEP 3: Check if already selected
+    // STEP 3: Check if already selected (local state only)
     const isSelected = selectedSkills.some(skill => 
       skill.name === skillName && skill.category === currentCategory
     );
     
     if (isSelected) {
-      console.log('🗑️ [useSkillSelection] Skill already selected, removing from local selection:', skillName);
+      console.log(`🗑️ ${logPrefix} Skill already selected locally, removing:`, skillName);
       setSelectedSkills(prev => prev.filter(skill => 
         !(skill.name === skillName && skill.category === currentCategory)
       ));
@@ -96,7 +98,7 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
 
     // STEP 4: Check if this skill requires additional details
     if (SPECIAL_SKILLS[skillName as keyof typeof SPECIAL_SKILLS]) {
-      console.log('📝 [useSkillSelection] Skill requires special details, opening dialog:', skillName);
+      console.log(`📝 ${logPrefix} Skill requires special details, opening dialog:`, skillName);
       setSpecialSkillDialog({
         isOpen: true,
         skillName,
@@ -105,69 +107,86 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       return { action: 'dialog_opened', skillName };
     }
 
-    // STEP 5: Submit regular skill directly
-    console.log('💾 [useSkillSelection] Submitting regular skill to database...');
+    // STEP 5: Submit regular skill directly with enhanced error tracking
+    console.log(`💾 ${logPrefix} Submitting regular skill to database...`);
+    
     try {
+      // Add to local state immediately for UI feedback
+      const newSkill = { 
+        name: skillName, 
+        category: currentCategory
+      };
+      
+      console.log(`📝 ${logPrefix} Adding to local state for immediate UI feedback:`, newSkill);
+      setSelectedSkills(prev => [...prev, newSkill]);
+      
+      // Submit to database
       const result = await submitSkillToDatabase(skillName, currentCategory);
-      console.log('✅ [useSkillSelection] Regular skill submitted successfully:', result);
+      console.log(`✅ ${logPrefix} Regular skill submitted successfully:`, result);
+      
       return { action: 'submitted', skillName, result };
     } catch (error) {
-      console.error('❌ [useSkillSelection] Failed to submit regular skill:', error);
+      // Remove from local state if database submission failed
+      console.error(`❌ ${logPrefix} Database submission failed, removing from local state`);
+      setSelectedSkills(prev => prev.filter(skill => 
+        !(skill.name === skillName && skill.category === currentCategory)
+      ));
+      
+      console.error(`❌ ${logPrefix} Failed to submit regular skill:`, error);
       throw error; // Re-throw so parent can handle
     }
   };
 
   /**
-   * CENTRALIZED database submission function with comprehensive debugging
+   * CENTRALIZED database submission function with enhanced debugging and error handling
    */
   const submitSkillToDatabase = async (skillName: string, category: SkillCategory, description?: string) => {
-    console.log('💾 [useSkillSelection] submitSkillToDatabase ENTRY POINT:', { 
+    const logPrefix = `💾 [useSkillSelection] User ${neighborhood?.id?.substring(0, 8)}`;
+    
+    console.log(`${logPrefix} submitSkillToDatabase ENTRY POINT:`, { 
       skillName, 
       category,
       hasDescription: !!description,
       description: description?.substring(0, 50) + (description && description.length > 50 ? '...' : ''),
       neighborhoodId: neighborhood?.id,
+      hasHandleSubmit: !!handleSubmit,
       timestamp: new Date().toISOString()
     });
     
+    // Validate we have the handleSubmit function
+    if (!handleSubmit) {
+      const errorMsg = 'handleSubmit function not available';
+      console.error(`❌ ${logPrefix} ${errorMsg}`);
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+    
     try {
-      // STEP 1: Prepare submission data
+      // STEP 1: Prepare submission data with validation
       const submissionData = {
         title: skillName,
         category: category,
         description: description || `${skillName} skill in ${category}`
       };
 
-      console.log('📤 [useSkillSelection] About to call handleSubmit with:', submissionData);
+      console.log(`📤 ${logPrefix} About to call handleSubmit with:`, submissionData);
 
       // STEP 2: Submit to database using the skills exchange hook
       const result = await handleSubmit(submissionData, 'offer');
       
-      console.log('✅ [useSkillSelection] handleSubmit completed successfully:', {
+      console.log(`✅ ${logPrefix} handleSubmit completed successfully:`, {
         result,
         skillName,
         category,
         timestamp: new Date().toISOString()
       });
-
-      // STEP 3: Add to local selection for UI feedback only after successful submission
-      setSelectedSkills(prev => {
-        const newSkill = { 
-          name: skillName, 
-          category: category,
-          details: description
-        };
-        const updated = [...prev, newSkill];
-        console.log('📝 [useSkillSelection] Updated local selectedSkills:', updated);
-        return updated;
-      });
       
-      console.log('🎉 [useSkillSelection] Skill submission process completed successfully');
+      console.log(`🎉 ${logPrefix} Skill submission process completed successfully`);
       toast.success(`${skillName} skill added successfully!`);
       
       return result;
     } catch (error) {
-      console.error('❌ [useSkillSelection] Database submission FAILED:', {
+      console.error(`❌ ${logPrefix} Database submission FAILED:`, {
         error: error instanceof Error ? {
           name: error.name,
           message: error.message,
