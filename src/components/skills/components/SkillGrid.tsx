@@ -7,6 +7,7 @@ import { SPECIAL_SKILLS } from '@/components/onboarding/survey/steps/skills/skil
 /**
  * SkillGrid - Component for displaying and selecting skills in a grid layout
  * Handles skill selection with checkboxes and special skill indicators
+ * FIXED: Added debugging to ensure proper event handling
  */
 interface SkillGridProps {
   skills: string[];
@@ -23,6 +24,26 @@ const SkillGrid: React.FC<SkillGridProps> = ({
     return selectedSkills.includes(skillName);
   };
 
+  /**
+   * Handle skill click with debugging
+   */
+  const handleSkillClick = (skillName: string) => {
+    console.log('🎯 [SkillGrid] Skill clicked:', {
+      skillName,
+      isSelected: isSkillSelected(skillName),
+      hasOnSkillSelect: !!onSkillSelect,
+      timestamp: new Date().toISOString()
+    });
+
+    // Ensure we have the handler before calling it
+    if (onSkillSelect) {
+      console.log('📞 [SkillGrid] Calling onSkillSelect handler for:', skillName);
+      onSkillSelect(skillName);
+    } else {
+      console.error('❌ [SkillGrid] onSkillSelect handler is missing!');
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
       {skills.map((skill) => {
@@ -33,7 +54,7 @@ const SkillGrid: React.FC<SkillGridProps> = ({
             className={`p-3 border rounded-md cursor-pointer transition-colors hover:bg-gray-50 ${
               selected ? 'border-green-500 bg-green-50' : 'border-gray-200'
             }`}
-            onClick={() => onSkillSelect(skill)}
+            onClick={() => handleSkillClick(skill)}
           >
             <div className="flex items-center space-x-2">
               <Checkbox

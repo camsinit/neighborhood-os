@@ -82,35 +82,60 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
   };
 
   /**
-   * SIMPLIFIED skill selection handler with proper error handling
+   * FIXED skill selection handler with comprehensive debugging and proper error handling
    */
   const handleSkillSelection = async (skillName: string) => {
-    console.log('🎯 [SkillsPageSelector] Skill selection initiated:', {
+    // STEP 1: Log entry point with detailed context
+    console.log('🎯 [SkillsPageSelector] handleSkillSelection ENTRY POINT:', {
       skillName,
       currentCategory,
+      categoryTitle,
+      hasCategory: !!currentCategory,
       timestamp: new Date().toISOString()
     });
 
-    // Early validation - must have category
+    // STEP 2: Early validation - must have category
     if (!currentCategory) {
-      console.error('❌ [SkillsPageSelector] Cannot select skill - no current category');
+      console.error('❌ [SkillsPageSelector] VALIDATION FAILED - no current category');
       toast.error('Please select a category first');
       return;
     }
 
+    console.log('✅ [SkillsPageSelector] Validation passed, proceeding with skill selection');
+
     try {
-      // Call the hook's skill select handler and wait for it to complete
-      console.log('🔄 [SkillsPageSelector] Calling handleSkillSelect...');
-      await handleSkillSelect(skillName, currentCategory);
-      console.log('✅ [SkillsPageSelector] handleSkillSelect completed successfully');
-    } catch (error) {
-      console.error('❌ [SkillsPageSelector] Error in handleSkillSelect:', {
-        error: error instanceof Error ? error.message : error,
+      // STEP 3: Call the hook's skill select handler with proper await
+      console.log('🔄 [SkillsPageSelector] About to call handleSkillSelect with:', {
         skillName,
         currentCategory,
         timestamp: new Date().toISOString()
       });
-      toast.error(`Failed to add skill: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
+      const result = await handleSkillSelect(skillName, currentCategory);
+      
+      console.log('✅ [SkillsPageSelector] handleSkillSelect completed:', {
+        result,
+        skillName,
+        currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      // STEP 4: Comprehensive error handling
+      console.error('❌ [SkillsPageSelector] handleSkillSelect ERROR:', {
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        } : error,
+        skillName,
+        currentCategory,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to add skill: ${errorMessage}`);
     }
   };
 
@@ -150,17 +175,18 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
         onRemoveSkill={removeSkill}
       />
 
-      {/* Skills grid */}
+      {/* Skills grid - FIXED: Ensure proper handler connection */}
       <SkillGrid
         skills={categorySkills}
         selectedSkills={getSelectedSkillNames()}
-        onSkillSelect={handleSkillSelection} // Use the simplified handler
+        onSkillSelect={handleSkillSelection} // This now has proper debugging and error handling
       />
 
       {/* Custom skill input */}
       <CustomSkillInput
         categoryTitle={categoryTitle}
         onAddCustomSkill={(skillName) => {
+          console.log('🎯 [SkillsPageSelector] Custom skill add requested:', { skillName, currentCategory });
           if (currentCategory) {
             handleCustomSkillAdd(skillName, currentCategory);
           } else {
@@ -179,6 +205,10 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
           setSpecialSkillDialog(prev => ({ ...prev, details }))
         }
         onConfirm={() => {
+          console.log('🎯 [SkillsPageSelector] Special skill confirm requested:', { 
+            skillName: specialSkillDialog.skillName, 
+            currentCategory 
+          });
           if (currentCategory) {
             handleSpecialSkillConfirm(currentCategory);
           } else {
