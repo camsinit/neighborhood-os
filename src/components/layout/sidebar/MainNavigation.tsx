@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
  * MainNavigation Component
  * 
  * Renders the main dashboard/home navigation link
- * UPDATED: Consistent font styling with other navigation items
+ * REVERTED: Back to original font styling
  */
 const MainNavigation = () => {
   return (
@@ -17,10 +17,10 @@ const MainNavigation = () => {
         to="/dashboard"
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors",
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
             isActive
-              ? "bg-gray-100 text-gray-900"
-              : "text-gray-900 hover:bg-gray-50"
+              ? "bg-gray-100"
+              : "hover:bg-gray-50"
           )
         }
       >

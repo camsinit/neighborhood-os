@@ -22,8 +22,7 @@ interface ActionButtonsProps {
  * 
  * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
  * Now includes Modules navigation and maintains consistent styling with main navigation
- * UPDATED: Settings button now uses user profile image with proper alignment
- * UPDATED: All buttons use consistent font weight (font-semibold) and sizing
+ * REVERTED: Back to original font styling and proper settings button alignment
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get navigation function
@@ -85,7 +84,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {/* Modules button - matches main navigation styling */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-sm font-semibold text-gray-900 hover:bg-gray-50 hover:text-gray-900"
+        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50 hover:text-gray-900"
         onClick={handleModulesClick}
       >
         <Grid3X3 className="h-5 w-5 text-gray-900" />
@@ -95,28 +94,26 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {/* Settings button - now uses profile image with proper alignment */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50"
         onClick={handleSettingsClick}
       >
         {/* User profile image with same dimensions as other icons and proper alignment */}
-        <div className="flex items-center justify-center w-5 h-5">
-          <Avatar className="h-5 w-5">
-            <AvatarImage 
-              src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
-              alt={displayName} 
-            />
-            <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
-              {displayName.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        <Avatar className="h-5 w-5">
+          <AvatarImage 
+            src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
+            alt={displayName} 
+          />
+          <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
+            {displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
         Settings
       </Button>
       
       {/* Invite button - matches main navigation styling */}
       <Button
         variant="ghost"
-        className="w-full justify-start gap-3 text-sm font-semibold text-gray-900 hover:bg-gray-50"
+        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50"
         onClick={() => setIsInviteOpen(true)}
       >
         <UserPlus className="h-5 w-5" />
@@ -127,7 +124,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {isSuperAdmin && (
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
           onClick={handleDebugClick}
         >
           <Bug className="h-5 w-5" />
