@@ -34,7 +34,7 @@ const ModuleLayout = ({
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <h1 className="text-3xl font-bold text-white">{title}</h1>
           {description && (
-            <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm max-w-md">
+            <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm w-full max-w-md lg:w-auto">
               <p className="text-gray-700 text-sm">{description}</p>
             </div>
           )}

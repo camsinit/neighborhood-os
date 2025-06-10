@@ -77,19 +77,7 @@ const ModulesPage = () => {
       description="Discover add-on modules to enhance your neighborhood's functionality and build stronger community connections."
       themeColor="neighbors"
     >
-      {/* Hero section with explanation */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-3">
-          Neighborhood Module Hub
-        </h2>
-        <p className="text-gray-600 leading-relaxed max-w-3xl">
-          Enhance your neighborhood with specialized modules designed to strengthen community bonds 
-          and improve local collaboration. Each module can be added by neighborhood admins to upgrade 
-          your community's features and functionality.
-        </p>
-      </div>
-
-      {/* Modules grid */}
+      {/* Modules grid - removed the hero section with explanation text */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module) => (
           <ModuleCard

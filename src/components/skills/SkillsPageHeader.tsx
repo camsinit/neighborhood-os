@@ -19,7 +19,7 @@ const SkillsPageHeader: React.FC<SkillsPageHeaderProps> = ({ children }) => {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-8 pb-6 sm:px-[25px]">
         <div className="flex flex-col gap-4">
           <h1 className="text-3xl font-bold text-green-500">Skill Sharing</h1>
-          <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm max-w-md">
+          <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm w-full max-w-md">
             <p className="text-gray-700 text-sm">Share skills and knowledge with your neighbors</p>
           </div>
         </div>
