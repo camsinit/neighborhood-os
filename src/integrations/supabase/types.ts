@@ -886,6 +886,62 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_survey_responses: {
+        Row: {
+          ai_coding_experience: string
+          city: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          neighborhood_name: string
+          neighbors_to_onboard: number
+          open_source_interest: string
+          priority_score: number | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          ai_coding_experience: string
+          city: string
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          neighborhood_name: string
+          neighbors_to_onboard?: number
+          open_source_interest: string
+          priority_score?: number | null
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          ai_coding_experience?: string
+          city?: string
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          neighborhood_name?: string
+          neighbors_to_onboard?: number
+          open_source_interest?: string
+          priority_score?: number | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_waitlist_email"
+            columns: ["email"]
+            isOneToOne: false
+            referencedRelation: "waitlist"
+            referencedColumns: ["email"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -902,6 +958,14 @@ export type Database = {
       backfill_neighborhood_ids: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      calculate_priority_score: {
+        Args: {
+          neighbors_count: number
+          ai_experience: string
+          open_source: string
+        }
+        Returns: number
       }
       check_neighborhood_access: {
         Args: { neighborhood_id: string }

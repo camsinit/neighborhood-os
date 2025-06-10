@@ -1,150 +1,129 @@
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StarBorder } from "@/components/ui/star-border"; // Import the StarBorder component
-import { Badge } from "@/components/ui/badge"; // Import Badge for the banner
+import WaitlistSurveyPopover from "./WaitlistSurveyPopover";
 
 /**
  * WaitlistForm component
  * 
- * This component renders a form for users to join the waitlist
- * by submitting their email address. It uses the StarBorder component
- * for a more decorative, animated appearance.
+ * Handles email signup for the waitlist with validation and success feedback.
+ * After successful signup, triggers a survey popover to collect additional information.
  */
 const WaitlistForm = () => {
-  // State to track the email input value
+  // Form state management
   const [email, setEmail] = useState("");
-  // State to track loading status during submission
-  const [isLoading, setIsLoading] = useState(false);
-  // State to track if form was successfully submitted
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  // Get toast notification function
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  
+  // Toast notifications for user feedback
   const { toast } = useToast();
 
   /**
-   * Handle form submission
-   * Submits the email to the waitlist via the Edge Function
+   * Handle form submission for waitlist signup
    */
   const handleSubmit = async (e: React.FormEvent) => {
-    // Prevent default form submission behavior
     e.preventDefault();
     
-    // Don't proceed if already processing a submission
-    if (isLoading) return;
-    
-    // Validate email before submission
-    if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    // Basic email validation
+    if (!email || !email.includes("@")) {
       toast({
         title: "Invalid email",
-        description: "Please enter a valid email address",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
     }
-    
-    // Set loading state to true while processing
-    setIsLoading(true);
-    
+
+    setIsSubmitting(true);
+
     try {
-      console.log("Submitting email to waitlist:", email);
+      console.log("Submitting waitlist signup for:", email);
       
-      // Call the join-waitlist Edge Function
+      // Call the existing join-waitlist edge function
       const { data, error } = await supabase.functions.invoke("join-waitlist", {
         body: { email },
       });
-      
-      // If there was an error calling the function
+
       if (error) {
-        console.error("Error calling join-waitlist function:", error);
-        throw new Error("Failed to join waitlist. Please try again.");
+        console.error("Error joining waitlist:", error);
+        throw new Error("Failed to join waitlist");
       }
-      
-      console.log("Response from join-waitlist function:", data);
-      
-      // Check if the request was successful based on the response
-      if (!data.success) {
-        console.error("Function reported error:", data.error);
-        throw new Error(data.error || "Failed to join waitlist");
-      }
-      
-      // Show success message with updated text
+
+      console.log("Waitlist signup successful:", data);
+
+      // Show success message
       toast({
-        title: "We'll be in touch!",
-        description: "You've been added to our waitlist. Thank you for your interest!",
+        title: "Welcome to the waitlist!",
+        description: "Please take a moment to tell us more about yourself.",
       });
+
+      // Store the email and show the survey popover
+      setSubmittedEmail(email);
+      setShowSurvey(true);
       
-      // Clear the email input
+      // Clear the form
       setEmail("");
-      // Set the form as submitted to show confirmation message
-      setIsSubmitted(true);
-      
+
     } catch (error: any) {
-      // Show error message
-      console.error("Waitlist submission error:", error);
+      console.error("Waitlist signup error:", error);
       toast({
         title: "Something went wrong",
         description: error.message || "Failed to join waitlist. Please try again.",
         variant: "destructive",
       });
     } finally {
-      // Reset loading state
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
+  /**
+   * Handle survey popover close
+   */
+  const handleSurveyClose = () => {
+    setShowSurvey(false);
+    setSubmittedEmail("");
+  };
+
   return (
-    // Modified container to control width directly at this level 
-    // and ensure it applies to both the badge and form
-    <div className="w-full max-w-[600px] mx-auto">
-      {/* Banner announcing invite rollout */}
-      <div className="w-full text-center mb-2">
-        <Badge 
-          variant="outline" 
-          className="py-1 px-3 bg-gradient-to-r from-blue-100 to-purple-100 text-primary animate-pulse border-primary/30"
-        >
-          Invites rolling out May 1
-        </Badge>
-      </div>
-      
-      {/* Changed wrapper to full width to properly apply max-width */}
-      <StarBorder as="div" className="w-full">
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2 sm:flex-row">
-          {/* If submitted, show confirmation message. Otherwise, show email input field */}
-          {isSubmitted ? (
-            // Confirmation message displayed in place of the input
-            <div className="flex-grow py-2 px-4 text-center text-primary font-medium">
-              We'll be in touch!
-            </div>
-          ) : (
-            // Email input field with rounded corners
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-grow rounded-full" // Oval shape for the input
-              disabled={isLoading}
-              aria-label="Email for waitlist"
-            />
-          )}
-          
-          {/* Submit button with rounded corners - hidden after successful submission */}
-          {!isSubmitted && (
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="rounded-full" // Oval shape for the button
-            >
-              {isLoading ? "Joining..." : "Join Waitlist"}
-            </Button>
-          )}
-        </form>
-      </StarBorder>
-    </div>
+    <>
+      {/* Main waitlist form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
+            className="flex-1 h-12 text-base"
+            required
+          />
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="h-12 px-8 text-base font-medium"
+          >
+            {isSubmitting ? "Joining..." : "Join Waitlist"}
+          </Button>
+        </div>
+        
+        {/* Privacy notice */}
+        <p className="text-sm text-gray-600 text-center">
+          We'll only contact you when neighborhoodOS is ready. No spam, ever.
+        </p>
+      </form>
+
+      {/* Survey popover that appears after successful waitlist signup */}
+      <WaitlistSurveyPopover
+        isOpen={showSurvey}
+        onClose={handleSurveyClose}
+        userEmail={submittedEmail}
+      />
+    </>
   );
 };
 
