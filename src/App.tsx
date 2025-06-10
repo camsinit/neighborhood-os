@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,7 @@ import SkillsPage from "./pages/SkillsPage";
 import GoodsPage from "./pages/GoodsPage";
 import SafetyPage from "./pages/SafetyPage";
 import NeighborsPage from "./pages/NeighborsPage";
+import ModulesPage from "./pages/ModulesPage";
 import DebugPage from "./pages/DebugPage";
 import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -127,6 +129,16 @@ const App = () => {
                       <ProtectedRoute>
                         <MainLayout>
                           <NeighborsPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/modules"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <ModulesPage />
                         </MainLayout>
                       </ProtectedRoute>
                     }

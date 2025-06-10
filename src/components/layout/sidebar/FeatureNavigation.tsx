@@ -1,83 +1,89 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { Calendar, Gift, Brain, Info, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { moduleThemeColors } from "@/theme/moduleTheme";
+import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { Calendar, Brain, Gift, Info, Users, Grid3X3 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
- * FeatureNavigation component
+ * FeatureNavigation Component
  * 
- * Displays the feature navigation items with their respective theme colors
- * Order: Calendar, Skills, Freebies, Updates (formerly Safety), Neighbors
+ * Renders the main feature navigation links in the sidebar
+ * Each link uses NavLink for automatic active state management
+ * Icons are color-coded to match each module's theme
  */
 const FeatureNavigation = () => {
-  // Get current location to determine which nav item is active
+  // Get current location for styling active states
   const location = useLocation();
-  
-  // Define navigation items with their respective theme colors
-  // Each item has a specific color that represents its category
-  // Removed care module from the feature nav items
-  const featureNavItems = [
-    { 
-      icon: Calendar, 
-      label: "Calendar", 
-      href: "/calendar", 
-      // Using moduleThemeColors to ensure consistent colors across the app
-      color: moduleThemeColors.calendar.primary
+
+  /**
+   * Navigation items configuration
+   * Each item includes path, label, icon, and color theme
+   */
+  const navigationItems = [
+    {
+      path: '/calendar',
+      label: 'Calendar',
+      icon: Calendar,
+      activeColor: 'text-blue-600',
+      hoverColor: 'hover:text-blue-600'
     },
-    { 
-      icon: Brain, 
-      label: "Skills", 
-      href: "/skills", 
-      // Updated to green from moduleThemeColors
-      color: moduleThemeColors.skills.primary
+    {
+      path: '/skills',
+      label: 'Skills',
+      icon: Brain,
+      activeColor: 'text-green-600',
+      hoverColor: 'hover:text-green-600'
     },
-    { 
-      icon: Gift, 
-      label: "Freebies", 
-      href: "/goods", 
-      color: moduleThemeColors.goods.primary
+    {
+      path: '/goods',
+      label: 'Freebies',
+      icon: Gift,
+      activeColor: 'text-orange-600',
+      hoverColor: 'hover:text-orange-600'
     },
-    { 
-      icon: Info, 
-      label: "Updates", 
-      href: "/safety", 
-      color: moduleThemeColors.safety.primary
+    {
+      path: '/safety',
+      label: 'Updates',
+      icon: Info,
+      activeColor: 'text-red-600',
+      hoverColor: 'hover:text-red-600'
     },
-    { 
+    {
+      path: '/neighbors',
+      label: 'Neighbors',
       icon: Users,
-      label: "Neighbors",
-      href: "/neighbors",
-      color: moduleThemeColors.neighbors.primary
+      activeColor: 'text-purple-600',
+      hoverColor: 'hover:text-purple-600'
     },
+    {
+      path: '/modules',
+      label: 'Modules',
+      icon: Grid3X3,
+      activeColor: 'text-gray-900', // Black for universal page
+      hoverColor: 'hover:text-gray-900'
+    }
   ];
 
   return (
     <div className="space-y-1">
-      {featureNavItems.map((item) => {
-        // Check if current path matches this nav item
-        const isActive = location.pathname === item.href || 
-                        location.pathname.startsWith(item.href + '/');
+      {navigationItems.map((item) => {
+        const isActive = location.pathname === item.path;
+        const Icon = item.icon;
+        
         return (
-          <Link key={item.href} to={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-3 text-base font-medium",
-                isActive && "bg-gray-100" // Highlight active item
-              )}
-            >
-              <item.icon 
-                className="h-5 w-5" 
-                color={item.color}
-                style={{
-                  transition: 'transform 0.2s ease-in-out'
-                }}
-              />
-              {item.label}
-            </Button>
-          </Link>
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+              isActive
+                ? `bg-gray-100 ${item.activeColor}`
+                : `text-gray-600 hover:bg-gray-50 ${item.hoverColor}`
+            )}
+          >
+            <Icon className="h-5 w-5 flex-shrink-0" />
+            {item.label}
+          </NavLink>
         );
       })}
     </div>
