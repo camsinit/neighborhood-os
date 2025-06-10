@@ -22,7 +22,7 @@ interface ActionButtonsProps {
  * 
  * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
  * Now uses consistent NavLink styling to match the main navigation exactly
- * Updated to remove background hover effects, keeping only text color changes
+ * Updated to use bold font weight on hover instead of color changes for modules, settings, and invite
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get current user for profile image
@@ -62,15 +62,15 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-1">
-      {/* Modules navigation - using NavLink for consistency */}
+      {/* Modules navigation - using bold on hover instead of color change */}
       <NavLink
         to="/modules"
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
             isActive
-              ? "text-purple-600"
-              : "hover:text-purple-600"
+              ? "text-purple-600 font-semibold"
+              : "hover:font-semibold"
           )
         }
       >
@@ -78,15 +78,15 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Modules
       </NavLink>
 
-      {/* Settings navigation - using NavLink with profile image */}
+      {/* Settings navigation - using bold on hover instead of color change */}
       <NavLink
         to="/settings"
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
             isActive
-              ? "text-gray-700"
-              : "hover:text-gray-700"
+              ? "font-semibold"
+              : "hover:font-semibold"
           )
         }
       >
@@ -103,10 +103,10 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         Settings
       </NavLink>
       
-      {/* Invite button - using button but styled to match NavLink exactly */}
+      {/* Invite button - using bold on hover instead of color change */}
       <button
         onClick={handleInviteClick}
-        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors hover:text-gray-700 w-full text-left"
+        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all hover:font-semibold w-full text-left"
       >
         <UserPlus className="h-5 w-5 flex-shrink-0" />
         Invite Neighbor
