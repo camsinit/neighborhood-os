@@ -8,6 +8,10 @@ import { createEvent, updateEvent } from "./utils/eventServices";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { refreshEvents } from "@/utils/refreshEvents";
+import { createLogger } from '@/utils/logger';
+
+// Create a dedicated logger for this hook
+const logger = createLogger('useEventSubmit');
 
 interface EventSubmitProps {
   onSuccess: () => void;
@@ -18,6 +22,7 @@ interface EventSubmitProps {
  * 
  * This hook provides functions to create and update events in the database
  * Now relies ONLY on database triggers for activity creation
+ * Enhanced with better logging and activity refresh
  * 
  * @param onSuccess - Callback function to run after successful submission
  * @returns Object containing handleSubmit and handleUpdate functions
@@ -47,9 +52,9 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
           
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
-          console.log(`[useEventSubmit] Fetched neighborhood timezone: ${data.timezone}`);
+          logger.debug(`Fetched neighborhood timezone: ${data.timezone}`);
         } else {
-          console.error('[useEventSubmit] Error fetching timezone:', error);
+          logger.error('Error fetching timezone:', error);
         }
       }
     };
@@ -80,7 +85,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
     try {
       // Add detailed logging before the insert operation
-      console.log("[useEventSubmit] Attempting to insert event with database triggers:", {
+      logger.info("Attempting to insert event with database triggers:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         neighborhoodTimezone,
@@ -99,25 +104,29 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       const eventData = transformEventFormData(formData, user.id, neighborhood.id, neighborhoodTimezone);
       
       // Log the transformed data that will be sent to the database
-      console.log("[useEventSubmit] Transformed event data:", eventData);
+      logger.debug("Transformed event data:", eventData);
 
       // Create the event in the database - triggers handle activities/notifications automatically
       const data = await createEvent(eventData, user.id, formData.title);
       
       // Log success after database operation
-      console.log("[useEventSubmit] Event created successfully with database triggers:", {
+      logger.info("Event created successfully with database triggers:", {
         eventId: data?.[0]?.id,
         timestamp: new Date().toISOString()
       });
       
+      // Force refresh of activities query to immediately show the new activity
+      queryClient.invalidateQueries({ queryKey: ["activities", neighborhood.id] });
+      
       // Refresh UI components
       refreshEvents.emit('event-submitted');
+      refreshEvents.emit('activities-updated');
       
       onSuccess();
       
       return data;
     } catch (error: any) {
-      console.error('[useEventSubmit] Error creating event:', error);
+      logger.error('Error creating event:', error);
       toast.error("Failed to create event: " + error.message);
       
       // Re-throw the error for the component to handle if needed
@@ -141,7 +150,7 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
 
     try {
       // Add detailed logging before the update operation
-      console.log("[useEventSubmit] Attempting to update event with database triggers:", {
+      logger.info("Attempting to update event with database triggers:", {
         eventId,
         userId: user.id,
         neighborhoodTimezone,
@@ -158,14 +167,18 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       // Success notification
       toast.success("Event updated successfully");
       
+      // Force refresh of activities query
+      queryClient.invalidateQueries({ queryKey: ["activities", neighborhood.id] });
+      
       // Refresh UI components
       refreshEvents.emit('event-submitted');
+      refreshEvents.emit('activities-updated');
       
       onSuccess();
       
       return data;
     } catch (error: any) {
-      console.error('[useEventSubmit] Error updating event:', error);
+      logger.error('Error updating event:', error);
       toast.error("Failed to update event: " + error.message);
       throw error;
     }

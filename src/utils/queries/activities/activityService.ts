@@ -1,7 +1,7 @@
 
 /**
  * This file contains the core service function to fetch activities
- * Now properly filtered by neighborhood
+ * Now properly filtered by neighborhood with enhanced logging for debugging
  */
 import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "./types";
@@ -14,7 +14,7 @@ const logger = createLogger('activityService');
 
 /**
  * Fetches recent activities from the database
- * Now properly filtered by current neighborhood
+ * Now properly filtered by current neighborhood with enhanced error handling
  * 
  * This has been optimized to fetch up-to-date titles from related content tables
  * and properly handle deleted content references
@@ -62,7 +62,10 @@ export const fetchActivities = async (neighborhoodId: string | null): Promise<Ac
     throw error;
   }
 
-  logger.debug(`Fetched ${activitiesData.length} activities for neighborhood ${neighborhoodId}`);
+  logger.debug(`Fetched ${activitiesData.length} activities for neighborhood ${neighborhoodId}`, {
+    activityIds: activitiesData.map(a => a.id),
+    activityTypes: activitiesData.map(a => a.activity_type)
+  });
 
   // Group content IDs by their content type for efficient batch fetching
   // Skip any items that are already marked as deleted in metadata
@@ -117,6 +120,14 @@ export const fetchActivities = async (neighborhoodId: string | null): Promise<Ac
       ...activity,
       metadata: metadata
     } as Activity;
+  });
+
+  logger.info(`Processed ${activities.length} activities for display`, {
+    neighborhoodId,
+    eventActivities: activities.filter(a => a.activity_type === 'event_created').length,
+    safetyActivities: activities.filter(a => a.activity_type === 'safety_update').length,
+    skillActivities: activities.filter(a => a.activity_type.includes('skill')).length,
+    goodsActivities: activities.filter(a => a.activity_type.includes('good')).length
   });
 
   return activities as Activity[];
