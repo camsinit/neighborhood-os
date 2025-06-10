@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
  * Renders the main feature navigation links in the sidebar
  * Each link uses NavLink for automatic active state management
  * Icons are color-coded to match each module's theme
+ * UPDATED: Consistent font sizing and weight across all items
  */
 const FeatureNavigation = () => {
   // Get current location for styling active states
@@ -68,7 +69,7 @@ const FeatureNavigation = () => {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+              "flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors",
               isActive
                 ? `bg-gray-100 text-gray-900`
                 : `text-gray-900 hover:bg-gray-50 ${item.hoverColor}`

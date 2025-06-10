@@ -1,47 +1,32 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Home } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
- * MainNavigation component
+ * MainNavigation Component
  * 
- * Displays the primary navigation item (Home/Dashboard)
+ * Renders the main dashboard/home navigation link
+ * UPDATED: Consistent font styling with other navigation items
  */
 const MainNavigation = () => {
-  // Get current location to determine which nav item is active
-  const location = useLocation();
-  
-  // Main navigation item (Home) - This is the main entry point
-  const mainNavItems = [
-    { 
-      icon: Home, 
-      label: "Home", 
-      href: "/home" // Standardized to use /home path
-    }
-  ];
-
   return (
     <div className="space-y-1">
-      {mainNavItems.map((item) => {
-        // Check if current path matches this nav item
-        const isActive = location.pathname === item.href;
-        return (
-          <Link key={item.href} to={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-3 text-base font-medium",
-                isActive && "bg-gray-100" // Highlight active item
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {item.label}
-            </Button>
-          </Link>
-        );
-      })}
+      <NavLink
+        to="/dashboard"
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors",
+            isActive
+              ? "bg-gray-100 text-gray-900"
+              : "text-gray-900 hover:bg-gray-50"
+          )
+        }
+      >
+        <Home className="h-5 w-5 flex-shrink-0" />
+        Home
+      </NavLink>
     </div>
   );
 };
