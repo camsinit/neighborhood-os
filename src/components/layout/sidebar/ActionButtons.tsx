@@ -1,14 +1,14 @@
 
 import { UserPlus, Bug, Grid3X3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { NavLink } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import UnifiedInviteDialog from "@/components/invite/UnifiedInviteDialog";
 import { useSuperAdminAccess } from "@/hooks/useSuperAdminAccess";
+import { cn } from "@/lib/utils";
 
 /**
  * Props for the ActionButtons component - onOpenSettings is no longer needed
@@ -21,13 +21,9 @@ interface ActionButtonsProps {
  * ActionButtons component
  * 
  * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
- * Now includes Modules navigation and maintains consistent styling with main navigation
- * REVERTED: Back to original font styling and proper settings button alignment
+ * Now uses consistent NavLink styling to match the main navigation exactly
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
-  // Get navigation function
-  const navigate = useNavigate();
-  
   // Get current user for profile image
   const user = useUser();
   
@@ -56,49 +52,45 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User';
   
   /**
-   * Handle modules button click - navigate to modules page
+   * Handle invite button click - open the unified invite dialog
    */
-  const handleModulesClick = () => {
-    console.log('[ActionButtons] Navigating to modules page');
-    navigate('/modules');
-  };
-
-  /**
-   * Handle settings button click - navigate to settings page
-   */
-  const handleSettingsClick = () => {
-    console.log('[ActionButtons] Navigating to settings page');
-    navigate('/settings');
-  };
-
-  /**
-   * Handle debug button click - navigate to debug page
-   */
-  const handleDebugClick = () => {
-    console.log('[ActionButtons] Navigating to debug page');
-    navigate('/debug');
+  const handleInviteClick = () => {
+    console.log('[ActionButtons] Opening invite dialog');
+    setIsInviteOpen(true);
   };
   
   return (
     <div className="space-y-1">
-      {/* Modules button - matches main navigation styling */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50 hover:text-gray-900"
-        onClick={handleModulesClick}
+      {/* Modules navigation - using NavLink for consistency */}
+      <NavLink
+        to="/modules"
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
+            isActive
+              ? "bg-gray-100"
+              : "hover:bg-gray-50"
+          )
+        }
       >
-        <Grid3X3 className="h-5 w-5 text-gray-900" />
+        <Grid3X3 className="h-5 w-5 flex-shrink-0" />
         Modules
-      </Button>
+      </NavLink>
 
-      {/* Settings button - now uses profile image with proper alignment */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50"
-        onClick={handleSettingsClick}
+      {/* Settings navigation - using NavLink with profile image */}
+      <NavLink
+        to="/settings"
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
+            isActive
+              ? "bg-gray-100"
+              : "hover:bg-gray-50"
+          )
+        }
       >
-        {/* User profile image with same dimensions as other icons and proper alignment */}
-        <Avatar className="h-5 w-5">
+        {/* User profile image with same dimensions as other icons */}
+        <Avatar className="h-5 w-5 flex-shrink-0">
           <AvatarImage 
             src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
             alt={displayName} 
@@ -108,28 +100,33 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
           </AvatarFallback>
         </Avatar>
         Settings
-      </Button>
+      </NavLink>
       
-      {/* Invite button - matches main navigation styling */}
-      <Button
-        variant="ghost"
-        className="w-full justify-start gap-3 text-gray-900 hover:bg-gray-50"
-        onClick={() => setIsInviteOpen(true)}
+      {/* Invite button - using button but styled to match NavLink exactly */}
+      <button
+        onClick={handleInviteClick}
+        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors hover:bg-gray-50 w-full text-left"
       >
-        <UserPlus className="h-5 w-5" />
+        <UserPlus className="h-5 w-5 flex-shrink-0" />
         Invite Neighbor
-      </Button>
+      </button>
 
-      {/* Debug button - only visible to Super Admins */}
+      {/* Debug navigation - only visible to Super Admins, styled consistently */}
       {isSuperAdmin && (
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
-          onClick={handleDebugClick}
+        <NavLink
+          to="/debug"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+              isActive
+                ? "bg-red-100 text-red-700"
+                : "text-red-600 hover:bg-red-50 hover:text-red-700"
+            )
+          }
         >
-          <Bug className="h-5 w-5" />
+          <Bug className="h-5 w-5 flex-shrink-0" />
           Debug
-        </Button>
+        </NavLink>
       )}
       
       {/* Unified invite dialog */}
