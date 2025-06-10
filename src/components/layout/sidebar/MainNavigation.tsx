@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
  * MainNavigation Component
  * 
  * Renders the main dashboard/home navigation link
- * REVERTED: Back to original font styling
+ * Updated to remove background hover effects, keeping only text color changes
  */
 const MainNavigation = () => {
   return (
@@ -19,8 +19,8 @@ const MainNavigation = () => {
           cn(
             "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
             isActive
-              ? "bg-gray-100"
-              : "hover:bg-gray-50"
+              ? "text-blue-600"
+              : "hover:text-blue-600"
           )
         }
       >

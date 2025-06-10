@@ -22,6 +22,7 @@ interface ActionButtonsProps {
  * 
  * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
  * Now uses consistent NavLink styling to match the main navigation exactly
+ * Updated to remove background hover effects, keeping only text color changes
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get current user for profile image
@@ -68,8 +69,8 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
           cn(
             "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
             isActive
-              ? "bg-gray-100"
-              : "hover:bg-gray-50"
+              ? "text-purple-600"
+              : "hover:text-purple-600"
           )
         }
       >
@@ -84,8 +85,8 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
           cn(
             "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
             isActive
-              ? "bg-gray-100"
-              : "hover:bg-gray-50"
+              ? "text-gray-700"
+              : "hover:text-gray-700"
           )
         }
       >
@@ -105,7 +106,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {/* Invite button - using button but styled to match NavLink exactly */}
       <button
         onClick={handleInviteClick}
-        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors hover:bg-gray-50 w-full text-left"
+        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors hover:text-gray-700 w-full text-left"
       >
         <UserPlus className="h-5 w-5 flex-shrink-0" />
         Invite Neighbor
@@ -119,8 +120,8 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
             cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
               isActive
-                ? "bg-red-100 text-red-700"
-                : "text-red-600 hover:bg-red-50 hover:text-red-700"
+                ? "text-red-700"
+                : "text-red-600 hover:text-red-700"
             )
           }
         >
