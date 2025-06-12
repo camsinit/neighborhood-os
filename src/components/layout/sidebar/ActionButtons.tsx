@@ -23,6 +23,7 @@ interface ActionButtonsProps {
  * Displays the modules, settings, invite, and debug buttons at the bottom of the sidebar
  * Now uses consistent NavLink styling to match the main navigation exactly
  * Updated to use bold font weight on hover instead of color changes for modules, settings, and invite
+ * Updated to keep Modules text black when active instead of purple
  */
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get current user for profile image
@@ -69,7 +70,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
           cn(
             "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
             isActive
-              ? "text-purple-600 font-semibold"
+              ? "text-gray-900 font-semibold"
               : "hover:font-semibold"
           )
         }
