@@ -6,7 +6,7 @@ import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
-import SkillsPageHeader from '@/components/skills/SkillsPageHeader';
+import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import AddSkillPopover from '@/components/skills/AddSkillPopover';
 
@@ -15,7 +15,8 @@ const logger = createLogger('SkillsPage');
 /**
  * SkillsPage - Main page component for the Skills Exchange
  * 
- * This component has been refactored to use the new unified AddSkillPopover
+ * This component has been refactored to use the standard ModuleLayout
+ * for consistency with other pages, and uses the unified AddSkillPopover
  * for better maintainability and consistency across the application.
  */
 function SkillsPage() {
@@ -90,7 +91,11 @@ function SkillsPage() {
   
   return (
     <>
-      <SkillsPageHeader>
+      <ModuleLayout
+        title="Skill Sharing"
+        description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
+        themeColor="skills"
+      >
         <SkillsPageContent
           view={view}
           category={category}
@@ -104,7 +109,7 @@ function SkillsPage() {
           setSearchParams={setSearchParams}
           setIsSkillDialogOpen={setIsSkillDialogOpen}
         />
-      </SkillsPageHeader>
+      </ModuleLayout>
       
       {/* Unified Add Skill Popover */}
       <AddSkillPopover

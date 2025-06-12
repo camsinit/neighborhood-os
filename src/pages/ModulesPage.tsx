@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import ModuleCard from '@/components/modules/ModuleCard';
@@ -76,7 +77,7 @@ const ModulesPage = () => {
       description="Discover add-on modules to enhance your neighborhood's functionality and build stronger community connections."
       themeColor="neighbors"
     >
-      {/* Modules grid - removed the hero section with explanation text */}
+      {/* Modules grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module) => (
           <ModuleCard
