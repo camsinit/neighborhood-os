@@ -15,9 +15,9 @@ const logger = createLogger('SkillsPage');
 /**
  * SkillsPage - Main page component for the Skills Exchange
  * 
- * This component has been refactored to use the standard ModuleLayout
- * for consistency with other pages, and uses the unified AddSkillPopover
- * for better maintainability and consistency across the application.
+ * This component uses the standard ModuleLayout for consistency with other pages
+ * and follows the universal page design pattern established across the application.
+ * Updated to use proper ModuleLayout structure with consistent spacing and alignment.
  */
 function SkillsPage() {
   const [searchParams, setSearchParams] = useSearchParams();

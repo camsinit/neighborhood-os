@@ -10,8 +10,8 @@ import { ModuleLayoutProps } from '@/types/module';
  * ModuleLayout Component
  * 
  * This is the foundational layout component for all module pages.
- * It provides consistent structure and styling while avoiding duplicate headers.
- * Updated to display description inline with the title instead of below it.
+ * It provides consistent structure and styling while ensuring proper left-alignment
+ * for all key elements (title, description, and content).
  * 
  * @param children - The main content to be displayed in the module
  * @param title - The title of the module/page
@@ -29,21 +29,22 @@ const ModuleLayout = ({
   return (
     // Main container with theme-specific gradient background
     <ModuleContainer themeColor={themeColor}>
-      {/* Header with title and inline description */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 pt-8 pb-6 sm:px-[25px]">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <h1 className="text-3xl font-bold text-white">{title}</h1>
-          {description && (
-            <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm w-full max-w-md lg:w-auto">
-              <p className="text-gray-700 text-sm">{description}</p>
-            </div>
-          )}
-        </div>
+      {/* Header section with proper left-alignment */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
+        {/* Title - left-aligned */}
+        <h1 className="text-3xl font-bold text-white mb-4 text-left">{title}</h1>
+        
+        {/* Description box - left-aligned and full-width within container */}
+        {description && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm">
+            <p className="text-gray-700 text-sm text-left">{description}</p>
+          </div>
+        )}
       </div>
       
       <ModuleContent className={className}>
-        {/* Main content area */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg mt-6">
+        {/* Main content area - left-aligned container */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           {children}
         </div>
       </ModuleContent>
