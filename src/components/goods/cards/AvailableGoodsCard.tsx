@@ -1,69 +1,143 @@
 
-import React from 'react';
-import { GoodsExchangeItem } from '@/types/localTypes';
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MapPin, Clock, User, MessageCircle, Archive } from 'lucide-react';
+import { format } from 'date-fns';
+import { generateDataAttributes } from '@/utils/dataAttributes';
+import { ItemRequestDialog } from '@/components/items/dialogs/ItemRequestDialog';
+import { useGoodsItemDeletion } from '../hooks/useGoodsItemDeletion';
 
 interface AvailableGoodsCardProps {
-  item: GoodsExchangeItem;
-  onClick: () => void;
+  item: any;
+  onContact?: (item: any) => void;
 }
 
-/**
- * AvailableGoodsCard - Compact card component for available goods items
- * 
- * Updated to use a more compact height (h-48 instead of h-64) to minimize
- * empty space while maintaining all necessary content visibility.
- */
-const AvailableGoodsCard: React.FC<AvailableGoodsCardProps> = ({
-  item,
-  onClick
-}) => {
+const AvailableGoodsCard = ({ item, onContact }: AvailableGoodsCardProps) => {
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const { handleDeleteItem, isDeleting } = useGoodsItemDeletion();
+
+  // Generate data attributes for highlighting and navigation
+  const dataAttributes = generateDataAttributes('goods', item.id);
+
+  const handleContactClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsRequestDialogOpen(true);
+  };
+
+  const getUrgencyColor = (urgency: string) => {
+    switch (urgency) {
+      case 'high':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
-    <div 
-      className="w-64 h-48 flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm transition-all duration-200"
-      onClick={onClick}
-    >
-      {/* Image section at the top - reduced height */}
-      <div className="w-full h-24 flex-shrink-0 bg-gray-100">
-        {(item.image_url || (item.images && item.images.length > 0)) ? (
-          <img 
-            src={item.image_url || item.images?.[0]} 
-            alt={item.title}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center text-gray-400">
-            <span className="text-xs">No image</span>
+    <>
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        {...dataAttributes} // Apply data attributes for highlighting
+      >
+        {/* Image Section */}
+        {item.image_url && (
+          <div className="aspect-video overflow-hidden">
+            <img
+              src={item.image_url}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
           </div>
         )}
-      </div>
-      
-      {/* Content section - more compact */}
-      <div className="flex-1 flex flex-col justify-between p-3">
-        {/* Main content */}
-        <div className="flex-1">
-          {/* Title with profile picture - single line with truncation */}
-          <div className="flex items-center gap-2 mb-2">
-            <Avatar className="h-4 w-4 flex-shrink-0">
-              <AvatarImage src={item.profiles?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs">
-                {item.profiles?.display_name?.[0] || '?'}
-              </AvatarFallback>
-            </Avatar>
-            <h3 className="text-sm font-semibold text-gray-900 truncate flex-1">
+
+        <div className="p-4">
+          {/* Header with title and urgency */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1">
               {item.title}
             </h3>
+            {item.urgency && (
+              <Badge 
+                variant="outline" 
+                className={`text-xs font-medium ${getUrgencyColor(item.urgency)}`}
+              >
+                {item.urgency}
+              </Badge>
+            )}
           </div>
-          
-          {/* Description preview - limited to 2 lines */}
+
+          {/* Description */}
           {item.description && (
-            <p className="text-xs text-gray-600 line-clamp-2">
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
               {item.description}
             </p>
           )}
+
+          {/* Category and Condition */}
+          <div className="flex items-center gap-2 mb-4">
+            {item.goods_category && (
+              <Badge variant="secondary" className="text-xs">
+                {item.goods_category}
+              </Badge>
+            )}
+            {item.condition && (
+              <Badge variant="outline" className="text-xs">
+                {item.condition}
+              </Badge>
+            )}
+          </div>
+
+          {/* Provider Info */}
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={item.profiles?.avatar_url} alt={item.profiles?.display_name} />
+              <AvatarFallback>
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                {item.profiles?.display_name || 'Anonymous'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {format(new Date(item.created_at), 'MMM d, yyyy')}
+              </p>
+            </div>
+          </div>
+
+          {/* Footer with availability and action */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Clock className="h-3 w-3" />
+              Available until {format(new Date(item.valid_until), 'MMM d')}
+            </div>
+            
+            <Button
+              size="sm"
+              onClick={handleContactClick}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Request
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </Card>
+
+      {/* Request Dialog */}
+      <ItemRequestDialog
+        open={isRequestDialogOpen}
+        onOpenChange={setIsRequestDialogOpen}
+        item={item}
+      />
+    </>
   );
 };
 

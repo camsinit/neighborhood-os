@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSkillsStore } from '@/stores/skillsStore';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import { highlightItem } from '@/utils/highlight';
+import { useDeepLinkHandler } from '@/hooks/useDeepLinkHandler';
 import { createLogger } from '@/utils/logger';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import ModuleLayout from '@/components/layout/ModuleLayout';
@@ -18,6 +18,7 @@ const logger = createLogger('SkillsPage');
  * This component uses the standard ModuleLayout for consistency with other pages
  * and follows the universal page design pattern established across the application.
  * Updated to use proper ModuleLayout structure with consistent spacing and alignment.
+ * Enhanced with unified navigation system and deep link handling.
  */
 function SkillsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,9 @@ function SkillsPage() {
   
   // State for the unified skill dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
+  
+  // Handle deep link parameters for direct navigation to skills
+  const { hasDeepLink } = useDeepLinkHandler('skills');
   
   const highlightedSkill = useHighlightedItem('skills');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
@@ -38,18 +42,13 @@ function SkillsPage() {
     setSearchQuery(searchQuery);
   }, [searchQuery, setSearchQuery]);
   
-  // Handle direct links to specific skills
+  // Log component mounting and deep link status
   useEffect(() => {
-    const skillId = searchParams.get('skillId');
-    if (skillId) {
-      highlightItem('skills', skillId);
+    logger.info('Component mounted, version: 2025-06-13');
+    if (hasDeepLink) {
+      logger.info('Deep link detected, will highlight skill when ready');
     }
-  }, [searchParams]);
-  
-  // Log component mounting
-  useEffect(() => {
-    logger.info('Component mounted, version: 2025-06-03');
-  }, []);
+  }, [hasDeepLink]);
   
   // Handle tab changes
   const handleTabChange = (value: string) => {

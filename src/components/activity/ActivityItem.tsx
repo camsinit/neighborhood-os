@@ -1,3 +1,4 @@
+
 import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User } from "lucide-react";
@@ -5,7 +6,9 @@ import { Activity } from "@/utils/queries/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
-import { highlightItem } from "@/utils/highlight";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
+import { HighlightableItemType } from "@/utils/highlight/types";
+import { generateDataAttributes } from "@/utils/dataAttributes";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
@@ -73,6 +76,23 @@ const getActivityBadgeLabel = (activityType: string): string => {
 };
 
 /**
+ * Map activity types to highlightable item types
+ */
+const getHighlightableType = (activityType: string): HighlightableItemType => {
+  // Extract the base type from activity_type (e.g., skill_offered → skills)
+  const baseType = activityType.split('_')[0];
+  
+  // Map to our standard item types
+  switch (baseType) {
+    case 'skill': return 'skills';
+    case 'event': return 'event';
+    case 'good': return 'goods';
+    case 'safety': return 'safety';
+    default: return 'event'; // Default fallback
+  }
+};
+
+/**
  * Component for displaying a single activity item in the feed
  */
 const ActivityItem = ({
@@ -80,61 +100,48 @@ const ActivityItem = ({
   onAction
 }: ActivityItemProps) => {
   const navigate = useNavigate();
+  const navigationService = createItemNavigationService(navigate);
+  
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
   const timeAgo = getCompactTimeAgo(new Date(activity.created_at));
   
-  // Check if this is a skill-related activity
-  const isSkillActivity = activity.activity_type === 'skill_offered' || 
-                          activity.activity_type === 'skill_requested';
-                          
   // Check if the content has been deleted
   const isDeleted = activity.metadata?.deleted === true;
 
   /**
-   * Determine the activity type and corresponding item type for highlighting
+   * Handle click on activity item - uses unified navigation service
    */
-  const getActivityItemType = () => {
-    // Extract the base type from activity_type (e.g., skill_offered → skills)
-    const baseType = activity.activity_type.split('_')[0];
-    
-    // Map to our standard item types
-    switch (baseType) {
-      case 'skill': return 'skills';
-      case 'event': return 'event';
-      case 'good': return 'goods';
-      case 'safety': return 'safety';
-      default: return 'event'; // Default fallback
-    }
-  };
-
-  /**
-   * Handle click on activity item - navigates directly to the content
-   */
-  const handleItemClick = () => {
+  const handleItemClick = async () => {
     if (isDeleted) {
       // For deleted content, show the action dialog
       onAction(activity);
       return;
     }
     
-    // Get the item type and navigate to the appropriate page
-    const itemType = getActivityItemType();
-    const route = itemType === 'event' ? '/calendar' : `/${itemType}`;
+    // Get the item type and use unified navigation service
+    const itemType = getHighlightableType(activity.activity_type);
     
-    // Navigate to the page and highlight the item
-    navigate(route);
-    
-    // After navigation, highlight the specific item
-    setTimeout(() => {
-      // Fixed highlightItem call to use proper API
-      highlightItem(itemType, activity.content_id);
-    }, 100);
+    try {
+      const result = await navigationService.navigateToItem(
+        itemType, 
+        activity.content_id, 
+        { showToast: true }
+      );
+      
+      if (!result.success) {
+        console.error('Navigation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Error navigating from activity item:', error);
+    }
   };
 
   // Get the activity type for the badge
-  const activityType = getActivityItemType();
-  const activityLabel = activityType.charAt(0).toUpperCase() + activityType.slice(1);
+  const activityType = getHighlightableType(activity.activity_type);
+  
+  // Generate data attributes for this activity item
+  const dataAttributes = generateDataAttributes(activityType, activity.content_id);
   
   // If the activity is deleted, don't render it at all
   if (isDeleted) {
@@ -149,6 +156,7 @@ const ActivityItem = ({
           borderLeft: `4px solid ${activityColor}`
         }}
         onClick={handleItemClick}
+        {...dataAttributes} // Apply data attributes for highlighting
       >
         {/* Profile avatar with hover tooltip showing name */}
         <TooltipProvider>

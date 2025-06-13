@@ -1,12 +1,16 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, Construction, Eye, User } from "lucide-react";
 import { format } from "date-fns";
+import { generateDataAttributes } from "@/utils/dataAttributes";
+
 interface SafetyUpdateCardProps {
   update: any;
   onClick: () => void;
 }
+
 const SafetyUpdateCard = ({
   update,
   onClick
@@ -44,9 +48,19 @@ const SafetyUpdateCard = ({
         };
     }
   };
+
   const typeStyles = getTypeStyles(update.type);
   const IconComponent = typeStyles.icon;
-  return <Card className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 ${typeStyles.border}`} onClick={onClick}>
+  
+  // Generate data attributes for highlighting and navigation
+  const dataAttributes = generateDataAttributes('safety', update.id);
+
+  return (
+    <Card 
+      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 ${typeStyles.border}`} 
+      onClick={onClick}
+      {...dataAttributes} // Apply data attributes for highlighting
+    >
       <div className="flex items-start gap-4">
         <Avatar className="h-10 w-10">
           <AvatarImage src={update.profiles?.avatar_url} alt={update.profiles?.display_name || 'User'} />
@@ -81,9 +95,13 @@ const SafetyUpdateCard = ({
         </div>
       </div>
 
-      {update.imageUrl && <div className="mt-3">
+      {update.imageUrl && (
+        <div className="mt-3">
           <img src={update.imageUrl} alt={update.title} className="rounded-lg w-full h-48 object-cover" />
-        </div>}
-    </Card>;
+        </div>
+      )}
+    </Card>
+  );
 };
+
 export default SafetyUpdateCard;

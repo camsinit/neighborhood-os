@@ -3,8 +3,7 @@
  * Universal Notification Item Component
  * 
  * Handles all notification types with smart navigation integration
- * Now includes theme-based color highlighting for content and borders
- * ENHANCED: Removed close button and improved title highlighting
+ * Now uses the unified ItemNavigationService for consistent navigation
  */
 import React from 'react';
 import { Card } from '@/components/ui/card';
@@ -16,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { NotificationWithProfile } from './types';
 import { useNotificationActions } from './useNotifications';
-import { navigateAndHighlight } from '@/utils/highlight/navigateAndHighlight';
+import { createItemNavigationService } from '@/services/navigation/ItemNavigationService';
 import { HighlightableItemType } from '@/utils/highlight/types';
 import { highlightTitleContent } from '@/utils/highlight/titleHighlighting';
 import { getModuleThemeColor } from '@/theme/moduleTheme';
@@ -64,28 +63,12 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
   }
 };
 
-// Simple route mapping for content types
-const getRoute = (contentType: string): string => {
-  switch (contentType) {
-    case 'events':
-      return '/calendar';
-    case 'safety':
-      return '/safety';
-    case 'skills':
-    case 'skill_sessions':
-      return '/skills';
-    case 'goods':
-      return '/goods';
-    case 'neighbors':
-      return '/neighbors';
-    default:
-      return '/home';
-  }
-};
-
 export function NotificationItem({ notification, variant = 'drawer' }: NotificationItemProps) {
   const navigate = useNavigate();
   const { markAsRead, archive } = useNotificationActions();
+
+  // Create navigation service instance
+  const navigationService = createItemNavigationService(navigate);
 
   // Get actor info with fallback
   const actorName = notification.profiles?.display_name || 'A neighbor';
@@ -97,27 +80,33 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   // Get theme color for this notification's content type
   const themeColor = getThemeColor(notification.content_type);
 
-  // Handle view action with smart navigation
+  // Handle view action with unified navigation service
   const handleView = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     try {
-      // Mark as read
+      // Mark as read first
       if (!notification.is_read) {
         await markAsRead(notification.id);
       }
 
-      // Smart navigation with highlighting
+      // Use unified navigation service
       const highlightType = getHighlightType(notification.content_type);
       if (highlightType && notification.content_id) {
-        // Use smart navigation to route and highlight
-        navigateAndHighlight(highlightType, notification.content_id, navigate, true);
+        const result = await navigationService.navigateToItem(
+          highlightType, 
+          notification.content_id, 
+          { showToast: true }
+        );
+        
+        if (!result.success) {
+          toast.error(result.error || 'Failed to navigate to content');
+        }
       } else {
-        // Fallback to simple route navigation
-        navigate(getRoute(notification.content_type));
+        // Fallback for unsupported content types
+        toast.error('Unable to navigate to this content type');
       }
 
-      toast.success('Navigated to content');
     } catch (error) {
       console.error('Error viewing notification:', error);
       toast.error('Failed to navigate');
@@ -196,7 +185,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
           )}
         </div>
         
-        {/* Unread indicator - REMOVED close button */}
+        {/* Unread indicator */}
         {!notification.is_read && (
           <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></div>
         )}

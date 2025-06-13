@@ -4,6 +4,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skill, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
+import { generateDataAttributes } from '@/utils/dataAttributes';
 import SkillRequestCard from './SkillRequestCard';
 import SkillOfferCard from './SkillOfferCard';
 import SkillDetailsContent from './SkillDetailsContent';
@@ -14,6 +15,7 @@ import SkillDetailsContent from './SkillDetailsContent';
  * This component has been refactored to use smaller, focused components
  * for better maintainability and clarity. It now serves as a container
  * that determines which card type to show based on props.
+ * Updated to include proper data attributes for highlighting and navigation.
  */
 interface SkillCardProps {
   skill: SkillWithProfile;
@@ -34,6 +36,9 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   // Check if current user is the skill owner
   const isOwner = currentUser?.id === skill.user_id;
   
+  // Generate data attributes for highlighting and navigation
+  const dataAttributes = generateDataAttributes('skills', skill.id);
+  
   // Handle skill deletion
   const handleDeleteSkill = async (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -45,23 +50,27 @@ const SkillCard = ({ skill, onContribute, type }: SkillCardProps) => {
   // For skill requests, we render the request card component
   if (type === 'request') {
     return (
-      <SkillRequestCard
-        skill={skill}
-      />
+      <div {...dataAttributes}>
+        <SkillRequestCard
+          skill={skill}
+        />
+      </div>
     );
   }
 
   // For skill offers, we render the offer card and detail dialog
   return (
     <>
-      <SkillOfferCard 
-        skill={skill}
-        isOwner={isOwner}
-        onDelete={handleDeleteSkill}
-        isDeleting={isDeleting}
-        onRequestSkill={() => {}} // No longer using request skill functionality
-        onClick={() => setIsDetailsOpen(true)}
-      />
+      <div {...dataAttributes}>
+        <SkillOfferCard 
+          skill={skill}
+          isOwner={isOwner}
+          onDelete={handleDeleteSkill}
+          isDeleting={isDeleting}
+          onRequestSkill={() => {}} // No longer using request skill functionality
+          onClick={() => setIsDetailsOpen(true)}
+        />
+      </div>
 
       {/* Details dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
