@@ -20,16 +20,16 @@ export function useHighlightedItem(type: HighlightableItemType): UseHighlightedI
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   
   useEffect(() => {
-    // Create a listener for highlight events that match this component's type
-    // Fix: Correct the function call and parameter types
-    const removeListener = createHighlightListener((detail: any) => {
-      if (detail.type === type) {
-        setHighlightedId(detail.id);
-      }
-    });
+    // Create the event listener function for this item type
+    const eventListener = createHighlightListener(type);
     
-    // Clean up listener on unmount
-    return removeListener;
+    // Add the event listener to listen for highlight events
+    document.addEventListener('highlightItem', eventListener);
+    
+    // Return cleanup function to remove the event listener
+    return () => {
+      document.removeEventListener('highlightItem', eventListener);
+    };
   }, [type]);
   
   // Function to clear the current highlight state
