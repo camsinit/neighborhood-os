@@ -21,7 +21,8 @@ export function useHighlightedItem(type: HighlightableItemType): UseHighlightedI
   
   useEffect(() => {
     // Create a listener for highlight events that match this component's type
-    const removeListener = createHighlightListener((detail) => {
+    // Fix: Correct the function call and parameter types
+    const removeListener = createHighlightListener((detail: any) => {
       if (detail.type === type) {
         setHighlightedId(detail.id);
       }

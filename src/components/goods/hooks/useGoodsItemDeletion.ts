@@ -15,7 +15,8 @@ import { GoodsExchangeItem } from '@/types/localTypes';
 import { useUser } from "@supabase/auth-helpers-react";
 import { refreshEvents } from '@/utils/refreshEvents';
 
-export const useGoodsItemDeletion = (onRefresh: () => void, onItemDeleted?: () => void) => {
+// Fix: Make parameters optional to support different usage patterns
+export const useGoodsItemDeletion = (onRefresh?: () => void, onItemDeleted?: () => void) => {
   // Get the current user for permission checks
   const currentUser = useUser();
   const queryClient = useQueryClient();
@@ -90,10 +91,12 @@ export const useGoodsItemDeletion = (onRefresh: () => void, onItemDeleted?: () =
       refreshEvents.goods();
       refreshEvents.activities();
       
-      // Call the legacy refresh callback
-      onRefresh();
+      // Call the legacy refresh callback if provided
+      if (onRefresh) {
+        onRefresh();
+      }
       
-      // Close any open dialogs/popovers by calling the callback
+      // Close any open dialogs/popovers by calling the callback if provided
       if (onItemDeleted) {
         onItemDeleted();
       }
@@ -105,5 +108,11 @@ export const useGoodsItemDeletion = (onRefresh: () => void, onItemDeleted?: () =
     }
   };
 
-  return { handleDeleteGoodsItem, isDeletingItem };
+  return { 
+    handleDeleteGoodsItem, 
+    isDeletingItem,
+    // Add backward compatibility aliases
+    handleDeleteItem: handleDeleteGoodsItem,
+    isDeleting: isDeletingItem
+  };
 };

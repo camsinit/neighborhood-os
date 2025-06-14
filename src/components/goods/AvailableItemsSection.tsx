@@ -69,6 +69,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
           <AvailableGoodsCard
             key={item.id}
             item={item}
+            // Fix: Use the correct onClick prop name
             onClick={() => setSelectedItem(item)}
           />
         ))}

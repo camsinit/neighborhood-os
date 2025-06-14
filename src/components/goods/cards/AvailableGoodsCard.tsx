@@ -7,17 +7,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Clock, User, MessageCircle, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateDataAttributes } from '@/utils/dataAttributes';
-import { ItemRequestDialog } from '@/components/items/dialogs/ItemRequestDialog';
-import { useGoodsItemDeletion } from '../hooks/useGoodsItemDeletion';
+// Fix: Import as default export instead of named export
+import ItemRequestDialog from '@/components/items/dialogs/ItemRequestDialog';
 
+// Fix: Update the interface to match actual usage
 interface AvailableGoodsCardProps {
   item: any;
   onContact?: (item: any) => void;
+  onClick?: () => void; // Add missing onClick prop
 }
 
-const AvailableGoodsCard = ({ item, onContact }: AvailableGoodsCardProps) => {
+const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProps) => {
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
-  const { handleDeleteItem, isDeleting } = useGoodsItemDeletion();
 
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('goods', item.id);
@@ -25,6 +26,13 @@ const AvailableGoodsCard = ({ item, onContact }: AvailableGoodsCardProps) => {
   const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsRequestDialogOpen(true);
+  };
+
+  // Handle card click to open details
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    }
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -45,6 +53,7 @@ const AvailableGoodsCard = ({ item, onContact }: AvailableGoodsCardProps) => {
       <Card 
         className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
         {...dataAttributes} // Apply data attributes for highlighting
+        onClick={handleCardClick} // Add click handler for card
       >
         {/* Image Section */}
         {item.image_url && (
@@ -135,7 +144,7 @@ const AvailableGoodsCard = ({ item, onContact }: AvailableGoodsCardProps) => {
       <ItemRequestDialog
         open={isRequestDialogOpen}
         onOpenChange={setIsRequestDialogOpen}
-        item={item}
+        request={item} // Fix: Use 'request' prop instead of 'item'
       />
     </>
   );
