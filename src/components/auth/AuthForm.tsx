@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
  * 
  * This component provides both sign in and sign up functionality.
  * It manages user authentication state, form submission, and navigation
- * to the index route upon successful authentication, which then handles
+ * to the dashboard entry point upon successful authentication, which then handles
  * proper routing based on user status.
  * 
  * Updated with styling to match the landing page aesthetics.
@@ -42,8 +43,8 @@ const AuthForm = () => {
       console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
       
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        console.log("[AuthForm] Valid session detected, navigating to index route");
-        navigate("/", { replace: true });
+        console.log("[AuthForm] Valid session detected, navigating to dashboard entry point");
+        navigate("/dashboard", { replace: true });
       }
     });
 

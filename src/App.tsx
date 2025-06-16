@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
+import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import OnboardingPage from "./pages/OnboardingPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -60,19 +61,28 @@ const App = () => {
               <Toaster />
               <BrowserRouter>
                 <Routes>
+                  {/* Public routes - accessible without authentication */}
+                  <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/onboarding" element={<OnboardingPage />} />
-                  {/* Join routes moved outside ProtectedRoute to allow unauthenticated access */}
+                  
+                  {/* Join routes - allow unauthenticated access */}
                   <Route path="/join/:inviteCode" element={<JoinPage />} />
                   <Route path="/join" element={<JoinPage />} />
+                  
+                  {/* Onboarding - special handling for guest mode */}
+                  <Route path="/onboarding" element={<OnboardingPage />} />
+                  
+                  {/* Dashboard entry point - handles authenticated user routing */}
                   <Route
-                    path="/"
+                    path="/dashboard"
                     element={
                       <ProtectedRoute>
                         <Index />
                       </ProtectedRoute>
                     }
                   />
+                  
+                  {/* Protected app routes */}
                   <Route
                     path="/home"
                     element={

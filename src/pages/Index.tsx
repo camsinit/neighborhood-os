@@ -1,9 +1,10 @@
 
 /**
- * Index page component
+ * Dashboard Entry Point Component
  * 
- * This component serves as the entry point to the application when a user visits the index route.
- * It redirects users based on authentication status, onboarding status, and neighborhood context.
+ * This component serves as the entry point for authenticated users.
+ * It determines where to route users based on their onboarding status and neighborhood context.
+ * This replaces the previous Index that had infinite redirect loops.
  */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,16 +16,16 @@ import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Index component that handles routing logic
+ * Dashboard entry component for authenticated users only
  * 
- * This component determines where to send users based on their authentication,
- * onboarding status, and neighborhood status. It shows a loading indicator while making this determination.
+ * This component determines where to send authenticated users based on their 
+ * onboarding status and neighborhood status. It shows a loading indicator while making this determination.
  */
 const Index = () => {
   // Navigation hook for redirecting users
   const navigate = useNavigate();
   
-  // Get the current authenticated user
+  // Get the current authenticated user (should always exist due to ProtectedRoute)
   const user = useUser();
   
   // State to track if we need to wait longer than expected
@@ -77,17 +78,16 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [isLoadingNeighborhood, isCheckingOnboarding]);
   
-  // Effect to handle routing logic based on authentication, onboarding and neighborhood status
+  // Effect to handle routing logic based on onboarding and neighborhood status
   useEffect(() => {
     // Safety check: If we're still loading data, wait
-    if (isLoadingNeighborhood || isCheckingOnboarding) {
-      console.log("[Index] Still loading data, waiting before routing...");
+    if (isLoadingNeighborhood || isCheckingOnboarding || !user) {
+      console.log("[Dashboard] Still loading data, waiting before routing...");
       return;
     }
     
     // Logging to help with debugging
-    console.log("[Index] Routing decision point reached:", {
-      isAuthenticated: !!user,
+    console.log("[Dashboard] Routing decision point reached:", {
       needsOnboarding,
       hasNeighborhood: !!currentNeighborhood,
       neighborhoodId: currentNeighborhood?.id,
@@ -96,32 +96,24 @@ const Index = () => {
       timestamp: new Date().toISOString()
     });
     
-    // Use immediate routing with replace to prevent history buildup
-    // If user is not authenticated, redirect to landing page
-    if (!user) {
-      console.log("[Index] User not authenticated, redirecting to landing page");
-      navigate("/", { replace: true });
-      return;
-    }
-    
     // If user needs onboarding, redirect to onboarding page
-    if (user && needsOnboarding) {
-      console.log("[Index] User needs onboarding, redirecting to onboarding page");
+    if (needsOnboarding) {
+      console.log("[Dashboard] User needs onboarding, redirecting to onboarding page");
       navigate("/onboarding", { replace: true });
       return;
     }
     
     // If authenticated and has neighborhood, redirect to home page
-    if (user && currentNeighborhood) {
-      console.log("[Index] User authenticated with neighborhood, redirecting to home page");
+    if (currentNeighborhood) {
+      console.log("[Dashboard] User authenticated with neighborhood, redirecting to home page");
       navigate("/home", { replace: true });
       return;
     }
     
     // If there was an error loading neighborhood data or no neighborhood, redirect to home anyway
     // Let the home page handle the "no neighborhood" state instead of forcing join page
-    if (user && (!currentNeighborhood || error)) {
-      console.log("[Index] User authenticated but no neighborhood, redirecting to home page to handle gracefully");
+    if (!currentNeighborhood || error) {
+      console.log("[Dashboard] User authenticated but no neighborhood, redirecting to home page to handle gracefully");
       navigate("/home", { replace: true });
       return;
     }

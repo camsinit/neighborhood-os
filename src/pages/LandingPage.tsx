@@ -1,32 +1,33 @@
+
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
 import { Button } from "@/components/ui/button";
-import Features from "@/components/landing/Features"; // Import the new Features component
+import Features from "@/components/landing/Features";
 
 /**
  * LandingPage component
  * 
  * The public-facing landing page with a waitlist signup form,
  * hero image showcasing the application, and features section.
- * Now includes an integrated survey flow after waitlist signup.
+ * This is now the main entry point for unauthenticated users.
+ * Authenticated users are redirected to the dashboard entry point.
  */
 const LandingPage = () => {
   // Initialize the navigate function from React Router to handle redirections
   const navigate = useNavigate();
 
   // Get the user's session from Supabase Auth context
-  const {
-    session
-  } = useSessionContext();
+  const { session } = useSessionContext();
 
-  // If user is already logged in, redirect to dashboard
+  // If user is already logged in, redirect to dashboard entry point
   // This effect runs when the component mounts and whenever session changes
   useEffect(() => {
     if (session) {
-      navigate("/dashboard");
+      console.log("[LandingPage] User is authenticated, redirecting to dashboard");
+      navigate("/dashboard", { replace: true });
     }
   }, [session, navigate]);
   
