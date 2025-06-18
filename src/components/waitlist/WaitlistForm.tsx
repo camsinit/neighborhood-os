@@ -110,11 +110,6 @@ const WaitlistForm = () => {
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
         </div>
-        
-        {/* Privacy notice */}
-        <p className="text-sm text-gray-600 text-center">
-          We'll only contact you when neighborhoodOS is ready. No spam, ever.
-        </p>
       </form>
 
       {/* Survey popover that appears after successful waitlist signup */}
