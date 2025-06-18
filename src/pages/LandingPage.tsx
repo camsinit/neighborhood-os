@@ -1,50 +1,49 @@
 
-import { useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
 import { Button } from "@/components/ui/button";
 import Features from "@/components/landing/Features";
+import { Link } from "react-router-dom";
 
 /**
  * LandingPage component
  * 
  * The public-facing landing page with a waitlist signup form,
  * hero image showcasing the application, and features section.
- * This is now the main entry point for unauthenticated users.
- * Authenticated users are redirected to the dashboard entry point.
+ * This is now accessible to both authenticated and unauthenticated users.
+ * Authenticated users see a "Dashboard" button, while unauthenticated users see "Login".
  */
 const LandingPage = () => {
-  // Initialize the navigate function from React Router to handle redirections
-  const navigate = useNavigate();
-
   // Get the user's session from Supabase Auth context
   const { session } = useSessionContext();
-
-  // If user is already logged in, redirect to dashboard entry point
-  // This effect runs when the component mounts and whenever session changes
-  useEffect(() => {
-    if (session) {
-      console.log("[LandingPage] User is authenticated, redirecting to dashboard");
-      navigate("/dashboard", { replace: true });
-    }
-  }, [session, navigate]);
+  
+  // Log the current authentication state for debugging
+  console.log("[LandingPage] Current session state:", { 
+    isAuthenticated: !!session,
+    userId: session?.user?.id 
+  });
   
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation header with logo and login button */}
+      {/* Navigation header with logo and conditional login/dashboard button */}
       <header className="w-full py-4 px-6 flex justify-between items-center">
         {/* Logo in the top left */}
         <div className="flex items-center">
           
         </div>
         
-        {/* Login button in the top right - updated to have rounded-full class for oval shape */}
+        {/* Conditional button - Dashboard for authenticated users, Login for unauthenticated */}
         <Button asChild className="rounded-full">
-          <Link to="/login" className="hover:bg-primary/90 transition-colors">
-            Login
-          </Link>
+          {session ? (
+            <Link to="/dashboard" className="hover:bg-primary/90 transition-colors">
+              Dashboard
+            </Link>
+          ) : (
+            <Link to="/login" className="hover:bg-primary/90 transition-colors">
+              Login
+            </Link>
+          )}
         </Button>
       </header>
       
