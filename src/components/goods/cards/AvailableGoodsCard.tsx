@@ -164,7 +164,7 @@ const AvailableGoodsCard = ({
             </p>}
 
           {/* Spacer to push footer to bottom */}
-          <div className="flex-1"></div>
+          
 
           {/* Action Button - Only show when card has been clicked */}
           {isCardClicked && <div className="flex-shrink-0">
