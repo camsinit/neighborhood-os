@@ -19,9 +19,21 @@ interface AvailableGoodsCardProps {
 
 const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProps) => {
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('goods', item.id);
+
+  // Debug logging for image issues
+  console.log('AvailableGoodsCard - Item data:', {
+    title: item.title,
+    id: item.id,
+    image_url: item.image_url,
+    hasImageUrl: !!item.image_url,
+    imageUrlType: typeof item.image_url,
+    imageUrlLength: item.image_url?.length
+  });
 
   const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -33,6 +45,18 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
     if (onClick) {
       onClick();
     }
+  };
+
+  const handleImageLoad = () => {
+    console.log('Image loaded successfully for:', item.title);
+    setImageLoaded(true);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    console.log('Image failed to load for:', item.title, 'URL:', item.image_url);
+    setImageError(true);
+    setImageLoaded(false);
   };
 
   const getUrgencyColor = (urgency: string) => {
@@ -57,12 +81,14 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
       >
         {/* Image Section with overlay - Fixed height */}
         <div className="h-48 overflow-hidden flex-shrink-0 relative">
-          {item.image_url ? (
+          {item.image_url && !imageError ? (
             <>
               <img
                 src={item.image_url}
                 alt={item.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onLoad={handleImageLoad}
+                onError={handleImageError}
               />
               {/* Available until overlay on image */}
               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
@@ -71,11 +97,19 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
               </div>
             </>
           ) : (
-            /* Fallback for items without images */
+            /* Fallback for items without images or failed to load */
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
               <div className="text-gray-500 text-center">
                 <Archive className="h-8 w-8 mx-auto mb-2" />
-                <span className="text-xs">No image</span>
+                <span className="text-xs">
+                  {imageError ? 'Image failed to load' : 'No image'}
+                </span>
+                {/* Debug info */}
+                {item.image_url && (
+                  <div className="text-xs mt-1 opacity-70">
+                    URL: {item.image_url.substring(0, 30)}...
+                  </div>
+                )}
               </div>
               {/* Available until overlay for no-image items */}
               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
