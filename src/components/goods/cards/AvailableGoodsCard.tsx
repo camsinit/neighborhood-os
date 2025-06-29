@@ -51,53 +51,46 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   return (
     <>
       <Card 
-        className="w-full h-80 flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
-        {/* Image Section - Fixed height */}
-        <div className="h-48 overflow-hidden bg-gray-100 flex-shrink-0">
-          {item.image_url ? (
+        {/* Image Section */}
+        {item.image_url && (
+          <div className="aspect-video overflow-hidden">
             <img
               src={item.image_url}
               alt={item.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <Archive className="h-12 w-12" />
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Content Section - Fixed height with flex layout */}
-        <div className="p-4 flex flex-col flex-1">
-          {/* Header with title and urgency - Fixed height */}
-          <div className="flex items-start justify-between gap-3 mb-2 min-h-[3rem] flex-shrink-0">
-            <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1 line-clamp-2">
+        <div className="p-4">
+          {/* Header with title and urgency */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1">
               {item.title}
             </h3>
             {item.urgency && (
               <Badge 
                 variant="outline" 
-                className={`text-xs font-medium flex-shrink-0 ${getUrgencyColor(item.urgency)}`}
+                className={`text-xs font-medium ${getUrgencyColor(item.urgency)}`}
               >
                 {item.urgency}
               </Badge>
             )}
           </div>
 
-          {/* Description - Fixed height with line clamping */}
-          <div className="mb-3 flex-shrink-0" style={{ minHeight: '2.5rem' }}>
-            {item.description && (
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {item.description}
-              </p>
-            )}
-          </div>
+          {/* Description */}
+          {item.description && (
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+              {item.description}
+            </p>
+          )}
 
-          {/* Category and Condition - Fixed height */}
-          <div className="flex items-center gap-2 mb-3 flex-shrink-0" style={{ minHeight: '1.5rem' }}>
+          {/* Category and Condition */}
+          <div className="flex items-center gap-2 mb-4">
             {item.goods_category && (
               <Badge variant="secondary" className="text-xs">
                 {item.goods_category}
@@ -110,11 +103,8 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
             )}
           </div>
 
-          {/* Spacer to push footer to bottom */}
-          <div className="flex-1"></div>
-
-          {/* Provider Info - Fixed at bottom */}
-          <div className="flex items-center gap-3 mb-3 flex-shrink-0">
+          {/* Provider Info */}
+          <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-8 w-8">
               <AvatarImage src={item.profiles?.avatar_url} alt={item.profiles?.display_name} />
               <AvatarFallback>
@@ -131,8 +121,8 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
             </div>
           </div>
 
-          {/* Footer with availability and action - Fixed at bottom */}
-          <div className="flex items-center justify-between flex-shrink-0">
+          {/* Footer with availability and action */}
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Clock className="h-3 w-3" />
               Available until {format(new Date(item.valid_until), 'MMM d')}
