@@ -51,20 +51,40 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   return (
     <>
       <Card 
-        className="w-80 h-96 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col"
+        className="w-80 h-[440px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col"
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
-        {/* Image Section - Fixed height */}
-        {item.image_url && (
-          <div className="h-48 overflow-hidden flex-shrink-0">
-            <img
-              src={item.image_url}
-              alt={item.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-        )}
+        {/* Image Section with overlay - Fixed height */}
+        <div className="h-48 overflow-hidden flex-shrink-0 relative">
+          {item.image_url ? (
+            <>
+              <img
+                src={item.image_url}
+                alt={item.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              {/* Available until overlay on image */}
+              <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Available until {format(new Date(item.valid_until), 'MMM d')}
+              </div>
+            </>
+          ) : (
+            /* Fallback for items without images */
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <div className="text-gray-500 text-center">
+                <Archive className="h-8 w-8 mx-auto mb-2" />
+                <span className="text-xs">No image</span>
+              </div>
+              {/* Available until overlay for no-image items */}
+              <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Available until {format(new Date(item.valid_until), 'MMM d')}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Content Section - Flexible height with consistent padding */}
         <div className="p-4 flex flex-col flex-1">
@@ -125,17 +145,12 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
             </div>
           </div>
 
-          {/* Footer with availability and action */}
-          <div className="flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <Clock className="h-3 w-3" />
-              Available until {format(new Date(item.valid_until), 'MMM d')}
-            </div>
-            
+          {/* Action Button - Fixed at bottom */}
+          <div className="flex-shrink-0">
             <Button
               size="sm"
               onClick={handleContactClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full"
             >
               <MessageCircle className="h-4 w-4 mr-1" />
               Request
