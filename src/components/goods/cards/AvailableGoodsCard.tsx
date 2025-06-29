@@ -25,14 +25,33 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('goods', item.id);
 
+  // Get the image URL - check both image_url and images array
+  const getImageUrl = () => {
+    // First try the direct image_url field
+    if (item.image_url) {
+      return item.image_url;
+    }
+    
+    // Then try the images array (first image)
+    if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+      return item.images[0];
+    }
+    
+    return null;
+  };
+
+  const imageUrl = getImageUrl();
+
   // Debug logging for image issues
   console.log('AvailableGoodsCard - Item data:', {
     title: item.title,
     id: item.id,
     image_url: item.image_url,
-    hasImageUrl: !!item.image_url,
-    imageUrlType: typeof item.image_url,
-    imageUrlLength: item.image_url?.length
+    images: item.images,
+    finalImageUrl: imageUrl,
+    hasImageUrl: !!imageUrl,
+    imageUrlType: typeof imageUrl,
+    imageUrlLength: imageUrl?.length
   });
 
   const handleContactClick = (e: React.MouseEvent) => {
@@ -54,7 +73,7 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   };
 
   const handleImageError = () => {
-    console.log('Image failed to load for:', item.title, 'URL:', item.image_url);
+    console.log('Image failed to load for:', item.title, 'URL:', imageUrl);
     setImageError(true);
     setImageLoaded(false);
   };
@@ -81,10 +100,10 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
       >
         {/* Image Section with overlay - Fixed height */}
         <div className="h-48 overflow-hidden flex-shrink-0 relative">
-          {item.image_url && !imageError ? (
+          {imageUrl && !imageError ? (
             <>
               <img
-                src={item.image_url}
+                src={imageUrl}
                 alt={item.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onLoad={handleImageLoad}
@@ -105,9 +124,9 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
                   {imageError ? 'Image failed to load' : 'No image'}
                 </span>
                 {/* Debug info */}
-                {item.image_url && (
+                {imageUrl && (
                   <div className="text-xs mt-1 opacity-70">
-                    URL: {item.image_url.substring(0, 30)}...
+                    URL: {imageUrl.substring(0, 30)}...
                   </div>
                 )}
               </div>
