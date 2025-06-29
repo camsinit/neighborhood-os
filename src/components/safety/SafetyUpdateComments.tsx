@@ -7,9 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { createLogger } from '@/utils/logger';
-
-// Replace line 11 with:
 import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { createLogger } from '@/utils/logger';
 

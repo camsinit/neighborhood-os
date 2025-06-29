@@ -1,12 +1,12 @@
 
 /**
- * Unified Event System
+ * Unified Event System with Migration Layer
  * 
  * Consolidates refreshEvents, databaseEventEmitter, and useAutoRefresh
- * into a single, efficient event system
+ * into a single, efficient event system with backward compatibility
  */
 
-// Supported event types
+// Core supported event types
 export type UnifiedEventType = 
   'activities' | 
   'notifications' | 
@@ -16,30 +16,64 @@ export type UnifiedEventType =
   'skills' | 
   'neighbors';
 
+// Legacy event names that need to be mapped
+type LegacyEventType = 
+  'event-submitted' |
+  'activities-updated' |
+  'safety-updated' |
+  'notification-created' |
+  'goods-updated' |
+  'skills-updated' |
+  'neighbors-updated';
+
+// All supported event types (core + legacy)
+type AllEventTypes = UnifiedEventType | LegacyEventType;
+
+// Mapping from legacy event names to new ones
+const eventMapping: Record<LegacyEventType, UnifiedEventType> = {
+  'event-submitted': 'events',
+  'activities-updated': 'activities',
+  'safety-updated': 'safety',
+  'notification-created': 'notifications',
+  'goods-updated': 'goods',
+  'skills-updated': 'skills',
+  'neighbors-updated': 'neighbors'
+};
+
 // Event observer storage
 const observers = new Map<UnifiedEventType, Set<() => void>>();
 
 /**
+ * Normalize event type to core type
+ */
+const normalizeEventType = (eventType: AllEventTypes): UnifiedEventType => {
+  return eventMapping[eventType as LegacyEventType] || eventType as UnifiedEventType;
+};
+
+/**
  * Subscribe to events
  */
-export const subscribe = (eventType: UnifiedEventType, callback: () => void): (() => void) => {
-  if (!observers.has(eventType)) {
-    observers.set(eventType, new Set());
+export const subscribe = (eventType: AllEventTypes, callback: () => void): (() => void) => {
+  const normalizedType = normalizeEventType(eventType);
+  
+  if (!observers.has(normalizedType)) {
+    observers.set(normalizedType, new Set());
   }
   
-  observers.get(eventType)!.add(callback);
+  observers.get(normalizedType)!.add(callback);
   
   // Return unsubscribe function
   return () => {
-    observers.get(eventType)?.delete(callback);
+    observers.get(normalizedType)?.delete(callback);
   };
 };
 
 /**
  * Emit events
  */
-export const emit = (eventType: UnifiedEventType, data?: any): void => {
-  const callbacks = observers.get(eventType);
+export const emit = (eventType: AllEventTypes, data?: any): void => {
+  const normalizedType = normalizeEventType(eventType);
+  const callbacks = observers.get(normalizedType);
   if (callbacks) {
     callbacks.forEach(callback => callback());
   }
@@ -48,7 +82,7 @@ export const emit = (eventType: UnifiedEventType, data?: any): void => {
 /**
  * Emit multiple related events at once
  */
-export const emitMultiple = (eventTypes: UnifiedEventType[]): void => {
+export const emitMultiple = (eventTypes: AllEventTypes[]): void => {
   eventTypes.forEach(eventType => emit(eventType));
 };
 
@@ -74,12 +108,31 @@ export const emitDatabaseChange = (
   emitMultiple(eventsToEmit);
 };
 
-// Export the unified system
+// Legacy method compatibility layer
+const legacyMethods = {
+  skills: () => emit('skills'),
+  activities: () => emit('activities'),
+  events: () => emit('events'),
+  safety: () => emit('safety'),
+  goods: () => emit('goods'),
+  notifications: () => emit('notifications'),
+  neighbors: () => emit('neighbors'),
+  dispatchRefreshEvent: (eventType?: string) => {
+    if (eventType) {
+      emit(eventType as AllEventTypes);
+    } else {
+      emit('activities'); // Default fallback
+    }
+  }
+};
+
+// Export the unified system with legacy compatibility
 export const unifiedEvents = {
   subscribe,
   emit,
   emitMultiple,
-  emitDatabaseChange
+  emitDatabaseChange,
+  ...legacyMethods
 };
 
 export default unifiedEvents;
