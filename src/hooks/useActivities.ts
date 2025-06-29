@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useEffect } from "react";
 
-// Simplified activity type that matches database schema
+// Activity type that matches database schema and existing usage
 export interface Activity {
   id: string;
   actor_id: string;
@@ -21,6 +21,7 @@ export interface Activity {
   created_at: string;
   neighborhood_id: string | null;
   metadata?: any;
+  is_public: boolean | null; // Added to match existing Activity type
   profiles?: {
     display_name?: string;
     avatar_url?: string;
@@ -47,6 +48,7 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
       created_at,
       neighborhood_id,
       metadata,
+      is_public,
       profiles:actor_id (
         display_name,
         avatar_url

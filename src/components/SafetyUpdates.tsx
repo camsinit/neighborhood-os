@@ -20,7 +20,7 @@ import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from "@/utils/unifiedEventSystem"; // Updated import
 import { createLogger } from "@/utils/logger";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -94,10 +94,8 @@ const SafetyUpdates = () => {
         setSelectedUpdate(null);
         queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
         
-        // Signal refresh events
-        refreshEvents.emit('safety-updated');
-        refreshEvents.emit('notification-created');
-        refreshEvents.emit('activities');
+        // Signal refresh events using unified system
+        unifiedEvents.emitMultiple(['safety', 'activities', 'notifications']);
       } catch (err) {
         logger.error("Error in delete operation:", err);
         toast.error("An error occurred while deleting");

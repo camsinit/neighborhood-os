@@ -7,7 +7,7 @@ import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { useAutoRefresh } from "@/hooks/useAutoRefresh";
+import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized"; // Updated import
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this component
@@ -62,7 +62,7 @@ const ActivityFeed = () => {
           }))
         );
       } else {
-        logger.debug("No neighbor join activities found in current feed");
+        logger.info("No neighbor join activities found in current feed");
       }
       
       if (goodsActivities.length > 0) {
@@ -76,35 +76,31 @@ const ActivityFeed = () => {
           }))
         );
       } else {
-        logger.debug("No goods activities found in current feed");
+        logger.info("No goods activities found in current feed");
       }
     }
 
     // Set up periodic refetching every 30 seconds
     const intervalId = setInterval(() => {
-      logger.debug("Performing automatic periodic refresh");
+      logger.info("Performing automatic periodic refresh");
       refetch();
     }, 30000);
     return () => clearInterval(intervalId);
   }, [activities?.length, refetch]);
 
-  // Use our centralized auto-refresh hook to listen for ALL activity types
-  // This ensures the feed refreshes for skills, events, safety updates, goods, and neighbors
-  // ENHANCED: Added 'neighbor-joined' and 'goods-updated' events specifically
-  useAutoRefresh(['activities'], [
-    'activities-updated', 
-    'event-rsvp-updated', 
-    'event-submitted', 
-    'event-deleted', 
-    'safety-updated', 
-    'goods-updated',    // For goods creation/updates
-    'skills-updated',
-    'neighbor-joined'   // For neighbor join events
-  ]);
+  // Use our optimized auto-refresh hook to listen for ALL activity types
+  useAutoRefreshOptimized([
+    'activities', 
+    'events', 
+    'safety', 
+    'goods',
+    'skills',
+    'neighbors'
+  ], refetch);
 
   // Manual refresh handler with enhanced logging
   const handleManualRefresh = () => {
-    logger.debug("Manual refresh triggered - checking for new neighbor and goods activities");
+    logger.info("Manual refresh triggered - checking for new neighbor and goods activities");
     refetch();
     setLastRefresh(new Date());
     toast(`Feed refreshed - Last updated: ${new Date().toLocaleTimeString()}`);
@@ -112,7 +108,7 @@ const ActivityFeed = () => {
 
   // Handler for when activities need special handling (like deleted items)
   const handleActivityAction = (activity: Activity) => {
-    logger.debug(`Activity action triggered for ${activity.id}`);
+    logger.info(`Activity action triggered for ${activity.id}`);
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
@@ -121,7 +117,7 @@ const ActivityFeed = () => {
   const filteredActivities = activities?.filter(activity => {
     const isDeleted = !!activity.metadata?.deleted;
     if (isDeleted) {
-      logger.debug(`Filtered out deleted activity: ${activity.id}`);
+      logger.info(`Filtered out deleted activity: ${activity.id}`);
     }
     return !isDeleted;
   }) || [];
@@ -129,7 +125,7 @@ const ActivityFeed = () => {
   // Enhanced logging for what we're actually displaying
   useEffect(() => {
     if (filteredActivities.length > 0) {
-      logger.debug(`Displaying ${Math.min(displayCount, filteredActivities.length)} activities out of ${filteredActivities.length} total`);
+      logger.info(`Displaying ${Math.min(displayCount, filteredActivities.length)} activities out of ${filteredActivities.length} total`);
       
       // Log the activity types we're showing for debugging
       const activityTypeBreakdown = filteredActivities.reduce((acc, activity) => {
@@ -137,13 +133,13 @@ const ActivityFeed = () => {
         return acc;
       }, {} as Record<string, number>);
       
-      logger.debug("Activity type breakdown:", activityTypeBreakdown);
+      logger.info("Activity type breakdown:", activityTypeBreakdown);
     }
   }, [filteredActivities, displayCount]);
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
-    logger.debug("Rendering loading skeletons");
+    logger.info("Rendering loading skeletons");
     return (
       <div className="space-y-4 py-2">
         {[1, 2, 3, 4].map(i => (
@@ -160,7 +156,7 @@ const ActivityFeed = () => {
 
   // Display a message when there are no activities
   if (!filteredActivities?.length) {
-    logger.debug("No activities to display");
+    logger.info("No activities to display");
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
         <div className="text-center">
@@ -174,7 +170,7 @@ const ActivityFeed = () => {
     );
   }
   
-  logger.debug("Rendering activity feed with data");
+  logger.info("Rendering activity feed with data");
 
   // Display the activities with load more button
   return (

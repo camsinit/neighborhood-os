@@ -4,7 +4,7 @@
  * Reduced verbosity and better performance
  */
 
-export type LogLevel = 'error' | 'warn' | 'info';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LoggerConfig {
   minLevel: LogLevel;
@@ -18,6 +18,7 @@ const config: LoggerConfig = {
 };
 
 const LOG_LEVEL_PRIORITY = {
+  debug: 0,
   info: 1,
   warn: 2,
   error: 3
@@ -36,6 +37,12 @@ export function createLogger(moduleName: string) {
   };
 
   return {
+    debug: (message: string, ...args: any[]): void => {
+      if (shouldLog('debug')) {
+        console.debug(formatMessage(message), ...args);
+      }
+    },
+
     info: (message: string, ...args: any[]): void => {
       if (shouldLog('info')) {
         console.info(formatMessage(message), ...args);
