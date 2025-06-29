@@ -12,7 +12,7 @@ import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { useUser } from '@supabase/auth-helpers-react';
 import * as skillsService from '@/services/skills/skillsService';
 import { toast } from 'sonner';
-import { dispatchRefreshEvent } from '@/utils/refreshEvents';
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Define the context shape
@@ -82,7 +82,7 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       await skillsService.createSkill(formData, mode, user.id, neighborhood.id);
       
       // Dispatch a refresh event
-      dispatchRefreshEvent('skills-updated');
+      unifiedEvents.dispatchRefreshEvent('skills-updated');
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -106,7 +106,7 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       await skillsService.updateSkill(skillId, formData, user.id);
       
       // Dispatch a refresh event
-      dispatchRefreshEvent('skills-updated');
+      unifiedEvents.dispatchRefreshEvent('skills-updated');
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });
@@ -131,7 +131,7 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       await skillsService.deleteSkill(skillId, skillTitle, user.id);
       
       // Dispatch a refresh event
-      dispatchRefreshEvent('skills-updated');
+      unifiedEvents.dispatchRefreshEvent('skills-updated');
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['skills-exchange'] });

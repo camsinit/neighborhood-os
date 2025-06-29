@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -8,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { refreshEvents } from '@/utils/refreshEvents';
+import { createLogger } from '@/utils/logger';
+
+// Replace line 11 with:
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { createLogger } from '@/utils/logger';
 
 // Create a logger for this component
@@ -109,7 +111,7 @@ export function SafetyUpdateComments({ updateId }: SafetyUpdateCommentsProps) {
         setNewComment('');
         
         // Trigger a refresh of notifications
-        refreshEvents.emit('notification-created');
+        unifiedEvents.emit('notifications');
         logger.debug('Comment added successfully, database trigger will handle notification');
       }
     } catch (error) {

@@ -1,4 +1,3 @@
-
 /**
  * Hook for safety update notifications
  * 
@@ -6,7 +5,7 @@
  * Now exclusively uses the database triggers system
  */
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 
 // Create a dedicated logger for safety notifications
 const logger = createLogger('useSafetyNotifications');
@@ -29,8 +28,8 @@ export async function notifySafetyComment(
     });
     
     // Signal that notifications might have changed
-    refreshEvents.emit('notification-created');
-    refreshEvents.emit('safety-updated');
+    unifiedEvents.emit('notification-created');
+    unifiedEvents.emit('safety-updated');
     
     return true;
   } catch (err) {
@@ -57,8 +56,8 @@ export async function notifySafetyChange(
     });
     
     // Signal that notifications might have changed
-    refreshEvents.emit('notification-created');
-    refreshEvents.emit('safety-updated');
+    unifiedEvents.emit('notification-created');
+    unifiedEvents.emit('safety-updated');
     
     return true;
   } catch (err) {

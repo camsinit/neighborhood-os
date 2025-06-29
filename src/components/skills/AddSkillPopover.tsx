@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Check } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import SkillsPageSelector from './SkillsPageSelector';
 import { useQueryClient } from '@tanstack/react-query';
-import { refreshEvents } from '@/utils/refreshEvents';
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 
 /**
  * AddSkillPopover - Unified popover for adding skills across the application
@@ -45,8 +44,7 @@ const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
     queryClient.invalidateQueries({ queryKey: ['activities'] });
     
     // Dispatch refresh events for any components listening
-    refreshEvents.emit('skills-updated');
-    refreshEvents.emit('activities-updated');
+    unifiedEvents.emitMultiple(['skills', 'activities']);
     
     // Call optional callback
     if (onSkillAdded) {
@@ -65,8 +63,7 @@ const AddSkillPopover: React.FC<AddSkillPopoverProps> = ({
     queryClient.invalidateQueries({ queryKey: ['activities'] });
     
     // Dispatch refresh events
-    refreshEvents.emit('skills-updated');
-    refreshEvents.emit('activities-updated');
+    unifiedEvents.emitMultiple(['skills', 'activities']);
     
     // Close the dialog when user clicks Submit
     onOpenChange(false);

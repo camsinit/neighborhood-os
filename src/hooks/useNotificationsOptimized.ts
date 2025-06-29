@@ -37,12 +37,12 @@ const fetchNotifications = async (): Promise<NotificationWithProfile[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Single query with join - more efficient than separate queries
+  // Fixed query with proper join syntax
   const { data: notifications, error } = await supabase
     .from('notifications')
     .select(`
       *,
-      profiles:actor_id (
+      profiles!notifications_actor_id_fkey (
         display_name,
         avatar_url
       )
@@ -87,28 +87,32 @@ export function useNotificationsOptimized() {
 
   // Set up real-time subscription
   useEffect(() => {
-    const { data: { user } } = supabase.auth.getUser();
-    if (!user) return;
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        () => {
-          query.refetch();
-        }
-      )
-      .subscribe();
+      const channel = supabase
+        .channel('notifications-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            query.refetch();
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
+
+    getUser();
   }, [query]);
 
   return query;

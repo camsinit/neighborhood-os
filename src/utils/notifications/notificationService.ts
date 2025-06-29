@@ -1,4 +1,3 @@
-
 /**
  * Unified Notification Service
  * 
@@ -14,7 +13,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from "@/utils/unifiedEventSystem";
 import { 
   createTemplatedNotification,
   createEventRSVPNotification,
@@ -93,8 +92,8 @@ export async function createNotification(params: NotificationParams): Promise<st
     // The database function returns the notification ID
     logger.debug('Notification created successfully:', data);
     
-    // Emit event using the refresh system
-    refreshEvents.emit('notification-created');
+    // Emit event using the unified system
+    unifiedEvents.emit('notifications');
     
     return data;
   } catch (error) {

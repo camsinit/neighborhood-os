@@ -9,24 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useEffect } from "react";
+import { Activity, ActivityType, ActivityMetadata } from "@/utils/queries/activities/types";
 
-// Activity type that matches database schema and existing usage
-export interface Activity {
-  id: string;
-  actor_id: string;
-  activity_type: string;
-  content_id: string;
-  content_type: string;
-  title: string;
-  created_at: string;
-  neighborhood_id: string | null;
-  metadata?: any;
-  is_public: boolean | null; // Added to match existing Activity type
-  profiles?: {
-    display_name?: string;
-    avatar_url?: string;
-  };
-}
+// Re-export types for consistency
+export type { Activity, ActivityType, ActivityMetadata };
 
 /**
  * Optimized activity fetching function
@@ -60,8 +46,13 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
 
   if (error) throw error;
   
-  // Filter out deleted items (simplified logic)
-  return (activities || []).filter(activity => !activity.metadata?.deleted);
+  // Filter out deleted items with proper type checking
+  return (activities || []).filter(activity => {
+    if (!activity.metadata) return true;
+    // Safe type checking for metadata
+    const metadata = activity.metadata as any;
+    return !metadata?.deleted;
+  });
 };
 
 /**

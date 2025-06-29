@@ -1,11 +1,10 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillFormData } from "@/components/skills/types/skillFormTypes";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import * as skillsService from "@/services/skills/skillsService";
 import { createLogger } from '@/utils/logger';
 
@@ -87,7 +86,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Dispatch refresh events to ensure immediate UI updates
       logger.debug("Dispatching skills-updated event");
-      refreshEvents.skills();
+      unifiedEvents.skills();
       
       // Also invalidate the queries directly
       logger.debug("Invalidating queries to refresh UI");
@@ -151,7 +150,7 @@ export const useSkillsExchange = ({ onSuccess }: SkillsExchangeProps) => {
 
       // Use the refreshEvents system to notify listeners
       logger.debug("Dispatching skills-updated event after update");
-      refreshEvents.skills();
+      unifiedEvents.skills();
       
       // Also invalidate the queries directly to ensure immediate refresh
       logger.debug("Manually invalidating queries after update");

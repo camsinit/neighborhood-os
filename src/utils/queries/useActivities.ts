@@ -5,34 +5,61 @@
  * Now properly filters by current neighborhood
  */
 import { useQuery } from "@tanstack/react-query";
-import { fetchActivities } from "./activities/activityService";
-import { Activity, ActivityType, ActivityMetadata } from "./activities/types";
-import { isContentDeleted } from "./activities/metadataUtils";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
+import { Activity, ActivityType, ActivityMetadata } from "./activities/types";
+import { supabase } from "@/integrations/supabase/client";
 
 // Re-export types for backward compatibility
 export type { Activity, ActivityType, ActivityMetadata };
-export { isContentDeleted };
+
+/**
+ * Fetch activities with proper neighborhood filtering
+ */
+const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[]> => {
+  if (!neighborhoodId) return [];
+  
+  const { data: activities, error } = await supabase
+    .from('activities')
+    .select(`
+      id,
+      actor_id,
+      activity_type,
+      content_id,
+      content_type,
+      title,
+      created_at,
+      neighborhood_id,
+      metadata,
+      is_public,
+      profiles:actor_id (
+        display_name,
+        avatar_url
+      )
+    `)
+    .eq('neighborhood_id', neighborhoodId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) throw error;
+  
+  return (activities || []).filter(activity => {
+    if (!activity.metadata) return true;
+    const metadata = activity.metadata as any;
+    return !metadata?.deleted;
+  });
+};
 
 /**
  * Custom hook for fetching recent neighborhood activities
- * Returns activities with synchronized titles from their source content
- * and proper handling for deleted content
- * Now properly filtered by current neighborhood
  */
 export const useActivities = () => {
-  // Get the current neighborhood context
   const neighborhood = useCurrentNeighborhood();
 
   return useQuery({
-    // Include neighborhood_id in query key for proper cache isolation
     queryKey: ["activities", neighborhood?.id],
     queryFn: () => fetchActivities(neighborhood?.id || null),
-    // Only run the query if we have a neighborhood
     enabled: !!neighborhood?.id,
-    // Use a shorter stale time to refresh more frequently
-    staleTime: 30000, // 30 seconds
-    // Add a refetch interval for automatic updates
-    refetchInterval: 60000, // 1 minute
+    staleTime: 30000,
+    refetchInterval: 60000,
   });
 };

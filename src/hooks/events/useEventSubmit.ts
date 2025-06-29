@@ -1,4 +1,3 @@
-
 import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,7 +6,7 @@ import { transformEventFormData, transformEventUpdateData } from "./utils/eventD
 import { createEvent, updateEvent } from "./utils/eventServices";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this hook
@@ -119,8 +118,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ["activities", neighborhood.id] });
       
       // Refresh UI components
-      refreshEvents.emit('event-submitted');
-      refreshEvents.emit('activities-updated');
+      unifiedEvents.emit('event-submitted');
+      unifiedEvents.emit('activities-updated');
       
       onSuccess();
       
@@ -171,8 +170,8 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
       queryClient.invalidateQueries({ queryKey: ["activities", neighborhood.id] });
       
       // Refresh UI components
-      refreshEvents.emit('event-submitted');
-      refreshEvents.emit('activities-updated');
+      unifiedEvents.emit('event-submitted');
+      unifiedEvents.emit('activities-updated');
       
       onSuccess();
       

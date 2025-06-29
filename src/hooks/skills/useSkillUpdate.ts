@@ -1,4 +1,3 @@
-
 /**
  * Hook to handle updating a skill and ensuring activities are updated too
  * Updated to use centralized query key constants for consistency
@@ -8,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@supabase/auth-helpers-react";
 import * as skillsService from "@/services/skills/skillsService";
 import { toast } from "sonner";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { QUERY_KEYS, getInvalidationKeys } from "@/utils/queryKeys";
 
 // Define the options interface for configuration
@@ -60,8 +59,8 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       window.dispatchEvent(new Event('skill-update-submitted'));
       
       // Add refresh event for activities feed using our central system
-      refreshEvents.skills();
-      refreshEvents.activities();
+      unifiedEvents.skills();
+      unifiedEvents.activities();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {
@@ -115,8 +114,8 @@ export const useSkillUpdate = (options?: SkillUpdateOptions) => {
       }));
       
       // Add refresh event for activities feed using our central system
-      refreshEvents.skills();
-      refreshEvents.activities();
+      unifiedEvents.skills();
+      unifiedEvents.activities();
 
       // Call onSuccess if provided
       if (options?.onSuccess) {

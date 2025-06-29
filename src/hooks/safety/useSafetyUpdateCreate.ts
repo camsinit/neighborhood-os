@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -6,7 +5,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { SafetyUpdateFormData } from "@/components/safety/schema/safetyUpdateSchema";
-import { refreshEvents } from "@/utils/refreshEvents";
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { createLogger } from "@/utils/logger";
 
 // Create a dedicated logger for this hook
@@ -86,9 +85,9 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
       queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
-      // Use refreshEvents to signal update to auto-refresh components
-      refreshEvents.emit('safety-updated');
-      refreshEvents.emit('activities');
+      // Use unifiedEvents to signal update to auto-refresh components
+      unifiedEvents.emit('safety-updated');
+      unifiedEvents.emit('activities');
       
       // Call success callback if provided
       if (onSuccess) {

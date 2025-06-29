@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User } from '@supabase/supabase-js';
 import { Neighborhood } from '@/contexts/neighborhood/types';
-import { refreshEvents } from '@/utils/refreshEvents';
+import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { SupportRequestFormData } from '../types/formTypes';
 
 /**
@@ -90,12 +89,12 @@ export const useSupportRequestFormSubmit = (
 
       // Fixed: Use the correct refresh event based on the category
       if (formData.category === 'goods') {
-        refreshEvents.goods();
+        unifiedEvents.emit('goods');
       } else if (formData.category === 'skills') {
-        refreshEvents.skills();
+        unifiedEvents.emit('skills');
       } else {
         // Generic refresh for other types - using goods as a fallback
-        refreshEvents.goods();
+        unifiedEvents.emit('goods');
       }
 
       // Close the form
