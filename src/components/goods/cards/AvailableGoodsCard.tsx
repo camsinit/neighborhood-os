@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,8 +15,11 @@ interface AvailableGoodsCardProps {
   onContact?: (item: any) => void;
   onClick?: () => void; // Add missing onClick prop
 }
-
-const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProps) => {
+const AvailableGoodsCard = ({
+  item,
+  onContact,
+  onClick
+}: AvailableGoodsCardProps) => {
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -33,15 +35,13 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
     if (item.image_url) {
       return item.image_url;
     }
-    
+
     // Then try the images array (first image)
     if (item.images && Array.isArray(item.images) && item.images.length > 0) {
       return item.images[0];
     }
-    
     return null;
   };
-
   const imageUrl = getImageUrl();
 
   // Debug logging for image issues
@@ -55,7 +55,6 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
     imageUrlType: typeof imageUrl,
     imageUrlLength: imageUrl?.length
   });
-
   const handleContactClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsRequestDialogOpen(true);
@@ -68,19 +67,16 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
       onClick();
     }
   };
-
   const handleImageLoad = () => {
     console.log('Image loaded successfully for:', item.title);
     setImageLoaded(true);
     setImageError(false);
   };
-
   const handleImageError = () => {
     console.log('Image failed to load for:', item.title, 'URL:', imageUrl);
     setImageError(true);
     setImageLoaded(false);
   };
-
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'high':
@@ -98,74 +94,49 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   const capitalizeFirstLetter = (text: string) => {
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
-
-  return (
-    <>
-      <Card 
-        className="w-80 h-[440px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col"
-        {...dataAttributes} // Apply data attributes for highlighting
-        onClick={handleCardClick} // Add click handler for card
-      >
+  return <>
+      <Card className="w-80 h-[440px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col" {...dataAttributes} // Apply data attributes for highlighting
+    onClick={handleCardClick} // Add click handler for card
+    >
         {/* Image Section with overlay and tags - Fixed height */}
         <div className="h-48 overflow-hidden flex-shrink-0 relative">
-          {imageUrl && !imageError ? (
-            <>
-              <img
-                src={imageUrl}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                onLoad={handleImageLoad}
-                onError={handleImageError}
-              />
+          {imageUrl && !imageError ? <>
+              <img src={imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onLoad={handleImageLoad} onError={handleImageError} />
               {/* Available until overlay on image */}
               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Available until {format(new Date(item.valid_until), 'MMM d')}
               </div>
-            </>
-          ) : (
-            /* Fallback for items without images or failed to load */
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            </> : (/* Fallback for items without images or failed to load */
+        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
               <div className="text-gray-500 text-center">
                 <Archive className="h-8 w-8 mx-auto mb-2" />
                 <span className="text-xs">
                   {imageError ? 'Image failed to load' : 'No image'}
                 </span>
                 {/* Debug info */}
-                {imageUrl && (
-                  <div className="text-xs mt-1 opacity-70">
+                {imageUrl && <div className="text-xs mt-1 opacity-70">
                     URL: {imageUrl.substring(0, 30)}...
-                  </div>
-                )}
+                  </div>}
               </div>
               {/* Available until overlay for no-image items */}
               <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Available until {format(new Date(item.valid_until), 'MMM d')}
               </div>
-            </div>
-          )}
+            </div>)}
 
           {/* Tags in top right corner of image */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">
-            {item.urgency && (
-              <Badge 
-                variant="outline" 
-                className={`text-xs font-medium bg-white/90 backdrop-blur-sm ${getUrgencyColor(item.urgency)}`}
-              >
+            {item.urgency && <Badge variant="outline" className={`text-xs font-medium bg-white/90 backdrop-blur-sm ${getUrgencyColor(item.urgency)}`}>
                 {capitalizeFirstLetter(item.urgency)}
-              </Badge>
-            )}
-            {item.goods_category && (
-              <Badge variant="secondary" className="text-xs bg-white/90 backdrop-blur-sm">
+              </Badge>}
+            {item.goods_category && <Badge variant="secondary" className="text-xs bg-white/90 backdrop-blur-sm">
                 {capitalizeFirstLetter(item.goods_category)}
-              </Badge>
-            )}
-            {item.condition && (
-              <Badge variant="outline" className="text-xs bg-white/90 backdrop-blur-sm">
+              </Badge>}
+            {item.condition && <Badge variant="outline" className="text-xs bg-white/90 backdrop-blur-sm">
                 {capitalizeFirstLetter(item.condition)}
-              </Badge>
-            )}
+              </Badge>}
           </div>
         </div>
 
@@ -183,46 +154,31 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
               <h3 className="text-lg font-semibold text-gray-900 leading-tight line-clamp-2">
                 {item.title}
               </h3>
-              <p className="text-sm font-medium text-gray-700">
-                {item.profiles?.display_name || 'Anonymous'}
-              </p>
+              
             </div>
           </div>
 
           {/* Description - Limited to 2 lines */}
-          {item.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-shrink-0">
+          {item.description && <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-shrink-0">
               {item.description}
-            </p>
-          )}
+            </p>}
 
           {/* Spacer to push footer to bottom */}
           <div className="flex-1"></div>
 
           {/* Action Button - Only show when card has been clicked */}
-          {isCardClicked && (
-            <div className="flex-shrink-0">
-              <Button
-                size="sm"
-                onClick={handleContactClick}
-                className="bg-blue-600 hover:bg-blue-700 text-white w-full"
-              >
+          {isCardClicked && <div className="flex-shrink-0">
+              <Button size="sm" onClick={handleContactClick} className="bg-blue-600 hover:bg-blue-700 text-white w-full">
                 <MessageCircle className="h-4 w-4 mr-1" />
                 Request
               </Button>
-            </div>
-          )}
+            </div>}
         </div>
       </Card>
 
       {/* Request Dialog */}
-      <ItemRequestDialog
-        open={isRequestDialogOpen}
-        onOpenChange={setIsRequestDialogOpen}
-        request={item} // Fix: Use 'request' prop instead of 'item'
-      />
-    </>
-  );
+      <ItemRequestDialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen} request={item} // Fix: Use 'request' prop instead of 'item'
+    />
+    </>;
 };
-
 export default AvailableGoodsCard;
