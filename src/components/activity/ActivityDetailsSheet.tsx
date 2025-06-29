@@ -1,5 +1,5 @@
 
-import { Activity } from "@/utils/queries/useActivities";
+import { Activity } from "@/hooks/useActivities";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { getActivityDescription } from "./utils/activityHelpers";
 import { AlertCircle } from "lucide-react";

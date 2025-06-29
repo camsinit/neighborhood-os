@@ -6,7 +6,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Book } from "lucide-react";
-import { Activity } from "@/utils/queries/useActivities";
+import { Activity } from "@/hooks/useActivities";
 import { Button } from "@/components/ui/button";
 
 /**

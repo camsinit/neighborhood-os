@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { Activity, useActivities } from "@/utils/queries/useActivities";
+import { Activity, useActivities } from "@/hooks/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized"; // Updated import
+import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized";
 import { createLogger } from '@/utils/logger';
 
 // Create a dedicated logger for this component

@@ -1,3 +1,4 @@
+
 import { 
   Calendar, 
   Shield, 
@@ -8,7 +9,7 @@ import {
   UserPlus,
   Gift
 } from "lucide-react";
-import { ActivityType } from "@/utils/queries/useActivities";
+import { ActivityType } from "@/hooks/useActivities";
 import { getModuleThemeColor } from "@/theme/moduleTheme";
 
 /**

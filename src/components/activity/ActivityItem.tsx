@@ -2,7 +2,7 @@
 import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
 import { User } from "lucide-react";
-import { Activity } from "@/utils/queries/useActivities";
+import { Activity } from "@/hooks/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
 import { useNavigate } from "react-router-dom";
