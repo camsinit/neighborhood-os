@@ -3,9 +3,10 @@
  * Optimized Activity Feed Component
  * 
  * Simplified version with minimal logging and efficient rendering
+ * Now uses the consolidated useActivities hook
  */
 import { useState } from "react";
-import { useActivities } from "@/hooks/useActivities";
+import { useActivities } from "@/hooks/useActivities"; // Updated import to use consolidated hook
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";

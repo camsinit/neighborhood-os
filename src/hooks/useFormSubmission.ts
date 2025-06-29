@@ -8,7 +8,6 @@ import { useSkillsManagement } from "./form/useSkillsManagement";
 import { useProfileManagement } from "./form/useProfileManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
-import { emitNeighborJoinEvent } from "@/utils/databaseEventEmitter";
 import { unifiedEvents } from "@/utils/unifiedEventSystem";
 import { createLogger } from "@/utils/logger";
 
@@ -122,7 +121,7 @@ export const useFormSubmission = () => {
       // Clear the pending invite from localStorage since it's been processed
       localStorage.removeItem('pendingInviteCode');
       
-      // ENHANCED: Emit neighbor join event to update UI components  
+      // ENHANCED: Emit neighbor join event to update UI components using unified events
       logger.info("Successfully processed invite and joined neighborhood - emitting events");
       unifiedEvents.emitDatabaseChange('create', 'neighbor');
       

@@ -31,29 +31,52 @@ export interface NotificationWithProfile {
 }
 
 /**
- * Fetch notifications with profile data in a single optimized query
+ * Fetch notifications with profile data using a two-step approach
+ * This avoids the complex foreign key join issues we were having
  */
 const fetchNotifications = async (): Promise<NotificationWithProfile[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // Fixed query with proper join syntax
+  // Step 1: Fetch notifications without the problematic profile join
   const { data: notifications, error } = await supabase
     .from('notifications')
-    .select(`
-      *,
-      profiles!notifications_actor_id_fkey (
-        display_name,
-        avatar_url
-      )
-    `)
+    .select('*') // Get all notification fields first
     .eq('user_id', user.id)
     .eq('is_archived', false)
     .order('created_at', { ascending: false })
     .limit(50);
 
   if (error) throw error;
-  return notifications || [];
+  if (!notifications || notifications.length === 0) return [];
+
+  // Step 2: Get unique actor IDs and fetch their profiles separately
+  const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
+  let profilesMap = new Map();
+  
+  if (actorIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', actorIds);
+
+    if (!profilesError && profiles) {
+      profiles.forEach(profile => {
+        profilesMap.set(profile.id, {
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url
+        });
+      });
+    }
+  }
+
+  // Step 3: Combine notifications with profile data
+  const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
+    ...notification,
+    profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
+  }));
+
+  return notificationsWithProfiles;
 };
 
 /**

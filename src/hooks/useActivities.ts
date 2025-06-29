@@ -15,14 +15,38 @@ import { Activity, ActivityType, ActivityMetadata } from "@/utils/queries/activi
 export type { Activity, ActivityType, ActivityMetadata };
 
 /**
- * Optimized activity fetching function
+ * Helper function to safely cast metadata from Json to ActivityMetadata
+ * This handles the type incompatibility between database Json type and our TypeScript interface
+ */
+const normalizeMetadata = (metadata: any): ActivityMetadata | null => {
+  if (!metadata) return null;
+  
+  // If metadata is a string, try to parse it as JSON
+  if (typeof metadata === 'string') {
+    try {
+      return JSON.parse(metadata) as ActivityMetadata;
+    } catch {
+      return null;
+    }
+  }
+  
+  // If it's already an object, cast it directly
+  if (typeof metadata === 'object') {
+    return metadata as ActivityMetadata;
+  }
+  
+  return null;
+};
+
+/**
+ * Optimized activity fetching function with proper type casting
  * Combines all the complex logic from multiple services into one efficient query
  */
 const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[]> => {
   if (!neighborhoodId) return [];
   
   // Single optimized query with all necessary joins
-  const { data: activities, error } = await supabase
+  const { data: rawActivities, error } = await supabase
     .from('activities')
     .select(`
       id,
@@ -46,13 +70,20 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
 
   if (error) throw error;
   
-  // Filter out deleted items with proper type checking
-  return (activities || []).filter(activity => {
-    if (!activity.metadata) return true;
-    // Safe type checking for metadata
-    const metadata = activity.metadata as any;
-    return !metadata?.deleted;
-  });
+  // Transform raw activities to properly typed Activity objects
+  const activities: Activity[] = (rawActivities || [])
+    .map(rawActivity => ({
+      ...rawActivity,
+      metadata: normalizeMetadata(rawActivity.metadata), // Safe type casting
+      profiles: rawActivity.profiles || { display_name: null, avatar_url: null }
+    }))
+    .filter(activity => {
+      // Filter out deleted items with proper type checking
+      const metadata = activity.metadata;
+      return !metadata?.deleted;
+    });
+
+  return activities;
 };
 
 /**
