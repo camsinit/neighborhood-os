@@ -51,13 +51,13 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
   return (
     <>
       <Card 
-        className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="w-80 h-96 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col"
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
-        {/* Image Section */}
+        {/* Image Section - Fixed height */}
         {item.image_url && (
-          <div className="aspect-video overflow-hidden">
+          <div className="h-48 overflow-hidden flex-shrink-0">
             <img
               src={item.image_url}
               alt={item.title}
@@ -66,31 +66,32 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
           </div>
         )}
 
-        <div className="p-4">
+        {/* Content Section - Flexible height with consistent padding */}
+        <div className="p-4 flex flex-col flex-1">
           {/* Header with title and urgency */}
           <div className="flex items-start justify-between gap-3 mb-3">
-            <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 leading-tight flex-1 line-clamp-2">
               {item.title}
             </h3>
             {item.urgency && (
               <Badge 
                 variant="outline" 
-                className={`text-xs font-medium ${getUrgencyColor(item.urgency)}`}
+                className={`text-xs font-medium flex-shrink-0 ${getUrgencyColor(item.urgency)}`}
               >
                 {item.urgency}
               </Badge>
             )}
           </div>
 
-          {/* Description */}
+          {/* Description - Limited to 2 lines */}
           {item.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+            <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-shrink-0">
               {item.description}
             </p>
           )}
 
           {/* Category and Condition */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 flex-shrink-0">
             {item.goods_category && (
               <Badge variant="secondary" className="text-xs">
                 {item.goods_category}
@@ -103,8 +104,11 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
             )}
           </div>
 
+          {/* Spacer to push footer to bottom */}
+          <div className="flex-1"></div>
+
           {/* Provider Info */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4 flex-shrink-0">
             <Avatar className="h-8 w-8">
               <AvatarImage src={item.profiles?.avatar_url} alt={item.profiles?.display_name} />
               <AvatarFallback>
@@ -122,7 +126,7 @@ const AvailableGoodsCard = ({ item, onContact, onClick }: AvailableGoodsCardProp
           </div>
 
           {/* Footer with availability and action */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Clock className="h-3 w-3" />
               Available until {format(new Date(item.valid_until), 'MMM d')}
