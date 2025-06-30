@@ -70,7 +70,7 @@ export function HeroSection({
             neighborhoodOS
           </h1>
 
-          <p className="text-md relative z-10 max-w-[550px] font-medium text-muted-foreground sm:text-xl">The open-source Nextdoor replacement to create a more caring neighborhood</p>
+          <p className="text-md relative z-10 max-w-[550px] font-medium text-muted-foreground sm:text-xl">Your operating system for a more caring neighborhood.</p>
 
           {actions.length > 0 && <div className="relative z-10 flex justify-center gap-4">
               {actions.map((action, index) => <Button key={index} variant={action.variant || "default"} size="lg" asChild>
