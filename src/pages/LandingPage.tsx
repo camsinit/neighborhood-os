@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
 import { Button } from "@/components/ui/button";
 import Features from "@/components/landing/Features";
+import { Feature108 } from "@/components/ui/shadcnblocks-com-feature108";
 import { Link } from "react-router-dom";
 
 /**
@@ -59,7 +60,10 @@ const LandingPage = () => {
         }} 
       />
       
-      {/* Features section - Added below the hero section */}
+      {/* Feature108 component - New tabbed feature section */}
+      <Feature108 />
+      
+      {/* Features section - Added below the Feature108 component */}
       <Features />
       
       {/* You could add more sections here for testimonials, etc. */}
