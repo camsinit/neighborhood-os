@@ -54,7 +54,7 @@ const LandingPage = () => {
         actions={[]} 
         waitlistForm={<WaitlistForm />} 
         image={{
-          src: "/lovable-uploads/b6e45c1b-fed2-45a6-aa5d-4be080111ddd.png",
+          src: "/lovable-uploads/ce6d7ca5-f300-40dd-95ff-fd2e261a3165.png",
           alt: "Neighborhood dashboard interface showing Quick Actions and activity feed"
         }} 
       />
