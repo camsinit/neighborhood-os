@@ -59,7 +59,7 @@ const LandingPage = () => {
         }} 
       />
       
-      {/* Features section - Added below the hero section */}
+      {/* Features section with accordion - Added directly below hero */}
       <Features />
       
       {/* You could add more sections here for testimonials, etc. */}
