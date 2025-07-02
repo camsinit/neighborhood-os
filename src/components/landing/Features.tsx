@@ -45,12 +45,6 @@ const Features = () => {
     },
     {
       id: 6,
-      title: "Care Requests",
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=600&h=400&fit=crop",
-      description: "Request or offer help during challenging times, from meal trains to rides for medical appointments. Create a caring community where neighbors support each other.",
-    },
-    {
-      id: 7,
       title: "Neighbors Directory",
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
       description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share. Transform your neighborhood from strangers to friends.",
