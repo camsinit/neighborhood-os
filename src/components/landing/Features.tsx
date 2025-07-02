@@ -42,7 +42,7 @@ const Features = () => {
       <div className="max-w-3xl mx-auto text-center pt-16 px-8 md:px-16 lg:px-24 py-0">
         <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">How does neighborhoodOS work?</h2>
         <p className="text-muted-foreground text-lg mb-8">
-          Nextdoor became a message board for complaints and missing cats. We help your neighborhood become an invaluable resource for connection, care, and community.
+          Nextdoor became a message board for complaints and missing cats. neighborhoodOS focuses solely on the ingredients that every dreamy neighborhood is made of: connection, care, and community.
         </p>
       </div>
       
