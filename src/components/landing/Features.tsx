@@ -15,36 +15,30 @@ const Features = () => {
   const neighborhoodFeatures = [
     {
       id: 1,
-      title: "Home Dashboard",
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=600&h=400&fit=crop",
-      description: "One page for all the activity happening across your neighborhood. Ask questions to our AI assistant to find what you're looking for. See events, safety updates, and community discussions all in one place.",
-    },
-    {
-      id: 2,
       title: "Community Calendar",
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
       description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality. Never miss another community event and build stronger relationships with your neighbors.",
     },
     {
-      id: 3,
+      id: 2,
       title: "Safety Updates",
       image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop",
       description: "Share and receive important safety information with neighbors, from suspicious activity to lost pets. Keep your community informed and create a safer environment for everyone.",
     },
     {
-      id: 4,
+      id: 3,
       title: "Skills Exchange",
       image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
       description: "Offer your talents to neighbors or find help with projects, from gardening advice to language lessons. Build a community where everyone's skills are valued and shared.",
     },
     {
-      id: 5,
+      id: 4,
       title: "Goods Exchange",
       image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop",
       description: "Reduce waste by sharing items like ladders or cake pans that aren't used daily. See what's available nearby and contribute to a more sustainable neighborhood.",
     },
     {
-      id: 6,
+      id: 5,
       title: "Neighbors Directory",
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
       description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share. Transform your neighborhood from strangers to friends.",
