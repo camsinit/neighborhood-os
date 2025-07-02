@@ -94,7 +94,7 @@ export function HeroSection({
             }} />
               
               <Mockup type="responsive">
-                <img src={image.src} alt={image.alt} width={1248} height={765} className="w-[calc(100%+160px)] h-auto object-contain rounded-2xl drop-shadow-xl relative z-10" />
+                <img src={image.src} alt={image.alt} width={1248} height={765} className="w-[calc(100%+160px)] h-auto object-contain rounded-2xl drop-shadow-xl relative z-10 scale-[1.3]" />
               </Mockup>
             </div>
           </div>
