@@ -62,7 +62,10 @@ const LandingPage = () => {
       {/* Features section with accordion - Added directly below hero */}
       <Features />
       
-      {/* You could add more sections here for testimonials, etc. */}
+      {/* Footer with credits */}
+      <footer className="py-8 text-center text-muted-foreground">
+        <p>Made with ❤️ in Oakland by <a href="https://x.com/camsinit" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cam</a></p>
+      </footer>
     </div>
   );
 };
