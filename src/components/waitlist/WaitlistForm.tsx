@@ -92,20 +92,20 @@ const WaitlistForm = () => {
     <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 h-[77px] p-4 bg-gradient-to-b from-gray-100 to-white rounded-[30px]">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-10 text-base rounded-[30px]"
+            className="flex-1 h-12 text-base"
             required
           />
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="h-10 px-8 text-base font-medium rounded-[30px]"
+            className="h-12 px-8 text-base font-medium"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
