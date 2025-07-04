@@ -92,7 +92,7 @@ const WaitlistForm = () => {
     <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 h-20 p-4 bg-gradient-to-b from-gray-100 to-white rounded-[30px]">
+        <div className="flex flex-col sm:flex-row gap-3 h-[77px] p-4 bg-gradient-to-b from-gray-100 to-white rounded-[30px]">
           <Input
             type="email"
             placeholder="Enter your email"
