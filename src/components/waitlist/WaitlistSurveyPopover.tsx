@@ -64,8 +64,7 @@ const WaitlistSurveyPopover = ({
     neighborhoodName: "",
     city: "",
     state: "",
-    neighborsToOnboard: 1,
-    // Default to 1 instead of 0
+    neighborsToOnboard: 0,
     aiCodingExperience: "",
     openSourceInterest: ""
   });
@@ -146,7 +145,7 @@ const WaitlistSurveyPopover = ({
       return formData.email && formData.firstName && formData.lastName && formData.neighborhoodName && formData.city && formData.state;
     } else {
       // Additional questions page - require all fields
-      return formData.neighborsToOnboard > 0 && formData.aiCodingExperience && formData.openSourceInterest;
+      return formData.neighborsToOnboard >= 0 && formData.aiCodingExperience && formData.openSourceInterest;
     }
   };
 
@@ -204,7 +203,7 @@ const WaitlistSurveyPopover = ({
       {/* Number of neighbors */}
       <div>
         <Label htmlFor="neighborsCount">If you had an account today, how many neighbors could you text an invite code to today?</Label>
-        <Input id="neighborsCount" type="number" min="0" max="100" value={formData.neighborsToOnboard} onChange={e => handleInputChange('neighborsToOnboard', parseInt(e.target.value) || 1)} placeholder="Enter a number" className="mt-2" />
+        <Input id="neighborsCount" type="number" min="0" max="100" value={formData.neighborsToOnboard} onChange={e => handleInputChange('neighborsToOnboard', parseInt(e.target.value) || 0)} placeholder="0" className="mt-2" />
       </div>
 
       {/* AI Coding Experience */}
