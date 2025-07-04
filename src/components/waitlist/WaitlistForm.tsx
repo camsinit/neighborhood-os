@@ -95,11 +95,12 @@ const WaitlistForm = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <Input
             type="email"
-            placeholder="Enter your email"
+            placeholder="Your Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base rounded-[30px]"
+            className="flex-1 text-base rounded-[30px] text-right pr-3"
+            style={{ height: '58px' }}
             required
           />
           <Button 
