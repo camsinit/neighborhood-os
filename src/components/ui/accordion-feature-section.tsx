@@ -83,9 +83,7 @@ const Feature197 = ({
                     </h6>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <p className="mt-3 text-muted-foreground">
-                      Most neighborhood gatherings are low-key, low-effort, and just need a simple place for people to RSVP to and get reminders from. That's exactly what our Calendar page is for.
-                    </p>
+                    <p className="mt-3 text-muted-foreground">What feels better than giving old things a new home? Knowing the people who you give it to! Enable gifting at a hyper-local level and turn old things into new connections with your neighbors.</p>
                     {/* Show image on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
                       <img src={tab.image} alt={tab.title} className="h-full max-h-80 w-full rounded-md object-cover" />
