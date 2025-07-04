@@ -93,14 +93,14 @@ const WaitlistForm = () => {
     <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-full border border-gray-200">
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base bg-white border border-gray-200"
+            className="flex-1 h-12 text-base bg-transparent border-0 rounded-full focus:ring-0 focus:outline-none"
             required
           />
           <Button 
