@@ -90,22 +90,22 @@ const WaitlistForm = () => {
 
   return (
     <>
-      {/* Main waitlist form */}
+      {/* Main waitlist form with pill-shaped design */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
+        <div className="flex items-center bg-gray-100 rounded-full p-2 max-w-md mx-auto">
+          <input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base"
+            className="flex-1 bg-transparent border-none outline-none px-4 py-2 text-base placeholder:text-muted-foreground disabled:opacity-50"
             required
           />
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="h-12 px-8 text-base font-medium"
+            className="h-10 px-6 text-base font-medium rounded-full flex-shrink-0"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
