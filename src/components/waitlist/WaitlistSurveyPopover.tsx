@@ -249,7 +249,7 @@ const WaitlistSurveyPopover = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            
+            <span>Tell us more about yourself</span>
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
@@ -257,7 +257,10 @@ const WaitlistSurveyPopover = ({
         </DialogHeader>
 
         {/* Progress indicator */}
-        
+        <div className="flex justify-center space-x-2 mb-4">
+          <div className={cn("h-2 w-2 rounded-full", currentPage === 0 ? "bg-blue-600" : "bg-gray-300")} />
+          <div className={cn("h-2 w-2 rounded-full", currentPage === 1 ? "bg-blue-600" : "bg-gray-300")} />
+        </div>
 
         {/* Carousel content */}
         <div className="min-h-[400px]">
