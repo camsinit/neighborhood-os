@@ -85,19 +85,16 @@ export function HeroSection({
               {waitlistForm}
             </div>}
 
-          <div className="relative pt-8 w-fit mx-auto mb-16">
-            <div className="relative p-8 rounded-[20px] overflow-hidden" style={{
-              background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
-              backgroundSize: "200% 200%"
-            }}>
-              <div className="absolute inset-0 rounded-[20px] blur-2xl opacity-40" style={{
+          <div className="relative pt-8 w-full max-w-3xl mb-16">
+            <div className="relative px-8 pb-8">
+              <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40" style={{
               background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
               transform: "scale(1.05)",
               zIndex: 0
             }} />
               
               <Mockup type="responsive">
-                <img src="/lovable-uploads/f90db1c8-97ab-4bbc-8abd-5028d865c6e4.png" alt="Neighborhood dashboard interface showing Quick Actions and activity feed" width={1248} height={765} className="w-[calc(100%+160px)] h-auto object-contain rounded-[20px] drop-shadow-xl relative z-10 scale-[1.3] pt-[40px]" />
+                <img src="/lovable-uploads/f90db1c8-97ab-4bbc-8abd-5028d865c6e4.png" alt="Neighborhood dashboard interface showing Quick Actions and activity feed" width={1248} height={765} className="w-[calc(100%+160px)] h-auto object-contain rounded-t-2xl drop-shadow-xl relative z-10 scale-[1.3] pt-[40px]" />
               </Mockup>
             </div>
           </div>

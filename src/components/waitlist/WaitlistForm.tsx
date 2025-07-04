@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { StarBorder } from "@/components/ui/star-border";
 import WaitlistSurveyPopover from "./WaitlistSurveyPopover";
 
 /**
@@ -93,20 +92,20 @@ const WaitlistForm = () => {
     <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-full border border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base bg-white border border-gray-300 rounded-full focus:ring-0 focus:outline-none focus:border-gray-400"
+            className="flex-1 h-12 text-base"
             required
           />
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="h-12 px-8 text-base font-medium rounded-full bg-blue-500 hover:bg-blue-600 text-white shrink-0"
+            className="h-12 px-8 text-base font-medium"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
