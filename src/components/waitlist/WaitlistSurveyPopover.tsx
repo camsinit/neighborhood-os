@@ -142,8 +142,8 @@ const WaitlistSurveyPopover = ({
    */
   const canProceed = () => {
     if (currentPage === 0) {
-      // Essential info page - require all fields
-      return formData.firstName && formData.lastName && formData.neighborhoodName && formData.city && formData.state;
+      // Essential info page - require all fields including email
+      return formData.email && formData.firstName && formData.lastName && formData.neighborhoodName && formData.city && formData.state;
     } else {
       // Additional questions page - require all fields
       return formData.neighborsToOnboard > 0 && formData.aiCodingExperience && formData.openSourceInterest;
@@ -155,10 +155,10 @@ const WaitlistSurveyPopover = ({
    */
    const renderEssentialInfoPage = () => <div className="space-y-4">
 
-      {/* Email field - pre-populated and disabled */}
+      {/* Email field - editable */}
       <div>
         <Label htmlFor="email">Email Address</Label>
-        <Input id="email" type="email" value={formData.email} disabled className="bg-gray-100" />
+        <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange('email', e.target.value)} placeholder="Enter your email address" />
       </div>
 
       {/* Name fields */}
