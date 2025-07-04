@@ -84,7 +84,7 @@ const Feature197 = ({
                   </AccordionTrigger>
                   <AccordionContent>
                     <p className="mt-3 text-muted-foreground">
-                      {tab.description}
+                      Most neighborhood gatherings are low-key, low-effort, and just need a simple place for people to RSVP to and get reminders from. That's exactly what our Calendar page is for.
                     </p>
                     {/* Show image on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
