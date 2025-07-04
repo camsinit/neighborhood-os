@@ -91,7 +91,7 @@ const WaitlistForm = () => {
 
   return (
     <>
-      {/* Main waitlist form with special border effects */}
+      {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <Input
@@ -100,18 +100,16 @@ const WaitlistForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base bg-white"
+            className="flex-1 h-12 text-base bg-white border border-gray-200"
             required
           />
-          <StarBorder 
-            as="button"
+          <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="h-12 px-8 text-base font-medium"
-            speed="4s"
+            className="h-12 px-8 text-base font-medium rounded-full bg-blue-500 hover:bg-blue-600 text-white"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
-          </StarBorder>
+          </Button>
         </div>
       </form>
 
