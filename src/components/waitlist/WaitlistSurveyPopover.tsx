@@ -203,7 +203,7 @@ const WaitlistSurveyPopover = ({
 
       {/* Number of neighbors */}
       <div>
-        <Label htmlFor="neighborsCount">How many neighbors would you feel comfortable onboarding onto neighborhoodOS?</Label>
+        <Label htmlFor="neighborsCount">If you had an account today, how many neighbors could you text an invite code to today?</Label>
         <Input id="neighborsCount" type="number" min="0" max="100" value={formData.neighborsToOnboard} onChange={e => handleInputChange('neighborsToOnboard', parseInt(e.target.value) || 1)} placeholder="Enter a number" className="mt-2" />
       </div>
 
@@ -260,7 +260,7 @@ const WaitlistSurveyPopover = ({
         </div>
 
         {/* Carousel content */}
-        <div className="min-h-[300px]">
+        <div className="min-h-[300px] py-0">
           {currentPage === 0 ? renderEssentialInfoPage() : renderAdditionalQuestionsPage()}
         </div>
 
