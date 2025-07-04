@@ -9,6 +9,7 @@ import { SkillCategory, SkillWithProfile } from '../types/skillTypes';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, getInvalidationKeys } from '@/utils/queryKeys';
+import ShareButton from '@/components/ui/share-button';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -29,6 +30,8 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
+  // Add state to track hover for share button
+  const [isHovering, setIsHovering] = useState(false);
 
   // Hook for skill operations (delete functionality) with success callback using centralized keys
   const queryClient = useQueryClient();
@@ -76,6 +79,8 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
       data-skill-id={skill.id}
       className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
       onClick={() => !isOwner && setIsContributeDialogOpen(true)}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
       {/* User profile and skill title */}
       <div className="flex items-center gap-3 flex-grow">
@@ -87,6 +92,18 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
           <h4 className="font-medium text-gray-900">{skill.title}</h4>
         </div>
       </div>
+      
+      {/* Share button that shows on hover - positioned to avoid conflicts with owner actions */}
+      {isHovering && !isOwner && (
+        <div className="absolute right-20 top-1/2 transform -translate-y-1/2 z-10">
+          <ShareButton
+            contentType="skills"
+            contentId={skill.id}
+            neighborhoodId={skill.neighborhood_id}
+            className="bg-white hover:bg-gray-50 border border-gray-200"
+          />
+        </div>
+      )}
       
       {/* Category tag that hides on hover */}
       <Badge 

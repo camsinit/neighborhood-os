@@ -11,6 +11,7 @@ import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import ShareButton from "@/components/ui/share-button";
 
 /**
  * EventCard component displays an event in the calendar
@@ -38,6 +39,8 @@ const EventCard = ({
   const [isHovering, setIsHovering] = useState(false);
   // Add state to control the Sheet open state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  // Add state to track hover specifically for share button
+  const [isCardHovering, setIsCardHovering] = useState(false);
 
   // Format display time using the neighborhood timezone
   const displayTime = formatInNeighborhoodTimezone(parseISO(event.time), 'h:mm a', neighborhoodTimezone);
@@ -144,9 +147,28 @@ const EventCard = ({
   const eventPreview = <div 
       data-event-id={event.id} 
       className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
-      onMouseEnter={() => setIsHovering(true)} 
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => {
+        setIsHovering(true);
+        setIsCardHovering(true);
+      }} 
+      onMouseLeave={() => {
+        setIsHovering(false);
+        setIsCardHovering(false);
+      }}
     >
+      {/* Share button in top right corner - shows on hover */}
+      {isCardHovering && (
+        <div className="absolute top-1 right-1 z-10">
+          <ShareButton
+            contentType="events"
+            contentId={event.id}
+            neighborhoodId={event.neighborhood_id}
+            className="bg-white/90 hover:bg-white text-gray-600 hover:text-gray-900"
+            size="sm"
+          />
+        </div>
+      )}
+
       {/* Host edit button - only shows when hovering on events you created */}
       {isHost && isHovering}
       

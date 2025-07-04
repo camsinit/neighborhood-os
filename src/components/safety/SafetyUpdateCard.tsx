@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { AlertTriangle, Construction, Eye, User } from "lucide-react";
 import { format } from "date-fns";
 import { generateDataAttributes } from "@/utils/dataAttributes";
+import ShareButton from "@/components/ui/share-button";
+import { useState } from "react";
 
 interface SafetyUpdateCardProps {
   update: any;
@@ -15,6 +17,8 @@ const SafetyUpdateCard = ({
   update,
   onClick
 }: SafetyUpdateCardProps) => {
+  // Add state to track hover for share button
+  const [isHovering, setIsHovering] = useState(false);
   // Helper function to get tag color based on type
   const getTypeStyles = (type: string) => {
     switch (type) {
@@ -57,10 +61,24 @@ const SafetyUpdateCard = ({
 
   return (
     <Card 
-      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 ${typeStyles.border}`} 
+      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
       onClick={onClick}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
       {...dataAttributes} // Apply data attributes for highlighting
     >
+      {/* Share button in top right corner - shows on hover */}
+      {isHovering && (
+        <div className="absolute top-2 right-2 z-10">
+          <ShareButton
+            contentType="safety"
+            contentId={update.id}
+            neighborhoodId={update.neighborhood_id}
+            className="bg-white hover:bg-gray-50"
+          />
+        </div>
+      )}
+
       <div className="flex items-start gap-4">
         <Avatar className="h-10 w-10">
           <AvatarImage src={update.profiles?.avatar_url} alt={update.profiles?.display_name || 'User'} />

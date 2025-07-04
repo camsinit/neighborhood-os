@@ -653,6 +653,45 @@ export type Database = {
           },
         ]
       }
+      shared_items: {
+        Row: {
+          content_id: string
+          content_type: Database["public"]["Enums"]["shareable_content_type"]
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          neighborhood_id: string
+          share_code: string
+          shared_by: string
+          view_count: number
+        }
+        Insert: {
+          content_id: string
+          content_type: Database["public"]["Enums"]["shareable_content_type"]
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          neighborhood_id: string
+          share_code: string
+          shared_by: string
+          view_count?: number
+        }
+        Update: {
+          content_id?: string
+          content_type?: Database["public"]["Enums"]["shareable_content_type"]
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          neighborhood_id?: string
+          share_code?: string
+          shared_by?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       skill_contributors: {
         Row: {
           availability: string | null
@@ -1005,6 +1044,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: Json
       }
+      generate_share_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_activities_safe: {
         Args: { user_uuid: string; limit_count?: number }
         Returns: {
@@ -1186,6 +1229,7 @@ export type Database = {
         | "goods"
         | "skills"
         | "neighbor_welcome"
+      shareable_content_type: "events" | "safety" | "skills" | "goods"
       user_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -1333,6 +1377,7 @@ export const Constants = {
         "skills",
         "neighbor_welcome",
       ],
+      shareable_content_type: ["events", "safety", "skills", "goods"],
       user_role: ["super_admin", "admin", "moderator", "user"],
     },
   },

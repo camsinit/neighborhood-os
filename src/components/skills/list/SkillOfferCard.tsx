@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
 import SkillContactPopover from '../SkillContactPopover';
+import ShareButton from '@/components/ui/share-button';
+import { useState } from 'react';
 
 /**
  * SkillOfferCard - The compact card showing an offered skill
@@ -40,6 +42,8 @@ const SkillOfferCard = ({
   onRequestSkill,
   onClick 
 }: SkillOfferCardProps) => {
+  // Add state to track hover for share button
+  const [isHovering, setIsHovering] = useState(false);
   // Get the category colors from our map, fallback to technology if not found
   const categoryStyle = categoryColors[skill.skill_category as SkillCategory] || categoryColors.technology;
 
@@ -48,6 +52,8 @@ const SkillOfferCard = ({
       data-skill-id={skill.id}
       className="flex items-center p-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer relative group"
       onClick={onClick}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
       {/* User profile and skill title */}
       <div className="flex items-center gap-3 flex-grow">
@@ -59,6 +65,18 @@ const SkillOfferCard = ({
           <h4 className="font-medium text-gray-900">{skill.title}</h4>
         </div>
       </div>
+      
+      {/* Share button that shows on hover */}
+      {isHovering && !isOwner && (
+        <div className="absolute right-20 top-1/2 transform -translate-y-1/2 z-10">
+          <ShareButton
+            contentType="skills"
+            contentId={skill.id}
+            neighborhoodId={skill.neighborhood_id}
+            className="bg-white hover:bg-gray-50 border border-gray-200"
+          />
+        </div>
+      )}
       
       {/* Category tag that hides on hover */}
       <Badge 
