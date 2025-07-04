@@ -99,7 +99,7 @@ const WaitlistForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 text-base rounded-[30px] text-right pr-3"
+            className="flex-1 text-base rounded-[30px] pl-[15px]"
             style={{ height: '58px' }}
             required
           />
