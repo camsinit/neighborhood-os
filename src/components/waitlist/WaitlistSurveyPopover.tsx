@@ -153,11 +153,7 @@ const WaitlistSurveyPopover = ({
   /**
    * Render the essential info page (page 0)
    */
-  const renderEssentialInfoPage = () => <div className="space-y-4">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold mb-2">Neighborhood Information</h3>
-        
-      </div>
+   const renderEssentialInfoPage = () => <div className="space-y-4">
 
       {/* Email field - pre-populated and disabled */}
       <div>
@@ -249,10 +245,11 @@ const WaitlistSurveyPopover = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
+            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Neighborhood Information</h3>
+            <div></div>
           </DialogTitle>
         </DialogHeader>
 
