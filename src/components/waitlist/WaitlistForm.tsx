@@ -90,29 +90,25 @@ const WaitlistForm = () => {
 
   return (
     <>
-      {/* Main waitlist form with pill-shaped design */}
+      {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex items-center justify-center bg-gradient-to-r from-gray-50 to-gray-100 rounded-full px-4 max-w-lg mx-auto">
-          <input
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 bg-white border border-gray-300 py-2 px-4 text-base text-gray-700 placeholder:text-gray-400 rounded-l-full border-r-0 outline-none focus:ring-0 disabled:opacity-50"
-            style={{ borderColor: '#e5e7eb', color: '#374151' }}
+            className="flex-1 h-12 text-base"
             required
           />
-          <button
+          <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="py-2 px-4 text-base font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-r-full cursor-pointer transition-colors duration-200 disabled:opacity-50 border-l-0"
-            style={{ backgroundColor: isSubmitting ? '#3b82f6' : '#3b82f6' }}
-            onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = '#2563eb')}
-            onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = '#3b82f6')}
+            className="h-12 px-8 text-base font-medium"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
-          </button>
+          </Button>
         </div>
       </form>
 
