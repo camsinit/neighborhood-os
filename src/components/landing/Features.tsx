@@ -13,7 +13,7 @@ const Features = () => {
   // Using placeholder images that can be replaced later
   const neighborhoodFeatures = [{
     id: 1,
-    title: "Community Calendar",
+    title: "Gatherings",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
     description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality. Never miss another community event and build stronger relationships with your neighbors."
   }, {
