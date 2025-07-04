@@ -197,8 +197,8 @@ const WaitlistSurveyPopover = ({
    */
   const renderAdditionalQuestionsPage = () => <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold mb-2">Additional Questions</h3>
-        <p className="text-gray-600">Help us prioritize onboarding and provide better support</p>
+        
+        
       </div>
 
       {/* Number of neighbors */}
