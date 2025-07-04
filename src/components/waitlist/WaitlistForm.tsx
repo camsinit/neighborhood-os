@@ -100,13 +100,13 @@ const WaitlistForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 h-12 text-base bg-transparent border-0 rounded-full focus:ring-0 focus:outline-none"
+            className="flex-1 h-12 text-base bg-white border border-gray-300 rounded-full focus:ring-0 focus:outline-none focus:border-gray-400"
             required
           />
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            className="h-12 px-8 text-base font-medium rounded-full bg-blue-500 hover:bg-blue-600 text-white"
+            className="h-12 px-8 text-base font-medium rounded-full bg-blue-500 hover:bg-blue-600 text-white shrink-0"
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
