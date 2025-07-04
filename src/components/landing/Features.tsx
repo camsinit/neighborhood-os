@@ -41,7 +41,7 @@ const Features = () => {
       {/* Header section with title and description */}
       <div className="max-w-4xl mx-auto text-center pt-16 px-8 md:px-16 lg:px-24 py-0">
         <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">What's a neighborhood operating system?</h2>
-        <p className="text-muted-foreground text-lg mb-8">An easy, unified system to coordinate the care behind every connected neighborhood</p>
+        <p className="text-muted-foreground text-lg mb-8">It's an easy, unified system to coordinate the care behind every connected neighborhood</p>
       </div>
       
       {/* Accordion feature section */}
