@@ -153,7 +153,7 @@ const WaitlistSurveyPopover = ({
   /**
    * Render the essential info page (page 0)
    */
-   const renderEssentialInfoPage = () => <div className="space-y-4">
+  const renderEssentialInfoPage = () => <div className="space-y-4">
 
       {/* Email field - editable */}
       <div>
@@ -248,7 +248,7 @@ const WaitlistSurveyPopover = ({
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
-            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Neighborhood Information</h3>
+            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Additional Information</h3>
             <div></div>
           </DialogTitle>
         </DialogHeader>
