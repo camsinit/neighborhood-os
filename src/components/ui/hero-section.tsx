@@ -94,7 +94,7 @@ export function HeroSection({
             }} />
               
               <Mockup type="responsive">
-                <img src="/lovable-uploads/f90db1c8-97ab-4bbc-8abd-5028d865c6e4.png" alt="Neighborhood dashboard interface showing Quick Actions and activity feed" width={1248} height={765} className="w-[calc(100%+160px)] h-auto rounded-[20px] drop-shadow-xl relative z-10 scale-[1.3] pt-[40px] object-fill" />
+                <img src="/lovable-uploads/f90db1c8-97ab-4bbc-8abd-5028d865c6e4.png" alt="Neighborhood dashboard interface showing Quick Actions and activity feed" width={1248} height={765} className="w-[calc(100%+160px)] h-auto rounded-[20px] drop-shadow-xl relative z-10 scale-[1.3] object-cover" />
               </Mockup>
             </div>
           </div>
