@@ -107,7 +107,7 @@ const WaitlistForm = () => {
             type="submit" 
             disabled={isSubmitting}
             className="px-8 text-base font-medium rounded-[30px]"
-            style={{ height: '38px' }}
+            style={{ height: '48px' }}
           >
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
