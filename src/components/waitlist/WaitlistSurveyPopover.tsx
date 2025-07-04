@@ -248,10 +248,7 @@ const WaitlistSurveyPopover = ({
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
-            <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
-              <h3 className="text-lg font-semibold">Neighborhood Information</h3>
-              <p className="text-sm text-gray-600 mt-1">Tell us a bit about your neighborhood</p>
-            </div>
+            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Neighborhood Information</h3>
             <div></div>
           </DialogTitle>
         </DialogHeader>
