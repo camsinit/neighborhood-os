@@ -49,8 +49,8 @@ serve(async (req) => {
       );
     }
 
-    // Validate numeric field
-    if (!neighborsToOnboard || neighborsToOnboard < 0) {
+    // Validate numeric field (allow 0 as a valid value)
+    if (neighborsToOnboard == null || typeof neighborsToOnboard !== 'number' || neighborsToOnboard < 0) {
       return new Response(
         JSON.stringify({ success: false, error: "Invalid neighbor count" }),
         { headers, status: 400 }
