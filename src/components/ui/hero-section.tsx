@@ -81,7 +81,7 @@ export function HeroSection({
                 </Button>)}
             </div>}
 
-          {waitlistForm && <div className="relative z-10 w-full flex justify-center">
+          {waitlistForm && <div className="relative z-10 w-full flex justify-center mb-[30px]">
               {waitlistForm}
             </div>}
 
