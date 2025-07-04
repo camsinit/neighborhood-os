@@ -76,10 +76,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <>{children}</>;
   }
 
-  // If not authenticated, redirect to login page (except for guest onboarding)
+  // If not authenticated, redirect to landing page (except for guest onboarding)
   if (!user || !session) {
-    console.log("[ProtectedRoute] User not authenticated, redirecting to login");
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    console.log("[ProtectedRoute] User not authenticated, redirecting to landing page");
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
   
   // If user needs to complete onboarding, redirect to onboarding page
