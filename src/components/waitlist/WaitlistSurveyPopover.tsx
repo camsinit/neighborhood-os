@@ -259,7 +259,7 @@ const WaitlistSurveyPopover = ({
         </div>
 
         {/* Carousel content */}
-        <div className="min-h-[300px] py-0">
+        <div className="min-h-[300px] py-0 -mt-4">
           {currentPage === 0 ? renderEssentialInfoPage() : renderAdditionalQuestionsPage()}
         </div>
 
