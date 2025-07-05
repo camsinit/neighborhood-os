@@ -20,6 +20,7 @@ import SafetyPage from "./pages/SafetyPage";
 import NeighborsPage from "./pages/NeighborsPage";
 import ModulesPage from "./pages/ModulesPage";
 import DebugPage from "./pages/DebugPage";
+import SharePage from "./pages/SharePage";
 import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
@@ -68,6 +69,9 @@ const App = () => {
                   {/* Join routes - allow unauthenticated access */}
                   <Route path="/join/:inviteCode" element={<JoinPage />} />
                   <Route path="/join" element={<JoinPage />} />
+                  
+                  {/* Share routes - allow unauthenticated access */}
+                  <Route path="/share/:shareCode" element={<SharePage />} />
                   
                   {/* Onboarding - special handling for guest mode */}
                   <Route path="/onboarding" element={<OnboardingPage />} />
