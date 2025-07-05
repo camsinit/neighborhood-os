@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Clock, User, MessageCircle, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateDataAttributes } from '@/utils/dataAttributes';
-import ShareButton from '@/components/ui/share-button';
 // Fix: Import as default export instead of named export
 import ItemRequestDialog from '@/components/items/dialogs/ItemRequestDialog';
 
@@ -26,8 +25,6 @@ const AvailableGoodsCard = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   // Add state to track if card has been clicked to show request button
   const [isCardClicked, setIsCardClicked] = useState(false);
-  // Add state to track hover for share button
-  const [isHovering, setIsHovering] = useState(false);
 
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('goods', item.id);
@@ -102,8 +99,6 @@ const AvailableGoodsCard = ({
         className="w-80 h-[440px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative" 
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         {/* Image Section with overlay and tags - Fixed height */}
         <div className="h-48 overflow-hidden flex-shrink-0 relative">
@@ -132,18 +127,6 @@ const AvailableGoodsCard = ({
                 Available until {format(new Date(item.valid_until), 'MMM d')}
               </div>
             </div>)}
-
-          {/* Share button in top right corner - shows on hover */}
-          {isHovering && (
-            <div className="absolute top-2 right-2 z-10">
-              <ShareButton
-                contentType="goods"
-                contentId={item.id}
-                neighborhoodId={item.neighborhood_id}
-                className="bg-white/90 backdrop-blur-sm hover:bg-white"
-              />
-            </div>
-          )}
 
           {/* Tags in top right corner of image */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">

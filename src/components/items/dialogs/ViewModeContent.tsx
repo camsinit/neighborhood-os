@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2 } from "lucide-react";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { createContactEmailLink } from '../utils/contactUtils';
+import ShareButton from '@/components/ui/share-button';
 
 /**
  * Props for the ViewModeContent component
@@ -69,18 +70,27 @@ const ViewModeContent: React.FC<ViewModeContentProps> = ({
         
         <p className="mb-4">{request.description}</p>
         
-        <div className="flex justify-end mt-4 space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-          >
-            Close
-          </Button>
-          <Button 
-            onClick={() => window.open(createContactEmailLink(request), '_blank')}
-          >
-            {actionButtonText}
-          </Button>
+        <div className="flex justify-between items-center mt-4">
+          <ShareButton
+            contentType="goods"
+            contentId={request.id}
+            neighborhoodId={request.neighborhood_id}
+            size="sm"
+            variant="outline"
+          />
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={() => window.open(createContactEmailLink(request), '_blank')}
+            >
+              {actionButtonText}
+            </Button>
+          </div>
         </div>
       </div>
     </>
