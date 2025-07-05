@@ -84,8 +84,8 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         throw insertError;
       }
 
-      // Create the shareable URL
-      const shareUrl = `${window.location.origin}/share/${shareCode}`;
+      // Create the shareable URL using the fixed domain
+      const shareUrl = `https://neighborhoodos.com/share/${shareCode}`;
 
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
