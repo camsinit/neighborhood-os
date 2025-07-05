@@ -43,16 +43,25 @@ const ViewModeContent: React.FC<ViewModeContentProps> = ({
               Posted by {request.profiles?.display_name || "Anonymous"}
             </DialogDescription>
           </div>
-          {onUpdate && (
-            <Button
+          <div className="flex items-center gap-2">
+            <ShareButton
+              contentType="goods"
+              contentId={request.id}
+              neighborhoodId={request.neighborhood_id}
+              size="sm"
               variant="ghost"
-              size="icon"
-              onClick={onEdit}
-              className="h-8 w-8"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-          )}
+            />
+            {onUpdate && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onEdit}
+                className="h-8 w-8"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </DialogHeader>
       
@@ -70,27 +79,18 @@ const ViewModeContent: React.FC<ViewModeContentProps> = ({
         
         <p className="mb-4">{request.description}</p>
         
-        <div className="flex justify-between items-center mt-4">
-          <ShareButton
-            contentType="goods"
-            contentId={request.id}
-            neighborhoodId={request.neighborhood_id}
-            size="sm"
-            variant="outline"
-          />
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-            >
-              Close
-            </Button>
-            <Button 
-              onClick={() => window.open(createContactEmailLink(request), '_blank')}
-            >
-              {actionButtonText}
-            </Button>
-          </div>
+        <div className="flex justify-end mt-4 space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
+          <Button 
+            onClick={() => window.open(createContactEmailLink(request), '_blank')}
+          >
+            {actionButtonText}
+          </Button>
         </div>
       </div>
     </>
