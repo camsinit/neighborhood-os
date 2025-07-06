@@ -162,7 +162,7 @@ export const ActivityDebugPanel = () => {
     }
   };
 
-  // Clean up duplicate activities
+  // Clean up duplicate activities with improved error handling
   const cleanupDuplicates = async () => {
     if (!debugResults?.duplicateAnalysis?.duplicateGroups?.length) {
       toast.error('No duplicates found to clean up');
@@ -173,9 +173,10 @@ export const ActivityDebugPanel = () => {
       logger.debug('Cleaning up duplicate activities...');
       
       let cleanedCount = 0;
+      let errorCount = 0;
       
       for (const group of debugResults.duplicateAnalysis.duplicateGroups) {
-        // Keep the first activity, delete the rest
+        // Keep the first activity (oldest), delete the newer duplicates
         const toDelete = group.activities.slice(1);
         
         for (const activity of toDelete) {
@@ -186,12 +187,24 @@ export const ActivityDebugPanel = () => {
             
           if (!error) {
             cleanedCount++;
+            logger.debug(`Deleted duplicate activity: ${activity.id}`);
+          } else {
+            errorCount++;
+            logger.error(`Failed to delete activity ${activity.id}:`, error);
           }
         }
       }
       
-      toast.success(`Cleaned up ${cleanedCount} duplicate activities`);
-      analyzeActivities(); // Refresh
+      if (cleanedCount > 0) {
+        toast.success(`Successfully cleaned up ${cleanedCount} duplicate activities`);
+      }
+      
+      if (errorCount > 0) {
+        toast.warning(`${errorCount} duplicates couldn't be deleted due to permissions`);
+      }
+      
+      // Refresh the analysis
+      analyzeActivities();
       
     } catch (error) {
       logger.error('Error cleaning up duplicates:', error);
