@@ -1,7 +1,7 @@
 
 import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { Activity } from "@/hooks/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
@@ -11,6 +11,10 @@ import { HighlightableItemType } from "@/utils/highlight/types";
 import { generateDataAttributes } from "@/utils/dataAttributes";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useUser } from "@supabase/auth-helpers-react";
 
 /**
  * Props for the ActivityItem component
@@ -101,6 +105,7 @@ const ActivityItem = ({
 }: ActivityItemProps) => {
   const navigate = useNavigate();
   const navigationService = createItemNavigationService(navigate);
+  const currentUser = useUser();
   
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
@@ -108,6 +113,10 @@ const ActivityItem = ({
   
   // Check if the content has been deleted
   const isDeleted = activity.metadata?.deleted === true;
+  
+  // Check if user can delete this activity (created by them and within last hour)
+  const canDelete = currentUser?.id === activity.actor_id && 
+    differenceInHours(new Date(), new Date(activity.created_at)) <= 1;
 
   /**
    * Handle click on activity item - uses unified navigation service
@@ -134,6 +143,27 @@ const ActivityItem = ({
       }
     } catch (error) {
       console.error('Error navigating from activity item:', error);
+    }
+  };
+
+  /**
+   * Handle delete activity - marks activity as deleted in database
+   */
+  const handleDeleteActivity = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering item click
+    
+    try {
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('id', activity.id);
+        
+      if (error) throw error;
+      
+      toast.success('Activity removed');
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      toast.error('Failed to remove activity');
     }
   };
 
@@ -194,6 +224,25 @@ const ActivityItem = ({
             {activity.title}
           </p>
         </div>
+
+        {/* Delete button for user's recent activities */}
+        {canDelete && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 mr-2 opacity-60 hover:opacity-100 text-gray-500 hover:text-red-500"
+                onClick={handleDeleteActivity}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remove activity</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
 
         {/* Activity action badge */}
         <Badge 
