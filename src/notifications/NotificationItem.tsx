@@ -4,8 +4,9 @@
  * 
  * Handles all notification types with smart navigation integration
  * Now uses the unified ItemNavigationService for consistent navigation
+ * Features slide-out animation when archiving notifications
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -66,6 +67,9 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
 export function NotificationItem({ notification, variant = 'drawer' }: NotificationItemProps) {
   const navigate = useNavigate();
   const { markAsRead, archive } = useNotificationActions();
+  
+  // State to track if notification is being archived (for animation)
+  const [isArchiving, setIsArchiving] = useState(false);
 
   // Create navigation service instance
   const navigationService = createItemNavigationService(navigate);
@@ -113,16 +117,30 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
     }
   };
 
-  // Handle archive action
+  // Handle archive action with slide-out animation
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     try {
-      await archive(notification.id);
-      toast.success('Notification archived');
+      // Start the slide-out animation
+      setIsArchiving(true);
+      
+      // Wait for animation to complete (500ms as defined in CSS)
+      setTimeout(async () => {
+        try {
+          await archive(notification.id);
+          toast.success('Notification archived');
+        } catch (error) {
+          console.error('Error archiving notification:', error);
+          toast.error('Failed to archive');
+          // Reset animation state on error
+          setIsArchiving(false);
+        }
+      }, 500);
     } catch (error) {
-      console.error('Error archiving notification:', error);
+      console.error('Error starting archive animation:', error);
       toast.error('Failed to archive');
+      setIsArchiving(false);
     }
   };
 
@@ -132,6 +150,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
         p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4
         ${!notification.is_read ? 'bg-blue-50 border-blue-200' : 'bg-white'}
         ${variant === 'popover' ? 'mb-2' : 'mb-3'}
+        ${isArchiving ? 'swipe-out-right' : ''}
       `}
       style={{
         borderLeftColor: themeColor
