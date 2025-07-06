@@ -82,7 +82,7 @@ async function pollDevServer(config: DevServerConfig): Promise<void> {
 
     // Make safe request to dev server
     const response = await safeFetch(devServerUrl, {
-      maxRetries: config.maxRetries,
+      maxRetries: 1, // Reduce retries to prevent infinite loops
       timeout: 3000, // Short timeout for dev server
       method: 'GET'
     });
@@ -91,6 +91,11 @@ async function pollDevServer(config: DevServerConfig): Promise<void> {
       console.log('[DevServer] Successfully connected to development server');
       // Reset retry counters on successful connection
       resetRetryCounters(devServerUrl);
+    } else if (response.status === 404) {
+      // Don't continue polling if dev server doesn't exist
+      console.log('[DevServer] Dev server endpoint not found (404), stopping polling');
+      stopDevServerPolling();
+      return;
     }
 
   } catch (error) {
@@ -98,9 +103,13 @@ async function pollDevServer(config: DevServerConfig): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.warn('[DevServer] Failed to connect to development server:', errorMessage);
     
-    // Check if this looks like a CORS error
+    // Check if this looks like a CORS error or 404 error
     if (errorMessage.includes('CORS') || errorMessage.includes('blocked')) {
       console.warn('[DevServer] CORS error detected - this is normal in some development setups');
+    } else if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+      console.warn('[DevServer] Dev server not found, stopping polling to prevent infinite retries');
+      stopDevServerPolling();
+      return;
     }
   }
 
