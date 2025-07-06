@@ -41,7 +41,9 @@ function SafetyPage() {
         description="Stay informed about safety in your community"
         themeColor="safety"
       >
-        <SafetyUpdates />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+          <SafetyUpdates />
+        </div>
       </ModuleLayout>
 
       {/* Universal sheet management */}

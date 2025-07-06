@@ -129,19 +129,21 @@ function SkillsPage() {
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
         themeColor="skills"
       >
-        <SkillsPageContent
-          view={view}
-          category={category}
-          searchQuery={searchQuery}
-          searchParams={searchParams}
-          searchInputRef={searchInputRef}
-          handleTabChange={handleTabChange}
-          handleCategoryClick={handleCategoryClick}
-          handleBackToCategories={handleBackToCategories}
-          getTypedCategory={getTypedCategory}
-          setSearchParams={setSearchParams}
-          setIsSkillDialogOpen={setIsSkillDialogOpen}
-        />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+          <SkillsPageContent
+            view={view}
+            category={category}
+            searchQuery={searchQuery}
+            searchParams={searchParams}
+            searchInputRef={searchInputRef}
+            handleTabChange={handleTabChange}
+            handleCategoryClick={handleCategoryClick}
+            handleBackToCategories={handleBackToCategories}
+            getTypedCategory={getTypedCategory}
+            setSearchParams={setSearchParams}
+            setIsSkillDialogOpen={setIsSkillDialogOpen}
+          />
+        </div>
       </ModuleLayout>
       
       {/* Unified Add Skill Popover */}

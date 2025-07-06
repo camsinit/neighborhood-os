@@ -37,7 +37,9 @@ function GoodsPage() {
         description="Share items with your neighbors or find what you need"
         themeColor="goods"
       >
-        <GoodsPageContainer />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+          <GoodsPageContainer />
+        </div>
       </ModuleLayout>
       
       {/* Universal sheet management */}

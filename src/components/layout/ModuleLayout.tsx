@@ -68,10 +68,8 @@ const ModuleLayout = ({
       </div>
       
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
-        {/* Main content area - left-aligned container */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
-          {children}
-        </div>
+        {/* Content without automatic container - let children handle their own styling */}
+        {children}
       </div>
     </div>
   );

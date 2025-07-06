@@ -36,7 +36,9 @@ function CalendarPage() {
         description="Upcoming events in your neighborhood"
         themeColor="calendar"
       >
-        <CommunityCalendar />
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+          <CommunityCalendar />
+        </div>
       </ModuleLayout>
 
       {/* Universal sheet management */}
