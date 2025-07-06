@@ -9,9 +9,11 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 import SkillContactPopover from '@/components/skills/SkillContactPopover';
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import SkillSheetContent from '../SkillSheetContent';
 
 /**
  * CategorySkillsList - Simple list format for skills in a category
@@ -30,10 +32,12 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
   const user = useUser();
   const { updateSkillTitle, deleteSkill, isLoading: isUpdating } = useSkillUpdate();
   
-  // State for edit dialog
+  // State for edit dialog and skill sheet
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<{ id: string; title: string } | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<{ title: string; category: SkillCategory } | null>(null);
+  const [skillSheetOpen, setSkillSheetOpen] = useState(false);
 
   // Fetch skills grouped by title to stack profiles for the same skill
   const {
@@ -135,6 +139,14 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
     }
   };
 
+  /**
+   * Handle skill card click - opens the skill detail sheet
+   */
+  const handleSkillClick = (skillTitle: string) => {
+    setSelectedSkill({ title: skillTitle, category: selectedCategory });
+    setSkillSheetOpen(true);
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin" />
@@ -156,7 +168,12 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
     <>
       <div className="space-y-2">
         {skillsData.map((skillGroup, index) => (
-          <div key={index} className="group relative flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white transition-all duration-200">
+          <Sheet key={index} open={skillSheetOpen && selectedSkill?.title === skillGroup.title} onOpenChange={setSkillSheetOpen}>
+            <SheetTrigger asChild>
+              <div 
+                className="group relative flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-white transition-all duration-200 cursor-pointer"
+                onClick={() => handleSkillClick(skillGroup.title)}
+              >
             {/* Skill title on the left */}
             <div className="flex-1">
               <h3 className="font-medium text-gray-900">{skillGroup.title}</h3>
@@ -246,7 +263,17 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
                 </div>
               )}
             </div>
-          </div>
+              </div>
+            </SheetTrigger>
+            
+            {selectedSkill?.title === skillGroup.title && (
+              <SkillSheetContent
+                skillTitle={selectedSkill.title}
+                skillCategory={selectedSkill.category}
+                onOpenChange={setSkillSheetOpen}
+              />
+            )}
+          </Sheet>
         ))}
       </div>
 
