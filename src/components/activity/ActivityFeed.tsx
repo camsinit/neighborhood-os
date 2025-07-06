@@ -6,11 +6,9 @@ import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, RefreshCw, Trash2 } from "lucide-react";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized";
 import { createLogger } from '@/utils/logger';
-import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
-import { supabase } from "@/integrations/supabase/client";
 
 // Create a dedicated logger for this component
 const logger = createLogger('ActivityFeed');
@@ -35,10 +33,6 @@ const ActivityFeed = () => {
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [debugDeleteMode, setDebugDeleteMode] = useState(false);
-  
-  // Check if user is super admin for debug features
-  const { isSuperAdmin } = useSuperAdminAccess();
 
   // Enhanced logging for debugging neighbor join and goods activities
   useEffect(() => {
@@ -119,32 +113,6 @@ const ActivityFeed = () => {
     setSheetOpen(true);
   };
 
-  // Debug: Delete activity function for super admins
-  const handleDeleteActivity = async (activityId: string) => {
-    if (!isSuperAdmin) {
-      toast.error("Only super admins can delete activities");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.rpc('delete_activity_debug', {
-        activity_id: activityId
-      });
-
-      if (error) throw error;
-
-      if (data) {
-        toast.success("Activity deleted successfully");
-        refetch(); // Refresh the activities list
-      } else {
-        toast.error("Failed to delete activity");
-      }
-    } catch (error) {
-      console.error("Error deleting activity:", error);
-      toast.error("Error deleting activity");
-    }
-  };
-
   // Filter out deleted activities and log what we're showing
   const filteredActivities = activities?.filter(activity => {
     const isDeleted = !!activity.metadata?.deleted;
@@ -206,22 +174,7 @@ const ActivityFeed = () => {
 
   // Display the activities with load more button
   return (
-    <>
-      {/* Debug mode toggle for super admins */}
-      {isSuperAdmin && (
-        <div className="flex justify-end mb-4">
-          <Button
-            variant={debugDeleteMode ? "destructive" : "outline"}
-            size="sm"
-            onClick={() => setDebugDeleteMode(!debugDeleteMode)}
-            className="text-xs"
-          >
-            <Trash2 className="h-3 w-3 mr-1" />
-            {debugDeleteMode ? "Exit Debug Mode" : "Debug Delete Mode"}
-          </Button>
-        </div>
-      )}
-      
+    <>      
       <div className="py-2 space-y-4">
         {/* Only render the number of items we want to display */}
         {filteredActivities.slice(0, displayCount).map(activity => (
@@ -229,8 +182,6 @@ const ActivityFeed = () => {
             key={activity.id} 
             activity={activity} 
             onAction={handleActivityAction}
-            debugDeleteMode={debugDeleteMode}
-            onDelete={handleDeleteActivity}
           />
         ))}
         
