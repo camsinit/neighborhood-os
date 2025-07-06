@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, MessageCircle, Calendar, MapPin } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import ShareButton from '@/components/ui/share-button';
 
 interface RequestDetailCardProps {
   request: GoodsExchangeItem;
@@ -32,7 +33,17 @@ const RequestDetailCard: React.FC<RequestDetailCardProps> = ({
   const isUrgent = request.urgency === 'high';
   
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-4 relative">
+      {/* Share button in top right corner */}
+      <div className="absolute top-2 right-2 z-10">
+        <ShareButton
+          contentType="goods"
+          contentId={request.id}
+          neighborhoodId={request.neighborhood_id}
+          size="sm"
+          variant="ghost"
+        />
+      </div>
       {/* Header with user info */}
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
