@@ -32,10 +32,13 @@ export const transformEventFormData = (
     neighborhood_id: neighborhoodId,
     // Use the properly combined date and time
     time: dateTimeStr,
-    // Include these fields only for UI display if they exist in the form data
+    // Include recurring event fields with proper validation
     is_recurring: formData.isRecurring || false,
     recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
-    recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null
+    // Convert recurrence_end_date to proper timestamp format if it exists and is valid
+    recurrence_end_date: formData.isRecurring && formData.recurrenceEndDate && formData.recurrenceEndDate.trim() !== '' 
+      ? new Date(formData.recurrenceEndDate + 'T23:59:59').toISOString()
+      : null
   };
 };
 
@@ -62,9 +65,12 @@ export const transformEventUpdateData = (
     location: formData.location,
     // Use the properly combined date and time
     time: dateTimeStr,
-    // Include these fields for UI display
+    // Include recurring event fields with proper validation  
     is_recurring: formData.isRecurring || false,
     recurrence_pattern: formData.isRecurring ? formData.recurrencePattern : null,
-    recurrence_end_date: formData.isRecurring ? formData.recurrenceEndDate : null
+    // Convert recurrence_end_date to proper timestamp format if it exists and is valid
+    recurrence_end_date: formData.isRecurring && formData.recurrenceEndDate && formData.recurrenceEndDate.trim() !== '' 
+      ? new Date(formData.recurrenceEndDate + 'T23:59:59').toISOString()
+      : null
   };
 };
