@@ -84,6 +84,29 @@ const Feature197 = ({
                   </AccordionTrigger>
                   <AccordionContent>
                     <p className="mt-3 text-muted-foreground">{tab.description}</p>
+                    
+                    {/* Replaces section with placeholder logos */}
+                    <div className="mt-4 flex items-center gap-4">
+                      <span className="font-bold text-foreground">Replaces</span>
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop" 
+                          alt="Service 1" 
+                          className="w-8 h-8 rounded object-cover opacity-60"
+                        />
+                        <img 
+                          src="https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=40&h=40&fit=crop" 
+                          alt="Service 2" 
+                          className="w-8 h-8 rounded object-cover opacity-60"
+                        />
+                        <img 
+                          src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=40&h=40&fit=crop" 
+                          alt="Service 3" 
+                          className="w-8 h-8 rounded object-cover opacity-60"
+                        />
+                      </div>
+                    </div>
+                    
                     {/* Show image on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
                       <img src={tab.image} alt={tab.title} className="h-full max-h-80 w-full rounded-md object-cover" />
