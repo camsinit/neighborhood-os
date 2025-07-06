@@ -6,6 +6,9 @@ import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogN
 import { useSearchParams } from 'react-router-dom'; 
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import { highlightItem } from '@/utils/highlight';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('SafetyPage');
 
 /**
  * SafetyPage Component
@@ -22,12 +25,38 @@ function SafetyPage() {
   // State for dialog controls
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // Effect to handle deep linking to specific safety updates
+  // Enhanced contextual navigation handling
   useEffect(() => {
     const updateId = searchParams.get('updateId');
+    const highlightId = searchParams.get('highlight');
+    const dialogParam = searchParams.get('dialog');
+    
+    // Handle legacy updateId parameter
     if (updateId) {
       highlightItem('safety', updateId);
     }
+    
+    // Handle new highlight parameter
+    if (highlightId) {
+      highlightItem('safety', highlightId);
+    }
+    
+    // Auto-open safety dialog if requested
+    if (highlightId && dialogParam === 'true') {
+      // Delay to ensure safety update is highlighted first
+      setTimeout(() => {
+        const safetyElement = document.querySelector(`[data-safety-id="${highlightId}"]`) as HTMLElement;
+        if (safetyElement) {
+          safetyElement.click(); // Trigger safety detail opening
+          logger.info(`Auto-opened safety dialog for: ${highlightId}`);
+        }
+      }, 1000);
+    }
+    
+    logger.info('Safety page contextual navigation:', {
+      highlight: highlightId,
+      dialog: dialogParam
+    });
   }, [searchParams]);
   
   return (

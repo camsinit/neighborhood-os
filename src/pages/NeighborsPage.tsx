@@ -6,6 +6,9 @@ import { useSearchParams } from 'react-router-dom';
 import { highlightItem } from '@/utils/highlight';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
+import { createLogger } from '@/utils/logger';
+
+const logger = createLogger('NeighborsPage');
 
 /**
  * NeighborsPage Component
@@ -22,12 +25,40 @@ function NeighborsPage() {
   // State for dialog controls - now uses unified invite dialog
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
-  // Effect to handle deep linking to specific neighbor profiles
+  // Enhanced contextual navigation handling
   useEffect(() => {
     const neighborId = searchParams.get('neighborId');
+    const highlightId = searchParams.get('highlight');
+    const profileParam = searchParams.get('profile');
+    const dialogParam = searchParams.get('dialog');
+    
+    // Handle legacy neighborId parameter
     if (neighborId) {
       highlightItem('neighbors', neighborId);
     }
+    
+    // Handle new highlight parameter
+    if (highlightId) {
+      highlightItem('neighbors', highlightId);
+    }
+    
+    // Auto-open neighbor profile if requested
+    if (highlightId && (dialogParam === 'true' || profileParam === 'open')) {
+      // Delay to ensure neighbor is highlighted first
+      setTimeout(() => {
+        const neighborElement = document.querySelector(`[data-neighbor-id="${highlightId}"]`) as HTMLElement;
+        if (neighborElement) {
+          neighborElement.click(); // Trigger neighbor profile opening
+          logger.info(`Auto-opened neighbor profile for: ${highlightId}`);
+        }
+      }, 1000);
+    }
+    
+    logger.info('Neighbors page contextual navigation:', {
+      highlight: highlightId,
+      profile: profileParam,
+      dialog: dialogParam
+    });
   }, [searchParams]);
   
   return (

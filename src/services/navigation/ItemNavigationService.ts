@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { createLogger } from '@/utils/logger';
 import { HighlightableItemType } from '@/utils/highlight/types';
 import { highlightItem } from '@/utils/highlight/highlightItem';
+import { ItemContextService } from './ItemContextService';
 
 // Create a dedicated logger for navigation service
 const logger = createLogger('ItemNavigationService');
@@ -33,7 +34,7 @@ const CONTENT_TYPE_NAMES: Record<HighlightableItemType, string> = {
 };
 
 /**
- * Options for navigation behavior
+ * Options for navigation behavior with enhanced contextual navigation
  */
 interface NavigationOptions {
   /** Whether to show a toast notification when item is found */
@@ -44,6 +45,22 @@ interface NavigationOptions {
   urlParams?: Record<string, string>;
   /** Timeout in milliseconds to wait for element before giving up */
   highlightTimeout?: number;
+  
+  // Enhanced contextual options
+  /** Auto-open item dialog/sheet after highlighting */
+  openDialog?: boolean;
+  /** Navigate to specific category (for skills, goods) */
+  categoryContext?: string;
+  /** Navigate to specific date (for calendar events) */
+  dateContext?: Date;
+  /** Navigate to specific tab (for multi-tab pages) */
+  tabContext?: string;
+  /** Pre-populate search query */
+  searchContext?: string;
+  /** Scroll to specific section */
+  scrollToSection?: string;
+  /** Calendar view preference (week/month) */
+  calendarView?: 'week' | 'month';
 }
 
 /**
@@ -91,12 +108,32 @@ export class ItemNavigationService {
         return { success: false, error };
       }
       
-      // Build URL with parameters including highlight info
+      // Build URL with parameters including highlight info and context
       const searchParams = new URLSearchParams({
         highlight: id,
         type: type,
         ...urlParams
       });
+      
+      // Add contextual parameters
+      if (options.categoryContext) {
+        searchParams.set('category', options.categoryContext);
+      }
+      if (options.dateContext) {
+        searchParams.set('date', options.dateContext.toISOString().split('T')[0]);
+      }
+      if (options.tabContext) {
+        searchParams.set('tab', options.tabContext);
+      }
+      if (options.searchContext) {
+        searchParams.set('q', options.searchContext);
+      }
+      if (options.scrollToSection) {
+        searchParams.set('section', options.scrollToSection);
+      }
+      if (options.calendarView) {
+        searchParams.set('view', options.calendarView);
+      }
       
       const fullRoute = `${route}?${searchParams.toString()}`;
       
@@ -182,8 +219,81 @@ export class ItemNavigationService {
   }
   
   /**
-   * Navigate with context awareness - determines best route based on current page
+   * Enhanced navigation with automatic context fetching
    */
+  async navigateToItemWithContext(
+    type: HighlightableItemType,
+    id: string,
+    options: NavigationOptions = {}
+  ): Promise<NavigationResult> {
+    try {
+      logger.info(`Starting contextual navigation to ${type}: ${id}`);
+      
+      // Fetch item context for enhanced navigation
+      const context = await ItemContextService.fetchItemContext(type, id);
+      
+      if (!context) {
+        logger.warn(`Could not fetch context for ${type}: ${id}, falling back to basic navigation`);
+        return this.navigateToItem(type, id, options);
+      }
+      
+      // Build enhanced navigation options based on context
+      const enhancedOptions: NavigationOptions = {
+        ...options,
+        urlParams: { ...options.urlParams }
+      };
+      
+      // Add context-specific parameters
+      switch (type) {
+        case 'event':
+          if (context.eventDate) {
+            enhancedOptions.dateContext = context.eventDate;
+          }
+          if (context.calendarView) {
+            enhancedOptions.calendarView = context.calendarView;
+          }
+          break;
+          
+        case 'skills':
+          if (context.skillCategory) {
+            enhancedOptions.categoryContext = context.skillCategory;
+          }
+          if (context.skillType) {
+            enhancedOptions.tabContext = context.skillType === 'offer' ? 'offers' : 'requests';
+          }
+          break;
+          
+        case 'goods':
+          if (context.goodsType) {
+            enhancedOptions.tabContext = context.goodsType === 'offer' ? 'offers' : 'needs';
+          }
+          if (context.urgency === 'high') {
+            enhancedOptions.scrollToSection = 'urgent';
+          }
+          break;
+          
+        case 'safety':
+          // Safety updates are chronological, context helps with positioning
+          break;
+          
+        case 'neighbors':
+          if (options.openDialog) {
+            enhancedOptions.urlParams!['profile'] = 'open';
+          }
+          break;
+      }
+      
+      logger.info(`Enhanced navigation options for ${type}:`, enhancedOptions);
+      
+      // Navigate with enhanced context
+      return this.navigateToItem(type, id, enhancedOptions);
+      
+    } catch (error) {
+      logger.error(`Error in contextual navigation for ${type}: ${id}`, error);
+      // Fall back to basic navigation
+      return this.navigateToItem(type, id, options);
+    }
+  }
   async navigateWithContext(
     type: HighlightableItemType,
     id: string,

@@ -13,6 +13,7 @@ import {
   isEqual,
   isSameMonth,
 } from "date-fns";
+import { useSearchParams } from "react-router-dom";
 import AddEventDialog from "./AddEventDialog";
 import { useEvents } from "@/utils/queries/useEvents";
 import CalendarHeader from "./calendar/CalendarHeader";
@@ -39,6 +40,48 @@ const CommunityCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  
+  // Get URL parameters for contextual navigation
+  const [searchParams] = useSearchParams();
+  
+  // Handle contextual navigation from URL parameters
+  useEffect(() => {
+    const urlDate = searchParams.get('date');
+    const urlView = searchParams.get('view') as 'week' | 'month' | null;
+    const highlightId = searchParams.get('highlight');
+    const dialogParam = searchParams.get('dialog');
+    
+    // Set date from URL parameter
+    if (urlDate) {
+      try {
+        const targetDate = new Date(urlDate);
+        if (!isNaN(targetDate.getTime())) {
+          setCurrentDate(targetDate);
+          logger.info(`Calendar set to date from URL: ${urlDate}`);
+        }
+      } catch (error) {
+        logger.error('Invalid date in URL parameter:', urlDate);
+      }
+    }
+    
+    // Set view from URL parameter
+    if (urlView && (urlView === 'week' || urlView === 'month')) {
+      setView(urlView);
+      logger.info(`Calendar set to ${urlView} view from URL`);
+    }
+    
+    // Auto-open event dialog if requested
+    if (highlightId && dialogParam === 'true') {
+      // Delay to ensure event is highlighted first
+      setTimeout(() => {
+        const eventElement = document.querySelector(`[data-event-id="${highlightId}"]`) as HTMLElement;
+        if (eventElement) {
+          eventElement.click(); // Trigger event detail opening
+          logger.info(`Auto-opened event dialog for: ${highlightId}`);
+        }
+      }, 1000);
+    }
+  }, [searchParams]);
   
   // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();

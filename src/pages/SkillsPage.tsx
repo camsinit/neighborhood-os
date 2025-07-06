@@ -37,7 +37,41 @@ function SkillsPage() {
   
   const { setSearchQuery } = useSkillsStore();
   
-  // Set up search from URL params
+  // Enhanced contextual navigation handling
+  useEffect(() => {
+    const urlCategory = searchParams.get('category');
+    const urlTab = searchParams.get('tab');
+    const urlQuery = searchParams.get('q');
+    const highlightId = searchParams.get('highlight');
+    const dialogParam = searchParams.get('dialog');
+    
+    // Set search query from URL
+    if (urlQuery) {
+      setSearchQuery(urlQuery);
+    }
+    
+    // Auto-open skill dialog if requested
+    if (highlightId && dialogParam === 'true') {
+      // Delay to ensure skill is highlighted first
+      setTimeout(() => {
+        const skillElement = document.querySelector(`[data-skill-id="${highlightId}"]`) as HTMLElement;
+        if (skillElement) {
+          skillElement.click(); // Trigger skill detail opening
+          logger.info(`Auto-opened skill dialog for: ${highlightId}`);
+        }
+      }, 1500); // Longer delay for skills to ensure category loads first
+    }
+    
+    logger.info('Skills page contextual navigation:', {
+      category: urlCategory,
+      tab: urlTab,
+      query: urlQuery,
+      highlight: highlightId,
+      dialog: dialogParam
+    });
+  }, [searchParams, setSearchQuery]);
+  
+  // Set up search from URL params (keeping existing functionality)
   useEffect(() => {
     setSearchQuery(searchQuery);
   }, [searchQuery, setSearchQuery]);
