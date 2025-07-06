@@ -21,7 +21,6 @@ interface SkillSheetContentProps {
   skillCategory: SkillCategory;
   onOpenChange?: (open: boolean) => void;
 }
-
 interface SkillProvider {
   user_id: string;
   display_name: string;
@@ -30,9 +29,8 @@ interface SkillProvider {
   availability: string | null;
   skill_id: string;
 }
-
-const SkillSheetContent = ({ 
-  skillTitle, 
+const SkillSheetContent = ({
+  skillTitle,
   skillCategory,
   onOpenChange
 }: SkillSheetContentProps) => {
@@ -52,22 +50,18 @@ const SkillSheetContent = ({
   useEffect(() => {
     const fetchProviders = async () => {
       if (!user) return;
-
       try {
         // Get user's neighborhood
-        const { data: userNeighborhood } = await supabase
-          .from('neighborhood_members')
-          .select('neighborhood_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
-
+        const {
+          data: userNeighborhood
+        } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
         if (!userNeighborhood) return;
 
         // Fetch skills with user profiles
-        const { data: skills, error } = await supabase
-          .from('skills_exchange')
-          .select(`
+        const {
+          data: skills,
+          error
+        } = await supabase.from('skills_exchange').select(`
             id,
             user_id,
             description,
@@ -76,13 +70,7 @@ const SkillSheetContent = ({
               display_name,
               avatar_url
             )
-          `)
-          .eq('neighborhood_id', userNeighborhood.neighborhood_id)
-          .eq('skill_category', skillCategory)
-          .eq('title', skillTitle)
-          .eq('request_type', 'offer')
-          .eq('is_archived', false);
-
+          `).eq('neighborhood_id', userNeighborhood.neighborhood_id).eq('skill_category', skillCategory).eq('title', skillTitle).eq('request_type', 'offer').eq('is_archived', false);
         if (error) throw error;
 
         // Transform the data
@@ -94,9 +82,8 @@ const SkillSheetContent = ({
           availability: skill.availability,
           skill_id: skill.id
         })) || [];
-
         setProviders(providersData);
-        
+
         // Check if current user offers this skill
         setUserHasSkill(providersData.some(p => p.user_id === user.id));
       } catch (error) {
@@ -105,37 +92,30 @@ const SkillSheetContent = ({
         setLoading(false);
       }
     };
-
     fetchProviders();
   }, [user, skillTitle, skillCategory]);
 
   // Handle "Have this skill?" button click
   const handleAddSkill = async () => {
     if (!user) return;
-
     try {
       // Get user's neighborhood
-      const { data: userNeighborhood } = await supabase
-        .from('neighborhood_members')
-        .select('neighborhood_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
-
+      const {
+        data: userNeighborhood
+      } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
       if (!userNeighborhood) return;
 
       // Add the skill offer
-      const { error } = await supabase
-        .from('skills_exchange')
-        .insert({
-          user_id: user.id,
-          neighborhood_id: userNeighborhood.neighborhood_id,
-          title: skillTitle,
-          skill_category: skillCategory,
-          request_type: 'offer',
-          valid_until: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() // 90 days from now
-        });
-
+      const {
+        error
+      } = await supabase.from('skills_exchange').insert({
+        user_id: user.id,
+        neighborhood_id: userNeighborhood.neighborhood_id,
+        title: skillTitle,
+        skill_category: skillCategory,
+        request_type: 'offer',
+        valid_until: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() // 90 days from now
+      });
       if (error) throw error;
 
       // Refresh the providers list
@@ -148,35 +128,45 @@ const SkillSheetContent = ({
   };
 
   // Category colors matching the existing system
-  const categoryColors: Record<SkillCategory, {bg: string, text: string}> = {
-    technology: {bg: 'bg-[#D3E4FD]', text: 'text-[#221F26]'},
-    emergency: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
-    professional: {bg: 'bg-[#E5DEFF]', text: 'text-[#8B5CF6]'},
-    maintenance: {bg: 'bg-[#FDE1D3]', text: 'text-[#F97316]'},
-    care: {bg: 'bg-[#FFDEE2]', text: 'text-[#D946EF]'},
-    education: {bg: 'bg-[#F2FCE2]', text: 'text-emerald-600'}
+  const categoryColors: Record<SkillCategory, {
+    bg: string;
+    text: string;
+  }> = {
+    technology: {
+      bg: 'bg-[#D3E4FD]',
+      text: 'text-[#221F26]'
+    },
+    emergency: {
+      bg: 'bg-[#FFDEE2]',
+      text: 'text-[#D946EF]'
+    },
+    professional: {
+      bg: 'bg-[#E5DEFF]',
+      text: 'text-[#8B5CF6]'
+    },
+    maintenance: {
+      bg: 'bg-[#FDE1D3]',
+      text: 'text-[#F97316]'
+    },
+    care: {
+      bg: 'bg-[#FFDEE2]',
+      text: 'text-[#D946EF]'
+    },
+    education: {
+      bg: 'bg-[#F2FCE2]',
+      text: 'text-emerald-600'
+    }
   };
-
   const categoryStyle = categoryColors[skillCategory] || categoryColors.technology;
-
-  return (
-    <SheetContent className="sm:max-w-md overflow-y-auto">
+  return <SheetContent className="sm:max-w-md overflow-y-auto">
       <SheetHeader className="mb-4">
         <SheetTitle className="text-xl font-bold flex justify-between items-start">
           <div className="flex flex-col gap-2">
             <span>{skillTitle}</span>
-            <Badge className={`${categoryStyle.bg} ${categoryStyle.text} border-0 text-xs w-fit`}>
-              {skillCategory.charAt(0).toUpperCase() + skillCategory.slice(1)}
-            </Badge>
+            
           </div>
           <div className="flex items-center gap-2">
-            <ShareButton
-              contentType="skills"
-              contentId={providers[0]?.skill_id || ''}
-              neighborhoodId=""
-              size="sm"
-              variant="ghost"
-            />
+            <ShareButton contentType="skills" contentId={providers[0]?.skill_id || ''} neighborhoodId="" size="sm" variant="ghost" />
           </div>
         </SheetTitle>
       </SheetHeader>
@@ -192,24 +182,13 @@ const SkillSheetContent = ({
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          {!userHasSkill && (
-            <Button 
-              onClick={handleAddSkill}
-              className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white"
-            >
+          {!userHasSkill && <Button onClick={handleAddSkill} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
               <Plus className="h-4 w-4" />
               Have this skill?
-            </Button>
-          )}
+            </Button>}
           
-          <SkillContactPopover
-            skillTitle={skillTitle}
-            skillCategory={skillCategory}
-          >
-            <Button 
-              variant="outline"
-              className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
-            >
+          <SkillContactPopover skillTitle={skillTitle} skillCategory={skillCategory}>
+            <Button variant="outline" className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50">
               <MessageSquare className="h-4 w-4" />
               Request Help
             </Button>
@@ -219,17 +198,8 @@ const SkillSheetContent = ({
         {/* Providers list */}
         <div>
           <h3 className="font-semibold text-lg mb-3">Neighbors Who Offer This</h3>
-          {loading ? (
-            <div className="text-gray-500">Loading...</div>
-          ) : providers.length === 0 ? (
-            <div className="text-gray-500">No neighbors currently offer this skill.</div>
-          ) : (
-            <div className="space-y-4">
-              {providers.map((provider) => (
-                <div 
-                  key={provider.user_id} 
-                  className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50"
-                >
+          {loading ? <div className="text-gray-500">Loading...</div> : providers.length === 0 ? <div className="text-gray-500">No neighbors currently offer this skill.</div> : <div className="space-y-4">
+              {providers.map(provider => <div key={provider.user_id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={provider.avatar_url || undefined} />
                     <AvatarFallback>
@@ -240,44 +210,25 @@ const SkillSheetContent = ({
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">
                       {provider.display_name}
-                      {provider.user_id === user?.id && (
-                        <span className="text-sm text-gray-500 font-normal"> (You)</span>
-                      )}
+                      {provider.user_id === user?.id && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
                     </h4>
                     
-                    {provider.description && (
-                      <p className="text-sm text-gray-600 mt-1">{provider.description}</p>
-                    )}
+                    {provider.description && <p className="text-sm text-gray-600 mt-1">{provider.description}</p>}
                     
-                    {provider.availability && (
-                      <p className="text-xs text-gray-500 mt-1">
+                    {provider.availability && <p className="text-xs text-gray-500 mt-1">
                         Available: {provider.availability}
-                      </p>
-                    )}
+                      </p>}
                   </div>
                   
-                  {provider.user_id !== user?.id && (
-                    <SkillContactPopover
-                      skillTitle={skillTitle}
-                      skillCategory={skillCategory}
-                    >
-                      <Button 
-                        size="sm"
-                        variant="outline"
-                        className="border-green-500 text-green-600 hover:bg-green-50"
-                      >
+                  {provider.user_id !== user?.id && <SkillContactPopover skillTitle={skillTitle} skillCategory={skillCategory}>
+                      <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
                         Contact
                       </Button>
-                    </SkillContactPopover>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                    </SkillContactPopover>}
+                </div>)}
+            </div>}
         </div>
       </div>
-    </SheetContent>
-  );
+    </SheetContent>;
 };
-
 export default SkillSheetContent;
