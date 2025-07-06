@@ -1,5 +1,5 @@
 import React from 'react';
-import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import ModuleLayout from '@/components/layout/ModuleLayout';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
 import { Sheet } from '@/components/ui/sheet';
 import EventSheetContent from '@/components/event/EventSheetContent';
@@ -30,22 +30,14 @@ function CalendarPage() {
     pageName: 'CalendarPage'
   });
   return (
-    <ModuleContainer themeColor="calendar">
-      {/* Header with improved spacing */}
-      <ModuleHeader title="Community Calendar" themeColor="calendar" />
-      
-      {/* Full-width description box with consistent padding */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-6 sm:px-[25px]">
-        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm mx-0 px-[16px]">
-          <p className="text-gray-700 text-sm">Upcoming events in your neighborhood</p>
-        </div>
-      </div>
-      
-      <ModuleContent className="px-4 sm:px-6 lg:px-8">
-        <div className="module-card">
-          <CommunityCalendar />
-        </div>
-      </ModuleContent>
+    <>
+      <ModuleLayout
+        title="Community Calendar"
+        description="Upcoming events in your neighborhood"
+        themeColor="calendar"
+      >
+        <CommunityCalendar />
+      </ModuleLayout>
 
       {/* Universal sheet management */}
       {isSheetOpen && sheetItem && (
@@ -56,7 +48,7 @@ function CalendarPage() {
           />
         </Sheet>
       )}
-    </ModuleContainer>
+    </>
   );
 }
 export default CalendarPage;

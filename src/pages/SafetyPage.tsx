@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import ModuleLayout from '@/components/layout/ModuleLayout';
 import SafetyUpdates from '@/components/SafetyUpdates';
 import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
@@ -35,25 +35,14 @@ function SafetyPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   return (
-    <ModuleContainer themeColor="safety">
-      {/* Header with just the title */}
-      <ModuleHeader 
-        title="Updates" 
+    <>
+      <ModuleLayout
+        title="Updates"
+        description="Stay informed about safety in your community"
         themeColor="safety"
-      />
-      
-      {/* Full-width description box with consistent padding */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-6 sm:px-[25px]">
-        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm mx-0 px-[16px]">
-          <p className="text-gray-700 text-sm">Stay informed about safety in your community</p>
-        </div>
-      </div>
-      
-      <ModuleContent>
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
-          <SafetyUpdates />
-        </div>
-      </ModuleContent>
+      >
+        <SafetyUpdates />
+      </ModuleLayout>
 
       {/* Universal sheet management */}
       {isSheetOpen && sheetItem && (
@@ -67,7 +56,7 @@ function SafetyPage() {
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
-    </ModuleContainer>
+    </>
   );
 }
 

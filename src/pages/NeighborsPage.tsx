@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
+import ModuleLayout from '@/components/layout/ModuleLayout';
 import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
@@ -35,23 +35,14 @@ function NeighborsPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   
   return (
-    <ModuleContainer themeColor="neighbors">
-      {/* Header with just the title */}
-      <ModuleHeader 
-        title="Neighbors" 
+    <>
+      <ModuleLayout
+        title="Neighbors"
+        description="Get to know the people in your community"
         themeColor="neighbors"
-      />
-      
-      {/* Full-width description box with consistent padding */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-6 sm:px-[25px]">
-        <div className="module-description bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-100 shadow-sm mx-0 px-[16px]">
-          <p className="text-gray-700 text-sm">Get to know the people in your community</p>
-        </div>
-      </div>
-      
-      <ModuleContent>
+      >
         <UserDirectory />
-      </ModuleContent>
+      </ModuleLayout>
 
       {/* Universal sheet management */}
       {isSheetOpen && sheetItem && (
@@ -65,7 +56,7 @@ function NeighborsPage() {
         open={isInviteOpen} 
         onOpenChange={setIsInviteOpen}
       />
-    </ModuleContainer>
+    </>
   );
 }
 
