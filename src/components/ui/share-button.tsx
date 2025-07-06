@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './button';
-import { Share2 } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -119,7 +119,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
       title="Share this item"
       aria-label="Share this item"
     >
-      <Share2 className="h-4 w-4" />
+      <Upload className="h-4 w-4" />
     </Button>
   );
 };
