@@ -1,29 +1,36 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
-import { useSearchParams } from 'react-router-dom';
-import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import { highlightItem } from '@/utils/highlight';
+import { usePageSheetController } from '@/hooks/usePageSheetController';
+import { Sheet } from '@/components/ui/sheet';
+import EventSheetContent from '@/components/event/EventSheetContent';
 import CommunityCalendar from '@/components/CommunityCalendar';
+import { useEvents } from '@/utils/queries/useEvents';
 
 /**
  * CalendarPage Component
  * 
- * Displays the community calendar with proper module styling
+ * Displays the community calendar with universal sheet management
  * and supports highlighting events from deep links.
- * The description is displayed in a full-width box beneath the header.
  */
 function CalendarPage() {
-  const [searchParams] = useSearchParams();
-  const highlightedEvent = useHighlightedItem('event');
-
-  // Effect to handle deep linking to specific events
-  useEffect(() => {
-    const eventId = searchParams.get('eventId');
-    if (eventId) {
-      highlightItem('event', eventId);
-    }
-  }, [searchParams]);
-  return <ModuleContainer themeColor="calendar">
+  const { data: events } = useEvents();
+  
+  // Universal page controller for sheet management
+  const {
+    isSheetOpen,
+    sheetItem,
+    openSheet,
+    closeSheet
+  } = usePageSheetController({
+    contentType: 'event',
+    fetchItem: async (id: string) => {
+      // Find event in the current data
+      return events?.find(event => event.id === id) || null;
+    },
+    pageName: 'CalendarPage'
+  });
+  return (
+    <ModuleContainer themeColor="calendar">
       {/* Header with improved spacing */}
       <ModuleHeader title="Community Calendar" themeColor="calendar" />
       
@@ -39,6 +46,17 @@ function CalendarPage() {
           <CommunityCalendar />
         </div>
       </ModuleContent>
-    </ModuleContainer>;
+
+      {/* Universal sheet management */}
+      {isSheetOpen && sheetItem && (
+        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+          <EventSheetContent 
+            event={sheetItem} 
+            onOpenChange={closeSheet}
+          />
+        </Sheet>
+      )}
+    </ModuleContainer>
+  );
 }
 export default CalendarPage;

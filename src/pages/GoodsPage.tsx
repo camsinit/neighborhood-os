@@ -1,99 +1,34 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import GoodsPageContainer from '@/components/goods/GoodsPageContainer';
-import { useSearchParams } from 'react-router-dom';
-import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import { useUrlSheetState } from '@/hooks/useUrlSheetState';
-import { highlightItem } from '@/utils/highlight';
+import { usePageSheetController } from '@/hooks/usePageSheetController';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
-import AddItemDialog from '@/components/goods/GoodsDialogs';
-import { createLogger } from '@/utils/logger';
 import { Sheet } from '@/components/ui/sheet';
 import GoodsSheetContent from '@/components/goods/GoodsSheetContent';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 
-const logger = createLogger('GoodsPage');
-
 /**
  * GoodsPage Component
  * 
- * Displays the goods exchange functionality with proper module styling
+ * Displays the goods exchange functionality with universal sheet management
  * and supports highlighting goods items from deep links.
- * Now uses the standardized module layout with full-width description.
  */
 function GoodsPage() {
-  // State for route parameters and highlighting
-  const [searchParams] = useSearchParams();
-  const highlightedItem = useHighlightedItem('goods');
+  const { data: goodsData } = useGoodsExchange();
   
-  // URL-based sheet state management
+  // Universal page controller for sheet management
   const {
     isSheetOpen,
-    detailItemId,
-    detailItem,
-    isLoadingItem,
+    sheetItem,
     openSheet,
     closeSheet
-  } = useUrlSheetState({
+  } = usePageSheetController({
     contentType: 'goods',
     fetchItem: async (id: string) => {
-      // Fetch specific goods item - you may need to implement this
-      const { data } = useGoodsExchange();
-      return data?.find(item => item.id === id);
-    }
+      return goodsData?.find(item => item.id === id) || null;
+    },
+    pageName: 'GoodsPage'
   });
-  
-  // State for dialog controls
-  const [isAddItemOpen, setIsAddItemOpen] = useState(false);
-  
-  // Enhanced contextual navigation handling
-  useEffect(() => {
-    const goodsId = searchParams.get('goodsId');
-    const urlTab = searchParams.get('tab');
-    const sectionParam = searchParams.get('section');
-    const highlightId = searchParams.get('highlight');
-    const dialogParam = searchParams.get('dialog');
-    
-    // Handle legacy goodsId parameter
-    if (goodsId) {
-      highlightItem('goods', goodsId);
-    }
-    
-    // Handle new highlight parameter
-    if (highlightId) {
-      highlightItem('goods', highlightId);
-    }
-    
-    // Auto-open goods dialog if requested
-    if (highlightId && dialogParam === 'true') {
-      // Delay to ensure goods item is highlighted first
-      setTimeout(() => {
-        const goodsElement = document.querySelector(`[data-goods-id="${highlightId}"]`) as HTMLElement;
-        if (goodsElement) {
-          goodsElement.click(); // Trigger goods detail opening
-          logger.info(`Auto-opened goods dialog for: ${highlightId}`);
-        }
-      }, 1000);
-    }
-    
-    // Scroll to urgent section if specified
-    if (sectionParam === 'urgent') {
-      setTimeout(() => {
-        const urgentSection = document.querySelector('[data-section="urgent"]');
-        if (urgentSection) {
-          urgentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          logger.info('Scrolled to urgent goods section');
-        }
-      }, 800);
-    }
-    
-    logger.info('Goods page contextual navigation:', {
-      tab: urlTab,
-      section: sectionParam,
-      highlight: highlightId,
-      dialog: dialogParam
-    });
-  }, [searchParams]);
   
   return (
     <ModuleContainer themeColor="goods">
@@ -116,10 +51,10 @@ function GoodsPage() {
         </div>
       </ModuleContent>
       
-      {/* URL-managed detail sheet */}
-      {isSheetOpen && detailItem && (
+      {/* Universal sheet management */}
+      {isSheetOpen && sheetItem && (
         <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-          <GoodsSheetContent item={detailItem} onOpenChange={closeSheet} />
+          <GoodsSheetContent item={sheetItem} onOpenChange={closeSheet} />
         </Sheet>
       )}
     </ModuleContainer>

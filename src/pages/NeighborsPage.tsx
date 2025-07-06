@@ -1,79 +1,38 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import { UserDirectory } from '@/components/neighbors/UserDirectory';
-import { useSearchParams } from 'react-router-dom';
-import { highlightItem } from '@/utils/highlight';
-import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import { useUrlSheetState } from '@/hooks/useUrlSheetState';
+import { usePageSheetController } from '@/hooks/usePageSheetController';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
-import { createLogger } from '@/utils/logger';
 import { Sheet } from '@/components/ui/sheet';
 import NeighborSheetContent from '@/components/neighbors/NeighborSheetContent';
-
-const logger = createLogger('NeighborsPage');
+import { useNeighborUsers } from '@/components/neighbors/hooks/useNeighborUsers';
 
 /**
  * NeighborsPage Component
  * 
- * Displays the neighbors directory with proper module styling
+ * Displays the neighbors directory with universal sheet management
  * and supports highlighting neighbors from deep links.
- * Now uses the unified invite dialog system and matches safety page margins.
  */
 function NeighborsPage() {
-  // State for route parameters and highlighting
-  const [searchParams] = useSearchParams();
-  const highlightedNeighbor = useHighlightedItem('neighbors');
+  const { data: users } = useNeighborUsers();
   
-  // URL-based sheet state management
+  // Universal page controller for sheet management
   const {
     isSheetOpen,
-    detailItemId,
-    detailItem,
+    sheetItem,
     openSheet,
     closeSheet
-  } = useUrlSheetState({
-    contentType: 'neighbors'
+  } = usePageSheetController({
+    contentType: 'neighbors',
+    fetchItem: async (id: string) => {
+      return users?.find(user => user.id === id) || null;
+    },
+    pageName: 'NeighborsPage'
   });
   
-  // State for dialog controls - now uses unified invite dialog
+  // State for dialog controls
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  
-  // Enhanced contextual navigation handling
-  useEffect(() => {
-    const neighborId = searchParams.get('neighborId');
-    const highlightId = searchParams.get('highlight');
-    const profileParam = searchParams.get('profile');
-    const dialogParam = searchParams.get('dialog');
-    
-    // Handle legacy neighborId parameter
-    if (neighborId) {
-      highlightItem('neighbors', neighborId);
-    }
-    
-    // Handle new highlight parameter
-    if (highlightId) {
-      highlightItem('neighbors', highlightId);
-    }
-    
-    // Auto-open neighbor profile if requested
-    if (highlightId && (dialogParam === 'true' || profileParam === 'open')) {
-      // Delay to ensure neighbor is highlighted first
-      setTimeout(() => {
-        const neighborElement = document.querySelector(`[data-neighbor-id="${highlightId}"]`) as HTMLElement;
-        if (neighborElement) {
-          neighborElement.click(); // Trigger neighbor profile opening
-          logger.info(`Auto-opened neighbor profile for: ${highlightId}`);
-        }
-      }, 1000);
-    }
-    
-    logger.info('Neighbors page contextual navigation:', {
-      highlight: highlightId,
-      profile: profileParam,
-      dialog: dialogParam
-    });
-  }, [searchParams]);
   
   return (
     <ModuleContainer themeColor="neighbors">
@@ -91,14 +50,13 @@ function NeighborsPage() {
       </div>
       
       <ModuleContent>
-        {/* Remove the bg-white wrapper to match safety updates structure */}
         <UserDirectory />
       </ModuleContent>
 
-      {/* URL-managed detail sheet */}
-      {isSheetOpen && detailItem && (
+      {/* Universal sheet management */}
+      {isSheetOpen && sheetItem && (
         <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-          <NeighborSheetContent neighbor={detailItem} onOpenChange={closeSheet} />
+          <NeighborSheetContent neighbor={sheetItem} onOpenChange={closeSheet} />
         </Sheet>
       )}
 

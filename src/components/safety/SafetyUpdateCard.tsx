@@ -9,6 +9,8 @@ import { generateDataAttributes } from "@/utils/dataAttributes";
 import ShareButton from "@/components/ui/share-button";
 import SafetySheetContent from "./SafetySheetContent";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 interface SafetyUpdateCardProps {
   update: any;
@@ -19,6 +21,7 @@ const SafetyUpdateCard = ({
   update,
   onClick
 }: SafetyUpdateCardProps) => {
+  const navigate = useNavigate();
   // Add state to track hover for share button
   const [isHovering, setIsHovering] = useState(false);
   
@@ -63,7 +66,11 @@ const SafetyUpdateCard = ({
   const dataAttributes = generateDataAttributes('safety', update.id);
 
   const handleCardClick = () => {
-    onClick(update); // Pass the full update data
+    // Use navigation service to open sheet via URL
+    const navigationService = createItemNavigationService(navigate);
+    navigationService.navigateToItem('safety', update.id, { 
+      showToast: false 
+    });
   };
 
   return (

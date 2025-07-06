@@ -1,9 +1,10 @@
-
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import BaseGoodsCard from './BaseGoodsCard';
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 interface RequestGoodsCardProps {
   request: GoodsExchangeItem;
@@ -20,20 +21,32 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
   request,
   onSelect
 }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    // Use navigation service to open sheet via URL
+    const navigationService = createItemNavigationService(navigate);
+    navigationService.navigateToItem('goods', request.id, { 
+      showToast: false 
+    });
+  };
+  
+  const handleHelpClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect(request); // Keep the help action separate
+  };
+
   return (
     <BaseGoodsCard 
       item={request}
-      onClick={() => onSelect(request)} // Pass the full item
+      onClick={handleCardClick}
       className="w-64 h-48"
     >
       {/* Dotted "I can help!" section at the top - reduced height */}
       <div className="w-full h-24 flex-shrink-0 bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
         <Button 
           className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect(request); // Pass the full item
-          }}
+          onClick={handleHelpClick}
         >
           I can help!
         </Button>

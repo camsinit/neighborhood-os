@@ -1,77 +1,38 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
 import SafetyUpdates from '@/components/SafetyUpdates';
 import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
-import { useSearchParams } from 'react-router-dom'; 
-import { useHighlightedItem } from '@/hooks/useHighlightedItem';
-import { useUrlSheetState } from '@/hooks/useUrlSheetState';
-import { highlightItem } from '@/utils/highlight';
-import { createLogger } from '@/utils/logger';
+import { usePageSheetController } from '@/hooks/usePageSheetController';
 import { Sheet } from '@/components/ui/sheet';
 import SafetySheetContent from '@/components/safety/SafetySheetContent';
-
-const logger = createLogger('SafetyPage');
+import { useSafetyUpdates } from '@/utils/queries/useSafetyUpdates';
 
 /**
  * SafetyPage Component
  * 
- * Displays the safety updates with proper module styling
+ * Displays the safety updates with universal sheet management
  * and supports highlighting specific updates from deep links.
- * Now uses the standardized module layout with full-width description.
  */
 function SafetyPage() {
-  // State for route parameters and highlighting
-  const [searchParams] = useSearchParams();
-  const highlightedUpdate = useHighlightedItem('safety');
+  const { data: safetyUpdates } = useSafetyUpdates();
   
-  // URL-based sheet state management
+  // Universal page controller for sheet management
   const {
     isSheetOpen,
-    detailItemId,
-    detailItem,
+    sheetItem,
     openSheet,
     closeSheet
-  } = useUrlSheetState({
-    contentType: 'safety'
+  } = usePageSheetController({
+    contentType: 'safety',
+    fetchItem: async (id: string) => {
+      return safetyUpdates?.data?.find(update => update.id === id) || null;
+    },
+    pageName: 'SafetyPage'
   });
   
   // State for dialog controls
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Enhanced contextual navigation handling
-  useEffect(() => {
-    const updateId = searchParams.get('updateId');
-    const highlightId = searchParams.get('highlight');
-    const dialogParam = searchParams.get('dialog');
-    
-    // Handle legacy updateId parameter
-    if (updateId) {
-      highlightItem('safety', updateId);
-    }
-    
-    // Handle new highlight parameter
-    if (highlightId) {
-      highlightItem('safety', highlightId);
-    }
-    
-    // Auto-open safety dialog if requested
-    if (highlightId && dialogParam === 'true') {
-      // Delay to ensure safety update is highlighted first
-      setTimeout(() => {
-        const safetyElement = document.querySelector(`[data-safety-id="${highlightId}"]`) as HTMLElement;
-        if (safetyElement) {
-          safetyElement.click(); // Trigger safety detail opening
-          logger.info(`Auto-opened safety dialog for: ${highlightId}`);
-        }
-      }, 1000);
-    }
-    
-    logger.info('Safety page contextual navigation:', {
-      highlight: highlightId,
-      dialog: dialogParam
-    });
-  }, [searchParams]);
   
   return (
     <ModuleContainer themeColor="safety">
@@ -94,10 +55,10 @@ function SafetyPage() {
         </div>
       </ModuleContent>
 
-      {/* URL-managed detail sheet */}
-      {isSheetOpen && detailItem && (
+      {/* Universal sheet management */}
+      {isSheetOpen && sheetItem && (
         <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-          <SafetySheetContent update={detailItem} onOpenChange={closeSheet} />
+          <SafetySheetContent update={sheetItem} onOpenChange={closeSheet} />
         </Sheet>
       )}
 

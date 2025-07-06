@@ -11,6 +11,8 @@ import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 /**
  * EventCard component displays an event in the calendar
@@ -29,6 +31,7 @@ const EventCard = ({
   event,
   onDelete
 }: EventCardProps) => {
+  const navigate = useNavigate();
   // Get current user and set up state
   const user = useUser();
   const [isRsvped, setIsRsvped] = useState(false);
@@ -134,9 +137,12 @@ const EventCard = ({
     created_at: event.created_at || new Date().toISOString()
   };
   
-  // Function to handle sheet closing
-  const handleSheetClose = () => {
-    setIsSheetOpen(false);
+  // Handle event click - now uses navigation service instead of internal state
+  const handleEventClick = () => {
+    const navigationService = createItemNavigationService(navigate);
+    navigationService.navigateToItem('event', event.id, { 
+      showToast: false 
+    });
   };
 
   // Event preview card with click effect for showing details
@@ -144,7 +150,7 @@ const EventCard = ({
   const eventPreview = <div 
       data-event-id={event.id} 
       className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
-      onClick={() => setIsSheetOpen(true)}
+      onClick={handleEventClick}
     >
       {/* Host edit button - only shows when hovering on events you created */}
       {isHost && isHovering}
@@ -157,18 +163,9 @@ const EventCard = ({
     </div>;
 
   return (
-    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-      <SheetTrigger asChild>
-        <EventHoverCard event={eventWithRequiredProps}>
-          {eventPreview}
-        </EventHoverCard>
-      </SheetTrigger>
-      <EventSheetContent 
-        event={eventWithRequiredProps} 
-        EditButton={EditButton} 
-        onOpenChange={setIsSheetOpen}
-      />
-    </Sheet>
+    <EventHoverCard event={eventWithRequiredProps}>
+      {eventPreview}
+    </EventHoverCard>
   );
 };
 

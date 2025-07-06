@@ -6,6 +6,8 @@ import { Sheet } from "@/components/ui/sheet";
 import { User, MapPin, Mail, Phone } from "lucide-react";
 import NeighborSheetContent from "./NeighborSheetContent";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
 
 interface NeighborCardProps {
   user: UserWithRole;
@@ -19,8 +21,13 @@ interface NeighborCardProps {
  * Updated to show contact icons when contact info is available instead of hardcoded email.
  */
 export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
+  const navigate = useNavigate();
   const handleCardClick = () => {
-    onClick(user); // Pass the full user data
+    // Use navigation service to open sheet via URL
+    const navigationService = createItemNavigationService(navigate);
+    navigationService.navigateToItem('neighbors', user.id, { 
+      showToast: false 
+    });
   };
 
   return (
