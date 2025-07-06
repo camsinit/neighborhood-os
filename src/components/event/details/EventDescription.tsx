@@ -13,9 +13,9 @@ const EventDescription = ({ description }: EventDescriptionProps) => {
   if (!description) return null;
   
   return (
-    <div className="mt-4">
-      <h3 className="font-medium mb-1">Details</h3>
-      <p className="text-sm text-gray-600 whitespace-pre-wrap">{description}</p>
+    <div className="bg-white rounded-xl border border-hsl(var(--border)) p-4">
+      <h3 className="font-semibold text-hsl(var(--foreground)) mb-3">Details</h3>
+      <p className="text-sm text-hsl(var(--muted-foreground)) leading-relaxed whitespace-pre-wrap">{description}</p>
     </div>
   );
 };

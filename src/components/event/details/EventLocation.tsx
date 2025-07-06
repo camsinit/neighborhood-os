@@ -15,11 +15,13 @@ const EventLocation = ({ location }: EventLocationProps) => {
   if (!location) return null;
   
   return (
-    <div className="flex items-start gap-3">
-      <MapPin className="h-5 w-5 text-gray-500 mt-0.5 shrink-0" />
-      <div>
-        <div className="font-medium">Location</div>
-        <div className="text-sm text-gray-600">{location}</div>
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-full bg-hsl(var(--calendar-color)/0.1) flex items-center justify-center">
+        <MapPin className="h-5 w-5 text-hsl(var(--calendar-color))" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-hsl(var(--muted-foreground))">Location</p>
+        <p className="font-medium text-hsl(var(--foreground)) truncate">{location}</p>
       </div>
     </div>
   );

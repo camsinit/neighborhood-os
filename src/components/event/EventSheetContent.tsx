@@ -66,46 +66,54 @@ const EventSheetContent = ({
 
   return (
     <SheetContent className="sm:max-w-md overflow-y-auto">
-      <SheetHeader className="mb-4">
-        <SheetTitle className="text-xl font-bold flex justify-between items-start">
-          <span>{event.title}</span>
-          <div className="flex items-center gap-2">
+      {/* Modern header with gradient background */}
+      <div className="relative -m-6 mb-0 p-6 bg-gradient-to-br from-hsl(var(--calendar-color)) to-hsl(var(--calendar-color)/0.8) text-white rounded-t-lg">
+        <div className="flex justify-between items-start mb-2">
+          <h1 className="text-2xl font-bold leading-tight">{event.title}</h1>
+          <div className="flex items-center gap-2 opacity-90">
             <ShareButton
               contentType="events"
               contentId={event.id}
               neighborhoodId={event.neighborhood_id}
               size="sm"
               variant="ghost"
+              className="text-white hover:bg-white/20"
             />
             {EditButton && <EditButton onSheetClose={handleSheetClose} />}
           </div>
-        </SheetTitle>
-      </SheetHeader>
-
-      <div className="space-y-6">
-        {/* Event details using our new components */}
+        </div>
+        
+        {/* Date and time prominently displayed in header */}
         <EventDateTime 
           date={event.time} 
-          neighborhoodTimezone={neighborhoodTimezone} 
+          neighborhoodTimezone={neighborhoodTimezone}
+          isHeaderVersion={true}
         />
+      </div>
+
+      <div className="space-y-4 pt-6">
+        {/* Key event details in a compact card */}
+        <div className="bg-hsl(var(--calendar-light)) rounded-xl p-4 space-y-3">
+          <EventLocation location={event.location} />
+          <EventHost 
+            hostName={event.profiles?.display_name} 
+            isCurrentUserHost={isHost} 
+          />
+        </div>
         
-        <EventLocation location={event.location} />
-        
-        <EventHost 
-          hostName={event.profiles?.display_name} 
-          isCurrentUserHost={isHost} 
-        />
-        
+        {/* Description section */}
         <EventDescription description={event.description} />
         
-        {/* RSVP button */}
-        <EventRSVPButton 
-          eventId={event.id} 
-          isHost={isHost}
-          neighborhoodId={event.neighborhood_id}
-        />
+        {/* RSVP button - more prominent */}
+        <div className="py-2">
+          <EventRSVPButton 
+            eventId={event.id} 
+            isHost={isHost}
+            neighborhoodId={event.neighborhood_id}
+          />
+        </div>
         
-        {/* Attendees section */}
+        {/* Attendees section with better styling */}
         <EventAttendeesList eventId={event.id} />
       </div>
     </SheetContent>
