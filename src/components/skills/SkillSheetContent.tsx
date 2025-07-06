@@ -197,7 +197,7 @@ const SkillSheetContent = ({
 
         {/* Providers list */}
         <div>
-          <h3 className="font-semibold text-lg mb-3">Neighbors Who Offer This</h3>
+          <h3 className="font-semibold text-lg mb-3">Neighbors with this skill</h3>
           {loading ? <div className="text-gray-500">Loading...</div> : providers.length === 0 ? <div className="text-gray-500">No neighbors currently offer this skill.</div> : <div className="space-y-4">
               {providers.map(provider => <div key={provider.user_id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
                   <Avatar className="h-12 w-12">
