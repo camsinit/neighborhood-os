@@ -61,13 +61,17 @@ const EventFormRecurrenceFields = ({
                 <Label htmlFor="weekly">Weekly</Label>
               </div>
               <div className="flex items-center space-x-2">
+                <RadioGroupItem value="bi-weekly" id="bi-weekly" />
+                <Label htmlFor="bi-weekly">Bi-weekly</Label>
+              </div>
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="monthly" id="monthly" />
                 <Label htmlFor="monthly">Monthly</Label>
               </div>
             </RadioGroup>
           </div>
           <div className="space-y-2 pl-6 border-l-2 border-gray-100">
-            <Label htmlFor="endDate">End Date</Label>
+            <Label htmlFor="endDate">End Date (optional)</Label>
             <Input
               id="endDate"
               type="date"
