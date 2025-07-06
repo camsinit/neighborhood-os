@@ -3,6 +3,7 @@ import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import BaseGoodsCard from './BaseGoodsCard';
 
 interface RequestGoodsCardProps {
   request: GoodsExchangeItem;
@@ -20,9 +21,10 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
   onSelect
 }) => {
   return (
-    <div 
-      className="w-64 h-48 flex flex-col rounded-lg border border-gray-200 hover:border-gray-300 bg-white cursor-pointer overflow-hidden shadow-sm transition-all duration-200"
+    <BaseGoodsCard 
+      item={request}
       onClick={onSelect}
+      className="w-64 h-48"
     >
       {/* Dotted "I can help!" section at the top - reduced height */}
       <div className="w-full h-24 flex-shrink-0 bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
@@ -62,7 +64,7 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </BaseGoodsCard>
   );
 };
 

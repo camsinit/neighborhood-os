@@ -2,10 +2,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Sheet } from "@/components/ui/sheet";
 import { AlertTriangle, Construction, Eye, User } from "lucide-react";
 import { format } from "date-fns";
 import { generateDataAttributes } from "@/utils/dataAttributes";
 import ShareButton from "@/components/ui/share-button";
+import SafetySheetContent from "./SafetySheetContent";
 import { useState } from "react";
 
 interface SafetyUpdateCardProps {
@@ -17,8 +19,9 @@ const SafetyUpdateCard = ({
   update,
   onClick
 }: SafetyUpdateCardProps) => {
-  // Add state to track hover for share button
+  // Add state to track hover for share button and sheet
   const [isHovering, setIsHovering] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   // Helper function to get tag color based on type
   const getTypeStyles = (type: string) => {
     switch (type) {
@@ -59,14 +62,20 @@ const SafetyUpdateCard = ({
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('safety', update.id);
 
+  const handleCardClick = () => {
+    setIsSheetOpen(true);
+    if (onClick) onClick();
+  };
+
   return (
-    <Card 
-      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
-      onClick={onClick}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      {...dataAttributes} // Apply data attributes for highlighting
-    >
+    <>
+      <Card 
+        className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
+        onClick={handleCardClick}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        {...dataAttributes} // Apply data attributes for highlighting
+      >
       {/* Share button in top right corner - shows on hover */}
       {isHovering && (
         <div className="absolute top-2 right-2 z-10">
@@ -119,6 +128,11 @@ const SafetyUpdateCard = ({
         </div>
       )}
     </Card>
+
+    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <SafetySheetContent update={update} onOpenChange={setIsSheetOpen} />
+    </Sheet>
+  </>
   );
 };
 

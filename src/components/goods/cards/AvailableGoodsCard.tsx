@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Clock, User, MessageCircle, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateDataAttributes } from '@/utils/dataAttributes';
+import { Sheet } from "@/components/ui/sheet";
+import GoodsSheetContent from '../GoodsSheetContent';
 // Fix: Import as default export instead of named export
 import ItemRequestDialog from '@/components/items/dialogs/ItemRequestDialog';
 
@@ -21,6 +23,7 @@ const AvailableGoodsCard = ({
   onClick
 }: AvailableGoodsCardProps) => {
   const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   // Add state to track if card has been clicked to show request button
@@ -60,9 +63,10 @@ const AvailableGoodsCard = ({
     setIsRequestDialogOpen(true);
   };
 
-  // Handle card click to show request button and open details
+  // Handle card click to show request button and open sheet
   const handleCardClick = () => {
     setIsCardClicked(true);
+    setIsSheetOpen(true);
     if (onClick) {
       onClick();
     }
@@ -181,6 +185,11 @@ const AvailableGoodsCard = ({
       {/* Request Dialog */}
       <ItemRequestDialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen} request={item} // Fix: Use 'request' prop instead of 'item'
     />
+
+      {/* Sheet for detailed view */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <GoodsSheetContent item={item} onOpenChange={setIsSheetOpen} />
+      </Sheet>
     </>;
 };
 export default AvailableGoodsCard;

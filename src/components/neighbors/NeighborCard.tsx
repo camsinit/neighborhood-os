@@ -2,7 +2,10 @@
 import { UserWithRole } from "@/types/roles";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Sheet } from "@/components/ui/sheet";
 import { User, MapPin, Mail, Phone } from "lucide-react";
+import NeighborSheetContent from "./NeighborSheetContent";
+import { useState } from "react";
 
 interface NeighborCardProps {
   user: UserWithRole;
@@ -16,12 +19,20 @@ interface NeighborCardProps {
  * Updated to show contact icons when contact info is available instead of hardcoded email.
  */
 export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleCardClick = () => {
+    setIsSheetOpen(true);
+    if (onClick) onClick();
+  };
+
   return (
-    <Card 
-      data-neighbor-id={user.id}
-      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-      onClick={onClick}
-    >
+    <>
+      <Card 
+        data-neighbor-id={user.id}
+        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+        onClick={handleCardClick}
+      >
       <CardContent className="p-4">
         <div className="flex flex-col items-center space-y-3">
           {/* Avatar */}
@@ -62,5 +73,10 @@ export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
         </div>
       </CardContent>
     </Card>
+
+    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <NeighborSheetContent neighbor={user} onOpenChange={setIsSheetOpen} />
+    </Sheet>
+  </>
   );
 };
