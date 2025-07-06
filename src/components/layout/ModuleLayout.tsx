@@ -32,7 +32,7 @@ const ModuleLayout = ({
       {/* Header section with proper left-alignment */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
         {/* Title - left-aligned */}
-        <h1 className="text-3xl font-bold text-white mb-4 text-left">{title}</h1>
+        <h1 className="text-3xl font-bold text-green-800 mb-4 text-left">{title}</h1>
         
         {/* Description box - left-aligned and full-width within container */}
         {description && (
