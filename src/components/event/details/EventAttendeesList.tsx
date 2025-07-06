@@ -2,7 +2,6 @@
 import { Calendar as CalIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { useEventRSVPs } from "@/utils/queries/useEventRSVPs";
 import { useUser } from "@supabase/auth-helpers-react";
 
@@ -29,63 +28,43 @@ const EventAttendeesList = ({ eventId }: EventAttendeesListProps) => {
   const rsvpCount = attendees?.length || 0;
 
   return (
-    <div className="bg-white rounded-xl border border-hsl(var(--border)) p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-full bg-hsl(var(--calendar-color)/0.1) flex items-center justify-center">
-          <CalIcon className="h-4 w-4 text-hsl(var(--calendar-color))" />
-        </div>
-        <h3 className="font-semibold text-hsl(var(--foreground))">
-          Attendees ({rsvpCount})
-        </h3>
-      </div>
+    <div className="mt-4">
+      <Separator className="my-4" />
+      <h3 className="font-medium flex items-center mb-2">
+        <CalIcon className="h-4 w-4 mr-2 text-gray-500" />
+        Attendees ({rsvpCount})
+      </h3>
       
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-2 border-hsl(var(--calendar-color)) border-t-transparent"></div>
-        </div>
+        <p className="text-sm text-gray-500">Loading attendees...</p>
       ) : attendees && attendees.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {attendees.map((attendee) => {
             // Check if this person is the host
             const isEventHost = (attendee as any).isHost || false;
             const isCurrentUser = user?.id === attendee.user_id;
             
             return (
-              <div key={attendee.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-hsl(var(--accent)) transition-colors">
-                <Avatar className="h-8 w-8 border-2 border-hsl(var(--border))">
+              <div key={attendee.user_id} className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
                   {attendee.profiles?.avatar_url ? (
                     <AvatarImage src={attendee.profiles.avatar_url} />
                   ) : null}
-                  <AvatarFallback className="bg-hsl(var(--calendar-color)/0.1) text-hsl(var(--calendar-color)) font-medium">
+                  <AvatarFallback>
                     {(attendee.profiles?.display_name || 'A')[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-hsl(var(--foreground)) truncate">
-                      {attendee.profiles?.display_name || 'Anonymous'}
-                    </span>
-                    {isEventHost && (
-                      <Badge variant="secondary" className="text-xs bg-hsl(var(--calendar-color)/0.1) text-hsl(var(--calendar-color)) border-hsl(var(--calendar-color)/0.2)">
-                        Host
-                      </Badge>
-                    )}
-                    {!isEventHost && isCurrentUser && (
-                      <Badge variant="outline" className="text-xs">You</Badge>
-                    )}
-                  </div>
-                </div>
+                <span className="text-sm">
+                  {attendee.profiles?.display_name || 'Anonymous'}
+                  {isEventHost && <span className="text-xs text-blue-600 ml-1 font-medium">(Host)</span>}
+                  {!isEventHost && isCurrentUser && <span className="text-xs text-gray-500 ml-1">(You)</span>}
+                </span>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-12 h-12 rounded-full bg-hsl(var(--muted)) mx-auto mb-3 flex items-center justify-center">
-            <CalIcon className="h-6 w-6 text-hsl(var(--muted-foreground))" />
-          </div>
-          <p className="text-sm text-hsl(var(--muted-foreground))">No attendees yet. Be the first to RSVP!</p>
-        </div>
+        <p className="text-sm text-gray-500">No attendees yet. Be the first to RSVP!</p>
       )}
     </div>
   );
