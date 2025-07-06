@@ -34,7 +34,7 @@ function SafetyPage() {
     <ModuleContainer themeColor="safety">
       {/* Header with just the title */}
       <ModuleHeader 
-        title="Safety Updates" 
+        title="Updates" 
         themeColor="safety"
       />
       
