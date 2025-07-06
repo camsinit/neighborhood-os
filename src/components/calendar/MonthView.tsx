@@ -13,6 +13,7 @@ interface MonthViewProps {
   currentDate: Date;
   events: Event[];
   isLoading?: boolean;
+  getEventsForDate?: (date: Date) => Event[]; // Add the getEventsForDate prop
 }
 
 /**
@@ -27,7 +28,7 @@ interface MonthViewProps {
  * @param events - Array of events to show on the calendar
  * @param isLoading - Whether events are loading
  */
-const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) => {
+const MonthView = ({ currentDate, events, isLoading = false, getEventsForDate }: MonthViewProps) => {
   // State for the Add Event dialog
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -80,7 +81,7 @@ const MonthView = ({ currentDate, events, isLoading = false }: MonthViewProps) =
             key={day.toISOString()}
             date={day}
             isCurrentMonth={isSameMonth(day, currentDate)}
-            events={events.filter(event => 
+            events={getEventsForDate ? getEventsForDate(day) : events.filter(event => 
               format(new Date(event.time), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
             )}
             isLoading={isLoading}

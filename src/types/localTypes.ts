@@ -43,6 +43,12 @@ export interface Event {
   created_at: string;
   neighborhood_id: string; // Add neighborhood_id field which is required for activities
   profiles?: Profile; // Profile of the host
+  metadata?: {
+    isRecurringInstance?: boolean;
+    originalEventId?: string;
+    originalDate?: string;
+    [key: string]: any;
+  }; // Optional metadata for recurring instances and other purposes
 }
 
 /**

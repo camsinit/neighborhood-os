@@ -23,6 +23,7 @@ import { toast } from "sonner"; // Updated import for toast
 import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized"; // Updated import
 import { createLogger } from "@/utils/logger";
 import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
+import { getEventsWithRecurring } from "@/utils/recurringEvents"; // Import recurring events utility
 
 // Create a logger for the CommunityCalendar component
 const logger = createLogger('CommunityCalendar');
@@ -116,18 +117,26 @@ const CommunityCalendar = () => {
     addScaleAnimation(document.querySelector('.calendar-container'));
   };
 
-  // Type-safe function to get events for a specific date
+  // Type-safe function to get events for a specific date including recurring instances
   const getEventsForDate = (date: Date): LocalEvent[] => {
     if (!events) return [];
     
-    // Convert fetched events to LocalEvent type with required properties
-    return events.filter(event => {
+    // Generate a date range for recurring event calculation
+    // We'll generate events for a few months around the current date
+    const rangeStart = startOfMonth(subMonths(date, 3));
+    const rangeEnd = endOfMonth(addMonths(date, 6));
+    
+    // Get all events including recurring instances
+    const allEvents = getEventsWithRecurring(events, rangeStart, rangeEnd);
+    
+    // Filter to only events on the specific date
+    return allEvents.filter(event => {
       const eventDate = parseISO(event.time);
       return isEqual(
         new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate()),
         new Date(date.getFullYear(), date.getMonth(), date.getDate())
       );
-    }) as LocalEvent[]; // Type assertion here as we know the structure matches
+    });
   };
 
   // Handle event addition and trigger refetch
@@ -161,6 +170,7 @@ const CommunityCalendar = () => {
             currentDate={currentDate}
             events={events as LocalEvent[] || []}
             isLoading={isLoading}
+            getEventsForDate={getEventsForDate}
           />
         )}
       </div>
