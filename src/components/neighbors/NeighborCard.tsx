@@ -9,7 +9,7 @@ import { useState } from "react";
 
 interface NeighborCardProps {
   user: UserWithRole;
-  onClick: () => void;
+  onClick: (user: UserWithRole) => void; // Pass full user data
 }
 
 /**
@@ -19,20 +19,16 @@ interface NeighborCardProps {
  * Updated to show contact icons when contact info is available instead of hardcoded email.
  */
 export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
   const handleCardClick = () => {
-    setIsSheetOpen(true);
-    if (onClick) onClick();
+    onClick(user); // Pass the full user data
   };
 
   return (
-    <>
-      <Card 
-        data-neighbor-id={user.id}
-        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-        onClick={handleCardClick}
-      >
+    <Card 
+      data-neighbor-id={user.id}
+      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      onClick={handleCardClick}
+    >
       <CardContent className="p-4">
         <div className="flex flex-col items-center space-y-3">
           {/* Avatar */}
@@ -73,10 +69,5 @@ export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
         </div>
       </CardContent>
     </Card>
-
-    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-      <NeighborSheetContent neighbor={user} onOpenChange={setIsSheetOpen} />
-    </Sheet>
-  </>
   );
 };

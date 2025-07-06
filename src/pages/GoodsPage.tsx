@@ -1,13 +1,16 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import GoodsPageContainer from '@/components/goods/GoodsPageContainer';
 import { useSearchParams } from 'react-router-dom';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { useUrlSheetState } from '@/hooks/useUrlSheetState';
 import { highlightItem } from '@/utils/highlight';
 import { ModuleContainer, ModuleContent, ModuleHeader } from '@/components/layout/module';
-import { useState } from 'react';
 import AddItemDialog from '@/components/goods/GoodsDialogs';
 import { createLogger } from '@/utils/logger';
+import { Sheet } from '@/components/ui/sheet';
+import GoodsSheetContent from '@/components/goods/GoodsSheetContent';
+import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 
 const logger = createLogger('GoodsPage');
 
@@ -22,6 +25,23 @@ function GoodsPage() {
   // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedItem = useHighlightedItem('goods');
+  
+  // URL-based sheet state management
+  const {
+    isSheetOpen,
+    detailItemId,
+    detailItem,
+    isLoadingItem,
+    openSheet,
+    closeSheet
+  } = useUrlSheetState({
+    contentType: 'goods',
+    fetchItem: async (id: string) => {
+      // Fetch specific goods item - you may need to implement this
+      const { data } = useGoodsExchange();
+      return data?.find(item => item.id === id);
+    }
+  });
   
   // State for dialog controls
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
@@ -95,6 +115,13 @@ function GoodsPage() {
           <GoodsPageContainer />
         </div>
       </ModuleContent>
+      
+      {/* URL-managed detail sheet */}
+      {isSheetOpen && detailItem && (
+        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+          <GoodsSheetContent item={detailItem} onOpenChange={closeSheet} />
+        </Sheet>
+      )}
     </ModuleContainer>
   );
 }

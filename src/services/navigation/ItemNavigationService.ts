@@ -110,7 +110,7 @@ export class ItemNavigationService {
       
       // Build URL with parameters including highlight info and context
       const searchParams = new URLSearchParams({
-        highlight: id,
+        detail: id, // Use detail parameter for direct sheet opening
         type: type,
         ...urlParams
       });
@@ -324,29 +324,43 @@ export class ItemNavigationService {
   }
   
   /**
-   * Handle URL parameters for direct deep links
+   * Handle URL parameters for direct deep links and sheet opening
    */
   static handleDeepLinkParams(searchParams: URLSearchParams): {
     shouldHighlight: boolean;
+    shouldOpenSheet: boolean;
     type?: HighlightableItemType;
     id?: string;
   } {
+    const detailId = searchParams.get('detail');
     const highlightId = searchParams.get('highlight');
     const contentType = searchParams.get('type') as HighlightableItemType;
     
+    // Priority to detail parameter for direct sheet opening
+    if (detailId && contentType && ROUTE_MAP[contentType]) {
+      return {
+        shouldHighlight: true,
+        shouldOpenSheet: true,
+        type: contentType,
+        id: detailId
+      };
+    }
+    
+    // Fallback to highlight parameter for highlighting only
     if (highlightId && contentType && ROUTE_MAP[contentType]) {
       return {
         shouldHighlight: true,
+        shouldOpenSheet: false,
         type: contentType,
         id: highlightId
       };
     }
     
-    return { shouldHighlight: false };
+    return { shouldHighlight: false, shouldOpenSheet: false };
   }
   
   /**
-   * Create a shareable deep link for an item
+   * Create a shareable deep link for an item with sheet opened
    */
   static createDeepLink(
     type: HighlightableItemType, 
@@ -354,7 +368,7 @@ export class ItemNavigationService {
     baseUrl: string = window.location.origin
   ): string {
     const route = ROUTE_MAP[type];
-    const params = new URLSearchParams({ highlight: id, type });
+    const params = new URLSearchParams({ detail: id, type });
     return `${baseUrl}${route}?${params.toString()}`;
   }
 }

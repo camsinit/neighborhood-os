@@ -12,16 +12,16 @@ import { useState } from "react";
 
 interface SafetyUpdateCardProps {
   update: any;
-  onClick: () => void;
+  onClick: (update: any) => void; // Pass full update data
 }
 
 const SafetyUpdateCard = ({
   update,
   onClick
 }: SafetyUpdateCardProps) => {
-  // Add state to track hover for share button and sheet
+  // Add state to track hover for share button
   const [isHovering, setIsHovering] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
   // Helper function to get tag color based on type
   const getTypeStyles = (type: string) => {
     switch (type) {
@@ -63,19 +63,17 @@ const SafetyUpdateCard = ({
   const dataAttributes = generateDataAttributes('safety', update.id);
 
   const handleCardClick = () => {
-    setIsSheetOpen(true);
-    if (onClick) onClick();
+    onClick(update); // Pass the full update data
   };
 
   return (
-    <>
-      <Card 
-        className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
-        onClick={handleCardClick}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-        {...dataAttributes} // Apply data attributes for highlighting
-      >
+    <Card 
+      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
+      onClick={handleCardClick}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      {...dataAttributes} // Apply data attributes for highlighting
+    >
       {/* Share button in top right corner - shows on hover */}
       {isHovering && (
         <div className="absolute top-2 right-2 z-10">
@@ -128,11 +126,6 @@ const SafetyUpdateCard = ({
         </div>
       )}
     </Card>
-
-    <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-      <SafetySheetContent update={update} onOpenChange={setIsSheetOpen} />
-    </Sheet>
-  </>
   );
 };
 

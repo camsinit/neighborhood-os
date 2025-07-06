@@ -5,8 +5,11 @@ import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { useSearchParams } from 'react-router-dom';
 import { highlightItem } from '@/utils/highlight';
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { useUrlSheetState } from '@/hooks/useUrlSheetState';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
 import { createLogger } from '@/utils/logger';
+import { Sheet } from '@/components/ui/sheet';
+import NeighborSheetContent from '@/components/neighbors/NeighborSheetContent';
 
 const logger = createLogger('NeighborsPage');
 
@@ -21,6 +24,17 @@ function NeighborsPage() {
   // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedNeighbor = useHighlightedItem('neighbors');
+  
+  // URL-based sheet state management
+  const {
+    isSheetOpen,
+    detailItemId,
+    detailItem,
+    openSheet,
+    closeSheet
+  } = useUrlSheetState({
+    contentType: 'neighbors'
+  });
   
   // State for dialog controls - now uses unified invite dialog
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -80,6 +94,13 @@ function NeighborsPage() {
         {/* Remove the bg-white wrapper to match safety updates structure */}
         <UserDirectory />
       </ModuleContent>
+
+      {/* URL-managed detail sheet */}
+      {isSheetOpen && detailItem && (
+        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+          <NeighborSheetContent neighbor={detailItem} onOpenChange={closeSheet} />
+        </Sheet>
+      )}
 
       {/* The unified invite dialog */}
       <UnifiedInviteDialog 

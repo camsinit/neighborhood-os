@@ -7,7 +7,7 @@ import BaseGoodsCard from './BaseGoodsCard';
 
 interface RequestGoodsCardProps {
   request: GoodsExchangeItem;
-  onSelect: () => void;
+  onSelect: (item: GoodsExchangeItem) => void; // Pass full item data
 }
 
 /**
@@ -23,7 +23,7 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
   return (
     <BaseGoodsCard 
       item={request}
-      onClick={onSelect}
+      onClick={() => onSelect(request)} // Pass the full item
       className="w-64 h-48"
     >
       {/* Dotted "I can help!" section at the top - reduced height */}
@@ -32,7 +32,7 @@ const RequestGoodsCard: React.FC<RequestGoodsCardProps> = ({
           className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2"
           onClick={(e) => {
             e.stopPropagation();
-            onSelect();
+            onSelect(request); // Pass the full item
           }}
         >
           I can help!

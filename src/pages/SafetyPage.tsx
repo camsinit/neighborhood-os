@@ -5,8 +5,11 @@ import SafetyUpdates from '@/components/SafetyUpdates';
 import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
 import { useSearchParams } from 'react-router-dom'; 
 import { useHighlightedItem } from '@/hooks/useHighlightedItem';
+import { useUrlSheetState } from '@/hooks/useUrlSheetState';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
+import { Sheet } from '@/components/ui/sheet';
+import SafetySheetContent from '@/components/safety/SafetySheetContent';
 
 const logger = createLogger('SafetyPage');
 
@@ -21,6 +24,17 @@ function SafetyPage() {
   // State for route parameters and highlighting
   const [searchParams] = useSearchParams();
   const highlightedUpdate = useHighlightedItem('safety');
+  
+  // URL-based sheet state management
+  const {
+    isSheetOpen,
+    detailItemId,
+    detailItem,
+    openSheet,
+    closeSheet
+  } = useUrlSheetState({
+    contentType: 'safety'
+  });
   
   // State for dialog controls
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,6 +93,13 @@ function SafetyPage() {
           <SafetyUpdates />
         </div>
       </ModuleContent>
+
+      {/* URL-managed detail sheet */}
+      {isSheetOpen && detailItem && (
+        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+          <SafetySheetContent update={detailItem} onOpenChange={closeSheet} />
+        </Sheet>
+      )}
 
       {/* Render the AddSafetyUpdateDialogNew component */}
       <AddSafetyUpdateDialogNew 
