@@ -15,7 +15,7 @@ interface RSVPListProps {
 /**
  * RSVPList Component
  * 
- * Displays a list of users who have RSVP'd to an event
+ * Displays a list of users who have RSVP'd to an event plus the event host
  * 
  * @param eventId - The ID of the event to show RSVPs for
  * @param className - Optional CSS class name for styling
@@ -64,17 +64,21 @@ const RSVPList = ({ eventId, className = "", showEmptyState = true }: RSVPListPr
       <h4 className="font-medium mb-2">Attendees ({rsvps.length})</h4>
       <div className="flex -space-x-2">
         {/* Show avatars for the first few RSVPs */}
-        {displayedRsvps.map((rsvp) => (
-          <Avatar key={rsvp.id} className="border-2 border-background w-8 h-8">
-            <AvatarImage 
-              src={rsvp.profiles?.avatar_url || ""} 
-              alt={rsvp.profiles?.display_name || "Attendee"} 
-            />
-            <AvatarFallback className="bg-gray-200 text-gray-600">
-              <User className="h-4 w-4" />
-            </AvatarFallback>
-          </Avatar>
-        ))}
+        {displayedRsvps.map((rsvp) => {
+          const isEventHost = (rsvp as any).isHost || false;
+          
+          return (
+            <Avatar key={rsvp.id} className={`border-2 border-background w-8 h-8 ${isEventHost ? 'ring-2 ring-blue-500' : ''}`}>
+              <AvatarImage 
+                src={rsvp.profiles?.avatar_url || ""} 
+                alt={rsvp.profiles?.display_name || "Attendee"} 
+              />
+              <AvatarFallback className="bg-gray-200 text-gray-600">
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+          );
+        })}
         
         {/* Show "and X more" if there are additional RSVPs */}
         {remainingCount > 0 && (
@@ -87,7 +91,11 @@ const RSVPList = ({ eventId, className = "", showEmptyState = true }: RSVPListPr
       {/* Show names of visible attendees */}
       <div className="mt-2 text-sm text-gray-600">
         {displayedRsvps
-          .map((rsvp) => rsvp.profiles?.display_name || "Anonymous")
+          .map((rsvp) => {
+            const name = rsvp.profiles?.display_name || "Anonymous";
+            const isEventHost = (rsvp as any).isHost || false;
+            return isEventHost ? `${name} (Host)` : name;
+          })
           .join(", ")}
         {remainingCount > 0 && ` and ${remainingCount} more`}
       </div>
