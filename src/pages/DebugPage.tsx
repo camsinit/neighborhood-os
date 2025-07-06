@@ -15,7 +15,7 @@ import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
-import MainLayout from '@/components/layout/MainLayout';
+
 
 /**
  * DebugPage component
@@ -33,8 +33,7 @@ const DebugPage = () => {
   const [showSurveyTest, setShowSurveyTest] = useState(false);
 
   return (
-    <MainLayout>
-      <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-6 max-w-7xl">
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -200,8 +199,7 @@ const DebugPage = () => {
           onOpenChange={setShowSurveyTest}
           isTestMode={true} // Mark this as test mode to prevent data modification
         />
-      </div>
-    </MainLayout>
+    </div>
   );
 };
 
