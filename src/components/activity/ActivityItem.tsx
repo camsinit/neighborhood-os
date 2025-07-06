@@ -1,7 +1,7 @@
 
 import React from "react";
 import { differenceInHours, differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
-import { User } from "lucide-react";
+import { User, Trash2 } from "lucide-react";
 import { Activity } from "@/hooks/useActivities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getActivityIcon, getActivityColor } from "./utils/activityHelpers";
@@ -11,6 +11,7 @@ import { HighlightableItemType } from "@/utils/highlight/types";
 import { generateDataAttributes } from "@/utils/dataAttributes";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 /**
  * Props for the ActivityItem component
@@ -18,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 interface ActivityItemProps {
   activity: Activity;
   onAction: (activity: Activity) => void;
+  debugDeleteMode?: boolean;
+  onDelete?: (activityId: string) => void;
 }
 
 /**
@@ -97,7 +100,9 @@ const getHighlightableType = (activityType: string): HighlightableItemType => {
  */
 const ActivityItem = ({
   activity,
-  onAction
+  onAction,
+  debugDeleteMode = false,
+  onDelete
 }: ActivityItemProps) => {
   const navigate = useNavigate();
   const navigationService = createItemNavigationService(navigate);
@@ -134,6 +139,16 @@ const ActivityItem = ({
       }
     } catch (error) {
       console.error('Error navigating from activity item:', error);
+    }
+  };
+
+  /**
+   * Handle delete button click - prevents event propagation
+   */
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the item click
+    if (onDelete) {
+      onDelete(activity.id);
     }
   };
 
@@ -207,6 +222,19 @@ const ActivityItem = ({
         >
           {getActivityBadgeLabel(activity.activity_type)}
         </Badge>
+
+        {/* Debug delete button - only visible in debug mode */}
+        {debugDeleteMode && onDelete && (
+          <Button
+            variant="destructive"
+            size="sm"
+            className="ml-2 p-1 h-6 w-6 min-w-0"
+            onClick={handleDeleteClick}
+            title="Delete activity (Debug Mode)"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        )}
       </div>
     </div>
   );

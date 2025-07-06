@@ -1040,6 +1040,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_activity_debug: {
+        Args: { activity_id: string }
+        Returns: boolean
+      }
       delete_user_account: {
         Args: { target_user_id: string }
         Returns: Json
