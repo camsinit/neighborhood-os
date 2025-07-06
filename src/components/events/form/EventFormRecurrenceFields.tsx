@@ -77,7 +77,6 @@ const EventFormRecurrenceFields = ({
               type="date"
               value={recurrenceEndDate}
               onChange={(e) => setRecurrenceEndDate(e.target.value)}
-              required={isRecurring}
             />
           </div>
         </>
