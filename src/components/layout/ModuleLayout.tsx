@@ -32,8 +32,8 @@ const ModuleLayout = ({
   const themeConfig = moduleThemeColors[themeColor];
   
   return (
-    // Main container with theme-specific gradient background
-    <ModuleContainer themeColor={themeColor}>
+    // Main container without gradient background
+    <div className="min-h-screen bg-gray-50">
       {/* Header section with proper left-alignment */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
         {/* Title - theme-colored and left-aligned */}
@@ -67,13 +67,13 @@ const ModuleLayout = ({
         )}
       </div>
       
-      <ModuleContent className={className}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
         {/* Main content area - left-aligned container */}
         <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           {children}
         </div>
-      </ModuleContent>
-    </ModuleContainer>
+      </div>
+    </div>
   );
 };
 
