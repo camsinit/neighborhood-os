@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import ShareButton from "@/components/ui/share-button";
 
 // Import our new component modules
 import EventDateTime from "./details/EventDateTime";
@@ -68,7 +69,16 @@ const EventSheetContent = ({
       <SheetHeader className="mb-4">
         <SheetTitle className="text-xl font-bold flex justify-between items-start">
           <span>{event.title}</span>
-          {EditButton && <EditButton onSheetClose={handleSheetClose} />}
+          <div className="flex items-center gap-2">
+            <ShareButton
+              contentType="events"
+              contentId={event.id}
+              neighborhoodId={event.neighborhood_id}
+              size="sm"
+              variant="ghost"
+            />
+            {EditButton && <EditButton onSheetClose={handleSheetClose} />}
+          </div>
         </SheetTitle>
       </SheetHeader>
 
