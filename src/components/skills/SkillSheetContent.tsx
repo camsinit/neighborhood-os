@@ -38,6 +38,8 @@ const SkillSheetContent = ({
   const [providers, setProviders] = useState<SkillProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [userHasSkill, setUserHasSkill] = useState(false);
+  // Store neighborhood ID for sharing functionality
+  const [neighborhoodId, setNeighborhoodId] = useState<string>('');
 
   // Function to close the sheet
   const handleSheetClose = () => {
@@ -56,6 +58,9 @@ const SkillSheetContent = ({
           data: userNeighborhood
         } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
         if (!userNeighborhood) return;
+
+        // Store the neighborhood ID for sharing functionality
+        setNeighborhoodId(userNeighborhood.neighborhood_id);
 
         // Fetch skills with user profiles
         const {
@@ -166,7 +171,7 @@ const SkillSheetContent = ({
             
           </div>
           <div className="flex items-center gap-2">
-            <ShareButton contentType="skills" contentId={providers[0]?.skill_id || ''} neighborhoodId="" size="sm" variant="ghost" />
+            <ShareButton contentType="skills" contentId={providers[0]?.skill_id || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
           </div>
         </SheetTitle>
       </SheetHeader>
