@@ -35,7 +35,7 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
   if (!user || user.id !== update.author_id) return null;
 
   // Type cast the update.type to ensure it matches our schema
-  const safetyType = update.type as "Emergency" | "Suspicious Activity" | "Infrastructure" | "Weather Alert" | "General Safety";
+  const safetyType = update.type as "Housing/Rentals" | "Suspicious Activity" | "Ideas & Inspiration";
 
   // Pass the correct props to the SafetyUpdateForm component
   return (

@@ -8,8 +8,8 @@ export const safetyUpdateSchema = z.object({
   description: z.string().min(3, {
     message: "Description must be at least 3 characters.",
   }),
-  // Updated to use a more specific set of safety-related categories
-  type: z.enum(["Emergency", "Suspicious Activity", "Infrastructure", "Weather Alert", "General Safety"], {
+  // Updated to use neighborhood update categories
+  type: z.enum(["Housing/Rentals", "Suspicious Activity", "Ideas & Inspiration"], {
     required_error: "Please select a type.",
   }),
   imageUrl: z.string().optional(),
@@ -17,12 +17,10 @@ export const safetyUpdateSchema = z.object({
 
 export type SafetyUpdateFormData = z.infer<typeof safetyUpdateSchema>;
 
-// Updated with new safety-specific categories
+// Updated with new neighborhood update categories
 export const SAFETY_UPDATE_TYPES = [
-  { value: "Emergency", label: "Emergency" },          // For urgent situations requiring immediate attention
-  { value: "Suspicious Activity", label: "Suspicious Activity" },  // For reporting unusual or concerning behavior
-  { value: "Infrastructure", label: "Infrastructure" }, // For issues with roads, lighting, etc.
-  { value: "Weather Alert", label: "Weather Alert" },   // For severe weather warnings
-  { value: "General Safety", label: "General Safety" }  // For other safety-related updates
+  { value: "Housing/Rentals", label: "Housing/Rentals" },
+  { value: "Suspicious Activity", label: "Suspicious Activity" },
+  { value: "Ideas & Inspiration", label: "Ideas & Inspiration" }
 ];
 

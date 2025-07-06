@@ -28,7 +28,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Emergency", // Set Emergency as default to test the triggers
+      type: existingData?.type || "Housing/Rentals", // Set Housing/Rentals as default
       imageUrl: existingData?.imageUrl || "",
     },
   });
