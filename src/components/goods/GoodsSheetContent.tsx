@@ -330,60 +330,39 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                   Description
                 </h3>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6">
                   {item.description}
                 </p>
-              </div>
-            )}
-
-            {/* Additional Images Gallery */}
-            {item.images && item.images.length > 1 && (
-              <div className="bg-white border border-gray-200/60 rounded-xl p-5">
-                <h3 className="font-semibold text-lg mb-4 text-gray-900 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  More Images
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {item.images.slice(1).map((image, index) => (
-                    <div key={index} className="group cursor-pointer">
-                      <img
-                        src={image}
-                        alt={`${item.title} image ${index + 2}`}
-                        className="rounded-lg object-cover aspect-square w-full group-hover:scale-105 transition-transform duration-200 shadow-sm"
-                      />
+                
+                {/* Timeline Information integrated */}
+                <div className="border-t border-gray-200 pt-6">
+                  <h4 className="font-semibold text-base mb-4 text-gray-900 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                    Timeline
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Posted</p>
+                        <p className="text-gray-600">{format(new Date(item.created_at), 'MMM d, yyyy')}</p>
+                      </div>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                        <Calendar className="h-4 w-4 text-orange-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Available until</p>
+                        <p className="text-gray-600">{format(new Date(item.valid_until), 'MMM d, yyyy')}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* Timeline Information */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60 rounded-xl p-5">
-              <h3 className="font-semibold text-lg mb-4 text-gray-900 flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                Timeline
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Posted</p>
-                    <p className="text-gray-600">{format(new Date(item.created_at), 'MMM d, yyyy')}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Available until</p>
-                    <p className="text-gray-600">{format(new Date(item.valid_until), 'MMM d, yyyy')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Contact CTA - Enhanced */}
             {!isOwner && (
