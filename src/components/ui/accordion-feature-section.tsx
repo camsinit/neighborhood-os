@@ -144,8 +144,17 @@ const Feature197 = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   
-  // Video URL - using the uploaded video from GitHub
-  const videoUrl = "/videos/Events.mp4";
+  // Video mapping for each section - you can replace these with actual video URLs
+  const videoMapping = {
+    1: "/videos/Events.mp4", // Gatherings/Events
+    2: "/videos/Events.mp4", // Freebies (placeholder - replace with actual video)
+    3: "/videos/Events.mp4", // Skills (placeholder - replace with actual video)
+    4: "/videos/Events.mp4", // Safety (placeholder - replace with actual video)
+    5: "/videos/Events.mp4", // Messaging (placeholder - replace with actual video)
+  };
+  
+  // Get current video URL based on active tab
+  const currentVideoUrl = videoMapping[activeTabId as keyof typeof videoMapping] || "/videos/Events.mp4";
   
   // Intersection observer to trigger video play when section is visible
   useEffect(() => {
@@ -172,6 +181,17 @@ const Feature197 = ({
     
     return () => observer.disconnect();
   }, []);
+  
+  // Effect to play video when active tab changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Reset and play video when tab changes
+    video.currentTime = 0;
+    setShowReplayButton(false);
+    video.play().catch(console.error);
+  }, [activeTabId, currentVideoUrl]);
   
   // Handle video end event
   const handleVideoEnd = () => {
@@ -229,7 +249,7 @@ const Feature197 = ({
           <div ref={videoContainerRef} className="relative m-auto hidden w-1/2 overflow-hidden rounded-xl bg-muted md:block">
             <video 
               ref={videoRef}
-              src={videoUrl}
+              src={currentVideoUrl}
               className="aspect-[4/3] rounded-md object-cover w-full h-full"
               muted
               onEnded={handleVideoEnd}
