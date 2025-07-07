@@ -153,7 +153,7 @@ const Feature197 = ({
                     </h6>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <p className="mt-3 text-muted-foreground py-[10px]">{tab.description}</p>
+                    <p className="mt-3 text-muted-foreground pb-[10px]">{tab.description}</p>
                     
                     {/* Replaces section with feature-specific logos */}
                     <div className="mt-4 flex items-start gap-4">
