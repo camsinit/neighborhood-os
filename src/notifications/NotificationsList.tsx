@@ -7,7 +7,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, Check } from 'lucide-react';
+import { Bell, Check, Circle } from 'lucide-react';
 import { NotificationItem } from './NotificationItem';
 import { useNotifications, useUnreadCount, useNotificationActions } from './useNotifications';
 import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
@@ -32,7 +32,15 @@ export function NotificationsList() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Bell className="h-6 w-6" />
-            Notifications ({notifications.length})
+            Notifications
+            {notifications.length > 0 && (
+              <div className="relative">
+                <Circle className="h-6 w-6 fill-red-500 text-red-500" />
+                <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                  {notifications.length > 99 ? '99+' : notifications.length}
+                </span>
+              </div>
+            )}
             {unreadCount > 0 && (
               <span className="h-5 w-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
                 {unreadCount > 9 ? '9+' : unreadCount}
