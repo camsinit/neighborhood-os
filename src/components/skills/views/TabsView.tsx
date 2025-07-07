@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { ThemedTabs, ThemedTabsContent } from '@/components/ui/themed-tabs';
 import SkillsPageNavigation from '@/components/skills/SkillsPageNavigation';
 import SkillsList from '@/components/skills/SkillsList';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
@@ -35,7 +35,7 @@ const TabsView: React.FC<TabsViewProps> = ({
   getTypedCategory
 }) => {
   return (
-    <Tabs value={view} onValueChange={handleTabChange}>
+    <ThemedTabs value={view} onValueChange={handleTabChange}>
       <SkillsPageNavigation
         view={view}
         searchQuery={searchQuery}
@@ -46,16 +46,16 @@ const TabsView: React.FC<TabsViewProps> = ({
         setIsSkillDialogOpen={setIsSkillDialogOpen}
       />
       
-      <TabsContent value="offers" className="mt-0">
+      <ThemedTabsContent value="offers" className="mt-0">
         <SkillsList showRequests={false} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-      </TabsContent>
-      <TabsContent value="requests" className="mt-0">
+      </ThemedTabsContent>
+      <ThemedTabsContent value="requests" className="mt-0">
         <SkillsList showRequests={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-      </TabsContent>
-      <TabsContent value="mine" className="mt-0">
+      </ThemedTabsContent>
+      <ThemedTabsContent value="mine" className="mt-0">
         <SkillsList showMine={true} selectedCategory={getTypedCategory(category)} searchQuery={searchQuery} />
-      </TabsContent>
-    </Tabs>
+      </ThemedTabsContent>
+    </ThemedTabs>
   );
 };
 

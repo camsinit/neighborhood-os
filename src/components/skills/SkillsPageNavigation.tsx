@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemedTabs, ThemedTabsList, ThemedTabsTrigger } from '@/components/ui/themed-tabs';
 import { PlusCircle, MessageSquare } from 'lucide-react';
 import SearchInput from '@/components/ui/search-input';
 import SkillsFilter from '@/components/skills/SkillsFilter';
@@ -54,27 +54,27 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         />
         <SkillsFilter />
         
-        {/* Tabs using standard styling like Freebies */}
+        {/* Tabs using themed styling */}
         <div className="ml-auto hidden sm:block">
-          <Tabs value={view} onValueChange={handleTabChange}>
-            <TabsList>
-              <TabsTrigger value="offers" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">Offers</TabsTrigger>
-              <TabsTrigger value="requests" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">Requests</TabsTrigger>
-              <TabsTrigger value="mine" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">My Skills</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ThemedTabs value={view} onValueChange={handleTabChange}>
+            <ThemedTabsList themeColor="skills">
+              <ThemedTabsTrigger value="offers" themeColor="skills">Offers</ThemedTabsTrigger>
+              <ThemedTabsTrigger value="requests" themeColor="skills">Requests</ThemedTabsTrigger>
+              <ThemedTabsTrigger value="mine" themeColor="skills">My Skills</ThemedTabsTrigger>
+            </ThemedTabsList>
+          </ThemedTabs>
         </div>
       </div>
       
-      {/* Show tabs on mobile below search/filter using standard styling */}
+      {/* Show tabs on mobile below search/filter using themed styling */}
       <div className="sm:hidden w-full">
-        <Tabs value={view} onValueChange={handleTabChange}>
-          <TabsList className="w-full">
-            <TabsTrigger value="offers" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">Offers</TabsTrigger>
-            <TabsTrigger value="requests" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">Requests</TabsTrigger>
-            <TabsTrigger value="mine" className="flex-1 data-[state=active]:bg-green-500 data-[state=active]:text-white">My Skills</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <ThemedTabs value={view} onValueChange={handleTabChange}>
+          <ThemedTabsList className="w-full" themeColor="skills">
+            <ThemedTabsTrigger value="offers" className="flex-1" themeColor="skills">Offers</ThemedTabsTrigger>
+            <ThemedTabsTrigger value="requests" className="flex-1" themeColor="skills">Requests</ThemedTabsTrigger>
+            <ThemedTabsTrigger value="mine" className="flex-1" themeColor="skills">My Skills</ThemedTabsTrigger>
+          </ThemedTabsList>
+        </ThemedTabs>
       </div>
       
       {/* Action buttons section */}

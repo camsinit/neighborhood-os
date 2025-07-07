@@ -6,7 +6,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemedTabs, ThemedTabsList, ThemedTabsTrigger } from "@/components/ui/themed-tabs";
 
 interface CalendarHeaderProps {
   view: 'week' | 'month';
@@ -98,13 +98,13 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           <ChevronRight className="h-4 w-4" />
         </Button>
         
-        {/* View toggle using standard Tabs component like in Freebies */}
-        <Tabs value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')}>
-          <TabsList>
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="month">Month</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* View toggle using themed tabs */}
+        <ThemedTabs value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')}>
+          <ThemedTabsList themeColor="calendar">
+            <ThemedTabsTrigger value="week" themeColor="calendar">Week</ThemedTabsTrigger>
+            <ThemedTabsTrigger value="month" themeColor="calendar">Month</ThemedTabsTrigger>
+          </ThemedTabsList>
+        </ThemedTabs>
         
         <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
           <Plus className="h-4 w-4 mr-1" /> Add Event
