@@ -19,32 +19,32 @@ const categoryConfig: Record<SkillCategory, {
   technology: {
     icon: Brain,
     displayName: 'Technology',
-    iconColor: 'text-blue-600'
+    iconColor: 'text-green-600'
   },
   emergency: {
     icon: Shield,
     displayName: 'Emergency & Safety',
-    iconColor: 'text-red-600'
+    iconColor: 'text-green-600'
   },
   professional: {
     icon: Briefcase,
     displayName: 'Professional Services',
-    iconColor: 'text-purple-600'
+    iconColor: 'text-green-600'
   },
   maintenance: {
     icon: Wrench,
     displayName: 'Home & Maintenance',
-    iconColor: 'text-orange-600'
+    iconColor: 'text-green-600'
   },
   care: {
     icon: Heart,
     displayName: 'Care & Support',
-    iconColor: 'text-pink-600'
+    iconColor: 'text-green-600'
   },
   education: {
     icon: GraduationCap,
     displayName: 'Education & Arts',
-    iconColor: 'text-emerald-600'
+    iconColor: 'text-green-600'
   }
 };
 interface SkillCategoryCardProps {
