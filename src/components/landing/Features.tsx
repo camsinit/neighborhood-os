@@ -53,7 +53,7 @@ const Features = () => {
     ]
   }, {
     id: 5,
-    title: "Neighbors Directory",
+    title: "Directory",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
     description: "Google Groups are archaic and spreadsheets are hard to maintain. Our neighbor directory makes it easy to know who's nearby and how to reach out to find them",
     replaces: [
