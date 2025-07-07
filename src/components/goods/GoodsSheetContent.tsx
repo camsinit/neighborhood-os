@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Calendar, MapPin, Package, MessageSquare, Edit, Trash } from "lucide-react";
+import { User, Calendar, MapPin, Package, MessageSquare, Edit, Trash, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import ShareButton from "@/components/ui/share-button";
@@ -203,6 +203,53 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
               <p className="text-sm text-gray-600">
                 {item.request_type === 'offer' ? 'Offering this item' : 'Looking for this item'}
               </p>
+              
+              {/* Contact Information - Only show if not the owner */}
+              {!isOwner && (
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      // Toggle showing contact information
+                      const contactInfo = document.getElementById(`contact-info-${item.id}`);
+                      if (contactInfo) {
+                        contactInfo.classList.toggle('hidden');
+                      }
+                    }}
+                    className="text-xs"
+                  >
+                    <MessageCircle className="h-3 w-3 mr-1" />
+                    Show Contact Info
+                  </Button>
+                  
+                  {/* Contact details that will be shown/hidden */}
+                  <div id={`contact-info-${item.id}`} className="hidden mt-2 p-2 bg-white rounded border">
+                    <p className="text-xs font-medium text-gray-700 mb-1">Contact for pickup:</p>
+                    {(item.profiles as any)?.phone_visible && (item.profiles as any)?.phone_number && (
+                      <p className="text-xs text-gray-600">
+                        📞 {(item.profiles as any).phone_number}
+                      </p>
+                    )}
+                    {(item.profiles as any)?.email_visible && (
+                      <p className="text-xs text-gray-600">
+                        ✉️ Contact through the platform
+                      </p>
+                    )}
+                    {(item.profiles as any)?.address_visible && (item.profiles as any)?.address && (
+                      <p className="text-xs text-gray-600">
+                        📍 {(item.profiles as any).address}
+                      </p>
+                    )}
+                    {(!(item.profiles as any)?.phone_visible || !(item.profiles as any)?.phone_number) && 
+                     !(item.profiles as any)?.email_visible && 
+                     (!(item.profiles as any)?.address_visible || !(item.profiles as any)?.address) && (
+                      <p className="text-xs text-gray-500 italic">
+                        Contact information not publicly available. Consider reaching out through the neighborhood network.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
