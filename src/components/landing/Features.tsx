@@ -48,7 +48,7 @@ const Features = () => {
     description: "No more chaotic email threads, group chat threads, or annoying neighbors complaining about dog shit on their lawn. This is the place for simple updates from neighbors for everyday info you'd want to know.",
     replaces: [
       { name: "Nextdoor", logo: "/lovable-uploads/dc60d03c-4ca5-439c-be69-23fc4690750f.png", alt: "Nextdoor" },
-      { name: "Ring", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Ring" },
+      { name: "WhatsApp", logo: "/lovable-uploads/e1e264c6-2a64-4d09-9d38-b06285b7f1b9.png", alt: "WhatsApp" },
       { name: "Citizen", logo: "/lovable-uploads/6eacf9b2-3476-4edc-b2a1-b648b5997daf.png", alt: "Citizen" }
     ]
   }, {
