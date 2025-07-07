@@ -6,9 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { NotificationDrawer } from "@/notifications";
-import { useNeighborhood } from "@/contexts/neighborhood";
+  import { Button } from "@/components/ui/button";
+  import { useNeighborhood } from "@/contexts/neighborhood";
 import { useCreateNeighborhoodAccess } from "@/hooks/useCreateNeighborhoodAccess";
 import { CreateNeighborhoodDialog } from "@/components/neighborhoods/CreateNeighborhoodDialog";
 // Import toast directly from sonner for success messages
@@ -72,10 +71,9 @@ const Header = ({
           )}
         </div>
         
-        {/* Right side - only notifications now */}
+        {/* Right side - notifications now embedded in main content */}
         <div className="flex items-center gap-2">
-          {/* Add the enhanced notification button */}
-          <NotificationDrawer />
+          {/* Notifications moved to main content area */}
         </div>
       </header>
 

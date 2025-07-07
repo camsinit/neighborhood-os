@@ -1,11 +1,12 @@
 
 /**
  * Main homepage/dashboard of the neighborhood app
- * Reorganized layout with quick actions at top, activity feed below
+ * Split layout: Quick Actions at top, Activity Feed left, Notifications right
  */
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
+import { NotificationsList } from "@/notifications/NotificationsList";
 
 const HomePage = () => {
   return (
@@ -19,10 +20,22 @@ const HomePage = () => {
 
           <Separator className="my-2 bg-gray-200" />
 
-          {/* Activity Section */}
+          {/* Split Layout: Activity Feed + Notifications */}
           <section className="w-full">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
-            <ActivityFeed />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
+              {/* Left Column: Activity Feed */}
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
+                <div className="flex-1 overflow-hidden">
+                  <ActivityFeed />
+                </div>
+              </div>
+              
+              {/* Right Column: Notifications */}
+              <div className="flex flex-col">
+                <NotificationsList />
+              </div>
+            </div>
           </section>
         </div>
       </div>
