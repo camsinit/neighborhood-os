@@ -5,7 +5,6 @@ import { Pencil, Clock, Users } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
-import EventHoverCard from "./event/EventHoverCard";
 import EventSheetContent from "./event/EventSheetContent";
 import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
@@ -162,11 +161,7 @@ const EventCard = ({
         </div>}
     </div>;
 
-  return (
-    <EventHoverCard event={eventWithRequiredProps}>
-      {eventPreview}
-    </EventHoverCard>
-  );
+  return eventPreview;
 };
 
 export default EventCard;
