@@ -3,6 +3,7 @@
  * Main homepage/dashboard of the neighborhood app
  * Split layout: Quick Actions at top, Activity Feed left, Notifications right
  */
+import { Activity } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
 import ActivityFeed from "@/components/activity/ActivityFeed";
@@ -25,7 +26,10 @@ const HomePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
               {/* Left Column: Activity Feed */}
               <div className="flex flex-col">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Neighborhood Activity</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Activity className="h-6 w-6" />
+                  Neighborhood Activity
+                </h2>
                 <div className="flex-1 overflow-hidden">
                   <ActivityFeed />
                 </div>

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Activity } from "lucide-react";
 import ActivityFeed from "./ActivityFeed";
 import { NotificationDrawer } from "@/notifications";
 
@@ -11,7 +12,10 @@ const ActivitySection = () => {
   return (
     <section className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Neighborhood Activity</h2>
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Activity className="h-6 w-6" />
+          Neighborhood Activity
+        </h2>
         <NotificationDrawer />
       </div>
       {/* Activity feed is now displayed directly, without the container div */}
