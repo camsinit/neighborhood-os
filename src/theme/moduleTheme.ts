@@ -8,7 +8,7 @@
 // Theme color definitions for modules
 export const moduleThemeColors = {
   calendar: {
-    primary: "#0EA5E9", // bright blue
+    primary: "#3B82F6", // darker blue to match Add Event button
     light: "#E0F2FE",
     variable: "--calendar-color",
     lightVariable: "--calendar-light",
