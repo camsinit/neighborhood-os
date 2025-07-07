@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Loader2, MessageSquare, Edit, Trash } from 'lucide-react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
-import SkillContactPopover from '@/components/skills/SkillContactPopover';
+
 import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
@@ -209,20 +209,19 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
                   </Button>
                 </div>
               ) : (
-                // Show request button for others' skills
-                <SkillContactPopover
-                  skillTitle={skillGroup.title}
-                  skillCategory={selectedCategory}
+                // Show request button for others' skills  
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Simple click handler without popover
+                  }}
                 >
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    Request
-                  </Button>
-                </SkillContactPopover>
+                  <MessageSquare className="h-4 w-4" />
+                  Request
+                </Button>
               )}
             </div>
             

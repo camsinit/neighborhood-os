@@ -2,7 +2,7 @@
 import React from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import RequestDetailCard from '../components/RequestDetailCard';
+
 import RequestGoodsCard from '../cards/RequestGoodsCard';
 import EmptyState from "@/components/ui/empty-state";
 import { PackageSearch } from "lucide-react";
@@ -80,20 +80,6 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
             ))}
           </div>
 
-          {/* Centered modal dialog with grayed background for request details */}
-          <Dialog open={!!selectedRequest} onOpenChange={(open) => !open && onSelectedRequestChange(null)}>
-            <DialogContent className="max-w-md p-0 bg-white">
-              {selectedRequest && (
-                <RequestDetailCard
-                  request={selectedRequest}
-                  onDeleteItem={handleDelete}
-                  isDeletingItem={isDeletingItem}
-                  onEdit={() => handleEdit(selectedRequest)}
-                  isOwner={isOwner(selectedRequest)}
-                />
-              )}
-            </DialogContent>
-          </Dialog>
         </>
       ) : urgentRequests.length === 0 ? (
         <EmptyState

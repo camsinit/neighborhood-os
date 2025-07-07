@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkillWithProfile, SkillCategory } from '../types/skillTypes';
-import SkillContactPopover from '../SkillContactPopover';
+
 import ShareButton from '@/components/ui/share-button';
 import { useState } from 'react';
 
@@ -88,20 +88,16 @@ const SkillOfferCard = ({
       {/* Request button that shows on hover - now styled to match Add Skill button */}
       {!isOwner && (
         <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2">
-          <SkillContactPopover
-            skillTitle={skill.title}
-            skillCategory={skill.skill_category}
+          <Button 
+            variant="outline" 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click from triggering
+              onRequestSkill();
+            }}
+            className="bg-green-500 hover:bg-green-600 text-white border-0 font-medium"
           >
-            <Button 
-              variant="outline" 
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent card click from triggering
-              }}
-              className="bg-green-500 hover:bg-green-600 text-white border-0 font-medium"
-            >
-              Request Skill
-            </Button>
-          </SkillContactPopover>
+            Request Skill
+          </Button>
         </div>
       )}
     </div>

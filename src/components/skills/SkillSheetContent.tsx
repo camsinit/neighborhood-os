@@ -6,7 +6,7 @@ import { MessageSquare, Plus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
-import SkillContactPopover from "./SkillContactPopover";
+
 import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
 
@@ -192,12 +192,10 @@ const SkillSheetContent = ({
               Have this skill?
             </Button>}
           
-          <SkillContactPopover skillTitle={skillTitle} skillCategory={skillCategory}>
-            <Button variant="outline" className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50">
-              <MessageSquare className="h-4 w-4" />
-              Request Help
-            </Button>
-          </SkillContactPopover>
+          <Button variant="outline" className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50">
+            <MessageSquare className="h-4 w-4" />
+            Request Help
+          </Button>
         </div>
 
         {/* Providers list */}
@@ -225,11 +223,11 @@ const SkillSheetContent = ({
                       </p>}
                   </div>
                   
-                  {provider.user_id !== user?.id && <SkillContactPopover skillTitle={skillTitle} skillCategory={skillCategory}>
-                      <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
-                        Contact
-                      </Button>
-                    </SkillContactPopover>}
+                  {provider.user_id !== user?.id && (
+                    <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
+                      Contact
+                    </Button>
+                  )}
                 </div>)}
             </div>}
         </div>

@@ -1,8 +1,6 @@
 
 import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import RequestDetailCard from './components/RequestDetailCard';
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
 import { GoodsItemCategory } from "@/components/support/types/formTypes";
@@ -31,7 +29,6 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
 }) => {
   // Get current user to check ownership
   const user = useUser();
-  const [selectedItem, setSelectedItem] = useState<GoodsExchangeItem | null>(null);
   const [itemToEdit, setItemToEdit] = useState<GoodsExchangeItem | null>(null);
 
   // Function to check if current user owns the item
@@ -42,18 +39,15 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   const handleEdit = (item: GoodsExchangeItem) => {
     // Only allow editing if user owns the item
     if (isOwner(item)) {
-      setSelectedItem(null); // Close the detail dialog first
       setItemToEdit(item);
     }
   };
 
-  // Enhanced delete handler that closes the dialog after deletion
+  // Enhanced delete handler
   const handleDelete = async (item: GoodsExchangeItem) => {
     // Only allow deletion if user owns the item
     if (isOwner(item) && onDeleteItem) {
       await onDeleteItem(item);
-      // Close the dialog after successful deletion
-      setSelectedItem(null);
     }
   };
 
@@ -69,26 +63,14 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
           <AvailableGoodsCard
             key={item.id}
             item={item}
-            // Fix: Use the correct onClick prop name
-            onClick={() => setSelectedItem(item)}
+            onClick={() => {
+              // Items now use side panel navigation
+              // The actual navigation will be handled by the page controller
+            }}
           />
         ))}
       </div>
 
-      {/* Centered modal dialog with grayed background for item details */}
-      <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
-        <DialogContent className="max-w-md p-0 bg-white">
-          {selectedItem && (
-            <RequestDetailCard
-              request={selectedItem}
-              onDeleteItem={handleDelete}
-              isDeletingItem={isDeletingItem}
-              onEdit={() => handleEdit(selectedItem)}
-              isOwner={isOwner(selectedItem)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       <UniversalDialog
         open={!!itemToEdit}
