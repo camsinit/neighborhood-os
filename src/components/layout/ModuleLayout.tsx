@@ -44,23 +44,20 @@ const ModuleLayout = ({
           {title}
         </h1>
         
-        {/* Description box with theme color and info icon */}
+        {/* Description box with gradient and colored border */}
         {description && (
           <div 
-            className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
+            className="rounded-lg p-4 border-2 shadow-sm flex items-start gap-3"
             style={{ 
-              backgroundColor: themeConfig.light,
-              borderColor: themeConfig.primary + '20' // 20% opacity
+              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}05)`,
+              borderColor: themeConfig.primary
             }}
           >
             <Info 
               className="h-5 w-5 mt-0.5 shrink-0" 
               style={{ color: themeConfig.primary }}
             />
-            <p 
-              className="text-sm text-left leading-relaxed"
-              style={{ color: themeConfig.primary }}
-            >
+            <p className="text-sm text-left leading-relaxed text-black font-medium">
               {description}
             </p>
           </div>
