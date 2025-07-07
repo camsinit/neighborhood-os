@@ -91,11 +91,11 @@ const Feature197 = ({
                       <div className="flex items-center justify-between gap-8">
                         <div className="flex flex-col items-center gap-1">
                           <img 
-                            src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
-                            alt="Partiful" 
+                            src="/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png" 
+                            alt="OfferUp" 
                             className="w-8 h-8 rounded object-cover"
                           />
-                          <span className="text-xs text-muted-foreground">Partiful</span>
+                          <span className="text-xs text-muted-foreground">OfferUp</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <img 
