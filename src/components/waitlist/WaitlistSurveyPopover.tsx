@@ -265,10 +265,19 @@ const WaitlistSurveyPopover = ({
 
         {/* Navigation buttons */}
         <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={handlePrevious} disabled={currentPage === 0} className="flex items-center gap-2">
-            <ChevronLeft className="h-4 w-4" />
-            Previous
-          </Button>
+          <button 
+            type="button"
+            onClick={() => {
+              toast({
+                title: "Thanks for your interest!",
+                description: "We'll keep you in the loop on all neighborhoodOS updates!"
+              });
+              onClose();
+            }}
+            className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
+          >
+            I just want to stay in the loop
+          </button>
 
           {currentPage < 1 ? <Button onClick={handleNext} disabled={!canProceed()} className="flex items-center gap-2">
               Next
