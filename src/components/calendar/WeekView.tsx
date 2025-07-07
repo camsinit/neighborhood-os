@@ -59,8 +59,8 @@ const WeekView = ({ weekDates, events, isLoading, getEventsForDate }: WeekViewPr
         ))}
       </div>
 
-      {/* Calendar grid - Added padding to prevent corner clipping */}
-      <div className="grid grid-cols-7 border border-gray-200 rounded-lg overflow-hidden">
+      {/* Calendar grid - Square corners */}
+      <div className="grid grid-cols-7 border border-gray-200 overflow-hidden">
         {weekDates.map((date, i) => (
           <DayCell
             key={i}
