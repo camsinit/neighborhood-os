@@ -97,11 +97,14 @@ const Feature197 = ({
                           />
                           <span className="text-xs text-muted-foreground">Partiful</span>
                         </div>
-                        <img 
-                          src="https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=40&h=40&fit=crop" 
-                          alt="Service 2" 
-                          className="w-8 h-8 rounded object-cover opacity-60"
-                        />
+                        <div className="flex flex-col items-center gap-1">
+                          <img 
+                            src="/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png" 
+                            alt="Luma" 
+                            className="w-8 h-8 rounded object-cover opacity-60"
+                          />
+                          <span className="text-xs text-muted-foreground">Luma</span>
+                        </div>
                         <img 
                           src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=40&h=40&fit=crop" 
                           alt="Service 3" 
