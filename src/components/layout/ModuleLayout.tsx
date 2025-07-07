@@ -49,7 +49,7 @@ const ModuleLayout = ({
           <div 
             className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
             style={{ 
-              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 50%, white 50%)`,
+              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 40%, white)`,
               borderColor: themeConfig.primary
             }}
           >
