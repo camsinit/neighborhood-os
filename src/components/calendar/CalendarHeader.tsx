@@ -87,16 +87,18 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {/* Navigation buttons with consistent height - removed shadow wrapper */}
-        <Button variant="outline" size="sm" onClick={handlePreviousWeek}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleToday}>
-          Today
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleNextWeek}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        {/* Navigation buttons grouped together */}
+        <div className="flex">
+          <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleToday}>
+            Today
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleNextWeek}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
         
         {/* View toggle using themed tabs */}
         <ThemedTabs value={view} onValueChange={(value) => value && setView(value as 'week' | 'month')}>
