@@ -89,12 +89,12 @@ const AvailableGoodsCard = ({
   };
   return <>
       <Card 
-        className="w-80 h-[440px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative" 
+        className="w-64 h-[320px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative" 
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
         {/* Image Section with overlay and tags - Fixed height */}
-        <div className="h-48 overflow-hidden flex-shrink-0 relative">
+        <div className="h-32 overflow-hidden flex-shrink-0 relative">
           {imageUrl && !imageError ? <>
               <img src={imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onLoad={handleImageLoad} onError={handleImageError} />
               {/* Available until overlay on image */}
@@ -136,17 +136,17 @@ const AvailableGoodsCard = ({
         </div>
 
         {/* Content Section - Flexible height with consistent padding */}
-        <div className="p-4 flex flex-col flex-1">
+        <div className="p-3 flex flex-col flex-1">
           {/* Header with profile image and title */}
-          <div className="flex items-center gap-3 mb-3">
-            <Avatar className="h-8 w-8 flex-shrink-0">
+          <div className="flex items-center gap-2 mb-2">
+            <Avatar className="h-6 w-6 flex-shrink-0">
               <AvatarImage src={item.profiles?.avatar_url} alt={item.profiles?.display_name} />
               <AvatarFallback>
-                <User className="h-4 w-4" />
+                <User className="h-3 w-3" />
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 leading-tight line-clamp-2">
+              <h3 className="text-base font-semibold text-gray-900 leading-tight line-clamp-2">
                 {item.title}
               </h3>
               
@@ -154,7 +154,7 @@ const AvailableGoodsCard = ({
           </div>
 
           {/* Description - Limited to 2 lines */}
-          {item.description && <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-shrink-0">
+          {item.description && <p className="text-xs text-gray-600 mb-2 line-clamp-2 flex-shrink-0">
               {item.description}
             </p>}
 
