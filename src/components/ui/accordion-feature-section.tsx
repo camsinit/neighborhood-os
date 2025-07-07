@@ -86,7 +86,7 @@ const Feature197 = ({
                     <p className="mt-3 text-muted-foreground">{tab.description}</p>
                     
                     {/* Replaces section with placeholder logos */}
-                    <div className="mt-4 flex items-center gap-4">
+                    <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col items-center gap-1">
