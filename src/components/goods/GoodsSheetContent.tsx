@@ -364,26 +364,6 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
               </div>
             )}
 
-            {/* Contact CTA - Enhanced */}
-            {!isOwner && (
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-                <div className="text-center space-y-3">
-                  <h3 className="font-semibold text-lg">
-                    Interested in this {item.request_type === 'offer' ? 'item' : 'request'}?
-                  </h3>
-                  <p className="text-blue-100 text-sm">
-                    Connect with {item.profiles?.display_name || 'the owner'} to arrange pickup or discuss details
-                  </p>
-                  <Button 
-                    size="lg" 
-                    className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8 shadow-lg hover-scale"
-                  >
-                    <MessageSquare className="h-5 w-5 mr-2" />
-                    Contact {item.profiles?.display_name || 'Owner'}
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
