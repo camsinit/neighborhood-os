@@ -45,7 +45,7 @@ const Features = () => {
     id: 4,
     title: "Updates",
     image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop",
-    description: "Reduce waste by sharing items like ladders or cake pans that aren't used daily. See what's available nearby and contribute to a more sustainable neighborhood.",
+    description: "No more chaotic email threads, group chat threads, or annoying neighbors complaining about dog shit on their lawn. This is the place for simple updates from neighbors for everyday info you'd want to know.",
     replaces: [
       { name: "Nextdoor", logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png", alt: "Nextdoor" },
       { name: "Ring", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Ring" },
