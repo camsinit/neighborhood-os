@@ -59,7 +59,7 @@ const Features = () => {
     replaces: [
       { name: "Excel", logo: "/lovable-uploads/f0c5e6af-5668-4ef1-90d7-e4ecf0e6973a.png", alt: "Excel" },
       { name: "Teams", logo: "/lovable-uploads/b07ee94d-d879-4e82-bad1-bad887af0461.png", alt: "Teams" },
-      { name: "Google Sheets", logo: "/lovable-uploads/87e0d485-05f1-4a68-83bf-368a878a140b.png", alt: "Google Sheets" }
+      { name: "Google Groups", logo: "/lovable-uploads/87e0d485-05f1-4a68-83bf-368a878a140b.png", alt: "Google Groups" }
     ]
   }];
   return <section className="bg-background">
