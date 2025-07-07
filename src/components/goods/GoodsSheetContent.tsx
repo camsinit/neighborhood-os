@@ -200,7 +200,7 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                   </Badge>
                   {item.urgency && (
                     <Badge className={`${urgencyStyle.bg} ${urgencyStyle.text} bg-opacity-90 backdrop-blur-sm shadow-sm`}>
-                      {item.urgency === 'high' ? 'Urgent' : item.urgency}
+                      {item.urgency === 'high' ? 'Urgent' : item.urgency.charAt(0).toUpperCase() + item.urgency.slice(1)}
                     </Badge>
                   )}
                 </div>
@@ -209,7 +209,7 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                 {item.goods_category && (
                   <div className="absolute top-3 right-3">
                     <Badge variant="outline" className="bg-white/90 backdrop-blur-sm border-gray-200 shadow-sm">
-                      {item.goods_category}
+                      {item.goods_category.charAt(0).toUpperCase() + item.goods_category.slice(1)}
                     </Badge>
                   </div>
                 )}
@@ -224,12 +224,12 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                 </Badge>
                 {item.urgency && (
                   <Badge className={`${urgencyStyle.bg} ${urgencyStyle.text}`}>
-                    {item.urgency === 'high' ? 'Urgent' : item.urgency}
+                    {item.urgency === 'high' ? 'Urgent' : item.urgency.charAt(0).toUpperCase() + item.urgency.slice(1)}
                   </Badge>
                 )}
                 {item.goods_category && (
                   <Badge variant="outline">
-                    {item.goods_category}
+                    {item.goods_category.charAt(0).toUpperCase() + item.goods_category.slice(1)}
                   </Badge>
                 )}
               </div>
