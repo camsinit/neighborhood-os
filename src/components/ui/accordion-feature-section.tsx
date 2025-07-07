@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 /**
  * Interface defining the structure of a feature item
@@ -136,6 +138,27 @@ const Feature197 = ({
 
   // State to track which image should be displayed
   const [activeImage, setActiveImage] = useState(features[0].image);
+  
+  // Video state management
+  const [showReplayButton, setShowReplayButton] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Video URL - replace this with your externally hosted MP4 file
+  const videoUrl = "https://your-video-hosting-service.com/your-video.mp4";
+  
+  // Handle video end event
+  const handleVideoEnd = () => {
+    setShowReplayButton(true);
+  };
+  
+  // Handle replay button click
+  const handleReplay = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+      setShowReplayButton(false);
+    }
+  };
   return <section className="py-[10px]">
       <div className="container mx-auto">
         <div className="mb-12 flex w-full items-start justify-between gap-12">
@@ -175,9 +198,30 @@ const Feature197 = ({
             </Accordion>
           </div>
           
-          {/* Right side: Feature image (hidden on mobile) */}
+          {/* Right side: Feature video (hidden on mobile) */}
           <div className="relative m-auto hidden w-1/2 overflow-hidden rounded-xl bg-muted md:block">
-            <img src={activeImage} alt="Feature preview" className="aspect-[4/3] rounded-md object-cover pl-4" />
+            <video 
+              ref={videoRef}
+              src={videoUrl}
+              className="aspect-[4/3] rounded-md object-cover pl-4 w-full"
+              controls
+              onEnded={handleVideoEnd}
+              preload="metadata"
+            />
+            
+            {/* Replay button - shows when video ends */}
+            {showReplayButton && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl">
+                <Button 
+                  onClick={handleReplay}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="lg"
+                >
+                  <RotateCcw className="h-5 w-5" />
+                  Replay
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
