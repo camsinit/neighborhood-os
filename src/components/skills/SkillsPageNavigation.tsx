@@ -58,9 +58,9 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         <div className="ml-auto hidden sm:block">
           <Tabs value={view} onValueChange={handleTabChange}>
             <TabsList>
-              <TabsTrigger value="offers">Offers</TabsTrigger>
-              <TabsTrigger value="requests">Requests</TabsTrigger>
-              <TabsTrigger value="mine">My Skills</TabsTrigger>
+              <TabsTrigger value="offers" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Offers</TabsTrigger>
+              <TabsTrigger value="requests" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Requests</TabsTrigger>
+              <TabsTrigger value="mine" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">My Skills</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -70,9 +70,9 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
       <div className="sm:hidden w-full">
         <Tabs value={view} onValueChange={handleTabChange}>
           <TabsList className="w-full">
-            <TabsTrigger value="offers" className="flex-1">Offers</TabsTrigger>
-            <TabsTrigger value="requests" className="flex-1">Requests</TabsTrigger>
-            <TabsTrigger value="mine" className="flex-1">My Skills</TabsTrigger>
+            <TabsTrigger value="offers" className="flex-1 data-[state=active]:bg-green-600 data-[state=active]:text-white">Offers</TabsTrigger>
+            <TabsTrigger value="requests" className="flex-1 data-[state=active]:bg-green-600 data-[state=active]:text-white">Requests</TabsTrigger>
+            <TabsTrigger value="mine" className="flex-1 data-[state=active]:bg-green-600 data-[state=active]:text-white">My Skills</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
