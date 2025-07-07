@@ -25,36 +25,31 @@ const FeatureNavigation = () => {
       path: '/calendar',
       label: 'Calendar',
       icon: Calendar,
-      activeColor: 'text-blue-600',
-      hoverColor: 'hover:text-blue-600'
+      activeColor: 'text-blue-600'
     },
     {
       path: '/skills',
       label: 'Skills',
       icon: Brain,
-      activeColor: 'text-green-600',
-      hoverColor: 'hover:text-green-600'
+      activeColor: 'text-green-600'
     },
     {
       path: '/goods',
       label: 'Freebies',
       icon: Gift,
-      activeColor: 'text-orange-600',
-      hoverColor: 'hover:text-orange-600'
+      activeColor: 'text-orange-600'
     },
     {
       path: '/safety',
       label: 'Updates',
       icon: Info,
-      activeColor: 'text-red-600',
-      hoverColor: 'hover:text-red-600'
+      activeColor: 'text-red-600'
     },
     {
       path: '/neighbors',
       label: 'Neighbors',
       icon: Users,
-      activeColor: 'text-purple-600',
-      hoverColor: 'hover:text-purple-600'
+      activeColor: 'text-purple-600'
     }
   ];
 
@@ -69,10 +64,10 @@ const FeatureNavigation = () => {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-colors",
+              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
               isActive
                 ? item.activeColor
-                : item.hoverColor
+                : "text-gray-900"
             )}
           >
             <Icon className={cn(

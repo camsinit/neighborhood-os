@@ -134,7 +134,7 @@ const EventSheetContent = ({
     <Button 
       variant="ghost" 
       size="sm"
-      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+      className="text-destructive hover:bg-destructive/10"
       onClick={() => setIsDeleteDialogOpen(true)}
     >
       <Trash className="h-4 w-4 mr-2" />
@@ -164,7 +164,7 @@ const EventSheetContent = ({
                    variant="ghost"
                    size="sm"
                    onClick={() => setIsEditing(true)}
-                   className="text-foreground hover:text-primary"
+                   className="text-foreground"
                  >
                    <Edit className="h-4 w-4 mr-2" />
                    Edit
