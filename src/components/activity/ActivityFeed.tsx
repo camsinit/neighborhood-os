@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
 import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized";
 import { createLogger } from '@/utils/logger';
+import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
 
 // Create a dedicated logger for this component
 const logger = createLogger('ActivityFeed');
@@ -172,17 +173,44 @@ const ActivityFeed = () => {
   
   logger.info("Rendering activity feed with data");
 
-  // Display the activities with load more button
+  // Group activities by time intervals and render with section headers
+  const groupedActivities = groupByTimeInterval(filteredActivities);
+  const timeGroups = getNonEmptyTimeGroups(groupedActivities);
+  
+  // Calculate how many items to display across all groups
+  let itemsDisplayed = 0;
+  const displayGroups = timeGroups.map(([interval, items]) => {
+    const remainingCount = displayCount - itemsDisplayed;
+    if (remainingCount <= 0) {
+      return [interval, []] as const;
+    }
+    
+    const itemsToShow = items.slice(0, remainingCount);
+    itemsDisplayed += itemsToShow.length;
+    return [interval, itemsToShow] as const;
+  }).filter(([, items]) => items.length > 0);
+
   return (
     <>      
-      <div className="py-2 space-y-4">
-        {/* Only render the number of items we want to display */}
-        {filteredActivities.slice(0, displayCount).map(activity => (
-          <ActivityItem 
-            key={activity.id} 
-            activity={activity} 
-            onAction={handleActivityAction}
-          />
+      <div className="py-2">
+        {displayGroups.map(([interval, items], groupIndex) => (
+          <div key={interval}>
+            {/* Time interval section header */}
+            <h3 className={`text-sm font-medium text-gray-500 mb-2 ${groupIndex === 0 ? 'mt-0' : 'mt-6'}`}>
+              {interval}
+            </h3>
+            
+            {/* Activities in this time group */}
+            <div className="space-y-4 mb-2">
+              {items.map(activity => (
+                <ActivityItem 
+                  key={activity.id} 
+                  activity={activity} 
+                  onAction={handleActivityAction}
+                />
+              ))}
+            </div>
+          </div>
         ))}
         
         {/* Load more button */}

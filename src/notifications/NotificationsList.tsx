@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bell, Check } from 'lucide-react';
 import { NotificationItem } from './NotificationItem';
 import { useNotifications, useUnreadCount, useNotificationActions } from './useNotifications';
+import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
 
 export function NotificationsList() {
   const { data: notifications = [], isLoading } = useNotifications();
@@ -52,7 +53,7 @@ export function NotificationsList() {
         </div>
       </div>
       
-      {/* Content - maintains exact same functionality and design */}
+      {/* Content - maintains exact same functionality and design with time grouping */}
       <ScrollArea className="flex-1">
         <div>
           {isLoading ? (
@@ -60,13 +61,31 @@ export function NotificationsList() {
               Loading notifications...
             </div>
           ) : notifications.length > 0 ? (
-            notifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                variant="drawer"
-              />
-            ))
+            (() => {
+              // Group notifications by time intervals
+              const groupedNotifications = groupByTimeInterval(notifications);
+              const timeGroups = getNonEmptyTimeGroups(groupedNotifications);
+              
+              return timeGroups.map(([interval, items], groupIndex) => (
+                <div key={interval}>
+                  {/* Time interval section header */}
+                  <h3 className={`text-sm font-medium text-gray-500 mb-2 ${groupIndex === 0 ? 'mt-0' : 'mt-6'}`}>
+                    {interval}
+                  </h3>
+                  
+                  {/* Notifications in this time group */}
+                  <div className="mb-2">
+                    {items.map((notification) => (
+                      <NotificationItem
+                        key={notification.id}
+                        notification={notification}
+                        variant="drawer"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ));
+            })()
           ) : (
             <div className="text-center py-8 text-gray-500">
               <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
