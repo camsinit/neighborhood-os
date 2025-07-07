@@ -58,7 +58,7 @@ export function NotificationsList() {
       
       {/* Content - maintains exact same functionality and design with time grouping */}
       <ScrollArea className="flex-1">
-        <div>
+        <div className="p-6 bg-white rounded-lg border border-gray-200">
           {isLoading ? (
             <div className="text-center py-8 text-gray-500">
               Loading notifications...
