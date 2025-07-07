@@ -105,11 +105,14 @@ const Feature197 = ({
                           />
                           <span className="text-xs text-muted-foreground">Luma</span>
                         </div>
-                        <img 
-                          src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=40&h=40&fit=crop" 
-                          alt="Service 3" 
-                          className="w-8 h-8 rounded object-cover opacity-60"
-                        />
+                        <div className="flex flex-col items-center gap-1">
+                          <img 
+                            src="/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png" 
+                            alt="FB Events" 
+                            className="w-8 h-8 rounded object-cover opacity-60"
+                          />
+                          <span className="text-xs text-muted-foreground">FB Events</span>
+                        </div>
                       </div>
                     </div>
                     
