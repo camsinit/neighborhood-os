@@ -23,9 +23,9 @@ const Features = () => {
     description: "What feels better than giving old things a new home? Knowing the people who you give it to! Enable gifting at a hyper-local level and turn old things into new connections with your neighbors."
   }, {
     id: 3,
-    title: "Skills Exchange",
+    title: "Skills",
     image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
-    description: "Offer your talents to neighbors or find help with projects, from gardening advice to language lessons. Build a community where everyone's skills are valued and shared."
+    description: "Why pay a stranger to do something for you when you have a neighbor down the street who's happy to do it for free? Sure, it's nice to save money, but mostly it just feels good to help a neighbor out."
   }, {
     id: 4,
     title: "Freebies",
