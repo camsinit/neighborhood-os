@@ -57,7 +57,7 @@ const ModuleLayout = ({
               className="h-5 w-5 mt-0.5 shrink-0" 
               style={{ color: themeConfig.primary }}
             />
-            <p className="text-sm text-left leading-relaxed text-black font-medium">
+            <p className="text-sm text-left leading-relaxed text-black">
               {description}
             </p>
           </div>
