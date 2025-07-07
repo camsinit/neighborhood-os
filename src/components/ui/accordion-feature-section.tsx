@@ -5,13 +5,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 /**
  * Interface defining the structure of a feature item
- * Each feature has an id, title, image, and description
+ * Each feature has an id, title, image, description, and replaces array
  */
 interface FeatureItem {
   id: number;
   title: string;
   image: string;
   description: string;
+  replaces: {
+    name: string;
+    logo: string;
+    alt: string;
+  }[];
 }
 
 /**
@@ -28,27 +33,52 @@ const defaultFeatures: FeatureItem[] = [{
   id: 1,
   title: "Ready-to-Use UI Blocks",
   image: "/images/block/placeholder-1.svg",
-  description: "Browse through our extensive collection of pre-built UI blocks designed with shadcn/ui. Each block is carefully crafted to be responsive, accessible, and easily customizable. Simply copy and paste the code into your project."
+  description: "Browse through our extensive collection of pre-built UI blocks designed with shadcn/ui. Each block is carefully crafted to be responsive, accessible, and easily customizable. Simply copy and paste the code into your project.",
+  replaces: [
+    { name: "Partiful", logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png", alt: "Partiful" },
+    { name: "Luma", logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png", alt: "Luma" },
+    { name: "Facebook", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Facebook" }
+  ]
 }, {
   id: 2,
   title: "Tailwind CSS & TypeScript",
   image: "/images/block/placeholder-2.svg",
-  description: "Built with Tailwind CSS for rapid styling and TypeScript for type safety. Our blocks leverage the full power of Tailwind's utility classes while maintaining clean, type-safe code that integrates seamlessly with your Next.js projects."
+  description: "Built with Tailwind CSS for rapid styling and TypeScript for type safety. Our blocks leverage the full power of Tailwind's utility classes while maintaining clean, type-safe code that integrates seamlessly with your Next.js projects.",
+  replaces: [
+    { name: "OfferUp", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "OfferUp" },
+    { name: "Craigslist", logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png", alt: "Craigslist" },
+    { name: "Marketplace", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Marketplace" }
+  ]
 }, {
   id: 3,
   title: "Dark Mode & Customization",
   image: "/images/block/placeholder-3.svg",
-  description: "Every block supports dark mode out of the box and can be customized to match your brand. Modify colors, spacing, and typography using Tailwind's configuration. The shadcn/ui theming system makes it easy to maintain consistency across your site."
+  description: "Every block supports dark mode out of the box and can be customized to match your brand. Modify colors, spacing, and typography using Tailwind's configuration. The shadcn/ui theming system makes it easy to maintain consistency across your site.",
+  replaces: [
+    { name: "TaskRabbit", logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png", alt: "TaskRabbit" },
+    { name: "Thumbtack", logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png", alt: "Thumbtack" },
+    { name: "Angie", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "Angie" }
+  ]
 }, {
   id: 4,
   title: "Accessibility First",
   image: "/images/block/placeholder-4.svg",
-  description: "All blocks are built with accessibility in mind, following WCAG guidelines. They include proper ARIA labels, keyboard navigation support, and semantic HTML structure. Ensure your website is usable by everyone without extra effort."
+  description: "All blocks are built with accessibility in mind, following WCAG guidelines. They include proper ARIA labels, keyboard navigation support, and semantic HTML structure. Ensure your website is usable by everyone without extra effort.",
+  replaces: [
+    { name: "Nextdoor", logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png", alt: "Nextdoor" },
+    { name: "Ring", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Ring" },
+    { name: "Citizen", logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png", alt: "Citizen" }
+  ]
 }, {
   id: 5,
   title: "Modern Development Stack",
   image: "/images/block/placeholder-5.svg",
-  description: "Built for modern web development with React 18, Next.js 14, and the latest shadcn/ui components. Take advantage of React Server Components, TypeScript strict mode, and other cutting-edge features while maintaining excellent performance."
+  description: "Built for modern web development with React 18, Next.js 14, and the latest shadcn/ui components. Take advantage of React Server Components, TypeScript strict mode, and other cutting-edge features while maintaining excellent performance.",
+  replaces: [
+    { name: "WhatsApp", logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png", alt: "WhatsApp" },
+    { name: "Telegram", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "Telegram" },
+    { name: "Discord", logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png", alt: "Discord" }
+  ]
 }];
 
 /**
@@ -85,34 +115,20 @@ const Feature197 = ({
                   <AccordionContent>
                     <p className="mt-3 text-muted-foreground">{tab.description}</p>
                     
-                    {/* Replaces section with placeholder logos */}
+                    {/* Replaces section with feature-specific logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
                       <div className="flex items-center justify-between gap-8">
-                        <div className="flex flex-col items-center gap-1">
-                          <img 
-                            src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
-                            alt="Partiful" 
-                            className="w-8 h-8 rounded object-cover"
-                          />
-                          <span className="text-xs text-muted-foreground">Partiful</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-1">
-                          <img 
-                            src="/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png" 
-                            alt="Luma" 
-                            className="w-8 h-8 rounded object-cover"
-                          />
-                          <span className="text-xs text-muted-foreground">Luma</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-1">
-                          <img 
-                            src="/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png" 
-                            alt="Facebook" 
-                            className="w-8 h-8 rounded object-cover"
-                          />
-                          <span className="text-xs text-muted-foreground">Facebook</span>
-                        </div>
+                        {tab.replaces.map((replacement, index) => (
+                          <div key={index} className="flex flex-col items-center gap-1">
+                            <img 
+                              src={replacement.logo} 
+                              alt={replacement.alt} 
+                              className="w-8 h-8 rounded object-cover"
+                            />
+                            <span className="text-xs text-muted-foreground">{replacement.name}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                     
