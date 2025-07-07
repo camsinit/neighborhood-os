@@ -20,7 +20,7 @@ const Features = () => {
     id: 2,
     title: "Freebies",
     image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop",
-    description: "What feels better than giving old things a new home? Knowing the people who you give it to! Enable gifting at a hyper-local level and turn old things into new connections with your neighbors."
+    description: "What feels better than giving old things a new home? Knowing the people who you give it to. Turn old things into new connections with your neighbors, easy peasy."
   }, {
     id: 3,
     title: "Skills",
