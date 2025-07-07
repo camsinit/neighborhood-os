@@ -37,7 +37,7 @@ const Features = () => {
     image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop",
     description: "Why pay a stranger to do something for you when you have a neighbor down the street who's happy to do it for free? Sure, it's nice to save money, but mostly it just feels good to help a neighbor out.",
     replaces: [
-      { name: "TaskRabbit", logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png", alt: "TaskRabbit" },
+      { name: "TaskRabbit", logo: "/lovable-uploads/a603952b-1083-46b7-95c4-636882545a12.png", alt: "TaskRabbit" },
       { name: "Thumbtack", logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png", alt: "Thumbtack" },
       { name: "Angie", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "Angie" }
     ]
