@@ -15,7 +15,7 @@ const Features = () => {
     id: 1,
     title: "Gatherings",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
-    description: "Stay connected with all neighborhood gatherings, from block parties to garden days with easy RSVP functionality. Never miss another community event and build stronger relationships with your neighbors."
+    description: "Most neighborhood gatherings are low-key, low-effort, and just need a simple place for people to RSVP to and get reminders from. That's exactly what our no-frills Calendar page is designed to do."
   }, {
     id: 2,
     title: "Safety Updates",
