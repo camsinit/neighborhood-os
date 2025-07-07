@@ -203,8 +203,9 @@ const Feature197 = ({
             <video 
               ref={videoRef}
               src={videoUrl}
-              className="aspect-[4/3] rounded-md object-cover pl-4 w-full"
-              controls
+              className="aspect-[4/3] rounded-md object-cover w-full h-full"
+              autoPlay
+              muted
               onEnded={handleVideoEnd}
               preload="metadata"
             />
