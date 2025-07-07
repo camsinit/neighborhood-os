@@ -2,11 +2,26 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Calendar, MapPin, Package, MessageSquare } from "lucide-react";
+import { User, Calendar, MapPin, Package, MessageSquare, Edit, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { GoodsExchangeItem } from '@/types/localTypes';
 import ShareButton from "@/components/ui/share-button";
 import { useUser } from '@supabase/auth-helpers-react';
+import { useState } from 'react';
+import GoodsForm from './GoodsForm';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /**
  * GoodsSheetContent - Side panel component for displaying detailed goods item information
@@ -24,13 +39,56 @@ interface GoodsSheetContentProps {
 
 const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
   const user = useUser();
+  const queryClient = useQueryClient();
   const isOwner = user?.id === item.user_id;
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Function to close the sheet
   const handleSheetClose = () => {
     if (onOpenChange) {
       onOpenChange(false);
     }
+  };
+
+  // Handle confirmed deletion
+  const handleConfirmedDelete = async () => {
+    setIsDeleting(true);
+    
+    try {
+      // Close the sheet first
+      handleSheetClose();
+      
+      // Add a small delay to ensure sheet animation completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const { error } = await supabase
+        .from('goods_exchange')
+        .delete()
+        .eq('id', item.id);
+        
+      if (error) throw error;
+      toast.success("Item deleted successfully");
+      
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
+      
+    } catch (error: any) {
+      console.error('Error deleting item:', error);
+      toast.error(`Failed to delete item: ${error.message}`);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  // Handle edit success
+  const handleEditSuccess = () => {
+    setIsEditing(false);
+    // Refresh the data
+    queryClient.invalidateQueries({ queryKey: ['goods-exchange'] });
+    toast.success("Item updated successfully");
   };
 
   // Get urgency styling
@@ -50,120 +108,188 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
   const urgencyStyle = getUrgencyStyle(item.urgency);
 
   return (
+    <>
     <SheetContent className="sm:max-w-md overflow-y-auto">
       <SheetHeader className="mb-4">
         <SheetTitle className="text-xl font-bold flex justify-between items-start">
-          <span>{item.title}</span>
+          <span>{isEditing ? "Edit Item" : item.title}</span>
           <div className="flex items-center gap-2">
-            <ShareButton
-              contentType="goods"
-              contentId={item.id}
-              neighborhoodId={item.neighborhood_id}
-              size="sm"
-              variant="ghost"
-            />
+            {!isEditing && (
+              <ShareButton
+                contentType="goods"
+                contentId={item.id}
+                neighborhoodId={item.neighborhood_id}
+                size="sm"
+                variant="ghost"
+              />
+            )}
+            {isOwner && !isEditing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="text-foreground"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
+            {isEditing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         </SheetTitle>
       </SheetHeader>
 
-      <div className="space-y-6">
-        {/* Item Type and Urgency */}
-        <div className="flex gap-2 flex-wrap">
-          <Badge variant={item.request_type === 'offer' ? 'default' : 'secondary'}>
-            {item.request_type === 'offer' ? 'Available' : 'Needed'}
-          </Badge>
-          {item.urgency && (
-            <Badge className={`${urgencyStyle.bg} ${urgencyStyle.text}`}>
-              {item.urgency === 'high' ? 'Urgent' : item.urgency}
-            </Badge>
-          )}
-          {item.goods_category && (
-            <Badge variant="outline">
-              {item.goods_category}
-            </Badge>
-          )}
-        </div>
-
-        {/* Provider/Requester Information */}
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={item.profiles?.avatar_url || undefined} />
-            <AvatarFallback>
-              <User className="h-6 w-6" />
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1">
-            <h4 className="font-medium text-gray-900">
-              {item.profiles?.display_name || 'Anonymous'}
-              {isOwner && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
-            </h4>
-            <p className="text-sm text-gray-600">
-              {item.request_type === 'offer' ? 'Offering this item' : 'Looking for this item'}
-            </p>
-          </div>
-        </div>
-
-        {/* Description */}
-        {item.description && (
-          <div>
-            <h3 className="font-semibold text-lg mb-2">Description</h3>
-            <p className="text-gray-600 whitespace-pre-wrap">{item.description}</p>
-          </div>
-        )}
-
-        {/* Item Images */}
-        {item.images && item.images.length > 0 && (
-          <div>
-            <h3 className="font-semibold text-lg mb-2">Images</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {item.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`${item.title} image ${index + 1}`}
-                  className="rounded-lg object-cover aspect-square"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Legacy single image support */}
-        {item.image_url && (!item.images || item.images.length === 0) && (
-          <div>
-            <h3 className="font-semibold text-lg mb-2">Image</h3>
-            <img
-              src={item.image_url}
-              alt={item.title}
-              className="rounded-lg w-full h-48 object-cover"
-            />
-          </div>
-        )}
-
-        {/* Date Information */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="h-4 w-4" />
-            <span>Posted: {format(new Date(item.created_at), 'MMM d, yyyy')}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Calendar className="h-4 w-4" />
-            <span>Available until: {format(new Date(item.valid_until), 'MMM d, yyyy')}</span>
-          </div>
-        </div>
-
-        {/* Contact Actions */}
-        {!isOwner && (
+      {isEditing ? (
+        <div className="space-y-4">
+          <GoodsForm 
+            onSuccess={handleEditSuccess}
+            initialData={item}
+            mode="edit"
+          />
+          {/* Delete button in edit mode */}
           <div className="pt-4 border-t">
-            <Button className="w-full flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Contact {item.profiles?.display_name || 'Owner'}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Delete Item
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Item Type and Urgency */}
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant={item.request_type === 'offer' ? 'default' : 'secondary'}>
+              {item.request_type === 'offer' ? 'Available' : 'Needed'}
+            </Badge>
+            {item.urgency && (
+              <Badge className={`${urgencyStyle.bg} ${urgencyStyle.text}`}>
+                {item.urgency === 'high' ? 'Urgent' : item.urgency}
+              </Badge>
+            )}
+            {item.goods_category && (
+              <Badge variant="outline">
+                {item.goods_category}
+              </Badge>
+            )}
+          </div>
+
+          {/* Provider/Requester Information */}
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={item.profiles?.avatar_url || undefined} />
+              <AvatarFallback>
+                <User className="h-6 w-6" />
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="flex-1">
+              <h4 className="font-medium text-gray-900">
+                {item.profiles?.display_name || 'Anonymous'}
+                {isOwner && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
+              </h4>
+              <p className="text-sm text-gray-600">
+                {item.request_type === 'offer' ? 'Offering this item' : 'Looking for this item'}
+              </p>
+            </div>
+          </div>
+
+          {/* Description */}
+          {item.description && (
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Description</h3>
+              <p className="text-gray-600 whitespace-pre-wrap">{item.description}</p>
+            </div>
+          )}
+
+          {/* Item Images */}
+          {item.images && item.images.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Images</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {item.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${item.title} image ${index + 1}`}
+                    className="rounded-lg object-cover aspect-square"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Legacy single image support */}
+          {item.image_url && (!item.images || item.images.length === 0) && (
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Image</h3>
+              <img
+                src={item.image_url}
+                alt={item.title}
+                className="rounded-lg w-full h-48 object-cover"
+              />
+            </div>
+          )}
+
+          {/* Date Information */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="h-4 w-4" />
+              <span>Posted: {format(new Date(item.created_at), 'MMM d, yyyy')}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="h-4 w-4" />
+              <span>Available until: {format(new Date(item.valid_until), 'MMM d, yyyy')}</span>
+            </div>
+          </div>
+
+          {/* Contact Actions */}
+          {!isOwner && (
+            <div className="pt-4 border-t">
+              <Button className="w-full flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Contact {item.profiles?.display_name || 'Owner'}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </SheetContent>
+
+    {/* Delete confirmation dialog */}
+    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete this item. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleConfirmedDelete}
+            disabled={isDeleting}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 

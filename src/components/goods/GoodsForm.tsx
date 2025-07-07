@@ -2,7 +2,7 @@
 // This is the main goods form component, refactored into smaller subcomponents
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { GoodsFormProps } from "@/components/support/types/formTypes";
+import { GoodsFormProps } from "./types/goodsFormTypes";
 
 // Import our refactored components
 import CategorySelection from "./form/CategorySelection";

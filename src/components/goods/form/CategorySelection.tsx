@@ -2,7 +2,7 @@
 // This component handles category selection for goods form using a dropdown select
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsCategory } from "../types/goodsFormTypes";
 
 // Import category names from constants
 import { CATEGORY_NAMES } from "../utils/goodsConstants";

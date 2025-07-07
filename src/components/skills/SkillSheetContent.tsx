@@ -132,6 +132,30 @@ const SkillSheetContent = ({
     }
   };
 
+  // Handle "Remove myself from this skill" button click
+  const handleRemoveSkill = async () => {
+    if (!user) return;
+    try {
+      // Remove user's skill offer for this specific skill title and category
+      const { error } = await supabase
+        .from('skills_exchange')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('title', skillTitle)
+        .eq('skill_category', skillCategory)
+        .eq('request_type', 'offer');
+        
+      if (error) throw error;
+
+      // Update local state
+      setUserHasSkill(false);
+      // Refresh providers list by removing current user
+      setProviders(providers.filter(p => p.user_id !== user.id));
+    } catch (error) {
+      console.error('Error removing skill:', error);
+    }
+  };
+
   // Category colors matching the existing system
   const categoryColors: Record<SkillCategory, {
     bg: string;
@@ -187,10 +211,20 @@ const SkillSheetContent = ({
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          {!userHasSkill && <Button onClick={handleAddSkill} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
+          {!userHasSkill ? (
+            <Button onClick={handleAddSkill} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
               <Plus className="h-4 w-4" />
               Have this skill?
-            </Button>}
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleRemoveSkill} 
+              variant="outline" 
+              className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
+            >
+              Remove myself from this skill
+            </Button>
+          )}
           
           <Button variant="outline" className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50">
             <MessageSquare className="h-4 w-4" />

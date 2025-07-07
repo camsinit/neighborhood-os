@@ -5,7 +5,7 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { useGoodsFormState } from "./useGoodsFormState";
 import { useGoodsFormHandlers } from "./useGoodsFormHandlers";
 import { useGoodsFormSubmit } from "./useGoodsFormSubmit";
-import { GoodsFormProps } from "@/components/support/types/formTypes";
+import { GoodsFormProps } from "../types/goodsFormTypes";
 import { toast } from "sonner";
 
 export const useGoodsForm = ({ 

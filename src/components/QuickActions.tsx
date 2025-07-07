@@ -3,7 +3,7 @@ import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "luc
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import AddEventDialog from "./AddEventDialog";
-import AddSupportRequestDialog from "./AddSupportRequestDialog";
+// Removed AddSupportRequestDialog import
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
@@ -133,7 +133,7 @@ const QuickActions = () => {
 
       {/* Dialog components - now using proper goods dialogs for items */}
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
-      <AddSupportRequestDialog open={isAddRequestOpen} onOpenChange={setIsAddRequestOpen} initialRequestType={initialRequestType} view={requestView} />
+      {/* Removed support request dialog - no longer needed */}
       <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
       
       {/* Proper goods dialogs for items */}

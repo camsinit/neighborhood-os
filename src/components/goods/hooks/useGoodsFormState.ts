@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { GoodsItemFormData, GoodsRequestFormData, GoodsItemCategory, RequestType } from "@/components/support/types/formTypes";
+import { ItemFormData, RequestFormData, GoodsCategory, UrgencyLevel } from "../types/goodsFormTypes";
 
 /**
  * Custom hook to manage the form state for goods items
