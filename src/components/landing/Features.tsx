@@ -55,7 +55,7 @@ const Features = () => {
     id: 5,
     title: "Neighbors Directory",
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
-    description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share. Transform your neighborhood from strangers to friends.",
+    description: "Google Groups are archaic and spreadsheets are hard to maintain. Our neighbor directory makes it easy to know who's nearby and how to reach out to find them",
     replaces: [
       { name: "WhatsApp", logo: "/lovable-uploads/0c36a159-f12a-4584-b606-0f0707a4c9c3.png", alt: "WhatsApp" },
       { name: "Telegram", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "Telegram" },
