@@ -25,9 +25,9 @@ export function NotificationsList() {
   };
 
   return (
-    <div className="h-full flex flex-col border rounded-lg bg-white">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b flex-shrink-0">
+      <div className="mb-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Bell className="h-6 w-6" />
@@ -54,7 +54,7 @@ export function NotificationsList() {
       
       {/* Content - maintains exact same functionality and design */}
       <ScrollArea className="flex-1">
-        <div className="p-4">
+        <div>
           {isLoading ? (
             <div className="text-center py-8 text-gray-500">
               Loading notifications...
