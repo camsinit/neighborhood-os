@@ -111,7 +111,7 @@ const Feature197 = ({
                             alt="FB Events" 
                             className="w-8 h-8 rounded object-cover"
                           />
-                          <span className="text-xs text-muted-foreground">FB Events</span>
+                          <span className="text-xs text-muted-foreground">Facebook</span>
                         </div>
                       </div>
                     </div>
