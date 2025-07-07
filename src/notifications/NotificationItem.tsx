@@ -168,15 +168,15 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
         
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Title - Using template from backend with color highlighting */}
-          <div className={`text-sm leading-tight ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
-            {highlightTitleContent(notification.title, notification.content_type)}
+          {/* Title and Time */}
+          <div className="flex justify-between items-start gap-2">
+            <div className={`text-sm leading-tight flex-1 ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
+              {highlightTitleContent(notification.title, notification.content_type)}
+            </div>
+            <span className="text-xs text-gray-500 font-medium flex-shrink-0">
+              {timeAgo.replace(' ago', '').replace('about ', '')}
+            </span>
           </div>
-          
-          {/* Time */}
-          <p className="text-xs text-gray-500 mt-1">
-            {timeAgo}
-          </p>
           
           {/* Actions for drawer variant */}
           {variant === 'drawer' && (
