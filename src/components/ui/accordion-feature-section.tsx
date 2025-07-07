@@ -35,7 +35,7 @@ const defaultFeatures: FeatureItem[] = [{
   id: 1,
   title: "Ready-to-Use UI Blocks",
   image: "/images/block/placeholder-1.svg",
-  description: "Browse through our extensive collection of pre-built UI blocks designed with shadcn/ui. Each block is carefully crafted to be responsive, accessible, and easily customizable. Simply copy and paste the code into your project.",
+  description: "Most neighborhood gatherings are low-key, low-effort, and just need a simple place for people to RSVP and get event reminders from. That's exactly what our no-frills Calendar page is designed to do.",
   replaces: [{
     name: "Partiful",
     logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
