@@ -6,6 +6,7 @@ import GoodsForm from './GoodsForm';
 import { GoodsCategory } from "./types/goodsFormTypes";
 import AvailableGoodsCard from './cards/AvailableGoodsCard';
 import { useUser } from '@supabase/auth-helpers-react';
+import { toast } from 'sonner';
 
 interface AvailableItemsSectionProps {
   goodsItems: GoodsExchangeItem[];
@@ -37,8 +38,16 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   };
 
   const handleEdit = (item: GoodsExchangeItem) => {
+    console.log("Editing item:", item);
+    console.log("Item ID:", item?.id);
+    
     // Only allow editing if user owns the item
     if (isOwner(item)) {
+      if (!item?.id) {
+        toast.error("Cannot edit item: missing item ID");
+        console.error("Edit failed - item data:", item);
+        return;
+      }
       setItemToEdit(item);
     }
   };

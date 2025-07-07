@@ -42,8 +42,20 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
   };
 
   const handleEdit = (item: GoodsExchangeItem) => {
+    console.log("Editing item:", item);
+    console.log("Item ID:", item?.id);
+    
     // Only allow editing if user owns the item
     if (isOwner(item)) {
+      if (!item?.id) {
+        toast({
+          title: "Edit Error",
+          description: "Cannot edit item: missing item ID",
+          variant: "destructive"
+        });
+        console.error("Edit failed - item data:", item);
+        return;
+      }
       setItemToEdit(item);
     } else {
       toast({

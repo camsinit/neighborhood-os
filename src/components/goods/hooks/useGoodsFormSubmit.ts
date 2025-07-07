@@ -50,7 +50,13 @@ export const useGoodsFormSubmit = (
     
     if (mode === 'edit' && !itemId) {
       toast.error("Cannot update item: missing item ID");
-      console.error("Edit mode requires itemId", { mode, itemId });
+      console.error("Edit mode requires itemId", { 
+        mode, 
+        itemId: {
+          _type: typeof itemId,
+          value: itemId
+        }
+      });
       return;
     }
     
