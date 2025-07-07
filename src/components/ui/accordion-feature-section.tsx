@@ -99,7 +99,7 @@ const Feature197 = ({
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <img 
-                            src="/lovable-uploads/ce6e9486-1522-417d-bf8f-704ae5194283.png" 
+                            src="/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png" 
                             alt="Craigslist" 
                             className="w-8 h-8 rounded object-cover"
                           />
