@@ -1,5 +1,5 @@
 
-import { Settings, Home, Plus } from "lucide-react";
+import { Settings, Home, Plus, Zap } from "lucide-react";
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -55,7 +55,10 @@ const Header = ({
       <header className="h-16 px-4 flex items-center justify-between">
         {/* Left side - Quick Actions title and create neighborhood option if applicable */}
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Zap className="h-6 w-6" />
+            Quick Actions
+          </h2>
           
           {/* Show create neighborhood option if user has access and no neighborhood */}
           {canCreateNeighborhood && !currentNeighborhood && (
