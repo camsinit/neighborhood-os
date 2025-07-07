@@ -47,9 +47,9 @@ const ModuleLayout = ({
         {/* Description box with gradient and colored border */}
         {description && (
           <div 
-            className="rounded-lg p-4 border-2 shadow-sm flex items-start gap-3"
+            className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
             style={{ 
-              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}05)`,
+              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 50%, white 50%)`,
               borderColor: themeConfig.primary
             }}
           >
