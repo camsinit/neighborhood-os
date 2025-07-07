@@ -192,7 +192,7 @@ const ActivityFeed = () => {
 
   return (
     <>      
-      <div className="py-2 bg-white rounded-lg border border-gray-200">
+      <div className="p-6 bg-white rounded-lg border border-gray-200">
         {displayGroups.map(([interval, items], groupIndex) => (
           <div key={interval}>
             {/* Time interval section header */}
