@@ -41,7 +41,7 @@ function CalendarPage() {
           className="backdrop-blur-sm rounded-lg p-6 shadow-lg border"
           style={{ 
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.calendar.primary + '40',
+            borderColor: moduleThemeColors.calendar.primary,
             boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.calendar.primary}10`
           }}
         >
