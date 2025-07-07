@@ -1,28 +1,13 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-/**
- * Survey form data interface
- */
-interface SurveyData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  neighborhoodName: string;
-  city: string;
-  state: string;
-  neighborsToOnboard: number;
-  aiCodingExperience: string;
-  openSourceInterest: string;
-}
+import { useWaitlistSurveyForm } from "./hooks/useWaitlistSurveyForm";
+import { useWaitlistSurveyNavigation } from "./hooks/useWaitlistSurveyNavigation";
+import { useWaitlistSurveySubmit } from "./hooks/useWaitlistSurveySubmit";
+import { WaitlistSurveyStep1 } from "./steps/WaitlistSurveyStep1";
+import { WaitlistSurveyStep2 } from "./steps/WaitlistSurveyStep2";
 
 /**
  * Props for the WaitlistSurveyPopover component
@@ -45,201 +30,26 @@ const WaitlistSurveyPopover = ({
   onClose,
   userEmail
 }: WaitlistSurveyPopoverProps) => {
-  // Current carousel page (0 = essential info, 1 = additional questions)
-  const [currentPage, setCurrentPage] = useState(0);
-
-  // Loading state for form submission
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Toast for user feedback
-  const {
-    toast
-  } = useToast();
-
-  // Form data state with pre-populated email
-  const [formData, setFormData] = useState<SurveyData>({
-    email: userEmail,
-    firstName: "",
-    lastName: "",
-    neighborhoodName: "",
-    city: "",
-    state: "",
-    neighborsToOnboard: 0,
-    aiCodingExperience: "",
-    openSourceInterest: ""
-  });
-
-  /**
-   * Handle input field changes
-   */
-  const handleInputChange = (field: keyof SurveyData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  /**
-   * Navigate to the next carousel page
-   */
-  const handleNext = () => {
-    if (currentPage < 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  /**
-   * Navigate to the previous carousel page
-   */
-  const handlePrevious = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  /**
-   * Submit the survey data
-   */
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      console.log("Submitting waitlist survey:", formData);
-
-      // Call edge function to save survey data
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke("save-waitlist-survey", {
-        body: formData
-      });
-      if (error) {
-        console.error("Error submitting survey:", error);
-        throw new Error("Failed to submit survey");
-      }
-      console.log("Survey submitted successfully:", data);
-      toast({
-        title: "Thank you!",
-        description: "Your information has been submitted. We'll be in touch soon!"
-      });
-
-      // Close the popover
-      onClose();
-    } catch (error: any) {
-      console.error("Survey submission error:", error);
-      toast({
-        title: "Something went wrong",
-        description: error.message || "Failed to submit survey. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { toast } = useToast();
+  
+  // Custom hooks for form management
+  const { formData, updateField, validateStep1, validateStep2 } = useWaitlistSurveyForm(userEmail);
+  const { currentPage, goToNext, isFirstStep, isLastStep } = useWaitlistSurveyNavigation();
+  const { isSubmitting, submitSurvey } = useWaitlistSurveySubmit(onClose);
 
   /**
    * Check if current page can be completed
    */
   const canProceed = () => {
-    if (currentPage === 0) {
-      // Essential info page - require all fields including email
-      return formData.email && formData.firstName && formData.lastName && formData.neighborhoodName && formData.city && formData.state;
-    } else {
-      // Additional questions page - require all fields
-      return formData.neighborsToOnboard >= 0 && formData.aiCodingExperience && formData.openSourceInterest;
-    }
+    return isFirstStep ? validateStep1() : validateStep2();
   };
 
   /**
-   * Render the essential info page (page 0)
+   * Handle form submission
    */
-  const renderEssentialInfoPage = () => <div className="space-y-4">
-
-      {/* Email field - editable */}
-      <div>
-        <Label htmlFor="email">Email Address</Label>
-        <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange('email', e.target.value)} placeholder="Enter your email address" />
-      </div>
-
-      {/* Name fields */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="firstName">First Name</Label>
-          <Input id="firstName" value={formData.firstName} onChange={e => handleInputChange('firstName', e.target.value)} placeholder="Enter your first name" />
-        </div>
-        <div>
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input id="lastName" value={formData.lastName} onChange={e => handleInputChange('lastName', e.target.value)} placeholder="Enter your last name" />
-        </div>
-      </div>
-
-      {/* Neighborhood name */}
-      <div>
-        <Label htmlFor="neighborhoodName">Neighborhood Name</Label>
-        <Input id="neighborhoodName" value={formData.neighborhoodName} onChange={e => handleInputChange('neighborhoodName', e.target.value)} placeholder="e.g., Sunset District, Capitol Hill" />
-      </div>
-
-      {/* City and State */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="city">City</Label>
-          <Input id="city" value={formData.city} onChange={e => handleInputChange('city', e.target.value)} placeholder="Enter your city" />
-        </div>
-        <div>
-          <Label htmlFor="state">State</Label>
-          <Input id="state" value={formData.state} onChange={e => handleInputChange('state', e.target.value)} placeholder="e.g., CA, NY" />
-        </div>
-      </div>
-    </div>;
-
-  /**
-   * Render the additional questions page (page 1)
-   */
-  const renderAdditionalQuestionsPage = () => <div className="space-y-6">
-      <div className="text-center mb-6">
-        
-        
-      </div>
-
-      {/* Number of neighbors */}
-      <div>
-        <Label htmlFor="neighborsCount">If you had an account today, how many neighbors could you text an invite code to today?</Label>
-        <Input id="neighborsCount" type="number" min="0" max="100" value={formData.neighborsToOnboard} onChange={e => handleInputChange('neighborsToOnboard', parseInt(e.target.value) || 0)} placeholder="0" className="mt-2" />
-      </div>
-
-      {/* AI Coding Experience */}
-      <div>
-        <Label htmlFor="aiExperience">Do you have any experience with AI coding?</Label>
-        <Select value={formData.aiCodingExperience} onValueChange={value => handleInputChange('aiCodingExperience', value)}>
-          <SelectTrigger className="mt-2">
-            <SelectValue placeholder="Select your experience level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="None">None - I haven't used AI for coding</SelectItem>
-            <SelectItem value="Beginner">Beginner - I've tried AI coding tools a few times</SelectItem>
-            <SelectItem value="Intermediate">Intermediate - I use AI coding tools regularly</SelectItem>
-            <SelectItem value="Advanced">Advanced - I'm very comfortable with AI coding</SelectItem>
-            <SelectItem value="Expert">Expert - I'm highly skilled with AI coding tools</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Open Source Interest */}
-      <div>
-        <Label htmlFor="openSourceInterest">Are you interested in open-source software?</Label>
-        <Select value={formData.openSourceInterest} onValueChange={value => handleInputChange('openSourceInterest', value)}>
-          <SelectTrigger className="mt-2">
-            <SelectValue placeholder="Select your interest level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Not Interested">Not Interested</SelectItem>
-            <SelectItem value="Not Very Interested">Not Very Interested</SelectItem>
-            <SelectItem value="Somewhat Interested">Somewhat Interested</SelectItem>
-            <SelectItem value="Interested">Interested</SelectItem>
-            <SelectItem value="Very Interested">Very Interested</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>;
+  const handleSubmit = () => {
+    submitSurvey(formData);
+  };
   return <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -260,7 +70,11 @@ const WaitlistSurveyPopover = ({
 
         {/* Carousel content */}
         <div className="min-h-[300px] py-0 -mt-4">
-          {currentPage === 0 ? renderEssentialInfoPage() : renderAdditionalQuestionsPage()}
+          {isFirstStep ? (
+            <WaitlistSurveyStep1 formData={formData} onFieldChange={updateField} />
+          ) : (
+            <WaitlistSurveyStep2 formData={formData} onFieldChange={updateField} />
+          )}
         </div>
 
         {/* Navigation buttons */}
@@ -279,12 +93,16 @@ const WaitlistSurveyPopover = ({
             I just want to stay in the loop
           </button>
 
-          {currentPage < 1 ? <Button onClick={handleNext} disabled={!canProceed()} className="flex items-center gap-2">
+          {isFirstStep ? (
+            <Button onClick={goToNext} disabled={!canProceed()} className="flex items-center gap-2">
               Next
               <ChevronRight className="h-4 w-4" />
-            </Button> : <Button onClick={handleSubmit} disabled={!canProceed() || isSubmitting} className="flex items-center gap-2">
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={!canProceed() || isSubmitting} className="flex items-center gap-2">
               {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>;
