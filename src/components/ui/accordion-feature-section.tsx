@@ -88,7 +88,7 @@ const Feature197 = ({
                     {/* Replaces section with placeholder logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center justify-between gap-8">
                         <div className="flex flex-col items-center gap-1">
                           <img 
                             src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
