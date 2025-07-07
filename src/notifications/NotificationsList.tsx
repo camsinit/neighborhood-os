@@ -4,16 +4,20 @@
  * A contained panel version of notifications for embedded use
  * Maintains all functionality from NotificationDrawer: swipe dismissal, card design, etc.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bell, Check, Circle } from 'lucide-react';
+import { Bell, Check, ChevronDown, Archive } from 'lucide-react';
 import { NotificationItem } from './NotificationItem';
-import { useNotifications, useUnreadCount, useNotificationActions } from './useNotifications';
+import { useNotifications, useUnreadCount, useNotificationActions, useArchivedNotifications } from './useNotifications';
 import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
 
 export function NotificationsList() {
+  // State for controlling archive view
+  const [showArchived, setShowArchived] = useState(false);
+  
   const { data: notifications = [], isLoading } = useNotifications();
+  const { data: archivedNotifications = [], isLoading: isLoadingArchived, refetch: refetchArchived } = useArchivedNotifications();
   const { data: unreadCount = 0 } = useUnreadCount();
   const { markAllAsRead } = useNotificationActions();
 
@@ -23,6 +27,11 @@ export function NotificationsList() {
     } catch (error) {
       console.error('Error marking all as read:', error);
     }
+  };
+
+  const handleViewArchive = async () => {
+    setShowArchived(true);
+    await refetchArchived();
   };
 
   return (
@@ -59,43 +68,82 @@ export function NotificationsList() {
       {/* Content - maintains exact same functionality and design with time grouping */}
       <ScrollArea className="flex-1">
         <div className="p-6 bg-white rounded-lg border border-gray-200">
-          {isLoading ? (
+          {(isLoading || (showArchived && isLoadingArchived)) ? (
             <div className="text-center py-8 text-gray-500">
               Loading notifications...
             </div>
-          ) : notifications.length > 0 ? (
-            (() => {
+          ) : (() => {
+            // Use archived notifications if showing archive, otherwise use regular notifications
+            const displayNotifications = showArchived ? archivedNotifications : notifications;
+            
+            if (displayNotifications.length > 0) {
               // Group notifications by time intervals
-              const groupedNotifications = groupByTimeInterval(notifications);
+              const groupedNotifications = groupByTimeInterval(displayNotifications);
               const timeGroups = getNonEmptyTimeGroups(groupedNotifications);
               
-              return timeGroups.map(([interval, items], groupIndex) => (
-                <div key={interval}>
-                  {/* Time interval section header */}
-                  <h3 className={`text-sm font-medium text-gray-500 mb-2 ${groupIndex === 0 ? 'mt-0' : 'mt-6'}`}>
-                    {interval}
-                  </h3>
+              return (
+                <>
+                  {/* Show archive header if viewing archived notifications */}
+                  {showArchived && (
+                    <div className="mb-6 pb-4 border-b border-gray-200">
+                      <div className="flex items-center gap-2">
+                        <Archive className="h-5 w-5 text-gray-500" />
+                        <h3 className="text-lg font-medium text-gray-700">Archived Notifications</h3>
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Showing {archivedNotifications.length} archived notification{archivedNotifications.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  )}
                   
-                  {/* Notifications in this time group */}
-                  <div className="mb-2">
-                    {items.map((notification) => (
-                      <NotificationItem
-                        key={notification.id}
-                        notification={notification}
-                        variant="drawer"
-                      />
-                    ))}
-                  </div>
+                  {timeGroups.map(([interval, items], groupIndex) => (
+                    <div key={interval}>
+                      {/* Time interval section header */}
+                      <h3 className={`text-sm font-medium text-gray-500 mb-2 ${groupIndex === 0 ? 'mt-0' : 'mt-6'}`}>
+                        {interval}
+                      </h3>
+                      
+                      {/* Notifications in this time group */}
+                      <div className="mb-2">
+                        {items.map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            variant="drawer"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              );
+            } else {
+              return (
+                <div className="text-center py-8 text-gray-500">
+                  <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>{showArchived ? 'No archived notifications' : 'No notifications yet'}</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {showArchived 
+                      ? 'You haven\'t archived any notifications'
+                      : 'You\'ll see updates from your neighborhood here'
+                    }
+                  </p>
                 </div>
-              ));
-            })()
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No notifications yet</p>
-              <p className="text-sm text-gray-400 mt-1">
-                You'll see updates from your neighborhood here
-              </p>
+              );
+            }
+          })()}
+          
+          {/* View Archive button - only show if not viewing archive and there are current notifications */}
+          {!showArchived && notifications.length > 0 && (
+            <div className="flex justify-center pt-4">
+              <Button 
+                variant="outline" 
+                onClick={handleViewArchive}
+                className="w-full max-w-[200px]"
+              >
+                <Archive className="h-4 w-4 mr-2" />
+                View Archive
+              </Button>
             </div>
           )}
         </div>

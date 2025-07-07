@@ -116,6 +116,75 @@ export function useUnreadCount() {
 }
 
 /**
+ * Hook to get archived notifications
+ */
+export function useArchivedNotifications() {
+  return useQuery({
+    queryKey: ['notifications', 'archived'],
+    queryFn: async (): Promise<NotificationWithProfile[]> => {
+      logger.debug('Fetching archived notifications');
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        logger.warn('No authenticated user');
+        return [];
+      }
+
+      // Fetch archived notifications
+      const { data: notifications, error: notificationsError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_archived', true)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (notificationsError) {
+        logger.error('Error fetching archived notifications:', notificationsError);
+        throw notificationsError;
+      }
+
+      if (!notifications || notifications.length === 0) {
+        logger.debug('No archived notifications found');
+        return [];
+      }
+
+      // Get unique actor IDs to fetch profiles
+      const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
+      
+      let profilesMap = new Map();
+      
+      if (actorIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', actorIds);
+
+        if (profilesError) {
+          logger.warn('Error fetching profiles for archived notifications:', profilesError);
+        } else if (profiles) {
+          profiles.forEach(profile => {
+            profilesMap.set(profile.id, profile);
+          });
+        }
+      }
+
+      // Merge notifications with profile data
+      const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
+        ...notification,
+        profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
+      }));
+
+      logger.debug(`Fetched ${notificationsWithProfiles.length} archived notifications`);
+      return notificationsWithProfiles;
+    },
+    enabled: false, // Only fetch when explicitly requested
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+/**
  * Actions for notifications
  */
 export function useNotificationActions() {
