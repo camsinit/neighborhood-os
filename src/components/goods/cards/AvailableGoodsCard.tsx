@@ -89,7 +89,7 @@ const AvailableGoodsCard = ({
   };
   return <>
       <Card 
-        className="w-64 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative"
+        className="w-48 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative"
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
