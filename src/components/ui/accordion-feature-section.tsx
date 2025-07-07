@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { RotateCcw } from "lucide-react";
@@ -142,9 +142,36 @@ const Feature197 = ({
   // Video state management
   const [showReplayButton, setShowReplayButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   
   // Video URL - using the uploaded video from GitHub
   const videoUrl = "/videos/Events.mp4";
+  
+  // Intersection observer to trigger video play when section is visible
+  useEffect(() => {
+    const videoContainer = videoContainerRef.current;
+    const video = videoRef.current;
+    
+    if (!videoContainer || !video) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Reset video and play when section comes into view
+            video.currentTime = 0;
+            setShowReplayButton(false);
+            video.play().catch(console.error);
+          }
+        });
+      },
+      { threshold: 0.5 } // Trigger when 50% of the element is visible
+    );
+    
+    observer.observe(videoContainer);
+    
+    return () => observer.disconnect();
+  }, []);
   
   // Handle video end event
   const handleVideoEnd = () => {
@@ -199,12 +226,11 @@ const Feature197 = ({
           </div>
           
           {/* Right side: Feature video (hidden on mobile) */}
-          <div className="relative m-auto hidden w-1/2 overflow-hidden rounded-xl bg-muted md:block">
+          <div ref={videoContainerRef} className="relative m-auto hidden w-1/2 overflow-hidden rounded-xl bg-muted md:block">
             <video 
               ref={videoRef}
               src={videoUrl}
               className="aspect-[4/3] rounded-md object-cover w-full h-full"
-              autoPlay
               muted
               onEnded={handleVideoEnd}
               preload="metadata"
