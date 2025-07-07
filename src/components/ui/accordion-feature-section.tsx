@@ -124,7 +124,7 @@ const Feature197 = ({
                             <img 
                               src={replacement.logo} 
                               alt={replacement.alt} 
-                              className="w-8 h-8 rounded object-cover"
+                              className="w-[47px] h-[47px] rounded object-cover"
                             />
                             <span className="text-xs text-muted-foreground text-center">{replacement.name}</span>
                           </div>
