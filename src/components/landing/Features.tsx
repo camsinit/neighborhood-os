@@ -57,7 +57,7 @@ const Features = () => {
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
     description: "Build stronger connections by seeing who lives nearby, their interests, and skills they're willing to share. Transform your neighborhood from strangers to friends.",
     replaces: [
-      { name: "WhatsApp", logo: "/lovable-uploads/ea13fbfa-65f7-42dc-b52e-8d5bc9e62def.png", alt: "WhatsApp" },
+      { name: "WhatsApp", logo: "/lovable-uploads/0c36a159-f12a-4584-b606-0f0707a4c9c3.png", alt: "WhatsApp" },
       { name: "Telegram", logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png", alt: "Telegram" },
       { name: "Discord", logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png", alt: "Discord" }
     ]
