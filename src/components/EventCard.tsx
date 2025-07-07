@@ -126,7 +126,7 @@ const EventCard = ({
   // Determine event color based on RSVP status
   const getEventColor = () => {
     if (isRsvped) {
-      return "border-green-300 bg-green-100";
+      return "border-blue-300 bg-blue-100";
     }
     return "border-gray-300 bg-gray-100";
   };
