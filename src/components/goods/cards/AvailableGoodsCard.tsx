@@ -89,7 +89,7 @@ const AvailableGoodsCard = ({
   };
   return <>
       <Card 
-        className="w-64 h-[320px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative" 
+        className="w-64 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col relative"
         {...dataAttributes} // Apply data attributes for highlighting
         onClick={handleCardClick} // Add click handler for card
       >
@@ -135,8 +135,8 @@ const AvailableGoodsCard = ({
           </div>
         </div>
 
-        {/* Content Section - Flexible height with consistent padding */}
-        <div className="p-3 flex flex-col flex-1">
+        {/* Content Section - Compact padding */}
+        <div className="p-3">
           {/* Header with profile image and title */}
           <div className="flex items-center gap-2 mb-2">
             <Avatar className="h-6 w-6 flex-shrink-0">
@@ -149,18 +149,13 @@ const AvailableGoodsCard = ({
               <h3 className="text-base font-semibold text-gray-900 leading-tight line-clamp-2">
                 {item.title}
               </h3>
-              
             </div>
           </div>
 
           {/* Description - Limited to 2 lines */}
-          {item.description && <p className="text-xs text-gray-600 mb-2 line-clamp-2 flex-shrink-0">
+          {item.description && <p className="text-xs text-gray-600 line-clamp-2">
               {item.description}
             </p>}
-
-          {/* Spacer to push footer to bottom */}
-          
-
         </div>
       </Card>
 
