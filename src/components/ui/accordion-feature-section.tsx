@@ -89,11 +89,14 @@ const Feature197 = ({
                     <div className="mt-4 flex items-center gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
                       <div className="flex items-center gap-3">
-                        <img 
-                          src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop" 
-                          alt="Service 1" 
-                          className="w-8 h-8 rounded object-cover opacity-60"
-                        />
+                        <div className="flex flex-col items-center gap-1">
+                          <img 
+                            src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
+                            alt="Partiful" 
+                            className="w-8 h-8 rounded object-cover opacity-60"
+                          />
+                          <span className="text-xs text-muted-foreground">Partiful</span>
+                        </div>
                         <img 
                           src="https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=40&h=40&fit=crop" 
                           alt="Service 2" 
