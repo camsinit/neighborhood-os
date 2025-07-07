@@ -19,7 +19,7 @@ const Features = () => {
     replaces: [
       { name: "Partiful", logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png", alt: "Partiful" },
       { name: "Luma", logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png", alt: "Luma" },
-      { name: "Facebook", logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png", alt: "Facebook" }
+      { name: "WhatsApp", logo: "/lovable-uploads/9480fc98-cf20-4e77-999c-ae26bc9e4ef9.png", alt: "WhatsApp" }
     ]
   }, {
     id: 2,
