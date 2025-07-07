@@ -33,11 +33,31 @@ import { useGoodsForm } from "./hooks/useGoodsForm";
 const GoodsForm = ({ 
   onClose, 
   initialValues,
+  initialData, // Add support for initialData from edit mode
   mode = 'create',
   requestId,
   initialRequestType,
   forceDefaultDisplay = false // Added this prop to force consistent display
 }: GoodsFormProps & { forceDefaultDisplay?: boolean }) => {
+  
+  // Transform initialData from database format to form format for edit mode
+  const transformedInitialValues = initialData ? {
+    title: initialData.title || "",
+    description: initialData.description || "",
+    // Map database field 'goods_category' to form field 'category'
+    category: initialData.goods_category || initialData.category || "Furniture",
+    // Map database field 'request_type' to form field 'requestType'
+    requestType: initialData.request_type === "offer" ? "offer" as const : "need" as const,
+    // Handle images from both image_url and images array
+    images: initialData.images || (initialData.image_url ? [initialData.image_url] : []),
+    // Handle urgency for requests
+    urgency: initialData.urgency || "medium" as const,
+    // Calculate available days from valid_until date for offers
+    availableDays: initialData.valid_until ? 
+      Math.max(1, Math.ceil((new Date(initialData.valid_until).getTime() - Date.now()) / (1000 * 60 * 60 * 24))) 
+      : 30
+  } : initialValues;
+
   // Use our custom hook to manage the form state and handlers
   // Now passing mode and requestId for proper edit functionality
   const {
@@ -56,8 +76,8 @@ const GoodsForm = ({
     setRequestFormData
   } = useGoodsForm({ 
     onClose, 
-    initialValues, 
-    initialRequestType,
+    initialValues: transformedInitialValues, // Use transformed data
+    initialRequestType: transformedInitialValues?.requestType || initialRequestType,
     mode, // Pass mode to hook
     requestId // Pass requestId to hook
   });

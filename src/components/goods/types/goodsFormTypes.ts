@@ -6,7 +6,7 @@ export interface GoodsFormProps {
   onClose?: () => void;
   onSuccess?: () => void;
   initialValues?: Partial<GoodsFormData>;
-  initialData?: any; // For existing goods items
+  initialData?: any; // For existing goods items from database (edit mode)
   mode?: 'create' | 'edit';
   requestId?: string;
   initialRequestType?: 'offer' | 'need';
