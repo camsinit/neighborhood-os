@@ -143,8 +143,8 @@ const Feature197 = ({
   const [showReplayButton, setShowReplayButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // Video URL - replace this with your externally hosted MP4 file
-  const videoUrl = "https://your-video-hosting-service.com/your-video.mp4";
+  // Video URL - using the uploaded video from GitHub
+  const videoUrl = "/videos/Events.mp4";
   
   // Handle video end event
   const handleVideoEnd = () => {
