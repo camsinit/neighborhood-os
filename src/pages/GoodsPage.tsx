@@ -6,6 +6,7 @@ import ModuleLayout from '@/components/layout/ModuleLayout';
 import { Sheet } from '@/components/ui/sheet';
 import GoodsSheetContent from '@/components/goods/GoodsSheetContent';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 /**
  * GoodsPage Component
@@ -37,7 +38,14 @@ function GoodsPage() {
         description="Share items with your neighbors or find what you need"
         themeColor="goods"
       >
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-6 shadow-lg border-2"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.goods.primary + '20',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.goods.primary}10`
+          }}
+        >
           <GoodsPageContainer />
         </div>
       </ModuleLayout>

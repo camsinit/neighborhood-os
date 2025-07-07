@@ -127,7 +127,7 @@ export const UserDirectory = () => {
   }
   
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+    <div className="p-6">
       {/* Search header */}
       <NeighborsHeader 
         onSearchChange={setSearchQuery}

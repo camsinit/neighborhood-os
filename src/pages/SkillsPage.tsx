@@ -9,6 +9,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import AddSkillPopover from '@/components/skills/AddSkillPopover';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 const logger = createLogger('SkillsPage');
 
@@ -129,7 +130,14 @@ function SkillsPage() {
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
         themeColor="skills"
       >
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-6 shadow-lg border-2"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.skills.primary + '20',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
+          }}
+        >
           <SkillsPageContent
             view={view}
             category={category}

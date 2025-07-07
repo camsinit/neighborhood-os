@@ -7,6 +7,7 @@ import { usePageSheetController } from '@/hooks/usePageSheetController';
 import { Sheet } from '@/components/ui/sheet';
 import SafetySheetContent from '@/components/safety/SafetySheetContent';
 import { useSafetyUpdates } from '@/utils/queries/useSafetyUpdates';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 /**
  * SafetyPage Component
@@ -41,7 +42,14 @@ function SafetyPage() {
         description="Stay informed about safety in your community"
         themeColor="safety"
       >
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-6 shadow-lg border-2"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.safety.primary + '20',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
+          }}
+        >
           <SafetyUpdates />
         </div>
       </ModuleLayout>

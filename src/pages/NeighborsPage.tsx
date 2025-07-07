@@ -7,6 +7,7 @@ import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
 import { Sheet } from '@/components/ui/sheet';
 import NeighborSheetContent from '@/components/neighbors/NeighborSheetContent';
 import { useNeighborUsers } from '@/components/neighbors/hooks/useNeighborUsers';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 /**
  * NeighborsPage Component
@@ -41,7 +42,16 @@ function NeighborsPage() {
         description="Get to know the people in your community"
         themeColor="neighbors"
       >
-        <UserDirectory />
+        <div 
+          className="backdrop-blur-sm rounded-lg border-2"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.neighbors.primary + '20',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.neighbors.primary}10`
+          }}
+        >
+          <UserDirectory />
+        </div>
       </ModuleLayout>
 
       {/* Universal sheet management */}

@@ -5,6 +5,7 @@ import { Sheet } from '@/components/ui/sheet';
 import EventSheetContent from '@/components/event/EventSheetContent';
 import CommunityCalendar from '@/components/CommunityCalendar';
 import { useEvents } from '@/utils/queries/useEvents';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 /**
  * CalendarPage Component
@@ -36,7 +37,14 @@ function CalendarPage() {
         description="Upcoming events in your neighborhood"
         themeColor="calendar"
       >
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
+        <div 
+          className="backdrop-blur-sm rounded-lg p-6 shadow-lg border-2"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.calendar.primary + '20',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.calendar.primary}10`
+          }}
+        >
           <CommunityCalendar />
         </div>
       </ModuleLayout>
