@@ -36,7 +36,7 @@ export const moduleThemeColors = {
     icon: "Info" // Changed from Shield to Info
   },
   neighbors: {
-    primary: "#7E69AB", // secondary purple
+    primary: "#8B5FFF", // brighter, more saturated purple
     light: "#F5F3FF",
     variable: "--neighbors-color",
     lightVariable: "--neighbors-light",
