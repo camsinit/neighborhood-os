@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "@/components/ui/share-button";
+import EditEventDialog from "./EditEventDialog";
 
 // Import our new component modules
 import EventDateTime from "./details/EventDateTime";
@@ -77,7 +78,17 @@ const EventSheetContent = ({
               size="sm"
               variant="ghost"
             />
-            {EditButton && <EditButton onSheetClose={handleSheetClose} />}
+            {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
+             (isHost && (
+               <EditEventDialog 
+                 event={event} 
+                 onSheetClose={handleSheetClose}
+               >
+                 <div className="flex items-center gap-2 text-foreground hover:text-primary cursor-pointer">
+                   <span className="text-sm">Edit</span>
+                 </div>
+               </EditEventDialog>
+             ))}
           </div>
         </SheetTitle>
       </SheetHeader>
