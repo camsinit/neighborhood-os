@@ -18,9 +18,9 @@ const Features = () => {
     description: "Most neighborhood gatherings are low-key, low-effort, and just need a simple place for people to RSVP to and get reminders from. That's exactly what our no-frills Calendar page is designed to do."
   }, {
     id: 2,
-    title: "Safety Updates",
+    title: "Freebies",
     image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop",
-    description: "Share and receive important safety information with neighbors, from suspicious activity to lost pets. Keep your community informed and create a safer environment for everyone."
+    description: "What feels better than giving old things a new home? Knowing the people who you give it to! Enable gifting at a hyper-local level and turn old things into new connections with your neighbors."
   }, {
     id: 3,
     title: "Skills Exchange",
