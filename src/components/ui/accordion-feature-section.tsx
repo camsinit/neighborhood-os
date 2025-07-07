@@ -88,12 +88,12 @@ const Feature197 = ({
                     {/* Replaces section with placeholder logos */}
                     <div className="mt-4 flex items-center gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         <div className="flex flex-col items-center gap-1">
                           <img 
                             src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
                             alt="Partiful" 
-                            className="w-8 h-8 rounded object-cover opacity-60"
+                            className="w-8 h-8 rounded object-cover"
                           />
                           <span className="text-xs text-muted-foreground">Partiful</span>
                         </div>
@@ -101,7 +101,7 @@ const Feature197 = ({
                           <img 
                             src="/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png" 
                             alt="Luma" 
-                            className="w-8 h-8 rounded object-cover opacity-60"
+                            className="w-8 h-8 rounded object-cover"
                           />
                           <span className="text-xs text-muted-foreground">Luma</span>
                         </div>
@@ -109,7 +109,7 @@ const Feature197 = ({
                           <img 
                             src="/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png" 
                             alt="FB Events" 
-                            className="w-8 h-8 rounded object-cover opacity-60"
+                            className="w-8 h-8 rounded object-cover"
                           />
                           <span className="text-xs text-muted-foreground">FB Events</span>
                         </div>
