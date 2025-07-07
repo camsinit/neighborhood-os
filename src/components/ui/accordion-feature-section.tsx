@@ -118,7 +118,7 @@ const Feature197 = ({
                     {/* Replaces section with feature-specific logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-[100px]">
+                      <div className="flex items-center gap-[50px]">
                         {tab.replaces.map((replacement, index) => (
                           <div key={index} className="flex flex-col items-center gap-1">
                             <img 
