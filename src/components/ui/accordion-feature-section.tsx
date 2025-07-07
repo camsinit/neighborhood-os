@@ -91,24 +91,24 @@ const Feature197 = ({
                       <div className="flex items-center justify-between gap-8">
                         <div className="flex flex-col items-center gap-1">
                           <img 
-                            src="/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png" 
-                            alt="OfferUp" 
+                            src="/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png" 
+                            alt="Partiful" 
                             className="w-8 h-8 rounded object-cover"
                           />
-                          <span className="text-xs text-muted-foreground">OfferUp</span>
+                          <span className="text-xs text-muted-foreground">Partiful</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <img 
-                            src="/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png" 
-                            alt="Craigslist" 
+                            src="/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png" 
+                            alt="Luma" 
                             className="w-8 h-8 rounded object-cover"
                           />
-                          <span className="text-xs text-muted-foreground">Craigslist</span>
+                          <span className="text-xs text-muted-foreground">Luma</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <img 
                             src="/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png" 
-                            alt="FB Events" 
+                            alt="Facebook" 
                             className="w-8 h-8 rounded object-cover"
                           />
                           <span className="text-xs text-muted-foreground">Facebook</span>
