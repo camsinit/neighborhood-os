@@ -43,7 +43,7 @@ const Features = () => {
     ]
   }, {
     id: 4,
-    title: "Freebies",
+    title: "Updates",
     image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop",
     description: "Reduce waste by sharing items like ladders or cake pans that aren't used daily. See what's available nearby and contribute to a more sustainable neighborhood.",
     replaces: [
