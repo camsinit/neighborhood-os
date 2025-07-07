@@ -228,8 +228,8 @@ const Feature197 = ({
                     {/* Replaces section with feature-specific logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-[50px]">
-                        {tab.replaces.map((replacement, index) => <div key={index} className="flex flex-col items-center gap-1">
+                      <div className="flex items-center justify-between min-w-[200px]">
+                        {tab.replaces.map((replacement, index) => <div key={index} className="flex flex-col items-center gap-1 flex-1">
                             <img src={replacement.logo} alt={replacement.alt} className="w-8 h-8 rounded object-cover" />
                             <span className="text-xs text-muted-foreground text-center">{replacement.name}</span>
                           </div>)}
