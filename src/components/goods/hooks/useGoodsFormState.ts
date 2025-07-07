@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ItemFormData, RequestFormData, GoodsCategory, UrgencyLevel } from "../types/goodsFormTypes";
+import { ItemFormData, RequestFormData, GoodsCategory, UrgencyLevel, RequestType } from "../types/goodsFormTypes";
 
 /**
  * Custom hook to manage the form state for goods items
@@ -15,7 +15,7 @@ import { ItemFormData, RequestFormData, GoodsCategory, UrgencyLevel } from "../t
  * @param initialRequestType - Optional initial request type (offer or need)
  * @returns An object containing all the form state and utility functions
  */
-export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | GoodsRequestFormData>, initialRequestType?: RequestType | null) => {
+export const useGoodsFormState = (initialValues?: Partial<ItemFormData | RequestFormData>, initialRequestType?: RequestType | null) => {
   // Set initial request type from initialRequestType prop, initialValues, or default to "offer"
   // First check if initialValues exists before trying to access its properties
   const requestTypeFromValues = initialValues?.requestType || initialRequestType || "offer";
@@ -30,40 +30,40 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
   // Check if this is an offer form
   const isOfferForm = normalizedRequestType === "offer";
   
-  // Default category to 'furniture' if none provided - this ensures we always have a category selected
-  const defaultCategory: GoodsItemCategory = "furniture";
+  // Default category to 'Furniture' if none provided - this ensures we always have a category selected
+  const defaultCategory: GoodsCategory = "Furniture";
   
-  // For offer forms, we use the GoodsItemFormData structure
-  const [itemFormData, setItemFormData] = useState<Partial<GoodsItemFormData>>({
+  // For offer forms, we use the ItemFormData structure
+  const [itemFormData, setItemFormData] = useState<Partial<ItemFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     // Use the initialValues category if available, otherwise use default
-    category: (initialValues?.category as GoodsItemCategory) || defaultCategory,
+    category: (initialValues?.category as GoodsCategory) || defaultCategory,
     // Set the requestType properly
     requestType: "offer",
     // Handle availableDays - only relevant for offer forms
     // First check if initialValues exists, then check if the property exists on initialValues
     availableDays: isOfferForm && initialValues && 'availableDays' in initialValues 
-      ? (initialValues as Partial<GoodsItemFormData>).availableDays || 30 
+      ? (initialValues as Partial<ItemFormData>).availableDays || 30 
       : 30,
     // Handle images - only relevant for offer forms
     // First check if initialValues exists, then check if the property exists on initialValues
     images: isOfferForm && initialValues && 'images' in initialValues
-      ? (initialValues as Partial<GoodsItemFormData>).images || []
+      ? (initialValues as Partial<ItemFormData>).images || []
       : []
   });
   
-  // For request forms, we use the GoodsRequestFormData structure
-  const [requestFormData, setRequestFormData] = useState<Partial<GoodsRequestFormData>>({
+  // For request forms, we use the RequestFormData structure
+  const [requestFormData, setRequestFormData] = useState<Partial<RequestFormData>>({
     title: initialValues?.title || "",
     description: initialValues?.description || "",
     // Handle urgency - only relevant for request forms
     // First check if initialValues exists, then check if the property exists on initialValues
     urgency: !isOfferForm && initialValues && 'urgency' in initialValues
-      ? (initialValues as Partial<GoodsRequestFormData>).urgency || "medium"
+      ? (initialValues as Partial<RequestFormData>).urgency || "medium"
       : "medium",
     // Use the initialValues category if available, otherwise use default
-    category: (initialValues?.category as GoodsItemCategory) || defaultCategory,
+    category: (initialValues?.category as GoodsCategory) || defaultCategory,
     // Set the requestType properly
     requestType: "need"
   });
@@ -71,8 +71,8 @@ export const useGoodsFormState = (initialValues?: Partial<GoodsItemFormData | Go
   const [uploading, setUploading] = useState(false);
   
   // Set the selected category from initialValues or use default
-  const [selectedCategory, setSelectedCategory] = useState<GoodsItemCategory>(
-    (initialValues?.category as GoodsItemCategory) || defaultCategory
+  const [selectedCategory, setSelectedCategory] = useState<GoodsCategory>(
+    (initialValues?.category as GoodsCategory) || defaultCategory
   );
   
   return {

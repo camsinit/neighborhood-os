@@ -1,7 +1,7 @@
 
 // This hook manages the form handlers
 import { toast } from "sonner";
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsCategory } from "../types/goodsFormTypes";
 import { processFileUpload, processMultipleFileUploads } from "../utils/imageHandling";
 
 export const useGoodsFormHandlers = (
@@ -10,7 +10,7 @@ export const useGoodsFormHandlers = (
   setUploading: (value: boolean) => void,
   setItemFormData: any,
   setRequestFormData: any,
-  setSelectedCategory: (category: GoodsItemCategory) => void
+  setSelectedCategory: (category: GoodsCategory) => void
 ) => {
   const handleAddImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!userId) {
@@ -69,7 +69,7 @@ export const useGoodsFormHandlers = (
     }));
   };
   
-  const handleCategoryChange = (category: GoodsItemCategory) => {
+  const handleCategoryChange = (category: GoodsCategory) => {
     console.log("Category changed to:", category);
     setSelectedCategory(category);
     if (isOfferForm) {

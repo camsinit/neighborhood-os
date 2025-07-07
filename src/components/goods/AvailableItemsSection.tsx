@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { GoodsExchangeItem } from '@/types/localTypes';
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from './GoodsForm';
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsCategory } from "./types/goodsFormTypes";
 import AvailableGoodsCard from './cards/AvailableGoodsCard';
 import { useUser } from '@supabase/auth-helpers-react';
 
@@ -84,11 +84,11 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
-              category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
+              category: (itemToEdit.goods_category as GoodsCategory) || "Furniture",
               requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               images: itemToEdit.images || [],
               availableDays: itemToEdit.request_type === "offer" ? 30 : undefined,
-              urgency: itemToEdit.urgency || "medium"
+              urgency: (itemToEdit.urgency === "critical" ? "high" : itemToEdit.urgency) || "medium"
             }}
             requestId={itemToEdit.id}
             initialRequestType={itemToEdit.request_type as "need" | "offer"}

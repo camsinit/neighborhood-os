@@ -1,6 +1,6 @@
 
 // This utility file handles form validation for the goods form
-import { GoodsItemFormData, GoodsRequestFormData } from "@/components/support/types/formTypes";
+import { ItemFormData, RequestFormData } from "../types/goodsFormTypes";
 
 // Validation result type for better error handling
 export interface ValidationResult {
@@ -21,7 +21,7 @@ export interface ValidationResult {
  * @param itemFormData The form data to validate
  * @returns ValidationResult with isValid flag and specific field errors
  */
-export const validateItemForm = (itemFormData: Partial<GoodsItemFormData>): ValidationResult => {
+export const validateItemForm = (itemFormData: Partial<ItemFormData>): ValidationResult => {
   const errors: ValidationResult['errors'] = {};
   
   // Check required fields
@@ -55,7 +55,7 @@ export const validateItemForm = (itemFormData: Partial<GoodsItemFormData>): Vali
  * @param requestFormData The form data to validate
  * @returns ValidationResult with isValid flag and specific field errors
  */
-export const validateRequestForm = (requestFormData: Partial<GoodsRequestFormData>): ValidationResult => {
+export const validateRequestForm = (requestFormData: Partial<RequestFormData>): ValidationResult => {
   const errors: ValidationResult['errors'] = {};
   
   // Check required fields

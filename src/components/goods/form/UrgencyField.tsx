@@ -8,15 +8,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GoodsRequestUrgency } from "@/components/support/types/formTypes";
+import { UrgencyLevel } from "../types/goodsFormTypes";
 
 // Import urgency level names from constants
 import { URGENCY_NAMES } from "../utils/goodsConstants";
 
 // Component props definition
 interface UrgencyFieldProps {
-  urgency: GoodsRequestUrgency;
-  onChange: (urgency: GoodsRequestUrgency) => void;
+  urgency: UrgencyLevel;
+  onChange: (urgency: UrgencyLevel) => void;
 }
 
 /**
@@ -32,7 +32,7 @@ const UrgencyField = ({ urgency, onChange }: UrgencyFieldProps) => {
       <Select 
         value={urgency} 
         onValueChange={(value) => {
-          onChange(value as GoodsRequestUrgency);
+          onChange(value as UrgencyLevel);
         }}
       >
         <SelectTrigger className="w-full">

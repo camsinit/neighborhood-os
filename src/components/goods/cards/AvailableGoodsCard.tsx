@@ -3,13 +3,11 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Clock, User, MessageCircle, Archive } from 'lucide-react';
+import { MapPin, Clock, User, Archive } from 'lucide-react';
 import { format } from 'date-fns';
 import { generateDataAttributes } from '@/utils/dataAttributes';
 import { Sheet } from "@/components/ui/sheet";
 import GoodsSheetContent from '../GoodsSheetContent';
-// Fix: Import as default export instead of named export
-import ItemRequestDialog from '@/components/items/dialogs/ItemRequestDialog';
 
 // Fix: Update the interface to match actual usage
 interface AvailableGoodsCardProps {
@@ -22,12 +20,9 @@ const AvailableGoodsCard = ({
   onContact,
   onClick
 }: AvailableGoodsCardProps) => {
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  // Add state to track if card has been clicked to show request button
-  const [isCardClicked, setIsCardClicked] = useState(false);
 
   // Generate data attributes for highlighting and navigation
   const dataAttributes = generateDataAttributes('goods', item.id);
@@ -58,14 +53,8 @@ const AvailableGoodsCard = ({
     imageUrlType: typeof imageUrl,
     imageUrlLength: imageUrl?.length
   });
-  const handleContactClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsRequestDialogOpen(true);
-  };
-
-  // Handle card click to show request button and open sheet
+  // Handle card click to open sheet
   const handleCardClick = () => {
-    setIsCardClicked(true);
     setIsSheetOpen(true);
     if (onClick) {
       onClick();
@@ -172,19 +161,9 @@ const AvailableGoodsCard = ({
           {/* Spacer to push footer to bottom */}
           
 
-          {/* Action Button - Only show when card has been clicked */}
-          {isCardClicked && <div className="flex-shrink-0">
-              <Button size="sm" onClick={handleContactClick} className="bg-blue-600 hover:bg-blue-700 text-white w-full">
-                <MessageCircle className="h-4 w-4 mr-1" />
-                Request
-              </Button>
-            </div>}
         </div>
       </Card>
 
-      {/* Request Dialog */}
-      <ItemRequestDialog open={isRequestDialogOpen} onOpenChange={setIsRequestDialogOpen} request={item} // Fix: Use 'request' prop instead of 'item'
-    />
 
       {/* Sheet for detailed view */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>

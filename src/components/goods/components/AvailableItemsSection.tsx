@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import UniversalDialog from "@/components/ui/universal-dialog";
 import GoodsForm from '../GoodsForm';
 import { useToast } from "@/hooks/use-toast";
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsCategory } from "../types/goodsFormTypes";
 import { useUser } from '@supabase/auth-helpers-react';
 import { Edit, Trash2 } from 'lucide-react';
 
@@ -156,8 +156,8 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
             initialValues={{
               title: itemToEdit.title,
               description: itemToEdit.description || "",
-              // Cast to GoodsItemCategory and use the correct property
-              category: (itemToEdit.goods_category as GoodsItemCategory) || "furniture",
+              // Cast to GoodsCategory and use the correct property
+              category: (itemToEdit.goods_category as GoodsCategory) || "Furniture",
               // Use requestType (not request_type) to match the expected interface
               requestType: itemToEdit.request_type === "need" ? "need" : "offer",
               // Include all images if available
@@ -165,7 +165,7 @@ const AvailableItemsSection: React.FC<AvailableItemsSectionProps> = ({
               // Include availableDays for offers (default to 30 if not available)
               availableDays: itemToEdit.request_type === "offer" ? 30 : undefined,
               // Include urgency for requests
-              urgency: itemToEdit.urgency || "medium"
+              urgency: (itemToEdit.urgency === "critical" ? "high" : itemToEdit.urgency) || "medium"
             }}
             requestId={itemToEdit.id}
             // Pass the initialRequestType to ensure the correct form type is shown

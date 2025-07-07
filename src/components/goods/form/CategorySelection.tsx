@@ -9,8 +9,8 @@ import { CATEGORY_NAMES } from "../utils/goodsConstants";
 
 // Component props definition
 interface CategorySelectionProps {
-  category?: GoodsItemCategory;
-  onChange: (category: GoodsItemCategory) => void;
+  category?: GoodsCategory;
+  onChange: (category: GoodsCategory) => void;
 }
 
 /**
@@ -29,7 +29,7 @@ const CategorySelection = ({ category, onChange }: CategorySelectionProps) => {
       <Label htmlFor="category">Item Category</Label>
       <Select 
         value={selectedCategory}  
-        onValueChange={(value) => onChange(value as GoodsItemCategory)}
+        onValueChange={(value) => onChange(value as GoodsCategory)}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a category" />

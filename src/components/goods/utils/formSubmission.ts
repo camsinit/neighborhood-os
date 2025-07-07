@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { GoodsItemFormData, GoodsRequestFormData } from "@/components/support/types/formTypes";
+import { ItemFormData, RequestFormData } from "../types/goodsFormTypes";
 import { unifiedEvents } from "@/utils/unifiedEventSystem";
 
 /**
@@ -9,8 +9,8 @@ import { unifiedEvents } from "@/utils/unifiedEventSystem";
  */
 export const submitGoodsForm = async (
   isOfferForm: boolean,
-  itemFormData: Partial<GoodsItemFormData>,
-  requestFormData: Partial<GoodsRequestFormData>,
+  itemFormData: Partial<ItemFormData>,
+  requestFormData: Partial<RequestFormData>,
   userId: string,
   neighborhoodId: string,
   itemId?: string
@@ -30,7 +30,7 @@ export const submitGoodsForm = async (
     if (isOfferForm) {
       const offerData = {
         ...baseData,
-        goods_category: itemFormData.category || 'furniture',
+        goods_category: itemFormData.category || 'Furniture',
         images: itemFormData.images || [],
         image_url: itemFormData.images?.[0] || null,
         valid_until: new Date(Date.now() + (itemFormData.availableDays || 30) * 24 * 60 * 60 * 1000).toISOString()

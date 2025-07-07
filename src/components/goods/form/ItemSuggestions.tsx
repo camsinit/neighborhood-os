@@ -2,14 +2,14 @@
 // This component displays quick suggestions based on selected category
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { GoodsItemCategory } from "@/components/support/types/formTypes";
+import { GoodsCategory } from "../types/goodsFormTypes";
 
 // Import suggestions from constants
 import { GOODS_SUGGESTIONS } from "../utils/goodsConstants";
 
 // Component props definition
 interface ItemSuggestionsProps {
-  category: GoodsItemCategory;
+  category: GoodsCategory;
   onSelectSuggestion: (suggestion: string) => void;
 }
 

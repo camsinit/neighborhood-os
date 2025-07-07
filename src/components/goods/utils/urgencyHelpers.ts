@@ -1,5 +1,5 @@
 
-import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
+import { UrgencyLevel } from '../types/goodsFormTypes';
 
 /**
  * Helper functions for working with urgency levels in goods requests
@@ -14,10 +14,9 @@ import { GoodsRequestUrgency } from '@/components/support/types/formTypes';
  * @param urgency - The urgency level of the request
  * @returns A string of CSS classes for the badge
  */
-export const getUrgencyClass = (urgency: GoodsRequestUrgency) => {
+export const getUrgencyClass = (urgency: UrgencyLevel) => {
   switch(urgency) {
-    case 'critical': return 'bg-red-100 text-red-800';
-    case 'high': return 'bg-orange-100 text-orange-800';
+    case 'high': return 'bg-red-100 text-red-800';
     case 'medium': return 'bg-yellow-100 text-yellow-800';
     case 'low': return 'bg-green-100 text-green-800';
     default: return 'bg-blue-100 text-blue-800';
@@ -30,9 +29,8 @@ export const getUrgencyClass = (urgency: GoodsRequestUrgency) => {
  * @param urgency - The urgency level of the request
  * @returns A human-readable string label
  */
-export const getUrgencyLabel = (urgency: GoodsRequestUrgency) => {
+export const getUrgencyLabel = (urgency: UrgencyLevel) => {
   switch(urgency) {
-    case 'critical': return 'Critical';
     case 'high': return 'High';
     case 'medium': return 'Medium';
     case 'low': return 'Low';
