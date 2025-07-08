@@ -144,13 +144,13 @@ const Feature197 = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   
-  // Video mapping for each section - you can replace these with actual video URLs
+  // Video mapping for each section - each has its own unique video file
   const videoMapping = {
     1: "/videos/Events.mp4", // Gatherings/Events
-    2: "/videos/Events.mp4", // Freebies (placeholder - replace with actual video)
-    3: "/videos/Events.mp4", // Skills (placeholder - replace with actual video)
-    4: "/videos/Events.mp4", // Safety (placeholder - replace with actual video)
-    5: "/videos/Events.mp4", // Messaging (placeholder - replace with actual video)
+    2: "/videos/Freebies.mp4", // Freebies
+    3: "/videos/Skills.mp4", // Skills
+    4: "/videos/Updates.mp4", // Updates/Safety
+    5: "/videos/Directory.mp4", // Directory
   };
   
   // Get current video URL based on active tab
@@ -236,17 +236,24 @@ const Feature197 = ({
                       </div>
                     </div>
                     
-                    {/* Show image on mobile devices below the description */}
+                    {/* Show video on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
-                      <img src={tab.image} alt={tab.title} className="h-full max-h-80 w-full rounded-md object-cover" />
+                      <video 
+                        src={currentVideoUrl}
+                        className="h-full max-h-80 w-full rounded-md object-cover"
+                        muted
+                        autoPlay
+                        loop
+                        preload="metadata"
+                      />
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
             </Accordion>
           </div>
           
-          {/* Right side: Feature video (hidden on mobile) */}
-          <div ref={videoContainerRef} className="relative m-auto hidden w-1/2 overflow-hidden rounded-xl bg-muted md:block">
+          {/* Right side: Feature video (visible on all screen sizes) */}
+          <div ref={videoContainerRef} className="relative m-auto w-full md:w-1/2 overflow-hidden rounded-xl bg-muted">
             <video 
               ref={videoRef}
               src={currentVideoUrl}
