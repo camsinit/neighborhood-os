@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ContactMethodDisplay } from './components/ContactMethodDisplay';
 
 /**
  * GoodsSheetContent - Side panel component for displaying detailed goods item information
@@ -44,6 +45,13 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Track whether contact info is revealed
+  const [isContactRevealed, setIsContactRevealed] = useState(false);
+
+  // Handle contact button click
+  const handleContactClick = () => {
+    setIsContactRevealed(!isContactRevealed);
+  };
 
   // Function to close the sheet
   const handleSheetClose = () => {
@@ -272,51 +280,18 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          const contactInfo = document.getElementById(`contact-info-${item.id}`);
-                          if (contactInfo) {
-                            contactInfo.classList.toggle('hidden');
-                            contactInfo.classList.toggle('animate-fade-in');
-                          }
-                        }}
-                        className="text-xs bg-white hover:bg-gray-50 border-gray-300"
+                        className="border-green-500 text-green-600 hover:bg-green-50"
+                        onClick={handleContactClick}
                       >
                         <MessageCircle className="h-3 w-3 mr-1" />
-                        Show Contact Info
+                        {isContactRevealed ? 'Hide Contact' : 'Show Contact Info'}
                       </Button>
                       
-                      <div id={`contact-info-${item.id}`} className="hidden bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
-                        <h5 className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                          <span>📬</span> Contact for pickup:
-                        </h5>
-                        <div className="space-y-1">
-                          {(item.profiles as any)?.phone_visible && (item.profiles as any)?.phone_number && (
-                            <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
-                              <span>📞</span>
-                              <span className="font-mono">{(item.profiles as any).phone_number}</span>
-                            </div>
-                          )}
-                          {(item.profiles as any)?.email_visible && (
-                            <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
-                              <span>✉️</span>
-                              <span>Contact through platform</span>
-                            </div>
-                          )}
-                          {(item.profiles as any)?.address_visible && (item.profiles as any)?.address && (
-                            <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
-                              <span>📍</span>
-                              <span>{(item.profiles as any).address}</span>
-                            </div>
-                          )}
-                          {(!(item.profiles as any)?.phone_visible || !(item.profiles as any)?.phone_number) && 
-                           !(item.profiles as any)?.email_visible && 
-                           (!(item.profiles as any)?.address_visible || !(item.profiles as any)?.address) && (
-                            <div className="text-xs text-gray-500 italic bg-yellow-50 rounded px-2 py-1 border border-yellow-200">
-                              Contact information not publicly available. Consider reaching out through the neighborhood network.
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      {/* Contact info display */}
+                      <ContactMethodDisplay 
+                        item={item} 
+                        isRevealed={isContactRevealed} 
+                      />
                     </div>
                   )}
                 </div>
