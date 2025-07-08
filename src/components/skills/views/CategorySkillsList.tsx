@@ -185,15 +185,17 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
             </div>
             
             {/* Action buttons that appear on hover - positioned between title and profiles */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4">
-              {skillGroup.userOwnsSkill ? (
-                // Show edit/delete buttons for user's own skills
+            {skillGroup.userOwnsSkill && (
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4">
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-8 w-8 p-0"
-                    onClick={() => handleEditSkill(skillGroup.userSkillId, skillGroup.title)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditSkill(skillGroup.userSkillId, skillGroup.title);
+                    }}
                     disabled={isUpdating}
                   >
                     <Edit className="h-4 w-4" />
@@ -202,28 +204,17 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
                     size="sm"
                     variant="outline"
                     className="h-8 w-8 p-0 border-red-500 text-red-600 hover:bg-red-50"
-                    onClick={() => handleDeleteSkill(skillGroup.userSkillId, skillGroup.title)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteSkill(skillGroup.userSkillId, skillGroup.title);
+                    }}
                     disabled={isUpdating}
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
                 </div>
-              ) : (
-                // Show request button for others' skills  
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-green-500 text-green-600 hover:bg-green-50 flex items-center gap-1.5"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Simple click handler without popover
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Request
-                </Button>
-              )}
-            </div>
+              </div>
+            )}
             
             {/* Profile images on the right */}
             <div className="flex items-center">
