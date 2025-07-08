@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useGoodsExchange } from '@/utils/queries/useGoodsExchange';
 import GoodsSections from './GoodsSections';
-import GoodsDialogs from './GoodsDialogs';
+import ItemRequestDialog from "@/components/items/dialogs/ItemRequestDialog";
 import { Tabs } from "@/components/ui/tabs";
 
 /**
@@ -11,9 +11,14 @@ import { Tabs } from "@/components/ui/tabs";
  * This is the main container for the Goods Exchange page, structured similarly
  * to the Skills page for consistency across modules.
  * 
- * Updated to use the dedicated goods form instead of the generic support request dialog.
+ * Updated to use side-panels instead of dialogs for adding items.
  */
-const GoodsPageContainer = () => {
+interface GoodsPageContainerProps {
+  onOfferItem: () => void;
+  onRequestItem: () => void;
+}
+
+const GoodsPageContainer = ({ onOfferItem, onRequestItem }: GoodsPageContainerProps) => {
   // State management for filters and views
   const [searchQuery, setSearchQuery] = useState("");
   const [showUrgent, setShowUrgent] = useState(true);
@@ -21,24 +26,11 @@ const GoodsPageContainer = () => {
   const [showAvailable, setShowAvailable] = useState(true);
   const [activeTab, setActiveTab] = useState("offers");
   
-  // Dialog state management - now using proper goods-specific dialogs
-  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
+  // State for viewing selected items (still using dialog for viewing)
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [initialRequestType, setInitialRequestType] = useState(null);
   
   // Fetch goods data
   const { data: goodsData, isLoading, refetch } = useGoodsExchange();
-
-  // Action handlers for the new goods-specific form
-  const handleAddItem = () => {
-    setInitialRequestType('offer');
-    setIsAddRequestOpen(true);
-  };
-
-  const handleAddRequest = () => {
-    setInitialRequestType('need');
-    setIsAddRequestOpen(true);
-  };
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -58,20 +50,18 @@ const GoodsPageContainer = () => {
           showAvailable={showAvailable}
           onRequestSelect={setSelectedRequest}
           onRefresh={refetch}
-          onOfferItem={handleAddItem}
-          onRequestItem={handleAddRequest}
+          onOfferItem={onOfferItem}
+          onRequestItem={onRequestItem}
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
       </Tabs>
 
-      {/* Updated dialogs using the proper goods-specific forms */}
-      <GoodsDialogs 
-        isAddRequestOpen={isAddRequestOpen}
-        selectedRequest={selectedRequest}
-        onAddRequestOpenChange={setIsAddRequestOpen}
-        onSelectedRequestChange={setSelectedRequest}
-        initialRequestType={initialRequestType}
+      {/* Dialog for viewing item details (unchanged) */}
+      <ItemRequestDialog
+        request={selectedRequest}
+        open={!!selectedRequest}
+        onOpenChange={() => setSelectedRequest(null)}
       />
     </div>
   );

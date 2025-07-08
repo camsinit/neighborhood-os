@@ -2,13 +2,12 @@
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AddEventDialog from "./AddEventDialog";
 // Removed AddSupportRequestDialog import
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
-// Import the proper goods dialogs and form
-import GoodsDialogs from "./goods/GoodsDialogs";
 
 /**
  * QuickActions component displays common actions for users to interact with the community.
@@ -24,6 +23,8 @@ import GoodsDialogs from "./goods/GoodsDialogs";
  * Updated to use proper goods forms instead of generic support request forms
  */
 const QuickActions = () => {
+  const navigate = useNavigate();
+  
   // State for controlling various dialogs
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
@@ -31,25 +32,19 @@ const QuickActions = () => {
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   const [requestView, setRequestView] = useState<'skills' | 'care' | 'goods' | 'general'>('general');
 
-  // New state for goods dialogs (using proper goods forms)
-  const [isGoodsDialogOpen, setIsGoodsDialogOpen] = useState(false);
-  const [goodsRequestType, setGoodsRequestType] = useState<"need" | "offer" | null>(null);
-
-  // Goods/Items actions (orange theme) - now using proper goods forms
+  // Goods/Items actions (orange theme) - now navigate to goods page
   const goodsActions = [{
     icon: Package,
     label: "Share an item",
     onClick: () => {
-      setGoodsRequestType("offer");
-      setIsGoodsDialogOpen(true);
+      navigate('/goods?action=offer');
     },
     moduleTheme: 'goods' as const
   }, {
     icon: Package,
     label: "Request an item",
     onClick: () => {
-      setGoodsRequestType("need");
-      setIsGoodsDialogOpen(true);
+      navigate('/goods?action=request');
     },
     moduleTheme: 'goods' as const
   }];
@@ -131,19 +126,10 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialog components - now using proper goods dialogs for items */}
+      {/* Dialog components - goods actions now navigate to goods page */}
       <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
       {/* Removed support request dialog - no longer needed */}
       <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
-      
-      {/* Proper goods dialogs for items */}
-      <GoodsDialogs 
-        isAddRequestOpen={isGoodsDialogOpen}
-        selectedRequest={null}
-        onAddRequestOpenChange={setIsGoodsDialogOpen}
-        onSelectedRequestChange={() => {}}
-        initialRequestType={goodsRequestType}
-      />
     </div>;
 };
 
