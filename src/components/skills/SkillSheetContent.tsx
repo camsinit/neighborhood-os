@@ -204,11 +204,6 @@ const SkillSheetContent = ({
               Remove myself from this skill
             </Button>
           )}
-          
-          <Button variant="outline" className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50">
-            <MessageSquare className="h-4 w-4" />
-            Request Help
-          </Button>
         </div>
 
         {/* Providers list */}
