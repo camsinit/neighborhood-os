@@ -60,12 +60,10 @@ export const useGoodsExchange = () => {
         const userIds = [...new Set(goodsData.map(item => item.user_id))];
         
         try {
-          // Fetch profile data for these users
-          // Note: Make sure we only request columns that actually exist in the profiles table
-          // Removing 'email' since it appears this column doesn't exist directly in profiles
+          // Fetch profile data for these users including contact information
           const { data: profilesData, error: profilesError } = await supabase
             .from("profiles")
-            .select('id, display_name, avatar_url')
+            .select('id, display_name, avatar_url, phone_number, phone_visible, email_visible, address, address_visible')
             .in('id', userIds);
             
           // Check if there was an error fetching profiles
