@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, RotateCcw } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Mockup } from "@/components/ui/mockup";
 import { cn } from "@/lib/utils";
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 
 /**
  * Interface defining the structure of a call-to-action button
@@ -50,51 +50,6 @@ export function HeroSection({
   waitlistForm,
   image
 }: HeroProps) {
-  // Video state management
-  const [showReplayButton, setShowReplayButton] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Intersection observer to trigger video play when section is visible
-  useEffect(() => {
-    const videoContainer = videoContainerRef.current;
-    const video = videoRef.current;
-    
-    if (!videoContainer || !video) return;
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Reset video and play when section comes into view
-            video.currentTime = 0;
-            setShowReplayButton(false);
-            video.play().catch(console.error);
-          }
-        });
-      },
-      { threshold: 0.5 } // Trigger when 50% of the element is visible
-    );
-    
-    observer.observe(videoContainer);
-    
-    return () => observer.disconnect();
-  }, []);
-  
-  // Handle video end event
-  const handleVideoEnd = () => {
-    setShowReplayButton(true);
-  };
-  
-  // Handle replay button click
-  const handleReplay = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-      setShowReplayButton(false);
-    }
-  };
-  
   return <section className={cn("bg-background text-foreground", "py-4 sm:py-12 md:py-16 px-4", "pb-0", "relative")}>
       <div className="absolute inset-0 opacity-10 filter blur-[120px]" style={{
       background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
@@ -139,30 +94,7 @@ export function HeroSection({
             }} />
               
               <Mockup type="responsive">
-                <div ref={videoContainerRef} className="relative overflow-hidden rounded-[20px]">
-                  <video 
-                    ref={videoRef}
-                    src="/videos/Skills.mp4"
-                    className="w-[calc(100%+160px)] h-auto rounded-[20px] drop-shadow-xl relative z-10 scale-[1.3] object-cover"
-                    muted
-                    onEnded={handleVideoEnd}
-                    preload="metadata"
-                  />
-                  
-                  {/* Replay button - shows when video ends */}
-                  {showReplayButton && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-[20px]">
-                      <Button 
-                        onClick={handleReplay}
-                        className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-                        size="lg"
-                      >
-                        <RotateCcw className="h-5 w-5" />
-                        Replay
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <img src="/lovable-uploads/f90db1c8-97ab-4bbc-8abd-5028d865c6e4.png" alt="Neighborhood dashboard interface showing Quick Actions and activity feed" width={1248} height={765} className="w-[calc(100%+160px)] h-auto rounded-[20px] drop-shadow-xl relative z-10 scale-[1.3] object-cover" />
               </Mockup>
             </div>
           </div>

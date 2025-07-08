@@ -148,7 +148,7 @@ const Feature197 = ({
   const videoMapping = {
     1: "/videos/Events.mp4", // Gatherings/Events
     2: "/videos/Events.mp4", // Freebies (placeholder - replace with actual video)
-    3: "/videos/Skills.mp4", // Skills
+    3: "/videos/Events.mp4", // Skills (placeholder - replace with actual video)
     4: "/videos/Events.mp4", // Safety (placeholder - replace with actual video)
     5: "/videos/Events.mp4", // Messaging (placeholder - replace with actual video)
   };
