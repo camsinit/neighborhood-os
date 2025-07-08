@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
+import { useSkillProviders, SkillProvider } from "./hooks/useSkillProviders";
+import { ContactMethodDisplay } from "./components/ContactMethodDisplay";
 
 /**
  * SkillSheetContent - Displays detailed skill information in a side sheet
@@ -21,25 +23,21 @@ interface SkillSheetContentProps {
   skillCategory: SkillCategory;
   onOpenChange?: (open: boolean) => void;
 }
-interface SkillProvider {
-  user_id: string;
-  display_name: string;
-  avatar_url: string | null;
-  description: string | null;
-  availability: string | null;
-  skill_id: string;
-}
+
 const SkillSheetContent = ({
   skillTitle,
   skillCategory,
   onOpenChange
 }: SkillSheetContentProps) => {
   const user = useUser();
-  const [providers, setProviders] = useState<SkillProvider[]>([]);
-  const [loading, setLoading] = useState(true);
   const [userHasSkill, setUserHasSkill] = useState(false);
   // Store neighborhood ID for sharing functionality
   const [neighborhoodId, setNeighborhoodId] = useState<string>('');
+  // Track which provider's contact info is revealed
+  const [revealedContactId, setRevealedContactId] = useState<string | null>(null);
+
+  // Use the hook to fetch skill providers with contact info
+  const { data: providers = [], isLoading: loading } = useSkillProviders(skillTitle, skillCategory);
 
   // Function to close the sheet
   const handleSheetClose = () => {
@@ -48,57 +46,38 @@ const SkillSheetContent = ({
     }
   };
 
-  // Fetch all providers for this skill
+  // Handle contact button click
+  const handleContactClick = (providerId: string) => {
+    setRevealedContactId(revealedContactId === providerId ? null : providerId);
+  };
+
+  // Get neighborhood ID from first provider or fetch separately
   useEffect(() => {
-    const fetchProviders = async () => {
+    const getNeighborhoodId = async () => {
       if (!user) return;
       try {
-        // Get user's neighborhood
-        const {
-          data: userNeighborhood
-        } = await supabase.from('neighborhood_members').select('neighborhood_id').eq('user_id', user.id).eq('status', 'active').single();
-        if (!userNeighborhood) return;
-
-        // Store the neighborhood ID for sharing functionality
-        setNeighborhoodId(userNeighborhood.neighborhood_id);
-
-        // Fetch skills with user profiles
-        const {
-          data: skills,
-          error
-        } = await supabase.from('skills_exchange').select(`
-            id,
-            user_id,
-            description,
-            availability,
-            profiles:user_id (
-              display_name,
-              avatar_url
-            )
-          `).eq('neighborhood_id', userNeighborhood.neighborhood_id).eq('skill_category', skillCategory).eq('title', skillTitle).eq('request_type', 'offer').eq('is_archived', false);
-        if (error) throw error;
-
-        // Transform the data
-        const providersData = skills?.map(skill => ({
-          user_id: skill.user_id,
-          display_name: skill.profiles?.display_name || 'Anonymous',
-          avatar_url: skill.profiles?.avatar_url,
-          description: skill.description,
-          availability: skill.availability,
-          skill_id: skill.id
-        })) || [];
-        setProviders(providersData);
-
-        // Check if current user offers this skill
-        setUserHasSkill(providersData.some(p => p.user_id === user.id));
+        const { data: userNeighborhood } = await supabase
+          .from('neighborhood_members')
+          .select('neighborhood_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        if (userNeighborhood) {
+          setNeighborhoodId(userNeighborhood.neighborhood_id);
+        }
       } catch (error) {
-        console.error('Error fetching skill providers:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching neighborhood ID:', error);
       }
     };
-    fetchProviders();
-  }, [user, skillTitle, skillCategory]);
+    getNeighborhoodId();
+  }, [user]);
+
+  // Check if current user offers this skill
+  useEffect(() => {
+    if (providers.length > 0 && user) {
+      setUserHasSkill(providers.some(p => p.user_id === user.id));
+    }
+  }, [providers, user]);
 
   // Handle "Have this skill?" button click
   const handleAddSkill = async () => {
@@ -149,8 +128,8 @@ const SkillSheetContent = ({
 
       // Update local state
       setUserHasSkill(false);
-      // Refresh providers list by removing current user
-      setProviders(providers.filter(p => p.user_id !== user.id));
+      // The useSkillProviders hook will automatically refetch
+      window.location.reload(); // Simple refresh to update providers
     } catch (error) {
       console.error('Error removing skill:', error);
     }
@@ -195,7 +174,7 @@ const SkillSheetContent = ({
             
           </div>
           <div className="flex items-center gap-2">
-            <ShareButton contentType="skills" contentId={providers[0]?.skill_id || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
+            <ShareButton contentType="skills" contentId={skillTitle || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
           </div>
         </SheetTitle>
       </SheetHeader>
@@ -236,33 +215,52 @@ const SkillSheetContent = ({
         <div>
           <h3 className="font-semibold text-lg mb-3">Neighbors with this skill</h3>
           {loading ? <div className="text-gray-500">Loading...</div> : providers.length === 0 ? <div className="text-gray-500">No neighbors currently offer this skill.</div> : <div className="space-y-4">
-              {providers.map(provider => <div key={provider.user_id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={provider.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {provider.display_name?.[0] || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">
-                      {provider.display_name}
-                      {provider.user_id === user?.id && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
-                    </h4>
+              {providers.map(provider => (
+                <div key={provider.user_id} className="flex flex-col gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {provider.user_profiles?.display_name?.[0] || '?'}
+                      </AvatarFallback>
+                    </Avatar>
                     
-                    {provider.description && <p className="text-sm text-gray-600 mt-1">{provider.description}</p>}
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">
+                        {provider.user_profiles?.display_name || 'Anonymous'}
+                        {provider.user_id === user?.id && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
+                      </h4>
+                      
+                      {provider.skill_description && <p className="text-sm text-gray-600 mt-1">{provider.skill_description}</p>}
+                      
+                      {provider.time_preferences && provider.time_preferences.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Available: {provider.time_preferences.join(', ')}
+                        </p>
+                      )}
+                    </div>
                     
-                    {provider.availability && <p className="text-xs text-gray-500 mt-1">
-                        Available: {provider.availability}
-                      </p>}
+                    {provider.user_id !== user?.id && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-green-500 text-green-600 hover:bg-green-50"
+                        onClick={() => handleContactClick(provider.user_id)}
+                      >
+                        {revealedContactId === provider.user_id ? 'Hide Contact' : 'Contact'}
+                      </Button>
+                    )}
                   </div>
                   
+                  {/* Contact info display */}
                   {provider.user_id !== user?.id && (
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-50">
-                      Contact
-                    </Button>
+                    <ContactMethodDisplay 
+                      provider={provider} 
+                      isRevealed={revealedContactId === provider.user_id} 
+                    />
                   )}
-                </div>)}
+                </div>
+              ))}
             </div>}
         </div>
       </div>
