@@ -254,13 +254,10 @@ const Feature197 = ({
           
           {/* Right side: Feature video (visible on all screen sizes) */}
           <div ref={videoContainerRef} className="relative m-auto w-full md:w-1/2 overflow-hidden rounded-xl bg-muted">
-            <video 
-              ref={videoRef}
-              src={currentVideoUrl}
+            <img 
+              src="/lovable-uploads/7c2ed1f2-cf5b-44f9-a071-dec2e0340ebe.png"
+              alt="Neighbors directory showing community members"
               className="aspect-[4/3] rounded-md object-cover w-full h-full"
-              muted
-              onEnded={handleVideoEnd}
-              preload="metadata"
             />
             
             {/* Replay button - shows when video ends */}
