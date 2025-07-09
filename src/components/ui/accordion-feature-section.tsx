@@ -266,7 +266,7 @@ const Feature197 = ({
               <video 
                 ref={videoRef}
                 src={currentVideoUrl}
-                className="aspect-[4/3] rounded-md object-cover w-full h-full"
+                className="w-full h-auto max-h-80 rounded-md object-contain"
                 muted
                 onEnded={handleVideoEnd}
                 preload="metadata"
