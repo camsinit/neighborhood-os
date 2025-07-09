@@ -48,7 +48,8 @@ const LandingPage = () => {
       </header>
       
       {/* Hero section with waitlist form and app preview */}
-      <HeroSection 
+      <div className="mt-[50px]">
+        <HeroSection
         title="neighborhoodOS" 
         description="The neighborhood operating system to create a caring neighborhood"
         actions={[]} 
@@ -58,6 +59,7 @@ const LandingPage = () => {
           alt: "Neighborhood dashboard interface showing Quick Actions and activity feed"
         }} 
       />
+      </div>
       
       {/* Features section with accordion - Added directly below hero */}
       <Features />
