@@ -5,7 +5,7 @@
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
-import { useSkillsExchange } from "@/hooks/skills/useSkillsExchange";
+import { useSkills } from "@/contexts/SkillsContext";
 import { useToast } from "@/hooks/use-toast";
 import { useSkillDuplicateCheck } from "@/hooks/skills/useSkillDuplicateCheck";
 import { SkillCategory } from "./types/skillTypes";
@@ -39,12 +39,7 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
   
   // Custom hooks for toast and skill submission
   const { toast } = useToast();
-  const { handleSubmit } = useSkillsExchange({
-    onSuccess: () => {
-      // Success is indicated by form closing and data refreshing - no toast needed
-      onClose();
-    }
-  });
+  const { createSkill } = useSkills();
 
   // Check for duplicate skills
   const { data: duplicates, isLoading: checkingDuplicates } = useSkillDuplicateCheck(formData, mode);
@@ -86,7 +81,8 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
     
     try {
       // Submit the form data
-      await handleSubmit(formData, mode);
+      await createSkill(formData, mode);
+      onClose(); // Close form on success
       console.log("[SkillForm] Form submitted successfully");
     } catch (error) {
       console.error("[SkillForm] Error submitting form:", error);

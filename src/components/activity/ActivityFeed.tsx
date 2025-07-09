@@ -7,7 +7,7 @@ import ActivityItem from "./ActivityItem";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized";
+import { supabase } from '@/integrations/supabase/client';
 import { createLogger } from '@/utils/logger';
 import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
 
@@ -89,15 +89,30 @@ const ActivityFeed = () => {
     return () => clearInterval(intervalId);
   }, [activities?.length, refetch]);
 
-  // Use our optimized auto-refresh hook to listen for ALL activity types
-  useAutoRefreshOptimized([
-    'activities', 
-    'events', 
-    'safety', 
-    'goods',
-    'skills',
-    'neighbors'
-  ], refetch);
+  // Set up real-time subscription for activities
+  useEffect(() => {
+    if (!activities) return;
+
+    const channel = supabase
+      .channel('activities-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities'
+        },
+        () => {
+          logger.info('Activities data changed, refetching...');
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activities, refetch]);
 
   // Manual refresh handler with enhanced logging
   const handleManualRefresh = () => {

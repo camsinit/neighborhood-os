@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
 import { SkillCategory } from './types/skillTypes';
-import { useSkillsPreview } from '@/hooks/skills/useSkillsPreview';
+import { useSkills } from '@/contexts/SkillsContext';
 import SkillCategoryCard from './SkillCategoryCard';
 import CategorySkillsDialog from './CategorySkillsDialog';
 import { Loader2 } from 'lucide-react';
-import { useSkillsExchange } from '@/hooks/skills/useSkillsExchange';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { toast } from 'sonner';
 
@@ -21,22 +20,13 @@ interface SkillCategoryGridProps {
 }
 
 const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }) => {
-  const { data: skillsData, isLoading, error } = useSkillsPreview();
+  const { skillsPreview: skillsData, isPreviewLoading: isLoading, createSkill } = useSkills();
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [selectedEmptyCategory, setSelectedEmptyCategory] = useState<SkillCategory | null>(null);
   const [isSubmittingSkills, setIsSubmittingSkills] = useState(false);
   
   // Get the current neighborhood context
   const neighborhood = useCurrentNeighborhood();
-  
-  // Hook for submitting skills to database - this was missing!
-  const { handleSubmit } = useSkillsExchange({
-    onSuccess: () => {
-      console.log('✅ Skill successfully added to database');
-      // Refresh the skills data after successful submission
-      // The useSkillsPreview hook should automatically refetch
-    }
-  });
 
   // All available skill categories - now using the 6 standardized onboarding categories
   const categories: SkillCategory[] = ['technology', 'emergency', 'professional', 'maintenance', 'care', 'education'];
@@ -89,8 +79,8 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
           description: `${skillName} skill in ${selectedEmptyCategory}`
         };
 
-        // Submit the skill as an offer using the existing hook
-        await handleSubmit(skillFormData, 'offer');
+        // Submit the skill as an offer using the consolidated context
+        await createSkill(skillFormData, 'offer');
         
         console.log(`✅ Successfully submitted: ${skillName}`);
       }
@@ -126,13 +116,6 @@ const SkillCategoryGrid: React.FC<SkillCategoryGridProps> = ({ onCategoryClick }
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        <p>Error loading skill categories. Please try again.</p>
-      </div>
-    );
-  }
 
   return (
     <>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { SkillCategory } from '@/components/skills/types/skillTypes';
 import { SPECIAL_SKILLS } from '@/components/onboarding/survey/steps/skills/skillCategories';
-import { useSkillsExchange } from '@/hooks/skills/useSkillsExchange';
+import { useSkills } from '@/contexts/SkillsContext';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { toast } from 'sonner';
 
@@ -39,12 +39,7 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
   const neighborhood = useCurrentNeighborhood();
 
   // Hook for submitting skills to database
-  const { handleSubmit } = useSkillsExchange({
-    onSuccess: () => {
-      console.log('✅ [useSkillSelection] Skill successfully added to database via handleSubmit');
-      onSkillAdded(); // Notify parent component
-    }
-  });
+  const { createSkill } = useSkills();
 
   /**
    * MAIN ENTRY POINT - skill selection handler with enhanced debugging and validation
@@ -57,7 +52,7 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       currentCategory,
       neighborhoodId: neighborhood?.id,
       neighborhoodName: neighborhood?.name,
-      hasHandleSubmit: !!handleSubmit,
+      hasCreateSkill: !!createSkill,
       timestamp: new Date().toISOString()
     });
     
@@ -149,13 +144,13 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
       hasDescription: !!description,
       description: description?.substring(0, 50) + (description && description.length > 50 ? '...' : ''),
       neighborhoodId: neighborhood?.id,
-      hasHandleSubmit: !!handleSubmit,
+      hasCreateSkill: !!createSkill,
       timestamp: new Date().toISOString()
     });
     
-    // Validate we have the handleSubmit function
-    if (!handleSubmit) {
-      const errorMsg = 'handleSubmit function not available';
+    // Validate we have the createSkill function
+    if (!createSkill) {
+      const errorMsg = 'createSkill function not available';
       console.error(`❌ ${logPrefix} ${errorMsg}`);
       toast.error(errorMsg);
       throw new Error(errorMsg);
@@ -171,8 +166,8 @@ export const useSkillSelection = ({ onSkillAdded }: UseSkillSelectionProps) => {
 
       console.log(`📤 ${logPrefix} About to call handleSubmit with:`, submissionData);
 
-      // STEP 2: Submit to database using the skills exchange hook
-      const result = await handleSubmit(submissionData, 'offer');
+      // STEP 2: Submit to database using the consolidated context
+      const result = await createSkill(submissionData, 'offer');
       
       console.log(`✅ ${logPrefix} handleSubmit completed successfully:`, {
         result,

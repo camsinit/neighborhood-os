@@ -21,7 +21,7 @@ import WeekView from "./calendar/WeekView";
 import MonthView from "./calendar/MonthView";
 import { addScaleAnimation } from "@/utils/animations";
 import { toast } from "sonner"; // Updated import for toast
-import { useAutoRefreshOptimized } from "@/hooks/useAutoRefreshOptimized"; // Updated import
+
 import { createLogger } from "@/utils/logger";
 import { Event as LocalEvent } from "@/types/localTypes"; // Import the local Event type
 import { getEventsWithRecurring } from "@/utils/recurringEvents"; // Import recurring events utility
@@ -86,8 +86,7 @@ const CommunityCalendar = () => {
   // Fetch events data with React Query
   const { data: events, isLoading, refetch } = useEvents();
   
-  // Set up auto-refresh for calendar events using optimized hook
-  useAutoRefreshOptimized(['events'], refetch);
+  // Real-time updates are handled by useEvents hook internally
 
   // Handle event navigation (e.g. from notifications)
   useEffect(() => {
