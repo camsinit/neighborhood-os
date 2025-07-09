@@ -236,16 +236,26 @@ const Feature197 = ({
                       </div>
                     </div>
                     
-                    {/* Show video on mobile devices below the description */}
+                    {/* Show video or image on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
-                      <video 
-                        src={currentVideoUrl}
-                        className="h-full max-h-80 w-full rounded-md object-cover"
-                        muted
-                        autoPlay
-                        loop
-                        preload="metadata"
-                      />
+                      {activeTabId === 5 ? (
+                        // Directory section shows the screenshot image
+                        <img 
+                          src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
+                          alt="Neighbors directory showing community members"
+                          className="w-full h-auto max-h-80 rounded-md object-contain"
+                        />
+                      ) : (
+                        // All other sections show videos
+                        <video 
+                          src={currentVideoUrl}
+                          className="h-full max-h-80 w-full rounded-md object-cover"
+                          muted
+                          autoPlay
+                          loop
+                          preload="metadata"
+                        />
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
