@@ -34,13 +34,13 @@ const LandingPage = () => {
         </div>
         
         {/* Conditional button - Dashboard for authenticated users, Login for unauthenticated */}
-        <Button asChild className="rounded-full">
+        <Button asChild variant="outline" className="rounded-full border-primary text-foreground hover:bg-primary/10">
           {session ? (
-            <Link to="/dashboard" className="hover:bg-primary/90 transition-colors">
+            <Link to="/dashboard" className="transition-colors">
               Dashboard
             </Link>
           ) : (
-            <Link to="/login" className="hover:bg-primary/90 transition-colors">
+            <Link to="/login" className="transition-colors">
               Login
             </Link>
           )}
