@@ -27,22 +27,48 @@ interface NotificationItemProps {
 }
 
 // Map content types to module theme colors for highlighting
+// This function now uses the same mapping logic as titleHighlighting for consistency
 const getThemeColor = (contentType: string): string => {
-  switch (contentType) {
-    case 'events':
-      return getModuleThemeColor('calendar');
-    case 'safety':
-      return getModuleThemeColor('safety');
-    case 'skills':
-    case 'skill_sessions':
-      return getModuleThemeColor('skills');
-    case 'goods':
-      return getModuleThemeColor('goods');
-    case 'neighbors':
-      return getModuleThemeColor('neighbors');
-    default:
-      return '#6E59A5'; // Default purple
+  // Convert contentType to lowercase for case-insensitive matching
+  const type = contentType.toLowerCase();
+  
+  // Map content types to module types using the same logic as titleHighlighting
+  let moduleType: keyof typeof import('@/theme/moduleTheme').moduleThemeColors | undefined;
+  
+  if (type.includes('event')) {
+    moduleType = 'calendar';
+  } else if (type.includes('skill')) {
+    moduleType = 'skills';
+  } else if (type.includes('good')) {
+    moduleType = 'goods';
+  } else if (type.includes('safety')) {
+    moduleType = 'safety';
+  } else if (type.includes('neighbor')) {
+    moduleType = 'neighbors';
+  } else {
+    // Handle exact matches for content types like 'events', 'goods', etc.
+    switch (type) {
+      case 'events':
+        moduleType = 'calendar';
+        break;
+      case 'skills':
+      case 'skill_sessions':
+        moduleType = 'skills';
+        break;
+      case 'goods':
+        moduleType = 'goods';
+        break;
+      case 'safety':
+        moduleType = 'safety';
+        break;
+      case 'neighbors':
+        moduleType = 'neighbors';
+        break;
+    }
   }
+  
+  // Return the theme color for the module type, or default purple
+  return moduleType ? getModuleThemeColor(moduleType) : '#6E59A5';
 };
 
 // Map content types to highlight types for smart navigation
