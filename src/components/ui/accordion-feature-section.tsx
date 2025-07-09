@@ -252,16 +252,29 @@ const Feature197 = ({
             </Accordion>
           </div>
           
-          {/* Right side: Feature video (visible on all screen sizes) */}
+          {/* Right side: Feature video or image based on section */}
           <div ref={videoContainerRef} className="relative m-auto w-full md:w-1/2 overflow-hidden rounded-xl bg-muted">
-            <img 
-              src="/lovable-uploads/7c2ed1f2-cf5b-44f9-a071-dec2e0340ebe.png"
-              alt="Neighbors directory showing community members"
-              className="aspect-[4/3] rounded-md object-cover w-full h-full"
-            />
+            {activeTabId === 5 ? (
+              // Directory section shows the screenshot image
+              <img 
+                src="/lovable-uploads/7c2ed1f2-cf5b-44f9-a071-dec2e0340ebe.png"
+                alt="Neighbors directory showing community members"
+                className="aspect-[4/3] rounded-md object-cover w-full h-full"
+              />
+            ) : (
+              // All other sections show videos
+              <video 
+                ref={videoRef}
+                src={currentVideoUrl}
+                className="aspect-[4/3] rounded-md object-cover w-full h-full"
+                muted
+                onEnded={handleVideoEnd}
+                preload="metadata"
+              />
+            )}
             
-            {/* Replay button - shows when video ends */}
-            {showReplayButton && (
+            {/* Replay button - shows when video ends (only for video sections) */}
+            {showReplayButton && activeTabId !== 5 && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl">
                 <Button 
                   onClick={handleReplay}
