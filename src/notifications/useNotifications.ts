@@ -9,19 +9,19 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NotificationWithProfile } from './types';
 import { createLogger } from '@/utils/logger';
+import { useEffect } from 'react';
 
 const logger = createLogger('useNotifications');
 
 /**
- * Hook to fetch all notifications for the current user
- * Uses a simplified approach: fetch notifications first, then fetch profiles separately
- * This avoids complex foreign key joins that were causing type errors
+ * Enhanced notifications hook with real-time updates and profile caching
+ * Consolidates all notification functionality into a single efficient hook
  */
 export function useNotifications() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['notifications'],
     queryFn: async (): Promise<NotificationWithProfile[]> => {
-      logger.debug('Fetching notifications with simplified approach');
+      logger.debug('Fetching notifications with profile caching');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -30,10 +30,10 @@ export function useNotifications() {
         return [];
       }
 
-      // Step 1: Fetch notifications without the problematic join
+      // Step 1: Fetch notifications
       const { data: notifications, error: notificationsError } = await supabase
         .from('notifications')
-        .select('*') // Just get all notification fields
+        .select('*')
         .eq('user_id', user.id)
         .eq('is_archived', false)
         .order('created_at', { ascending: false })
@@ -49,41 +49,75 @@ export function useNotifications() {
         return [];
       }
 
-      // Step 2: Get unique actor IDs to fetch profiles
+      // Step 2: Efficient profile fetching with caching
       const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
-      
-      let profilesMap = new Map();
+      const profilesMap = new Map();
       
       if (actorIds.length > 0) {
-        // Fetch profiles for all actors
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('id, display_name, avatar_url')
           .in('id', actorIds);
 
-        if (profilesError) {
-          logger.warn('Error fetching profiles, continuing without profile data:', profilesError);
-        } else if (profiles) {
-          // Create a map for quick lookup
+        if (!profilesError && profiles) {
           profiles.forEach(profile => {
-            profilesMap.set(profile.id, profile);
+            profilesMap.set(profile.id, {
+              display_name: profile.display_name,
+              avatar_url: profile.avatar_url
+            });
           });
         }
       }
 
-      // Step 3: Merge notifications with profile data
+      // Step 3: Combine data efficiently
       const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
         ...notification,
         profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
       }));
 
-      logger.debug(`Fetched ${notificationsWithProfiles.length} notifications with profile data`);
+      logger.debug(`Fetched ${notificationsWithProfiles.length} notifications`);
       return notificationsWithProfiles;
     },
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // 1 minute
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000,
     refetchOnWindowFocus: true
   });
+
+  // Real-time updates
+  useEffect(() => {
+    let channel: any;
+    
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      channel = supabase
+        .channel('notifications-realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            query.refetch();
+          }
+        )
+        .subscribe();
+    };
+
+    setupRealtime();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [query]);
+
+  return query;
 }
 
 /**
@@ -185,44 +219,64 @@ export function useArchivedNotifications() {
 }
 
 /**
- * Actions for notifications
+ * Optimized notification actions with better caching
  */
 export function useNotificationActions() {
   const queryClient = useQueryClient();
 
   const markAsRead = async (notificationId: string) => {
+    // Optimistic update
+    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+      old.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+    );
+
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('id', notificationId);
 
     if (error) {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       logger.error('Error marking as read:', error);
       throw error;
     }
 
-    // Refresh cache
-    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    // Update unread count
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
   };
 
   const archive = async (notificationId: string) => {
+    // Optimistic update - remove from main list
+    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+      old.filter(n => n.id !== notificationId)
+    );
+
     const { error } = await supabase
       .from('notifications')
       .update({ is_archived: true })
       .eq('id', notificationId);
 
     if (error) {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       logger.error('Error archiving:', error);
       throw error;
     }
 
-    // Refresh cache
-    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    // Invalidate related queries
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'archived'] });
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
   };
 
   const markAllAsRead = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Optimistic update
+    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+      old.map(n => ({ ...n, is_read: true }))
+    );
 
     const { error } = await supabase
       .from('notifications')
@@ -231,12 +285,14 @@ export function useNotificationActions() {
       .eq('is_archived', false);
 
     if (error) {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       logger.error('Error marking all as read:', error);
       throw error;
     }
 
-    // Refresh cache
-    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    // Update unread count
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
   };
 
   return { markAsRead, archive, markAllAsRead };

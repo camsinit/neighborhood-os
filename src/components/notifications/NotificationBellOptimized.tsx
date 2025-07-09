@@ -8,7 +8,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell } from 'lucide-react';
-import { useUnreadCountOptimized } from '@/hooks/useNotificationsOptimized';
+import { useUnreadCount } from '@/notifications/useNotifications';
 
 interface NotificationBellOptimizedProps {
   onClick?: () => void;
@@ -16,7 +16,7 @@ interface NotificationBellOptimizedProps {
 }
 
 export function NotificationBellOptimized({ onClick, className = '' }: NotificationBellOptimizedProps) {
-  const { data: unreadCount = 0 } = useUnreadCountOptimized();
+  const { data: unreadCount = 0 } = useUnreadCount();
 
   return (
     <Button

@@ -26,49 +26,47 @@ interface NotificationItemProps {
   variant?: 'popover' | 'drawer';
 }
 
-// Map content types to module theme colors for highlighting
-// This function now uses the same mapping logic as titleHighlighting for consistency
+// Simplified color mapping - direct lookup table for better performance
+const CONTENT_TYPE_COLORS: Record<string, string> = {
+  // Events/Calendar
+  'events': '#3B82F6',
+  'event': '#3B82F6',
+  
+  // Skills
+  'skills': '#22C55E',
+  'skill_sessions': '#22C55E',
+  'skill': '#22C55E',
+  
+  // Goods/Freebies
+  'goods': '#F97316',
+  'good': '#F97316',
+  
+  // Safety/Updates
+  'safety': '#EA384C',
+  'safety_updates': '#EA384C',
+  
+  // Neighbors
+  'neighbors': '#8B5FFF',
+  'neighbor': '#8B5FFF'
+};
+
 const getThemeColor = (contentType: string): string => {
-  // Convert contentType to lowercase for case-insensitive matching
-  const type = contentType.toLowerCase();
+  const type = contentType?.toLowerCase() || '';
   
-  // Map content types to module types using the same logic as titleHighlighting
-  let moduleType: keyof typeof import('@/theme/moduleTheme').moduleThemeColors | undefined;
+  // Direct lookup first
+  if (CONTENT_TYPE_COLORS[type]) {
+    return CONTENT_TYPE_COLORS[type];
+  }
   
-  if (type.includes('event')) {
-    moduleType = 'calendar';
-  } else if (type.includes('skill')) {
-    moduleType = 'skills';
-  } else if (type.includes('good')) {
-    moduleType = 'goods';
-  } else if (type.includes('safety')) {
-    moduleType = 'safety';
-  } else if (type.includes('neighbor')) {
-    moduleType = 'neighbors';
-  } else {
-    // Handle exact matches for content types like 'events', 'goods', etc.
-    switch (type) {
-      case 'events':
-        moduleType = 'calendar';
-        break;
-      case 'skills':
-      case 'skill_sessions':
-        moduleType = 'skills';
-        break;
-      case 'goods':
-        moduleType = 'goods';
-        break;
-      case 'safety':
-        moduleType = 'safety';
-        break;
-      case 'neighbors':
-        moduleType = 'neighbors';
-        break;
+  // Fallback pattern matching for compound types
+  for (const [key, color] of Object.entries(CONTENT_TYPE_COLORS)) {
+    if (type.includes(key)) {
+      return color;
     }
   }
   
-  // Return the theme color for the module type, or default purple
-  return moduleType ? getModuleThemeColor(moduleType) : '#6E59A5';
+  // Default purple
+  return '#8B5FFF';
 };
 
 // Map content types to highlight types for smart navigation
@@ -93,9 +91,6 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
 export function NotificationItem({ notification, variant = 'drawer' }: NotificationItemProps) {
   const navigate = useNavigate();
   const { markAsRead, archive } = useNotificationActions();
-  
-  // State to track if notification is being archived (for animation)
-  const [isArchiving, setIsArchiving] = useState(false);
 
   // Create navigation service instance
   const navigationService = createItemNavigationService(navigate);
@@ -141,30 +136,16 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
     }
   };
 
-  // Handle archive action with slide-out animation
+  // Simplified archive handler with optimistic updates
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     try {
-      // Start the slide-out animation
-      setIsArchiving(true);
-      
-      // Wait for animation to complete (500ms as defined in CSS)
-      setTimeout(async () => {
-        try {
-          await archive(notification.id);
-          toast.success('Notification archived');
-        } catch (error) {
-          console.error('Error archiving notification:', error);
-          toast.error('Failed to archive');
-          // Reset animation state on error
-          setIsArchiving(false);
-        }
-      }, 500);
+      await archive(notification.id);
+      toast.success('Notification archived');
     } catch (error) {
-      console.error('Error starting archive animation:', error);
+      console.error('Error archiving notification:', error);
       toast.error('Failed to archive');
-      setIsArchiving(false);
     }
   };
 
@@ -174,7 +155,6 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
         relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4 group
         ${!notification.is_read ? 'bg-blue-50 border-blue-200' : 'bg-white'}
         ${variant === 'popover' ? 'mb-2' : 'mb-3'}
-        ${isArchiving ? 'swipe-out-right' : ''}
       `}
       style={{
         borderLeftColor: themeColor

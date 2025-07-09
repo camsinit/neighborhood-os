@@ -1,26 +1,27 @@
 
 /**
- * Notification Types - Direct from Supabase Schema
+ * Simplified Notification Types
  * 
- * These types match exactly what comes from the database
- * No transformations or enhancements - keep it simple
+ * Centralized type definitions for the notification system
  */
 
 import { Database } from '@/integrations/supabase/types';
 
-// Direct database notification type
+// Core database types
 export type Notification = Database['public']['Tables']['notifications']['Row'];
-
-// Insert type for creating notifications
 export type NotificationInsert = Database['public']['Tables']['notifications']['Insert'];
-
-// Update type for modifying notifications
 export type NotificationUpdate = Database['public']['Tables']['notifications']['Update'];
 
-// Profile type for actor information
-export type Profile = Database['public']['Tables']['profiles']['Row'];
+// Notification types supported by the system
+export type NotificationType = 'event' | 'safety' | 'care' | 'goods' | 'skills' | 'neighbor_welcome';
 
-// Enhanced notification with profile data (minimal transformation)
+// Action types for notifications
+export type NotificationActionType = 'view' | 'respond' | 'schedule' | 'help' | 'learn' | 'rsvp' | 'comment' | 'share';
+
+// Enhanced notification with profile data
 export interface NotificationWithProfile extends Notification {
-  profiles?: Profile | null;
+  profiles?: {
+    display_name?: string;
+    avatar_url?: string;
+  } | null;
 }
