@@ -1,11 +1,18 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { WaitlistWelcomeEmail } from './_templates/waitlist-welcome.tsx';
 
 // Create a Supabase client with the service role key for admin permissions
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Initialize Resend client for sending emails
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 /**
  * Edge Function to handle waitlist signups
@@ -75,6 +82,28 @@ serve(async (req) => {
         JSON.stringify({ success: false, error: "Failed to join waitlist" }),
         { headers, status: 500 }
       );
+    }
+
+    // Send welcome email after successful waitlist signup
+    try {
+      const html = await renderAsync(
+        React.createElement(WaitlistWelcomeEmail, {
+          userEmail: email,
+          baseUrl: supabaseUrl.replace('.supabase.co', '.lovableproject.com'),
+        })
+      );
+
+      await resend.emails.send({
+        from: 'neighborhoodOS <hello@resend.dev>',
+        to: [email],
+        subject: 'Welcome to neighborhoodOS - You\'re on the waitlist!',
+        html,
+      });
+
+      console.log(`Welcome email sent successfully to: ${email}`);
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Don't fail the waitlist signup if email sending fails
     }
 
     // Success response
