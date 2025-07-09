@@ -46,6 +46,12 @@ interface WeeklySummaryEmailProps {
       daysAgo: number
     }>
   }
+  aiContent: {
+    welcomeMessage: string
+    weeklyInsight: string
+    communitySpotlight: string
+    callToAction: string
+  }
 }
 
 export const WeeklySummaryEmail = ({
@@ -55,6 +61,7 @@ export const WeeklySummaryEmail = ({
   baseUrl,
   stats,
   highlights,
+  aiContent,
 }: WeeklySummaryEmailProps) => (
   <Html>
     <Head />
@@ -66,10 +73,11 @@ export const WeeklySummaryEmail = ({
         
         <Text style={greeting}>Hi {memberName},</Text>
         
-        <Text style={text}>
-          Here's what happened in your neighborhood this week. No more chaotic email threads – 
-          just the updates that matter, delivered right to your inbox.
-        </Text>
+        {/* AI-Generated Welcome Message */}
+        <Section style={aiSection}>
+          <Text style={aiText}>{aiContent.welcomeMessage}</Text>
+          <Text style={aiText}>{aiContent.weeklyInsight}</Text>
+        </Section>
 
         {/* Stats Section */}
         <Section style={statsSection}>
@@ -180,12 +188,29 @@ export const WeeklySummaryEmail = ({
           </>
         )}
 
+        {/* AI-Generated Community Spotlight */}
+        <Section style={aiSection}>
+          <Heading style={h2}>🌟 Community Spotlight</Heading>
+          <Text style={aiText}>{aiContent.communitySpotlight}</Text>
+        </Section>
+
+        <Hr style={divider} />
+
+        {/* AI-Generated Call to Action */}
+        <Section style={aiSection}>
+          <Heading style={h2}>Stay Connected</Heading>
+          <Text style={aiText}>{aiContent.callToAction}</Text>
+          <Link href={baseUrl} style={ctaButton}>
+            Visit Your Neighborhood Dashboard
+          </Link>
+        </Section>
+
+        <Hr style={divider} />
+
         {/* Footer */}
         <Section style={footer}>
           <Text style={footerText}>
-            Want to contribute to your neighborhood? 
-            <Link href={baseUrl} style={link}> Visit your dashboard</Link> to share items, 
-            offer skills, or organize gatherings.
+            This weekly summary helps keep our community connected and informed.
           </Text>
           <Text style={footerText}>
             You're receiving this because you're a member of {neighborhoodName}. 
@@ -322,4 +347,32 @@ const footerText = {
 const link = {
   color: '#2563eb',
   textDecoration: 'none',
+}
+
+// AI Content Styles
+const aiSection = {
+  backgroundColor: '#f3f4f6',
+  borderRadius: '8px',
+  padding: '20px',
+  margin: '20px 0',
+  borderLeft: '4px solid #667eea',
+}
+
+const aiText = {
+  color: '#374151',
+  fontSize: '16px',
+  lineHeight: '24px',
+  margin: '0 0 16px 0',
+}
+
+const ctaButton = {
+  backgroundColor: '#667eea',
+  color: '#ffffff',
+  padding: '12px 24px',
+  borderRadius: '6px',
+  textDecoration: 'none',
+  display: 'inline-block',
+  fontWeight: '600',
+  fontSize: '16px',
+  marginTop: '16px',
 }

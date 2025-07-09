@@ -5,6 +5,9 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
 
+// Initialize Claude API client
+const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY");
+
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -18,6 +21,104 @@ const corsHeaders = {
 interface WeeklySummaryRequest {
   neighborhoodId: string;
   testEmail?: string; // Optional: for testing purposes
+}
+
+/**
+ * Generate AI-powered newsletter content using Claude
+ * This function takes neighborhood activity data and creates engaging, personalized content
+ */
+async function generateAIContent(neighborhoodName: string, stats: any, highlights: any) {
+  // If no Claude API key is available, return default content
+  if (!CLAUDE_API_KEY) {
+    console.log('No Claude API key found, using default content');
+    return {
+      welcomeMessage: `Hello from ${neighborhoodName}!`,
+      weeklyInsight: "This week has been full of neighborhood activity and connection.",
+      communitySpotlight: "Our community continues to grow and support each other.",
+      callToAction: "Stay engaged and keep building those neighbor connections!"
+    };
+  }
+
+  try {
+    // Create a comprehensive prompt for Claude to generate engaging content
+    const prompt = `You are writing a weekly neighborhood newsletter for "${neighborhoodName}". 
+
+Weekly Statistics:
+- New neighbors: ${stats.newMembers}
+- Upcoming events: ${stats.upcomingEvents}
+- Active skill requests: ${stats.activeSkillRequests}
+- Available items: ${stats.availableItems}
+- Safety updates: ${stats.safetyUpdates}
+
+Recent Highlights:
+- Events: ${highlights.events.map(e => `"${e.title}" on ${e.date}`).join(', ') || 'None'}
+- Available items: ${highlights.items.map(i => `"${i.title}" in ${i.category}`).join(', ') || 'None'}
+- Skills: ${highlights.skills.map(s => `"${s.title}" (${s.requestType})`).join(', ') || 'None'}
+- Safety: ${highlights.safety.map(s => `"${s.title}" (${s.type})`).join(', ') || 'None'}
+
+Please generate 4 short, engaging sections for the newsletter:
+1. welcomeMessage: A warm, personalized greeting (2-3 sentences)
+2. weeklyInsight: A thoughtful observation about the week's activity (2-3 sentences)
+3. communitySpotlight: Highlight something positive about community engagement (2-3 sentences)
+4. callToAction: An encouraging message to stay involved (1-2 sentences)
+
+Keep the tone friendly, community-focused, and encouraging. Make it feel personal and relevant to neighborhood life.
+
+Return as JSON with these 4 keys.`;
+
+    // Call Claude API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 1000,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Claude API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.content[0].text;
+    
+    // Try to parse the JSON response
+    try {
+      const aiContent = JSON.parse(content);
+      console.log('AI content generated successfully');
+      return aiContent;
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', parseError);
+      // Return default content if parsing fails
+      return {
+        welcomeMessage: `Hello from ${neighborhoodName}!`,
+        weeklyInsight: "This week has been full of neighborhood activity and connection.",
+        communitySpotlight: "Our community continues to grow and support each other.",
+        callToAction: "Stay engaged and keep building those neighbor connections!"
+      };
+    }
+
+  } catch (error) {
+    console.error('Error generating AI content:', error);
+    // Return default content if AI generation fails
+    return {
+      welcomeMessage: `Hello from ${neighborhoodName}!`,
+      weeklyInsight: "This week has been full of neighborhood activity and connection.",
+      communitySpotlight: "Our community continues to grow and support each other.",
+      callToAction: "Stay engaged and keep building those neighbor connections!"
+    };
+  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -165,6 +266,11 @@ const handler = async (req: Request): Promise<Response> => {
     const weekEnd = new Date();
     const weekOf = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
+    // Generate AI-powered content for the newsletter
+    console.log('Generating AI-powered content...');
+    const aiContent = await generateAIContent(neighborhood.name, stats, highlights);
+    console.log('AI content generated:', aiContent);
+
     // Determine recipients (test email or all members)
     const recipients = testEmail ? [{ email: testEmail, name: 'Test User' }] : memberEmails;
 
@@ -180,6 +286,7 @@ const handler = async (req: Request): Promise<Response> => {
           baseUrl: `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}`,
           stats,
           highlights,
+          aiContent, // Pass AI-generated content to email template
         })
       );
 
