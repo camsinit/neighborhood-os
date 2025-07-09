@@ -57,7 +57,7 @@ export function HeroSection({
     }} />
       
       <div className="mx-auto flex max-w-container flex-col gap-8 pt-8 sm:gap-16 pb-9 relative z-10 py-0 -mt-[50px]">
-        <div className="flex flex-col items-center gap-4 text-center sm:gap-8">
+        <div className="flex flex-col items-center gap-4 text-center sm:gap-8 pt-[25px]">
           {badge && <Badge variant="outline" className="gap-2 animate-pulse">
               <span className="text-muted-foreground">{badge.text}</span>
               <a href={badge.action.href} className="flex items-center gap-1">
