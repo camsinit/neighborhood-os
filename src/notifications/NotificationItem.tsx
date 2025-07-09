@@ -145,7 +145,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   return (
     <Card 
       className={`
-        p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4
+        relative p-3 transition-all duration-200 hover:shadow-md cursor-pointer border-l-4 group
         ${!notification.is_read ? 'bg-blue-50 border-blue-200' : 'bg-white'}
         ${variant === 'popover' ? 'mb-2' : 'mb-3'}
         ${isArchiving ? 'swipe-out-right' : ''}
@@ -155,6 +155,18 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
       }}
       onClick={handleCardClick}
     >
+      {/* Archive button - appears on hover on the left side */}
+      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm border border-gray-200"
+          onClick={handleArchive}
+        >
+          <Archive className="h-4 w-4 text-gray-600" />
+        </Button>
+      </div>
+
       <div className="flex items-start space-x-3">
         {/* Avatar */}
         <Avatar className="h-8 w-8 flex-shrink-0">
@@ -175,21 +187,6 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
               {timeAgo.replace(' ago', '').replace('about ', '')}
             </span>
           </div>
-          
-          {/* Archive action for drawer variant - only show archive button */}
-          {variant === 'drawer' && (
-            <div className="flex items-center gap-2 mt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs text-gray-500"
-                onClick={handleArchive}
-              >
-                <Archive className="h-3 w-3 mr-1" />
-                Archive
-              </Button>
-            </div>
-          )}
         </div>
         
         {/* Unread indicator */}
