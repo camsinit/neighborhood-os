@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Eye, Archive, User } from 'lucide-react';
+import { Archive, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -84,17 +84,15 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
   // Get theme color for this notification's content type
   const themeColor = getThemeColor(notification.content_type);
 
-  // Handle view action with unified navigation service
-  const handleView = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  // Handle click on notification card - navigate to content like Activity cards
+  const handleCardClick = async () => {
     try {
       // Mark as read first
       if (!notification.is_read) {
         await markAsRead(notification.id);
       }
 
-      // Use unified navigation service
+      // Use unified navigation service (same logic as ActivityItem)
       const highlightType = getHighlightType(notification.content_type);
       if (highlightType && notification.content_id) {
         const result = await navigationService.navigateToItem(
@@ -112,7 +110,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
       }
 
     } catch (error) {
-      console.error('Error viewing notification:', error);
+      console.error('Error navigating from notification:', error);
       toast.error('Failed to navigate');
     }
   };
@@ -155,7 +153,7 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
       style={{
         borderLeftColor: themeColor
       }}
-      onClick={handleView}
+      onClick={handleCardClick}
     >
       <div className="flex items-start space-x-3">
         {/* Avatar */}
@@ -178,19 +176,9 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
             </span>
           </div>
           
-          {/* Actions for drawer variant */}
+          {/* Archive action for drawer variant - only show archive button */}
           {variant === 'drawer' && (
             <div className="flex items-center gap-2 mt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs"
-                onClick={handleView}
-              >
-                <Eye className="h-3 w-3 mr-1" />
-                {notification.action_label}
-              </Button>
-              
               <Button
                 variant="ghost"
                 size="sm"
