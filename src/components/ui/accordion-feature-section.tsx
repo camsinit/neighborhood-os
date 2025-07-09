@@ -259,7 +259,7 @@ const Feature197 = ({
               <img 
                 src="/lovable-uploads/7c2ed1f2-cf5b-44f9-a071-dec2e0340ebe.png"
                 alt="Neighbors directory showing community members"
-                className="aspect-[4/3] rounded-md object-cover w-full h-full"
+                className="w-full h-auto max-h-80 rounded-md object-contain"
               />
             ) : (
               // All other sections show videos
