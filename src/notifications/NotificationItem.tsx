@@ -181,18 +181,6 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
       }}
       onClick={handleCardClick}
     >
-      {/* Archive button - appears on hover on the left side */}
-      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm border border-gray-200"
-          onClick={handleArchive}
-        >
-          <Archive className="h-4 w-4 text-gray-600" />
-        </Button>
-      </div>
-
       <div className="flex items-start space-x-3">
         {/* Avatar */}
         <Avatar className="h-8 w-8 flex-shrink-0">
@@ -204,14 +192,31 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
         
         {/* Content */}
         <div className="flex-1 min-w-0">
-          {/* Title and Time */}
+          {/* Title and Time/Archive */}
           <div className="flex justify-between items-start gap-2">
             <div className={`text-sm leading-tight flex-1 ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
               {highlightTitleContent(notification.title, notification.content_type)}
             </div>
-            <span className="text-xs text-gray-500 font-medium flex-shrink-0">
-              {timeAgo.replace(' ago', '').replace('about ', '')}
-            </span>
+            
+            {/* Date/Archive toggle on hover */}
+            <div className="flex-shrink-0 relative">
+              {/* Date - visible by default, hidden on hover */}
+              <span className="text-xs text-gray-500 font-medium group-hover:opacity-0 transition-opacity duration-200">
+                {timeAgo.replace(' ago', '').replace('about ', '')}
+              </span>
+              
+              {/* Archive button - hidden by default, visible on hover */}
+              <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+                  onClick={handleArchive}
+                >
+                  <Archive className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
         
