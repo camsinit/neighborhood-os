@@ -85,7 +85,7 @@ export function HeroSection({
               {waitlistForm}
             </div>}
 
-          <div className="relative pt-8 w-full max-w-3xl mb-16">
+          <div className="relative pt-[27px] w-full max-w-3xl mb-16">
             <div className="relative px-8 pb-8">
               <div className="absolute -inset-8 rounded-3xl blur-2xl opacity-40" style={{
               background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
