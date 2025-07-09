@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,62 +17,64 @@ const WaitlistForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState("");
-  
+
   // Toast notifications for user feedback
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   /**
    * Handle form submission for waitlist signup
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic email validation
     if (!email || !email.includes("@")) {
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       console.log("Submitting waitlist signup for:", email);
-      
-      // Call the existing join-waitlist edge function
-      const { data, error } = await supabase.functions.invoke("join-waitlist", {
-        body: { email },
-      });
 
+      // Call the existing join-waitlist edge function
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("join-waitlist", {
+        body: {
+          email
+        }
+      });
       if (error) {
         console.error("Error joining waitlist:", error);
         throw new Error("Failed to join waitlist");
       }
-
       console.log("Waitlist signup successful:", data);
 
       // Show success message
       toast({
         title: "Welcome to the waitlist!",
-        description: "Please take a moment to tell us more about yourself.",
+        description: "Please take a moment to tell us more about yourself."
       });
 
       // Store the email and show the survey popover
       setSubmittedEmail(email);
       setShowSurvey(true);
-      
+
       // Clear the form
       setEmail("");
-
     } catch (error: any) {
       console.error("Waitlist signup error:", error);
       toast({
         title: "Something went wrong",
         description: error.message || "Failed to join waitlist. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -87,41 +88,23 @@ const WaitlistForm = () => {
     setShowSurvey(false);
     setSubmittedEmail("");
   };
-
-  return (
-    <>
+  return <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-row gap-2">
-          <Input
-            type="email"
-            placeholder="Your Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isSubmitting}
-            className="flex-1 text-sm sm:text-base rounded-[30px] pl-[12px] sm:pl-[15px]"
-            style={{ height: '40px' }}
-            required
-          />
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap"
-            style={{ height: '40px' }}
-          >
+        <div className="flex flex-row gap-2 py-[27px]">
+          <Input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} disabled={isSubmitting} className="flex-1 text-sm sm:text-base rounded-[30px] pl-[12px] sm:pl-[15px]" style={{
+          height: '40px'
+        }} required />
+          <Button type="submit" disabled={isSubmitting} className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap" style={{
+          height: '40px'
+        }}>
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
         </div>
       </form>
 
       {/* Survey popover that appears after successful waitlist signup */}
-      <WaitlistSurveyPopover
-        isOpen={showSurvey}
-        onClose={handleSurveyClose}
-        userEmail={submittedEmail}
-      />
-    </>
-  );
+      <WaitlistSurveyPopover isOpen={showSurvey} onClose={handleSurveyClose} userEmail={submittedEmail} />
+    </>;
 };
-
 export default WaitlistForm;
