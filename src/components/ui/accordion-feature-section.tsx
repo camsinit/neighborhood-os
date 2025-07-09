@@ -257,7 +257,7 @@ const Feature197 = ({
             {activeTabId === 5 ? (
               // Directory section shows the screenshot image
               <img 
-                src="/lovable-uploads/7c2ed1f2-cf5b-44f9-a071-dec2e0340ebe.png"
+                src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
                 alt="Neighbors directory showing community members"
                 className="w-full h-auto max-h-80 rounded-md object-contain"
               />
