@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, Upload, X } from "lucide-react";
+import { UserCircle, Upload, X, Crop } from "lucide-react";
 import { useUser } from "@supabase/auth-helpers-react";
+import { ImageCropDialog } from "./profile/ImageCropDialog";
 
 /**
  * Profile Image Step Component
@@ -19,10 +20,12 @@ interface ProfileImageStepProps {
 
 export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
   const user = useUser();
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [originalImage, setOriginalImage] = useState<File | null>(null);
+  const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showCropDialog, setShowCropDialog] = useState(false);
 
-  // Handle file selection
+  // Handle file selection - opens crop dialog
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -39,23 +42,47 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
       return;
     }
 
-    // Create preview URL
-    const url = URL.createObjectURL(file);
+    // Store original image and open crop dialog
+    setOriginalImage(file);
+    setShowCropDialog(true);
+  };
+
+  // Handle crop completion
+  const handleCropComplete = (croppedBlob: Blob) => {
+    setCroppedImage(croppedBlob);
+    
+    // Create preview URL from cropped image
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    const url = URL.createObjectURL(croppedBlob);
     setPreviewUrl(url);
-    setSelectedImage(file);
+
+    // Convert blob to file for parent component
+    const croppedFile = new File([croppedBlob], originalImage?.name || 'cropped-image.jpg', {
+      type: 'image/jpeg',
+    });
     
     // Notify parent component
-    onImageChange?.(file);
+    onImageChange?.(croppedFile);
   };
 
   // Handle image removal
   const handleRemoveImage = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
-    }
+    }   
     setPreviewUrl(null);
-    setSelectedImage(null);
+    setOriginalImage(null);
+    setCroppedImage(null);
     onImageChange?.(null);
+  };
+
+  // Handle re-cropping existing image
+  const handleRecrop = () => {
+    if (originalImage) {
+      setShowCropDialog(true);
+    }
   };
 
   // Handle drag and drop
@@ -64,10 +91,14 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
     const file = event.dataTransfer.files[0];
     
     if (file && file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setSelectedImage(file);
-      onImageChange?.(file);
+      // Validate file size
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+      
+      setOriginalImage(file);
+      setShowCropDialog(true);
     }
   };
 
@@ -96,7 +127,7 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
           </Avatar>
           
           {/* Remove button for selected image */}
-          {selectedImage && (
+          {croppedImage && (
             <button
               onClick={handleRemoveImage}
               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
@@ -108,7 +139,7 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
 
         {/* Upload controls */}
         <div className="w-full max-w-sm">
-          {!selectedImage ? (
+          {!croppedImage ? (
             <>
               {/* File input */}
               <input
@@ -145,25 +176,34 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
               </div>
             </>
           ) : (
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-3">
               <p className="text-sm font-medium text-green-600">
-                ✓ Photo selected: {selectedImage.name}
+                ✓ Photo cropped and ready: {originalImage?.name}
               </p>
               <p className="text-xs text-gray-500">
                 This will be uploaded when you complete the survey
               </p>
               
-              {/* Change photo button */}
-              <label htmlFor="profile-image">
-                <Button variant="outline" asChild size="sm">
-                  <span className="cursor-pointer">
-                    Change Photo
-                  </span>
+              <div className="flex gap-2 justify-center">
+                {/* Re-crop button */}
+                <Button variant="outline" size="sm" onClick={handleRecrop}>
+                  <Crop className="mr-2 h-4 w-4" />
+                  Crop Again
                 </Button>
-              </label>
+                
+                {/* Change photo button */}
+                <label htmlFor="profile-image-change">
+                  <Button variant="outline" asChild size="sm">
+                    <span className="cursor-pointer">
+                      Change Photo
+                    </span>
+                  </Button>
+                </label>
+              </div>
+              
               <input
                 type="file"
-                id="profile-image"
+                id="profile-image-change"
                 accept="image/*"
                 onChange={handleFileSelect}
                 className="hidden"
@@ -179,6 +219,16 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
           </p>
         </div>
       </div>
+
+      {/* Image Crop Dialog */}
+      {originalImage && (
+        <ImageCropDialog
+          open={showCropDialog}
+          onOpenChange={setShowCropDialog}
+          imageFile={originalImage}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 };
