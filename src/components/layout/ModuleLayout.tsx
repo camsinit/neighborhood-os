@@ -280,9 +280,6 @@ const ModuleLayout = ({
 
                   {/* Call to action */}
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Ready to get started?
-                    </p>
                     <Button onClick={() => setCurrentStep(1)} className="w-full">
                       Get Started
                       <ArrowRight className="w-4 h-4 ml-2" />
