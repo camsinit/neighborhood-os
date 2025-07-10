@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,8 +16,9 @@ import { ImageCropDialog } from "./profile/ImageCropDialog";
 interface ProfileImageStepProps {
   onImageChange?: (file: File | null) => void;
 }
-
-export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
+export const ProfileImageStep = ({
+  onImageChange
+}: ProfileImageStepProps) => {
   const user = useUser();
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
@@ -50,7 +50,7 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
   // Handle crop completion
   const handleCropComplete = (croppedBlob: Blob) => {
     setCroppedImage(croppedBlob);
-    
+
     // Create preview URL from cropped image
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -60,9 +60,9 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
 
     // Convert blob to file for parent component
     const croppedFile = new File([croppedBlob], originalImage?.name || 'cropped-image.jpg', {
-      type: 'image/jpeg',
+      type: 'image/jpeg'
     });
-    
+
     // Notify parent component
     onImageChange?.(croppedFile);
   };
@@ -71,7 +71,7 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
   const handleRemoveImage = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
-    }   
+    }
     setPreviewUrl(null);
     setOriginalImage(null);
     setCroppedImage(null);
@@ -89,25 +89,20 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const file = event.dataTransfer.files[0];
-    
     if (file && file.type.startsWith('image/')) {
       // Validate file size
       if (file.size > 5 * 1024 * 1024) {
         alert('Image size must be less than 5MB');
         return;
       }
-      
       setOriginalImage(file);
       setShowCropDialog(true);
     }
   };
-
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold mb-2">Add a Profile Photo *</h3>
         <p className="text-sm text-muted-foreground">
@@ -127,36 +122,20 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
           </Avatar>
           
           {/* Remove button for selected image */}
-          {croppedImage && (
-            <button
-              onClick={handleRemoveImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-            >
+          {croppedImage && <button onClick={handleRemoveImage} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
               <X className="h-3 w-3" />
-            </button>
-          )}
+            </button>}
         </div>
 
         {/* Upload controls */}
         <div className="w-full max-w-sm">
-          {!croppedImage ? (
-            <>
+          {!croppedImage ? <>
               {/* File input */}
-              <input
-                type="file"
-                id="profile-image"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
+              <input type="file" id="profile-image" accept="image/*" onChange={handleFileSelect} className="hidden" />
               
               {/* Drag and drop area - now clickable */}
               <label htmlFor="profile-image">
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer"
-                >
+                <div onDrop={handleDrop} onDragOver={handleDragOver} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer">
                   <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                   <p className="text-sm text-gray-600">
                     Click here or drag and drop an image
@@ -166,12 +145,9 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
                   </p>
                 </div>
               </label>
-            </>
-          ) : (
-            <div className="text-center space-y-3">
-              <p className="text-xs text-gray-500">
-                This will be uploaded when you complete the survey
-              </p>
+            </> : <div className="text-center space-y-3">
+              
+              
               
               <div className="flex gap-2 justify-center">
                 {/* Re-crop button */}
@@ -190,15 +166,8 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
                 </label>
               </div>
               
-              <input
-                type="file"
-                id="profile-image-change"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </div>
-          )}
+              <input type="file" id="profile-image-change" accept="image/*" onChange={handleFileSelect} className="hidden" />
+            </div>}
         </div>
 
         {/* Required indicator */}
@@ -210,14 +179,6 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
       </div>
 
       {/* Image Crop Dialog */}
-      {originalImage && (
-        <ImageCropDialog
-          open={showCropDialog}
-          onOpenChange={setShowCropDialog}
-          imageFile={originalImage}
-          onCropComplete={handleCropComplete}
-        />
-      )}
-    </div>
-  );
+      {originalImage && <ImageCropDialog open={showCropDialog} onOpenChange={setShowCropDialog} imageFile={originalImage} onCropComplete={handleCropComplete} />}
+    </div>;
 };
