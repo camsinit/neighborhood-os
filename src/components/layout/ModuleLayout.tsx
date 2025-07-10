@@ -212,7 +212,7 @@ const ModuleLayout = ({
       {/* Skills onboarding overlay with full onboarding flow */}
       {showSkillsOnboardingOverlay && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
-          <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto">
+          <Card className="max-w-[622px] w-full max-h-[90vh] overflow-y-auto pointer-events-auto">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>
