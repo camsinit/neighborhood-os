@@ -42,10 +42,12 @@ const ModuleLayout = ({
   onSkillsOnboardingComplete
 }: ModuleLayoutProps) => {
   // State for onboarding flow within the overlay
-  const [currentStep, setCurrentStep] = useState(0); // 0: welcome, 1: skills survey
+  const [currentStep, setCurrentStep] = useState(0); // 0: welcome, 1-7: skills survey steps
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
+  const [skillsSurveyStep, setSkillsSurveyStep] = useState(0);
+  const [skillsSurveyTotal, setSkillsSurveyTotal] = useState(7);
   
   const { toast } = useToast();
   const user = useUser();
@@ -126,13 +128,45 @@ const ModuleLayout = ({
   };
 
   /**
-   * Calculate progress percentage
+   * Handle mini-survey progress updates
+   */
+  const handleMiniSurveyProgress = (step: number, total: number, completed: boolean) => {
+    setSkillsSurveyStep(step);
+    setSkillsSurveyTotal(total);
+  };
+
+  /**
+   * Calculate progress percentage based on current step and mini-survey progress
    */
   const getProgress = () => {
-    if (currentStep === 0) return 25;
-    if (currentStep === 1 && !hasCompletedSurvey) return 50;
-    if (currentStep === 1 && hasCompletedSurvey) return 100;
+    const totalSteps = 1 + skillsSurveyTotal; // Welcome + 7 skills steps
+    
+    if (currentStep === 0) {
+      return (1 / totalSteps) * 100; // Welcome step completed
+    }
+    
+    if (currentStep === 1) {
+      // Progress within skills survey: welcome + current skills step
+      const completedSteps = 1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0);
+      return (completedSteps / totalSteps) * 100;
+    }
+    
     return 0;
+  };
+
+  /**
+   * Get current step display text
+   */
+  const getCurrentStepText = () => {
+    if (currentStep === 0) {
+      return "1 of 8";
+    }
+    
+    if (currentStep === 1) {
+      return `${2 + skillsSurveyStep} of 8`;
+    }
+    
+    return "1 of 8";
   };
   
   return (
@@ -197,22 +231,22 @@ const ModuleLayout = ({
                 )}
               </div>
               
-              {/* Progress bar */}
-              <div className="space-y-2">
-                <Progress value={getProgress()} className="w-full" />
-                <p className="text-xs text-muted-foreground text-center">
-                  Step {currentStep + 1} of 2
-                </p>
-              </div>
+               {/* Progress bar */}
+               <div className="space-y-2">
+                 <Progress value={getProgress()} className="w-full" />
+                 <p className="text-xs text-muted-foreground text-center">
+                   Step {getCurrentStepText()}
+                 </p>
+               </div>
             </CardHeader>
             
             <CardContent>
               {/* Step 0: Welcome */}
               {currentStep === 0 && (
-                <div className="space-y-6 max-w-md mx-auto">
+                <div className="space-y-6 max-w-md mx-auto text-center">
                   {/* Welcome header */}
-                  <div className="text-center space-y-2">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                       <Users className="w-8 h-8 text-primary" />
                     </div>
                     <h2 className="text-xl font-bold">Welcome to Skills Sharing!</h2>
@@ -221,43 +255,33 @@ const ModuleLayout = ({
                     </p>
                   </div>
 
-                  {/* Philosophy explanation */}
-                  <div className="space-y-3">
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <Share2 className="w-4 h-4" />
-                          Share to Discover
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-xs text-muted-foreground">
-                          To view your neighbors' skills, we ask that you first share your own. 
-                          This creates a fair exchange where everyone contributes to the community.
+                  {/* Simplified philosophy - condensed */}
+                  <div className="space-y-4 text-sm">
+                    <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
+                      <Share2 className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                      <div>
+                        <span className="font-medium">Share to Discover</span>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Share your skills first to view your neighbors' skills and create a fair exchange.
                         </p>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
 
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          Privacy First
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <p className="text-xs text-muted-foreground">
-                          You control what you share and can add or remove skills at any time. 
-                          Only share what you're comfortable offering to your neighbors.
+                    <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
+                      <Eye className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                      <div>
+                        <span className="font-medium">Privacy First</span>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          You control what you share and can add or remove skills anytime.
                         </p>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Call to action */}
-                  <div className="text-center space-y-4">
+                  <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Ready to share your skills and discover what your neighbors have to offer?
+                      Ready to get started?
                     </p>
                     <Button onClick={() => setCurrentStep(1)} className="w-full">
                       Get Started
@@ -274,6 +298,7 @@ const ModuleLayout = ({
                     selectedSkills={selectedSkills}
                     onSkillsChange={setSelectedSkills}
                     onSurveyStateChange={handleSurveyStateChange}
+                    onMiniSurveyProgress={handleMiniSurveyProgress}
                   />
                   
                   {/* Complete button */}
