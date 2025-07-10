@@ -62,6 +62,7 @@ export interface ModuleLayoutProps {
   themeColor: ModuleThemeColor;
   className?: string;
   showSkillsOnboardingOverlay?: boolean; // New prop for skills onboarding overlay
+  onStartSkillsOnboarding?: () => void; // Callback for starting skills onboarding
 }
 
 /**

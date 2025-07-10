@@ -5,8 +5,10 @@ import ModuleHeader from './module/ModuleHeader';
 import ModuleContent from './module/ModuleContent';
 import ModuleContainer from './module/ModuleContainer';
 import { ModuleLayoutProps } from '@/types/module';
-import { Info } from 'lucide-react';
+import { Info, Users, Share2, Sparkles } from 'lucide-react';
 import { moduleThemeColors } from '@/theme/moduleTheme';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
  * ModuleLayout Component
@@ -27,7 +29,8 @@ const ModuleLayout = ({
   description,
   themeColor,
   className,
-  showSkillsOnboardingOverlay = false
+  showSkillsOnboardingOverlay = false,
+  onStartSkillsOnboarding
 }: ModuleLayoutProps) => {
   // Get theme colors for this module
   const themeConfig = moduleThemeColors[themeColor];
@@ -72,16 +75,60 @@ const ModuleLayout = ({
         </div>
       </div>
 
-      {/* Skills onboarding welcome image overlay - only shown when prop is true */}
+      {/* Skills onboarding welcome overlay with call-to-action */}
       {showSkillsOnboardingOverlay && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-white rounded-lg shadow-xl p-8 border-2 border-primary/20 pointer-events-auto">
-            <img 
-              src="/lovable-uploads/f4a78f9c-f26b-4911-9ad3-695ce74242b6.png" 
-              alt="Skills Onboarding Welcome" 
-              className="max-w-md max-h-96 object-contain mx-auto"
-            />
-          </div>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
+          <Card className="max-w-md w-full pointer-events-auto">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Welcome to Skills Sharing!</CardTitle>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <p className="text-center text-muted-foreground">
+                To view your neighbors' skills and abilities, we ask that you first share your own. 
+                This creates a fair community where everyone contributes.
+              </p>
+              
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <Share2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Share Your Skills</p>
+                    <p className="text-xs text-muted-foreground">
+                      Let neighbors know what you can help with
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Discover Local Talent</p>
+                    <p className="text-xs text-muted-foreground">
+                      Find neighbors who can help with what you need
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {onStartSkillsOnboarding && (
+                <Button 
+                  onClick={onStartSkillsOnboarding} 
+                  className="w-full mt-6"
+                  size="lg"
+                >
+                  Share My Skills
+                </Button>
+              )}
+              
+              <p className="text-xs text-center text-muted-foreground">
+                Takes just 2 minutes • You can update anytime
+              </p>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

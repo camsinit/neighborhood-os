@@ -10,7 +10,7 @@ import { SkillCategory } from '@/components/skills/types/skillTypes';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import AddSkillPopover from '@/components/skills/AddSkillPopover';
-import { SkillsOnboardingOverlay } from '@/components/skills/SkillsOnboardingOverlay';
+
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
@@ -174,6 +174,7 @@ function SkillsPage() {
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
         themeColor="skills"
         showSkillsOnboardingOverlay={hasCompletedSkillsOnboarding === false}
+        onStartSkillsOnboarding={handleStartSkillsOnboarding}
       >
         <div 
           className="backdrop-blur-sm rounded-lg p-6 shadow-lg border relative"
@@ -183,10 +184,6 @@ function SkillsPage() {
             boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
           }}
         >
-          {/* Skills onboarding overlay - show if user hasn't completed skills onboarding */}
-          {hasCompletedSkillsOnboarding === false && (
-            <SkillsOnboardingOverlay onStartOnboarding={handleStartSkillsOnboarding} />
-          )}
           <SkillsPageContent
             view={view}
             category={category}
