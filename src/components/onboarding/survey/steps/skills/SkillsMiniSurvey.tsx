@@ -29,6 +29,12 @@ interface SkillsMiniSurveyProps {
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
   onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
   onGoBackToWelcome?: () => void;
+  progressInfo?: {
+    currentStep: number;
+    totalSteps: number;
+    completedSteps: number;
+    primaryColor: string;
+  };
 }
 
 export const SkillsMiniSurvey = ({ 
@@ -36,7 +42,8 @@ export const SkillsMiniSurvey = ({
   onSkillsChange, 
   onSurveyStateChange,
   onMiniSurveyProgress,
-  onGoBackToWelcome
+  onGoBackToWelcome,
+  progressInfo
 }: SkillsMiniSurveyProps) => {
   // Convert selectedSkills prop to internal format for easier manipulation
   const [skillsWithDetails, setSkillsWithDetails] = useState<SelectedSkill[]>(() => {
@@ -374,9 +381,27 @@ export const SkillsMiniSurvey = ({
           Back
         </Button>
         
-        <div className="text-xs text-muted-foreground">
-          {currentCategory?.title}
-        </div>
+        {/* Progress dots replacing category text */}
+        {progressInfo && (
+          <div className="flex justify-center gap-2">
+            {Array.from({ length: progressInfo.totalSteps }, (_, index) => {
+              const stepNumber = index + 1;
+              const isCompleted = stepNumber <= progressInfo.completedSteps;
+              
+              return (
+                <div
+                  key={index}
+                  className="w-2 h-2 rounded-full transition-colors duration-200"
+                  style={{
+                    backgroundColor: isCompleted 
+                      ? progressInfo.primaryColor 
+                      : '#e5e7eb'
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
         
         <Button onClick={handleNext} size="sm">
           {currentStep < categoryKeys.length - 1 ? 'Next' : 'Summary'}

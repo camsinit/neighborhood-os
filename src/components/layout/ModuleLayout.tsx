@@ -295,6 +295,12 @@ const ModuleLayout = ({
                     onSkillsChange={setSelectedSkills}
                     onSurveyStateChange={handleSurveyStateChange}
                     onMiniSurveyProgress={handleMiniSurveyProgress}
+                    progressInfo={{
+                      currentStep: skillsSurveyStep,
+                      totalSteps: 8,
+                      completedSteps: 1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0),
+                      primaryColor: themeConfig.primary
+                    }}
                   />
                   
                   {/* Complete button */}
@@ -313,31 +319,29 @@ const ModuleLayout = ({
                  </div>
                )}
                
-               {/* Progress dots moved to bottom */}
-               <div className="mt-6 pt-4 border-t space-y-2">
-                 <div className="flex justify-center gap-2">
-                   {Array.from({ length: 8 }, (_, index) => {
-                     const stepNumber = index + 1;
-                     const isCompleted = currentStep === 0 
-                       ? stepNumber === 1
-                       : currentStep === 1 
-                         ? stepNumber <= (1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0))
-                         : false;
-                     
-                     return (
-                       <div
-                         key={index}
-                         className="w-2 h-2 rounded-full transition-colors duration-200"
-                         style={{
-                           backgroundColor: isCompleted 
-                             ? themeConfig.primary 
-                             : '#e5e7eb'
-                         }}
-                       />
-                     );
-                   })}
-                 </div>
-               </div>
+                {/* Progress dots only show during skills survey, not welcome */}
+                {currentStep === 1 && (
+                  <div className="mt-6 pt-4 border-t space-y-2">
+                    <div className="flex justify-center gap-2">
+                      {Array.from({ length: 8 }, (_, index) => {
+                        const stepNumber = index + 1;
+                        const isCompleted = stepNumber <= (1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0));
+                        
+                        return (
+                          <div
+                            key={index}
+                            className="w-2 h-2 rounded-full transition-colors duration-200"
+                            style={{
+                              backgroundColor: isCompleted 
+                                ? themeConfig.primary 
+                                : '#e5e7eb'
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
              </CardContent>
            </Card>
          </div>
