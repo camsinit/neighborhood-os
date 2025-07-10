@@ -80,8 +80,9 @@ const SkillForm = ({ onClose, mode }: SkillFormProps) => {
     console.log("[SkillForm] Submitting form:", { formData, mode });
     
     try {
-      // Submit the form data
-      await createSkill(formData, mode);
+      // Submit the form data - convert 'request' to 'need' for database compatibility
+      const dbMode = mode === 'request' ? 'need' : mode;
+      await createSkill(formData, dbMode as 'offer' | 'need');
       onClose(); // Close form on success
       console.log("[SkillForm] Form submitted successfully");
     } catch (error) {

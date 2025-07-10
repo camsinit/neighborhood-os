@@ -10,7 +10,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from '@/integrations/supabase/client';
-import { Skill, SkillCategory, SkillWithProfile, isValidRequestType } from '@/components/skills/types/skillTypes';
+import { Skill, SkillCategory, SkillWithProfile, isValidRequestType, mapToCurrentCategory } from '@/components/skills/types/skillTypes';
 import { SkillFormData } from '@/components/skills/types/skillFormTypes';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -33,10 +33,10 @@ interface SkillsContextType {
   setSelectedCategory: (category: SkillCategory | null) => void;
   
   // Skills operations
-  createSkill: (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => Promise<void>;
+  createSkill: (formData: Partial<SkillFormData>, mode: 'offer' | 'need') => Promise<void>;
   updateSkill: (skillId: string, formData: Partial<SkillFormData>) => Promise<void>;
   deleteSkill: (skillId: string, skillTitle: string) => Promise<void>;
-  checkForDuplicates: (title: string, category: string, mode: 'offer' | 'request') => Promise<any[]>;
+  checkForDuplicates: (title: string, category: string, mode: 'offer' | 'need') => Promise<any[]>;
   
   // Preview and grouped data
   skillsPreview: Record<SkillCategory, { offers: string[], requests: string[] }>;
@@ -141,7 +141,8 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
       };
 
       skills?.forEach(skill => {
-        const category = skill.skill_category as SkillCategory;
+        // Map legacy categories to current categories
+        const category = mapToCurrentCategory(skill.skill_category) as SkillCategory;
         if (groupedSkills[category]) {
           if (skill.request_type === 'offer') {
             groupedSkills[category].offers.push(skill.title);
@@ -162,10 +163,14 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
     // Ensure request_type is valid, defaulting to 'offer' if invalid
     const requestType = isValidRequestType(skill.request_type) ? skill.request_type : 'offer';
     
+    // Map legacy categories to current categories
+    const skillCategory = mapToCurrentCategory(skill.skill_category);
+    
     // Create a properly typed skill object
     return {
       ...skill,
       request_type: requestType,
+      skill_category: skillCategory,
       // Ensure other critical fields have appropriate defaults
       time_preferences: skill.time_preferences || null,
       // Make sure we include the profiles data
@@ -174,7 +179,7 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Create a new skill with optimistic updates
-  const createSkill = async (formData: Partial<SkillFormData>, mode: 'offer' | 'request') => {
+  const createSkill = async (formData: Partial<SkillFormData>, mode: 'offer' | 'need') => {
     if (!user || !neighborhood?.id) {
       toast.error("You must be logged in to create a skill");
       return;
@@ -290,7 +295,7 @@ export const SkillsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Check for duplicates before submission
-  const checkForDuplicates = async (title: string, category: string, mode: 'offer' | 'request') => {
+  const checkForDuplicates = async (title: string, category: string, mode: 'offer' | 'need') => {
     return await skillsService.checkForDuplicates(title, category, mode);
   };
 

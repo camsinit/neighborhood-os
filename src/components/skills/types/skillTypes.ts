@@ -1,15 +1,39 @@
 // Define the skill category type - now matching onboarding categories exactly
 export type SkillCategory = 'technology' | 'emergency' | 'professional' | 'maintenance' | 'care' | 'education';
 
-// Define valid request types - updated to use 'request' instead of 'need'
-export type SkillRequestType = 'offer' | 'request';
+/**
+ * Legacy category mapping for backwards compatibility
+ * Maps old database categories to new standardized categories
+ */
+export const LEGACY_CATEGORY_MAPPING: Record<string, SkillCategory> = {
+  'wellness': 'care',
+  'creative': 'education', 
+  'trade': 'maintenance',
+  // Include current categories for passthrough
+  'technology': 'technology',
+  'emergency': 'emergency',
+  'professional': 'professional',
+  'maintenance': 'maintenance',
+  'care': 'care',
+  'education': 'education'
+};
+
+/**
+ * Utility function to map any category (including legacy) to current categories
+ */
+export function mapToCurrentCategory(category: string): SkillCategory {
+  return LEGACY_CATEGORY_MAPPING[category] || 'professional';
+}
+
+// Define valid request types - matching the database values exactly
+export type SkillRequestType = 'offer' | 'need';
 
 /**
  * Utility function to check if a value is a valid request type
  * This helps with type safety when working with data from the database
  */
 export function isValidRequestType(value: any): value is SkillRequestType {
-  return value === 'offer' || value === 'request';
+  return value === 'offer' || value === 'need';
 }
 
 // Base skill interface that matches the database schema

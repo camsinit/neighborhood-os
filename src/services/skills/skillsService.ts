@@ -51,7 +51,7 @@ export const fetchSkills = async (category?: SkillCategory) => {
  */
 export const createSkill = async (
   formData: Partial<SkillFormData>,
-  mode: 'offer' | 'request',
+  mode: 'offer' | 'need',
   userId: string,
   neighborhoodId: string
 ) => {
@@ -72,11 +72,10 @@ export const createSkill = async (
   });
 
   // Create the insert data object with all fields explicitly defined
-  // Use 'need' instead of 'request' to match database constraint
   const insertData = {
     title: formData.title,
     description: formData.description || null,
-    request_type: mode === 'offer' ? 'offer' : 'need', // Fixed: use 'need' not 'request'
+    request_type: mode, // Direct use since mode is already 'offer' | 'need'
     user_id: userId,
     neighborhood_id: neighborhoodId,
     skill_category: formData.category,
@@ -235,7 +234,7 @@ export const deleteSkill = async (
 export const checkForDuplicates = async (
   title: string,
   category: string,
-  mode: 'offer' | 'request'
+  mode: 'offer' | 'need'
 ) => {
   // Query for similar skills
   const { data, error } = await supabase
