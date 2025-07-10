@@ -26,48 +26,64 @@ const ModuleLayout = ({
   title,
   description,
   themeColor,
-  className
+  className,
+  showSkillsOnboardingOverlay = false
 }: ModuleLayoutProps) => {
   // Get theme colors for this module
   const themeConfig = moduleThemeColors[themeColor];
   
   return (
-    // Main container without gradient background
-    <div className="min-h-screen bg-gray-50">
-      {/* Header section with proper left-alignment */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
-        {/* Title - theme-colored and left-aligned */}
-        <h1 
-          className="text-3xl font-bold mb-4 text-left"
-          style={{ color: themeConfig.primary }}
-        >
-          {title}
-        </h1>
-        
-        {/* Description box with gradient and colored border */}
-        {description && (
-          <div 
-            className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
-            style={{ 
-              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 40%, white)`,
-              borderColor: themeConfig.primary
-            }}
+    <div className={showSkillsOnboardingOverlay ? "relative min-h-screen" : "min-h-screen bg-gray-50"}>
+      {/* Main content - conditionally blurred for skills onboarding */}
+      <div className={showSkillsOnboardingOverlay ? "min-h-screen bg-gray-50 blur-sm" : ""}>
+        {/* Header section with proper left-alignment */}
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
+          {/* Title - theme-colored and left-aligned */}
+          <h1 
+            className="text-3xl font-bold mb-4 text-left"
+            style={{ color: themeConfig.primary }}
           >
-            <Info 
-              className="h-5 w-5 mt-0.5 shrink-0" 
-              style={{ color: themeConfig.primary }}
+            {title}
+          </h1>
+          
+          {/* Description box with gradient and colored border */}
+          {description && (
+            <div 
+              className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
+              style={{ 
+                background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 40%, white)`,
+                borderColor: themeConfig.primary
+              }}
+            >
+              <Info 
+                className="h-5 w-5 mt-0.5 shrink-0" 
+                style={{ color: themeConfig.primary }}
+              />
+              <p className="text-sm text-left leading-relaxed text-black">
+                {description}
+              </p>
+            </div>
+          )}
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
+          {/* Content without automatic container - let children handle their own styling */}
+          {children}
+        </div>
+      </div>
+
+      {/* Skills onboarding welcome image overlay - only shown when prop is true */}
+      {showSkillsOnboardingOverlay && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="bg-white rounded-lg shadow-xl p-8 border-2 border-primary/20 pointer-events-auto">
+            <img 
+              src="/lovable-uploads/f4a78f9c-f26b-4911-9ad3-695ce74242b6.png" 
+              alt="Skills Onboarding Welcome" 
+              className="max-w-md max-h-96 object-contain mx-auto"
             />
-            <p className="text-sm text-left leading-relaxed text-black">
-              {description}
-            </p>
           </div>
-        )}
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
-        {/* Content without automatic container - let children handle their own styling */}
-        {children}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

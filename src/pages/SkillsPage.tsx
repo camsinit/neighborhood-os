@@ -173,6 +173,7 @@ function SkillsPage() {
         title="Skill Sharing"
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
         themeColor="skills"
+        showSkillsOnboardingOverlay={hasCompletedSkillsOnboarding === false}
       >
         <div 
           className="backdrop-blur-sm rounded-lg p-6 shadow-lg border relative"

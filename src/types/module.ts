@@ -61,6 +61,7 @@ export interface ModuleLayoutProps {
   description?: string;
   themeColor: ModuleThemeColor;
   className?: string;
+  showSkillsOnboardingOverlay?: boolean; // New prop for skills onboarding overlay
 }
 
 /**
