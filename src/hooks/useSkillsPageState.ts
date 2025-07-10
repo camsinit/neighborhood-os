@@ -24,7 +24,6 @@ export const useSkillsPageState = () => {
   
   // Local component state
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
-  const [isSkillsOnboardingOpen, setIsSkillsOnboardingOpen] = useState(false);
   
   // Refs for components that need direct access
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -100,8 +99,6 @@ export const useSkillsPageState = () => {
     // Local state
     isSkillDialogOpen,
     setIsSkillDialogOpen,
-    isSkillsOnboardingOpen,
-    setIsSkillsOnboardingOpen,
     
     // Refs
     searchInputRef,

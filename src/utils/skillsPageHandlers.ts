@@ -83,25 +83,11 @@ export const createSkillAddedHandler = () => {
 
 /**
  * Creates a handler for skills onboarding completion
- * @param setIsSkillsOnboardingOpen - Function to close the onboarding dialog
  */
-export const createSkillsOnboardingCompleteHandler = (
-  setIsSkillsOnboardingOpen: (open: boolean) => void
-) => {
+export const createSkillsOnboardingCompleteHandler = () => {
   return () => {
-    setIsSkillsOnboardingOpen(false);
     logger.info('Skills onboarding completed successfully');
-  };
-};
-
-/**
- * Creates a handler for starting skills onboarding
- * @param setIsSkillsOnboardingOpen - Function to open the onboarding dialog
- */
-export const createStartSkillsOnboardingHandler = (
-  setIsSkillsOnboardingOpen: (open: boolean) => void
-) => {
-  return () => {
-    setIsSkillsOnboardingOpen(true);
+    // Additional logic for onboarding completion can be added here
+    // The actual completion is now handled within ModuleLayout
   };
 };

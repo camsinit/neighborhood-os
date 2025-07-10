@@ -6,13 +6,11 @@ import {
   createBackToCategoriesHandler,
   getTypedCategory,
   createSkillAddedHandler,
-  createSkillsOnboardingCompleteHandler,
-  createStartSkillsOnboardingHandler
+  createSkillsOnboardingCompleteHandler
 } from '@/utils/skillsPageHandlers';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import AddSkillPopover from '@/components/skills/AddSkillPopover';
-import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
@@ -36,8 +34,6 @@ function SkillsPage() {
     setSearchParams,
     isSkillDialogOpen,
     setIsSkillDialogOpen,
-    isSkillsOnboardingOpen,
-    setIsSkillsOnboardingOpen,
     searchInputRef,
     hasCompletedSkillsOnboarding,
     isOnboardingLoading,
@@ -49,8 +45,7 @@ function SkillsPage() {
   const handleCategoryClick = createCategoryClickHandler(setSearchParams, searchParams);
   const handleBackToCategories = createBackToCategoriesHandler(setSearchParams, searchParams);
   const handleSkillAdded = createSkillAddedHandler();
-  const handleSkillsOnboardingComplete = createSkillsOnboardingCompleteHandler(setIsSkillsOnboardingOpen);
-  const handleStartSkillsOnboarding = createStartSkillsOnboardingHandler(setIsSkillsOnboardingOpen);
+  const handleSkillsOnboardingComplete = createSkillsOnboardingCompleteHandler();
 
   // Show loading state while checking onboarding status
   if (isOnboardingLoading) {
@@ -77,7 +72,7 @@ function SkillsPage() {
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
         themeColor="skills"
         showSkillsOnboardingOverlay={hasCompletedSkillsOnboarding === false}
-        onStartSkillsOnboarding={handleStartSkillsOnboarding}
+        onSkillsOnboardingComplete={handleSkillsOnboardingComplete}
       >
         <div 
           className="backdrop-blur-sm rounded-lg p-6 shadow-lg border relative"
@@ -109,13 +104,6 @@ function SkillsPage() {
         onOpenChange={setIsSkillDialogOpen}
         selectedCategory={getTypedCategory(category)} // Auto-populate with current category if viewing one
         onSkillAdded={handleSkillAdded}
-      />
-      
-      {/* Skills Onboarding Dialog */}
-      <SkillsOnboardingDialog
-        open={isSkillsOnboardingOpen}
-        onOpenChange={setIsSkillsOnboardingOpen}
-        onComplete={handleSkillsOnboardingComplete}
       />
     </SkillsProvider>
   );
