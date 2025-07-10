@@ -153,7 +153,7 @@ export const ProfileImageStep = ({
                 {/* Re-crop button */}
                 <Button variant="outline" size="sm" onClick={handleRecrop}>
                   <Crop className="mr-2 h-4 w-4" />
-                  Crop Again
+                  Crop
                 </Button>
                 
                 {/* Change photo button */}
