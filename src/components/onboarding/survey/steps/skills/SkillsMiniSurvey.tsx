@@ -28,13 +28,15 @@ interface SkillsMiniSurveyProps {
   onSkillsChange: (skills: string[]) => void;
   onSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
   onMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
+  onGoBackToWelcome?: () => void;
 }
 
 export const SkillsMiniSurvey = ({ 
   selectedSkills, 
   onSkillsChange, 
   onSurveyStateChange,
-  onMiniSurveyProgress
+  onMiniSurveyProgress,
+  onGoBackToWelcome
 }: SkillsMiniSurveyProps) => {
   // Convert selectedSkills prop to internal format for easier manipulation
   const [skillsWithDetails, setSkillsWithDetails] = useState<SelectedSkill[]>(() => {
@@ -365,8 +367,7 @@ export const SkillsMiniSurvey = ({
       <div className="flex justify-between items-center pt-2">
         <Button 
           variant="outline" 
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
+          onClick={currentStep === 0 ? onGoBackToWelcome : handlePrevious}
           size="sm"
         >
           <ArrowLeft className="mr-1 h-3 w-3" />

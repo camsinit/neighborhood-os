@@ -190,6 +190,7 @@ export const SkillsOnboardingDialog = ({
                 selectedSkills={selectedSkills}
                 onSkillsChange={setSelectedSkills}
                 onSurveyStateChange={handleSurveyStateChange}
+                onGoBackToWelcome={() => setCurrentStep(0)}
               />
               
               {/* Complete button */}
