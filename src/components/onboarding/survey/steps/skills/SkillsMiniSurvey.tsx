@@ -309,7 +309,7 @@ export const SkillsMiniSurvey = ({
             <div
               key={skill}
               className={`p-2 border rounded-md cursor-pointer transition-colors hover:bg-gray-50 ${
-                selected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                selected ? 'border-green-500 bg-green-50' : 'border-gray-200'
               }`}
               onClick={() => handleSkillSelect(skill)}
             >
