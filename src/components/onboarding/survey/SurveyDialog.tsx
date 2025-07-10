@@ -28,7 +28,7 @@ interface SurveyDialogProps {
   submissionState?: FormSubmissionState;
 }
 
-// Define the survey steps
+// Define the survey steps (skills step removed - moved to Skills page)
 const steps = [
   {
     title: "Basic Information",
@@ -41,9 +41,6 @@ const steps = [
   },
   {
     title: "Profile Photo",
-  },
-  {
-    title: "Skills & Interests",
   },
 ];
 
@@ -61,30 +58,12 @@ const SurveyDialog = ({
   const {
     currentStep,
     formData,
-    skillsSurveyState,
     handleChange,
     handleValidation,
-    handleSkillsSurveyStateChange,
     isCurrentStepValid,
     handleNext,
     handlePrevious,
   } = useSurveyState();
-  
-  // Track skills mini-survey progress for progress bar calculation
-  const [skillsMiniSurveyProgress, setSkillsMiniSurveyProgress] = useState({
-    currentStep: 0,
-    totalSteps: 7, // 6 categories + 1 availability + 1 summary
-    hasCompleted: false,
-  });
-  
-  // Handle skills mini-survey progress updates
-  const handleSkillsMiniSurveyProgress = (currentStep: number, totalSteps: number, hasCompleted: boolean) => {
-    setSkillsMiniSurveyProgress({
-      currentStep,
-      totalSteps,
-      hasCompleted,
-    });
-  };
   
   // Handle survey completion - pass form data to completion handler
   const handleSurveyComplete = () => {
@@ -171,11 +150,10 @@ const SurveyDialog = ({
         {/* Survey header */}
         <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
         
-        {/* Progress indicator - now includes skills mini-survey progress */}
+        {/* Progress indicator */}
         <SurveyProgress 
           currentStep={currentStep} 
           totalSteps={steps.length}
-          skillsSurveyProgress={currentStep === 4 ? skillsMiniSurveyProgress : undefined}
         />
         
         {/* Current step component */}
@@ -185,8 +163,6 @@ const SurveyDialog = ({
             formData={formData}
             handleChange={handleChange}
             handleValidation={handleValidation}
-            onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
-            onSkillsMiniSurveyProgress={handleSkillsMiniSurveyProgress}
           />
         </div>
         
@@ -197,9 +173,6 @@ const SurveyDialog = ({
           isCurrentStepValid={isCurrentStepValid()}
           onPrevious={handlePrevious}
           onNext={() => handleNext(handleSurveyComplete, steps.length)}
-          isSkillsStep={currentStep === 4}
-          hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
-          hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
           disabled={submissionState?.isSubmitting}
         />
       </DialogContent>
