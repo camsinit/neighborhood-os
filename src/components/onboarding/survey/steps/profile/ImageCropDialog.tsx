@@ -3,14 +3,14 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { RotateCcw, Check, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import 'react-image-crop/dist/ReactCrop.css';
 
 /**
  * ImageCropDialog Component
  * 
  * Provides a dialog interface for users to crop their profile image to a circular format.
- * Features zoom, rotation, and precise positioning controls for optimal profile pictures.
+ * Features zoom and precise positioning controls for optimal profile pictures.
  * 
  * The cropping is done with a 1:1 aspect ratio to ensure it fits perfectly in circular avatars.
  */
@@ -52,7 +52,6 @@ export const ImageCropDialog = ({
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [scale, setScale] = useState(1);
-  const [rotate, setRotate] = useState(0);
   const [aspect] = useState<number | undefined>(1); // 1:1 aspect ratio for circular profiles
   
   const imgRef = useRef<HTMLImageElement>(null);
@@ -141,7 +140,6 @@ export const ImageCropDialog = ({
   // Reset transformations
   const handleReset = () => {
     setScale(1);
-    setRotate(0);
     if (imgRef.current && aspect) {
       const { width, height } = imgRef.current;
       setCrop(centerAspectCrop(width, height, aspect));
@@ -176,7 +174,7 @@ export const ImageCropDialog = ({
                   ref={imgRef}
                   alt="Crop me"
                   src={imageSrc}
-                  style={{ transform: `scale(${scale}) rotate(${rotate}deg)` }}
+                  style={{ transform: `scale(${scale})` }}
                   onLoad={onImageLoad}
                   className="max-w-full max-h-[350px] object-contain"
                 />
@@ -198,30 +196,6 @@ export const ImageCropDialog = ({
                 className="flex-1"
               />
               <span className="text-xs">+</span>
-            </div>
-          </div>
-
-          {/* Rotation control */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Rotation</label>
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                className="shrink-0"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              <Slider
-                value={[rotate]}
-                onValueChange={(value) => setRotate(value[0])}
-                max={180}
-                min={-180}
-                step={5}
-                className="flex-1"
-              />
-              <span className="text-xs w-12 text-center">{rotate}°</span>
             </div>
           </div>
 
