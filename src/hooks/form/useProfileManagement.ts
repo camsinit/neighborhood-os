@@ -19,7 +19,7 @@ export const useProfileManagement = () => {
         avatar_url: avatarUrl || null,
         email_visible: formData.emailVisible,
         phone_visible: formData.phoneVisible,
-        address_visible: formData.addressVisible || false,
+        address_visible: false,
         skills: formData.skills,
         completed_onboarding: true,
       };
