@@ -105,9 +105,7 @@ export const ProfileImageStep = ({
   return <div className="space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold mb-2">Add a Profile Photo </h3>
-        <p className="text-sm text-muted-foreground">
-          A profile photo is required to help neighbors recognize you and build community trust.
-        </p>
+        <p className="text-sm text-muted-foreground px-[42px]">Please use a photo with your face in it so your neighbors can put a face to the name.</p>
       </div>
 
       {/* Image upload area */}
