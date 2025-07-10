@@ -150,30 +150,22 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
                 className="hidden"
               />
               
-              {/* Upload button */}
+              {/* Drag and drop area - now clickable */}
               <label htmlFor="profile-image">
-                <Button asChild className="w-full">
-                  <span className="cursor-pointer">
-                    <Upload className="mr-2 h-4 w-4" />
-                    Choose Photo
-                  </span>
-                </Button>
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                >
+                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600">
+                    Click here or drag and drop an image
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Maximum file size: 5MB
+                  </p>
+                </div>
               </label>
-
-              {/* Drag and drop area */}
-              <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
-              >
-                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600">
-                  Or drag and drop an image here
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Maximum file size: 5MB
-                </p>
-              </div>
             </>
           ) : (
             <div className="text-center space-y-3">
