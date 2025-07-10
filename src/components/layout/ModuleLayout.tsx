@@ -9,7 +9,7 @@ import { Info, Users, Share2, Sparkles, Eye, ArrowRight, ArrowLeft } from 'lucid
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+
 import { SkillsMiniSurvey } from "@/components/onboarding/survey/steps/skills/SkillsMiniSurvey";
 import { useSkillsManagement } from "@/hooks/form/useSkillsManagement";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -231,9 +231,30 @@ const ModuleLayout = ({
                 )}
               </div>
               
-               {/* Progress bar */}
+               {/* Progress dots */}
                <div className="space-y-2">
-                 <Progress value={getProgress()} className="w-full" />
+                 <div className="flex justify-center gap-2">
+                   {Array.from({ length: 8 }, (_, index) => {
+                     const stepNumber = index + 1;
+                     const isCompleted = currentStep === 0 
+                       ? stepNumber === 1
+                       : currentStep === 1 
+                         ? stepNumber <= (1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0))
+                         : false;
+                     
+                     return (
+                       <div
+                         key={index}
+                         className="w-2 h-2 rounded-full transition-colors duration-200"
+                         style={{
+                           backgroundColor: isCompleted 
+                             ? themeConfig.primary 
+                             : '#e5e7eb'
+                         }}
+                       />
+                     );
+                   })}
+                 </div>
                  <p className="text-xs text-muted-foreground text-center">
                    Step {getCurrentStepText()}
                  </p>
@@ -245,10 +266,13 @@ const ModuleLayout = ({
               {currentStep === 0 && (
                 <div className="space-y-6 max-w-md mx-auto text-center">
                   {/* Welcome header */}
-                  <div className="space-y-3">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <Users className="w-8 h-8 text-primary" />
-                    </div>
+                   <div className="space-y-3">
+                     <div 
+                       className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
+                       style={{ backgroundColor: `${themeConfig.primary}10` }}
+                     >
+                       <Users className="w-8 h-8" style={{ color: themeConfig.primary }} />
+                     </div>
                     <h2 className="text-xl font-bold">Welcome to Skills Sharing!</h2>
                     <p className="text-muted-foreground text-sm">
                       Build a stronger community by sharing and discovering neighborhood skills
@@ -257,8 +281,8 @@ const ModuleLayout = ({
 
                   {/* Simplified philosophy - condensed */}
                   <div className="space-y-4 text-sm">
-                    <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
-                      <Share2 className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                     <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
+                       <Share2 className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: themeConfig.primary }} />
                       <div>
                         <span className="font-medium">Share to Discover</span>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -267,8 +291,8 @@ const ModuleLayout = ({
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
-                      <Eye className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                     <div className="flex items-start gap-3 text-left bg-muted/50 p-3 rounded-lg">
+                       <Eye className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: themeConfig.primary }} />
                       <div>
                         <span className="font-medium">Privacy First</span>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -280,10 +304,14 @@ const ModuleLayout = ({
 
                   {/* Call to action */}
                   <div className="space-y-4">
-                    <Button onClick={() => setCurrentStep(1)} className="w-full">
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                     <Button 
+                       onClick={() => setCurrentStep(1)} 
+                       className="w-full"
+                       style={{ backgroundColor: themeConfig.primary, borderColor: themeConfig.primary }}
+                     >
+                       Get Started
+                       <ArrowRight className="w-4 h-4 ml-2" />
+                     </Button>
                   </div>
                 </div>
               )}
@@ -301,13 +329,14 @@ const ModuleLayout = ({
                   {/* Complete button */}
                   {hasCompletedSurvey && (
                     <div className="flex justify-center pt-4 border-t">
-                      <Button 
-                        onClick={handleSkillsComplete}
-                        disabled={isSubmitting}
-                        className="min-w-[120px]"
-                      >
-                        {isSubmitting ? "Saving..." : "Complete Setup"}
-                      </Button>
+                       <Button 
+                         onClick={handleSkillsComplete}
+                         disabled={isSubmitting}
+                         className="min-w-[120px]"
+                         style={{ backgroundColor: themeConfig.primary, borderColor: themeConfig.primary }}
+                       >
+                         {isSubmitting ? "Saving..." : "Complete Setup"}
+                       </Button>
                     </div>
                   )}
                 </div>
