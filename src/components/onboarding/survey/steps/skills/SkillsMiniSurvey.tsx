@@ -273,7 +273,7 @@ export const SkillsMiniSurvey = ({
             Back
           </Button>
           <div className="text-xs text-muted-foreground">
-            Step {currentStep + 1} of {totalSteps} - Complete!
+            Review Complete
           </div>
           <div className="w-16" /> {/* Spacer for layout balance */}
         </div>
@@ -374,7 +374,7 @@ export const SkillsMiniSurvey = ({
         </Button>
         
         <div className="text-xs text-muted-foreground">
-          Step {currentStep + 1} of {totalSteps}
+          {currentCategory?.title}
         </div>
         
         <Button onClick={handleNext} size="sm">

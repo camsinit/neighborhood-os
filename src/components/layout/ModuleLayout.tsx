@@ -230,35 +230,6 @@ const ModuleLayout = ({
                   </Button>
                 )}
               </div>
-              
-               {/* Progress dots */}
-               <div className="space-y-2">
-                 <div className="flex justify-center gap-2">
-                   {Array.from({ length: 8 }, (_, index) => {
-                     const stepNumber = index + 1;
-                     const isCompleted = currentStep === 0 
-                       ? stepNumber === 1
-                       : currentStep === 1 
-                         ? stepNumber <= (1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0))
-                         : false;
-                     
-                     return (
-                       <div
-                         key={index}
-                         className="w-2 h-2 rounded-full transition-colors duration-200"
-                         style={{
-                           backgroundColor: isCompleted 
-                             ? themeConfig.primary 
-                             : '#e5e7eb'
-                         }}
-                       />
-                     );
-                   })}
-                 </div>
-                 <p className="text-xs text-muted-foreground text-center">
-                   Step {getCurrentStepText()}
-                 </p>
-               </div>
             </CardHeader>
             
             <CardContent>
@@ -339,13 +310,39 @@ const ModuleLayout = ({
                        </Button>
                     </div>
                   )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+                 </div>
+               )}
+               
+               {/* Progress dots moved to bottom */}
+               <div className="mt-6 pt-4 border-t space-y-2">
+                 <div className="flex justify-center gap-2">
+                   {Array.from({ length: 8 }, (_, index) => {
+                     const stepNumber = index + 1;
+                     const isCompleted = currentStep === 0 
+                       ? stepNumber === 1
+                       : currentStep === 1 
+                         ? stepNumber <= (1 + skillsSurveyStep + (hasCompletedSurvey ? 1 : 0))
+                         : false;
+                     
+                     return (
+                       <div
+                         key={index}
+                         className="w-2 h-2 rounded-full transition-colors duration-200"
+                         style={{
+                           backgroundColor: isCompleted 
+                             ? themeConfig.primary 
+                             : '#e5e7eb'
+                         }}
+                       />
+                     );
+                   })}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )}
+     </div>
   );
 };
 
