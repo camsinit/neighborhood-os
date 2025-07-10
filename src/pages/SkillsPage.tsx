@@ -12,6 +12,7 @@ import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import AddSkillPopover from '@/components/skills/AddSkillPopover';
 import { SkillsOnboardingOverlay } from '@/components/skills/SkillsOnboardingOverlay';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
+import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
 const logger = createLogger('SkillsPage');
@@ -167,7 +168,7 @@ function SkillsPage() {
   }
   
   return (
-    <>
+    <SkillsProvider>
       <ModuleLayout
         title="Skill Sharing"
         description="Share skills and knowledge with your neighbors to build a stronger, more connected community."
@@ -215,7 +216,7 @@ function SkillsPage() {
         onOpenChange={setIsSkillsOnboardingOpen}
         onComplete={handleSkillsOnboardingComplete}
       />
-    </>
+    </SkillsProvider>
   );
 }
 
