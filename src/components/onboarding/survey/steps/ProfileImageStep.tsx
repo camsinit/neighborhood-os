@@ -169,9 +169,6 @@ export const ProfileImageStep = ({ onImageChange }: ProfileImageStepProps) => {
             </>
           ) : (
             <div className="text-center space-y-3">
-              <p className="text-sm font-medium text-green-600">
-                ✓ Photo cropped and ready: {originalImage?.name}
-              </p>
               <p className="text-xs text-gray-500">
                 This will be uploaded when you complete the survey
               </p>
