@@ -60,13 +60,11 @@ export const SurveyStepRenderer = ({
           password={formData.password}
           emailVisible={formData.emailVisible}
           phoneVisible={formData.phoneVisible}
-          addressVisible={formData.addressVisible}
           onEmailChange={(value) => handleChange("email", value)}
           onPhoneChange={(value) => handleChange("phone", value)}
           onPasswordChange={(value) => handleChange("password", value)}
           onEmailVisibleChange={(value) => handleChange("emailVisible", value)}
           onPhoneVisibleChange={(value) => handleChange("phoneVisible", value)}
-          onAddressVisibleChange={(value) => handleChange("addressVisible", value)}
           onValidation={handleValidation}
         />
       );

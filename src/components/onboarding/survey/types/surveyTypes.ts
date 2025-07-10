@@ -20,7 +20,6 @@ export interface SurveyFormData {
   // Privacy settings
   emailVisible: boolean;
   phoneVisible: boolean;
-  addressVisible: boolean;
   
   // Address information
   address: string;

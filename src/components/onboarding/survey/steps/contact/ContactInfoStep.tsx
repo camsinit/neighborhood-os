@@ -16,12 +16,10 @@ interface ContactInfoStepProps {
   form: UseFormReturn<any>;
   emailVisible: boolean;
   phoneVisible: boolean;
-  addressVisible: boolean;
   visibilityError: string;
   showOptions: boolean;
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
-  onAddressVisibleChange: (value: boolean) => void;
   onToggleOptions: (show: boolean) => void;
   onVisibilityChange: () => void;
 }
@@ -30,12 +28,10 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
   form,
   emailVisible,
   phoneVisible,
-  addressVisible,
   visibilityError,
   showOptions,
   onEmailVisibleChange,
   onPhoneVisibleChange,
-  onAddressVisibleChange,
   onToggleOptions,
   onVisibilityChange
 }) => {
@@ -92,12 +88,10 @@ export const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
       <VisibilityToggle
         emailVisible={emailVisible}
         phoneVisible={phoneVisible}
-        addressVisible={addressVisible}
         visibilityError={visibilityError}
         showOptions={showOptions}
         onEmailVisibleChange={onEmailVisibleChange}
         onPhoneVisibleChange={onPhoneVisibleChange}
-        onAddressVisibleChange={onAddressVisibleChange}
         onToggleOptions={onToggleOptions}
         onVisibilityChange={onVisibilityChange}
       />

@@ -10,12 +10,10 @@ import { Label } from "@/components/ui/label";
 interface VisibilityToggleProps {
   emailVisible: boolean;
   phoneVisible: boolean;
-  addressVisible: boolean;
   visibilityError: string;
   showOptions: boolean;
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
-  onAddressVisibleChange: (value: boolean) => void;
   onToggleOptions: (show: boolean) => void;
   onVisibilityChange: () => void;
 }
@@ -23,11 +21,9 @@ interface VisibilityToggleProps {
 export const VisibilityToggle = ({
   emailVisible,
   phoneVisible,
-  addressVisible,
   visibilityError,
   onEmailVisibleChange,
   onPhoneVisibleChange,
-  onAddressVisibleChange,
   onVisibilityChange
 }: VisibilityToggleProps) => {
   return (
@@ -65,20 +61,6 @@ export const VisibilityToggle = ({
           />
           <Label htmlFor="show-phone" className="text-sm font-normal cursor-pointer">
             Show phone to neighbors
-          </Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="show-address" 
-            checked={addressVisible} 
-            onCheckedChange={(checked) => {
-              onAddressVisibleChange(checked as boolean);
-              onVisibilityChange();
-            }} 
-          />
-          <Label htmlFor="show-address" className="text-sm font-normal cursor-pointer">
-            Show address to neighbors (optional)
           </Label>
         </div>
       </div>

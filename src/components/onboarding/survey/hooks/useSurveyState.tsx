@@ -35,7 +35,6 @@ export const useSurveyState = () => {
     skills: [],
     emailVisible: true,
     phoneVisible: false,
-    addressVisible: false,
     profileImage: null,
   });
   

@@ -21,13 +21,11 @@ interface ContactInfoStepProps {
   password: string;
   emailVisible: boolean;
   phoneVisible: boolean;
-  addressVisible: boolean;
   onEmailChange: (value: string) => void;
   onPhoneChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
-  onAddressVisibleChange: (value: boolean) => void;
   onValidation?: (field: string, isValid: boolean) => void;
 }
 
@@ -37,13 +35,11 @@ export const ContactInfoStep = ({
   password,
   emailVisible,
   phoneVisible,
-  addressVisible,
   onEmailChange,
   onPhoneChange,
   onPasswordChange,
   onEmailVisibleChange,
   onPhoneVisibleChange,
-  onAddressVisibleChange,
   onValidation,
 }: ContactInfoStepProps) => {
   // Track validation errors
@@ -228,12 +224,10 @@ export const ContactInfoStep = ({
       <VisibilityToggle
         emailVisible={emailVisible}
         phoneVisible={phoneVisible}
-        addressVisible={addressVisible}
         visibilityError={errors.visibility}
         showOptions={showVisibilityOptions}
         onEmailVisibleChange={onEmailVisibleChange}
         onPhoneVisibleChange={onPhoneVisibleChange}
-        onAddressVisibleChange={onAddressVisibleChange}
         onToggleOptions={setShowVisibilityOptions}
         onVisibilityChange={handleVisibilityChange}
       />
