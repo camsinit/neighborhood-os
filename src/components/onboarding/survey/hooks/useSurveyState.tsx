@@ -24,7 +24,7 @@ export const useSurveyState = () => {
     hasSelectedSkills: false,
   });
   
-  // Form data state with proper initialization (removed bio, skillAvailability, skillTimePreferences)
+  // Form data state (skills removed - moved to Skills page)
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
@@ -32,7 +32,6 @@ export const useSurveyState = () => {
     phone: "",
     password: "",
     address: "",
-    skills: [],
     emailVisible: true,
     phoneVisible: false,
     profileImage: null,
@@ -89,12 +88,8 @@ export const useSurveyState = () => {
       case 2: // Address
         return formData.address.trim() !== "";
       
-      case 3: // Profile Image (now required)
+      case 3: // Profile Image (final step)
         return formData.profileImage !== null;
-      
-      case 4: // Skills & Interests
-        // Must complete the skills mini-survey (reach the summary step)
-        return skillsSurveyState.hasCompletedSurvey;
       
       default:
         return true;

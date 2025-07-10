@@ -27,8 +27,7 @@ export interface SurveyFormData {
   // Profile image
   profileImage: File | null;
   
-  // Skills (simplified - no availability during onboarding)
-  skills: string[];
+  // Skills removed - skills onboarding moved to Skills page
 }
 
 /**

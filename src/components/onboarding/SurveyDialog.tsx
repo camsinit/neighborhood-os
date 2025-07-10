@@ -23,7 +23,7 @@ interface SurveyDialogProps {
   isTestMode?: boolean;
 }
 
-// Define the survey steps
+// Define the survey steps (skills step removed - moved to Skills page)
 const steps = [
   {
     title: "Basic Information",
@@ -36,9 +36,6 @@ const steps = [
   },
   {
     title: "Profile Photo",
-  },
-  {
-    title: "Skills & Interests",
   },
 ];
 
@@ -131,13 +128,12 @@ const SurveyDialog = ({
         
         {/* Current step component */}
         <div className="py-4">
-          <SurveyStepRenderer
-            currentStep={currentStep}
-            formData={formData}
-            handleChange={handleChange}
-            handleValidation={handleValidation}
-            onSkillsSurveyStateChange={handleSkillsSurveyStateChange}
-          />
+        <SurveyStepRenderer
+          currentStep={currentStep}
+          formData={formData}
+          handleChange={handleChange}
+          handleValidation={handleValidation}
+        />
         </div>
         
         {/* Navigation buttons */}
@@ -147,9 +143,6 @@ const SurveyDialog = ({
           isCurrentStepValid={isCurrentStepValid()}
           onPrevious={handlePrevious}
           onNext={() => handleNext(handleSurveyComplete, steps.length)}
-          isSkillsStep={currentStep === 4}
-          hasCompletedSkillsSurvey={skillsSurveyState.hasCompletedSurvey}
-          hasSelectedSkills={skillsSurveyState.hasSelectedSkills}
         />
       </DialogContent>
     </Dialog>

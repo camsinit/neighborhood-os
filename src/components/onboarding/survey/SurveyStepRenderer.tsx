@@ -5,24 +5,21 @@ import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { ContactInfoStep } from "./steps/ContactInfoStep";
 import { AddressStep } from "./steps/AddressStep";
 import { ProfileImageStep } from "./steps/ProfileImageStep";
-import { EnhancedSkillsStep } from "./steps/EnhancedSkillsStep";
+// EnhancedSkillsStep removed - skills onboarding moved to Skills page
 
 /**
  * SurveyStepRenderer component
  * 
  * Handles rendering the appropriate step component based on the current step index.
  * This component encapsulates all the step-specific logic and props passing.
- * Now tracks skills survey completion state for navigation validation.
- * 
- * UPDATED: Removed availability handling - onboarding no longer collects availability preferences
+ * UPDATED: Removed skills step - skills onboarding moved to Skills page for "contribute to view" approach
  */
 interface SurveyStepRendererProps {
   currentStep: number;
   formData: SurveyFormData;
   handleChange: (field: keyof SurveyFormData, value: any) => void;
   handleValidation: (field: string, isValid: boolean) => void;
-  onSkillsSurveyStateChange?: (hasCompleted: boolean, hasSkills: boolean) => void;
-  onSkillsMiniSurveyProgress?: (currentStep: number, totalSteps: number, hasCompleted: boolean) => void;
+  // Skills-related props removed - skills onboarding moved to Skills page
 }
 
 export const SurveyStepRenderer = ({
@@ -30,8 +27,7 @@ export const SurveyStepRenderer = ({
   formData,
   handleChange,
   handleValidation,
-  onSkillsSurveyStateChange,
-  onSkillsMiniSurveyProgress,
+  // Skills-related props removed
 }: SurveyStepRendererProps) => {
   
   // Handle profile image change
@@ -85,15 +81,7 @@ export const SurveyStepRenderer = ({
         />
       );
     
-    case 4:
-      return (
-        <EnhancedSkillsStep
-          selectedSkills={formData.skills}
-          onSkillsChange={(value) => handleChange("skills", value)}
-          onSurveyStateChange={onSkillsSurveyStateChange}
-          onMiniSurveyProgress={onSkillsMiniSurveyProgress}
-        />
-      );
+    // Step 4 (Skills) removed - skills onboarding moved to Skills page
     
     default:
       return null;

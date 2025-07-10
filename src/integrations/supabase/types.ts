@@ -507,6 +507,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           completed_onboarding: boolean | null
+          completed_skills_onboarding: boolean | null
           created_at: string
           display_name: string | null
           email_visible: boolean | null
@@ -528,6 +529,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           completed_onboarding?: boolean | null
+          completed_skills_onboarding?: boolean | null
           created_at?: string
           display_name?: string | null
           email_visible?: boolean | null
@@ -549,6 +551,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           completed_onboarding?: boolean | null
+          completed_skills_onboarding?: boolean | null
           created_at?: string
           display_name?: string | null
           email_visible?: boolean | null

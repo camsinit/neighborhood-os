@@ -139,8 +139,7 @@ export const useFormSubmission = () => {
   const submitForm = async (formData: SurveyFormData): Promise<boolean> => {
     logger.info("Starting submission process");
     logger.info("Current user:", user ? `${user.id} (${user.email})` : 'null');
-    logger.info("Form data email:", formData.email);
-    logger.info("Skills to save:", formData.skills);
+    logger.info("Form data skills removed - now handled on Skills page");
 
     // Reset submission state
     setSubmissionState({
@@ -197,30 +196,10 @@ export const useFormSubmission = () => {
       setSubmissionState(prev => ({ ...prev, progress: 70 }));
       await upsertProfile(formData, userId, avatarUrl);
 
-      // Step 5: Save skills if any are selected (90%)
+      // Step 5: Skills handling removed (90%)
+      // Skills are now handled separately on the Skills page
       setSubmissionState(prev => ({ ...prev, progress: 90 }));
-      if (formData.skills && formData.skills.length > 0) {
-        logger.info("Saving skills:", formData.skills);
-        try {
-          await saveSkills(
-            formData.skills,
-            userId,
-            neighborhoodId
-          );
-          logger.info("Skills saved successfully");
-        } catch (skillError) {
-          logger.error("Error saving skills:", skillError);
-          // Don't fail the entire submission for skills errors
-          // but log it and show a warning
-          toast({
-            title: "Profile Created",
-            description: "Your profile was created but there was an issue saving your skills. You can add them later in the Skills section.",
-            variant: "default",
-          });
-        }
-      } else {
-        logger.info("No skills to save");
-      }
+      logger.info("Skills handling skipped - now handled on Skills page");
 
       // Step 6: Complete (100%)
       setSubmissionState({

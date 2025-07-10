@@ -15,6 +15,8 @@ import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
+import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
+import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 
 
 /**
@@ -31,6 +33,10 @@ const DebugPage = () => {
   // State for onboarding testing dialogs
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
+  const [showSkillsOnboardingTest, setShowSkillsOnboardingTest] = useState(false);
+  
+  // Skills onboarding hook for testing functions
+  const { resetSkillsOnboarding } = useSkillsOnboarding();
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -99,7 +105,7 @@ const DebugPage = () => {
                   <p className="text-sm text-muted-foreground mb-4">
                     Test the onboarding and survey flows in isolation without affecting user data.
                   </p>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
                       onClick={() => setShowOnboardingTest(true)}
@@ -116,7 +122,37 @@ const DebugPage = () => {
                       <TestTube className="w-4 h-4" />
                       Test Survey Flow
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowSkillsOnboardingTest(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="w-4 h-4" />
+                      Test Skills Onboarding
+                    </Button>
                   </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Skills Onboarding Management</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Reset skills onboarding status to test the Skills page overlay and onboarding flow.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={async () => {
+                      const success = await resetSkillsOnboarding();
+                      if (success) {
+                        alert('Skills onboarding status reset. Visit the Skills page to see the overlay.');
+                      } else {
+                        alert('Failed to reset skills onboarding status.');
+                      }
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <TestTube className="w-4 h-4" />
+                    Reset Skills Onboarding
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -197,6 +233,13 @@ const DebugPage = () => {
         <SurveyDialog
           open={showSurveyTest}
           onOpenChange={setShowSurveyTest}
+          isTestMode={true} // Mark this as test mode to prevent data modification
+        />
+        
+        <SkillsOnboardingDialog
+          open={showSkillsOnboardingTest}
+          onOpenChange={setShowSkillsOnboardingTest}
+          onComplete={() => setShowSkillsOnboardingTest(false)}
           isTestMode={true} // Mark this as test mode to prevent data modification
         />
     </div>
