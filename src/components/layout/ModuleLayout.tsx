@@ -32,54 +32,41 @@ const ModuleLayout = ({
   const themeConfig = moduleThemeColors[themeColor];
   
   return (
-    <div className="relative min-h-screen">
-      {/* Blurred background container */}
-      <div className="min-h-screen bg-gray-50 blur-sm">
-        {/* Header section with proper left-alignment */}
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
-          {/* Title - theme-colored and left-aligned */}
-          <h1 
-            className="text-3xl font-bold mb-4 text-left"
-            style={{ color: themeConfig.primary }}
-          >
-            {title}
-          </h1>
-          
-          {/* Description box with gradient and colored border */}
-          {description && (
-            <div 
-              className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
-              style={{ 
-                background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 40%, white)`,
-                borderColor: themeConfig.primary
-              }}
-            >
-              <Info 
-                className="h-5 w-5 mt-0.5 shrink-0" 
-                style={{ color: themeConfig.primary }}
-              />
-              <p className="text-sm text-left leading-relaxed text-black">
-                {description}
-              </p>
-            </div>
-          )}
-        </div>
+    // Main container without gradient background
+    <div className="min-h-screen bg-gray-50">
+      {/* Header section with proper left-alignment */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
+        {/* Title - theme-colored and left-aligned */}
+        <h1 
+          className="text-3xl font-bold mb-4 text-left"
+          style={{ color: themeConfig.primary }}
+        >
+          {title}
+        </h1>
         
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
-          {/* Content without automatic container - let children handle their own styling */}
-          {children}
-        </div>
+        {/* Description box with gradient and colored border */}
+        {description && (
+          <div 
+            className="rounded-lg p-4 border shadow-sm flex items-start gap-3"
+            style={{ 
+              background: `linear-gradient(to right, ${themeConfig.primary}20, ${themeConfig.primary}08 40%, white)`,
+              borderColor: themeConfig.primary
+            }}
+          >
+            <Info 
+              className="h-5 w-5 mt-0.5 shrink-0" 
+              style={{ color: themeConfig.primary }}
+            />
+            <p className="text-sm text-left leading-relaxed text-black">
+              {description}
+            </p>
+          </div>
+        )}
       </div>
-
-      {/* Welcome image overlay positioned on top */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="bg-white rounded-lg shadow-xl p-8 border-2 border-primary/20 pointer-events-auto">
-          <img 
-            src="/lovable-uploads/7fe17d62-731a-4c37-955e-86eb894ff215.png" 
-            alt="Welcome" 
-            className="max-w-md max-h-96 object-contain mx-auto"
-          />
-        </div>
+      
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-8">
+        {/* Content without automatic container - let children handle their own styling */}
+        {children}
       </div>
     </div>
   );
