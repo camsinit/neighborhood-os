@@ -159,27 +159,37 @@ export const ImageCropDialog = ({
 
         <div className="space-y-4">
           {/* Image cropping area */}
-          <div className="flex justify-center max-h-[400px] overflow-auto border rounded-lg">
-            {imageSrc && (
-              <ReactCrop
-                crop={crop}
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                onComplete={(c) => setCompletedCrop(c)}
-                aspect={aspect}
-                minWidth={100}
-                minHeight={100}
-                circularCrop // This makes the crop overlay circular
-              >
-                <img
-                  ref={imgRef}
-                  alt="Crop me"
-                  src={imageSrc}
-                  style={{ transform: `scale(${scale})` }}
-                  onLoad={onImageLoad}
-                  className="max-w-full max-h-[350px] object-contain"
-                />
-              </ReactCrop>
-            )}
+          <div className="flex justify-center border rounded-lg bg-gray-50 p-4">
+            <div className="relative max-w-full max-h-[400px]">
+              {imageSrc && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={aspect}
+                  minWidth={100}
+                  minHeight={100}
+                  circularCrop // This makes the crop overlay circular
+                  keepSelection
+                  ruleOfThirds
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Crop me"
+                    src={imageSrc}
+                    style={{ 
+                      transform: `scale(${scale})`,
+                      maxWidth: '100%',
+                      maxHeight: '400px',
+                      width: 'auto',
+                      height: 'auto',
+                      display: 'block'
+                    }}
+                    onLoad={onImageLoad}
+                  />
+                </ReactCrop>
+              )}
+            </div>
           </div>
 
           {/* Zoom control */}
