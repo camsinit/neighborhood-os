@@ -172,9 +172,7 @@ export const ProfileImageStep = ({
 
         {/* Required indicator */}
         <div className="text-center">
-          <p className="text-xs text-red-500">
-            * Profile photo is required to complete onboarding
-          </p>
+          <p className="text-xs text-red-500">Profile photo is required to complete onboarding</p>
         </div>
       </div>
 
