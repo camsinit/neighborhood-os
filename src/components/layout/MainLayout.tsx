@@ -2,7 +2,6 @@
 import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
-import DebugVisibilityToggle from "@/components/debug/DebugVisibilityToggle";
 
 /**
  * MainLayout component props
@@ -48,9 +47,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <main className="h-full">
           {children}
         </main>
-        
-        {/* Add the debug visibility toggle - only shows in development and to super admins */}
-        <DebugVisibilityToggle />
       </div>
     </div>
   );
