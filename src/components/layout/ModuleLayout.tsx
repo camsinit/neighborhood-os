@@ -197,16 +197,14 @@ const ModuleLayout = ({
                   {/* Welcome header */}
                    <div className="space-y-3 pt-5">
                      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{
-               backgroundColor: `${themeConfig.primary}10`
-             }}>
+                backgroundColor: `${themeConfig.primary}10`
+              }}>
                        <LogIn className="w-8 h-8" style={{
-                 color: themeConfig.primary
-               }} />
+                  color: themeConfig.primary
+                }} />
                      </div>
                     <h2 className="text-xl font-bold">Welcome to Skills Sharing!</h2>
-                    <p className="text-muted-foreground text-sm">
-                      Build a stronger community by sharing and discovering neighborhood skills
-                    </p>
+                    <p className="text-muted-foreground text-sm">Your skills can help your neighbors, but we need to know what they are before you can access the rest of this page.</p>
                   </div>
 
                   {/* Simplified philosophy - condensed */}
