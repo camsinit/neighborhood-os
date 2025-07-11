@@ -6,6 +6,7 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import Logo from './Logo';
 import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
+import AdminNavigation from './AdminNavigation';
 import ActionButtons from './ActionButtons';
 import DiagnosticsPanel from './DiagnosticsPanel';
 
@@ -48,6 +49,9 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
         {/* Feature navigation items */}
         <FeatureNavigation />
+
+        {/* Admin navigation - separate section for admin users */}
+        <AdminNavigation />
 
         {/* Divider before bottom actions */}
         <div className="my-4 h-px bg-gray-200" />

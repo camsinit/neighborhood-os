@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Calendar, Brain, Gift, Info, Users, Settings } from 'lucide-react';
+import { Calendar, Brain, Gift, Info, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCanAccessAdminPage } from '@/hooks/useCanAccessAdminPage';
 
 /**
  * FeatureNavigation Component
@@ -16,9 +15,6 @@ import { useCanAccessAdminPage } from '@/hooks/useCanAccessAdminPage';
 const FeatureNavigation = () => {
   // Get current location for styling active states
   const location = useLocation();
-  
-  // Check if user can access admin page
-  const { canAccess: canAccessAdmin } = useCanAccessAdminPage();
 
   /**
    * Navigation items configuration
@@ -54,14 +50,7 @@ const FeatureNavigation = () => {
       label: 'Neighbors',
       icon: Users,
       activeColor: 'text-purple-600'
-    },
-    // Admin link - only show for admins and stewards
-    ...(canAccessAdmin ? [{
-      path: '/admin',
-      label: 'Admin',
-      icon: Settings,
-      activeColor: 'text-slate-600'
-    }] : [])
+    }
   ];
 
   return (
