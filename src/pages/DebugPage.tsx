@@ -17,6 +17,8 @@ import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
+import InvitePreview from '@/components/invite/InvitePreview';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 
 /**
@@ -34,6 +36,7 @@ const DebugPage = () => {
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
   const [showSkillsOnboardingTest, setShowSkillsOnboardingTest] = useState(false);
+  const [showInvitePreviewTest, setShowInvitePreviewTest] = useState(false);
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
@@ -103,16 +106,16 @@ const DebugPage = () => {
                 <div>
                   <h3 className="text-lg font-medium mb-2">New User Onboarding</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Test the complete new user onboarding experience (profile setup survey + welcome screen).
+                    Test the complete invite-to-onboarding flow: invitation landing page → profile setup → welcome.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowOnboardingTest(true)}
+                      onClick={() => setShowInvitePreviewTest(true)}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
-                      Test New User Onboarding
+                      Test Full Invite Flow
                     </Button>
                   </div>
                 </div>
@@ -236,6 +239,40 @@ const DebugPage = () => {
           onComplete={() => setShowSkillsOnboardingTest(false)}
           isTestMode={true} // Mark this as test mode to prevent data modification
         />
+        
+        {/* Full Invite Flow Test Dialog */}
+        <Dialog open={showInvitePreviewTest} onOpenChange={setShowInvitePreviewTest}>
+          <DialogContent className="sm:max-w-[500px]">
+            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-4">
+              Test Mode - This simulates the full invite-to-onboarding experience
+            </div>
+            
+            <InvitePreview 
+              neighborhood={{
+                id: "c0e4e442-74c1-4b34-8388-b19f7b1c6a5d",
+                name: "Test Neighborhood",
+                city: "Test City", 
+                state: "CA",
+                created_at: new Date().toISOString(),
+                memberCount: 5
+              }}
+              previewMode={false}
+              className="border-0 shadow-none"
+            />
+            
+            <div className="mt-4 pt-4 border-t">
+              <Button 
+                onClick={() => {
+                  setShowInvitePreviewTest(false);
+                  setShowOnboardingTest(true);
+                }}
+                className="w-full"
+              >
+                Continue to Profile Setup
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 };
