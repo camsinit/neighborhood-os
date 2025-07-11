@@ -217,17 +217,6 @@ const ModuleLayout = ({
               <CardTitle>
                 {currentStep === 0 ? "Skills Sharing" : "Select Your Skills"}
               </CardTitle>
-              {currentStep === 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCurrentStep(0)}
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Back
-                </Button>
-              )}
             </CardHeader>
             
             <CardContent>
@@ -293,6 +282,7 @@ const ModuleLayout = ({
                     onSkillsChange={setSelectedSkills}
                     onSurveyStateChange={handleSurveyStateChange}
                     onMiniSurveyProgress={handleMiniSurveyProgress}
+                    onGoBackToWelcome={() => setCurrentStep(0)}
                     progressInfo={{
                       currentStep: skillsSurveyStep,
                       totalSteps: 8,
