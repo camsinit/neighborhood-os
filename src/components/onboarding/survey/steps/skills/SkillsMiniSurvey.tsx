@@ -326,6 +326,7 @@ export const SkillsMiniSurvey = ({
                 <Checkbox
                   checked={selected}
                   onChange={() => {}} // Handled by parent div click
+                  className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                 />
                 <span className="text-xs font-medium truncate">{skill}</span>
                 {SPECIAL_SKILLS[skill as keyof typeof SPECIAL_SKILLS] && (
@@ -357,7 +358,7 @@ export const SkillsMiniSurvey = ({
               onKeyDown={(e) => e.key === 'Enter' && handleCustomSkillAdd()}
               className="h-8 text-xs"
             />
-            <Button onClick={handleCustomSkillAdd} disabled={!customSkillInput.trim()} size="sm" className="h-8 px-2">
+            <Button onClick={handleCustomSkillAdd} disabled={!customSkillInput.trim()} size="sm" className="h-8 px-2 bg-green-500 hover:bg-green-600">
               <Check className="h-3 w-3 text-white" />
             </Button>
             <Button variant="outline" onClick={() => {
@@ -403,7 +404,7 @@ export const SkillsMiniSurvey = ({
           </div>
         )}
         
-        <Button onClick={handleNext} size="sm">
+        <Button onClick={handleNext} size="sm" className="bg-green-500 hover:bg-green-600">
           {currentStep < categoryKeys.length - 1 ? 'Next' : 'Summary'}
           <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
@@ -436,7 +437,7 @@ export const SkillsMiniSurvey = ({
             } size="sm">
               Cancel
             </Button>
-            <Button onClick={handleSpecialSkillConfirm} size="sm">
+            <Button onClick={handleSpecialSkillConfirm} size="sm" className="bg-green-500 hover:bg-green-600">
               Add Skill
             </Button>
           </DialogFooter>
