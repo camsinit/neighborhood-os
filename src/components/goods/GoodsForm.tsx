@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { GoodsFormProps } from "./types/goodsFormTypes";
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 // Import our refactored components
 import CategorySelection from "./form/CategorySelection";
@@ -151,7 +152,15 @@ const GoodsForm = ({
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={uploading}>
+          <Button 
+            type="submit" 
+            disabled={uploading}
+            style={{ 
+              backgroundColor: moduleThemeColors.goods.primary,
+              borderColor: moduleThemeColors.goods.primary 
+            }}
+            className="hover:opacity-90"
+          >
             {mode === 'edit' ? 'Update' : 'Submit'}
           </Button>
         </DialogFooter>
