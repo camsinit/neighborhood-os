@@ -409,6 +409,47 @@ export type Database = {
           },
         ]
       }
+      neighborhood_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          created_at: string | null
+          id: string
+          neighborhood_id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          neighborhood_id: string
+          role: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          created_at?: string | null
+          id?: string
+          neighborhood_id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neighborhood_roles_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       neighborhoods: {
         Row: {
           address: string | null
@@ -1162,6 +1203,10 @@ export type Database = {
           status: string
           joined_at: string
         }[]
+      }
+      get_user_neighborhood_role: {
+        Args: { user_uuid: string; neighborhood_uuid: string }
+        Returns: string
       }
       get_user_neighborhoods: {
         Args: { user_uuid: string }
