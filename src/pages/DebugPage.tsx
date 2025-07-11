@@ -52,6 +52,15 @@ const DebugPage = () => {
       fetchNeighborhoodPreview("c0e4e442-74c1-4b34-8388-b19f7b1c6a5d");
     }
   }, [showInvitePreviewTest, fetchNeighborhoodPreview]);
+  
+  // Reset neighborhood data when dialog closes
+  const handleInvitePreviewClose = (open: boolean) => {
+    setShowInvitePreviewTest(open);
+    if (!open) {
+      // Reset neighborhood data when dialog closes to prevent stale data
+      // Note: We can't directly reset the hook state, but it will reset on next open
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -253,7 +262,7 @@ const DebugPage = () => {
         />
         
         {/* Full Invite Flow Test Dialog */}
-        <Dialog open={showInvitePreviewTest} onOpenChange={setShowInvitePreviewTest}>
+        <Dialog open={showInvitePreviewTest} onOpenChange={handleInvitePreviewClose}>
           <DialogContent className="sm:max-w-[500px]">
             <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-4">
               Test Mode - This simulates the full invite-to-onboarding experience

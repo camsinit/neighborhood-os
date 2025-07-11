@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -26,8 +26,9 @@ export const useNeighborhoodPreview = () => {
 
   /**
    * Fetch neighborhood data for the given neighborhood ID
+   * Wrapped in useCallback to prevent infinite re-renders
    */
-  const fetchNeighborhoodPreview = async (neighborhoodId: string) => {
+  const fetchNeighborhoodPreview = useCallback(async (neighborhoodId: string) => {
     if (!neighborhoodId) return;
     
     setIsLoading(true);
@@ -73,7 +74,7 @@ export const useNeighborhoodPreview = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []); // Empty dependency array since the function doesn't depend on any changing values
 
   return {
     neighborhood,
