@@ -214,22 +214,20 @@ const ModuleLayout = ({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
           <Card className="w-[600px] max-h-[90vh] overflow-y-auto pointer-events-auto">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>
-                  {currentStep === 0 ? "Skills Sharing" : "Select Your Skills"}
-                </CardTitle>
-                {currentStep === 1 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCurrentStep(0)}
-                    disabled={isSubmitting}
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-1" />
-                    Back
-                  </Button>
-                )}
-              </div>
+              <CardTitle>
+                {currentStep === 0 ? "Skills Sharing" : "Select Your Skills"}
+              </CardTitle>
+              {currentStep === 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentStep(0)}
+                  disabled={isSubmitting}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-1" />
+                  Back
+                </Button>
+              )}
             </CardHeader>
             
             <CardContent>
