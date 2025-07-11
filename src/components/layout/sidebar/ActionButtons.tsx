@@ -67,7 +67,32 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-1">
-      {/* Invite button - moved above modules, using bold on hover instead of color change */}
+      {/* Settings navigation - using bold on hover instead of color change */}
+      <NavLink
+        to="/settings"
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
+            isActive
+              ? "font-semibold"
+              : "hover:font-semibold"
+          )
+        }
+      >
+        {/* User profile image with same dimensions as other icons */}
+        <Avatar className="h-5 w-5 flex-shrink-0">
+          <AvatarImage 
+            src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
+            alt={displayName} 
+          />
+          <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
+            {displayName.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        Settings
+      </NavLink>
+
+      {/* Invite button - moved below settings, using bold on hover instead of color change */}
       <button
         onClick={handleInviteClick}
         className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all hover:font-semibold w-full text-left"
@@ -109,31 +134,6 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
           Admin
         </NavLink>
       )}
-
-      {/* Settings navigation - using bold on hover instead of color change */}
-      <NavLink
-        to="/settings"
-        className={({ isActive }) =>
-          cn(
-            "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
-            isActive
-              ? "font-semibold"
-              : "hover:font-semibold"
-          )
-        }
-      >
-        {/* User profile image with same dimensions as other icons */}
-        <Avatar className="h-5 w-5 flex-shrink-0">
-          <AvatarImage 
-            src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
-            alt={displayName} 
-          />
-          <AvatarFallback className="text-xs bg-gray-200 text-gray-700">
-            {displayName.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        Settings
-      </NavLink>
 
       {/* Debug navigation - only visible to Super Admins, styled consistently */}
       {isSuperAdmin && (
