@@ -101,9 +101,9 @@ const DebugPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Onboarding Flow Testing</h3>
+                  <h3 className="text-lg font-medium mb-2">New User Onboarding</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Test the onboarding and survey flows in isolation without affecting user data.
+                    Test the complete new user onboarding experience (profile setup survey + welcome screen).
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Button 
@@ -112,47 +112,41 @@ const DebugPage = () => {
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
-                      Test Onboarding Flow
+                      Test New User Onboarding
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowSurveyTest(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <TestTube className="w-4 h-4" />
-                      Test Survey Flow
-                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Skills Page Onboarding</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Test the Skills page first-time user experience and overlay tutorial.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
                       onClick={() => setShowSkillsOnboardingTest(true)}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
-                      Test Skills Onboarding
+                      Test Skills Tutorial
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={async () => {
+                        const success = await resetSkillsOnboarding();
+                        if (success) {
+                          alert('Skills onboarding status reset. Visit the Skills page to see the overlay.');
+                        } else {
+                          alert('Failed to reset skills onboarding status.');
+                        }
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="w-4 h-4" />
+                      Reset Skills Tutorial Status
                     </Button>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Skills Onboarding Management</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Reset skills onboarding status to test the Skills page overlay and onboarding flow.
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={async () => {
-                      const success = await resetSkillsOnboarding();
-                      if (success) {
-                        alert('Skills onboarding status reset. Visit the Skills page to see the overlay.');
-                      } else {
-                        alert('Failed to reset skills onboarding status.');
-                      }
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <TestTube className="w-4 h-4" />
-                    Reset Skills Onboarding
-                  </Button>
                 </div>
               </CardContent>
             </Card>
