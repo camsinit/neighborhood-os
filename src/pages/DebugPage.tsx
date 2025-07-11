@@ -19,6 +19,7 @@ import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDial
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 import InvitePreview from '@/components/invite/InvitePreview';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useNeighborhoodPreview } from '@/hooks/useNeighborhoodPreview';
 
 
 /**
@@ -40,6 +41,17 @@ const DebugPage = () => {
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
+  
+  // Neighborhood preview hook to get actual neighborhood data
+  const { neighborhood, fetchNeighborhoodPreview, isLoading } = useNeighborhoodPreview();
+  
+  // Fetch actual neighborhood data when invite preview test opens
+  React.useEffect(() => {
+    if (showInvitePreviewTest) {
+      // Use the actual test neighborhood ID from custom instructions
+      fetchNeighborhoodPreview("c0e4e442-74c1-4b34-8388-b19f7b1c6a5d");
+    }
+  }, [showInvitePreviewTest, fetchNeighborhoodPreview]);
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -247,18 +259,22 @@ const DebugPage = () => {
               Test Mode - This simulates the full invite-to-onboarding experience
             </div>
             
-            <InvitePreview 
-              neighborhood={{
-                id: "c0e4e442-74c1-4b34-8388-b19f7b1c6a5d",
-                name: "Test Neighborhood",
-                city: "Test City", 
-                state: "CA",
-                created_at: new Date().toISOString(),
-                memberCount: 5
-              }}
-              previewMode={false}
-              className="border-0 shadow-none"
-            />
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground mt-2">Loading neighborhood data...</p>
+              </div>
+            ) : neighborhood ? (
+              <InvitePreview 
+                neighborhood={neighborhood}
+                previewMode={false}
+                className="border-0 shadow-none"
+              />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Failed to load neighborhood data</p>
+              </div>
+            )}
             
             <div className="mt-4 pt-4 border-t">
               <Button 
