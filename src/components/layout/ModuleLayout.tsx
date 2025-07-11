@@ -191,7 +191,7 @@ const ModuleLayout = ({
           <Card className="w-[600px] max-h-[90vh] overflow-y-auto pointer-events-auto">
             
             
-            <CardContent>
+            <CardContent className="mt-[50px]">
               {/* Step 0: Welcome */}
               {currentStep === 0 && <div className="space-y-6 max-w-md mx-auto text-center">
                   {/* Welcome header */}
