@@ -67,6 +67,15 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   return (
     <div className="space-y-1">
+      {/* Invite button - moved above modules, using bold on hover instead of color change */}
+      <button
+        onClick={handleInviteClick}
+        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all hover:font-semibold w-full text-left"
+      >
+        <UserPlus className="h-5 w-5 flex-shrink-0" />
+        Invite Neighbor
+      </button>
+
       {/* Modules navigation - using bold on hover instead of color change */}
       <NavLink
         to="/modules"
@@ -125,15 +134,6 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         </Avatar>
         Settings
       </NavLink>
-      
-      {/* Invite button - using bold on hover instead of color change */}
-      <button
-        onClick={handleInviteClick}
-        className="flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all hover:font-semibold w-full text-left"
-      >
-        <UserPlus className="h-5 w-5 flex-shrink-0" />
-        Invite Neighbor
-      </button>
 
       {/* Debug navigation - only visible to Super Admins, styled consistently */}
       {isSuperAdmin && (
