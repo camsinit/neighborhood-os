@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Copy, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import InvitePreview from "./InvitePreview";
+import { useNeighborhoodPreview } from "@/hooks/useNeighborhoodPreview";
 
 /**
  * Props for the UnifiedInviteDialog component
@@ -50,6 +53,20 @@ const UnifiedInviteDialog = ({
   const {
     currentNeighborhood
   } = useNeighborhood();
+
+  // Hook for fetching neighborhood preview data
+  const {
+    neighborhood: previewNeighborhood,
+    isLoading: isLoadingPreview,
+    fetchNeighborhoodPreview
+  } = useNeighborhoodPreview();
+
+  // Fetch neighborhood preview data when dialog opens and neighborhood is available
+  useEffect(() => {
+    if (open && currentNeighborhood?.id) {
+      fetchNeighborhoodPreview(currentNeighborhood.id);
+    }
+  }, [open, currentNeighborhood?.id, fetchNeighborhoodPreview]);
 
   /**
    * Generates a unique invitation link and copies it to clipboard
@@ -102,38 +119,92 @@ const UnifiedInviteDialog = ({
   const handleClose = () => {
     onOpenChange(false);
   };
-  return <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[400px]">
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
             Invite Someone to {currentNeighborhood?.name || 'Your Neighborhood'}
           </DialogTitle>
           <DialogDescription>
-            Generate a unique invite link that you can share with anyone you'd like to invite to your neighborhood.
+            Generate and share invite links, or preview how invitations will appear to recipients.
           </DialogDescription>
         </DialogHeader>
         
         <div className="py-6">
           {/* Check if user has a neighborhood */}
-          {!currentNeighborhood ? <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+          {!currentNeighborhood ? (
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
               <p className="text-sm text-yellow-800">
                 You need to be part of a neighborhood before you can invite others.
               </p>
-            </div> : <div className="text-center space-y-4">
-              {/* Main action button */}
-              <Button onClick={generateAndCopyLink} disabled={isGeneratingLink} className="w-full" size="lg">
-                <Copy className="mr-2 h-5 w-5" />
-                {isGeneratingLink ? "Generating Link..." : "Generate & Copy Invite Link"}
-              </Button>
+            </div>
+          ) : (
+            <Tabs defaultValue="generate" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="generate" className="flex items-center gap-2">
+                  <Copy className="h-4 w-4" />
+                  Generate Link
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Preview Invite
+                </TabsTrigger>
+              </TabsList>
               
-              {/* Instructions */}
-              <div className="text-sm text-gray-600 space-y-2">
-                
-                
-              </div>
-            </div>}
+              <TabsContent value="generate" className="mt-6">
+                <div className="text-center space-y-4">
+                  {/* Main action button */}
+                  <Button 
+                    onClick={generateAndCopyLink} 
+                    disabled={isGeneratingLink} 
+                    className="w-full" 
+                    size="lg"
+                  >
+                    <Copy className="mr-2 h-5 w-5" />
+                    {isGeneratingLink ? "Generating Link..." : "Generate & Copy Invite Link"}
+                  </Button>
+                  
+                  {/* Instructions */}
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <p>Click the button above to create a unique invite link that you can share with potential neighbors.</p>
+                    <p>The link will be automatically copied to your clipboard for easy sharing.</p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="preview" className="mt-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h3 className="font-semibold text-lg mb-2">Invitation Preview</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      This is how your invitation will appear to recipients when they click your invite link.
+                    </p>
+                  </div>
+                  
+                  {/* Show loading state while fetching preview data */}
+                  {isLoadingPreview ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : previewNeighborhood ? (
+                    <InvitePreview 
+                      neighborhood={previewNeighborhood} 
+                      previewMode={true}
+                      className="bg-gray-50 rounded-lg"
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>Unable to load preview data</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
 export default UnifiedInviteDialog;
