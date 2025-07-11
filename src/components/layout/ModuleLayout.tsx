@@ -189,11 +189,7 @@ const ModuleLayout = ({
       {/* Skills onboarding overlay with full onboarding flow */}
       {showSkillsOnboardingOverlay && <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
           <Card className="w-[600px] max-h-[90vh] overflow-y-auto pointer-events-auto">
-            <CardHeader>
-              <CardTitle>
-                {currentStep === 0 ? "Skills Sharing" : "Select Your Skills"}
-              </CardTitle>
-            </CardHeader>
+            
             
             <CardContent>
               {/* Step 0: Welcome */}
