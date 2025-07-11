@@ -21,6 +21,7 @@ import NeighborsPage from "./pages/NeighborsPage";
 import ModulesPage from "./pages/ModulesPage";
 import DebugPage from "./pages/DebugPage";
 import SharePage from "./pages/SharePage";
+import AdminPage from "./pages/AdminPage";
 import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
@@ -163,6 +164,16 @@ const App = () => {
                       <ProtectedRoute>
                         <MainLayout>
                           <SettingsPage />
+                        </MainLayout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout>
+                          <AdminPage />
                         </MainLayout>
                       </ProtectedRoute>
                     }
