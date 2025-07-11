@@ -14,7 +14,6 @@ import {
   isSameMonth,
 } from "date-fns";
 import { useSearchParams } from "react-router-dom";
-import AddEventDialog from "./AddEventDialog";
 import { useEvents } from "@/utils/queries/useEvents";
 import CalendarHeader from "./calendar/CalendarHeader";
 import WeekView from "./calendar/WeekView";
@@ -30,16 +29,22 @@ import { getEventsWithRecurring } from "@/utils/recurringEvents"; // Import recu
 const logger = createLogger('CommunityCalendar');
 
 /**
+ * Props for CommunityCalendar component
+ */
+interface CommunityCalendarProps {
+  onAddEvent?: (date?: Date) => void;
+}
+
+/**
  * CommunityCalendar component
  * 
  * This component displays events in either a week or month view.
  * It allows users to navigate between weeks/months and add new events.
  */
-const CommunityCalendar = () => {
+const CommunityCalendar = ({ onAddEvent }: CommunityCalendarProps) => {
   // State for current date and view mode
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'week' | 'month'>('week');
-  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   
   // Get URL parameters for contextual navigation
   const [searchParams] = useSearchParams();
@@ -181,10 +186,11 @@ const CommunityCalendar = () => {
     });
   };
 
-  // Handle event addition and trigger refetch
-  const handleAddEvent = async () => {
-    logger.info("Event added, refreshing data");
-    await refetch();
+  // Handle opening add event sheet with optional date
+  const handleOpenAddEvent = (date?: Date) => {
+    if (onAddEvent) {
+      onAddEvent(date);
+    }
   };
 
   return (
@@ -196,7 +202,7 @@ const CommunityCalendar = () => {
         handlePreviousWeek={handlePrevious}
         handleNextWeek={handleNext}
         handleToday={handleToday}
-        setIsAddEventOpen={setIsAddEventOpen}
+        onAddEvent={handleOpenAddEvent}
       />
       
       <div className="calendar-container">
@@ -217,11 +223,6 @@ const CommunityCalendar = () => {
         )}
       </div>
 
-      <AddEventDialog 
-        open={isAddEventOpen}
-        onOpenChange={setIsAddEventOpen}
-        onAddEvent={handleAddEvent}
-      />
     </div>
   );
 };

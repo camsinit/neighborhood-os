@@ -7,6 +7,7 @@ import { useMemo, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { ThemedTabs, ThemedTabsList, ThemedTabsTrigger } from "@/components/ui/themed-tabs";
+import { moduleThemeColors } from "@/theme/moduleTheme";
 
 interface CalendarHeaderProps {
   view: 'week' | 'month';
@@ -15,7 +16,7 @@ interface CalendarHeaderProps {
   handlePreviousWeek: () => void;
   handleNextWeek: () => void;
   handleToday: () => void;
-  setIsAddEventOpen: (open: boolean) => void;
+  onAddEvent?: (date?: Date) => void;
 }
 
 /**
@@ -31,7 +32,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     handlePreviousWeek,
     handleNextWeek,
     handleToday,
-    setIsAddEventOpen
+    onAddEvent
   } = props;
   const {
     currentNeighborhood
@@ -108,7 +109,15 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           </ThemedTabsList>
         </ThemedTabs>
         
-        <Button onClick={() => setIsAddEventOpen(true)} size="sm" className="ml-auto">
+        <Button 
+          onClick={() => onAddEvent && onAddEvent()} 
+          size="sm" 
+          className="ml-auto"
+          style={{ 
+            backgroundColor: moduleThemeColors.calendar.primary,
+            borderColor: moduleThemeColors.calendar.primary 
+          }}
+        >
           <Plus className="h-4 w-4 mr-1" /> Add Event
         </Button>
       </div>
