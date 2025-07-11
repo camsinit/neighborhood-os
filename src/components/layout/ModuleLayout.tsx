@@ -277,7 +277,7 @@ const ModuleLayout = ({
                   <div className="space-y-4">
                      <Button 
                        onClick={() => setCurrentStep(1)} 
-                       className="w-full"
+                       className="px-6"
                        style={{ backgroundColor: themeConfig.primary, borderColor: themeConfig.primary }}
                      >
                        Get Started
