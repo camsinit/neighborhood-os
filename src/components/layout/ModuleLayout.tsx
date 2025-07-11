@@ -4,7 +4,7 @@ import ModuleHeader from './module/ModuleHeader';
 import ModuleContent from './module/ModuleContent';
 import ModuleContainer from './module/ModuleContainer';
 import { ModuleLayoutProps } from '@/types/module';
-import { Info, Users, Share2, Sparkles, Eye, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Info, Users, Share2, Sparkles, Eye, ArrowRight, ArrowLeft, LogIn } from 'lucide-react';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -195,13 +195,13 @@ const ModuleLayout = ({
               {/* Step 0: Welcome */}
               {currentStep === 0 && <div className="space-y-6 max-w-md mx-auto text-center">
                   {/* Welcome header */}
-                   <div className="space-y-3">
+                   <div className="space-y-3 pt-5">
                      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto" style={{
-                backgroundColor: `${themeConfig.primary}10`
-              }}>
-                       <Users className="w-8 h-8" style={{
-                  color: themeConfig.primary
-                }} />
+               backgroundColor: `${themeConfig.primary}10`
+             }}>
+                       <LogIn className="w-8 h-8" style={{
+                 color: themeConfig.primary
+               }} />
                      </div>
                     <h2 className="text-xl font-bold">Welcome to Skills Sharing!</h2>
                     <p className="text-muted-foreground text-sm">
