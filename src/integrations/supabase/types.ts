@@ -1246,7 +1246,13 @@ export type Database = {
         | "skills"
         | "neighbor_welcome"
       shareable_content_type: "events" | "safety" | "skills" | "goods"
-      user_role: "super_admin" | "admin" | "moderator" | "user"
+      user_role:
+        | "super_admin"
+        | "admin"
+        | "moderator"
+        | "user"
+        | "steward"
+        | "neighbor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1406,7 +1412,14 @@ export const Constants = {
         "neighbor_welcome",
       ],
       shareable_content_type: ["events", "safety", "skills", "goods"],
-      user_role: ["super_admin", "admin", "moderator", "user"],
+      user_role: [
+        "super_admin",
+        "admin",
+        "moderator",
+        "user",
+        "steward",
+        "neighbor",
+      ],
     },
   },
 } as const
