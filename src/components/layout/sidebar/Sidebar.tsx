@@ -7,7 +7,6 @@ import Logo from './Logo';
 import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
-import DiagnosticsPanel from './DiagnosticsPanel';
 
 /**
  * Props for the Sidebar component - onOpenSettings no longer needed
@@ -28,7 +27,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   // Get current user
   const user = useUser();
   
-  // Get neighborhood context for diagnostics data
+  // Get neighborhood context for consistency
   const { 
     currentNeighborhood
   } = useNeighborhood();
@@ -54,12 +53,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
         {/* Settings and Invite buttons - settings now navigates to page */}
         <ActionButtons />
-        
-        {/* Diagnostics information panel */}
-        <DiagnosticsPanel 
-          user={user}
-          currentNeighborhood={currentNeighborhood}
-        />
       </nav>
     </div>
   );
