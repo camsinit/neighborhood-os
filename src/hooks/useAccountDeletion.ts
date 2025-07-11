@@ -21,12 +21,15 @@ interface DeleteAccountResponse {
  * This hook provides functionality to safely delete a user's account
  * and all associated data from the neighborhood platform.
  * 
- * Updated to work with the fixed database function that only references existing tables.
+ * Updated to comprehensively delete all user data while allowing re-registration.
  * 
  * Process:
- * 1. Calls the fixed delete_user_account database function
- * 2. Signs out the user from Supabase Auth
+ * 1. Calls the improved delete_user_account database function that now includes shared_items
+ * 2. Signs out the user from Supabase Auth  
  * 3. Navigates to the landing page
+ * 
+ * Note: Users can re-register with the same email after deletion because we only
+ * delete the profiles table, not the auth.users record (handled by Supabase).
  */
 export const useAccountDeletion = () => {
   const user = useUser();
@@ -36,8 +39,9 @@ export const useAccountDeletion = () => {
   /**
    * Delete the current user's account and all associated data
    * 
-   * This function now works with the corrected database function that only
-   * deletes from tables that actually exist in the database.
+   * This function calls the comprehensive delete_user_account database function
+   * that removes all user data including the previously missing shared_items.
+   * Re-registration with the same email is supported after deletion.
    */
   const deleteAccount = async (): Promise<boolean> => {
     if (!user?.id) {
@@ -49,8 +53,7 @@ export const useAccountDeletion = () => {
     setIsDeleting(true);
 
     try {
-      // Call the fixed database function to delete all user data
-      // This function now properly handles only existing tables
+      // Call the improved database function to delete all user data including shared_items
       const { data, error } = await supabase.rpc('delete_user_account', {
         target_user_id: user.id
       });
@@ -83,8 +86,8 @@ export const useAccountDeletion = () => {
         // Don't throw here - data is already deleted, just log the error
       }
 
-      // Show success message
-      toast.success("Your account and all data have been permanently deleted");
+      // Show success message - use the message from database response
+      toast.success(response.message || "Your account and all data have been permanently deleted");
 
       // Navigate to landing page
       navigate("/");

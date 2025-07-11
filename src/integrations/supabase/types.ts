@@ -1211,6 +1211,10 @@ export type Database = {
         Args: { user_a: string; user_b: string }
         Returns: boolean
       }
+      verify_user_deletion: {
+        Args: { target_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       activity_type:

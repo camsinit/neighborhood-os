@@ -98,7 +98,7 @@ export const DangerZone: React.FC = () => {
           <li>Cancel any pending skill offers or requests</li>
         </ul>
         <p className="text-sm text-red-800 mt-3 font-medium">
-          This action cannot be undone.
+          This action cannot be undone, but you can sign up again with the same email if desired.
         </p>
       </div>
 
