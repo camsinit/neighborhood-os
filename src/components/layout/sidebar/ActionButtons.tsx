@@ -1,5 +1,5 @@
 
-import { UserPlus, Bug, Grid3X3 } from "lucide-react";
+import { UserPlus, Bug, Grid3X3, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import UnifiedInviteDialog from "@/components/invite/UnifiedInviteDialog";
 import { useSuperAdminAccess } from "@/hooks/useSuperAdminAccess";
+import { useCanAccessAdminPage } from "@/hooks/useCanAccessAdminPage";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,6 +32,9 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   
   // Check if user has super admin access for debug page
   const { isSuperAdmin } = useSuperAdminAccess();
+  
+  // Check if user can access admin page
+  const { canAccess: canAccessAdmin } = useCanAccessAdminPage();
   
   // State to control the unified invite dialog visibility
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -78,6 +82,24 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
         <Grid3X3 className="h-5 w-5 flex-shrink-0" />
         Modules
       </NavLink>
+
+      {/* Admin navigation - only visible to admins and stewards */}
+      {canAccessAdmin && (
+        <NavLink
+          to="/admin"
+          className={({ isActive }) =>
+            cn(
+              "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
+              isActive
+                ? "font-semibold"
+                : "hover:font-semibold"
+            )
+          }
+        >
+          <Settings className="h-5 w-5 flex-shrink-0" />
+          Admin
+        </NavLink>
+      )}
 
       {/* Settings navigation - using bold on hover instead of color change */}
       <NavLink
