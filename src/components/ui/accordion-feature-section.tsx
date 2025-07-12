@@ -229,10 +229,10 @@ const Feature197 = ({
     }
   };
   return <section className="py-[10px]">
-      <div className="container mx-auto px-4 text-center">
-        <div className="mb-12 flex w-full items-start justify-center gap-12">
+      <div className="container mx-auto px-4">
+        <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Left side: Accordion with feature titles and descriptions */}
-          <div className="w-full md:w-1/2">
+          <div>
             <Accordion type="single" className="w-full" defaultValue="item-1">
               {features.map(tab => <AccordionItem key={tab.id} value={`item-${tab.id}`}>
                   <AccordionTrigger onClick={() => {
@@ -285,7 +285,7 @@ const Feature197 = ({
           </div>
           
           {/* Right side: Feature video or image based on section */}
-          <div ref={videoContainerRef} className="relative m-auto w-full md:w-1/2 overflow-hidden rounded-xl bg-muted">
+          <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl bg-muted">
             {activeTabId === 5 ? (
               // Directory section shows the screenshot image
               <img 
