@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Mail } from "lucide-react";
+import { Copy, Mail, Link, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,14 +38,14 @@ const getBaseUrl = (): string => {
 /**
  * UnifiedInviteDialog Component
  * 
- * Allows users to generate invite links or send email invitations to neighbors.
- * Simple interface focused on getting people connected to the neighborhood.
+ * Clean, focused interface for inviting neighbors via email or shareable link.
+ * Combines both methods in a single view for better UX.
  */
 const UnifiedInviteDialog = ({
   open,
   onOpenChange
 }: UnifiedInviteDialogProps) => {
-  // State for tracking operations
+  // State for tracking operations and form data
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [email, setEmail] = useState('');
@@ -58,7 +57,6 @@ const UnifiedInviteDialog = ({
 
   /**
    * Generates a unique invitation link and copies it to clipboard
-   * Uses the correct production domain for invite URLs
    */
   const generateAndCopyLink = async () => {
     // Validate required data is present
@@ -90,9 +88,8 @@ const UnifiedInviteDialog = ({
       // Copy the URL to clipboard
       await navigator.clipboard.writeText(inviteUrl);
 
-      // Show success message and close dialog
-      toast.success("Invite link copied to clipboard! Share it with your neighbor.");
-      onOpenChange(false);
+      // Show success message
+      toast.success("Invite link copied to clipboard!");
     } catch (error: any) {
       console.error("[UnifiedInviteDialog] Error generating invite:", error);
       toast.error("Failed to generate invite link. Please try again.");
@@ -159,8 +156,7 @@ const UnifiedInviteDialog = ({
 
       // Success! Clear form and show message
       setEmail('');
-      toast.success(`Invitation sent to ${email}! They'll receive an email with instructions to join.`);
-      onOpenChange(false);
+      toast.success(`Invitation sent to ${email}!`);
     } catch (error: any) {
       console.error("[UnifiedInviteDialog] Error sending email invite:", error);
       toast.error("Failed to send email invitation. Please try again.");
@@ -170,25 +166,27 @@ const UnifiedInviteDialog = ({
   };
 
   /**
-   * Handles closing the dialog
+   * Handles closing the dialog and resetting form state
    */
   const handleClose = () => {
+    setEmail('');
+    setEmailError('');
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-[600px] h-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            Invite Someone to {currentNeighborhood?.name || 'Your Neighborhood'}
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-2xl">
+            Invite to {currentNeighborhood?.name || 'Your Neighborhood'}
           </DialogTitle>
           <DialogDescription>
-            Share your neighborhood with others by sending them an invite link or emailing them directly.
+            Invite your neighbors to join and connect with your community.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-6">
+        <div className="flex-1 py-6 px-2">
           {/* Check if user has a neighborhood */}
           {!currentNeighborhood ? (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
@@ -197,51 +195,27 @@ const UnifiedInviteDialog = ({
               </p>
             </div>
           ) : (
-            <Tabs defaultValue="generate" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="generate" className="flex items-center gap-2">
-                  <Copy className="h-4 w-4" />
-                  Generate Link
-                </TabsTrigger>
-                <TabsTrigger value="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Invite
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="generate" className="mt-6">
-                <div className="text-center space-y-4">
-                  {/* Main action button for link generation */}
-                  <Button 
-                    onClick={generateAndCopyLink} 
-                    disabled={isGeneratingLink} 
-                    className="w-full" 
-                    size="lg"
-                  >
-                    <Copy className="mr-2 h-5 w-5" />
-                    {isGeneratingLink ? "Generating Link..." : "Generate & Copy Invite Link"}
-                  </Button>
-                  
-                  {/* Instructions */}
-                  <div className="text-sm text-gray-600 space-y-2">
-                    <p>Click the button above to create a unique invite link that you can share with potential neighbors.</p>
-                    <p>The link will be automatically copied to your clipboard for easy sharing.</p>
+            <div className="space-y-8">
+              {/* Email Invite Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <Mail className="h-5 w-5 text-blue-600" />
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="email" className="mt-6">
-                <div className="space-y-4">
-                  <div className="text-center mb-4">
-                    <h3 className="font-semibold text-lg mb-2">Send Email Invitation</h3>
+                  <div>
+                    <h3 className="font-semibold text-lg">Send Email Invitation</h3>
                     <p className="text-sm text-gray-600">
-                      Enter your neighbor's email address and we'll send them a personalized invitation to join.
+                      Send a personalized invite directly to their inbox
                     </p>
                   </div>
-                  
-                  {/* Email input form */}
+                </div>
+                
+                {/* Email input form */}
+                <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email address</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email address
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -251,7 +225,7 @@ const UnifiedInviteDialog = ({
                         setEmail(e.target.value);
                         if (emailError) setEmailError(''); // Clear error when typing
                       }}
-                      className={emailError ? "border-red-300" : ""}
+                      className={emailError ? "border-red-300 focus:border-red-500" : ""}
                     />
                     {/* Show inline error for email validation */}
                     {emailError && (
@@ -263,20 +237,52 @@ const UnifiedInviteDialog = ({
                   <Button 
                     onClick={sendEmailInvite} 
                     disabled={isSendingEmail || !email.trim()} 
-                    className="w-full" 
+                    className="w-full"
                     size="lg"
                   >
-                    <Mail className="mr-2 h-5 w-5" />
-                    {isSendingEmail ? "Sending..." : "Send Email Invitation"}
+                    <Send className="mr-2 h-4 w-4" />
+                    {isSendingEmail ? "Sending..." : "Send Invitation"}
                   </Button>
-                  
-                  {/* Additional info */}
-                  <div className="text-xs text-gray-500 text-center">
-                    <p>They'll receive an email with your name and a link to join {currentNeighborhood.name}.</p>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-muted-foreground">or</span>
+                </div>
+              </div>
+
+              {/* Copy Link Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-green-50 rounded-lg">
+                    <Link className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Copy Invite Link</h3>
+                    <p className="text-sm text-gray-600">
+                      Generate a link to share however you'd like
+                    </p>
                   </div>
                 </div>
-              </TabsContent>
-            </Tabs>
+                
+                {/* Generate link button */}
+                <Button 
+                  onClick={generateAndCopyLink} 
+                  disabled={isGeneratingLink} 
+                  variant="outline"
+                  className="w-full" 
+                  size="lg"
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  {isGeneratingLink ? "Generating..." : "Copy Invite Link"}
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </DialogContent>
