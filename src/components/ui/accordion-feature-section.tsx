@@ -39,15 +39,15 @@ const defaultFeatures: FeatureItem[] = [{
   description: "Most neighborhood gatherings are low-key, low-effort, and just need a simple place for RSVP's and reminders. That's exactly what our no-frills Calendar page is designed to do.",
   replaces: [{
     name: "partiful.com",
-    logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
+    logo: "https://img.logo.dev/partiful.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Partiful"
   }, {
     name: "lumalabs.ai",
-    logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
+    logo: "https://img.logo.dev/lumalabs.ai?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Luma"
   }, {
     name: "facebook.com",
-    logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
+    logo: "https://img.logo.dev/facebook.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Facebook"
   }]
 }, {
@@ -57,15 +57,15 @@ const defaultFeatures: FeatureItem[] = [{
   description: "Built with Tailwind CSS for rapid styling and TypeScript for type safety. Our blocks leverage the full power of Tailwind's utility classes while maintaining clean, type-safe code that integrates seamlessly with your Next.js projects.",
   replaces: [{
     name: "offerup.com",
-    logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
+    logo: "https://img.logo.dev/offerup.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "OfferUp"
   }, {
     name: "craigslist.org",
-    logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
+    logo: "https://img.logo.dev/craigslist.org?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Craigslist"
   }, {
     name: "facebook.com/marketplace",
-    logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
+    logo: "https://img.logo.dev/facebook.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Marketplace"
   }]
 }, {
@@ -75,15 +75,15 @@ const defaultFeatures: FeatureItem[] = [{
   description: "Every block supports dark mode out of the box and can be customized to match your brand. Modify colors, spacing, and typography using Tailwind's configuration. The shadcn/ui theming system makes it easy to maintain consistency across your site.",
   replaces: [{
     name: "taskrabbit.com",
-    logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
+    logo: "https://img.logo.dev/taskrabbit.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "TaskRabbit"
   }, {
     name: "thumbtack.com",
-    logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
+    logo: "https://img.logo.dev/thumbtack.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Thumbtack"
   }, {
     name: "angi.com",
-    logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
+    logo: "https://img.logo.dev/angi.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Angie"
   }]
 }, {
@@ -93,15 +93,15 @@ const defaultFeatures: FeatureItem[] = [{
   description: "All blocks are built with accessibility in mind, following WCAG guidelines. They include proper ARIA labels, keyboard navigation support, and semantic HTML structure. Ensure your website is usable by everyone without extra effort.",
   replaces: [{
     name: "nextdoor.com",
-    logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
+    logo: "https://img.logo.dev/nextdoor.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Nextdoor"
   }, {
     name: "ring.com",
-    logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
+    logo: "https://img.logo.dev/ring.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Ring"
   }, {
     name: "citizen.com",
-    logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
+    logo: "https://img.logo.dev/citizen.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Citizen"
   }]
 }, {
@@ -111,15 +111,15 @@ const defaultFeatures: FeatureItem[] = [{
   description: "Built for modern web development with React 18, Next.js 14, and the latest shadcn/ui components. Take advantage of React Server Components, TypeScript strict mode, and other cutting-edge features while maintaining excellent performance.",
   replaces: [{
     name: "whatsapp.com",
-    logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
+    logo: "https://img.logo.dev/whatsapp.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "WhatsApp"
   }, {
     name: "telegram.org",
-    logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
+    logo: "https://img.logo.dev/telegram.org?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Telegram"
   }, {
     name: "discord.com",
-    logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
+    logo: "https://img.logo.dev/discord.com?token=pk_SdwwezRcTT6rDwqgpowtPg",
     alt: "Discord"
   }]
 }];
