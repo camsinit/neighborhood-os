@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Copy, Mail, Link, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
+import EmailInviteSection from "./EmailInviteSection";
+import CopyLinkSection from "./CopyLinkSection";
 
 /**
  * Props for the UnifiedInviteDialog component
@@ -196,54 +194,14 @@ const UnifiedInviteDialog = ({
           ) : (
             <div className="space-y-8">
               {/* Email Invite Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Send Email Invitation</h3>
-                    <p className="text-sm text-gray-600">
-                      Send a personalized invite directly to their inbox
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Email input form */}
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
-                      Email address
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="neighbor@example.com"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) setEmailError(''); // Clear error when typing
-                      }}
-                      className={emailError ? "border-red-300 focus:border-red-500" : ""}
-                    />
-                    {/* Show inline error for email validation */}
-                    {emailError && (
-                      <p className="text-sm text-red-600">{emailError}</p>
-                    )}
-                  </div>
-
-                  {/* Send button */}
-                  <Button 
-                    onClick={sendEmailInvite} 
-                    disabled={isSendingEmail || !email.trim()} 
-                    className="w-full"
-                    size="lg"
-                  >
-                    <Send className="mr-2 h-4 w-4" />
-                    {isSendingEmail ? "Sending..." : "Send Invitation"}
-                  </Button>
-                </div>
-              </div>
+              <EmailInviteSection
+                email={email}
+                setEmail={setEmail}
+                emailError={emailError}
+                setEmailError={setEmailError}
+                isSendingEmail={isSendingEmail}
+                onSendEmailInvite={sendEmailInvite}
+              />
 
               {/* Divider */}
               <div className="relative">
@@ -255,19 +213,11 @@ const UnifiedInviteDialog = ({
                 </div>
               </div>
 
-              {/* Copy Link Section - Simplified */}
-              <div className="space-y-4">
-                <Button 
-                  onClick={generateAndCopyLink} 
-                  disabled={isGeneratingLink} 
-                  variant="outline"
-                  className="w-full" 
-                  size="lg"
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  {isGeneratingLink ? "Generating..." : "Copy Invite Link"}
-                </Button>
-              </div>
+              {/* Copy Link Section */}
+              <CopyLinkSection
+                isGeneratingLink={isGeneratingLink}
+                onGenerateAndCopyLink={generateAndCopyLink}
+              />
             </div>
           )}
         </div>
