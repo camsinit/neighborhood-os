@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { ReplacementLogo } from "@/components/ui/replacement-logo";
 import { RotateCcw } from "lucide-react";
 
 /**
@@ -247,14 +248,18 @@ const Feature197 = ({
                   <AccordionContent>
                     <p className="mt-3 text-muted-foreground pb-[10px]">{tab.description}</p>
                     
-                    {/* Replaces section with feature-specific logos */}
+                    {/* Replaces section with universally formatted logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center justify-between gap-9 min-w-[200px]">
-                        {tab.replaces.map((replacement, index) => <div key={index} className="flex flex-col items-center gap-1 flex-1">
-                            <img src={replacement.logo} alt={replacement.alt} className="w-8 h-8 rounded object-cover" />
-                            <span className="text-xs text-muted-foreground text-center">{replacement.name}</span>
-                          </div>)}
+                      <div className="flex items-center gap-4 min-w-[200px]">
+                        {tab.replaces.map((replacement, index) => (
+                          <ReplacementLogo
+                            key={index}
+                            logo={replacement.logo}
+                            name={replacement.name}
+                            alt={replacement.alt}
+                          />
+                        ))}
                       </div>
                     </div>
                     
