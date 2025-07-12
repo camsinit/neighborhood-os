@@ -40,7 +40,10 @@ export const ReplacementLogo = ({
       <div className="w-10 h-10 bg-background rounded-md flex items-center justify-center overflow-hidden">
         <img src={logo} alt={alt} className="w-8 h-8 object-contain" onError={e => {
         // Fallback: If image fails to load, hide it gracefully
+        console.log(`Failed to load logo: ${logo}`);
         e.currentTarget.style.display = 'none';
+      }} onLoad={() => {
+        console.log(`Successfully loaded logo: ${logo}`);
       }} />
       </div>
       
