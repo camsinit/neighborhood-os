@@ -230,7 +230,7 @@ const Feature197 = ({
   };
   return <section className="py-[10px]">
       <div className="container mx-auto">
-        <div className="mb-12 flex w-full items-start justify-between gap-12">
+        <div className="mb-12 flex w-full items-start justify-center gap-12">
           {/* Left side: Accordion with feature titles and descriptions */}
           <div className="w-full md:w-1/2">
             <Accordion type="single" className="w-full" defaultValue="item-1">
