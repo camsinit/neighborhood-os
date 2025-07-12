@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -256,21 +255,8 @@ const UnifiedInviteDialog = ({
                 </div>
               </div>
 
-              {/* Copy Link Section */}
+              {/* Copy Link Section - Simplified */}
               <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-green-50 rounded-lg">
-                    <Link className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Copy Invite Link</h3>
-                    <p className="text-sm text-gray-600">
-                      Generate a link to share however you'd like
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Generate link button */}
                 <Button 
                   onClick={generateAndCopyLink} 
                   disabled={isGeneratingLink} 
