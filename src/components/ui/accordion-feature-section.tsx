@@ -19,7 +19,6 @@ interface FeatureItem {
     name: string;
     logo: string;
     alt: string;
-    url?: string;
   }[];
 }
 
@@ -140,31 +139,46 @@ const Feature197 = ({
 
   // State to track which image should be displayed
   const [activeImage, setActiveImage] = useState(features[0].image);
-  
+
   // Video state management
   const [showReplayButton, setShowReplayButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Video mapping for each section - each has its own unique video file
   const videoMapping = {
-    1: "/videos/Events.mp4", // Gatherings/Events
-    2: "/videos/Freebies.mp4", // Freebies
-    3: "/videos/Skills.mp4", // Skills
-    4: "/videos/Updates.mp4", // Updates/Safety
-    5: "/videos/Directory.mp4", // Directory
+    1: "/videos/Events.mp4",
+    // Gatherings/Events
+    2: "/videos/Freebies.mp4",
+    // Freebies
+    3: "/videos/Skills.mp4",
+    // Skills
+    4: "/videos/Updates.mp4",
+    // Updates/Safety
+    5: "/videos/Directory.mp4" // Directory
   };
 
   // Color mapping for each section to match their respective page theme
   const getColorClass = (tabId: number, isActive: boolean) => {
     const baseClasses = "transition-colors duration-200";
     switch (tabId) {
-      case 1: return isActive ? `text-blue-600 ${baseClasses}` : `text-muted-foreground hover:text-blue-600 ${baseClasses}`; // Gatherings - blue theme
-      case 2: return isActive ? `text-orange-600 ${baseClasses}` : `text-muted-foreground hover:text-orange-600 ${baseClasses}`; // Freebies - orange theme
-      case 3: return isActive ? `text-green-600 ${baseClasses}` : `text-muted-foreground hover:text-green-600 ${baseClasses}`; // Skills - green theme
-      case 4: return isActive ? `text-red-600 ${baseClasses}` : `text-muted-foreground hover:text-red-600 ${baseClasses}`; // Updates/Safety - red theme
-      case 5: return isActive ? `text-purple-600 ${baseClasses}` : `text-muted-foreground hover:text-purple-600 ${baseClasses}`; // Directory - purple theme
-      default: return `text-foreground ${baseClasses}`;
+      case 1:
+        return isActive ? `text-blue-600 ${baseClasses}` : `text-muted-foreground hover:text-blue-600 ${baseClasses}`;
+      // Gatherings - blue theme
+      case 2:
+        return isActive ? `text-orange-600 ${baseClasses}` : `text-muted-foreground hover:text-orange-600 ${baseClasses}`;
+      // Freebies - orange theme
+      case 3:
+        return isActive ? `text-green-600 ${baseClasses}` : `text-muted-foreground hover:text-green-600 ${baseClasses}`;
+      // Skills - green theme
+      case 4:
+        return isActive ? `text-red-600 ${baseClasses}` : `text-muted-foreground hover:text-red-600 ${baseClasses}`;
+      // Updates/Safety - red theme
+      case 5:
+        return isActive ? `text-purple-600 ${baseClasses}` : `text-muted-foreground hover:text-purple-600 ${baseClasses}`;
+      // Directory - purple theme
+      default:
+        return `text-foreground ${baseClasses}`;
     }
   };
 
@@ -189,52 +203,48 @@ const Feature197 = ({
       });
     });
   }, []);
-  
+
   // Get current video URL based on active tab
   const currentVideoUrl = videoMapping[activeTabId as keyof typeof videoMapping] || "/videos/Events.mp4";
-  
+
   // Intersection observer to trigger video play when section is visible
   useEffect(() => {
     const videoContainer = videoContainerRef.current;
     const video = videoRef.current;
-    
     if (!videoContainer || !video) return;
-    
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Reset video and play when section comes into view
-            video.currentTime = 0;
-            setShowReplayButton(false);
-            video.play().catch(console.error);
-          }
-        });
-      },
-      { threshold: 0.5 } // Trigger when 50% of the element is visible
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Reset video and play when section comes into view
+          video.currentTime = 0;
+          setShowReplayButton(false);
+          video.play().catch(console.error);
+        }
+      });
+    }, {
+      threshold: 0.5
+    } // Trigger when 50% of the element is visible
     );
-    
     observer.observe(videoContainer);
-    
     return () => observer.disconnect();
   }, []);
-  
+
   // Effect to play video when active tab changes
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     // Reset and play video when tab changes
     video.currentTime = 0;
     setShowReplayButton(false);
     video.play().catch(console.error);
   }, [activeTabId, currentVideoUrl]);
-  
+
   // Handle video end event
   const handleVideoEnd = () => {
     setShowReplayButton(true);
   };
-  
+
   // Handle replay button click
   const handleReplay = () => {
     if (videoRef.current) {
@@ -244,7 +254,7 @@ const Feature197 = ({
     }
   };
   return <section className="py-[10px]">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-[30px]">
         <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Left side: Accordion with feature titles and descriptions */}
           <div>
@@ -266,38 +276,17 @@ const Feature197 = ({
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
                       <div className="flex items-center gap-[25px] flex-wrap flex-1 max-w-full">
-                         {tab.replaces.map((replacement, index) => (
-                           <ReplacementLogo
-                             key={index}
-                             logo={replacement.logo}
-                             name={replacement.name}
-                             alt={replacement.alt}
-                             url={replacement.url}
-                           />
-                         ))}
+                        {tab.replaces.map((replacement, index) => <ReplacementLogo key={index} logo={replacement.logo} name={replacement.name} alt={replacement.alt} />)}
                       </div>
                     </div>
                     
                     {/* Show video or image on mobile devices below the description */}
                     <div className="mt-4 md:hidden">
-                      {activeTabId === 5 ? (
-                        // Directory section shows the screenshot image
-                        <img 
-                          src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
-                          alt="Neighbors directory showing community members"
-                          className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
-                        />
-                      ) : (
-                        // All other sections show videos
-                        <video 
-                          src={currentVideoUrl}
-                          className="h-full max-h-80 w-full rounded-md object-cover drop-shadow-lg"
-                          muted
-                          autoPlay
-                          loop
-                          preload="metadata"
-                        />
-                      )}
+                      {activeTabId === 5 ?
+                  // Directory section shows the screenshot image
+                  <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
+                  // All other sections show videos
+                  <video src={currentVideoUrl} className="h-full max-h-80 w-full rounded-md object-cover" muted autoPlay loop preload="metadata" />}
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
@@ -306,38 +295,19 @@ const Feature197 = ({
           
           {/* Right side: Feature video or image based on section */}
           <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl mx-auto flex items-center justify-center h-full">
-            {activeTabId === 5 ? (
-              // Directory section shows the screenshot image
-              <img 
-                src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
-                alt="Neighbors directory showing community members"
-                className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
-              />
-            ) : (
-              // All other sections show videos
-              <video 
-                ref={videoRef}
-                src={currentVideoUrl}
-                className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
-                muted
-                onEnded={handleVideoEnd}
-                preload="metadata"
-              />
-            )}
+            {activeTabId === 5 ?
+          // Directory section shows the screenshot image
+          <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
+          // All other sections show videos
+          <video ref={videoRef} src={currentVideoUrl} className="w-full h-auto max-h-80 rounded-md object-contain" muted onEnded={handleVideoEnd} preload="metadata" />}
             
             {/* Replay button - shows when video ends (only for video sections) */}
-            {showReplayButton && activeTabId !== 5 && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
-                <Button 
-                  onClick={handleReplay}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-                  size="lg"
-                >
+            {showReplayButton && activeTabId !== 5 && <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
+                <Button onClick={handleReplay} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
                   <RotateCcw className="h-5 w-5" />
                   Replay
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </div>
