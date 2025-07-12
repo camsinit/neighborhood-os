@@ -157,11 +157,11 @@ const Feature197 = ({
   // Color mapping for each section to match their respective page theme
   const getColorClass = (tabId: number, isActive: boolean) => {
     switch (tabId) {
-      case 1: return isActive ? "text-blue-600" : "text-blue-400"; // Gatherings - blue theme
-      case 2: return isActive ? "text-orange-600" : "text-orange-400"; // Freebies - orange theme
-      case 3: return isActive ? "text-green-600" : "text-green-400"; // Skills - green theme
-      case 4: return isActive ? "text-red-600" : "text-red-400"; // Updates/Safety - red theme
-      case 5: return isActive ? "text-purple-600" : "text-purple-400"; // Directory - purple theme
+      case 1: return isActive ? "text-blue-600" : "text-muted-foreground"; // Gatherings - blue theme, muted when inactive
+      case 2: return isActive ? "text-orange-600" : "text-muted-foreground"; // Freebies - orange theme, muted when inactive
+      case 3: return isActive ? "text-green-600" : "text-muted-foreground"; // Skills - green theme, muted when inactive
+      case 4: return isActive ? "text-red-600" : "text-muted-foreground"; // Updates/Safety - red theme, muted when inactive
+      case 5: return isActive ? "text-purple-600" : "text-muted-foreground"; // Directory - purple theme, muted when inactive
       default: return "text-foreground";
     }
   };
