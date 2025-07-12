@@ -298,7 +298,7 @@ const Feature197 = ({
               <video 
                 ref={videoRef}
                 src={currentVideoUrl}
-                className="w-full h-auto max-h-80 rounded-md object-contain"
+                className="w-full h-auto max-h-80 rounded-md object-contain pt-[100px]"
                 muted
                 onEnded={handleVideoEnd}
                 preload="metadata"
