@@ -155,13 +155,13 @@ const Feature197 = ({
   };
 
   // Color mapping for each section to match their respective page theme
-  const getColorClass = (tabId: number) => {
+  const getColorClass = (tabId: number, isActive: boolean) => {
     switch (tabId) {
-      case 1: return "text-blue-600"; // Gatherings - blue theme
-      case 2: return "text-orange-600"; // Freebies - orange theme
-      case 3: return "text-green-600"; // Skills - green theme
-      case 4: return "text-red-600"; // Updates/Safety - red theme
-      case 5: return "text-purple-600"; // Directory - purple theme
+      case 1: return isActive ? "text-blue-600" : "text-blue-400"; // Gatherings - blue theme
+      case 2: return isActive ? "text-orange-600" : "text-orange-400"; // Freebies - orange theme
+      case 3: return isActive ? "text-green-600" : "text-green-400"; // Skills - green theme
+      case 4: return isActive ? "text-red-600" : "text-red-400"; // Updates/Safety - red theme
+      case 5: return isActive ? "text-purple-600" : "text-purple-400"; // Directory - purple theme
       default: return "text-foreground";
     }
   };
@@ -253,7 +253,7 @@ const Feature197 = ({
                 setActiveImage(tab.image);
                 setActiveTabId(tab.id);
               }} className="cursor-pointer py-5 !no-underline transition">
-                    <h6 className={`text-xl font-semibold ${getColorClass(tab.id)}`}>
+                    <h6 className={`text-xl font-semibold ${getColorClass(tab.id, tab.id === activeTabId)}`}>
                       {tab.title}
                     </h6>
                   </AccordionTrigger>
@@ -263,7 +263,7 @@ const Feature197 = ({
                     {/* Replaces section with universally formatted logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-1 flex-wrap flex-1 max-w-full">
+                      <div className="flex items-center gap-[25px] flex-wrap flex-1 max-w-full">
                         {tab.replaces.map((replacement, index) => (
                           <ReplacementLogo
                             key={index}
