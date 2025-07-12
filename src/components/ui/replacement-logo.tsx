@@ -23,9 +23,12 @@ interface ReplacementLogoProps {
  * ReplacementLogo component that displays a logo with consistent sizing
  * and text formatting regardless of the original image dimensions or text length
  */
-export const ReplacementLogo = ({ logo, name, alt }: ReplacementLogoProps) => {
-  return (
-    <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+export const ReplacementLogo = ({
+  logo,
+  name,
+  alt
+}: ReplacementLogoProps) => {
+  return <div className="flex flex-col items-center gap-2 flex-1 min-w-0 my-0 mx-[17px] px-0 py-[2px]">
       {/* 
         Logo container with fixed dimensions to ensure consistency
         - w-10 h-10: Fixed 40px square container
@@ -33,17 +36,12 @@ export const ReplacementLogo = ({ logo, name, alt }: ReplacementLogoProps) => {
         - rounded-md: Slightly rounded corners for modern look
         - flex items-center justify-center: Centers logo within container
         - overflow-hidden: Ensures logo doesn't break container bounds
-      */}
+       */}
       <div className="w-10 h-10 bg-background rounded-md flex items-center justify-center overflow-hidden">
-        <img 
-          src={logo} 
-          alt={alt} 
-          className="w-8 h-8 object-contain"
-          onError={(e) => {
-            // Fallback: If image fails to load, hide it gracefully
-            e.currentTarget.style.display = 'none';
-          }}
-        />
+        <img src={logo} alt={alt} className="w-8 h-8 object-contain" onError={e => {
+        // Fallback: If image fails to load, hide it gracefully
+        e.currentTarget.style.display = 'none';
+      }} />
       </div>
       
       {/* 
@@ -53,10 +51,9 @@ export const ReplacementLogo = ({ logo, name, alt }: ReplacementLogoProps) => {
         - text-center: Center-aligned text
         - leading-tight: Tighter line height for compact display
         - w-full: Ensures text container takes full width of parent
-      */}
+       */}
       <span className="text-xs text-muted-foreground text-center leading-tight w-full">
         {name}
       </span>
-    </div>
-  );
+    </div>;
 };
