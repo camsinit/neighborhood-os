@@ -154,6 +154,20 @@ const Feature197 = ({
     5: "/videos/Directory.mp4", // Directory
   };
 
+  // Color mapping for each section to match their respective page theme
+  const getColorClass = (tabId: number, isActive: boolean) => {
+    if (!isActive) return "text-muted-foreground";
+    
+    switch (tabId) {
+      case 1: return "text-primary"; // Events - primary theme
+      case 2: return "text-green-600"; // Freebies - green theme
+      case 3: return "text-blue-600"; // Skills - blue theme
+      case 4: return "text-orange-600"; // Updates/Safety - orange theme
+      case 5: return "text-purple-600"; // Directory - purple theme
+      default: return "text-foreground";
+    }
+  };
+
   // Preload all assets when component mounts
   useEffect(() => {
     // Preload all videos
@@ -241,7 +255,7 @@ const Feature197 = ({
                 setActiveImage(tab.image);
                 setActiveTabId(tab.id);
               }} className="cursor-pointer py-5 !no-underline transition">
-                    <h6 className={`text-xl font-semibold ${tab.id === activeTabId ? "text-foreground" : "text-muted-foreground"}`}>
+                    <h6 className={`text-xl font-semibold ${getColorClass(tab.id, tab.id === activeTabId)}`}>
                       {tab.title}
                     </h6>
                   </AccordionTrigger>
@@ -251,7 +265,7 @@ const Feature197 = ({
                     {/* Replaces section with universally formatted logos */}
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-5 flex-wrap flex-1 max-w-full">
+                      <div className="flex items-center gap-1 flex-wrap flex-1 max-w-full">
                         {tab.replaces.map((replacement, index) => (
                           <ReplacementLogo
                             key={index}
