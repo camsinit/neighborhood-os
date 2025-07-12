@@ -45,7 +45,7 @@ const Features = () => {
     id: 4,
     title: "Updates",
     image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&h=400&fit=crop",
-    description: "No more chaotic email threads, group chat threads, or annoying neighbors complaining about dog shit on their lawn. This is the place for simple updates from neighbors for everyday info you'd want to know.",
+    description: "No more group chats or annoying neighbors complaining about dog poop on their lawn. This is the place for simple updates from neighbors for everyday info you'd want to know.",
     replaces: [
       { name: "Nextdoor", logo: "https://img.logo.dev/nextdoor.com?token=pk_SdwwezRcTT6rDwqgpowtPg", alt: "Nextdoor", url: "https://nextdoor.com" },
       { name: "WhatsApp", logo: "https://img.logo.dev/whatsapp.com?token=pk_SdwwezRcTT6rDwqgpowtPg", alt: "WhatsApp", url: "https://whatsapp.com" },
