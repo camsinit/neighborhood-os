@@ -19,6 +19,7 @@ interface FeatureItem {
     name: string;
     logo: string;
     alt: string;
+    url?: string;
   }[];
 }
 
@@ -156,13 +157,14 @@ const Feature197 = ({
 
   // Color mapping for each section to match their respective page theme
   const getColorClass = (tabId: number, isActive: boolean) => {
+    const baseClasses = "transition-colors duration-200";
     switch (tabId) {
-      case 1: return isActive ? "text-blue-600" : "text-muted-foreground"; // Gatherings - blue theme, muted when inactive
-      case 2: return isActive ? "text-orange-600" : "text-muted-foreground"; // Freebies - orange theme, muted when inactive
-      case 3: return isActive ? "text-green-600" : "text-muted-foreground"; // Skills - green theme, muted when inactive
-      case 4: return isActive ? "text-red-600" : "text-muted-foreground"; // Updates/Safety - red theme, muted when inactive
-      case 5: return isActive ? "text-purple-600" : "text-muted-foreground"; // Directory - purple theme, muted when inactive
-      default: return "text-foreground";
+      case 1: return isActive ? `text-blue-600 ${baseClasses}` : `text-muted-foreground hover:text-blue-600 ${baseClasses}`; // Gatherings - blue theme
+      case 2: return isActive ? `text-orange-600 ${baseClasses}` : `text-muted-foreground hover:text-orange-600 ${baseClasses}`; // Freebies - orange theme
+      case 3: return isActive ? `text-green-600 ${baseClasses}` : `text-muted-foreground hover:text-green-600 ${baseClasses}`; // Skills - green theme
+      case 4: return isActive ? `text-red-600 ${baseClasses}` : `text-muted-foreground hover:text-red-600 ${baseClasses}`; // Updates/Safety - red theme
+      case 5: return isActive ? `text-purple-600 ${baseClasses}` : `text-muted-foreground hover:text-purple-600 ${baseClasses}`; // Directory - purple theme
+      default: return `text-foreground ${baseClasses}`;
     }
   };
 
@@ -264,14 +266,15 @@ const Feature197 = ({
                     <div className="mt-4 flex items-start gap-4">
                       <span className="font-bold text-foreground">Replaces</span>
                       <div className="flex items-center gap-[25px] flex-wrap flex-1 max-w-full">
-                        {tab.replaces.map((replacement, index) => (
-                          <ReplacementLogo
-                            key={index}
-                            logo={replacement.logo}
-                            name={replacement.name}
-                            alt={replacement.alt}
-                          />
-                        ))}
+                         {tab.replaces.map((replacement, index) => (
+                           <ReplacementLogo
+                             key={index}
+                             logo={replacement.logo}
+                             name={replacement.name}
+                             alt={replacement.alt}
+                             url={replacement.url}
+                           />
+                         ))}
                       </div>
                     </div>
                     
