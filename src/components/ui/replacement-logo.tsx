@@ -28,7 +28,7 @@ export const ReplacementLogo = ({
   name,
   alt
 }: ReplacementLogoProps) => {
-  return <div className="flex flex-col items-center gap-2 flex-1 min-w-0 my-0 mx-0 px-0 py-[2px]">
+  return <div className="flex flex-col items-center gap-2 min-w-0 my-0 mx-0 px-0 py-[2px]">
       {/* 
         Logo container with fixed dimensions to ensure consistency
         - w-10 h-10: Fixed 40px square container
