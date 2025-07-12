@@ -173,7 +173,7 @@ const UnifiedInviteDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-[700px] h-[500px]">
+      <DialogContent className="w-[600px] h-[500px]">
         <DialogHeader className="text-center">
           <DialogTitle className="text-2xl">
             Invite to {currentNeighborhood?.name || 'Your Neighborhood'}
