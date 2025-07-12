@@ -57,9 +57,9 @@ const Features = () => {
     image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=600&h=400&fit=crop",
     description: "Google Groups are archaic and spreadsheets are hard to maintain. Our neighbor directory makes it easy to know who's nearby and how to reach out to find them",
     replaces: [
-      { name: "Microsoft Excel", logo: "/lovable-uploads/e5b98f42-4cc3-4b54-8c9a-83c8b7b85c4a.png", alt: "Microsoft Excel" },
-      { name: "Google Groups", logo: "/lovable-uploads/35a1e3e4-cd8b-4b79-af1c-8b9e7d0a3c5f.png", alt: "Google Groups" },
-      { name: "Google Sheets", logo: "/lovable-uploads/bb5b88a5-d345-4c91-b3e7-8f1a9e2c5d4b.png", alt: "Google Sheets" }
+      { name: "Microsoft Excel", logo: "https://img.logo.dev/microsoft.com?token=pk_SdwwezRcTT6rDwqgpowtPg", alt: "Microsoft Excel" },
+      { name: "Google Groups", logo: "https://img.logo.dev/groups.google.com?token=pk_SdwwezRcTT6rDwqgpowtPg", alt: "Google Groups" },
+      { name: "Google Sheets", logo: "https://img.logo.dev/sheets.google.com?token=pk_SdwwezRcTT6rDwqgpowtPg", alt: "Google Sheets" }
     ]
   }];
   return <section className="bg-background">
