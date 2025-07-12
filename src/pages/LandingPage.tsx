@@ -34,13 +34,15 @@ const LandingPage = () => {
         </div>
         
         {/* Conditional button - Dashboard for authenticated users, Login for unauthenticated */}
-        <Button asChild variant="outline" className="rounded-full border-primary text-foreground hover:bg-primary/10">
+        <Button asChild variant="outline" className={`rounded-full ${session ? 'bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 via-indigo-500 to-purple-500 p-[2px]' : 'border-primary hover:bg-primary/10'}`}>
           {session ? (
-            <Link to="/dashboard" className="transition-colors">
-              Dashboard
-            </Link>
+            <div className="bg-background rounded-full px-4 py-2">
+              <Link to="/dashboard" className="transition-colors text-muted-foreground">
+                Dashboard
+              </Link>
+            </div>
           ) : (
-            <Link to="/login" className="transition-colors">
+            <Link to="/login" className="transition-colors text-foreground">
               Login
             </Link>
           )}
