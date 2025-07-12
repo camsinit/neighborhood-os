@@ -47,16 +47,5 @@ export const ReplacementLogo = ({
       }} />
       </div>
       
-      {/* 
-        Text container with consistent formatting
-        - text-xs: Small text size for compact display
-        - text-muted-foreground: Muted color for secondary information
-        - text-center: Center-aligned text
-        - leading-tight: Tighter line height for compact display
-        - w-full: Ensures text container takes full width of parent
-       */}
-      <span className="text-xs text-muted-foreground text-center leading-tight w-full">
-        {name}
-      </span>
     </div>;
 };
