@@ -152,6 +152,28 @@ const Feature197 = ({
     4: "/videos/Updates.mp4", // Updates/Safety
     5: "/videos/Directory.mp4", // Directory
   };
+
+  // Preload all assets when component mounts
+  useEffect(() => {
+    // Preload all videos
+    Object.values(videoMapping).forEach(videoUrl => {
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.src = videoUrl;
+    });
+
+    // Preload directory image
+    const img = new Image();
+    img.src = "/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png";
+
+    // Preload all feature logos
+    features.forEach(feature => {
+      feature.replaces.forEach(replacement => {
+        const logoImg = new Image();
+        logoImg.src = replacement.logo;
+      });
+    });
+  }, []);
   
   // Get current video URL based on active tab
   const currentVideoUrl = videoMapping[activeTabId as keyof typeof videoMapping] || "/videos/Events.mp4";
