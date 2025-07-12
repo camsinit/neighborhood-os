@@ -13,6 +13,21 @@ const corsHeaders = {
 };
 
 /**
+ * Get the production base URL for email links
+ * Always returns neighborhoodos.com for email consistency
+ */
+const getEmailBaseUrl = (): string => {
+  return "https://neighborhoodos.com";
+};
+
+/**
+ * Generate invite link with production URL
+ */
+const getInviteLink = (inviteCode: string): string => {
+  return `${getEmailBaseUrl()}/join/${inviteCode}`;
+};
+
+/**
  * Interface for neighbor invite email request
  */
 interface NeighborInviteRequest {
@@ -56,44 +71,40 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending neighbor invite from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`);
 
-    // Send the invitation email
+    // Send the invitation email using plain-text template
     const emailResponse = await resend.emails.send({
-      from: "Neighborhood OS <hello@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@neighborhoodos.com>",
       to: [recipientEmail],
-      subject: `${inviterName} invited you to join ${neighborhoodName}`,
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #2563eb; margin-bottom: 20px;">You're invited to join your neighborhood!</h1>
-          
-          <p style="font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-            Hi there! <strong>${inviterName}</strong> has invited you to join <strong>${neighborhoodName}</strong> on Neighborhood OS.
-          </p>
-          
-          <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px;">
-            Neighborhood OS helps neighbors connect, share resources, and build stronger communities together. 
-            You can discover local events, share skills, find help when you need it, and get to know the people around you.
-          </p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteUrl}" 
-               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 500;">
-              Join ${neighborhoodName}
-            </a>
-          </div>
-          
-          <p style="font-size: 14px; color: #666; margin-top: 30px;">
-            If the button doesn't work, copy and paste this link into your browser:<br>
-            <a href="${inviteUrl}" style="color: #2563eb; word-break: break-all;">${inviteUrl}</a>
-          </p>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-          
-          <p style="font-size: 12px; color: #999; text-align: center;">
-            This invitation was sent by ${inviterName}. If you didn't expect this invitation, 
-            you can safely ignore this email.
-          </p>
-        </div>
-      `,
+      subject: `Your neighbor ${inviterName} invited you to join ${neighborhoodName} on NeighborhoodOS`,
+      text: `Hi there!
+
+${inviterName} thought you'd be a great addition to the ${neighborhoodName} community on NeighborhoodOS.
+
+This isn't another social media rabbit hole, promise. Just a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.
+
+Ready to see what your neighbors are up to?
+
+Join ${neighborhoodName}: ${inviteUrl}
+
+This invite expires in 7 days (because nothing good lasts forever).
+
+Welcome to the neighborhood,
+The NeighborhoodOS Team`,
+      // Add minimal HTML for email clients that prefer it
+      html: `<p>Hi there!</p>
+
+<p>${inviterName} thought you'd be a great addition to the ${neighborhoodName} community on NeighborhoodOS.</p>
+
+<p>This isn't another social media rabbit hole, promise. Just a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.</p>
+
+<p>Ready to see what your neighbors are up to?</p>
+
+<p><a href="${inviteUrl}">Join ${neighborhoodName}</a></p>
+
+<p>This invite expires in 7 days (because nothing good lasts forever).</p>
+
+<p>Welcome to the neighborhood,<br>
+The NeighborhoodOS Team</p>`,
     });
 
     console.log("Email sent successfully:", emailResponse);
