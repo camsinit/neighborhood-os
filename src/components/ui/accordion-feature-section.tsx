@@ -290,7 +290,7 @@ const Feature197 = ({
           </div>
           
           {/* Right side: Feature video or image based on section */}
-          <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl bg-muted w-fit h-fit mx-auto flex items-center justify-center">
+          <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl bg-muted mx-auto flex items-center justify-center h-full">
             {activeTabId === 5 ? (
               // Directory section shows the screenshot image
               <img 
