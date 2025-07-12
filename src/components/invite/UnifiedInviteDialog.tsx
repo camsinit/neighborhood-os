@@ -1,14 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, Eye } from "lucide-react";
+import { Copy, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
-import InvitePreview from "./InvitePreview";
-import { useNeighborhoodPreview } from "@/hooks/useNeighborhoodPreview";
 
 /**
  * Props for the UnifiedInviteDialog component
@@ -38,35 +39,22 @@ const getBaseUrl = (): string => {
 /**
  * UnifiedInviteDialog Component
  * 
- * Simplified invite system that only generates and copies invite links.
- * No need for neighbor information - just click and share!
+ * Allows users to generate invite links or send email invitations to neighbors.
+ * Simple interface focused on getting people connected to the neighborhood.
  */
 const UnifiedInviteDialog = ({
   open,
   onOpenChange
 }: UnifiedInviteDialogProps) => {
-  // State for tracking link generation
+  // State for tracking operations
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   // Get required hooks for user and neighborhood context
   const user = useUser();
-  const {
-    currentNeighborhood
-  } = useNeighborhood();
-
-  // Hook for fetching neighborhood preview data
-  const {
-    neighborhood: previewNeighborhood,
-    isLoading: isLoadingPreview,
-    fetchNeighborhoodPreview
-  } = useNeighborhoodPreview();
-
-  // Fetch neighborhood preview data when dialog opens and neighborhood is available
-  useEffect(() => {
-    if (open && currentNeighborhood?.id) {
-      fetchNeighborhoodPreview(currentNeighborhood.id);
-    }
-  }, [open, currentNeighborhood?.id, fetchNeighborhoodPreview]);
+  const { currentNeighborhood } = useNeighborhood();
 
   /**
    * Generates a unique invitation link and copies it to clipboard
@@ -78,6 +66,7 @@ const UnifiedInviteDialog = ({
       toast.error("Unable to generate invite link. Please make sure you're logged in and part of a neighborhood.");
       return;
     }
+    
     setIsGeneratingLink(true);
     try {
       // Generate a unique invite code using crypto.randomUUID()
@@ -85,13 +74,12 @@ const UnifiedInviteDialog = ({
       console.log("[UnifiedInviteDialog] Generating invite for neighborhood:", currentNeighborhood.id);
 
       // Create a new invitation record in the database
-      const {
-        error
-      } = await supabase.from("invitations").insert({
+      const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
         inviter_id: user.id,
         neighborhood_id: currentNeighborhood.id
       });
+      
       if (error) throw error;
 
       // Create the invitation URL using the correct base URL
@@ -114,11 +102,80 @@ const UnifiedInviteDialog = ({
   };
 
   /**
+   * Sends an email invitation to the specified email address
+   */
+  const sendEmailInvite = async () => {
+    // Clear previous errors
+    setEmailError('');
+    
+    // Validate email input
+    if (!email.trim()) {
+      setEmailError('Email address is required');
+      return;
+    }
+    
+    if (!email.includes('@')) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    
+    // Validate required data is present
+    if (!user || !currentNeighborhood) {
+      toast.error("Unable to send invite. Please make sure you're logged in and part of a neighborhood.");
+      return;
+    }
+    
+    setIsSendingEmail(true);
+    try {
+      // Generate a unique invite code for this email invitation
+      const inviteCode = crypto.randomUUID();
+      console.log("[UnifiedInviteDialog] Generating email invite for neighborhood:", currentNeighborhood.id);
+
+      // Create a new invitation record in the database with email
+      const { error: inviteError } = await supabase.from("invitations").insert({
+        invite_code: inviteCode,
+        inviter_id: user.id,
+        neighborhood_id: currentNeighborhood.id,
+        email: email.trim()
+      });
+      
+      if (inviteError) throw inviteError;
+
+      // Create the invitation URL
+      const baseUrl = getBaseUrl();
+      const inviteUrl = `${baseUrl}/join/${inviteCode}`;
+
+      // Send the email via edge function
+      const { error: emailError } = await supabase.functions.invoke('send-neighbor-invite', {
+        body: {
+          recipientEmail: email.trim(),
+          inviterName: user.user_metadata?.display_name || user.email,
+          neighborhoodName: currentNeighborhood.name,
+          inviteUrl: inviteUrl
+        }
+      });
+
+      if (emailError) throw emailError;
+
+      // Success! Clear form and show message
+      setEmail('');
+      toast.success(`Invitation sent to ${email}! They'll receive an email with instructions to join.`);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("[UnifiedInviteDialog] Error sending email invite:", error);
+      toast.error("Failed to send email invitation. Please try again.");
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  /**
    * Handles closing the dialog
    */
   const handleClose = () => {
     onOpenChange(false);
   };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -127,7 +184,7 @@ const UnifiedInviteDialog = ({
             Invite Someone to {currentNeighborhood?.name || 'Your Neighborhood'}
           </DialogTitle>
           <DialogDescription>
-            Generate and share invite links, or preview how invitations will appear to recipients.
+            Share your neighborhood with others by sending them an invite link or emailing them directly.
           </DialogDescription>
         </DialogHeader>
         
@@ -146,15 +203,15 @@ const UnifiedInviteDialog = ({
                   <Copy className="h-4 w-4" />
                   Generate Link
                 </TabsTrigger>
-                <TabsTrigger value="preview" className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Preview Invite
+                <TabsTrigger value="email" className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email Invite
                 </TabsTrigger>
               </TabsList>
               
               <TabsContent value="generate" className="mt-6">
                 <div className="text-center space-y-4">
-                  {/* Main action button */}
+                  {/* Main action button for link generation */}
                   <Button 
                     onClick={generateAndCopyLink} 
                     disabled={isGeneratingLink} 
@@ -173,31 +230,50 @@ const UnifiedInviteDialog = ({
                 </div>
               </TabsContent>
               
-              <TabsContent value="preview" className="mt-6">
+              <TabsContent value="email" className="mt-6">
                 <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="font-semibold text-lg mb-2">Invitation Preview</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      This is how your invitation will appear to recipients when they click your invite link.
+                  <div className="text-center mb-4">
+                    <h3 className="font-semibold text-lg mb-2">Send Email Invitation</h3>
+                    <p className="text-sm text-gray-600">
+                      Enter your neighbor's email address and we'll send them a personalized invitation to join.
                     </p>
                   </div>
                   
-                  {/* Show loading state while fetching preview data */}
-                  {isLoadingPreview ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
-                  ) : previewNeighborhood ? (
-                    <InvitePreview 
-                      neighborhood={previewNeighborhood} 
-                      previewMode={true}
-                      className="bg-gray-50 rounded-lg"
+                  {/* Email input form */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="neighbor@example.com"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (emailError) setEmailError(''); // Clear error when typing
+                      }}
+                      className={emailError ? "border-red-300" : ""}
                     />
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>Unable to load preview data</p>
-                    </div>
-                  )}
+                    {/* Show inline error for email validation */}
+                    {emailError && (
+                      <p className="text-sm text-red-600">{emailError}</p>
+                    )}
+                  </div>
+
+                  {/* Send button */}
+                  <Button 
+                    onClick={sendEmailInvite} 
+                    disabled={isSendingEmail || !email.trim()} 
+                    className="w-full" 
+                    size="lg"
+                  >
+                    <Mail className="mr-2 h-5 w-5" />
+                    {isSendingEmail ? "Sending..." : "Send Email Invitation"}
+                  </Button>
+                  
+                  {/* Additional info */}
+                  <div className="text-xs text-gray-500 text-center">
+                    <p>They'll receive an email with your name and a link to join {currentNeighborhood.name}.</p>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
@@ -207,4 +283,5 @@ const UnifiedInviteDialog = ({
     </Dialog>
   );
 };
+
 export default UnifiedInviteDialog;
