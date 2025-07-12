@@ -20,6 +20,7 @@ export const useProfileManagement = () => {
         email_visible: formData.emailVisible,
         phone_visible: formData.phoneVisible,
         address_visible: false,
+        years_lived_here: formData.yearsLivedHere || null,
         // skills removed - no longer collected during onboarding
         completed_onboarding: true,
       };

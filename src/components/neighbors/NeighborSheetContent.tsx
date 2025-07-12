@@ -65,6 +65,13 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
               <Calendar className="h-4 w-4" />
               <span>Joined {format(new Date(neighbor.created_at || new Date()), 'MMM yyyy')}</span>
             </div>
+
+            {/* Years lived here */}
+            {neighbor.profiles?.years_lived_here && (
+              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">
+                📍 {neighbor.profiles.years_lived_here} {neighbor.profiles.years_lived_here === 1 ? 'year' : 'years'} in the area
+              </div>
+            )}
           </div>
         </div>
 

@@ -562,6 +562,7 @@ export type Database = {
           theme: string | null
           timezone: string | null
           updated_at: string
+          years_lived_here: number | null
         }
         Insert: {
           access_needs?: string | null
@@ -584,6 +585,7 @@ export type Database = {
           theme?: string | null
           timezone?: string | null
           updated_at?: string
+          years_lived_here?: number | null
         }
         Update: {
           access_needs?: string | null
@@ -606,6 +608,7 @@ export type Database = {
           theme?: string | null
           timezone?: string | null
           updated_at?: string
+          years_lived_here?: number | null
         }
         Relationships: []
       }

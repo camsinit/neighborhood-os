@@ -72,6 +72,13 @@ export const NeighborCard = ({ user, onClick }: NeighborCardProps) => {
                 <span className="truncate max-w-[120px]">{user.profiles.address}</span>
               </div>
             )}
+
+            {/* Show years lived here if available */}
+            {user.profiles?.years_lived_here && (
+              <div className="text-xs text-gray-500">
+                {user.profiles.years_lived_here} {user.profiles.years_lived_here === 1 ? 'year' : 'years'} here
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

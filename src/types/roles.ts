@@ -19,6 +19,7 @@ export interface UserWithRole {
     address_visible: boolean;
     needs_visible: boolean;
     bio: string;
+    years_lived_here: number | null;
     email?: string; // Add email field here too
   } | null;
 }
