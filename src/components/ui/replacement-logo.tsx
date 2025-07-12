@@ -31,11 +31,10 @@ export const ReplacementLogo = ({ logo, name, alt }: ReplacementLogoProps) => {
         - w-10 h-10: Fixed 40px square container
         - bg-background: Subtle background for better logo visibility
         - rounded-md: Slightly rounded corners for modern look
-        - border: Subtle border to define the logo area
         - flex items-center justify-center: Centers logo within container
         - overflow-hidden: Ensures logo doesn't break container bounds
       */}
-      <div className="w-10 h-10 bg-background rounded-md border flex items-center justify-center overflow-hidden">
+      <div className="w-10 h-10 bg-background rounded-md flex items-center justify-center overflow-hidden">
         <img 
           src={logo} 
           alt={alt} 
@@ -53,10 +52,9 @@ export const ReplacementLogo = ({ logo, name, alt }: ReplacementLogoProps) => {
         - text-muted-foreground: Muted color for secondary information
         - text-center: Center-aligned text
         - leading-tight: Tighter line height for compact display
-        - truncate: Prevents text overflow with ellipsis
         - w-full: Ensures text container takes full width of parent
       */}
-      <span className="text-xs text-muted-foreground text-center leading-tight truncate w-full">
+      <span className="text-xs text-muted-foreground text-center leading-tight w-full">
         {name}
       </span>
     </div>
