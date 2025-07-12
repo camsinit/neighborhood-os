@@ -285,13 +285,13 @@ const Feature197 = ({
                         <img 
                           src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
                           alt="Neighbors directory showing community members"
-                          className="w-full h-auto max-h-80 rounded-md object-contain"
+                          className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
                         />
                       ) : (
                         // All other sections show videos
                         <video 
                           src={currentVideoUrl}
-                          className="h-full max-h-80 w-full rounded-md object-cover"
+                          className="h-full max-h-80 w-full rounded-md object-cover drop-shadow-lg"
                           muted
                           autoPlay
                           loop
@@ -311,14 +311,14 @@ const Feature197 = ({
               <img 
                 src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png"
                 alt="Neighbors directory showing community members"
-                className="w-full h-auto max-h-80 rounded-md object-contain"
+                className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
               />
             ) : (
               // All other sections show videos
               <video 
                 ref={videoRef}
                 src={currentVideoUrl}
-                className="w-full h-auto max-h-80 rounded-md object-contain"
+                className="w-full h-auto max-h-80 rounded-md object-contain drop-shadow-lg"
                 muted
                 onEnded={handleVideoEnd}
                 preload="metadata"
