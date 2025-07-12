@@ -38,15 +38,15 @@ const defaultFeatures: FeatureItem[] = [{
   image: "/images/block/placeholder-1.svg",
   description: "Most neighborhood gatherings are low-key, low-effort, and just need a simple place for RSVP's and reminders. That's exactly what our no-frills Calendar page is designed to do.",
   replaces: [{
-    name: "Partiful",
+    name: "partiful.com",
     logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
     alt: "Partiful"
   }, {
-    name: "Luma",
+    name: "lumalabs.ai",
     logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
     alt: "Luma"
   }, {
-    name: "Facebook",
+    name: "facebook.com",
     logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
     alt: "Facebook"
   }]
@@ -56,15 +56,15 @@ const defaultFeatures: FeatureItem[] = [{
   image: "/images/block/placeholder-2.svg",
   description: "Built with Tailwind CSS for rapid styling and TypeScript for type safety. Our blocks leverage the full power of Tailwind's utility classes while maintaining clean, type-safe code that integrates seamlessly with your Next.js projects.",
   replaces: [{
-    name: "OfferUp",
+    name: "offerup.com",
     logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
     alt: "OfferUp"
   }, {
-    name: "Craigslist",
+    name: "craigslist.org",
     logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
     alt: "Craigslist"
   }, {
-    name: "Marketplace",
+    name: "facebook.com/marketplace",
     logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
     alt: "Marketplace"
   }]
@@ -74,15 +74,15 @@ const defaultFeatures: FeatureItem[] = [{
   image: "/images/block/placeholder-3.svg",
   description: "Every block supports dark mode out of the box and can be customized to match your brand. Modify colors, spacing, and typography using Tailwind's configuration. The shadcn/ui theming system makes it easy to maintain consistency across your site.",
   replaces: [{
-    name: "TaskRabbit",
+    name: "taskrabbit.com",
     logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
     alt: "TaskRabbit"
   }, {
-    name: "Thumbtack",
+    name: "thumbtack.com",
     logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
     alt: "Thumbtack"
   }, {
-    name: "Angie",
+    name: "angi.com",
     logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
     alt: "Angie"
   }]
@@ -92,15 +92,15 @@ const defaultFeatures: FeatureItem[] = [{
   image: "/images/block/placeholder-4.svg",
   description: "All blocks are built with accessibility in mind, following WCAG guidelines. They include proper ARIA labels, keyboard navigation support, and semantic HTML structure. Ensure your website is usable by everyone without extra effort.",
   replaces: [{
-    name: "Nextdoor",
+    name: "nextdoor.com",
     logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
     alt: "Nextdoor"
   }, {
-    name: "Ring",
+    name: "ring.com",
     logo: "/lovable-uploads/150bc5c5-2da6-48a5-bdc0-fda9218a2a34.png",
     alt: "Ring"
   }, {
-    name: "Citizen",
+    name: "citizen.com",
     logo: "/lovable-uploads/f6ad984f-cbf9-4056-80e5-cdf5a44f816f.png",
     alt: "Citizen"
   }]
@@ -110,15 +110,15 @@ const defaultFeatures: FeatureItem[] = [{
   image: "/images/block/placeholder-5.svg",
   description: "Built for modern web development with React 18, Next.js 14, and the latest shadcn/ui components. Take advantage of React Server Components, TypeScript strict mode, and other cutting-edge features while maintaining excellent performance.",
   replaces: [{
-    name: "WhatsApp",
+    name: "whatsapp.com",
     logo: "/lovable-uploads/2e8ba0c4-f0ef-4f92-b41c-51a63bf67944.png",
     alt: "WhatsApp"
   }, {
-    name: "Telegram",
+    name: "telegram.org",
     logo: "/lovable-uploads/e1bc1776-d9c6-4c5c-9ea4-fbaf85b73d53.png",
     alt: "Telegram"
   }, {
-    name: "Discord",
+    name: "discord.com",
     logo: "/lovable-uploads/6ecb06fc-bfb0-4ac5-93af-0a52e4d1eb6b.png",
     alt: "Discord"
   }]
