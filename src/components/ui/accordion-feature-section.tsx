@@ -312,7 +312,7 @@ const Feature197 = ({
             
             {/* Replay button - shows when video ends (only for video sections) */}
             {showReplayButton && activeTabId !== 5 && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl p-4">
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
                 <Button 
                   onClick={handleReplay}
                   className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
