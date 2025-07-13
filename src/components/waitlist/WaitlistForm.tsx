@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ShimmerInput } from "@/components/ui/shimmer-input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import WaitlistSurveyPopover from "./WaitlistSurveyPopover";
@@ -92,9 +93,19 @@ const WaitlistForm = () => {
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-row gap-2 py-[27px]">
-          <Input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} disabled={isSubmitting} className="flex-1 text-sm sm:text-base rounded-[30px] pl-[12px] sm:pl-[15px]" style={{
-          height: '40px'
-        }} required />
+          <ShimmerInput 
+            type="email" 
+            placeholder="Your Email" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            disabled={isSubmitting} 
+            shimmerColor="#e5e7eb"
+            shimmerDuration="3s"
+            background="#ffffff"
+            className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px]" 
+            style={{ height: '40px' }} 
+            required 
+          />
           <Button type="submit" disabled={isSubmitting} className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap" style={{
           height: '40px'
         }}>
