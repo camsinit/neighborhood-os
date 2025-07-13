@@ -42,10 +42,10 @@ export const SurveyStepRenderer = ({
         <BasicInfoStep
           firstName={formData.firstName}
           lastName={formData.lastName}
-          yearsLivedHere={formData.yearsLivedHere}
+          yearMovedIn={formData.yearMovedIn}
           onFirstNameChange={(value) => handleChange("firstName", value)}
           onLastNameChange={(value) => handleChange("lastName", value)}
-          onYearsLivedHereChange={(value) => handleChange("yearsLivedHere", value)}
+          onYearMovedInChange={(value) => handleChange("yearMovedIn", value)}
           onValidation={handleValidation}
         />
       );

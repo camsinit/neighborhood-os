@@ -11,6 +11,13 @@ export const useProfileManagement = () => {
    */
   const upsertProfile = async (formData: SurveyFormData, userId: string, avatarUrl?: string) => {
     try {
+      // Calculate years lived here from the move-in year
+      const calculateYearsLived = (yearMovedIn: number | null): number | null => {
+        if (yearMovedIn === null) return null;
+        const currentYear = new Date().getFullYear();
+        return Math.max(0, currentYear - yearMovedIn);
+      };
+
       const profileData = {
         id: userId,
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -20,7 +27,7 @@ export const useProfileManagement = () => {
         email_visible: formData.emailVisible,
         phone_visible: formData.phoneVisible,
         address_visible: false,
-        years_lived_here: formData.yearsLivedHere || null,
+        years_lived_here: calculateYearsLived(formData.yearMovedIn),
         // skills removed - no longer collected during onboarding
         completed_onboarding: true,
       };

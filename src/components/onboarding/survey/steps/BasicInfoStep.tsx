@@ -2,45 +2,61 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+/**
+ * Generate array of years from 1950 to current year
+ */
+const generateYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let year = currentYear; year >= 1950; year--) {
+    years.push(year);
+  }
+  return years;
+};
 
 /**
  * Basic Information Step Component
  * 
- * This step collects the user's first name, last name, and years lived here
+ * This step collects the user's first name, last name, and year moved in
  * with validation to ensure required fields are provided.
  */
 interface BasicInfoStepProps {
   firstName: string;
   lastName: string;
-  yearsLivedHere: number | null;
+  yearMovedIn: number | null;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
-  onYearsLivedHereChange: (value: number | null) => void;
+  onYearMovedInChange: (value: number | null) => void;
   onValidation?: (field: string, isValid: boolean) => void; // Add validation callback
 }
 
 export const BasicInfoStep = ({
   firstName,
   lastName,
-  yearsLivedHere,
+  yearMovedIn,
   onFirstNameChange,
   onLastNameChange,
-  onYearsLivedHereChange,
+  onYearMovedInChange,
   onValidation,
 }: BasicInfoStepProps) => {
   // Track validation errors for display
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
-    yearsLivedHere: "",
+    yearMovedIn: "",
   });
 
   // Track if fields have been touched by the user to prevent immediate error display
   const [touched, setTouched] = useState({
     firstName: false,
     lastName: false,
-    yearsLivedHere: false,
+    yearMovedIn: false,
   });
+
+  // Get year options for the dropdown
+  const yearOptions = generateYearOptions();
 
   // Validate first name and notify parent
   const validateFirstName = (value: string) => {
@@ -68,29 +84,27 @@ export const BasicInfoStep = ({
     return isValid;
   };
 
-  // Validate years lived here (optional field, but must be positive if provided)
-  const validateYearsLivedHere = (value: number | null) => {
+  // Validate year moved in (optional field, but must be reasonable if provided)
+  const validateYearMovedIn = (value: number | null) => {
     let isValid = true;
     let errorMessage = "";
 
     if (value !== null) {
-      if (value < 0) {
+      const currentYear = new Date().getFullYear();
+      if (value < 1950 || value > currentYear) {
         isValid = false;
-        errorMessage = "Years must be a positive number";
-      } else if (value > 150) {
-        isValid = false;
-        errorMessage = "Please enter a reasonable number of years";
+        errorMessage = `Year must be between 1950 and ${currentYear}`;
       }
     }
 
-    if (!isValid && touched.yearsLivedHere) {
-      setErrors(prev => ({ ...prev, yearsLivedHere: errorMessage }));
+    if (!isValid && touched.yearMovedIn) {
+      setErrors(prev => ({ ...prev, yearMovedIn: errorMessage }));
     } else {
-      setErrors(prev => ({ ...prev, yearsLivedHere: "" }));
+      setErrors(prev => ({ ...prev, yearMovedIn: "" }));
     }
     
     // Notify parent component of validation result
-    onValidation?.("yearsLivedHere", isValid);
+    onValidation?.("yearMovedIn", isValid);
     return isValid;
   };
 
@@ -105,15 +119,11 @@ export const BasicInfoStep = ({
     validateLastName(e.target.value);
   };
 
-  const handleYearsLivedHereBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setTouched(prev => ({ ...prev, yearsLivedHere: true }));
-    const value = e.target.value === "" ? null : parseInt(e.target.value);
-    validateYearsLivedHere(value);
-  };
-
-  const handleYearsLivedHereChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value === "" ? null : parseInt(e.target.value);
-    onYearsLivedHereChange(value);
+  const handleYearMovedInChange = (value: string) => {
+    setTouched(prev => ({ ...prev, yearMovedIn: true }));
+    const yearValue = value === "" ? null : parseInt(value);
+    onYearMovedInChange(yearValue);
+    validateYearMovedIn(yearValue);
   };
 
   // Run validation when values change (but only show errors if touched)
@@ -126,8 +136,8 @@ export const BasicInfoStep = ({
   }, [lastName, touched.lastName]);
 
   useEffect(() => {
-    validateYearsLivedHere(yearsLivedHere);
-  }, [yearsLivedHere, touched.yearsLivedHere]);
+    validateYearMovedIn(yearMovedIn);
+  }, [yearMovedIn, touched.yearMovedIn]);
 
   return (
     <div className="space-y-4">
@@ -162,22 +172,23 @@ export const BasicInfoStep = ({
         </div>
       </div>
       
-      {/* Years lived here field - full width */}
+      {/* Year moved in field - full width */}
       <div className="space-y-2">
-        <Label htmlFor="yearsLivedHere">How many years have you lived here? (optional)</Label>
-        <Input
-          id="yearsLivedHere"
-          type="number"
-          min="0"
-          max="150"
-          value={yearsLivedHere ?? ""}
-          onChange={handleYearsLivedHereChange}
-          onBlur={handleYearsLivedHereBlur}
-          placeholder="e.g., 5"
-          className={errors.yearsLivedHere ? "border-red-500" : ""}
-        />
-        {errors.yearsLivedHere && (
-          <p className="text-sm text-red-500">{errors.yearsLivedHere}</p>
+        <Label htmlFor="yearMovedIn">What year did you move to this neighborhood? (optional)</Label>
+        <Select value={yearMovedIn?.toString() || ""} onValueChange={handleYearMovedInChange}>
+          <SelectTrigger className={errors.yearMovedIn ? "border-red-500" : ""}>
+            <SelectValue placeholder="Select year..." />
+          </SelectTrigger>
+          <SelectContent>
+            {yearOptions.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.yearMovedIn && (
+          <p className="text-sm text-red-500">{errors.yearMovedIn}</p>
         )}
         <p className="text-sm text-gray-500">
           This helps neighbors understand your connection to the community and will be displayed on your profile

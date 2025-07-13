@@ -28,7 +28,7 @@ export const useSurveyState = () => {
   const [formData, setFormData] = useState<SurveyFormData>({
     firstName: "",
     lastName: "",
-    yearsLivedHere: null,
+    yearMovedIn: null,
     email: "",
     phone: "",
     password: "",

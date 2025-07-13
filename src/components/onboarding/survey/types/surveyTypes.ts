@@ -11,7 +11,7 @@ export interface SurveyFormData {
   // Basic information
   firstName: string;
   lastName: string;
-  yearsLivedHere: number | null;
+  yearMovedIn: number | null;
   
   // Contact information  
   email: string;
