@@ -113,6 +113,9 @@ const WaitlistForm = () => {
             {isSubmitting ? "Joining..." : "Join Waitlist"}
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Join the waitlist if you're a neighborhood instigator who wants early-access
+        </p>
       </form>
 
       {/* Survey popover that appears after successful waitlist signup */}
