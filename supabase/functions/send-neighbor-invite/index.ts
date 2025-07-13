@@ -1,6 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { NeighborInviteEmail } from './_templates/neighbor-invite.tsx';
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -13,18 +16,28 @@ const corsHeaders = {
 };
 
 /**
- * Get the production base URL for email links
- * Always returns neighborhoodos.com for email consistency
+ * URL Generation Utilities for Email Templates
+ * Importing centralized URL generation with UTM tracking
  */
+
+// Get the production base URL for email links
 const getEmailBaseUrl = (): string => {
   return "https://neighborhoodos.com";
 };
 
-/**
- * Generate invite link with production URL
- */
-const getInviteLink = (inviteCode: string): string => {
-  return `${getEmailBaseUrl()}/join/${inviteCode}`;
+// Add UTM parameters for email tracking
+const addEmailTrackingParams = (url: string, campaign: string, source: string = "email"): string => {
+  const urlObj = new URL(url);
+  urlObj.searchParams.set("utm_source", source);
+  urlObj.searchParams.set("utm_medium", "email");
+  urlObj.searchParams.set("utm_campaign", campaign);
+  return urlObj.toString();
+};
+
+// Generate invite link with UTM tracking
+const getInviteURL = (inviteCode: string): string => {
+  const baseUrl = `${getEmailBaseUrl()}/join/${inviteCode}`;
+  return addEmailTrackingParams(baseUrl, "neighbor_invite", "email");
 };
 
 /**
@@ -71,40 +84,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending neighbor invite from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`);
 
-    // Send the invitation email using plain-text template
+    // Extract invite code from URL to generate tracked URL
+    const urlParts = inviteUrl.split('/');
+    const inviteCode = urlParts[urlParts.length - 1];
+    const trackedInviteUrl = getInviteURL(inviteCode);
+
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(NeighborInviteEmail, {
+        inviterName,
+        neighborhoodName,
+        inviteUrl: trackedInviteUrl,
+      })
+    );
+
+    // Send the invitation email using React Email template
     const emailResponse = await resend.emails.send({
       from: "NeighborhoodOS <hello@neighborhoodos.com>",
       to: [recipientEmail],
       subject: `Your neighbor ${inviterName} invited you to join ${neighborhoodName} on NeighborhoodOS`,
-      text: `Hi there!
-
-${inviterName} thought you'd be a great addition to the ${neighborhoodName} community on NeighborhoodOS.
-
-This isn't another social media rabbit hole, promise. Just a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.
-
-Ready to see what your neighbors are up to?
-
-Join ${neighborhoodName}: ${inviteUrl}
-
-This invite expires in 7 days (because nothing good lasts forever).
-
-Welcome to the neighborhood,
-The NeighborhoodOS Team`,
-      // Add minimal HTML for email clients that prefer it
-      html: `<p>Hi there!</p>
-
-<p>${inviterName} thought you'd be a great addition to the ${neighborhoodName} community on NeighborhoodOS.</p>
-
-<p>This isn't another social media rabbit hole, promise. Just a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.</p>
-
-<p>Ready to see what your neighbors are up to?</p>
-
-<p><a href="${inviteUrl}">Join ${neighborhoodName}</a></p>
-
-<p>This invite expires in 7 days (because nothing good lasts forever).</p>
-
-<p>Welcome to the neighborhood,<br>
-The NeighborhoodOS Team</p>`,
+      html,
     });
 
     console.log("Email sent successfully:", emailResponse);

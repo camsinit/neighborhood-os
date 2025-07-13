@@ -1,5 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { OnboardingCommunityEmail } from './_templates/onboarding-1-community.tsx';
+import { OnboardingEventsEmail } from './_templates/onboarding-2-events.tsx';
+import { OnboardingSkillsEmail } from './_templates/onboarding-3-skills.tsx';
+import { OnboardingGoodsEmail } from './_templates/onboarding-4-goods.tsx';
+import { OnboardingSafetyEmail } from './_templates/onboarding-5-safety.tsx';
+import { OnboardingDirectoryEmail } from './_templates/onboarding-6-directory.tsx';
+import { OnboardingModulesEmail } from './_templates/onboarding-7-modules.tsx';
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -12,22 +21,35 @@ const corsHeaders = {
 };
 
 /**
- * Get the production base URL for email links
- * Always returns neighborhoodos.com for email consistency
+ * URL Generation Utilities for Email Templates
+ * Importing centralized URL generation with UTM tracking
  */
+
+// Get the production base URL for email links
 const getEmailBaseUrl = (): string => {
   return "https://neighborhoodos.com";
 };
 
-/**
- * Generate deep links for email templates
- */
+// Add UTM parameters for email tracking
+const addEmailTrackingParams = (url: string, campaign: string, source: string = "email"): string => {
+  const urlObj = new URL(url);
+  urlObj.searchParams.set("utm_source", source);
+  urlObj.searchParams.set("utm_medium", "email");
+  urlObj.searchParams.set("utm_campaign", campaign);
+  return urlObj.toString();
+};
+
+// Base URL generators
 const getHomeLink = (): string => {
   return `${getEmailBaseUrl()}/dashboard`;
 };
 
 const getEventsLink = (): string => {
   return `${getEmailBaseUrl()}/events`;
+};
+
+const getCreateEventLink = (): string => {
+  return `${getEmailBaseUrl()}/events/create`;
 };
 
 const getSkillsLink = (): string => {
@@ -50,6 +72,11 @@ const getModulesLink = (): string => {
   return `${getEmailBaseUrl()}/settings`;
 };
 
+// Enhanced URL generators with UTM tracking for onboarding emails
+const getOnboardingURL = (baseFunction: () => string, step: number): string => {
+  return addEmailTrackingParams(baseFunction(), `onboarding_step_${step}`, "email");
+};
+
 /**
  * Interface for onboarding email request
  */
@@ -61,190 +88,80 @@ interface OnboardingEmailRequest {
 }
 
 /**
- * Email templates for the 7-part onboarding series
+ * Get React Email template component and subject for onboarding emails
  */
-const getEmailTemplate = (emailNumber: number, firstName: string, neighborhoodName: string) => {
+const getOnboardingTemplate = (emailNumber: number, firstName: string, neighborhoodName: string) => {
+  const subjects = {
+    1: `The scoop on what's happening in ${neighborhoodName}`,
+    2: `What's happening around ${neighborhoodName}?`,
+    3: `What are you surprisingly good at, ${firstName}?`,
+    4: `One person's trash is another person's treasure (literally)`,
+    5: `Stay in the loop (without the drama)`,
+    6: `Meet your neighbors (they're actually pretty cool)`,
+    7: `Making ${neighborhoodName} work for everyone`
+  };
+
   const templates = {
     1: {
-      subject: `The scoop on what's happening in ${neighborhoodName}`,
-      text: `Hi ${firstName},
-
-Ready for the grand tour? Your neighborhood homepage is where all the action happens.
-
-${getHomeLink()}
-
-Think of it as your neighborhood's front porch - you'll see who's doing what, what events are coming up, and get a general sense of the vibe. 
-
-No algorithm deciding what you see. Just real updates from real neighbors about real stuff. Refreshing, right?
-
-Take a peek and see what you've been missing,
-The NeighborhoodOS Team`,
-      html: `<p>Hi ${firstName},</p>
-
-<p>Ready for the grand tour? Your neighborhood homepage is where all the action happens.</p>
-
-<p><a href="${getHomeLink()}">${getHomeLink()}</a></p>
-
-<p>Think of it as your neighborhood's front porch - you'll see who's doing what, what events are coming up, and get a general sense of the vibe.</p>
-
-<p>No algorithm deciding what you see. Just real updates from real neighbors about real stuff. Refreshing, right?</p>
-
-<p>Take a peek and see what you've been missing,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[1],
+      component: OnboardingCommunityEmail,
+      props: {
+        firstName,
+        neighborhoodName,
+        homeLink: getOnboardingURL(getHomeLink, 1)
+      }
     },
     2: {
-      subject: `What's happening around ${neighborhoodName}?`,
-      text: `${firstName},
-
-Event planning doesn't have to be rocket science (unless you're hosting a rocket science meetup, in which case, cool).
-
-${getEventsLink()}
-
-See what's coming up in ${neighborhoodName}, or create something yourself. Block parties, book clubs, or "let's all just sit outside and complain about the weather" gatherings - they're all fair game.
-
-Pro tip: The best neighborhood events are usually the simplest ones.
-
-Happy event hunting,
-The NeighborhoodOS Team`,
-      html: `<p>${firstName},</p>
-
-<p>Event planning doesn't have to be rocket science (unless you're hosting a rocket science meetup, in which case, cool).</p>
-
-<p><a href="${getEventsLink()}">${getEventsLink()}</a></p>
-
-<p>See what's coming up in ${neighborhoodName}, or create something yourself. Block parties, book clubs, or "let's all just sit outside and complain about the weather" gatherings - they're all fair game.</p>
-
-<p>Pro tip: The best neighborhood events are usually the simplest ones.</p>
-
-<p>Happy event hunting,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[2],
+      component: OnboardingEventsEmail,
+      props: {
+        firstName,
+        neighborhoodName,
+        eventsLink: getOnboardingURL(getEventsLink, 2),
+        createEventLink: getOnboardingURL(getCreateEventLink, 2)
+      }
     },
     3: {
-      subject: `What are you surprisingly good at, ${firstName}?`,
-      text: `Hey ${firstName},
-
-Everyone's good at something. Maybe you make killer banana bread, know how to fix squeaky hinges, or can fold a fitted sheet properly (seriously, that's a superpower).
-
-${getSkillsLink()}
-
-Share what you're good at, or find someone who can help with that thing you've been putting off for months. It's like a neighborhood favor exchange, but more organized and less awkward.
-
-Warning: You might actually enjoy helping your neighbors. Side effects include feeling useful and making new friends.
-
-Share away,
-The NeighborhoodOS Team`,
-      html: `<p>Hey ${firstName},</p>
-
-<p>Everyone's good at something. Maybe you make killer banana bread, know how to fix squeaky hinges, or can fold a fitted sheet properly (seriously, that's a superpower).</p>
-
-<p><a href="${getSkillsLink()}">${getSkillsLink()}</a></p>
-
-<p>Share what you're good at, or find someone who can help with that thing you've been putting off for months. It's like a neighborhood favor exchange, but more organized and less awkward.</p>
-
-<p>Warning: You might actually enjoy helping your neighbors. Side effects include feeling useful and making new friends.</p>
-
-<p>Share away,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[3],
+      component: OnboardingSkillsEmail,
+      props: {
+        firstName,
+        skillsLink: getOnboardingURL(getSkillsLink, 3)
+      }
     },
     4: {
-      subject: `One person's trash is another person's treasure (literally)`,
-      text: `${firstName},
-
-Got stuff you don't need? Need stuff you don't have? The freebies page is your new best friend.
-
-${getFreebiesLink()}
-
-From extra garden vegetables to that exercise bike you swore you'd use, neighbors in ${neighborhoodName} are sharing all kinds of useful (and occasionally weird) stuff.
-
-It's like garage sale season, but without the early morning price negotiations.
-
-Happy treasure hunting,
-The NeighborhoodOS Team`,
-      html: `<p>${firstName},</p>
-
-<p>Got stuff you don't need? Need stuff you don't have? The freebies page is your new best friend.</p>
-
-<p><a href="${getFreebiesLink()}">${getFreebiesLink()}</a></p>
-
-<p>From extra garden vegetables to that exercise bike you swore you'd use, neighbors in ${neighborhoodName} are sharing all kinds of useful (and occasionally weird) stuff.</p>
-
-<p>It's like garage sale season, but without the early morning price negotiations.</p>
-
-<p>Happy treasure hunting,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[4],
+      component: OnboardingGoodsEmail,
+      props: {
+        firstName,
+        neighborhoodName,
+        goodsLink: getOnboardingURL(getFreebiesLink, 4)
+      }
     },
     5: {
-      subject: `Stay in the loop (without the drama)`,
-      text: `Hi ${firstName},
-
-Remember group chats that spiral into debates about proper hedge trimming techniques? Yeah, we don't do that here.
-
-${getUpdatesLink()}
-
-The updates page is for simple, useful neighborhood info. Construction notices, lost pet alerts, "heads up about the ice cream truck route" - the good stuff without the commentary.
-
-Just neighbors keeping neighbors informed. Novel concept, we know.
-
-Stay informed,
-The NeighborhoodOS Team`,
-      html: `<p>Hi ${firstName},</p>
-
-<p>Remember group chats that spiral into debates about proper hedge trimming techniques? Yeah, we don't do that here.</p>
-
-<p><a href="${getUpdatesLink()}">${getUpdatesLink()}</a></p>
-
-<p>The updates page is for simple, useful neighborhood info. Construction notices, lost pet alerts, "heads up about the ice cream truck route" - the good stuff without the commentary.</p>
-
-<p>Just neighbors keeping neighbors informed. Novel concept, we know.</p>
-
-<p>Stay informed,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[5],
+      component: OnboardingSafetyEmail,
+      props: {
+        firstName,
+        safetyLink: getOnboardingURL(getUpdatesLink, 5)
+      }
     },
     6: {
-      subject: `Meet your neighbors (they're actually pretty cool)`,
-      text: `${firstName},
-
-Ever wonder who that person is you wave to every morning? Or which neighbor has the amazing garden you admire on walks?
-
-${getDirectoryLink()}
-
-The neighborhood directory helps you put names to faces and discover the interesting people living around you. Who knows - you might find your new favorite dog-walking buddy or discover someone who shares your obsession with sourdough starters.
-
-Connecting neighbors, one introduction at a time,
-The NeighborhoodOS Team`,
-      html: `<p>${firstName},</p>
-
-<p>Ever wonder who that person is you wave to every morning? Or which neighbor has the amazing garden you admire on walks?</p>
-
-<p><a href="${getDirectoryLink()}">${getDirectoryLink()}</a></p>
-
-<p>The neighborhood directory helps you put names to faces and discover the interesting people living around you. Who knows - you might find your new favorite dog-walking buddy or discover someone who shares your obsession with sourdough starters.</p>
-
-<p>Connecting neighbors, one introduction at a time,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[6],
+      component: OnboardingDirectoryEmail,
+      props: {
+        firstName,
+        directoryLink: getOnboardingURL(getDirectoryLink, 6)
+      }
     },
     7: {
-      subject: `Making ${neighborhoodName} work for everyone`,
-      text: `Hey ${firstName},
-
-Every neighborhood is different. Some love organizing elaborate holiday decorations, others just want to know when the garbage truck is running late.
-
-${getModulesLink()}
-
-Neighborhood modules let your community customize NeighborhoodOS for what matters to you. Think of it as the difference between a one-size-fits-all t-shirt and something actually tailored to fit.
-
-Your neighborhood, your way,
-The NeighborhoodOS Team`,
-      html: `<p>Hey ${firstName},</p>
-
-<p>Every neighborhood is different. Some love organizing elaborate holiday decorations, others just want to know when the garbage truck is running late.</p>
-
-<p><a href="${getModulesLink()}">${getModulesLink()}</a></p>
-
-<p>Neighborhood modules let your community customize NeighborhoodOS for what matters to you. Think of it as the difference between a one-size-fits-all t-shirt and something actually tailored to fit.</p>
-
-<p>Your neighborhood, your way,<br>
-The NeighborhoodOS Team</p>`
+      subject: subjects[7],
+      component: OnboardingModulesEmail,
+      props: {
+        firstName,
+        neighborhoodName,
+        modulesLink: getOnboardingURL(getModulesLink, 7)
+      }
     }
   };
 
@@ -298,8 +215,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending onboarding email ${emailNumber} to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
 
-    // Get the email template for this step
-    const template = getEmailTemplate(emailNumber, firstName, neighborhoodName);
+    // Get the React Email template for this step
+    const template = getOnboardingTemplate(emailNumber, firstName, neighborhoodName);
 
     if (!template) {
       return new Response(
@@ -313,13 +230,17 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Send the onboarding email
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(template.component, template.props)
+    );
+
+    // Send the onboarding email using React Email
     const emailResponse = await resend.emails.send({
       from: "NeighborhoodOS <hello@neighborhoodos.com>",
       to: [recipientEmail],
       subject: template.subject,
-      text: template.text,
-      html: template.html,
+      html,
     });
 
     console.log(`Onboarding email ${emailNumber} sent successfully:`, emailResponse);

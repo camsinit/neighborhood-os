@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'npm:react@18.3.1';
 import {
   Body,
   Button,
@@ -8,14 +8,14 @@ import {
   Html,
   Preview,
   Text,
-} from '@react-email/components';
+} from 'npm:@react-email/components@0.0.22';
 
 interface InvitationAcceptedEmailProps {
   accepterName: string;
   neighborhoodName: string;
   isAdminNotification: boolean;
-  directoryUrl?: string;
-  dashboardUrl?: string;
+  directoryUrl: string;
+  dashboardUrl: string;
 }
 
 /**
@@ -26,8 +26,8 @@ export const InvitationAcceptedEmail = ({
   accepterName = 'Someone',
   neighborhoodName = 'Your Neighborhood',
   isAdminNotification = false,
-  directoryUrl = 'https://neighborhoodos.com/neighbors',
-  dashboardUrl = 'https://neighborhoodos.com/dashboard',
+  directoryUrl = '',
+  dashboardUrl = '',
 }: InvitationAcceptedEmailProps) => {
   // Different content based on recipient type
   const subject = isAdminNotification 

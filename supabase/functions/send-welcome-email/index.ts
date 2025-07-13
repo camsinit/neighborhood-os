@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { WelcomeEmail } from './_templates/welcome-email-updated.tsx';
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -12,16 +15,25 @@ const corsHeaders = {
 };
 
 /**
- * Get the production base URL for email links
- * Always returns neighborhoodos.com for email consistency
+ * URL Generation Utilities for Email Templates
+ * Importing centralized URL generation with UTM tracking
  */
+
+// Get the production base URL for email links
 const getEmailBaseUrl = (): string => {
   return "https://neighborhoodos.com";
 };
 
-/**
- * Generate deep links for email templates
- */
+// Add UTM parameters for email tracking
+const addEmailTrackingParams = (url: string, campaign: string, source: string = "email"): string => {
+  const urlObj = new URL(url);
+  urlObj.searchParams.set("utm_source", source);
+  urlObj.searchParams.set("utm_medium", "email");
+  urlObj.searchParams.set("utm_campaign", campaign);
+  return urlObj.toString();
+};
+
+// Base URL generators
 const getHomeLink = (): string => {
   return `${getEmailBaseUrl()}/dashboard`;
 };
@@ -32,6 +44,11 @@ const getSkillsLink = (): string => {
 
 const getCreateEventLink = (): string => {
   return `${getEmailBaseUrl()}/events/create`;
+};
+
+// Enhanced URL generators with UTM tracking for welcome emails
+const getWelcomeURL = (baseFunction: () => string): string => {
+  return addEmailTrackingParams(baseFunction(), "welcome_email", "email");
 };
 
 /**
@@ -76,73 +93,28 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending welcome email to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
 
-    // Generate email links
-    const homeLink = getHomeLink();
-    const skillsLink = getSkillsLink();
-    const createEventLink = getCreateEventLink();
+    // Generate email links with UTM tracking
+    const homeLink = getWelcomeURL(getHomeLink);
+    const skillsLink = getWelcomeURL(getSkillsLink);
+    const createEventLink = getWelcomeURL(getCreateEventLink);
 
-    // Send the welcome email using plain-text template
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(WelcomeEmail, {
+        firstName,
+        neighborhoodName,
+        homeLink,
+        skillsLink,
+        createEventLink,
+      })
+    );
+
+    // Send the welcome email using React Email template
     const emailResponse = await resend.emails.send({
       from: "NeighborhoodOS <hello@neighborhoodos.com>",
       to: [recipientEmail],
       subject: `Welcome to ${neighborhoodName}, ${firstName}!`,
-      text: `Hey ${firstName},
-
-Welcome to ${neighborhoodName} on NeighborhoodOS! 
-
-You're officially part of the neighborhood now. No turning back. (Just kidding - you can leave anytime, but we hope you won't want to.)
-
-Here's how to make the most of your new digital neighborhood:
-
-🏠 **Explore your neighborhood**: Check out what's happening around you
-${homeLink}
-
-🤝 **Share your skills**: Let neighbors know what you're good at (even if it's just making excellent grilled cheese)
-${skillsLink}
-
-🎉 **Create your first event**: Host something simple and fun. Here are some low-effort ideas:
-   - "Coffee on my porch" (bring your own mug)
-   - "Dog meetup at the park" (humans welcome too)
-   - "Neighborhood walk" (walking optional, chatting required)
-
-${createEventLink}
-
-That's it! No 47-step tutorials or complicated setup. Just neighbors being neighborly.
-
-Questions? Just reply to this email. We're real people, not robots.
-
-Welcome aboard,
-The NeighborhoodOS Team`,
-      // Add minimal HTML for email clients that prefer it
-      html: `<p>Hey ${firstName},</p>
-
-<p>Welcome to ${neighborhoodName} on NeighborhoodOS!</p>
-
-<p>You're officially part of the neighborhood now. No turning back. (Just kidding - you can leave anytime, but we hope you won't want to.)</p>
-
-<p>Here's how to make the most of your new digital neighborhood:</p>
-
-<p>🏠 <strong>Explore your neighborhood</strong>: Check out what's happening around you<br>
-<a href="${homeLink}">${homeLink}</a></p>
-
-<p>🤝 <strong>Share your skills</strong>: Let neighbors know what you're good at (even if it's just making excellent grilled cheese)<br>
-<a href="${skillsLink}">${skillsLink}</a></p>
-
-<p>🎉 <strong>Create your first event</strong>: Host something simple and fun. Here are some low-effort ideas:</p>
-<ul>
-<li>"Coffee on my porch" (bring your own mug)</li>
-<li>"Dog meetup at the park" (humans welcome too)</li>
-<li>"Neighborhood walk" (walking optional, chatting required)</li>
-</ul>
-
-<p><a href="${createEventLink}">${createEventLink}</a></p>
-
-<p>That's it! No 47-step tutorials or complicated setup. Just neighbors being neighborly.</p>
-
-<p>Questions? Just reply to this email. We're real people, not robots.</p>
-
-<p>Welcome aboard,<br>
-The NeighborhoodOS Team</p>`,
+      html,
     });
 
     console.log("Welcome email sent successfully:", emailResponse);
