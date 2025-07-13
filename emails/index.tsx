@@ -1,13 +1,17 @@
 import * as React from 'react';
-import { WelcomeEmail } from './welcome-email';
 
-// Export all email templates for React Email preview
-export { WelcomeEmail };
-export { default as WaitlistWelcome } from '../supabase/functions/save-waitlist-survey/_templates/waitlist-welcome';
-export { default as OnboardingWelcome } from '../supabase/functions/send-onboarding-email/_templates/onboarding-welcome';
-export { default as OnboardingCommunity } from '../supabase/functions/send-onboarding-email/_templates/onboarding-community';
-export { default as OnboardingSkills } from '../supabase/functions/send-onboarding-email/_templates/onboarding-skills';
-export { default as OnboardingEvents } from '../supabase/functions/send-onboarding-email/_templates/onboarding-events';
-export { default as OnboardingCare } from '../supabase/functions/send-onboarding-email/_templates/onboarding-care';
-export { default as OnboardingGoods } from '../supabase/functions/send-onboarding-email/_templates/onboarding-goods';
-export { default as OnboardingConclusion } from '../supabase/functions/send-onboarding-email/_templates/onboarding-conclusion';
+// Core email templates
+export { WelcomeEmail } from './welcome-email';
+export { default as NeighborInvite } from './neighbor-invite';
+export { default as InvitationAccepted } from './invitation-accepted';
+export { default as WaitlistWelcome } from './waitlist-welcome';
+export { default as WeeklySummary } from './weekly-summary';
+
+// Onboarding series (7 emails sent every 3 days)
+export { default as OnboardingCommunity } from './onboarding-community';
+export { default as OnboardingEvents } from './onboarding-events';
+export { default as OnboardingSkills } from './onboarding-skills';
+export { default as OnboardingCare } from './onboarding-care';
+export { default as OnboardingGoods } from './onboarding-goods';
+export { default as OnboardingDirectory } from './onboarding-directory';
+export { default as OnboardingConclusion } from './onboarding-conclusion';
