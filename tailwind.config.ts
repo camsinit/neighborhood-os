@@ -106,7 +106,26 @@ export default {
 					'0%': { transform: 'translateY(0px)' },
 					'50%': { transform: 'translateY(-10px)' },
 					'100%': { transform: 'translateY(0px)' },
-				}
+				},
+				"spin-around": {
+					"0%": {
+						transform: "translateZ(0) rotate(0)",
+					},
+					"15%, 35%": {
+						transform: "translateZ(0) rotate(90deg)",
+					},
+					"65%, 85%": {
+						transform: "translateZ(0) rotate(270deg)",
+					},
+					"100%": {
+						transform: "translateZ(0) rotate(360deg)",
+					},
+				},
+				"shimmer-slide": {
+					to: {
+						transform: "translate(calc(100cqw - 100%), 0)",
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -115,6 +134,8 @@ export default {
 				'star-movement-top': 'star-movement-top linear infinite alternate',
 				'gradient-shift': 'gradient-shift 8s ease infinite',
 				'float': 'float 6s ease-in-out infinite',
+				"shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
+				"spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
 			},
 			boxShadow: {
 				'chat': '0 2px 8px rgba(0, 0, 0, 0.05)',
