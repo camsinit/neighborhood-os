@@ -61,8 +61,8 @@ const ShimmerInput = React.forwardRef<HTMLInputElement, ShimmerInputProps>(
             {/* spark before - with rainbow effect */}
             <div 
               className={cn(
-                "animate-spin-around absolute -inset-full w-auto rotate-0 [translate:0_0]",
-                rainbowEffect && "animate-rainbow-shimmer"
+                "absolute -inset-full w-auto rotate-0 [translate:0_0]",
+                rainbowEffect ? "animate-rainbow-shimmer" : "animate-spin-around"
               )}
               style={{
                 background: rainbowEffect ? rainbowGradient : regularGradient
