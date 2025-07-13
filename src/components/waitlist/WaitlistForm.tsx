@@ -102,6 +102,7 @@ const WaitlistForm = () => {
             shimmerColor="#e5e7eb"
             shimmerDuration="3s"
             background="#ffffff"
+            rainbowEffect={true}
             className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px]" 
             style={{ height: '40px' }} 
             required 

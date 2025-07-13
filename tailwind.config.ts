@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -126,6 +127,23 @@ export default {
 						transform: "translate(calc(100cqw - 100%), 0)",
 					},
 				},
+				"rainbow-shimmer": {
+					"0%": {
+						filter: "hue-rotate(0deg) saturate(1.2) brightness(1.1)",
+					},
+					"25%": {
+						filter: "hue-rotate(90deg) saturate(1.4) brightness(1.2)",
+					},
+					"50%": {
+						filter: "hue-rotate(180deg) saturate(1.3) brightness(1.1)",
+					},
+					"75%": {
+						filter: "hue-rotate(270deg) saturate(1.4) brightness(1.2)",
+					},
+					"100%": {
+						filter: "hue-rotate(360deg) saturate(1.2) brightness(1.1)",
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -136,6 +154,7 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				"shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
 				"spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
+				"rainbow-shimmer": "rainbow-shimmer 4s ease-in-out infinite",
 			},
 			boxShadow: {
 				'chat': '0 2px 8px rgba(0, 0, 0, 0.05)',
