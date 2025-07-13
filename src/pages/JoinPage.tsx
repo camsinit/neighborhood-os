@@ -170,6 +170,17 @@ const JoinPage = () => {
 
       console.log("[JoinPage] Marking invitation as accepted");
       
+      // Get invitation details to notify inviter and admin
+      const { data: inviteData } = await supabase
+        .from('invitations')
+        .select(`
+          inviter_id,
+          neighborhood_id,
+          neighborhoods:neighborhood_id (created_by)
+        `)
+        .eq('invite_code', inviteCode)
+        .single();
+      
       // Mark the invitation as accepted
       const { error: inviteError } = await supabase
         .from('invitations')
@@ -183,6 +194,61 @@ const JoinPage = () => {
       if (inviteError) {
         console.warn("[JoinPage] Failed to update invitation status:", inviteError);
         // Don't fail the join process for this
+      }
+
+      // Send invitation accepted notifications
+      if (inviteData) {
+        try {
+          // Get user profile for name
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('id', user.id)
+            .single();
+
+          const accepterName = profileData?.display_name || user.email?.split('@')[0] || 'A neighbor';
+
+          // Get emails of people to notify (inviter and admin if different)
+          const emailsToNotify = new Set<string>();
+          
+          // Get inviter email
+          const { data: inviterProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', inviteData.inviter_id)
+            .single();
+            
+          if (inviterProfile) {
+            const { data: inviterAuth } = await supabase.auth.admin.getUserById(inviteData.inviter_id);
+            if (inviterAuth.user?.email) {
+              emailsToNotify.add(inviterAuth.user.email);
+            }
+          }
+
+          // Get admin email if different from inviter
+          const adminId = (inviteData.neighborhoods as any)?.created_by;
+          if (adminId && adminId !== inviteData.inviter_id) {
+            const { data: adminAuth } = await supabase.auth.admin.getUserById(adminId);
+            if (adminAuth.user?.email) {
+              emailsToNotify.add(adminAuth.user.email);
+            }
+          }
+
+          // Send notification emails
+          if (emailsToNotify.size > 0) {
+            await supabase.functions.invoke('send-invitation-accepted', {
+              body: {
+                recipientEmails: Array.from(emailsToNotify),
+                accepterName,
+                neighborhoodName: neighborhood.name,
+                isAdminNotification: false // Will be handled by the function
+              }
+            });
+          }
+        } catch (emailError) {
+          console.warn("[JoinPage] Failed to send invitation accepted emails:", emailError);
+          // Don't fail the join process for email errors
+        }
       }
 
       // Success!

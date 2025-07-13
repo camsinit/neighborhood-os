@@ -45,6 +45,42 @@ export const useProfileManagement = () => {
       if (error) throw error;
       
       console.log("[useProfileManagement] Profile upserted successfully");
+
+      // Trigger onboarding email series if user came from an invite
+      try {
+        const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+        if (pendingInviteCode) {
+          console.log("[useProfileManagement] User completed onboarding from invite, triggering email series");
+          
+          // Get user's neighborhood info for the email series
+          const neighborhoodId = await getUserNeighborhoodId(userId);
+          if (neighborhoodId) {
+            const { data: neighborhoodData } = await supabase
+              .from('neighborhoods')
+              .select('name')
+              .eq('id', neighborhoodId)
+              .single();
+
+            const { data: authUser } = await supabase.auth.getUser();
+            
+            if (neighborhoodData && authUser.user?.email) {
+              await supabase.functions.invoke('queue-onboarding-series', {
+                body: {
+                  userEmail: authUser.user.email,
+                  firstName: formData.firstName,
+                  neighborhoodName: neighborhoodData.name,
+                  userId: userId,
+                  neighborhoodId: neighborhoodId
+                }
+              });
+              console.log("[useProfileManagement] Onboarding email series queued successfully");
+            }
+          }
+        }
+      } catch (emailError) {
+        console.warn("[useProfileManagement] Failed to queue onboarding series:", emailError);
+        // Don't fail profile creation for email errors
+      }
     } catch (error) {
       console.error('Error upserting profile:', error);
       throw new Error('Failed to create/update profile');

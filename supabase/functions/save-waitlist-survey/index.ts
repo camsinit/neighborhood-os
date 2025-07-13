@@ -1,11 +1,18 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { WaitlistWelcomeEmail } from './_templates/waitlist-welcome.tsx';
 
 // Create a Supabase client with the service role key for admin permissions
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Initialize Resend client for sending emails
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 /**
  * Edge Function to handle waitlist survey submissions
@@ -127,6 +134,36 @@ serve(async (req) => {
         JSON.stringify({ success: false, error: "Failed to save survey response" }),
         { headers, status: 500 }
       );
+    }
+
+    // Send updated waitlist welcome email with survey data after successful survey submission
+    try {
+      const html = await renderAsync(
+        React.createElement(WaitlistWelcomeEmail, {
+          userEmail: email,
+          baseUrl: supabaseUrl.replace('.supabase.co', '.lovableproject.com'),
+          firstName: firstName,
+          lastName: lastName,
+          neighborhoodName: neighborhoodName,
+          city: city,
+          state: state,
+          neighborsToOnboard: neighborsToOnboard,
+          aiCodingExperience: aiCodingExperience,
+          openSourceInterest: openSourceInterest,
+        })
+      );
+
+      await resend.emails.send({
+        from: 'neighborhoodOS <hello@resend.dev>',
+        to: [email],
+        subject: 'Thanks for your neighborhood instigator survey!',
+        html,
+      });
+
+      console.log(`Updated waitlist welcome email sent successfully to: ${email}`);
+    } catch (emailError) {
+      console.error("Error sending updated waitlist welcome email:", emailError);
+      // Don't fail the survey submission if email sending fails
     }
 
     // Success response with priority score

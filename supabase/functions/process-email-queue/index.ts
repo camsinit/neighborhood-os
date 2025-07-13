@@ -27,36 +27,96 @@ interface EmailTemplate {
   html: string;
 }
 
-// Get email template based on type
-function getEmailTemplate(templateType: string, templateData: any): EmailTemplate {
+// Process different email types - some use templates, others call specialized functions
+async function processEmailByType(email: any): Promise<{success: boolean, messageId?: string, error?: string}> {
+  const { template_type, template_data, recipient_email } = email;
+  const { firstName, neighborhoodName, emailNumber } = template_data;
+  
+  switch (template_type) {
+    case 'onboarding_series':
+      try {
+        // Call the specialized onboarding email function
+        const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-onboarding-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          },
+          body: JSON.stringify({
+            recipientEmail: recipient_email,
+            firstName,
+            neighborhoodName,
+            emailNumber
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Onboarding email function failed: ${errorData}`);
+        }
+        
+        const result = await response.json();
+        return { success: true, messageId: result.messageId };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+    
+    case 'welcome':
+      try {
+        // Call the specialized welcome email function
+        const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-welcome-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`
+          },
+          body: JSON.stringify({
+            recipientEmail: recipient_email,
+            firstName,
+            neighborhoodName
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`Welcome email function failed: ${errorData}`);
+        }
+        
+        const result = await response.json();
+        return { success: true, messageId: result.messageId };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+    
+    default:
+      // For other email types, use simple template
+      const template = getSimpleEmailTemplate(template_type, template_data);
+      
+      try {
+        const emailResponse = await resend.emails.send({
+          from: "NeighborhoodOS <noreply@neighborhoodos.com>",
+          to: [recipient_email],
+          subject: template.subject,
+          text: template.text,
+          html: template.html,
+        });
+
+        if (emailResponse.error) {
+          throw new Error(`Resend API error: ${emailResponse.error.message}`);
+        }
+
+        return { success: true, messageId: emailResponse.data?.id };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      }
+  }
+}
+
+// Simple template function for basic email types
+function getSimpleEmailTemplate(templateType: string, templateData: any): EmailTemplate {
   const { firstName, neighborhoodName } = templateData;
   
   switch (templateType) {
-    case 'welcome':
-      return {
-        subject: `Welcome to ${neighborhoodName}!`,
-        text: `Hi ${firstName}!\n\nWelcome to ${neighborhoodName}! We're excited to have you join our neighborhood community.\n\nBest regards,\nThe NeighborhoodOS Team`,
-        html: `
-          <h1>Welcome to ${neighborhoodName}!</h1>
-          <p>Hi ${firstName}!</p>
-          <p>Welcome to ${neighborhoodName}! We're excited to have you join our neighborhood community.</p>
-          <p>Best regards,<br>The NeighborhoodOS Team</p>
-        `
-      };
-    
-    case 'onboarding_1':
-      return {
-        subject: `Getting Started with ${neighborhoodName}`,
-        text: `Hi ${firstName}!\n\nThis is the first email in your onboarding series for ${neighborhoodName}.\n\nBest regards,\nThe NeighborhoodOS Team`,
-        html: `
-          <h1>Getting Started with ${neighborhoodName}</h1>
-          <p>Hi ${firstName}!</p>
-          <p>This is the first email in your onboarding series for ${neighborhoodName}.</p>
-          <p>Best regards,<br>The NeighborhoodOS Team</p>
-        `
-      };
-    
-    // Add more onboarding templates as needed
     default:
       return {
         subject: `Update from ${neighborhoodName}`,
@@ -113,20 +173,11 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         console.log(`[process-email-queue] Processing email ${email.id} of type ${email.template_type}`);
 
-        // Get the email template
-        const template = getEmailTemplate(email.template_type, email.template_data);
+        // Process the email based on its type
+        const result = await processEmailByType(email);
 
-        // Send email via Resend
-        const emailResponse = await resend.emails.send({
-          from: "NeighborhoodOS <noreply@neighborhoodos.com>",
-          to: [email.recipient_email],
-          subject: template.subject,
-          text: template.text,
-          html: template.html,
-        });
-
-        if (emailResponse.error) {
-          throw new Error(`Resend API error: ${emailResponse.error.message}`);
+        if (!result.success) {
+          throw new Error(result.error || 'Email processing failed');
         }
 
         // Update email status to sent
@@ -135,7 +186,7 @@ const handler = async (req: Request): Promise<Response> => {
           .update({
             status: 'sent',
             sent_at: new Date().toISOString(),
-            resend_email_id: emailResponse.data?.id || null,
+            resend_email_id: result.messageId || null,
             error_message: null
           })
           .eq('id', email.id);
