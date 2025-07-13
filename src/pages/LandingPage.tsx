@@ -3,6 +3,7 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { HeroSection } from "@/components/ui/hero-section";
 import WaitlistForm from "@/components/waitlist/WaitlistForm";
 import { Button } from "@/components/ui/button";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 import Features from "@/components/landing/Features";
 import { Link } from "react-router-dom";
 
@@ -33,18 +34,30 @@ const LandingPage = () => {
           
         </div>
         
-        {/* Conditional button - Dashboard for authenticated users, Login for unauthenticated */}
-        <Button asChild variant="outline" className="rounded-full border-primary hover:bg-primary/10">
-          {session ? (
-            <Link to="/dashboard" className="transition-colors text-foreground">
+        {/* Conditional shimmer button - Dashboard for authenticated users, Login for unauthenticated */}
+        {session ? (
+          <Link to="/dashboard">
+            <ShimmerButton 
+              shimmerColor="#ffffff"
+              shimmerDuration="2s"
+              background="linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.8))"
+              className="rounded-full border border-primary/20 px-6 py-2 text-white shadow-lg"
+            >
               Dashboard
-            </Link>
-          ) : (
-            <Link to="/login" className="transition-colors text-foreground">
+            </ShimmerButton>
+          </Link>
+        ) : (
+          <Link to="/login">
+            <ShimmerButton 
+              shimmerColor="#ffffff"
+              shimmerDuration="2s"
+              background="linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary)/0.8))"
+              className="rounded-full border border-secondary/20 px-6 py-2 text-white shadow-lg"
+            >
               Login
-            </Link>
-          )}
-        </Button>
+            </ShimmerButton>
+          </Link>
+        )}
       </header>
       
       {/* Hero section with waitlist form and app preview */}
