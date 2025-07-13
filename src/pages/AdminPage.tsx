@@ -19,10 +19,10 @@ import React, { useState } from 'react';
 import { useCanAccessAdminPage } from '@/hooks/useCanAccessAdminPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, Users, FileText, Mail, Settings, TrendingUp, Shield } from 'lucide-react';
+import { BarChart3, Users, Mail, Settings, TrendingUp, Shield } from 'lucide-react';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import AdminMembers from '@/components/admin/AdminMembers';
-import AdminContent from '@/components/admin/AdminContent';
+
 import AdminInvitations from '@/components/admin/AdminInvitations';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminReports from '@/components/admin/AdminReports';
@@ -84,7 +84,7 @@ const AdminPage = () => {
 
         {/* Admin Tabs */}
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -92,10 +92,6 @@ const AdminPage = () => {
             <TabsTrigger value="members" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Members</span>
-            </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Content</span>
             </TabsTrigger>
             <TabsTrigger value="invitations" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
@@ -120,9 +116,6 @@ const AdminPage = () => {
             <AdminMembers />
           </TabsContent>
 
-          <TabsContent value="content" className="space-y-6">
-            <AdminContent />
-          </TabsContent>
 
           <TabsContent value="invitations" className="space-y-6">
             <AdminInvitations />
