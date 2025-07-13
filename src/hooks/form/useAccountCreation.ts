@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { SurveyFormData } from "@/components/onboarding/survey/types/surveyTypes";
+import { queueEmail, queueOnboardingSeries } from "@/utils/email/emailQueue";
 
 /**
  * Hook for handling user account creation during onboarding
@@ -9,9 +10,13 @@ import { SurveyFormData } from "@/components/onboarding/survey/types/surveyTypes
  */
 export const useAccountCreation = () => {
   /**
-   * Create user account if they don't have one
+   * Create user account if they don't have one and queue welcome emails
    */
-  const createUserAccount = async (formData: SurveyFormData): Promise<string | null> => {
+  const createUserAccount = async (
+    formData: SurveyFormData, 
+    neighborhoodName?: string, 
+    neighborhoodId?: string
+  ): Promise<string | null> => {
     if (!formData.email || !formData.password) {
       throw new Error('Email and password are required for account creation');
     }
@@ -34,6 +39,44 @@ export const useAccountCreation = () => {
       if (!authData.user) throw new Error('Failed to create user account');
 
       console.log("[useAccountCreation] User account created successfully:", authData.user.id);
+
+      // Queue welcome email and onboarding series if neighborhood info is provided
+      if (neighborhoodName && neighborhoodId) {
+        console.log("[useAccountCreation] Queueing welcome email and onboarding series");
+        
+        // Queue immediate welcome email
+        const welcomeResult = await queueEmail({
+          recipient_email: formData.email,
+          template_type: 'welcome',
+          template_data: {
+            firstName: formData.firstName,
+            neighborhoodName: neighborhoodName
+          },
+          scheduled_for: new Date(), // Send immediately
+          neighborhood_id: neighborhoodId,
+          user_id: authData.user.id
+        });
+
+        if (!welcomeResult.success) {
+          console.error("[useAccountCreation] Failed to queue welcome email:", welcomeResult.error);
+          // Don't fail account creation if email queueing fails
+        }
+
+        // Queue 7-part onboarding series
+        const onboardingResult = await queueOnboardingSeries(
+          formData.email,
+          formData.firstName,
+          neighborhoodName,
+          neighborhoodId,
+          authData.user.id
+        );
+
+        if (!onboardingResult.success) {
+          console.error("[useAccountCreation] Failed to queue onboarding series:", onboardingResult.error);
+          // Don't fail account creation if email queueing fails
+        }
+      }
+
       return authData.user.id;
     } catch (error) {
       console.error('[useAccountCreation] Error creating user account:', error);

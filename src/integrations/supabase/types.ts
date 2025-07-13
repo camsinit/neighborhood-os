@@ -137,6 +137,60 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          max_retries: number
+          neighborhood_id: string | null
+          recipient_email: string
+          resend_email_id: string | null
+          retry_count: number
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          template_data: Json
+          template_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_retries?: number
+          neighborhood_id?: string | null
+          recipient_email: string
+          resend_email_id?: string | null
+          retry_count?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          template_data?: Json
+          template_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_retries?: number
+          neighborhood_id?: string | null
+          recipient_email?: string
+          resend_email_id?: string | null
+          retry_count?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          template_data?: Json
+          template_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string
