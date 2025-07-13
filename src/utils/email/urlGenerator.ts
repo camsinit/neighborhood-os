@@ -47,13 +47,21 @@ export const getModulesLink = (): string => {
   return `${getEmailBaseUrl()}/settings`;
 };
 
-// Action-specific links
+// Action-specific links with CTA optimization
 export const getCreateEventLink = (): string => {
   return `${getEmailBaseUrl()}/events/create`;
 };
 
 export const getInviteLink = (inviteCode: string): string => {
   return `${getEmailBaseUrl()}/join/${inviteCode}`;
+};
+
+export const getJoinNeighborhoodLink = (inviteCode: string): string => {
+  return `${getEmailBaseUrl()}/join/${inviteCode}`;
+};
+
+export const getExploreNeighborhoodLink = (): string => {
+  return `${getEmailBaseUrl()}/dashboard`;
 };
 
 // Utility function to add UTM parameters for email tracking
@@ -63,4 +71,17 @@ export const addEmailTrackingParams = (url: string, campaign: string, source: st
   urlObj.searchParams.set("utm_medium", "email");
   urlObj.searchParams.set("utm_campaign", campaign);
   return urlObj.toString();
+};
+
+// Enhanced URL generators with UTM tracking for specific email campaigns
+export const getOnboardingURL = (baseFunction: () => string, step: number): string => {
+  return addEmailTrackingParams(baseFunction(), `onboarding_step_${step}`, "email");
+};
+
+export const getWelcomeURL = (baseFunction: () => string): string => {
+  return addEmailTrackingParams(baseFunction(), "welcome_email", "email");
+};
+
+export const getInviteURL = (inviteCode: string): string => {
+  return addEmailTrackingParams(getInviteLink(inviteCode), "neighbor_invite", "email");
 };
