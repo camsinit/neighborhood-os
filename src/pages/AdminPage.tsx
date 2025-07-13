@@ -22,28 +22,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart3, Users, Mail, Settings, TrendingUp, Shield } from 'lucide-react';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import AdminMembers from '@/components/admin/AdminMembers';
-
 import AdminInvitations from '@/components/admin/AdminInvitations';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminReports from '@/components/admin/AdminReports';
-
 const AdminPage = () => {
   // Check if user has admin/steward access
-  const { canAccess, isAdmin, isSteward, isLoading, role } = useCanAccessAdminPage();
-  
+  const {
+    canAccess,
+    isAdmin,
+    isSteward,
+    isLoading,
+    role
+  } = useCanAccessAdminPage();
+
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
+    return <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+      </div>;
   }
-  
+
   // Access denied
   if (!canAccess) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
+    return <div className="flex items-center justify-center min-h-[400px]">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -54,12 +55,9 @@ const AdminPage = () => {
             </CardDescription>
           </CardHeader>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+  return <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
@@ -70,15 +68,8 @@ const AdminPage = () => {
             </h1>
           </div>
           <p className="text-gray-600">
-            {isAdmin 
-              ? "Manage your neighborhood as an administrator" 
-              : "Support your neighborhood as a steward"
-            }
-            {role && (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                {role.charAt(0).toUpperCase() + role.slice(1)}
-              </span>
-            )}
+            {isAdmin ? "Manage your neighborhood as an administrator" : "Support your neighborhood as a steward"}
+            {role}
           </p>
         </div>
 
@@ -130,8 +121,6 @@ const AdminPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default AdminPage;
