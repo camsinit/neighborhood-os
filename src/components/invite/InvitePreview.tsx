@@ -144,12 +144,11 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
                 >
                   Join Neighborhood
                 </Button>
-                <p className="text-xs text-gray-500 text-center">
-                  {previewMode 
-                    ? "This is how the invite will appear to recipients"
-                    : "You'll create an account and set up your profile to join"
-                  }
-                </p>
+                {previewMode && (
+                  <p className="text-xs text-gray-500 text-center">
+                    This is how the invite will appear to recipients
+                  </p>
+                )}
               </div>
             )}
           </div>
