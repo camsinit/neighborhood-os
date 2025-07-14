@@ -49,11 +49,7 @@ export function useFetchNeighborhood(
     const startTime = startFetch();
     
     try {
-      // If we already have a current neighborhood, we're done
-      if (currentNeighborhood) {
-        completeFetch(startTime);
-        return;
-      }
+      // Always fetch fresh neighborhood data to ensure dashboard pages load properly
 
       logger.debug("Fetching neighborhoods for user:", user.id);
 
