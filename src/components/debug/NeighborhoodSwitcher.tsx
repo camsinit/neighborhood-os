@@ -1,11 +1,11 @@
 /**
- * NeighborhoodSwitcher - Super Admin debugging tool
+ * NeighborhoodSwitcher - Super Admin neighborhood switching tool
  * 
- * Allows super admins to temporarily switch neighborhood context for debugging purposes.
- * This doesn't change actual membership, just the current viewing context.
+ * Allows super admins to actually switch their active neighborhood membership
+ * for debugging and management purposes throughout the entire application.
  */
 import React, { useState } from 'react';
-import { ChevronDown, MapPin, RotateCcw } from 'lucide-react';
+import { ChevronDown, MapPin, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { Neighborhood } from '@/contexts/neighborhood/types';
@@ -31,7 +31,7 @@ interface NeighborhoodOption {
 }
 
 /**
- * Create a context override for debugging purposes
+ * Keep debug context for backward compatibility with existing debug tools
  */
 const DebugNeighborhoodContext = React.createContext<{
   debugNeighborhood: Neighborhood | null;
@@ -59,14 +59,16 @@ export const useDebugNeighborhood = () => {
 };
 
 /**
- * NeighborhoodSwitcher Component
+ * NeighborhoodSwitcher Component - Actually switches active neighborhood
  */
 export const NeighborhoodSwitcher: React.FC = () => {
-  const { currentNeighborhood } = useNeighborhood();
-  const { debugNeighborhood, setDebugNeighborhood } = useDebugNeighborhood();
+  const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
+  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [originalNeighborhood, setOriginalNeighborhood] = useState<Neighborhood | null>(null);
   
   // Fetch all neighborhoods available to super admin
-  const { data: neighborhoods, isLoading } = useQuery({
+  const { data: neighborhoods, isLoading: isFetchingNeighborhoods } = useQuery({
     queryKey: ['all-neighborhoods-debug'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,50 +85,102 @@ export const NeighborhoodSwitcher: React.FC = () => {
     },
   });
 
-  // Handle neighborhood selection
-  const handleNeighborhoodSelect = (neighborhood: NeighborhoodOption) => {
-    const debugNeighborhood: Neighborhood = {
-      id: neighborhood.id,
-      name: neighborhood.name,
-    };
-    setDebugNeighborhood(debugNeighborhood);
-    toast({
-      title: "Debug Mode Active",
-      description: `Now viewing data from "${neighborhood.display_name}" for debugging purposes.`,
+  // Store the original neighborhood when first switching
+  React.useEffect(() => {
+    if (currentNeighborhood && !originalNeighborhood) {
+      setOriginalNeighborhood(currentNeighborhood);
+    }
+  }, [currentNeighborhood, originalNeighborhood]);
+
+  // Handle actual neighborhood switching
+  const handleNeighborhoodSelect = async (neighborhood: NeighborhoodOption) => {
+    setIsLoading(true);
+    
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Add user to the selected neighborhood
+      const { data, error } = await supabase.rpc('add_neighborhood_member', {
+        user_uuid: user.id,
+        neighborhood_uuid: neighborhood.id
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Failed to join neighborhood');
+      }
+
+      // Refresh the neighborhood context to reflect the change
+      refreshNeighborhoodData();
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['neighborhoods'] });
+      queryClient.invalidateQueries({ queryKey: ['user-neighborhoods'] });
+      
+      toast({
+        title: "Neighborhood Switched Successfully",
+        description: `You are now actively operating in "${neighborhood.display_name}". All data and actions will be in this neighborhood context.`,
+      });
+      
+    } catch (error) {
+      console.error('Error switching neighborhood:', error);
+      toast({
+        title: "Failed to Switch Neighborhood",
+        description: error instanceof Error ? error.message : "An unexpected error occurred while switching neighborhoods.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Return to original neighborhood
+  const handleReturnToOriginal = async () => {
+    if (!originalNeighborhood) {
+      toast({
+        title: "No Original Neighborhood",
+        description: "No original neighborhood to return to.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await handleNeighborhoodSelect({
+      id: originalNeighborhood.id,
+      name: originalNeighborhood.name,
+      display_name: originalNeighborhood.name
     });
   };
 
-  // Reset to original neighborhood
-  const handleReset = () => {
-    setDebugNeighborhood(null);
-    toast({
-      title: "Debug Mode Disabled",
-      description: "Returned to your original neighborhood context.",
-    });
-  };
-
-  const currentDisplay = debugNeighborhood || currentNeighborhood;
-  const isInDebugMode = debugNeighborhood !== null;
+  const isActivelySwitched = originalNeighborhood && currentNeighborhood?.id !== originalNeighborhood.id;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium">Neighborhood Context Switcher</h3>
+          <h3 className="text-lg font-medium">Active Neighborhood Switcher</h3>
           <p className="text-sm text-muted-foreground">
-            Temporarily switch to another neighborhood's data for debugging purposes.
+            Switch your active neighborhood membership to operate in different communities.
           </p>
         </div>
         
-        {isInDebugMode && (
+        {isActivelySwitched && (
           <Button
             variant="outline"
             size="sm"
-            onClick={handleReset}
+            onClick={handleReturnToOriginal}
             className="flex items-center gap-2"
+            disabled={isLoading}
           >
             <RotateCcw className="w-4 h-4" />
-            Reset
+            Return to Original
           </Button>
         )}
       </div>
@@ -137,12 +191,12 @@ export const NeighborhoodSwitcher: React.FC = () => {
             <Button 
               variant="outline" 
               className="flex items-center gap-2 min-w-[200px] justify-between bg-background border-2 shadow-sm hover:bg-accent z-50"
-              disabled={isLoading}
+              disabled={isFetchingNeighborhoods || isLoading}
             >
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">
-                  {currentDisplay?.name || 'No neighborhood selected'}
+                  {currentNeighborhood?.name || 'No neighborhood selected'}
                 </span>
               </div>
               <ChevronDown className="w-4 h-4 opacity-50" />
@@ -154,11 +208,11 @@ export const NeighborhoodSwitcher: React.FC = () => {
             align="start"
           >
             <DropdownMenuLabel className="font-semibold">
-              Available Neighborhoods
+              Switch to Neighborhood
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             
-            {isLoading ? (
+            {isFetchingNeighborhoods ? (
               <DropdownMenuItem disabled>
                 <span className="text-muted-foreground">Loading neighborhoods...</span>
               </DropdownMenuItem>
@@ -167,10 +221,18 @@ export const NeighborhoodSwitcher: React.FC = () => {
                 <DropdownMenuItem
                   key={neighborhood.id}
                   onClick={() => handleNeighborhoodSelect(neighborhood)}
-                  className="cursor-pointer hover:bg-accent focus:bg-accent"
+                  className={`cursor-pointer hover:bg-accent focus:bg-accent ${
+                    currentNeighborhood?.id === neighborhood.id ? 'bg-accent font-medium' : ''
+                  }`}
+                  disabled={isLoading}
                 >
                   <div className="flex flex-col">
-                    <span className="font-medium">{neighborhood.name}</span>
+                    <span className="font-medium">
+                      {neighborhood.name}
+                      {currentNeighborhood?.id === neighborhood.id && (
+                        <span className="ml-2 text-xs text-primary">(Current)</span>
+                      )}
+                    </span>
                     {(neighborhood.city || neighborhood.state) && (
                       <span className="text-sm text-muted-foreground">
                         {neighborhood.city}{neighborhood.city && neighborhood.state ? ', ' : ''}{neighborhood.state}
@@ -187,10 +249,17 @@ export const NeighborhoodSwitcher: React.FC = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {isInDebugMode && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded text-amber-700 text-sm">
-            <span className="font-medium">DEBUG MODE:</span>
-            <span>Viewing {debugNeighborhood.name}</span>
+        {isActivelySwitched && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm">
+            <AlertTriangle className="w-4 h-4" />
+            <span className="font-medium">ACTIVE SWITCH:</span>
+            <span>Operating in {currentNeighborhood?.name}</span>
+          </div>
+        )}
+        
+        {isLoading && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
+            <span className="font-medium">Switching neighborhoods...</span>
           </div>
         )}
       </div>
