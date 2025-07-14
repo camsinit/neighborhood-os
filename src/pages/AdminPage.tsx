@@ -69,7 +69,6 @@ const AdminPage = () => {
           </div>
           <p className="text-gray-600">
             {isAdmin ? "Manage your neighborhood as an administrator" : "Support your neighborhood as a steward"}
-            {role}
           </p>
         </div>
 
