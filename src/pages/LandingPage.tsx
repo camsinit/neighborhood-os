@@ -51,8 +51,8 @@ const LandingPage = () => {
             <ShimmerButton 
               shimmerColor="#ffffff"
               shimmerDuration="2s"
-              background="linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary)/0.8))"
-              className="rounded-full border border-secondary/20 px-6 py-2 text-white shadow-lg"
+              background="linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.8))"
+              className="rounded-full border border-primary/20 px-6 py-2 text-white shadow-lg"
             >
               Login
             </ShimmerButton>
