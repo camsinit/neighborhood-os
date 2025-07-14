@@ -5,7 +5,7 @@
  * for debugging and management purposes throughout the entire application.
  */
 import React, { useState } from 'react';
-import { ChevronDown, MapPin, RotateCcw, AlertTriangle } from 'lucide-react';
+import { ChevronDown, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -65,7 +65,6 @@ export const NeighborhoodSwitcher: React.FC = () => {
   const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const [originalNeighborhood, setOriginalNeighborhood] = useState<Neighborhood | null>(null);
   
   // Fetch all neighborhoods available to super admin
   const { data: neighborhoods, isLoading: isFetchingNeighborhoods } = useQuery({
@@ -84,13 +83,6 @@ export const NeighborhoodSwitcher: React.FC = () => {
       }));
     },
   });
-
-  // Store the original neighborhood when first switching
-  React.useEffect(() => {
-    if (currentNeighborhood && !originalNeighborhood) {
-      setOriginalNeighborhood(currentNeighborhood);
-    }
-  }, [currentNeighborhood, originalNeighborhood]);
 
   // Handle actual neighborhood switching
   const handleNeighborhoodSelect = async (neighborhood: NeighborhoodOption) => {
@@ -141,26 +133,6 @@ export const NeighborhoodSwitcher: React.FC = () => {
     }
   };
 
-  // Return to original neighborhood
-  const handleReturnToOriginal = async () => {
-    if (!originalNeighborhood) {
-      toast({
-        title: "No Original Neighborhood",
-        description: "No original neighborhood to return to.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await handleNeighborhoodSelect({
-      id: originalNeighborhood.id,
-      name: originalNeighborhood.name,
-      display_name: originalNeighborhood.name
-    });
-  };
-
-  const isActivelySwitched = originalNeighborhood && currentNeighborhood?.id !== originalNeighborhood.id;
-
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -170,19 +142,6 @@ export const NeighborhoodSwitcher: React.FC = () => {
             Switch your active neighborhood membership to operate in different communities.
           </p>
         </div>
-        
-        {isActivelySwitched && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReturnToOriginal}
-            className="flex items-center gap-2"
-            disabled={isLoading}
-          >
-            <RotateCcw className="w-4 h-4" />
-            Return to Original
-          </Button>
-        )}
       </div>
 
       <div className="flex items-center gap-3">
@@ -249,14 +208,6 @@ export const NeighborhoodSwitcher: React.FC = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {isActivelySwitched && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded text-blue-700 text-sm">
-            <AlertTriangle className="w-4 h-4" />
-            <span className="font-medium">ACTIVE SWITCH:</span>
-            <span>Operating in {currentNeighborhood?.name}</span>
-          </div>
-        )}
-        
         {isLoading && (
           <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
             <span className="font-medium">Switching neighborhoods...</span>
