@@ -21,6 +21,11 @@ interface NeighborhoodData {
  */
 interface InvitePreviewProps {
   neighborhood: NeighborhoodData;
+  /** Information about who sent the invite */
+  inviter?: {
+    name: string;
+    id: string;
+  };
   /** Whether to show in preview mode (read-only) or interactive mode */
   previewMode?: boolean;
   /** Optional className for styling */
@@ -37,6 +42,7 @@ interface InvitePreviewProps {
  */
 const InvitePreview: React.FC<InvitePreviewProps> = ({ 
   neighborhood, 
+  inviter,
   previewMode = false,
   className = ""
 }) => {
@@ -77,7 +83,10 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
             <Users className="h-8 w-8 text-blue-600" />
           </div>
           <CardDescription className="mb-2">
-            You've been invited to join the
+            {inviter 
+              ? `${inviter.name} has invited you to join the`
+              : "You've been invited to join the"
+            }
           </CardDescription>
           <CardTitle className="text-2xl">{neighborhood.name} Neighborhood</CardTitle>
           
