@@ -11,7 +11,7 @@
  * - Steward: Read-only access (isReadOnly prop)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,18 +23,20 @@ import { Separator } from '@/components/ui/separator';
 import { AlertTriangle, Settings, Shield, Trash2, UserCheck } from 'lucide-react';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 
 interface AdminSettingsProps {
   isReadOnly: boolean;
 }
 
 const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
-  const { currentNeighborhood } = useNeighborhood();
+  const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
   const { toast } = useToast();
 
   // State for form data
   const [formData, setFormData] = useState({
-    name: currentNeighborhood?.name || '',
+    name: '',
     description: '',
     city: '',
     state: '',
@@ -44,19 +46,60 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     allowInvites: true
   });
 
+  // Initialize form data when neighborhood data loads
+  useEffect(() => {
+    if (currentNeighborhood) {
+      const neighborhood = currentNeighborhood as any; // Cast to access database properties
+      setFormData({
+        name: neighborhood.name || '',
+        description: '', // Not stored in current schema
+        city: neighborhood.city || '',
+        state: neighborhood.state || '',
+        timezone: neighborhood.timezone || 'America/Los_Angeles',
+        isPublic: true, // Not stored in current schema
+        requireApproval: false, // Not stored in current schema
+        allowInvites: true // Not stored in current schema
+      });
+    }
+  }, [currentNeighborhood]);
+
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveSettings = () => {
-    if (isReadOnly) return;
+  const handleSaveSettings = async () => {
+    if (isReadOnly || !currentNeighborhood) return;
     
-    // TODO: Implement settings saving
-    toast({
-      title: "Settings Updated",
-      description: "Neighborhood settings have been saved successfully.",
-    });
+    try {
+      // Update the neighborhood in the database
+      const { error } = await supabase
+        .from('neighborhoods')
+        .update({
+          name: formData.name,
+          city: formData.city || null,
+          state: formData.state || null,
+          timezone: formData.timezone,
+        })
+        .eq('id', currentNeighborhood.id);
+
+      if (error) throw error;
+
+      // Refresh the neighborhood data to reflect changes in the UI
+      await refreshNeighborhoodData();
+      
+      toast({
+        title: "Settings Updated",
+        description: "Neighborhood settings have been saved successfully.",
+      });
+    } catch (error) {
+      console.error('Error saving neighborhood settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save neighborhood settings. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleTransferOwnership = () => {
