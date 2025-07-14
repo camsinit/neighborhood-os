@@ -76,10 +76,10 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
           <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
             <Users className="h-8 w-8 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl">Join {neighborhood.name}</CardTitle>
-          <CardDescription>
-            You've been invited to join this neighborhood community
+          <CardDescription className="mb-2">
+            You've been invited to join
           </CardDescription>
+          <CardTitle className="text-2xl">{neighborhood.name} neighborhood</CardTitle>
           
           {/* Preview mode indicator */}
           {previewMode && (
