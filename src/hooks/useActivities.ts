@@ -43,14 +43,7 @@ const normalizeMetadata = (metadata: any): ActivityMetadata | null => {
  * Combines all the complex logic from multiple services into one efficient query
  */
 const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[]> => {
-  console.log('[fetchActivities] Called with neighborhoodId:', neighborhoodId);
-  
-  if (!neighborhoodId) {
-    console.log('[fetchActivities] No neighborhoodId provided, returning empty array');
-    return [];
-  }
-  
-  console.log('[fetchActivities] Executing Supabase query for neighborhood:', neighborhoodId);
+  if (!neighborhoodId) return [];
   
   // Single optimized query with all necessary joins
   const { data: rawActivities, error } = await supabase
@@ -75,15 +68,7 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
     .order('created_at', { ascending: false })
     .limit(20);
 
-  if (error) {
-    console.error('[fetchActivities] Supabase query error:', error);
-    throw error;
-  }
-  
-  console.log('[fetchActivities] Raw activities from Supabase:', {
-    count: rawActivities?.length || 0,
-    activities: rawActivities?.map(a => ({ id: a.id, title: a.title, activity_type: a.activity_type }))
-  });
+  if (error) throw error;
   
   // Transform raw activities to properly typed Activity objects
   const activities: Activity[] = (rawActivities || [])
@@ -95,17 +80,8 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
     .filter(activity => {
       // Filter out deleted items with proper type checking
       const metadata = activity.metadata;
-      const isDeleted = !!metadata?.deleted;
-      if (isDeleted) {
-        console.log('[fetchActivities] Filtering out deleted activity:', activity.id);
-      }
-      return !isDeleted;
+      return !metadata?.deleted;
     });
-
-  console.log('[fetchActivities] Final processed activities:', {
-    count: activities.length,
-    activities: activities.map(a => ({ id: a.id, title: a.title, activity_type: a.activity_type }))
-  });
 
   return activities;
 };
@@ -116,32 +92,12 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
 export const useActivities = () => {
   const neighborhood = useCurrentNeighborhood();
   
-  // Enhanced debugging for activities query
-  console.log('[useActivities] Current neighborhood:', {
-    neighborhood,
-    neighborhoodId: neighborhood?.id,
-    neighborhoodName: neighborhood?.name,
-    timestamp: new Date().toISOString()
-  });
-  
   const query = useQuery({
     queryKey: ["activities", neighborhood?.id],
-    queryFn: () => {
-      console.log('[useActivities] Executing fetchActivities with neighborhoodId:', neighborhood?.id);
-      return fetchActivities(neighborhood?.id || null);
-    },
+    queryFn: () => fetchActivities(neighborhood?.id || null),
     enabled: !!neighborhood?.id,
     refetchInterval: 30000, // 30 seconds
     staleTime: 15000, // 15 seconds
-  });
-  
-  // Log query results
-  console.log('[useActivities] Query result:', {
-    data: query.data,
-    dataLength: query.data?.length,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error
   });
   
   // Set up real-time subscription for activities
