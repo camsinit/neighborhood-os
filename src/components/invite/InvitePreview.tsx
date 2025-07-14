@@ -79,7 +79,7 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
           <CardDescription className="mb-2">
             You've been invited to join the
           </CardDescription>
-          <CardTitle className="text-2xl">{neighborhood.name} neighborhood</CardTitle>
+          <CardTitle className="text-2xl">{neighborhood.name} Neighborhood</CardTitle>
           
           {/* Preview mode indicator */}
           {previewMode && (
@@ -144,12 +144,11 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
                 >
                   Join Neighborhood
                 </Button>
-                <p className="text-xs text-gray-500 text-center">
-                  {previewMode 
-                    ? "This is how the invite will appear to recipients"
-                    : "You'll create an account and set up your profile to join"
-                  }
-                </p>
+                {previewMode && (
+                  <p className="text-xs text-gray-500 text-center">
+                    This is how the invite will appear to recipients
+                  </p>
+                )}
               </div>
             )}
           </div>
