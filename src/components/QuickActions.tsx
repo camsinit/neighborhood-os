@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddEventDialog from "./AddEventDialog";
-// Removed AddSupportRequestDialog import
 import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
+import AddSkillPopover from "./skills/AddSkillPopover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
 
@@ -25,47 +27,45 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
 const QuickActions = () => {
   const navigate = useNavigate();
   
-  // State for controlling various dialogs
+  // State for controlling various dialogs and sheets
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [isAddRequestOpen, setIsAddRequestOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
+  const [isGoodsSheetOpen, setIsGoodsSheetOpen] = useState(false);
+  const [isSkillPopoverOpen, setIsSkillPopoverOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
-  const [requestView, setRequestView] = useState<'skills' | 'care' | 'goods' | 'general'>('general');
 
-  // Goods/Items actions (orange theme) - now navigate to goods page
+  // Goods/Items actions (orange theme) - now open proper goods sheet
   const goodsActions = [{
     icon: Package,
     label: "Share an item",
     onClick: () => {
-      navigate('/goods?action=offer');
+      setInitialRequestType("offer");
+      setIsGoodsSheetOpen(true);
     },
     moduleTheme: 'goods' as const
   }, {
     icon: Package,
     label: "Request an item",
     onClick: () => {
-      navigate('/goods?action=request');
+      setInitialRequestType("need");
+      setIsGoodsSheetOpen(true);
     },
     moduleTheme: 'goods' as const
   }];
 
-  // Skills actions (green theme)
+  // Skills actions (green theme) - now open proper skills popover
   const skillsActions = [{
     icon: Wrench,
     label: "Share a skill",
     onClick: () => {
-      setInitialRequestType("offer");
-      setRequestView('skills');
-      setIsAddRequestOpen(true);
+      setIsSkillPopoverOpen(true);
     },
     moduleTheme: 'skills' as const
   }, {
     icon: HelpCircle,
     label: "Request a skill",
     onClick: () => {
-      setInitialRequestType("need");
-      setRequestView('skills');
-      setIsAddRequestOpen(true);
+      setIsSkillPopoverOpen(true);
     },
     moduleTheme: 'skills' as const
   }];
@@ -126,10 +126,52 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialog components - goods actions now navigate to goods page */}
-      <AddEventDialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen} onAddEvent={() => {}} />
-      {/* Removed support request dialog - no longer needed */}
-      <AddSafetyUpdateDialogNew open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen} />
+      {/* Dialog and Sheet components - now using the same panels as individual pages */}
+      <AddEventDialog 
+        open={isAddEventOpen} 
+        onOpenChange={setIsAddEventOpen} 
+        onAddEvent={() => {}} 
+      />
+      
+      <AddSafetyUpdateDialogNew 
+        open={isSafetyUpdateOpen} 
+        onOpenChange={setIsSafetyUpdateOpen} 
+      />
+      
+      {/* Goods Sheet - same as used on GoodsPage */}
+      <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.goods.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.goods.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              {initialRequestType === "offer" ? "Offer an Item" : "Request an Item"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <GoodsForm
+              onClose={() => setIsGoodsSheetOpen(false)}
+              initialRequestType={initialRequestType}
+              mode="create"
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+      
+      {/* Skills Popover - same as used on SkillsPage */}
+      <AddSkillPopover
+        open={isSkillPopoverOpen}
+        onOpenChange={setIsSkillPopoverOpen}
+        onSkillAdded={() => {
+          // Optional: Add any callback logic here
+        }}
+      />
     </div>;
 };
 
