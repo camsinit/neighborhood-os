@@ -49,12 +49,19 @@ export function useFetchNeighborhood(
     const startTime = startFetch();
     
     try {
-      // If we already have a current neighborhood, we're done
-      if (currentNeighborhood) {
-        completeFetch(startTime);
-        return;
+      // Add debugging for the problematic user
+      if (user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] fetchNeighborhood - starting fetch, current state:', {
+          userId: user.id,
+          currentNeighborhood: currentNeighborhood,
+          currentNeighborhoodId: currentNeighborhood?.id,
+          fetchAttempts,
+          timestamp: new Date().toISOString()
+        });
       }
 
+      // UPDATED: Always fetch to ensure we have the latest data, don't skip if currentNeighborhood exists
+      // This ensures that neighborhood changes (like name updates) are reflected
       logger.debug("Fetching neighborhoods for user:", user.id);
 
       // First, check if user created any neighborhoods
@@ -70,10 +77,28 @@ export function useFetchNeighborhood(
         return;
       }
 
+      // Add debugging for the problematic user
+      if (user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] Created neighborhoods query result:', {
+          data: createdNeighborhoods,
+          count: createdNeighborhoods?.length || 0
+        });
+      }
+
       // If user created a neighborhood, use that
       if (createdNeighborhoods && createdNeighborhoods.length > 0) {
         const neighborhood = createdNeighborhoods[0] as Neighborhood;
         logger.debug("Found created neighborhood:", neighborhood.name);
+        
+        // Add debugging for the problematic user
+        if (user.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+          console.log('[DEBUG - User 74bf...] Setting created neighborhood:', {
+            neighborhoodId: neighborhood.id,
+            neighborhoodName: neighborhood.name,
+            expected: 'c0e4e442-74c1-4b34-8388-b19f7b1c6a5d'
+          });
+        }
+        
         setCurrentNeighborhood(neighborhood);
         completeFetch(startTime);
         return;

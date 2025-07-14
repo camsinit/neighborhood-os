@@ -26,7 +26,7 @@ export const useCurrentNeighborhood = (): Neighborhood | null => {
   // Get the current authenticated user
   const user = useUser();
   
-  // Add detailed debugging for the problematic user
+  // Add debugging for the problematic user
   useEffect(() => {
     if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
       console.log('[DEBUG - User 74bf...] useCurrentNeighborhood state:', {
@@ -34,6 +34,7 @@ export const useCurrentNeighborhood = (): Neighborhood | null => {
         currentNeighborhood: currentNeighborhood,
         neighborhoodId: currentNeighborhood?.id,
         neighborhoodName: currentNeighborhood?.name,
+        expectedNeighborhoodId: 'c0e4e442-74c1-4b34-8388-b19f7b1c6a5d',
         timestamp: new Date().toISOString()
       });
     }
