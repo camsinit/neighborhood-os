@@ -77,7 +77,7 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
             <Users className="h-8 w-8 text-blue-600" />
           </div>
           <CardDescription className="mb-2">
-            You've been invited to join
+            You've been invited to join the
           </CardDescription>
           <CardTitle className="text-2xl">{neighborhood.name} neighborhood</CardTitle>
           
