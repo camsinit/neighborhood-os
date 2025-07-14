@@ -20,6 +20,7 @@ import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 import InvitePreview from '@/components/invite/InvitePreview';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useNeighborhoodPreview } from '@/hooks/useNeighborhoodPreview';
+import { NeighborhoodSwitcher, DebugNeighborhoodProvider } from '@/components/debug/NeighborhoodSwitcher';
 
 
 /**
@@ -124,6 +125,10 @@ const DebugPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <DebugNeighborhoodProvider>
+                  <NeighborhoodSwitcher />
+                </DebugNeighborhoodProvider>
+                
                 <div>
                   <h3 className="text-lg font-medium mb-2">New User Onboarding</h3>
                   <p className="text-sm text-muted-foreground mb-4">
