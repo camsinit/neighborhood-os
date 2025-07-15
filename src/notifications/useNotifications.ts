@@ -1,27 +1,30 @@
 
 /**
- * Single Notifications Hook
+ * Neighborhood-Filtered Notifications Hook
  * 
- * Simple React Query hook that fetches notifications directly from Supabase
- * No complex transformations - the backend templates already provide perfect content
+ * React Query hook that fetches notifications filtered by current neighborhood
+ * Joins with content tables to ensure only relevant neighborhood notifications are shown
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { NotificationWithProfile } from './types';
 import { createLogger } from '@/utils/logger';
 import { useEffect } from 'react';
+import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 
 const logger = createLogger('useNotifications');
 
 /**
- * Enhanced notifications hook with real-time updates and profile caching
- * Consolidates all notification functionality into a single efficient hook
+ * Enhanced notifications hook with neighborhood filtering and real-time updates
+ * Filters notifications to show only those related to content from the current neighborhood
  */
 export function useNotifications() {
+  const currentNeighborhood = useCurrentNeighborhood();
+  
   const query = useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', currentNeighborhood?.id],
     queryFn: async (): Promise<NotificationWithProfile[]> => {
-      logger.debug('Fetching notifications with profile caching');
+      logger.debug('Fetching neighborhood-filtered notifications with profile caching');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -30,69 +33,78 @@ export function useNotifications() {
         return [];
       }
 
-      // Step 1: Fetch notifications
-      const { data: notifications, error: notificationsError } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_archived', false)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (notificationsError) {
-        logger.error('Error fetching notifications:', notificationsError);
-        throw notificationsError;
-      }
-
-      if (!notifications || notifications.length === 0) {
-        logger.debug('No notifications found');
+      // If no neighborhood is selected, return empty array
+      if (!currentNeighborhood?.id) {
+        logger.debug('No current neighborhood, returning empty notifications');
         return [];
       }
 
-      // Step 2: Efficient profile fetching with caching
-      const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
-      const profilesMap = new Map();
-      
-      if (actorIds.length > 0) {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, display_name, avatar_url')
-          .in('id', actorIds);
+      // Step 1: Fetch notifications filtered by neighborhood
+      // We need to join with content tables to filter by their neighborhood_id
+      const { data: notifications, error: notificationsError } = await supabase
+        .from('notifications')
+        .select(`
+          *,
+          events!inner(neighborhood_id),
+          safety_updates!inner(neighborhood_id),
+          skills_exchange!inner(neighborhood_id),
+          goods_exchange!inner(neighborhood_id)
+        `)
+        .eq('user_id', user.id)
+        .eq('is_archived', false)
+        .or(`events.neighborhood_id.eq.${currentNeighborhood.id},safety_updates.neighborhood_id.eq.${currentNeighborhood.id},skills_exchange.neighborhood_id.eq.${currentNeighborhood.id},goods_exchange.neighborhood_id.eq.${currentNeighborhood.id}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-        if (!profilesError && profiles) {
-          profiles.forEach(profile => {
-            profilesMap.set(profile.id, {
-              display_name: profile.display_name,
-              avatar_url: profile.avatar_url
-            });
-          });
+      // If the complex join fails, fallback to basic notification fetch
+      if (notificationsError) {
+        logger.warn('Complex join failed, falling back to basic fetch:', notificationsError);
+        
+        const { data: basicNotifications, error: basicError } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_archived', false)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (basicError) {
+          logger.error('Error fetching notifications:', basicError);
+          throw basicError;
         }
+
+        // For fallback, we'll filter notifications manually by checking content
+        const filteredNotifications = await filterNotificationsByNeighborhood(
+          basicNotifications || [], 
+          currentNeighborhood.id
+        );
+        
+        return await enrichWithProfiles(filteredNotifications);
       }
 
-      // Step 3: Combine data efficiently
-      const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
-        ...notification,
-        profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
-      }));
+      if (!notifications || notifications.length === 0) {
+        logger.debug('No neighborhood-filtered notifications found');
+        return [];
+      }
 
-      logger.debug(`Fetched ${notificationsWithProfiles.length} notifications`);
-      return notificationsWithProfiles;
+      return await enrichWithProfiles(notifications);
     },
+    enabled: !!currentNeighborhood?.id, // Only fetch when neighborhood is available
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000,
     refetchOnWindowFocus: true
   });
 
-  // Real-time updates
+  // Real-time updates with neighborhood context
   useEffect(() => {
     let channel: any;
     
     const setupRealtime = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || !currentNeighborhood?.id) return;
 
       channel = supabase
-        .channel('notifications-realtime')
+        .channel(`notifications-realtime-${currentNeighborhood.id}`)
         .on(
           'postgres_changes',
           {
@@ -115,53 +127,186 @@ export function useNotifications() {
         supabase.removeChannel(channel);
       }
     };
-  }, [query]);
+  }, [query, currentNeighborhood?.id]);
 
   return query;
 }
 
 /**
- * Hook to get unread notification count
+ * Helper function to filter notifications by neighborhood based on content associations
+ */
+async function filterNotificationsByNeighborhood(
+  notifications: any[],
+  neighborhoodId: string
+): Promise<any[]> {
+  if (!notifications.length) return [];
+
+  const contentTypeQueries = [];
+  const contentIds = {
+    events: [],
+    safety: [],
+    skills: [],
+    goods: []
+  };
+
+  // Group content IDs by type
+  for (const notification of notifications) {
+    switch (notification.content_type) {
+      case 'events':
+        contentIds.events.push(notification.content_id);
+        break;
+      case 'safety':
+      case 'safety_updates':
+        contentIds.safety.push(notification.content_id);
+        break;
+      case 'skills':
+      case 'skills_exchange':
+        contentIds.skills.push(notification.content_id);
+        break;
+      case 'goods':
+      case 'goods_exchange':
+        contentIds.goods.push(notification.content_id);
+        break;
+    }
+  }
+
+  // Query each content type for neighborhood associations
+  const validContentIds = new Set();
+
+  if (contentIds.events.length > 0) {
+    const { data } = await supabase
+      .from('events')
+      .select('id')
+      .in('id', contentIds.events)
+      .eq('neighborhood_id', neighborhoodId);
+    data?.forEach(item => validContentIds.add(item.id));
+  }
+
+  if (contentIds.safety.length > 0) {
+    const { data } = await supabase
+      .from('safety_updates')
+      .select('id')
+      .in('id', contentIds.safety)
+      .eq('neighborhood_id', neighborhoodId);
+    data?.forEach(item => validContentIds.add(item.id));
+  }
+
+  if (contentIds.skills.length > 0) {
+    const { data } = await supabase
+      .from('skills_exchange')
+      .select('id')
+      .in('id', contentIds.skills)
+      .eq('neighborhood_id', neighborhoodId);
+    data?.forEach(item => validContentIds.add(item.id));
+  }
+
+  if (contentIds.goods.length > 0) {
+    const { data } = await supabase
+      .from('goods_exchange')
+      .select('id')
+      .in('id', contentIds.goods)
+      .eq('neighborhood_id', neighborhoodId);
+    data?.forEach(item => validContentIds.add(item.id));
+  }
+
+  // Filter notifications to only include those with valid content IDs
+  return notifications.filter(notification => 
+    validContentIds.has(notification.content_id)
+  );
+}
+
+/**
+ * Helper function to enrich notifications with profile data
+ */
+async function enrichWithProfiles(notifications: any[]): Promise<NotificationWithProfile[]> {
+  if (!notifications.length) return [];
+
+  // Step 2: Efficient profile fetching with caching
+  const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
+  const profilesMap = new Map();
+  
+  if (actorIds.length > 0) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', actorIds);
+
+    if (!profilesError && profiles) {
+      profiles.forEach(profile => {
+        profilesMap.set(profile.id, {
+          display_name: profile.display_name,
+          avatar_url: profile.avatar_url
+        });
+      });
+    }
+  }
+
+  // Step 3: Combine data efficiently
+  const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
+    ...notification,
+    profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
+  }));
+
+  logger.debug(`Enriched ${notificationsWithProfiles.length} notifications with profiles`);
+  return notificationsWithProfiles;
+}
+
+/**
+ * Hook to get unread notification count filtered by current neighborhood
  */
 export function useUnreadCount() {
+  const currentNeighborhood = useCurrentNeighborhood();
+  
   return useQuery({
-    queryKey: ['notifications', 'unread-count'],
+    queryKey: ['notifications', 'unread-count', currentNeighborhood?.id],
     queryFn: async (): Promise<number> => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return 0;
+      if (!user || !currentNeighborhood?.id) return 0;
 
-      const { count, error } = await supabase
+      // Get all unread notifications and filter by neighborhood
+      const { data: notifications, error } = await supabase
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .select('content_type, content_id')
         .eq('user_id', user.id)
         .eq('is_read', false)
         .eq('is_archived', false);
 
       if (error) {
-        logger.error('Error fetching unread count:', error);
+        logger.error('Error fetching unread notifications:', error);
         return 0;
       }
 
-      return count || 0;
+      if (!notifications?.length) return 0;
+
+      // Filter by neighborhood using the same logic as main notifications
+      const filteredNotifications = await filterNotificationsByNeighborhood(
+        notifications,
+        currentNeighborhood.id
+      );
+
+      return filteredNotifications.length;
     },
+    enabled: !!currentNeighborhood?.id,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000
   });
 }
 
 /**
- * Hook to get archived notifications
+ * Hook to get archived notifications filtered by current neighborhood
  */
 export function useArchivedNotifications() {
+  const currentNeighborhood = useCurrentNeighborhood();
+  
   return useQuery({
-    queryKey: ['notifications', 'archived'],
+    queryKey: ['notifications', 'archived', currentNeighborhood?.id],
     queryFn: async (): Promise<NotificationWithProfile[]> => {
-      logger.debug('Fetching archived notifications');
+      logger.debug('Fetching neighborhood-filtered archived notifications');
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        logger.warn('No authenticated user');
+      if (!user || !currentNeighborhood?.id) {
+        logger.warn('No authenticated user or neighborhood');
         return [];
       }
 
@@ -184,34 +329,13 @@ export function useArchivedNotifications() {
         return [];
       }
 
-      // Get unique actor IDs to fetch profiles
-      const actorIds = [...new Set(notifications.map(n => n.actor_id).filter(Boolean))];
-      
-      let profilesMap = new Map();
-      
-      if (actorIds.length > 0) {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('id', actorIds);
+      // Filter by neighborhood
+      const filteredNotifications = await filterNotificationsByNeighborhood(
+        notifications,
+        currentNeighborhood.id
+      );
 
-        if (profilesError) {
-          logger.warn('Error fetching profiles for archived notifications:', profilesError);
-        } else if (profiles) {
-          profiles.forEach(profile => {
-            profilesMap.set(profile.id, profile);
-          });
-        }
-      }
-
-      // Merge notifications with profile data
-      const notificationsWithProfiles: NotificationWithProfile[] = notifications.map(notification => ({
-        ...notification,
-        profiles: notification.actor_id ? profilesMap.get(notification.actor_id) || null : null
-      }));
-
-      logger.debug(`Fetched ${notificationsWithProfiles.length} archived notifications`);
-      return notificationsWithProfiles;
+      return await enrichWithProfiles(filteredNotifications);
     },
     enabled: false, // Only fetch when explicitly requested
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -219,14 +343,15 @@ export function useArchivedNotifications() {
 }
 
 /**
- * Optimized notification actions with better caching
+ * Optimized notification actions with neighborhood-aware caching
  */
 export function useNotificationActions() {
   const queryClient = useQueryClient();
+  const currentNeighborhood = useCurrentNeighborhood();
 
   const markAsRead = async (notificationId: string) => {
-    // Optimistic update
-    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+    // Optimistic update for current neighborhood
+    queryClient.setQueryData(['notifications', currentNeighborhood?.id], (old: NotificationWithProfile[] = []) =>
       old.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
     );
 
@@ -242,13 +367,13 @@ export function useNotificationActions() {
       throw error;
     }
 
-    // Update unread count
-    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+    // Update unread count for current neighborhood
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count', currentNeighborhood?.id] });
   };
 
   const archive = async (notificationId: string) => {
-    // Optimistic update - remove from main list
-    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+    // Optimistic update - remove from main list for current neighborhood
+    queryClient.setQueryData(['notifications', currentNeighborhood?.id], (old: NotificationWithProfile[] = []) =>
       old.filter(n => n.id !== notificationId)
     );
 
@@ -264,17 +389,17 @@ export function useNotificationActions() {
       throw error;
     }
 
-    // Invalidate related queries
-    queryClient.invalidateQueries({ queryKey: ['notifications', 'archived'] });
-    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+    // Invalidate related queries for current neighborhood
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'archived', currentNeighborhood?.id] });
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count', currentNeighborhood?.id] });
   };
 
   const markAllAsRead = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Optimistic update
-    queryClient.setQueryData(['notifications'], (old: NotificationWithProfile[] = []) =>
+    // Optimistic update for current neighborhood
+    queryClient.setQueryData(['notifications', currentNeighborhood?.id], (old: NotificationWithProfile[] = []) =>
       old.map(n => ({ ...n, is_read: true }))
     );
 
@@ -291,8 +416,8 @@ export function useNotificationActions() {
       throw error;
     }
 
-    // Update unread count
-    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+    // Update unread count for current neighborhood
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count', currentNeighborhood?.id] });
   };
 
   return { markAsRead, archive, markAllAsRead };
