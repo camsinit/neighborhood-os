@@ -23,6 +23,8 @@ interface InvitePreviewProps {
   neighborhood: NeighborhoodData;
   /** Whether to show in preview mode (read-only) or interactive mode */
   previewMode?: boolean;
+  /** Whether to show in full-screen testing mode (emulates real user experience) */
+  fullScreenMode?: boolean;
   /** Optional className for styling */
   className?: string;
 }
@@ -38,6 +40,7 @@ interface InvitePreviewProps {
 const InvitePreview: React.FC<InvitePreviewProps> = ({ 
   neighborhood, 
   previewMode = false,
+  fullScreenMode = false,
   className = ""
 }) => {
   // Get current user for determining button state
@@ -68,6 +71,87 @@ const InvitePreview: React.FC<InvitePreviewProps> = ({
     // In a real implementation, this would navigate to onboarding
     console.log("Navigate to onboarding with invite");
   };
+
+  // Full screen mode overrides all other styling for realistic testing
+  if (fullScreenMode) {
+    return (
+      <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
+              <Users className="h-8 w-8 text-blue-600" />
+            </div>
+            <CardDescription className="mb-2">
+              You've been invited to join the
+            </CardDescription>
+            <CardTitle className="text-2xl">{neighborhood.name} Neighborhood</CardTitle>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            {/* Neighborhood Preview Information */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 text-gray-600">
+                <MapPin className="h-5 w-5" />
+                <span>
+                  {neighborhood.city && neighborhood.state 
+                    ? `${neighborhood.city}, ${neighborhood.state}`
+                    : 'Location not specified'
+                  }
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3 text-gray-600">
+                <Users className="h-5 w-5" />
+                <span>{neighborhood.memberCount || 0} members</span>
+              </div>
+              
+              <div className="flex items-center space-x-3 text-gray-600">
+                <Calendar className="h-5 w-5" />
+                <span>
+                  Created {neighborhood.created_at 
+                    ? new Date(neighborhood.created_at).toLocaleDateString()
+                    : 'recently'
+                  }
+                </span>
+              </div>
+            </div>
+
+            {/* Join Button */}
+            <div className="space-y-3">
+              {user && !previewMode ? (
+                // Existing user - can join directly
+                <Button 
+                  onClick={handleJoinNeighborhood}
+                  disabled={isJoining}
+                  className="w-full"
+                  size="lg"
+                >
+                  <CheckCircle className="mr-2 h-5 w-5" />
+                  {isJoining ? 'Joining...' : `Join ${neighborhood.name}`}
+                </Button>
+              ) : (
+                // New user - needs to sign up first
+                <Button 
+                  onClick={handleNewUserSignup}
+                  className="w-full"
+                  size="lg"
+                >
+                  Join Neighborhood
+                </Button>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="text-center">
+              <p className="text-xs text-gray-500">
+                By joining, you'll be able to connect with your neighbors and participate in community activities.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex items-center justify-center p-4 ${className}`}>

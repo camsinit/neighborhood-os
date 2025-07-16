@@ -277,6 +277,7 @@ const DebugPage = () => {
               <InvitePreview 
                 neighborhood={neighborhood}
                 previewMode={false}
+                fullScreenMode={true}
                 className="border-0 shadow-none"
               />
             ) : (

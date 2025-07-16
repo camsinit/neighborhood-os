@@ -5,9 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
-import { useSkillUpdate } from "@/hooks/skills/useSkillUpdate";
-import { SkillWithProfile } from "../types/skillTypes";
+import { useUser } from "@supabase/auth-helpers-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { SkillWithProfile, SkillCategory } from "../types/skillTypes";
 import { toast } from "sonner";
+import { updateSkill } from "@/services/skills/skillsService";
+import { QUERY_KEYS, getInvalidationKeys } from "@/utils/queryKeys";
 
 /**
  * SkillEditDialog - Modal form for editing skill details
@@ -30,16 +33,12 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
   // Form state for basic skill information
   const [title, setTitle] = useState(skill.title);
   const [description, setDescription] = useState(skill.description || '');
-  const [category, setCategory] = useState(skill.skill_category);
+  const [category, setCategory] = useState<SkillCategory>(skill.skill_category);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Hook for updating skills
-  const { updateSkill, isLoading } = useSkillUpdate({
-    onSuccess: () => {
-      toast.success("Skill updated successfully");
-      onSuccess();
-      onOpenChange(false);
-    }
-  });
+  // Hooks for data operations
+  const user = useUser();
+  const queryClient = useQueryClient();
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,16 +55,36 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
       return;
     }
 
-    // Update the skill with new data
-    await updateSkill(skill.id, {
-      title: title.trim(),
-      description: description.trim() || null,
-      skill_category: category,
-      // Keep existing fields unchanged
-      request_type: skill.request_type,
-      neighborhood_id: skill.neighborhood_id,
-      valid_until: skill.valid_until
-    });
+    if (!user) {
+      toast.error("You must be logged in to update skills");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Update the skill using the service
+      await updateSkill(skill.id, {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        category: category
+      }, user.id);
+
+      // Invalidate queries to refresh the skill list
+      const invalidationKeys = getInvalidationKeys('SKILLS');
+      invalidationKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      });
+
+      toast.success("Skill updated successfully");
+      onSuccess();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error updating skill:', error);
+      toast.error("Failed to update skill");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Reset form when opening/closing
@@ -114,7 +133,7 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
           {/* Category Field */}
           <div className="space-y-2">
             <Label htmlFor="category">Category *</Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(value: SkillCategory) => setCategory(value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
