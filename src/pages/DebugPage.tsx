@@ -9,9 +9,10 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Bug, Database, Bell, Users, Activity, TestTube } from 'lucide-react';
+import { Bug, Database, Mail, Users, Activity, TestTube } from 'lucide-react';
 import { RLSDiagnosticsPanel } from '@/components/debug/RLSDiagnosticsPanel';
 import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
+import { EmailTestingPanel } from '@/components/debug/EmailTestingPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
@@ -30,7 +31,8 @@ import { useNeighborhoodPreview } from '@/hooks/useNeighborhoodPreview';
  * - RLS policy diagnostics
  * - Logging controls
  * - Onboarding testing
- * - Future: Notifications and Users debugging
+ * - Email testing for all email templates
+ * - Future: Users debugging
  */
 const DebugPage = () => {
   // State for onboarding testing dialogs
@@ -90,9 +92,9 @@ const DebugPage = () => {
               <TestTube className="w-4 h-4" />
               Testing
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="w-4 h-4" />
-              Notifications
+            <TabsTrigger value="emails" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Emails
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -176,31 +178,9 @@ const DebugPage = () => {
             </Card>
           </TabsContent>
           
-          {/* Notifications Debug Tab - Placeholder for future implementation */}
-          <TabsContent value="notifications" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-5 h-5" />
-                  Notifications Debug
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Notifications Debugging</h3>
-                  <p className="text-muted-foreground">
-                    Notification debugging tools are coming soon. This will include:
-                  </p>
-                  <ul className="text-sm text-muted-foreground mt-4 space-y-1">
-                    <li>• Notification delivery status tracking</li>
-                    <li>• Template testing and validation</li>
-                    <li>• User notification preferences analysis</li>
-                    <li>• Delivery failure diagnosis</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Email Testing Tab - Comprehensive email testing interface */}
+          <TabsContent value="emails" className="mt-4">
+            <EmailTestingPanel />
           </TabsContent>
           
           {/* Users Debug Tab - Placeholder for future implementation */}
