@@ -10,6 +10,7 @@ import { useSkillUpdate } from '@/hooks/skills/useSkillUpdate';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, getInvalidationKeys } from '@/utils/queryKeys';
 import ShareButton from '@/components/ui/share-button';
+import SkillEditDialog from '../form/SkillEditDialog';
 
 interface SkillRequestCardProps {
   skill: SkillWithProfile;
@@ -30,6 +31,7 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
   
   // State for managing dialogs
   const [isContributeDialogOpen, setIsContributeDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   // Add state to track hover for share button
   const [isHovering, setIsHovering] = useState(false);
 
@@ -54,11 +56,10 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
     await deleteSkill(skill.id, skill.title);
   };
 
-  // Handle edit action (placeholder for now)
+  // Handle edit action - opens edit dialog
   const handleEditSkill = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement edit functionality
-    console.log('Edit skill:', skill.title);
+    setIsEditDialogOpen(true);
   };
 
   // Updated to use the new standardized 6 categories
