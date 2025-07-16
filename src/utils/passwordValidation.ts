@@ -13,12 +13,25 @@
  * - Not a common weak password
  */
 
-// List of common weak passwords that should be rejected
+// List of common weak passwords and patterns that should be rejected
 const COMMON_WEAK_PASSWORDS = [
   'password', 'password123', '12345678', 'qwerty', 'abc123',
   'letmein', 'welcome', 'admin', 'password1', 'test', 'test123',
   'guest', 'user', 'root', 'default', '123456789', 'password!',
-  'Password123', 'Welcome123', 'Admin123'
+  'Password123', 'Welcome123', 'Admin123', 'testpassword123',
+  'TestPassword123', 'TestPassword123!', 'test123!', 'Test123!',
+  'Password123!', 'password123!', 'Welcome123!', 'welcome123!'
+];
+
+// Common weak password patterns that Supabase rejects
+const WEAK_PATTERNS = [
+  /^test.*123.*!?$/i,          // Test + numbers + optional exclamation
+  /^password.*123.*!?$/i,      // Password + numbers + optional exclamation  
+  /^welcome.*123.*!?$/i,       // Welcome + numbers + optional exclamation
+  /^.*123.*!?$/,               // Ending with 123 + optional exclamation
+  /^(test|password|welcome|admin|user|guest).*$/i, // Starting with common words
+  /^.*[0-9]{3,}.*$/,           // 3+ consecutive numbers
+  /^[a-zA-Z]*[0-9]*[!@#$%^&*]*$/, // Simple letter+number+symbol pattern
 ];
 
 export interface PasswordRequirement {
@@ -77,8 +90,32 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     },
     {
       id: 'notCommon',
-      label: 'Not a common weak password',
-      test: (pwd) => !COMMON_WEAK_PASSWORDS.includes(pwd.toLowerCase()),
+      label: 'Not a common weak password or pattern',
+      test: (pwd) => {
+        // Check exact matches against common weak passwords
+        const isCommonPassword = COMMON_WEAK_PASSWORDS.includes(pwd.toLowerCase());
+        if (isCommonPassword) return false;
+        
+        // Check against weak patterns
+        const matchesWeakPattern = WEAK_PATTERNS.some(pattern => pattern.test(pwd));
+        return !matchesWeakPattern;
+      },
+      met: false
+    },
+    {
+      id: 'complexity',
+      label: 'Avoid simple patterns (use random characters)',
+      test: (pwd) => {
+        // Ensure password has good entropy and isn't too predictable
+        const hasVariedCharacters = pwd.length >= 10 || 
+          (pwd.split('').filter((char, index) => pwd.indexOf(char) === index).length >= pwd.length * 0.7);
+        
+        // Avoid consecutive characters or simple patterns
+        const noConsecutiveChars = !/(.)\1{2,}/.test(pwd); // No 3+ repeated chars
+        const noSequentialChars = !/(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|123|234|345|456|567|678|789)/i.test(pwd);
+        
+        return hasVariedCharacters && noConsecutiveChars && noSequentialChars;
+      },
       met: false
     }
   ];
