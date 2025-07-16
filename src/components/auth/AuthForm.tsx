@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { PasswordInput } from "./PasswordInput";
 
 /**
  * Authentication Form Component
@@ -128,15 +129,15 @@ const AuthForm = () => {
           <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Password
           </label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1"
-            disabled={isLoading}
-          />
+          <div className="mt-1">
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="Enter your password"
+              disabled={isLoading}
+              showValidation={false} // Simple mode for sign-in
+            />
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <Button 

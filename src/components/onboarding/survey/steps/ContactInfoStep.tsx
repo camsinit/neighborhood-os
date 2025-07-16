@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ContactFields } from "./contact/ContactFields";
 import { PasswordField } from "./contact/PasswordField";
 import { VisibilityToggle } from "./contact/VisibilityToggle";
+import { validatePassword as validatePasswordStrength } from "@/utils/passwordValidation";
 
 /**
  * Contact Information Step Component
@@ -118,27 +119,28 @@ export const ContactInfoStep = ({
     return isValid;
   };
 
-  // Validate password - now always required since this is for account creation
+  // Validate password using enhanced validation utility
   const validatePassword = (value: string) => {
-    let isValid = true;
-    
     if (!value.trim()) {
       if (touched.password) {
         setErrors(prev => ({ ...prev, password: "Password is required" }));
       }
-      isValid = false;
-    } else if (value.length < 6) {
-      if (touched.password) {
-        setErrors(prev => ({ ...prev, password: "Password must be at least 6 characters" }));
-      }
-      isValid = false;
+      onValidation?.("password", false);
+      return false;
+    }
+    
+    // Use the comprehensive password validation
+    const validation = validatePasswordStrength(value);
+    
+    if (!validation.isValid && touched.password) {
+      setErrors(prev => ({ ...prev, password: validation.message }));
     } else {
       setErrors(prev => ({ ...prev, password: "" }));
     }
     
     // Notify parent component of validation result
-    onValidation?.("password", isValid);
-    return isValid;
+    onValidation?.("password", validation.isValid);
+    return validation.isValid;
   };
 
   // Validate that at least one contact method is visible (email or phone)
