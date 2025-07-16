@@ -9,8 +9,8 @@ SELECT
       'Authorization', 'Bearer ' || current_setting('request.jwt.claims', true)::json->>'token'
     ),
     body := jsonb_build_object(
-      'recipientEmail', 'your-test-email@example.com',  -- Replace with your actual email
-      'firstName', 'Test User',                         -- Replace with test name
+      'recipientEmail', 'your-email@example.com',  -- Replace with your actual email
+      'firstName', 'Test User',                         -- Replace with test name  
       'neighborhoodName', 'Test Neighborhood'          -- Replace with your neighborhood name
     )
   ) as response;
