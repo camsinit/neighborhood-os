@@ -15,12 +15,17 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNeighborhoodMembers } from '@/hooks/useNeighborhoodMembers';
 import { useIsNeighborhoodAdmin } from '@/hooks/useIsNeighborhoodAdmin';
+import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Download, UserPlus, UserMinus, Eye, Mail, Phone, MapPin, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminMembers = () => {
   const { data: members, isLoading } = useNeighborhoodMembers();
   const { isAdmin } = useIsNeighborhoodAdmin();
+  const { currentNeighborhood } = useNeighborhood();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -73,22 +78,64 @@ const AdminMembers = () => {
     });
   };
 
-  // Handle role promotion (placeholder)
-  const handlePromoteToSteward = (userId: string, userName: string) => {
-    // TODO: Implement role promotion logic
-    toast({
-      title: "Feature Coming Soon",
-      description: `Role promotion for ${userName} will be implemented in the next update.`,
-    });
+  // Handle role promotion - now actually implements the functionality
+  const handlePromoteToSteward = async (userId: string, userName: string) => {
+    try {
+      // Insert steward role into neighborhood_roles table
+      const { error } = await supabase
+        .from('neighborhood_roles')
+        .insert({
+          user_id: userId,
+          neighborhood_id: currentNeighborhood?.id,
+          role: 'steward'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Role Updated",
+        description: `${userName} has been promoted to Steward successfully.`,
+      });
+
+      // Refresh the members list
+      queryClient.invalidateQueries({ queryKey: ['neighborhood-members'] });
+    } catch (error: any) {
+      console.error('Error promoting user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to promote ${userName}: ${error.message}`,
+        variant: "destructive"
+      });
+    }
   };
 
-  // Handle member removal (placeholder)
-  const handleRemoveMember = (userId: string, userName: string) => {
-    // TODO: Implement member removal logic
-    toast({
-      title: "Feature Coming Soon",
-      description: `Member removal for ${userName} will be implemented with proper safeguards.`,
-    });
+  // Handle member removal - now actually implements the functionality
+  const handleRemoveMember = async (userId: string, userName: string) => {
+    try {
+      // Remove from neighborhood_members table
+      const { error } = await supabase
+        .from('neighborhood_members')
+        .delete()
+        .eq('user_id', userId)
+        .eq('neighborhood_id', currentNeighborhood?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Member Removed",
+        description: `${userName} has been removed from the neighborhood.`,
+      });
+
+      // Refresh the members list
+      queryClient.invalidateQueries({ queryKey: ['neighborhood-members'] });
+    } catch (error: any) {
+      console.error('Error removing user:', error);
+      toast({
+        title: "Error",
+        description: `Failed to remove ${userName}: ${error.message}`,
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -154,7 +201,7 @@ const AdminMembers = () => {
         <CardContent>
           <div className="space-y-4">
             {members?.map((member) => (
-              <div key={member.user_id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={member.user_id} className="flex items-center justify-between p-4 border rounded-lg group hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={member.avatar_url || undefined} />
@@ -207,17 +254,24 @@ const AdminMembers = () => {
                   </div>
                 </div>
                 
-                {/* Member Actions */}
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
+                {/* Member Actions - with hover effects and no border stroke */}
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="hover:bg-blue-50 hover:text-blue-600"
+                    title="View member details"
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                   
                   {/* Admin-only actions */}
                   {isAdmin && member.neighborhood_role === 'neighbor' && (
                     <Button 
-                      variant="outline" 
+                      variant="ghost"
                       size="sm"
+                      className="hover:bg-green-50 hover:text-green-600"
+                      title="Promote to Steward"
                       onClick={() => handlePromoteToSteward(member.user_id, member.display_name || 'Unknown')}
                     >
                       <UserPlus className="h-4 w-4" />
@@ -226,9 +280,10 @@ const AdminMembers = () => {
                   
                   {isAdmin && member.neighborhood_role !== 'admin' && (
                     <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-red-600 hover:text-red-700"
+                      variant="ghost"
+                      size="sm"
+                      className="hover:bg-red-50 hover:text-red-600"
+                      title="Remove member"
                       onClick={() => handleRemoveMember(member.user_id, member.display_name || 'Unknown')}
                     >
                       <UserMinus className="h-4 w-4" />

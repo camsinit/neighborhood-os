@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -121,7 +120,8 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
             variant="outline" 
             size="sm"
             onClick={handleEditSkill}
-            className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-0"
+            className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white"
+            title="Edit skill"
             disabled={isDeleting}
           >
             <Edit size={14} />
@@ -130,7 +130,8 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
             variant="outline" 
             size="sm"
             onClick={handleDeleteSkill}
-            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white border-0"
+            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white"
+            title="Delete skill"
             disabled={isDeleting}
           >
             <Trash2 size={14} />
@@ -144,11 +145,25 @@ const SkillRequestCard = ({ skill }: SkillRequestCardProps) => {
             e.stopPropagation();
             setIsContributeDialogOpen(true);
           }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white border-0"
+          className="opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#0EA5E9] hover:bg-[#0284C7] text-white"
         >
           Offer Help
         </Button>
       )}
+      
+      {/* Edit Dialog */}
+      <SkillEditDialog
+        skill={skill}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSuccess={() => {
+          // Invalidate queries to refresh the skill list
+          const invalidationKeys = getInvalidationKeys('SKILLS');
+          invalidationKeys.forEach(key => {
+            queryClient.invalidateQueries({ queryKey: [key] });
+          });
+        }}
+      />
     </div>
   );
 };

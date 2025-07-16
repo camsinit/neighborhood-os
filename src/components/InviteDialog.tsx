@@ -148,8 +148,8 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   };
 
   /**
-   * Validates email and shows placeholder message
-   * Uses inline error instead of toast for validation
+   * Send email invitation via Resend API
+   * Validates email and sends invitation with proper error handling
    */
   const sendEmailInvite = async () => {
     setEmailError(""); // Clear previous errors
@@ -169,9 +169,43 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       return;
     }
     
-    // Show placeholder message - no loading toast needed
-    toast.success("Coming soon! Email invitations will be implemented with Resend.");
-    setEmail("");
+    if (!user) {
+      toast.error("You must be logged in to send invitations");
+      return;
+    }
+
+    try {
+      // Generate invite code
+      const inviteCode = crypto.randomUUID();
+      
+      // Create invitation record in database
+      const { error: inviteError } = await supabase.from("invitations").insert({
+        invite_code: inviteCode,
+        inviter_id: user.id,
+        neighborhood_id: currentNeighborhood.id,
+        email: email.trim(),
+      });
+
+      if (inviteError) throw inviteError;
+
+      // Send email via edge function
+      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
+        body: {
+          email: email.trim(),
+          inviterName: user.user_metadata?.display_name || 'A neighbor',
+          neighborhoodName: currentNeighborhood.name,
+          inviteCode: inviteCode
+        }
+      });
+
+      if (emailError) throw emailError;
+
+      toast.success("Invitation sent successfully!");
+      setEmail("");
+    } catch (error: any) {
+      console.error("Error sending invitation:", error);
+      toast.error("Failed to send invitation: " + error.message);
+    }
   };
   
   /**

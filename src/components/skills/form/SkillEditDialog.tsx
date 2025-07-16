@@ -9,7 +9,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SkillWithProfile, SkillCategory } from "../types/skillTypes";
 import { toast } from "sonner";
-import { updateSkill } from "@/services/skills/skillsService";
+import { supabase } from "@/integrations/supabase/client";
 import { QUERY_KEYS, getInvalidationKeys } from "@/utils/queryKeys";
 
 /**
@@ -33,7 +33,7 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
   // Form state for basic skill information
   const [title, setTitle] = useState(skill.title);
   const [description, setDescription] = useState(skill.description || '');
-  const [category, setCategory] = useState<SkillCategory>(skill.skill_category);
+  const [category, setCategory] = useState<SkillCategory>(skill.skill_category as SkillCategory);
   const [isLoading, setIsLoading] = useState(false);
   
   // Hooks for data operations
@@ -63,12 +63,20 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
     setIsLoading(true);
 
     try {
-      // Update the skill using the service
-      await updateSkill(skill.id, {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        category: category
-      }, user.id);
+      // Update the skill using Supabase directly
+      const { error } = await supabase
+        .from('skills_exchange')
+        .update({
+          title: title.trim(),
+          description: description.trim() || null,
+          skill_category: category
+        })
+        .eq('id', skill.id)
+        .eq('user_id', user.id); // Ensure user can only update their own skills
+
+      if (error) {
+        throw error;
+      }
 
       // Invalidate queries to refresh the skill list
       const invalidationKeys = getInvalidationKeys('SKILLS');
@@ -93,7 +101,7 @@ const SkillEditDialog = ({ skill, open, onOpenChange, onSuccess }: SkillEditDial
       // Reset form to original values when closing
       setTitle(skill.title);
       setDescription(skill.description || '');
-      setCategory(skill.skill_category);
+      setCategory(skill.skill_category as SkillCategory);
     }
     onOpenChange(newOpen);
   };
