@@ -35,7 +35,7 @@ export const useFormSubmission = () => {
   
   // Import the individual hooks for each concern
   const { createUserAccount } = useAccountCreation();
-  const { uploadProfileImage } = useProfileImageUpload();
+  const { uploadProfileImage, downloadAndUploadOAuthImage } = useProfileImageUpload();
   const { saveSkills } = useSkillsManagement();
   const { upsertProfile, getUserNeighborhoodId } = useProfileManagement();
   
@@ -185,11 +185,21 @@ export const useFormSubmission = () => {
 
       logger.info("Found neighborhood:", neighborhoodId);
 
-      // Step 3: Upload profile image if provided (50%)
+      // Step 3: Upload profile image if provided or download OAuth image (50%)
       setSubmissionState(prev => ({ ...prev, progress: 50 }));
       let avatarUrl: string | undefined;
       if (formData.profileImage) {
         avatarUrl = await uploadProfileImage(formData.profileImage, userId);
+      } else if (formData.authMethod === 'oauth' && formData.profileImageUrl) {
+        logger.info("Downloading and uploading OAuth profile image");
+        try {
+          avatarUrl = await downloadAndUploadOAuthImage(formData.profileImageUrl, userId);
+          logger.info("OAuth profile image processed successfully");
+        } catch (error) {
+          logger.error("OAuth profile image processing failed:", error);
+          // Use original URL as fallback
+          avatarUrl = formData.profileImageUrl;
+        }
       }
 
       // Step 4: Create/update user profile (70%)

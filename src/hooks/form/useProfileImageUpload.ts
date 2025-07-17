@@ -39,5 +39,35 @@ export const useProfileImageUpload = () => {
     }
   };
 
-  return { uploadProfileImage };
+  /**
+   * Download and upload OAuth profile image to Supabase storage
+   */
+  const downloadAndUploadOAuthImage = async (imageUrl: string, userId: string): Promise<string | null> => {
+    if (!imageUrl) return null;
+
+    try {
+      console.log('[useProfileImageUpload] Downloading OAuth image:', imageUrl);
+      
+      // Download the image from the OAuth provider
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download image: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const file = new File([blob], `oauth-avatar-${userId}.jpg`, { type: 'image/jpeg' });
+
+      // Upload to our storage
+      const uploadedUrl = await uploadProfileImage(file, userId);
+      console.log('[useProfileImageUpload] OAuth image uploaded successfully:', uploadedUrl);
+      
+      return uploadedUrl;
+    } catch (error) {
+      console.error('[useProfileImageUpload] Error downloading/uploading OAuth image:', error);
+      // Return original URL as fallback
+      return imageUrl;
+    }
+  };
+
+  return { uploadProfileImage, downloadAndUploadOAuthImage };
 };

@@ -110,11 +110,21 @@ const DebugPage = () => {
                   <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowOnboardingTest(true)}
+                      onClick={() => {
+                        // Simulate OAuth data for consistent test flow
+                        console.log('[DebugPage] Setting up OAuth-like test data');
+                        localStorage.setItem('debugOAuthData', JSON.stringify({
+                          firstName: 'Test',
+                          lastName: 'User',
+                          email: 'test@example.com',
+                          profileImageUrl: 'https://via.placeholder.com/150'
+                        }));
+                        setShowOnboardingTest(true);
+                      }}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
-                      Test Full Invite Flow
+                      Test Unified Onboarding Flow
                     </Button>
                   </div>
                 </div>

@@ -29,19 +29,11 @@ interface SurveyDialogProps {
   submissionState?: FormSubmissionState;
 }
 
-// Define the survey steps - now dynamic based on auth method
-const getSteps = (authMethod: 'oauth' | 'manual') => {
-  if (authMethod === 'oauth') {
-    return [
-      { title: "Welcome!" },
-      { title: "About You" },
-      { title: "Privacy Settings" },
-    ];
-  }
+// Define the unified survey steps - same for both OAuth and manual users
+const getSteps = () => {
   return [
     { title: "Basic Information" },
-    { title: "Contact & Account" },
-    { title: "Address" },
+    { title: "Contact & Address" },
     { title: "Profile Photo" },
   ];
 };
@@ -83,8 +75,8 @@ const SurveyDialog = ({
     }
   }, [user, isInitialized, initializeFormData]);
 
-  // Get dynamic steps based on auth method
-  const steps = getSteps(formData.authMethod);
+  // Get unified steps for all users
+  const steps = getSteps();
   
   // Handle survey completion - pass form data to completion handler
   const handleSurveyComplete = () => {

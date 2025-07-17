@@ -63,10 +63,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Show loading spinner while checking authentication and neighborhood
   if (isLoadingAuth || (isLoadingNeighborhood && user) || (isCheckingOnboarding && user)) {
     return (
-      <LoadingSpinner 
-        isLoadingAuth={isLoadingAuth}
-        isCheckingOnboarding={isCheckingOnboarding}
-      />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-muted-foreground">
+            {isLoadingAuth ? 'Checking authentication...' : 
+             isCheckingOnboarding ? 'Checking onboarding status...' : 
+             'Loading neighborhood...'}
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -97,7 +103,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // redirect to join page - except for the join page itself and home page to avoid loops
   if (!currentNeighborhood && !isJoin && !isHome) {
     console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
-    return <Navigate to="/join" replace />;
+    // Show loading state briefly to prevent jarring redirect
+    setTimeout(() => {
+      // This will be handled by the redirect logic
+    }, 100);
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Setting up your neighborhood...</p>
+        </div>
+      </div>
+    );
   }
 
   // User is authenticated and has necessary data, render the protected content
