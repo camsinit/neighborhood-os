@@ -21,7 +21,13 @@ const AuthCallback = () => {
         
         if (error) {
           console.error('[AuthCallback] OAuth callback error:', error);
-          navigate('/login?error=oauth_failed');
+          // If we have a pending invite, redirect back to join page with error
+          const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+          if (pendingInviteCode) {
+            navigate(`/join/${pendingInviteCode}?error=oauth_failed`);
+          } else {
+            navigate('/login?error=oauth_failed');
+          }
           return;
         }
 

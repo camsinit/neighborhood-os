@@ -154,11 +154,11 @@ const SurveyDialog = ({
           </div>
         )}
         
-        {/* OAuth indicator */}
+        {/* OAuth indicator - enhanced for neighborhood join context */}
         {formData.authMethod === 'oauth' && formData.isDataPrePopulated && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mb-4">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <span>Connected with Google - some information pre-filled</span>
+            <span>Connected with Google - profile information pre-filled</span>
           </div>
         )}
         

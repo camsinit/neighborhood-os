@@ -39,6 +39,16 @@ const JoinPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
+  // Check for OAuth errors in URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam === 'oauth_failed') {
+      setOauthError('Google sign-in failed. Please try the manual signup option or try again.');
+    }
+  }, []);
 
   /**
    * Load neighborhood information from the invite code using security definer function
@@ -385,6 +395,13 @@ const JoinPage = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* OAuth Error Display */}
+          {oauthError && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600">{oauthError}</p>
+            </div>
+          )}
+          
           {/* Neighborhood Preview Information */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3 text-gray-600">

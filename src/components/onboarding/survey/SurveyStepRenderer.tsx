@@ -39,19 +39,29 @@ export const SurveyStepRenderer = ({
   if (formData.authMethod === 'oauth') {
     // OAuth flow: Welcome -> About You -> Privacy
     switch (currentStep) {
-      case 0: // Welcome screen with OAuth info
+      case 0: // Welcome screen with OAuth info - enhanced with neighborhood context
         return (
-          <BasicInfoStep
-            firstName={formData.firstName}
-            lastName={formData.lastName}
-            yearMovedIn={formData.yearMovedIn}
-            onFirstNameChange={(value) => handleChange("firstName", value)}
-            onLastNameChange={(value) => handleChange("lastName", value)}
-            onYearMovedInChange={(value) => handleChange("yearMovedIn", value)}
-            onValidation={handleValidation}
-            isOAuthUser={true}
-            isReadOnly={formData.isDataPrePopulated}
-          />
+          <div className="space-y-6">
+            {/* Neighborhood join context */}
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">Complete Your Profile</h3>
+              <p className="text-sm text-muted-foreground">
+                We've pre-filled some information from Google. Please complete the remaining details to join your neighborhood.
+              </p>
+            </div>
+            
+            <BasicInfoStep
+              firstName={formData.firstName}
+              lastName={formData.lastName}
+              yearMovedIn={formData.yearMovedIn}
+              onFirstNameChange={(value) => handleChange("firstName", value)}
+              onLastNameChange={(value) => handleChange("lastName", value)}
+              onYearMovedInChange={(value) => handleChange("yearMovedIn", value)}
+              onValidation={handleValidation}
+              isOAuthUser={true}
+              isReadOnly={formData.isDataPrePopulated}
+            />
+          </div>
         );
       
       case 1: // Address and Contact (combined)
