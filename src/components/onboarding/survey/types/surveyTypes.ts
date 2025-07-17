@@ -20,16 +20,11 @@ export interface SurveyFormData {
   
   // User-provided information
   yearMovedIn: number | null;
-  phone: string;
   address: string;
   
   // Auth-specific fields
   password?: string; // Only for manual signup
   profileImage?: File | null; // Only if uploading new image
-  
-  // Privacy settings
-  emailVisible: boolean;
-  phoneVisible: boolean;
 }
 
 /**

@@ -56,15 +56,9 @@ export const SurveyStepRenderer = ({
         <div className="space-y-6">
           <ContactInfoStep
             email={formData.email}
-            phone={formData.phone}
             password={formData.password || ''}
-            emailVisible={formData.emailVisible}
-            phoneVisible={formData.phoneVisible}
             onEmailChange={(value) => handleChange('email', value)}
-            onPhoneChange={(value) => handleChange('phone', value)}
             onPasswordChange={(value) => handleChange('password', value)}
-            onEmailVisibleChange={(value) => handleChange('emailVisible', value)}
-            onPhoneVisibleChange={(value) => handleChange('phoneVisible', value)}
             onValidation={handleValidation}
             isOAuthUser={formData.authMethod === 'oauth'}
           />

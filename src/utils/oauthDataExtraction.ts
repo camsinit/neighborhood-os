@@ -30,9 +30,6 @@ export const extractOAuthUserData = (user: User): Partial<SurveyFormData> => {
     lastName,
     email: user.email || '',
     profileImageUrl: userMetadata.avatar_url || userMetadata.picture || '',
-    emailVisible: true, // Default for OAuth users
-    phoneVisible: false,
-    phone: '', // OAuth doesn't typically provide phone
     address: '', // User will need to provide this
     yearMovedIn: null, // User will need to provide this
   };
@@ -50,13 +47,10 @@ export const createManualSignupFormData = (): SurveyFormData => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     address: '',
     yearMovedIn: null,
     password: '',
     profileImage: null,
-    emailVisible: true,
-    phoneVisible: false,
   };
 };
 
@@ -92,7 +86,5 @@ export const mergeOAuthData = (existingData: SurveyFormData, user: User): Survey
     // Preserve user-entered data for fields OAuth doesn't provide
     address: existingData.address,
     yearMovedIn: existingData.yearMovedIn,
-    phone: existingData.phone,
-    phoneVisible: existingData.phoneVisible,
   } as SurveyFormData;
 };

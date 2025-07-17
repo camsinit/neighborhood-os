@@ -21,11 +21,9 @@ export const useProfileManagement = () => {
       const profileData = {
         id: userId,
         display_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        phone_number: formData.phone || null,
         address: formData.address || null,
         avatar_url: avatarUrl || null,
-        email_visible: formData.emailVisible,
-        phone_visible: formData.phoneVisible,
+        email_visible: true, // Default email visibility
         address_visible: false,
         years_lived_here: calculateYearsLived(formData.yearMovedIn),
         // skills removed - no longer collected during onboarding

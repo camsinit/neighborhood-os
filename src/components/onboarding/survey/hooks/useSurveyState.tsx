@@ -32,11 +32,8 @@ export const useSurveyState = () => {
     lastName: "",
     yearMovedIn: null,
     email: "",
-    phone: "",
     password: "",
     address: "",
-    emailVisible: true,
-    phoneVisible: false,
     profileImage: null,
   });
   
@@ -86,7 +83,7 @@ export const useSurveyState = () => {
       
       case 1: // Contact/Auth Information  
         if (formData.authMethod === 'oauth') {
-          // OAuth users only need phone (password provided by OAuth)
+          // OAuth users only need email (password provided by OAuth)
           return formData.email.trim() !== "" && formData.email.includes("@");
         } else {
           // Manual users need email and password
