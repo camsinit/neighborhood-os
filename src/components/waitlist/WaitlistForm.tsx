@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,7 +115,7 @@ const WaitlistForm = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Join the waitlist if you're a neighborhood instigator who wants early-access
+          Join the waitlist if you're a neighborhood leader who wants early-access
         </p>
       </form>
 
