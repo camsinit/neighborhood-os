@@ -18,7 +18,6 @@ import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
-import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -33,9 +32,6 @@ import { useNavigate } from 'react-router-dom';
  * - Future: Users debugging
  */
 const DebugPage = () => {
-  // Navigation hook for redirecting to real JoinPage
-  const navigate = useNavigate();
-  
   // State for onboarding testing dialogs
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
@@ -43,18 +39,6 @@ const DebugPage = () => {
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
-  
-  /**
-   * Handle full invite flow test by navigating to real JoinPage with test invite code
-   */
-  const handleTestFullInviteFlow = () => {
-    // Use actual test invite code from the test neighborhood
-    const testInviteCode = '35f4a239-58d7-4ac8-94d3-c68d1793ccd7';
-    console.log('[DebugPage] Testing full invite flow with code:', testInviteCode);
-    
-    // Navigate to the real JoinPage with the test invite code
-    navigate(`/join/${testInviteCode}`);
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -126,7 +110,7 @@ const DebugPage = () => {
                   <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
-                      onClick={handleTestFullInviteFlow}
+                      onClick={() => setShowOnboardingTest(true)}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
