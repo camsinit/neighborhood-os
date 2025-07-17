@@ -5,20 +5,21 @@ import { SurveyStepRenderer } from "./SurveyStepRenderer";
 import { SurveyNavigation } from "./SurveyNavigation";
 import { useSurveyState } from "./hooks/useSurveyState";
 import { WelcomeScreen } from "../WelcomeScreen";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormSubmissionState } from "./types/surveyTypes";
 import { Progress } from "@/components/ui/progress";
+import { useUser } from "@supabase/auth-helpers-react";
+import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
+import { CheckCircle } from "lucide-react";
 
 /**
  * SurveyDialog component
  * 
  * A multi-step survey dialog that collects user information during onboarding.
- * Now refactored into smaller, focused components for better maintainability.
- * Includes skills survey validation to ensure users complete the mini-survey.
+ * Now OAuth-aware and adapts the flow based on authentication method.
  * Shows a welcome screen with confetti after completion.
- * Now includes form submission progress tracking.
  * 
- * UPDATED: Removed guest mode logic - all onboarding users create new accounts
+ * UPDATED: OAuth-aware with dynamic step flow based on auth method
  */
 interface SurveyDialogProps {
   open: boolean;
@@ -28,21 +29,22 @@ interface SurveyDialogProps {
   submissionState?: FormSubmissionState;
 }
 
-// Define the survey steps (skills step removed - moved to Skills page)
-const steps = [
-  {
-    title: "Basic Information",
-  },
-  {
-    title: "Contact Information",
-  },
-  {
-    title: "Address",
-  },
-  {
-    title: "Profile Photo",
-  },
-];
+// Define the survey steps - now dynamic based on auth method
+const getSteps = (authMethod: 'oauth' | 'manual') => {
+  if (authMethod === 'oauth') {
+    return [
+      { title: "Welcome!" },
+      { title: "About You" },
+      { title: "Privacy Settings" },
+    ];
+  }
+  return [
+    { title: "Basic Information" },
+    { title: "Contact & Account" },
+    { title: "Address" },
+    { title: "Profile Photo" },
+  ];
+};
 
 const SurveyDialog = ({ 
   open, 
@@ -51,8 +53,11 @@ const SurveyDialog = ({
   isTestMode = false,
   submissionState,
 }: SurveyDialogProps) => {
+  const user = useUser();
+  
   // Track if survey is completed and showing welcome screen
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Use custom hook for survey state management
   const {
@@ -63,7 +68,23 @@ const SurveyDialog = ({
     isCurrentStepValid,
     handleNext,
     handlePrevious,
+    initializeFormData,
   } = useSurveyState();
+
+  // Initialize with OAuth data if available
+  useEffect(() => {
+    if (user && !isInitialized) {
+      if (isOAuthUser(user)) {
+        console.log("[SurveyDialog] Initializing with OAuth data");
+        const oauthData = extractOAuthUserData(user);
+        initializeFormData(oauthData);
+      }
+      setIsInitialized(true);
+    }
+  }, [user, isInitialized, initializeFormData]);
+
+  // Get dynamic steps based on auth method
+  const steps = getSteps(formData.authMethod);
   
   // Handle survey completion - pass form data to completion handler
   const handleSurveyComplete = () => {
@@ -130,6 +151,14 @@ const SurveyDialog = ({
         {isTestMode && (
           <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
             Test Mode - No changes will be saved to your profile
+          </div>
+        )}
+        
+        {/* OAuth indicator */}
+        {formData.authMethod === 'oauth' && formData.isDataPrePopulated && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mb-4">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <span>Connected with Google - some information pre-filled</span>
           </div>
         )}
         

@@ -24,8 +24,10 @@ export const useSurveyState = () => {
     hasSelectedSkills: false,
   });
   
-  // Form data state (skills removed - moved to Skills page)
+  // Form data state (OAuth-aware structure)
   const [formData, setFormData] = useState<SurveyFormData>({
+    authMethod: 'manual',
+    isDataPrePopulated: false,
     firstName: "",
     lastName: "",
     yearMovedIn: null,
@@ -75,22 +77,32 @@ export const useSurveyState = () => {
 
   /**
    * Validate if current step has all required fields completed
+   * OAuth-aware validation logic
    */
   const isCurrentStepValid = (): boolean => {
     switch (currentStep) {
-      case 0: // Basic Information
+      case 0: // Basic Information (or OAuth Welcome)
         return formData.firstName.trim() !== "" && formData.lastName.trim() !== "";
       
-      case 1: // Contact Information  
-        return formData.email.trim() !== "" && 
-               formData.password.trim() !== "" && 
-               formData.email.includes("@");
+      case 1: // Contact/Auth Information  
+        if (formData.authMethod === 'oauth') {
+          // OAuth users only need phone (password provided by OAuth)
+          return formData.email.trim() !== "" && formData.email.includes("@");
+        } else {
+          // Manual users need email and password
+          return formData.email.trim() !== "" && 
+                 formData.password && formData.password.trim() !== "" && 
+                 formData.email.includes("@");
+        }
       
-      case 2: // Address
+      case 2: // Address & Contact
         return formData.address.trim() !== "";
       
       case 3: // Profile Image (final step)
-        return formData.profileImage !== null;
+        // OAuth users might have a profile image URL, manual users need to upload
+        return formData.authMethod === 'oauth' ? 
+          !!(formData.profileImageUrl || formData.profileImage !== null) :
+          formData.profileImage !== null;
       
       default:
         return true;
@@ -118,6 +130,16 @@ export const useSurveyState = () => {
     }
   };
 
+  /**
+   * Initialize form data with OAuth or manual data
+   */
+  const initializeFormData = (data: Partial<SurveyFormData>) => {
+    setFormData(prev => ({
+      ...prev,
+      ...data
+    }));
+  };
+
   return {
     currentStep,
     formData,
@@ -129,5 +151,6 @@ export const useSurveyState = () => {
     isCurrentStepValid,
     handleNext,
     handlePrevious,
+    initializeFormData,
   };
 };

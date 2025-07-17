@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
 import { usePendingInviteHandler } from "./hooks/usePendingInviteHandler";
 import SurveyDialog from "./survey/SurveyDialog";
+import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
 
 /**
  * OnboardingDialog component

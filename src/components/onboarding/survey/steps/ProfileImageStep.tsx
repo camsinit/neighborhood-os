@@ -15,9 +15,11 @@ import { ImageCropDialog } from "./profile/ImageCropDialog";
 
 interface ProfileImageStepProps {
   onImageChange?: (file: File | null) => void;
+  initialImageUrl?: string;
 }
 export const ProfileImageStep = ({
-  onImageChange
+  onImageChange,
+  initialImageUrl
 }: ProfileImageStepProps) => {
   const user = useUser();
   const [originalImage, setOriginalImage] = useState<File | null>(null);

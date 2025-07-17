@@ -28,6 +28,7 @@ interface ContactInfoStepProps {
   onEmailVisibleChange: (value: boolean) => void;
   onPhoneVisibleChange: (value: boolean) => void;
   onValidation?: (field: string, isValid: boolean) => void;
+  isOAuthUser?: boolean;
 }
 
 export const ContactInfoStep = ({
@@ -42,6 +43,7 @@ export const ContactInfoStep = ({
   onEmailVisibleChange,
   onPhoneVisibleChange,
   onValidation,
+  isOAuthUser = false,
 }: ContactInfoStepProps) => {
   // Track validation errors
   const [errors, setErrors] = useState({

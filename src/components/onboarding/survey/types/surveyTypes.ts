@@ -5,30 +5,31 @@
  * Contains all the data collected during the onboarding survey process.
  * This data is used to create user accounts, profiles, and initial skills.
  * 
- * UPDATED: Removed availability fields - no longer collected during onboarding
+ * UPDATED: OAuth-aware structure with conditional fields based on auth method
  */
 export interface SurveyFormData {
-  // Basic information
+  // Auth method tracking
+  authMethod: 'oauth' | 'manual';
+  isDataPrePopulated: boolean;
+  
+  // Basic information (may be pre-populated from OAuth)
   firstName: string;
   lastName: string;
-  yearMovedIn: number | null;
-  
-  // Contact information  
   email: string;
+  profileImageUrl?: string; // From OAuth provider
+  
+  // User-provided information
+  yearMovedIn: number | null;
   phone: string;
-  password: string;
+  address: string;
+  
+  // Auth-specific fields
+  password?: string; // Only for manual signup
+  profileImage?: File | null; // Only if uploading new image
   
   // Privacy settings
   emailVisible: boolean;
   phoneVisible: boolean;
-  
-  // Address information
-  address: string;
-  
-  // Profile image
-  profileImage: File | null;
-  
-  // Skills removed - skills onboarding moved to Skills page
 }
 
 /**

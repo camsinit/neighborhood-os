@@ -29,7 +29,9 @@ interface BasicInfoStepProps {
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
   onYearMovedInChange: (value: number | null) => void;
-  onValidation?: (field: string, isValid: boolean) => void; // Add validation callback
+  onValidation?: (field: string, isValid: boolean) => void;
+  isOAuthUser?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const BasicInfoStep = ({
@@ -40,6 +42,8 @@ export const BasicInfoStep = ({
   onLastNameChange,
   onYearMovedInChange,
   onValidation,
+  isOAuthUser = false,
+  isReadOnly = false,
 }: BasicInfoStepProps) => {
   // Track validation errors for display
   const [errors, setErrors] = useState({
