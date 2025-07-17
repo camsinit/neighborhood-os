@@ -280,12 +280,15 @@ const JoinPage = () => {
       console.error("[JoinPage] Missing invite code for OAuth signup");
     }
     
+    // Store OAuth destination for callback processing
+    localStorage.setItem('oauthDestination', 'onboarding');
+    
     try {
       console.log("[JoinPage] Starting Google OAuth signup");
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       });
 

@@ -27,6 +27,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SuperAdminRoute from "@/components/auth/SuperAdminRoute";
+import AuthCallback from "@/pages/AuthCallback";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -66,6 +67,7 @@ const App = () => {
                   {/* Public routes - accessible without authentication */}
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   
                   {/* Join routes - allow unauthenticated access */}
                   <Route path="/join/:inviteCode" element={<JoinPage />} />

@@ -98,10 +98,13 @@ const AuthForm = () => {
     console.log("[AuthForm] Starting Google authentication");
 
     try {
+      // Store OAuth destination for callback processing
+      localStorage.setItem('oauthDestination', 'dashboard');
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       });
 
