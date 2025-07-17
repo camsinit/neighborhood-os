@@ -18,9 +18,7 @@ import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
-import InvitePreview from '@/components/invite/InvitePreview';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useNeighborhoodPreview } from '@/hooks/useNeighborhoodPreview';
+import { useNavigate } from 'react-router-dom';
 
 
 /**
@@ -35,33 +33,27 @@ import { useNeighborhoodPreview } from '@/hooks/useNeighborhoodPreview';
  * - Future: Users debugging
  */
 const DebugPage = () => {
+  // Navigation hook for redirecting to real JoinPage
+  const navigate = useNavigate();
+  
   // State for onboarding testing dialogs
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
   const [showSkillsOnboardingTest, setShowSkillsOnboardingTest] = useState(false);
-  const [showInvitePreviewTest, setShowInvitePreviewTest] = useState(false);
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
   
-  // Neighborhood preview hook to get actual neighborhood data
-  const { neighborhood, fetchNeighborhoodPreview, isLoading } = useNeighborhoodPreview();
-  
-  // Fetch actual neighborhood data when invite preview test opens
-  React.useEffect(() => {
-    if (showInvitePreviewTest) {
-      // Use the actual test neighborhood ID from custom instructions
-      fetchNeighborhoodPreview("c0e4e442-74c1-4b34-8388-b19f7b1c6a5d");
-    }
-  }, [showInvitePreviewTest, fetchNeighborhoodPreview]);
-  
-  // Reset neighborhood data when dialog closes
-  const handleInvitePreviewClose = (open: boolean) => {
-    setShowInvitePreviewTest(open);
-    if (!open) {
-      // Reset neighborhood data when dialog closes to prevent stale data
-      // Note: We can't directly reset the hook state, but it will reset on next open
-    }
+  /**
+   * Handle full invite flow test by navigating to real JoinPage with test invite code
+   */
+  const handleTestFullInviteFlow = () => {
+    // Use actual test invite code from the test neighborhood
+    const testInviteCode = '35f4a239-58d7-4ac8-94d3-c68d1793ccd7';
+    console.log('[DebugPage] Testing full invite flow with code:', testInviteCode);
+    
+    // Navigate to the real JoinPage with the test invite code
+    navigate(`/join/${testInviteCode}`);
   };
 
   return (
@@ -134,7 +126,7 @@ const DebugPage = () => {
                   <div className="flex flex-wrap gap-3">
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowInvitePreviewTest(true)}
+                      onClick={handleTestFullInviteFlow}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
@@ -241,44 +233,6 @@ const DebugPage = () => {
           isTestMode={true} // Mark this as test mode to prevent data modification
         />
         
-        {/* Full Invite Flow Test Dialog */}
-        <Dialog open={showInvitePreviewTest} onOpenChange={handleInvitePreviewClose}>
-          <DialogContent className="sm:max-w-[500px]">
-            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-4">
-              Test Mode - This simulates the full invite-to-onboarding experience
-            </div>
-            
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground mt-2">Loading neighborhood data...</p>
-              </div>
-            ) : neighborhood ? (
-              <InvitePreview 
-                neighborhood={neighborhood}
-                previewMode={false}
-                fullScreenMode={true}
-                className="border-0 shadow-none"
-              />
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Failed to load neighborhood data</p>
-              </div>
-            )}
-            
-            <div className="mt-4 pt-4 border-t">
-              <Button 
-                onClick={() => {
-                  setShowInvitePreviewTest(false);
-                  setShowOnboardingTest(true);
-                }}
-                className="w-full"
-              >
-                Continue to Profile Setup
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
     </div>
   );
 };
