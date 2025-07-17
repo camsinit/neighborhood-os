@@ -93,30 +93,32 @@ const WaitlistForm = () => {
   return <>
       {/* Main waitlist form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-row gap-2 py-[27px]">
-          <ShimmerInput 
-            type="email" 
-            placeholder="Your Email" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            disabled={isSubmitting} 
-            shimmerColor="#e5e7eb"
-            shimmerDuration="3s"
-            background="#ffffff"
-            rainbowEffect={true}
-            className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px]" 
-            style={{ height: '40px' }} 
-            required 
-          />
-          <Button type="submit" disabled={isSubmitting} className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap" style={{
-          height: '40px'
-        }}>
-            {isSubmitting ? "Joining..." : "Join Waitlist"}
-          </Button>
+        <div className="py-[27px]">
+          <div className="flex flex-row gap-2">
+            <ShimmerInput 
+              type="email" 
+              placeholder="Your Email" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
+              disabled={isSubmitting} 
+              shimmerColor="#e5e7eb"
+              shimmerDuration="3s"
+              background="#ffffff"
+              rainbowEffect={true}
+              className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px]" 
+              style={{ height: '40px' }} 
+              required 
+            />
+            <Button type="submit" disabled={isSubmitting} className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap" style={{
+              height: '40px'
+            }}>
+              {isSubmitting ? "Joining..." : "Join Waitlist"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground" style={{ marginTop: '15px' }}>
+            Join the waitlist if you're a neighborhood leader who wants early-access
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Join the waitlist if you're a neighborhood leader who wants early-access
-        </p>
       </form>
 
       {/* Survey popover that appears after successful waitlist signup */}
