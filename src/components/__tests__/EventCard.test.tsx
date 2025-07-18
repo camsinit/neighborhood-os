@@ -36,9 +36,13 @@ vi.mock('@/services/navigation/ItemNavigationService', () => ({
 describe('EventCard', () => {
   const mockEvent = {
     id: '1',
+    event_id: '1',
     title: 'Neighborhood BBQ',
+    description: 'Community BBQ event',
     time: '2024-01-15T18:00:00Z',
+    location: 'Community Park',
     host_id: 'host-123',
+    is_recurring: false,
     neighborhood_id: 'neighborhood-1',
     created_at: '2024-01-01T00:00:00Z'
   }
