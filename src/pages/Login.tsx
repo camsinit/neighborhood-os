@@ -38,7 +38,7 @@ const Login = () => {
       <Button
         variant="ghost"
         onClick={() => navigate("/")}
-        className="absolute top-4 right-4 z-20 bg-transparent hover:bg-background/10 text-foreground"
+        className="absolute top-4 left-4 z-20 bg-transparent hover:bg-background/10 text-foreground"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back
