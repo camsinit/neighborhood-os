@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import AuthForm from "@/components/auth/AuthForm";
 import AuthHeader from "@/components/auth/AuthHeader";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -32,6 +34,16 @@ const Login = () => {
       "flex flex-col justify-center py-12 sm:px-6 lg:px-8",
       "bg-background text-foreground font-sans" // Added font-sans for consistency
     )}>
+      {/* Back button in top right corner */}
+      <Button
+        variant="ghost"
+        onClick={() => navigate("/")}
+        className="absolute top-4 right-4 z-20 bg-transparent hover:bg-background/10 text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back
+      </Button>
+
       {/* 
         Background gradient with blue tones to match the original aesthetic
       */}
