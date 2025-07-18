@@ -14,3 +14,6 @@ verify_jwt = true
 [functions.notify-neighbor-changes]
 verify_jwt = true
 enabled = false  # Disabled as functionality moved to database triggers
+
+[functions.slack]
+verify_jwt = false

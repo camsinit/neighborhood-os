@@ -136,6 +136,42 @@ serve(async (req) => {
       );
     }
 
+    // Send Slack notification for survey submission
+    try {
+      const slackResponse = await fetch(`https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/slack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+        },
+        body: JSON.stringify({
+          type: 'survey_submission',
+          data: {
+            email,
+            firstName,
+            lastName,
+            neighborhoodName,
+            city,
+            state,
+            neighborsToOnboard,
+            aiCodingExperience,
+            openSourceInterest,
+            priorityScore: data[0]?.priority_score || 0,
+            timestamp: new Date().toISOString(),
+          }
+        }),
+      });
+      
+      if (!slackResponse.ok) {
+        console.error("Failed to send Slack survey notification:", slackResponse.status);
+      } else {
+        console.log("Slack survey notification sent successfully");
+      }
+    } catch (slackError) {
+      console.error("Error sending Slack survey notification:", slackError);
+      // Don't fail the main request if Slack fails
+    }
+
     // Send updated waitlist welcome email with survey data after successful survey submission
     try {
       const html = await renderAsync(

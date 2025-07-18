@@ -84,6 +84,33 @@ serve(async (req) => {
       );
     }
 
+    // Send Slack notification for new waitlist signup
+    try {
+      const slackResponse = await fetch(`https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/slack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+        },
+        body: JSON.stringify({
+          type: 'waitlist_signup',
+          data: {
+            email,
+            timestamp: new Date().toISOString(),
+          }
+        }),
+      });
+      
+      if (!slackResponse.ok) {
+        console.error("Failed to send Slack notification:", slackResponse.status);
+      } else {
+        console.log("Slack notification sent successfully");
+      }
+    } catch (slackError) {
+      console.error("Error sending Slack notification:", slackError);
+      // Don't fail the main request if Slack fails
+    }
+
     // Send welcome email after successful waitlist signup
     try {
       const html = await renderAsync(
