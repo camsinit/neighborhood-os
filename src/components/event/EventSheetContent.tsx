@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "@/components/ui/share-button";
 import EventForm from "../events/EventForm";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Download } from "lucide-react";
+import { downloadICSFile } from "@/utils/icsGenerator";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -150,13 +151,25 @@ const EventSheetContent = ({
             <span>{isEditing ? "Edit Event" : event.title}</span>
             <div className="flex items-center gap-2">
               {!isEditing && (
-                <ShareButton
-                  contentType="events"
-                  contentId={event.id}
-                  neighborhoodId={event.neighborhood_id}
-                  size="sm"
-                  variant="ghost"
-                />
+                <>
+                  <Button
+                    onClick={() => downloadICSFile(event, neighborhoodTimezone)}
+                    size="sm"
+                    variant="ghost"
+                    className="h-10 w-10 p-0 rounded-full bg-muted hover:bg-muted/80"
+                    title="Download calendar event"
+                    aria-label="Download calendar event"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <ShareButton
+                    contentType="events"
+                    contentId={event.id}
+                    neighborhoodId={event.neighborhood_id}
+                    size="sm"
+                    variant="ghost"
+                  />
+                </>
               )}
               {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
                (isHost && !isEditing && (

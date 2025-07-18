@@ -1,14 +1,15 @@
 
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
-import { Pencil, Clock, Users } from "lucide-react";
+import { Pencil, Clock, Users, Download } from "lucide-react";
+import { downloadICSFile } from "@/utils/icsGenerator";
 import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import EventSheetContent from "./event/EventSheetContent";
-import { EventCardProps } from "./event/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { EventCardProps } from "./event/types";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
@@ -148,11 +149,27 @@ const EventCard = ({
   // Added mb-2 (margin-bottom) to create space between events
   const eventPreview = <div 
       data-event-id={event.id} 
-      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative`} 
+      className={`rounded-md px-2 py-1.5 mb-2 text-xs cursor-pointer hover:bg-opacity-80 border-l-4 ${getEventColor()} w-full hover:bg-blue-100 transition-colors relative group`} 
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
       onClick={handleEventClick}
     >
-      {/* Host edit button - only shows when hovering on events you created */}
-      {isHost && isHovering}
+      {/* Download button - shows on hover */}
+      {isHovering && (
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            downloadICSFile(event, neighborhoodTimezone);
+          }}
+          size="sm"
+          variant="ghost"
+          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white shadow-sm"
+          title="Download calendar event"
+          aria-label="Download calendar event"
+        >
+          <Download className="h-3 w-3" />
+        </Button>
+      )}
       
       <div className="font-medium line-clamp-2">{event.title}</div>
       {rsvpCount > 0 && <div className="flex items-center gap-1 text-gray-600 mt-1">
