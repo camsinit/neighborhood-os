@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import { UnsavedChangesDialog } from "./settings/components/UnsavedChangesDialog
 const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) => {
   const supabaseClient = useSupabaseClient();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   // Use the custom hook for form management
@@ -48,14 +48,9 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
     try {
       await supabaseClient.auth.signOut();
       navigate("/login");
-      toast({
-        title: "Signed out successfully",
-      });
+      showSuccessToast("Signed out successfully");
     } catch (error) {
-      toast({
-        title: "Error signing out",
-        variant: "destructive",
-      });
+      showErrorToast("Error signing out");
     }
   };
 

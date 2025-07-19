@@ -28,8 +28,6 @@ const Index = () => {
   // Get the current authenticated user (should always exist due to ProtectedRoute)
   const user = useUser();
   
-  // State to track if we need to wait longer than expected
-  const [isDelayed, setIsDelayed] = useState(false);
   
   // State to track onboarding status
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
@@ -66,17 +64,6 @@ const Index = () => {
     
     checkOnboardingStatus();
   }, [user]);
-  
-  // Set a timer to detect if loading is taking too long
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isLoadingNeighborhood || isCheckingOnboarding) {
-        setIsDelayed(true);
-      }
-    }, 5000); // Show delayed message after 5 seconds
-    
-    return () => clearTimeout(timer);
-  }, [isLoadingNeighborhood, isCheckingOnboarding]);
   
   // Effect to handle routing logic based on onboarding and neighborhood status
   useEffect(() => {
@@ -119,60 +106,14 @@ const Index = () => {
     }
   }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, needsOnboarding, isCheckingOnboarding]);
 
-  // Handle manual retry when there's an issue
-  const handleRetry = async () => {
-    await refreshNeighborhoodData();
-    // If we have a user and neighborhood after refresh, go to home
-    if (user && currentNeighborhood) {
-      navigate("/home", { replace: true });
-    }
-  };
 
   // Show a visible loading indicator while determining where to route
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      {isDelayed ? (
-        <Card className="p-6 max-w-md w-full">
-          <h2 className="text-xl font-bold text-center mb-4">Taking longer than expected...</h2>
-          <p className="text-gray-600 mb-6 text-center">
-            We're having trouble connecting to your neighborhood data. 
-            You can wait a bit longer or try these options:
-          </p>
-          <div className="flex flex-col gap-3">
-            <Button onClick={handleRetry} className="w-full">
-              Retry Connection
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/home")} 
-              className="w-full"
-            >
-              Go to Home Anyway
-            </Button>
-          </div>
-          {error && (
-            <p className="text-amber-600 text-sm mt-4 text-center">
-              Error details: {error.message || "Unknown connection issue"}
-            </p>
-          )}
-        </Card>
-      ) : (
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-600">Setting up your dashboard...</p>
-          <p className="text-gray-400 text-sm mt-2">
-            {isLoadingNeighborhood ? "Loading your neighborhood..." : 
-             isCheckingOnboarding ? "Checking profile status..." : 
-             "Preparing your experience..."}
-          </p>
-          {error && (
-            <p className="text-amber-600 text-sm mt-4">
-              Note: Having trouble connecting to neighborhood data. 
-              Taking you to home page where you can join a neighborhood.
-            </p>
-          )}
-        </div>
-      )}
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <p className="text-gray-600">Loading your neighborhood...</p>
+      </div>
     </div>
   );
 };

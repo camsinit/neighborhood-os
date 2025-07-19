@@ -73,14 +73,8 @@ const ArchiveButton = ({
       if (error) {
         console.error("Error archiving request:", error);
         
-        // Show a more detailed error message based on the error type
-        if (error.code === '42501') { // Permission denied error
-          toast.error("You don't have permission to archive this item");
-        } else if (error.code === 'PGRST116') { // Record not found
-          toast.error("This item no longer exists or has already been archived");
-        } else {
-          toast.error("Failed to archive the item: " + error.message);
-        }
+        // Show simple error message
+        toast.error("Something went wrong. Please refresh the page.");
         throw error;
       }
       

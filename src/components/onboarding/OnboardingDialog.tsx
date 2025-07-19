@@ -1,6 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
@@ -27,7 +27,7 @@ const OnboardingDialog = ({
   onOpenChange
 }: OnboardingDialogProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const user = useUser();
   
   console.log("[OnboardingDialog] Component initialized");
@@ -68,11 +68,10 @@ const OnboardingDialog = ({
       console.error("[OnboardingDialog] Error completing onboarding:", error);
       
       // Show error toast
-      toast({
-        title: "Error",
-        description: "Failed to complete profile setup. Please try again.",
-        variant: "destructive",
-      });
+      showErrorToast(
+        "Error",
+        "Failed to complete profile setup. Please try again."
+      );
     }
   };
   

@@ -88,6 +88,7 @@ const RegularGoodsSection: React.FC<RegularGoodsSectionProps> = ({
           description="Be the first to request an item from your neighbors"
           actionLabel="Request an Item"
           onAction={onRequestItem}
+          moduleTheme="goods"
         />
       ) : null}
     </div>
