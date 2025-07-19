@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/form";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { SafetyUpdateFormData, SAFETY_UPDATE_TYPES } from "../schema/safetyUpdateSchema";
+import ModuleTag from "@/components/ui/module-tag";
 
 interface SafetyTypeFieldProps {
   form: UseFormReturn<SafetyUpdateFormData>;
@@ -35,12 +36,17 @@ export const SafetyTypeField = ({ form }: SafetyTypeFieldProps) => {
                     key={type.value}
                     value={type.value}
                     aria-label={type.label}
-                    className="px-3 py-2 rounded-full border border-red-200 
-                      bg-red-50/80 text-red-700 hover:bg-red-100/80 transition-colors text-sm
-                      data-[state=on]:bg-red-500 data-[state=on]:text-white data-[state=on]:border-red-500
-                      min-w-fit"
+                    className="p-0 border-0 bg-transparent hover:bg-transparent"
+                    asChild
                   >
-                    <span className="whitespace-nowrap">{type.label}</span>
+                    <ModuleTag
+                      moduleTheme="safety"
+                      variant="pastel"
+                      selected={field.value === type.value}
+                      className="cursor-pointer"
+                    >
+                      <span className="whitespace-nowrap">{type.label}</span>
+                    </ModuleTag>
                   </ToggleGroupItem>
                 );
               })}

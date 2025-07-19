@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import ModuleButton from "@/components/ui/module-button";
 import { SafetyTextField } from "./form/SafetyTextField";
 import { SafetyTypeField } from "./form/SafetyTypeField";
 import { ImageField } from "./form/ImageField";
@@ -93,16 +93,18 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
         <ImageField form={form} />
         
         {/* Submit button with loading state - text changes based on operation type */}
-        <Button 
+        <ModuleButton 
           type="submit" 
           disabled={isLoading} 
-          className="w-full bg-red-600 hover:bg-red-700 text-white"
+          moduleTheme="safety"
+          variant="filled"
+          className="w-full"
         >
           {isLoading 
             ? (updateId ? "Updating..." : "Submitting...") 
             : (updateId ? "Update Safety Update" : "Post Safety Update")
           }
-        </Button>
+        </ModuleButton>
       </form>
     </Form>
   );

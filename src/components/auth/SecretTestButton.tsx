@@ -26,12 +26,10 @@ const SecretTestButton = () => {
             setShowSurvey(true);
           }
         }}
-        isTestMode={true} // Mark this as test mode
       />
       <SurveyDialog
         open={showSurvey}
         onOpenChange={setShowSurvey}
-        isTestMode={true} // Mark this as test mode
       />
     </>
   );

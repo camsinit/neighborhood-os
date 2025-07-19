@@ -1,5 +1,6 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import ModuleButton from "@/components/ui/module-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Plus } from "lucide-react";
@@ -191,10 +192,15 @@ const SkillSheetContent = ({
         {/* Action buttons */}
         <div className="flex gap-3">
           {!userHasSkill ? (
-            <Button onClick={handleAddSkill} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
+            <ModuleButton 
+              onClick={handleAddSkill} 
+              moduleTheme="skills"
+              variant="filled"
+              className="flex items-center gap-2"
+            >
               <Plus className="h-4 w-4" />
               Have this skill?
-            </Button>
+            </ModuleButton>
           ) : (
             <Button 
               onClick={handleRemoveSkill} 

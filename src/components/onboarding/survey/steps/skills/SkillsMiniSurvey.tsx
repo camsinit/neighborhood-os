@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import ModuleButton from "@/components/ui/module-button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -358,9 +359,16 @@ export const SkillsMiniSurvey = ({
               onKeyDown={(e) => e.key === 'Enter' && handleCustomSkillAdd()}
               className="h-8 text-xs"
             />
-            <Button onClick={handleCustomSkillAdd} disabled={!customSkillInput.trim()} size="sm" className="h-8 px-2 bg-green-500 hover:bg-green-600">
-              <Check className="h-3 w-3 text-white" />
-            </Button>
+            <ModuleButton 
+              onClick={handleCustomSkillAdd} 
+              disabled={!customSkillInput.trim()} 
+              size="sm" 
+              moduleTheme="skills"
+              variant="filled"
+              className="h-8 px-2"
+            >
+              <Check className="h-3 w-3" />
+            </ModuleButton>
             <Button variant="outline" onClick={() => {
               setShowCustomInput(false);
               setCustomSkillInput('');
@@ -404,10 +412,15 @@ export const SkillsMiniSurvey = ({
           </div>
         )}
         
-        <Button onClick={handleNext} size="sm" className="bg-green-500 hover:bg-green-600">
+        <ModuleButton 
+          onClick={handleNext} 
+          size="sm" 
+          moduleTheme="skills"
+          variant="filled"
+        >
           {currentStep < categoryKeys.length - 1 ? 'Next' : 'Summary'}
           <ArrowRight className="ml-1 h-3 w-3" />
-        </Button>
+        </ModuleButton>
       </div>
 
       {/* Special skill details dialog */}
@@ -437,9 +450,14 @@ export const SkillsMiniSurvey = ({
             } size="sm">
               Cancel
             </Button>
-            <Button onClick={handleSpecialSkillConfirm} size="sm" className="bg-green-500 hover:bg-green-600">
+            <ModuleButton 
+              onClick={handleSpecialSkillConfirm} 
+              size="sm"
+              moduleTheme="skills"
+              variant="filled"
+            >
               Add Skill
-            </Button>
+            </ModuleButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

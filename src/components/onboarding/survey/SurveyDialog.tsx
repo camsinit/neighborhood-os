@@ -25,7 +25,6 @@ interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onComplete?: (formData: any) => void;
-  isTestMode?: boolean;
   submissionState?: FormSubmissionState;
 }
 
@@ -38,11 +37,10 @@ const getSteps = () => {
   ];
 };
 
-const SurveyDialog = ({ 
-  open, 
-  onOpenChange, 
+const SurveyDialog = ({
+  open,
+  onOpenChange,
   onComplete,
-  isTestMode = false,
   submissionState,
 }: SurveyDialogProps) => {
   const user = useUser();
@@ -94,18 +92,12 @@ const SurveyDialog = ({
   
   // Handle dialog close request
   const handleCloseRequest = (open: boolean) => {
-    // If test mode, allow closing without warning
-    if (isTestMode) {
-      onOpenChange(open);
-      return;
-    }
-    
     // Don't allow closing during submission
     if (submissionState?.isSubmitting) {
       return;
     }
     
-    // In normal mode, show warning if trying to close
+    // Show warning if trying to close
     if (!open) {
       // TODO: Add confirmation dialog before closing
       // For now, just close the dialog
@@ -115,21 +107,11 @@ const SurveyDialog = ({
     }
   };
   
-  // Get test mode indicator for the dialog title
-  const testModeIndicator = isTestMode ? " (Test Mode)" : "";
-  
   // Show welcome screen after survey completion
   if (showWelcomeScreen) {
     return (
       <Dialog open={open} onOpenChange={handleCloseRequest}>
         <DialogContent className="sm:max-w-[500px]" hideCloseButton>
-          {/* Test mode indicator */}
-          {isTestMode && (
-            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
-              Test Mode - No changes will be saved to your profile
-            </div>
-          )}
-          
           <WelcomeScreen onGetStarted={handleFinalComplete} />
         </DialogContent>
       </Dialog>
@@ -139,13 +121,6 @@ const SurveyDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
       <DialogContent className="sm:max-w-[500px]" hideCloseButton>
-        {/* Test mode indicator */}
-        {isTestMode && (
-          <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
-            Test Mode - No changes will be saved to your profile
-          </div>
-        )}
-        
         {/* OAuth indicator - enhanced for neighborhood join context */}
         {formData.authMethod === 'oauth' && formData.isDataPrePopulated && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mb-4">
@@ -169,7 +144,7 @@ const SurveyDialog = ({
         )}
         
         {/* Survey header */}
-        <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
+        <SurveyStepHeader title={steps[currentStep].title} />
         
         {/* Progress indicator */}
         <SurveyProgress 

@@ -20,7 +20,6 @@ interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onComplete?: () => void;
-  isTestMode?: boolean;
 }
 
 // Define the survey steps (skills step removed - moved to Skills page)
@@ -39,11 +38,10 @@ const steps = [
   },
 ];
 
-const SurveyDialog = ({ 
-  open, 
-  onOpenChange, 
-  onComplete,
-  isTestMode = false
+const SurveyDialog = ({
+  open,
+  onOpenChange,
+  onComplete
 }: SurveyDialogProps) => {
   // Track if survey is completed and showing welcome screen
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
@@ -73,13 +71,7 @@ const SurveyDialog = ({
   
   // Handle dialog close request
   const handleCloseRequest = (open: boolean) => {
-    // If test mode, allow closing without warning
-    if (isTestMode) {
-      onOpenChange(open);
-      return;
-    }
-    
-    // In normal mode, show warning if trying to close
+    // Show warning if trying to close with unsaved changes
     if (!open) {
       // TODO: Add confirmation dialog before closing
       // For now, just close the dialog
@@ -89,21 +81,11 @@ const SurveyDialog = ({
     }
   };
   
-  // Get test mode indicator for the dialog title
-  const testModeIndicator = isTestMode ? " (Test Mode)" : "";
-  
   // Show welcome screen after survey completion
   if (showWelcomeScreen) {
     return (
       <Dialog open={open} onOpenChange={handleCloseRequest}>
         <DialogContent className="sm:max-w-[500px]">
-          {/* Test mode indicator */}
-          {isTestMode && (
-            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
-              Test Mode - No changes will be saved to your profile
-            </div>
-          )}
-          
           <WelcomeScreen onGetStarted={handleFinalComplete} />
         </DialogContent>
       </Dialog>
@@ -113,15 +95,8 @@ const SurveyDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
       <DialogContent className="sm:max-w-[500px]">
-        {/* Test mode indicator */}
-        {isTestMode && (
-          <div className="bg-amber-50 border border-amber-200 rounded px-3 py-1 text-amber-700 text-sm mb-2">
-            Test Mode - No changes will be saved to your profile
-          </div>
-        )}
-        
         {/* Survey header */}
-        <SurveyStepHeader title={`${steps[currentStep].title}${testModeIndicator}`} />
+        <SurveyStepHeader title={steps[currentStep].title} />
         
         {/* Progress indicator */}
         <SurveyProgress currentStep={currentStep} totalSteps={steps.length} />

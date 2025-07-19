@@ -211,20 +211,18 @@ const DebugPage = () => {
               setShowSurveyTest(true);
             }
           }}
-          isTestMode={true} // Mark this as test mode to prevent data modification
         />
         
         <SurveyDialog
           open={showSurveyTest}
           onOpenChange={setShowSurveyTest}
-          isTestMode={true} // Mark this as test mode to prevent data modification
         />
         
         <SkillsOnboardingDialog
           open={showSkillsOnboardingTest}
           onOpenChange={setShowSkillsOnboardingTest}
           onComplete={() => setShowSkillsOnboardingTest(false)}
-          isTestMode={true} // Mark this as test mode to prevent data modification
+          
         />
         
     </div>
