@@ -35,9 +35,9 @@ export const SafetyTypeField = ({ form }: SafetyTypeFieldProps) => {
                     key={type.value}
                     value={type.value}
                     aria-label={type.label}
-                    className="px-3 py-2 rounded-full border border-gray-200 
-                      bg-gray-50/80 text-gray-700 hover:bg-gray-100/80 transition-colors text-sm
-                      data-[state=on]:bg-amber-500 data-[state=on]:text-white data-[state=on]:border-amber-500
+                    className="px-3 py-2 rounded-full border border-red-200 
+                      bg-red-50/80 text-red-700 hover:bg-red-100/80 transition-colors text-sm
+                      data-[state=on]:bg-red-500 data-[state=on]:text-white data-[state=on]:border-red-500
                       min-w-fit"
                   >
                     <span className="whitespace-nowrap">{type.label}</span>

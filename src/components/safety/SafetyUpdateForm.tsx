@@ -96,7 +96,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
         <Button 
           type="submit" 
           disabled={isLoading} 
-          className="w-full"
+          className="w-full bg-red-600 hover:bg-red-700 text-white"
         >
           {isLoading 
             ? (updateId ? "Updating..." : "Submitting...") 
