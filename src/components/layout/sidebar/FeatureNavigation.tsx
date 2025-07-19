@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Calendar, Brain, Gift, Info, Users } from 'lucide-react';
+import { Home, Calendar, Brain, Gift, Info, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,8 +19,15 @@ const FeatureNavigation = () => {
   /**
    * Navigation items configuration
    * Each item includes path, label, icon, and color theme
+   * Home is now included at the top of the feature navigation
    */
   const navigationItems = [
+    {
+      path: '/home',
+      label: 'Home',
+      icon: Home,
+      activeColor: 'text-gray-900'
+    },
     {
       path: '/calendar',
       label: 'Calendar',

@@ -4,7 +4,6 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 
 // Import sidebar components
 import UserProfileCard from './UserProfileCard';
-import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
 
@@ -39,13 +38,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       
       {/* Navigation menu section */}
       <nav className="flex-1 px-3 overflow-y-auto">
-        {/* Home/Dashboard navigation */}
-        <MainNavigation />
-
-        {/* Divider between navigation groups */}
-        <div className="my-4 h-px bg-gray-200" />
-
-        {/* Feature navigation items */}
+        {/* All navigation items including Home at the top */}
         <FeatureNavigation />
 
         {/* Divider before bottom actions */}
