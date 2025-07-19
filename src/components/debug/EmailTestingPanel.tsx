@@ -698,16 +698,29 @@ export const EmailTestingPanel: React.FC = () => {
                         Test
                       </Button>
                       
-                      {/* Status indicator */}
-                      {testResults[config.id] && (
-                        <div className="flex items-center" title={testResults[config.id].success ? "Sent successfully" : "Failed to send"}>
-                          {testResults[config.id].success ? (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <XCircle className="w-4 h-4 text-red-600" />
-                          )}
-                        </div>
-                      )}
+                       {/* Status indicator */}
+                       {testResults[config.id] && (
+                         <div className="flex items-center" title={testResults[config.id].success ? "Sent successfully" : "Failed to send"}>
+                           {testResults[config.id].success ? (
+                             <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <div 
+                                className="w-4 h-4 text-red-600 hover:text-gray-500 cursor-pointer transition-colors duration-200" 
+                                onClick={() => {
+                                  // Remove this specific test result when clicked
+                                  setTestResults(prev => {
+                                    const updated = { ...prev };
+                                    delete updated[config.id];
+                                    return updated;
+                                  });
+                                }}
+                                title="Click to remove"
+                              >
+                                <XCircle className="w-full h-full" />
+                              </div>
+                           )}
+                         </div>
+                       )}
                     </div>
                   </div>
                 ))}
