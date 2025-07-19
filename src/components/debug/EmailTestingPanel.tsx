@@ -55,9 +55,8 @@ interface EmailConfig {
 /**
  * EmailTestingPanel Component
  * 
- * Provides a grid of email test cards, each representing a different email type
- * that can be sent by the application. Users can specify a test email address
- * and send test emails with predefined sample data.
+ * Provides a grouped list of email test options, organized by category.
+ * Users can specify a test email address and send test emails with predefined sample data.
  */
 export const EmailTestingPanel: React.FC = () => {
   // State for the test email address input and saved email
@@ -81,7 +80,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-1',
       name: 'Onboarding #1: Community',
-      description: 'Introduction to neighborhood community features',
+      description: 'Introduction to neighborhood community features and how to get started connecting with neighbors',
       icon: <Users className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -96,7 +95,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-2',
       name: 'Onboarding #2: Events',
-      description: 'Guide to creating and joining neighborhood events',
+      description: 'Complete guide to creating and joining neighborhood events, including RSVP functionality and event management',
       icon: <Calendar className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -111,7 +110,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-3',
       name: 'Onboarding #3: Skills',
-      description: 'How to share and request skills in the neighborhood',
+      description: 'How to share and request skills in the neighborhood, including setting up skill exchanges and sessions',
       icon: <Heart className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -126,7 +125,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-4',
       name: 'Onboarding #4: Goods',
-      description: 'Sharing and requesting items with neighbors',
+      description: 'Sharing and requesting items with neighbors, including the freebies exchange and item posting guidelines',
       icon: <Package className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -141,7 +140,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-5',
       name: 'Onboarding #5: Safety',
-      description: 'Stay informed about neighborhood safety updates',
+      description: 'Stay informed about neighborhood safety updates, emergency notifications, and community safety features',
       icon: <Shield className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -156,7 +155,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-6',
       name: 'Onboarding #6: Directory',
-      description: 'Connecting with your neighbors',
+      description: 'Connecting with your neighbors through the community directory and profile features',
       icon: <User className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -171,7 +170,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'onboarding-7',
       name: 'Onboarding #7: Modules',
-      description: 'Advanced features and neighborhood customization',
+      description: 'Advanced features and neighborhood customization options, including module preferences and settings',
       icon: <Settings className="w-5 h-5" />,
       category: 'onboarding',
       functionName: 'send-onboarding-email',
@@ -187,7 +186,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'welcome',
       name: 'Welcome Email',
-      description: 'Welcome message for new neighborhood members',
+      description: 'Welcome message for new neighborhood members with essential getting started information and next steps',
       icon: <Heart className="w-5 h-5" />,
       category: 'notifications',
       functionName: 'send-welcome-email',
@@ -200,7 +199,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'invitation',
       name: 'Basic Invitation',
-      description: 'Standard neighborhood invitation email',
+      description: 'Standard neighborhood invitation email with invite code and basic neighborhood information',
       icon: <Mail className="w-5 h-5" />,
       category: 'invitations',
       functionName: 'send-invitation',
@@ -214,7 +213,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'neighbor-invite',
       name: 'Personalized Neighbor Invite',
-      description: 'Personalized invitation from an existing neighbor',
+      description: 'Personalized invitation from an existing neighbor with custom message and neighborhood highlights',
       icon: <Users className="w-5 h-5" />,
       category: 'invitations',
       functionName: 'send-neighbor-invite',
@@ -229,7 +228,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'invitation-accepted',
       name: 'Invitation Accepted',
-      description: 'Notification when someone accepts an invitation',
+      description: 'Notification sent to the inviter when someone accepts their invitation to join the neighborhood',
       icon: <CheckCircle className="w-5 h-5" />,
       category: 'notifications',
       functionName: 'send-invitation-accepted',
@@ -243,7 +242,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'weekly-summary',
       name: 'Weekly Summary',
-      description: 'AI-generated weekly neighborhood newsletter',
+      description: 'AI-generated weekly neighborhood newsletter with highlights, upcoming events, and community updates',
       icon: <BookOpen className="w-5 h-5" />,
       category: 'notifications',
       functionName: 'send-weekly-summary',
@@ -256,7 +255,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'waitlist-welcome',
       name: 'Waitlist Welcome',
-      description: 'Welcome email for waitlist signup',
+      description: 'Welcome email for waitlist signup with next steps and what to expect during the waitlist period',
       icon: <MessageSquare className="w-5 h-5" />,
       category: 'waitlist',
       functionName: 'join-waitlist',
@@ -267,7 +266,7 @@ export const EmailTestingPanel: React.FC = () => {
     {
       id: 'survey-confirmation',
       name: 'Survey Confirmation',
-      description: 'Confirmation email after completing waitlist survey',
+      description: 'Confirmation email after completing waitlist survey with priority score and estimated timeline',
       icon: <CreditCard className="w-5 h-5" />,
       category: 'waitlist',
       functionName: 'save-waitlist-survey',
@@ -284,6 +283,35 @@ export const EmailTestingPanel: React.FC = () => {
       }
     }
   ];
+
+  // Helper function to group emails by category
+  const getEmailsByCategory = () => {
+    const categories = ['onboarding', 'notifications', 'invitations', 'waitlist'];
+    const grouped: Record<string, EmailConfig[]> = {};
+    
+    categories.forEach(category => {
+      grouped[category] = emailConfigs.filter(config => config.category === category);
+    });
+    
+    // Add any remaining categories that weren't explicitly listed
+    emailConfigs.forEach(config => {
+      if (!categories.includes(config.category)) {
+        if (!grouped[config.category]) {
+          grouped[config.category] = [];
+        }
+        grouped[config.category].push(config);
+      }
+    });
+    
+    // Remove empty categories
+    Object.keys(grouped).forEach(key => {
+      if (grouped[key].length === 0) {
+        delete grouped[key];
+      }
+    });
+    
+    return grouped;
+  };
 
   /**
    * Function to send a test email
@@ -364,26 +392,6 @@ export const EmailTestingPanel: React.FC = () => {
       // Clear loading state
       setLoadingStates(prev => ({ ...prev, [config.id]: false }));
     }
-  };
-
-  /**
-   * Get the appropriate color for category badges
-   */
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'onboarding': return 'bg-blue-100 text-blue-800';
-      case 'invitations': return 'bg-green-100 text-green-800';
-      case 'notifications': return 'bg-purple-100 text-purple-800';
-      case 'waitlist': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  /**
-   * Filter emails by category for organized display
-   */
-  const getEmailsByCategory = (category: string) => {
-    return emailConfigs.filter(config => config.category === category);
   };
 
   // Handle saving the email address
@@ -525,103 +533,111 @@ export const EmailTestingPanel: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Email Testing List - Converted from cards to list format */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Mail className="w-5 h-5" />
-            Email Testing
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Test all email templates by sending them to your specified email address
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* Email testing list header */}
-          <div className="border-b pb-3 mb-4">
-            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
-              <div className="col-span-4">Email Type</div>
-              <div className="col-span-3">Category</div>
-              <div className="col-span-3">Description</div>
-              <div className="col-span-2">Action</div>
-            </div>
-          </div>
-
-          {/* Email testing list items */}
-          <div className="space-y-2">
-            {emailConfigs.map((config) => (
-              <div
-                key={config.id}
-                className="grid grid-cols-12 gap-4 items-center py-3 px-2 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
-              >
-                {/* Email Type */}
-                <div className="col-span-4 flex items-center gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10">
-                    {config.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm">{config.name}</h3>
-                    {config.badge && (
-                      <Badge variant="outline" className="text-xs mt-1">{config.badge}</Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Category */}
-                <div className="col-span-3">
-                  <Badge className={getCategoryColor(config.category)} variant="secondary">
-                    {config.category}
-                  </Badge>
-                </div>
-
-                {/* Description */}
-                <div className="col-span-3">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {config.description}
-                  </p>
-                </div>
-
-                {/* Action & Status */}
-                <div className="col-span-2 flex items-center gap-2">
-                    <Button
-                      onClick={() => sendTestEmail(config)}
-                      disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
-                      size="sm"
-                      variant="outline"
-                      className="flex items-center gap-1"
-                    >
-                    {loadingStates[config.id] ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Send className="w-3 h-3" />
-                    )}
-                    Test
-                  </Button>
-                  
-                  {/* Status indicator */}
-                  {testResults[config.id] && (
-                    <div className="flex items-center" title={testResults[config.id].success ? "Sent successfully" : "Failed to send"}>
-                      {testResults[config.id].success ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-red-600" />
-                      )}
-                    </div>
-                  )}
+      {/* Email Testing List - Grouped by Categories */}
+      <div className="space-y-6">
+        {Object.entries(getEmailsByCategory()).map(([category, configs]) => (
+          <Card key={category}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 capitalize">
+                <Mail className="w-5 h-5" />
+                {category === 'other' ? 'Other Email Types' : `${category} Emails`}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {configs.length} email template{configs.length !== 1 ? 's' : ''} in this category
+              </p>
+            </CardHeader>
+            <CardContent>
+              {/* Category email list header */}
+              <div className="border-b pb-3 mb-4">
+                <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
+                  <div className="col-span-4">Email Type</div>
+                  <div className="col-span-6">Description</div>
+                  <div className="col-span-2">Action</div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Empty state if no emails */}
-          {emailConfigs.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No email configurations found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              {/* Category email list items */}
+              <div className="space-y-2">
+                {configs.map((config) => (
+                  <div
+                    key={config.id}
+                    className="grid grid-cols-12 gap-4 items-center py-3 px-2 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                  >
+                    {/* Email Type */}
+                    <div className="col-span-4 flex items-center gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10">
+                        {config.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-sm">{config.name}</h3>
+                        {config.badge && (
+                          <Badge variant="outline" className="text-xs mt-1">{config.badge}</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Extended Description */}
+                    <div className="col-span-6">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {config.description}
+                      </p>
+                    </div>
+
+                    {/* Action & Status */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Button
+                        onClick={() => sendTestEmail(config)}
+                        disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-1"
+                      >
+                        {loadingStates[config.id] ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3" />
+                        )}
+                        Test
+                      </Button>
+                      
+                      {/* Status indicator */}
+                      {testResults[config.id] && (
+                        <div className="flex items-center" title={testResults[config.id].success ? "Sent successfully" : "Failed to send"}>
+                          {testResults[config.id].success ? (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Empty state for category */}
+              {configs.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No email templates in this category</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* Overall empty state */}
+        {Object.keys(getEmailsByCategory()).length === 0 && (
+          <Card>
+            <CardContent className="py-8">
+              <div className="text-center text-muted-foreground">
+                <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>No email configurations found</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Test Results Summary */}
       {Object.keys(testResults).length > 0 && (
