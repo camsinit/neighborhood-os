@@ -626,21 +626,6 @@ export const EmailTestingPanel: React.FC = () => {
                 </div>
               </div>
               
-              {/* Helper text */}
-              <p className="text-sm text-muted-foreground mt-1">
-                {isLoadingEmail ? (
-                  "Loading saved email..."
-                ) : isEditingEmail ? (
-                  "Enter your email address and click Save. Press Enter to save or Escape to cancel."
-                ) : isEmailSaved ? (
-                  <>
-                    All test emails will be sent to <strong>{savedTestEmail}</strong>
-                    {isSuperAdmin ? " (saved in database)" : " (saved locally)"}. Click Edit to change.
-                  </>
-                ) : (
-                  "Enter your email address to receive test emails with sample data."
-                )}
-              </p>
             </div>
           </div>
         </CardContent>
