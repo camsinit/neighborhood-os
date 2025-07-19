@@ -248,15 +248,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
     logger.info('Resend API key found, proceeding with email send');
 
-    // Send the onboarding email using React Email
+    // Send the onboarding email using React Email with the correct verified domain
     logger.info('Attempting to send email via Resend', {
-      from: "NeighborhoodOS <hello@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
       to: recipientEmail,
       subject: template.subject
     });
 
     const emailResponse = await resend.emails.send({
-      from: "NeighborhoodOS <hello@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>", // Updated to use verified domain
       to: [recipientEmail],
       subject: template.subject,
       html,
@@ -265,7 +265,8 @@ const handler = async (req: Request): Promise<Response> => {
     logger.info('Resend response received:', {
       success: !!emailResponse.data,
       messageId: emailResponse.data?.id,
-      error: emailResponse.error
+      error: emailResponse.error,
+      fullResponse: emailResponse // Log the complete response for debugging
     });
 
     // Check for Resend errors
