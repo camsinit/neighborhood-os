@@ -1,8 +1,10 @@
+
 /**
  * Hook for safety update notifications
  * 
  * This hook provides utility functions for safety update notifications
- * Now exclusively uses the database triggers system
+ * Now exclusively uses the database triggers system and ensures comments
+ * only create notifications for involved parties, not activity feed items
  */
 import { createLogger } from "@/utils/logger";
 import { unifiedEvents } from '@/utils/unifiedEventSystem';
@@ -13,6 +15,7 @@ const logger = createLogger('useSafetyNotifications');
 /**
  * Signal that a safety comment has been added
  * Notification is created automatically by database triggers
+ * Comments will NOT create activity feed items, only targeted notifications
  * 
  * @param commentId - ID of the new comment
  * @param safetyUpdateId - ID of the safety update that was commented on
@@ -22,12 +25,12 @@ export async function notifySafetyComment(
   safetyUpdateId: string
 ): Promise<boolean> {
   try {
-    // Log that we're using the database trigger system
-    logger.info('Safety comment notification is handled by database triggers', {
+    // Log that we're using the database trigger system for targeted notifications only
+    logger.info('Safety comment notification handled by database triggers (notifications only, no activity)', {
       commentId, safetyUpdateId
     });
     
-    // Signal that notifications might have changed
+    // Signal that notifications might have changed (but not activities)
     unifiedEvents.emit('notification-created');
     unifiedEvents.emit('safety-updated');
     

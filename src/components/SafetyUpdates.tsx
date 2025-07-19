@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
@@ -9,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SafetyUpdateComments } from "./safety/SafetyUpdateComments";
+import { SafetyComments } from "./safety/SafetyComments";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User, Pencil, Trash2, Clock, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
@@ -20,7 +21,7 @@ import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { unifiedEvents } from "@/utils/unifiedEventSystem"; // Updated import
+import { unifiedEvents } from "@/utils/unifiedEventSystem";
 import { createLogger } from "@/utils/logger";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -32,7 +33,7 @@ const logger = createLogger('SafetyUpdates');
 /**
  * SafetyUpdates component displays a list of safety updates for the neighborhood
  * and provides functionality to create, view, and edit updates
- * Now uses database triggers for notifications
+ * Now uses database triggers for notifications and the unified SafetyComments component
  */
 const SafetyUpdates = () => {
   // State to control dialog visibility
@@ -152,7 +153,7 @@ const SafetyUpdates = () => {
         onOpenChange={setIsArchiveOpen}
       />
       
-      {/* Redesigned detail view dialog for a selected update with fixed height and scroll */}
+      {/* Redesigned detail view dialog for a selected update with unified comments */}
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
         <DialogContent className="sm:max-w-[700px] bg-white rounded-xl shadow-xl border-0 p-0 overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header section with improved design - fixed at top */}
@@ -250,11 +251,9 @@ const SafetyUpdates = () => {
               {/* Separator before comments */}
               <Separator className="mb-6" />
               
-              {/* Comments section with improved design */}
+              {/* Comments section - Now using unified SafetyComments component */}
               {selectedUpdate && (
-                <div className="bg-white">
-                  <SafetyUpdateComments updateId={selectedUpdate.id} />
-                </div>
+                <SafetyComments safetyUpdateId={selectedUpdate.id} />
               )}
             </div>
           </ScrollArea>
