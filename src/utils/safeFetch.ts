@@ -53,7 +53,10 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    console.log(`[safeFetch] Attempt ${retryState.attempts}/${maxRetries} for ${url}`);
+    // Only log on first attempt or errors to reduce console noise
+    if (retryState.attempts === 1) {
+      console.log(`[safeFetch] Attempting ${url}`);
+    }
 
     // Make the fetch request
     const response = await fetch(url, {
@@ -108,10 +111,15 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
 export function resetRetryCounters(url?: string): void {
   if (url) {
     retryTracker.delete(url);
-    console.log(`[safeFetch] Reset retry counter for ${url}`);
+    // Only log reset in debug mode to reduce console noise
+    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
+      console.log(`[safeFetch] Reset retry counter for ${url}`);
+    }
   } else {
     retryTracker.clear();
-    console.log('[safeFetch] Reset all retry counters');
+    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
+      console.log('[safeFetch] Reset all retry counters');
+    }
   }
 }
 

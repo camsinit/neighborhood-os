@@ -44,7 +44,10 @@ export function startDevServerPolling(config: Partial<DevServerConfig> = {}): vo
     return;
   }
 
-  console.log('[DevServer] Starting development server polling');
+  // Only log startup once to reduce console noise
+  if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
+    console.log('[DevServer] Starting development server polling');
+  }
   isPolling = true;
   
   pollDevServer(finalConfig);
@@ -75,7 +78,10 @@ async function pollDevServer(config: DevServerConfig): Promise<void> {
     const devServerUrl = config.url || detectDevServerUrl();
     
     if (!devServerUrl) {
-      console.log('[DevServer] No dev server URL detected, skipping poll');
+      // Only log if debug mode is enabled
+      if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
+        console.log('[DevServer] No dev server URL detected, skipping poll');
+      }
       scheduleNextPoll(config);
       return;
     }
@@ -88,7 +94,11 @@ async function pollDevServer(config: DevServerConfig): Promise<void> {
     });
 
     if (response.ok) {
-      console.log('[DevServer] Successfully connected to development server');
+      // Only log successful connection once per session to reduce noise
+      if (!window.sessionStorage.getItem('devServerConnected')) {
+        console.log('[DevServer] Successfully connected to development server');
+        window.sessionStorage.setItem('devServerConnected', 'true');
+      }
       // Reset retry counters on successful connection
       resetRetryCounters(devServerUrl);
     } else if (response.status === 404) {
@@ -159,7 +169,10 @@ export function initializeDevServerHandler(): void {
     return;
   }
 
-  console.log('[DevServer] Initializing development server handler');
+  // Only log initialization in debug mode
+  if (window.location.search.includes('debug=true')) {
+    console.log('[DevServer] Initializing development server handler');
+  }
   
   // Start polling with default config
   startDevServerPolling();
