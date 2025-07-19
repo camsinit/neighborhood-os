@@ -339,7 +339,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                       !newComment.trim() || 
                       newComment.length > 500
                     }
-                    className="bg-amber-500 hover:bg-amber-600"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     {createCommentMutation.isPending ? (
                       <>
