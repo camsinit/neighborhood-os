@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
@@ -9,16 +10,13 @@ import { OnboardingGoodsEmail } from './_templates/onboarding-4-goods.tsx';
 import { OnboardingSafetyEmail } from './_templates/onboarding-5-safety.tsx';
 import { OnboardingDirectoryEmail } from './_templates/onboarding-6-directory.tsx';
 import { OnboardingModulesEmail } from './_templates/onboarding-7-modules.tsx';
+import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Initialize logger for this function
+const logger = createLogger('send-onboarding-email');
 
 /**
  * URL Generation Utilities for Email Templates
@@ -173,12 +171,15 @@ const getOnboardingTemplate = (emailNumber: number, firstName: string, neighborh
  * Sends emails 1-7 of the onboarding sequence
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) {
+    return corsResponse;
   }
 
   try {
+    logger.info('Processing onboarding email request');
+
     // Parse the request body
     const { 
       recipientEmail, 
@@ -189,45 +190,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!recipientEmail || !firstName || !neighborhoodName || !emailNumber) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required fields: recipientEmail, firstName, neighborhoodName, emailNumber" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error('Missing required fields in request');
+      return errorResponse("Missing required fields: recipientEmail, firstName, neighborhoodName, emailNumber", 400);
     }
 
     // Validate email number is within range
     if (emailNumber < 1 || emailNumber > 7) {
-      return new Response(
-        JSON.stringify({ 
-          error: "emailNumber must be between 1 and 7" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error(`Invalid email number: ${emailNumber}`);
+      return errorResponse("emailNumber must be between 1 and 7", 400);
     }
 
-    console.log(`Sending onboarding email ${emailNumber} to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
+    logger.info(`Sending onboarding email ${emailNumber} to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
 
     // Get the React Email template for this step
     const template = getOnboardingTemplate(emailNumber, firstName, neighborhoodName);
 
     if (!template) {
-      return new Response(
-        JSON.stringify({ 
-          error: `No template found for email number ${emailNumber}` 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error(`No template found for email number ${emailNumber}`);
+      return errorResponse(`No template found for email number ${emailNumber}`, 400);
     }
 
     // Render React Email template
@@ -243,33 +223,16 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log(`Onboarding email ${emailNumber} sent successfully:`, emailResponse);
+    logger.info(`Onboarding email ${emailNumber} sent successfully`, { messageId: emailResponse.data?.id });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        messageId: emailResponse.data?.id,
-        emailNumber: emailNumber
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse({ 
+      messageId: emailResponse.data?.id,
+      emailNumber: emailNumber
+    }, `Onboarding email ${emailNumber} sent successfully`);
+
   } catch (error: any) {
-    console.error("Error in send-onboarding-email function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to send onboarding email" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in send-onboarding-email function", error);
+    return errorResponse(error.message || "Failed to send onboarding email", 500);
   }
 };
 

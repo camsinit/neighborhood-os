@@ -1,12 +1,10 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const logger = createLogger('send-invitation');
 
 interface InviteEmailRequest {
   email: string;
@@ -16,12 +14,15 @@ interface InviteEmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) {
+    return corsResponse;
   }
 
   try {
+    logger.info('Processing invitation email request');
+
     const { email, inviterName, neighborhoodName, inviteCode }: InviteEmailRequest = await req.json();
 
     // Create the invite URL
@@ -77,24 +78,12 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
 
-    return new Response(JSON.stringify({ success: true, emailResponse }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
+    return successResponse({ emailResponse }, "Invitation email sent successfully");
   } catch (error: any) {
-    console.error("Error in send-invitation function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in send-invitation function", error);
+    return errorResponse(error.message || "Failed to send invitation email", 500);
   }
 };
 
