@@ -26,10 +26,12 @@ import {
   Settings,
   BookOpen,
   MessageSquare,
-  CreditCard
+  CreditCard,
+  Edit
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 // Interface for email test results
 interface EmailTestResult {
@@ -58,8 +60,11 @@ interface EmailConfig {
  * and send test emails with predefined sample data.
  */
 export const EmailTestingPanel: React.FC = () => {
-  // State for the test email address
-  const [testEmail, setTestEmail] = useState('');
+  // State for the test email address input and saved email
+  const [testEmailInput, setTestEmailInput] = useState('');
+  const [savedTestEmail, setSavedTestEmail] = useState('');
+  const [isEmailSaved, setIsEmailSaved] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(true);
   
   // State for tracking loading status of each email test
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
@@ -286,11 +291,14 @@ export const EmailTestingPanel: React.FC = () => {
    * @param config - Email configuration object
    */
   const sendTestEmail = async (config: EmailConfig) => {
-    if (!testEmail) {
+    // Use saved email for testing, fall back to input if not saved
+    const emailToUse = isEmailSaved ? savedTestEmail : testEmailInput;
+    
+    if (!emailToUse?.trim()) {
       toast({
         title: "Email Required",
-        description: "Please enter a test email address first.",
-        variant: "destructive",
+        description: "Please enter and save an email address first",
+        variant: "destructive"
       });
       return;
     }
@@ -302,11 +310,11 @@ export const EmailTestingPanel: React.FC = () => {
       // Prepare the data with the test email
       const emailData = {
         ...config.sampleData,
-        recipientEmail: testEmail,
-        email: testEmail // For functions that use 'email' instead of 'recipientEmail'
+        recipientEmail: emailToUse,
+        email: emailToUse // For functions that use 'email' instead of 'recipientEmail'
       };
 
-      console.log(`[EmailTestingPanel] Sending test ${config.name} to ${testEmail}`);
+      console.log(`[EmailTestingPanel] Sending test ${config.name} to ${emailToUse}`);
       console.log(`[EmailTestingPanel] Using function: ${config.functionName}`);
       console.log(`[EmailTestingPanel] Email data:`, emailData);
 
@@ -324,14 +332,14 @@ export const EmailTestingPanel: React.FC = () => {
         ...prev,
         [config.id]: {
           success: true,
-          message: `Test email sent successfully to ${testEmail}`,
+          message: `Test email sent successfully to ${emailToUse}`,
           timestamp: new Date()
         }
       }));
 
       toast({
         title: "Email Sent!",
-        description: `${config.name} test email sent to ${testEmail}`,
+        description: `${config.name} test email sent to ${emailToUse}`,
       });
 
     } catch (error: any) {
@@ -378,6 +386,50 @@ export const EmailTestingPanel: React.FC = () => {
     return emailConfigs.filter(config => config.category === category);
   };
 
+  // Handle saving the email address
+  const handleSaveEmail = () => {
+    if (!testEmailInput?.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter an email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testEmailInput.trim())) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSavedTestEmail(testEmailInput.trim());
+    setIsEmailSaved(true);
+    setIsEditingEmail(false);
+    
+    toast({
+      title: "Email Saved!",
+      description: `Test emails will be sent to ${testEmailInput.trim()}`,
+    });
+  };
+
+  // Handle editing the email address
+  const handleEditEmail = () => {
+    setIsEditingEmail(true);
+    setTestEmailInput(savedTestEmail);
+  };
+
+  // Handle canceling edit
+  const handleCancelEdit = () => {
+    setTestEmailInput(savedTestEmail);
+    setIsEditingEmail(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -390,18 +442,83 @@ export const EmailTestingPanel: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Email input section with save/edit functionality */}
             <div>
               <Label htmlFor="test-email">Test Email Address</Label>
-              <Input
-                id="test-email"
-                type="email"
-                placeholder="your-email@example.com"
-                value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
-                className="mt-1"
-              />
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex-1 relative">
+                  <Input
+                    id="test-email"
+                    type="email"
+                    placeholder="your-email@example.com"
+                    value={isEditingEmail ? testEmailInput : savedTestEmail}
+                    onChange={(e) => setTestEmailInput(e.target.value)}
+                    readOnly={!isEditingEmail}
+                    className={cn(
+                      "transition-colors",
+                      !isEditingEmail && "bg-muted cursor-default",
+                      isEmailSaved && !isEditingEmail && "pr-10"
+                    )}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && isEditingEmail) {
+                        handleSaveEmail();
+                      }
+                      if (e.key === 'Escape' && isEditingEmail && isEmailSaved) {
+                        handleCancelEdit();
+                      }
+                    }}
+                  />
+                  
+                  {/* Check mark icon when email is saved */}
+                  {isEmailSaved && !isEditingEmail && (
+                    <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-green-600" />
+                  )}
+                </div>
+                
+                {/* Action buttons */}
+                <div className="flex items-center gap-1">
+                  {isEditingEmail ? (
+                    <>
+                      <Button
+                        onClick={handleSaveEmail}
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        Save
+                      </Button>
+                      {isEmailSaved && (
+                        <Button
+                          onClick={handleCancelEdit}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Button
+                      onClick={handleEditEmail}
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Helper text */}
               <p className="text-sm text-muted-foreground mt-1">
-                Enter your email address to receive test emails. All emails will be sent with sample data.
+                {isEditingEmail 
+                  ? "Enter your email address and click Save. Press Enter to save or Escape to cancel."
+                  : isEmailSaved 
+                    ? `All test emails will be sent to ${savedTestEmail}. Click Edit to change.`
+                    : "Enter your email address to receive test emails with sample data."
+                }
               </p>
             </div>
           </div>
@@ -466,13 +583,13 @@ export const EmailTestingPanel: React.FC = () => {
 
                 {/* Action & Status */}
                 <div className="col-span-2 flex items-center gap-2">
-                  <Button
-                    onClick={() => sendTestEmail(config)}
-                    disabled={loadingStates[config.id] || !testEmail}
-                    size="sm"
-                    variant="outline"
-                    className="flex items-center gap-1"
-                  >
+                    <Button
+                      onClick={() => sendTestEmail(config)}
+                      disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-1"
+                    >
                     {loadingStates[config.id] ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
                     ) : (
