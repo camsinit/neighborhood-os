@@ -34,6 +34,7 @@ const logger = createLogger('SafetyUpdates');
  * SafetyUpdates component displays a list of safety updates for the neighborhood
  * and provides functionality to create, view, and edit updates
  * Now uses database triggers for notifications and the unified SafetyComments component
+ * Includes support for displaying uploaded images
  */
 const SafetyUpdates = () => {
   // State to control dialog visibility
@@ -153,7 +154,7 @@ const SafetyUpdates = () => {
         onOpenChange={setIsArchiveOpen}
       />
       
-      {/* Redesigned detail view dialog for a selected update with unified comments */}
+      {/* Redesigned detail view dialog for a selected update with unified comments and image display */}
       <Dialog open={!!selectedUpdate} onOpenChange={() => setSelectedUpdate(null)}>
         <DialogContent className="sm:max-w-[700px] bg-white rounded-xl shadow-xl border-0 p-0 overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header section with improved design - fixed at top */}
@@ -236,6 +237,24 @@ const SafetyUpdates = () => {
           {/* Scrollable content section */}
           <ScrollArea className="flex-1 h-0">
             <div className="px-8 py-6">
+              {/* Image display - new section for uploaded images */}
+              {selectedUpdate?.image_url && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Image</h3>
+                  <div className="rounded-lg overflow-hidden border border-gray-200">
+                    <img
+                      src={selectedUpdate.image_url}
+                      alt={selectedUpdate.title}
+                      className="w-full max-h-96 object-cover"
+                      onError={(e) => {
+                        // Hide image if it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Description with improved typography */}
               {selectedUpdate?.description && (
                 <div className="mb-8">

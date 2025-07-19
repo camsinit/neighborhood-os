@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -14,6 +15,7 @@ const logger = createLogger('useSafetyUpdateCreate');
 /**
  * Hook for creating new safety updates
  * Now works with the cleaned-up database triggers that prevent duplicate activities
+ * Includes support for image uploads
  */
 export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -25,6 +27,7 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
   /**
    * Create a new safety update
    * Database triggers automatically handle activity and notification creation
+   * Now includes image URL handling
    */
   const createSafetyUpdate = async (formData: SafetyUpdateFormData) => {
     // Validate user authentication
@@ -49,16 +52,19 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
         neighborhoodId: neighborhood.id,
         title: formData.title,
         type: formData.type,
-        hasDescription: !!formData.description
+        hasDescription: !!formData.description,
+        hasImage: !!formData.imageUrl // Log image presence
       });
 
       // Insert the safety update - database triggers handle everything else automatically
+      // Now includes the image_url field
       const { error, data } = await supabase
         .from('safety_updates')
         .insert({
           title: formData.title,
           description: formData.description,
           type: formData.type,
+          image_url: formData.imageUrl || null, // Include image URL if provided
           author_id: user.id,
           neighborhood_id: neighborhood.id
         })
@@ -74,6 +80,7 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
       logger.info("Safety update created successfully:", {
         safetyUpdateId: data?.[0]?.id,
         title: formData.title,
+        hasImage: !!formData.imageUrl,
         note: "Database triggers handle activities and notifications automatically"
       });
 

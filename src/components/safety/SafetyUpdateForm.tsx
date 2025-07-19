@@ -20,6 +20,7 @@ interface SafetyUpdateFormProps {
  * Form component for creating and editing safety updates
  * Automatically detects edit mode when updateId is provided
  * Uses cleaned-up database triggers that prevent duplicate activities
+ * Now includes full image upload functionality
  */
 export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: SafetyUpdateFormProps) {
   // Set up the form with validation schema and default values
@@ -29,7 +30,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
       title: existingData?.title || "",
       description: existingData?.description || "",
       type: existingData?.type || "Housing/Rentals", // Set Housing/Rentals as default
-      imageUrl: existingData?.imageUrl || "",
+      imageUrl: existingData?.imageUrl || "", // Include imageUrl in default values
     },
   });
 
@@ -47,13 +48,20 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
 
   // Handle form submission - automatically choose create or update based on updateId
   const onSubmit = async (data: SafetyUpdateFormData) => {
-    console.log('[SafetyUpdateForm] Submitting safety update:', { isEdit: !!updateId, updateId, data });
+    console.log('[SafetyUpdateForm] Submitting safety update:', { 
+      isEdit: !!updateId, 
+      updateId, 
+      data: {
+        ...data,
+        hasImage: !!data.imageUrl // Log whether an image is included
+      }
+    });
     
     if (updateId) {
-      // This is an edit operation
+      // This is an edit operation - include the image URL
       await handleUpdate(updateId, data);
     } else {
-      // This is a create operation
+      // This is a create operation - include the image URL
       await submitSafetyUpdate(data);
     }
   };
@@ -81,7 +89,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
           multiline={true}
         />
         
-        {/* Optional image upload */}
+        {/* Image upload field - now fully functional */}
         <ImageField form={form} />
         
         {/* Submit button with loading state - text changes based on operation type */}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -13,6 +14,7 @@ const logger = createLogger('useSafetyUpdateEdit');
 /**
  * Hook for editing existing safety updates
  * Works with the cleaned-up database triggers
+ * Now includes support for image updates
  */
 export const useSafetyUpdateEdit = (onSuccess?: () => void) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -23,6 +25,7 @@ export const useSafetyUpdateEdit = (onSuccess?: () => void) => {
   /**
    * Update an existing safety update
    * Database triggers handle activity updates automatically
+   * Now includes image URL handling
    */
   const updateSafetyUpdate = async (updateId: string, formData: SafetyUpdateFormData) => {
     if (!user) {
@@ -39,16 +42,19 @@ export const useSafetyUpdateEdit = (onSuccess?: () => void) => {
         updateId,
         userId: user.id,
         title: formData.title,
-        type: formData.type
+        type: formData.type,
+        hasImage: !!formData.imageUrl // Log image presence
       });
 
       // Update the safety update - database triggers handle activity updates
+      // Now includes the image_url field
       const { error, data } = await supabase
         .from('safety_updates')
         .update({
           title: formData.title,
           description: formData.description,
           type: formData.type,
+          image_url: formData.imageUrl || null, // Update image URL
         })
         .eq('id', updateId)
         .eq('author_id', user.id) // Ensure user can only update their own safety updates

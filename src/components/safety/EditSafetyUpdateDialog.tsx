@@ -14,12 +14,14 @@ interface EditSafetyUpdateDialogProps {
     description: string | null;
     type: string;
     author_id: string;
+    image_url?: string | null; // Add image_url to the interface
   };
   children?: React.ReactNode;
 }
 
 /**
  * EditSafetyUpdateDialog - Shows a dialog to edit an existing safety update
+ * Now includes support for editing images
  * 
  * @param update - The safety update data to edit
  * @param children - Optional child elements to use as trigger
@@ -37,7 +39,7 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
   // Type cast the update.type to ensure it matches our schema
   const safetyType = update.type as "Housing/Rentals" | "Suspicious Activity" | "Ideas & Inspiration";
 
-  // Pass the correct props to the SafetyUpdateForm component
+  // Pass the correct props to the SafetyUpdateForm component, including image URL
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -61,6 +63,7 @@ const EditSafetyUpdateDialog = ({ update, children }: EditSafetyUpdateDialogProp
             title: update.title,
             description: update.description || "",
             type: safetyType,
+            imageUrl: update.image_url || "", // Include the image URL in existing data
           }}
           onSuccess={() => setOpen(false)}
           updateId={update.id}
