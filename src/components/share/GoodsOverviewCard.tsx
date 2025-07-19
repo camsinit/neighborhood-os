@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, Clock, MapPin, Package, Archive } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import OptimizedImage from '@/components/goods/OptimizedImage';
 
 /**
  * Interface for goods overview card props
@@ -101,20 +102,18 @@ const GoodsOverviewCard: React.FC<GoodsOverviewCardProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Item image */}
-        {imageUrl && (
-          <div className="relative overflow-hidden rounded-lg">
-            <img 
-              src={imageUrl} 
-              alt={goodsItem.title}
-              className="w-full h-64 object-cover"
-              onError={(e) => {
-                // Hide image if it fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-        )}
+        {/* Item image with optimized loading */}
+        <div className="relative overflow-hidden rounded-lg h-64">
+          <OptimizedImage
+            src={imageUrl}
+            alt={goodsItem.title}
+            className="w-full h-full"
+            colorScheme="goods"
+            loadingType="skeleton"
+            enableRetry={true}
+            maxRetries={2}
+          />
+        </div>
 
         {/* Item details */}
         <div className="space-y-3">
