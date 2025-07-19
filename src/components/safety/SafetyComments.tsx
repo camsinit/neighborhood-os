@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -206,6 +208,21 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
 
+  // Fetch current user's profile for avatar
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url, display_name')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   // Use our custom hooks
   const { data: comments = [], isLoading, error } = useSafetyComments(safetyUpdateId);
   const createCommentMutation = useCreateComment(safetyUpdateId);
@@ -296,7 +313,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
           <CardContent className="p-4">
             <div className="flex gap-3">
               <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src={user.user_metadata?.avatar_url} />
+                <AvatarImage src={currentUserProfile?.avatar_url || ''} />
                 <AvatarFallback className="bg-blue-100">
                   <User className="h-5 w-5 text-blue-600" />
                 </AvatarFallback>
