@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import ModuleButton from "@/components/ui/module-button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useNeighborhood } from "@/contexts/neighborhood";
@@ -109,17 +110,15 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
           </ThemedTabsList>
         </ThemedTabs>
         
-        <Button 
-          onClick={() => onAddEvent && onAddEvent()} 
-          size="sm" 
+        <ModuleButton
+          onClick={() => onAddEvent && onAddEvent()}
+          size="sm"
+          moduleTheme="calendar"
+          variant="filled"
           className="ml-auto"
-          style={{ 
-            backgroundColor: moduleThemeColors.calendar.primary,
-            borderColor: moduleThemeColors.calendar.primary 
-          }}
         >
           <Plus className="h-4 w-4 mr-1" /> Add Event
-        </Button>
+        </ModuleButton>
       </div>
     </div>
   );
