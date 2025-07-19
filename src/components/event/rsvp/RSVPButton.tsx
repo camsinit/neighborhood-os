@@ -109,7 +109,7 @@ const RSVPButton = ({
       onClick={toggleRSVP}
       disabled={isLoading}
       variant={hasRSVPed ? "default" : "outline"}
-      className={`bg-blue-500 hover:bg-blue-600 text-white transition-colors ${className}`}
+      className={`transition-colors ${className}`}
       data-testid="rsvp-button"
     >
       {isLoading ? (

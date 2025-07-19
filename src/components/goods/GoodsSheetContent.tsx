@@ -280,7 +280,6 @@ const GoodsSheetContent = ({ item, onOpenChange }: GoodsSheetContentProps) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-green-500 text-green-600 hover:bg-green-50"
                         onClick={handleContactClick}
                       >
                         <MessageCircle className="h-3 w-3 mr-1" />
