@@ -271,10 +271,8 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
             ))}
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-lg font-medium">No comments yet</p>
-            <p className="text-sm">Be the first to share your thoughts!</p>
+          <div className="text-center py-4 text-gray-500">
+            <p className="text-sm">No comments yet. Be the first to share your thoughts!</p>
           </div>
         ) : (
           comments.map((comment) => (

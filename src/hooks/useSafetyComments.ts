@@ -69,6 +69,7 @@ export function useCreateComment(safetyUpdateId: string) {
         .insert({
           content: content.trim(),
           safety_update_id: safetyUpdateId,
+          user_id: (await supabase.auth.getUser()).data.user?.id || '',
         })
         .select(`
           *,
