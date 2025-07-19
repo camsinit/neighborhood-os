@@ -5,7 +5,7 @@
  * that are currently sent by the application. It allows developers to send test
  * emails to themselves with sample data to verify email templates and content.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useUser } from '@supabase/auth-helpers-react';
 
 // Interface for email test results
 interface EmailTestResult {
@@ -59,11 +60,16 @@ interface EmailConfig {
  * Users can specify a test email address and send test emails with predefined sample data.
  */
 export const EmailTestingPanel: React.FC = () => {
+  // Get current user for role checking
+  const user = useUser();
+  
   // State for the test email address input and saved email
   const [testEmailInput, setTestEmailInput] = useState('');
   const [savedTestEmail, setSavedTestEmail] = useState('');
   const [isEmailSaved, setIsEmailSaved] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(true);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
   
   // State for tracking loading status of each email test
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
@@ -284,6 +290,67 @@ export const EmailTestingPanel: React.FC = () => {
     }
   ];
 
+  // Check if user is super admin and load saved email
+  useEffect(() => {
+    const checkUserRoleAndLoadEmail = async () => {
+      if (!user?.id) return;
+
+      try {
+        // Check if user is super admin
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'super_admin')
+          .single();
+
+        const isAdmin = !!roleData;
+        setIsSuperAdmin(isAdmin);
+
+        if (isAdmin) {
+          // Load saved email from database for super admins
+          setIsLoadingEmail(true);
+          const { data: settingData } = await supabase
+            .from('debug_settings')
+            .select('setting_value')
+            .eq('user_id', user.id)
+            .eq('setting_key', 'test_email')
+            .single();
+
+          if (settingData?.setting_value) {
+            setSavedTestEmail(settingData.setting_value);
+            setTestEmailInput(settingData.setting_value);
+            setIsEmailSaved(true);
+            setIsEditingEmail(false);
+          }
+        } else {
+          // Load from localStorage for non-admin users
+          const localEmail = localStorage.getItem('debug_test_email');
+          if (localEmail) {
+            setSavedTestEmail(localEmail);
+            setTestEmailInput(localEmail);
+            setIsEmailSaved(true);
+            setIsEditingEmail(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user role or loading email:', error);
+        // Fallback to localStorage
+        const localEmail = localStorage.getItem('debug_test_email');
+        if (localEmail) {
+          setSavedTestEmail(localEmail);
+          setTestEmailInput(localEmail);
+          setIsEmailSaved(true);
+          setIsEditingEmail(false);
+        }
+      } finally {
+        setIsLoadingEmail(false);
+      }
+    };
+
+    checkUserRoleAndLoadEmail();
+  }, [user?.id]);
+
   // Helper function to group emails by category
   const getEmailsByCategory = () => {
     const categories = ['onboarding', 'notifications', 'invitations', 'waitlist'];
@@ -395,7 +462,7 @@ export const EmailTestingPanel: React.FC = () => {
   };
 
   // Handle saving the email address
-  const handleSaveEmail = () => {
+  const handleSaveEmail = async () => {
     if (!testEmailInput?.trim()) {
       toast({
         title: "Email Required",
@@ -416,14 +483,54 @@ export const EmailTestingPanel: React.FC = () => {
       return;
     }
 
-    setSavedTestEmail(testEmailInput.trim());
-    setIsEmailSaved(true);
-    setIsEditingEmail(false);
-    
-    toast({
-      title: "Email Saved!",
-      description: `Test emails will be sent to ${testEmailInput.trim()}`,
-    });
+    const emailToSave = testEmailInput.trim();
+
+    try {
+      if (isSuperAdmin && user?.id) {
+        // Save to database for super admins
+        const { error } = await supabase
+          .from('debug_settings')
+          .upsert({
+            user_id: user.id,
+            setting_key: 'test_email',
+            setting_value: emailToSave
+          }, {
+            onConflict: 'user_id,setting_key'
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Email Saved!",
+          description: `Test emails will be sent to ${emailToSave} (saved to database)`,
+        });
+      } else {
+        // Save to localStorage for non-admin users
+        localStorage.setItem('debug_test_email', emailToSave);
+        
+        toast({
+          title: "Email Saved!",
+          description: `Test emails will be sent to ${emailToSave} (saved locally)`,
+        });
+      }
+
+      setSavedTestEmail(emailToSave);
+      setIsEmailSaved(true);
+      setIsEditingEmail(false);
+    } catch (error) {
+      console.error('Error saving email:', error);
+      
+      // Fallback to localStorage
+      localStorage.setItem('debug_test_email', emailToSave);
+      setSavedTestEmail(emailToSave);
+      setIsEmailSaved(true);
+      setIsEditingEmail(false);
+      
+      toast({
+        title: "Email Saved!",
+        description: `Test emails will be sent to ${emailToSave} (saved locally as fallback)`,
+      });
+    }
   };
 
   // Handle editing the email address
@@ -521,12 +628,18 @@ export const EmailTestingPanel: React.FC = () => {
               
               {/* Helper text */}
               <p className="text-sm text-muted-foreground mt-1">
-                {isEditingEmail 
-                  ? "Enter your email address and click Save. Press Enter to save or Escape to cancel."
-                  : isEmailSaved 
-                    ? `All test emails will be sent to ${savedTestEmail}. Click Edit to change.`
-                    : "Enter your email address to receive test emails with sample data."
-                }
+                {isLoadingEmail ? (
+                  "Loading saved email..."
+                ) : isEditingEmail ? (
+                  "Enter your email address and click Save. Press Enter to save or Escape to cancel."
+                ) : isEmailSaved ? (
+                  <>
+                    All test emails will be sent to <strong>{savedTestEmail}</strong>
+                    {isSuperAdmin ? " (saved in database)" : " (saved locally)"}. Click Edit to change.
+                  </>
+                ) : (
+                  "Enter your email address to receive test emails with sample data."
+                )}
               </p>
             </div>
           </div>
