@@ -3,7 +3,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
 
 // Import sidebar components
-import Logo from './Logo';
+import UserProfileCard from './UserProfileCard';
 import MainNavigation from './MainNavigation';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
@@ -34,8 +34,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
 
   return (
     <div className="w-60 border-r bg-white flex flex-col h-screen sticky top-0">
-      {/* Logo section at the top of sidebar */}
-      <Logo />
+      {/* User profile card at the top of sidebar */}
+      <UserProfileCard />
       
       {/* Navigation menu section */}
       <nav className="flex-1 px-3 overflow-y-auto">
