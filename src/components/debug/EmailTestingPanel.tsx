@@ -409,17 +409,42 @@ export const EmailTestingPanel: React.FC = () => {
         email: emailToUse // For functions that use 'email' instead of 'recipientEmail'
       };
 
+      console.log(`[EmailTestingPanel] Starting email test process`);
+      console.log(`[EmailTestingPanel] Config:`, {
+        id: config.id,
+        name: config.name,
+        functionName: config.functionName,
+        category: config.category
+      });
       console.log(`[EmailTestingPanel] Sending test ${config.name} to ${emailToUse}`);
       console.log(`[EmailTestingPanel] Using function: ${config.functionName}`);
       console.log(`[EmailTestingPanel] Email data:`, emailData);
+      console.log(`[EmailTestingPanel] Attempting to invoke Supabase function...`);
 
       // Call the appropriate edge function
       const { data, error } = await supabase.functions.invoke(config.functionName, {
         body: emailData
       });
 
+      console.log(`[EmailTestingPanel] Function response received`);
+      console.log(`[EmailTestingPanel] Response data:`, data);
+      console.log(`[EmailTestingPanel] Response error:`, error);
+
       if (error) {
+        console.error(`[EmailTestingPanel] Supabase function error:`, error);
+        console.error(`[EmailTestingPanel] Error details:`, {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
+      }
+
+      if (!data) {
+        console.warn(`[EmailTestingPanel] No data returned from function`);
+      } else {
+        console.log(`[EmailTestingPanel] Function returned data:`, data);
       }
 
       // Record successful test
@@ -432,13 +457,28 @@ export const EmailTestingPanel: React.FC = () => {
         }
       }));
 
+      console.log(`[EmailTestingPanel] ✅ Email test completed successfully for ${config.name}`);
+
       toast({
         title: "Email Sent!",
         description: `${config.name} test email sent to ${emailToUse}`,
       });
 
     } catch (error: any) {
-      console.error(`[EmailTestingPanel] Error sending ${config.name}:`, error);
+      console.error(`[EmailTestingPanel] ❌ Error sending ${config.name}:`, error);
+      console.error(`[EmailTestingPanel] Error type:`, typeof error);
+      console.error(`[EmailTestingPanel] Error stack:`, error.stack);
+      
+      // Log additional error details if available
+      if (error.message) {
+        console.error(`[EmailTestingPanel] Error message:`, error.message);
+      }
+      if (error.code) {
+        console.error(`[EmailTestingPanel] Error code:`, error.code);
+      }
+      if (error.status) {
+        console.error(`[EmailTestingPanel] HTTP status:`, error.status);
+      }
       
       // Record failed test
       setTestResults(prev => ({

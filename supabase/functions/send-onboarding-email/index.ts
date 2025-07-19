@@ -181,16 +181,32 @@ const handler = async (req: Request): Promise<Response> => {
     logger.info('Processing onboarding email request');
 
     // Parse the request body
+    const requestBody = await req.json();
+    logger.info('Request body received:', requestBody);
+
     const { 
       recipientEmail, 
       firstName, 
       neighborhoodName,
       emailNumber
-    }: OnboardingEmailRequest = await req.json();
+    }: OnboardingEmailRequest = requestBody;
 
     // Validate required fields
+    logger.info('Validating required fields:', {
+      hasRecipientEmail: !!recipientEmail,
+      hasFirstName: !!firstName,
+      hasNeighborhoodName: !!neighborhoodName,
+      hasEmailNumber: !!emailNumber,
+      emailNumber: emailNumber
+    });
+
     if (!recipientEmail || !firstName || !neighborhoodName || !emailNumber) {
-      logger.error('Missing required fields in request');
+      logger.error('Missing required fields in request', {
+        recipientEmail: !!recipientEmail,
+        firstName: !!firstName,
+        neighborhoodName: !!neighborhoodName,
+        emailNumber: !!emailNumber
+      });
       return errorResponse("Missing required fields: recipientEmail, firstName, neighborhoodName, emailNumber", 400);
     }
 
@@ -203,6 +219,7 @@ const handler = async (req: Request): Promise<Response> => {
     logger.info(`Sending onboarding email ${emailNumber} to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
 
     // Get the React Email template for this step
+    logger.info(`Retrieving template for email number ${emailNumber}`);
     const template = getOnboardingTemplate(emailNumber, firstName, neighborhoodName);
 
     if (!template) {
@@ -210,12 +227,34 @@ const handler = async (req: Request): Promise<Response> => {
       return errorResponse(`No template found for email number ${emailNumber}`, 400);
     }
 
+    logger.info('Template retrieved successfully:', {
+      hasComponent: !!template.component,
+      hasProps: !!template.props,
+      subject: template.subject
+    });
+
     // Render React Email template
+    logger.info('Starting React Email rendering');
     const html = await renderAsync(
       React.createElement(template.component, template.props)
     );
+    logger.info('React Email rendering completed', { htmlLength: html.length });
+
+    // Check if Resend API key is configured
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      logger.error('RESEND_API_KEY not configured');
+      return errorResponse("Email service not configured", 500);
+    }
+    logger.info('Resend API key found, proceeding with email send');
 
     // Send the onboarding email using React Email
+    logger.info('Attempting to send email via Resend', {
+      from: "NeighborhoodOS <hello@neighborhoodos.com>",
+      to: recipientEmail,
+      subject: template.subject
+    });
+
     const emailResponse = await resend.emails.send({
       from: "NeighborhoodOS <hello@neighborhoodos.com>",
       to: [recipientEmail],
@@ -223,7 +262,23 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    logger.info(`Onboarding email ${emailNumber} sent successfully`, { messageId: emailResponse.data?.id });
+    logger.info('Resend response received:', {
+      success: !!emailResponse.data,
+      messageId: emailResponse.data?.id,
+      error: emailResponse.error
+    });
+
+    // Check for Resend errors
+    if (emailResponse.error) {
+      logger.error('Resend returned an error:', emailResponse.error);
+      return errorResponse(`Email service error: ${emailResponse.error.message}`, 500);
+    }
+
+    logger.info(`Onboarding email ${emailNumber} sent successfully`, { 
+      messageId: emailResponse.data?.id,
+      recipient: recipientEmail,
+      subject: template.subject
+    });
 
     return successResponse({ 
       messageId: emailResponse.data?.id,
@@ -231,7 +286,11 @@ const handler = async (req: Request): Promise<Response> => {
     }, `Onboarding email ${emailNumber} sent successfully`);
 
   } catch (error: any) {
-    logger.error("Error in send-onboarding-email function", error);
+    logger.error("Error in send-onboarding-email function", {
+      error: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return errorResponse(error.message || "Failed to send onboarding email", 500);
   }
 };
