@@ -408,115 +408,101 @@ export const EmailTestingPanel: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Onboarding Email Series */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5" />
-            Onboarding Email Series
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {getEmailsByCategory('onboarding').map((config) => (
-              <Card key={config.id} className="border-2 hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {config.icon}
-                      <h3 className="font-medium text-sm">{config.name}</h3>
-                    </div>
-                    {config.badge && (
-                      <Badge variant="secondary" className="text-xs">{config.badge}</Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground mb-3">{config.description}</p>
-                  <div className="flex items-center justify-between">
-                    <Button
-                      onClick={() => sendTestEmail(config)}
-                      disabled={loadingStates[config.id] || !testEmail}
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      {loadingStates[config.id] ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Send className="w-3 h-3" />
-                      )}
-                      Send Test
-                    </Button>
-                    {testResults[config.id] && (
-                      <div className="flex items-center gap-1">
-                        {testResults[config.id].success ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-600" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Other Email Types */}
+      {/* Email Testing List - Converted from cards to list format */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
-            Other Email Types
+            Email Testing
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Test all email templates by sending them to your specified email address
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {emailConfigs.filter(config => config.category !== 'onboarding').map((config) => (
-              <Card key={config.id} className="border-2 hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {config.icon}
-                      <h3 className="font-medium text-sm">{config.name}</h3>
-                    </div>
-                    <Badge className={getCategoryColor(config.category)}>
-                      {config.category}
-                    </Badge>
+          {/* Email testing list header */}
+          <div className="border-b pb-3 mb-4">
+            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
+              <div className="col-span-4">Email Type</div>
+              <div className="col-span-3">Category</div>
+              <div className="col-span-3">Description</div>
+              <div className="col-span-2">Action</div>
+            </div>
+          </div>
+
+          {/* Email testing list items */}
+          <div className="space-y-2">
+            {emailConfigs.map((config) => (
+              <div
+                key={config.id}
+                className="grid grid-cols-12 gap-4 items-center py-3 px-2 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+              >
+                {/* Email Type */}
+                <div className="col-span-4 flex items-center gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-primary/10">
+                    {config.icon}
                   </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-muted-foreground mb-3">{config.description}</p>
-                  <div className="flex items-center justify-between">
-                    <Button
-                      onClick={() => sendTestEmail(config)}
-                      disabled={loadingStates[config.id] || !testEmail}
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      {loadingStates[config.id] ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Send className="w-3 h-3" />
-                      )}
-                      Send Test
-                    </Button>
-                    {testResults[config.id] && (
-                      <div className="flex items-center gap-1">
-                        {testResults[config.id].success ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <XCircle className="w-4 h-4 text-red-600" />
-                        )}
-                      </div>
+                  <div>
+                    <h3 className="font-medium text-sm">{config.name}</h3>
+                    {config.badge && (
+                      <Badge variant="outline" className="text-xs mt-1">{config.badge}</Badge>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                {/* Category */}
+                <div className="col-span-3">
+                  <Badge className={getCategoryColor(config.category)} variant="secondary">
+                    {config.category}
+                  </Badge>
+                </div>
+
+                {/* Description */}
+                <div className="col-span-3">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {config.description}
+                  </p>
+                </div>
+
+                {/* Action & Status */}
+                <div className="col-span-2 flex items-center gap-2">
+                  <Button
+                    onClick={() => sendTestEmail(config)}
+                    disabled={loadingStates[config.id] || !testEmail}
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-1"
+                  >
+                    {loadingStates[config.id] ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Send className="w-3 h-3" />
+                    )}
+                    Test
+                  </Button>
+                  
+                  {/* Status indicator */}
+                  {testResults[config.id] && (
+                    <div className="flex items-center" title={testResults[config.id].success ? "Sent successfully" : "Failed to send"}>
+                      {testResults[config.id].success ? (
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-600" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
+
+          {/* Empty state if no emails */}
+          {emailConfigs.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Mail className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No email configurations found</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
