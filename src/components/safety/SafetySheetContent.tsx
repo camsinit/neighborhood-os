@@ -199,13 +199,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
       ) : (
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="space-y-6 pr-4">
-            {/* Update Type Badge */}
-            <div>
-              <Badge className={`${typeStyles.bg} ${typeStyles.text} flex items-center gap-1 w-fit`}>
-                <IconComponent className="w-3 h-3" />
-                {update.type}
-              </Badge>
-            </div>
 
             {/* Author Information */}
             <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50">
