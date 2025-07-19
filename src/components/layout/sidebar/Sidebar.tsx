@@ -33,7 +33,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
   } = useNeighborhood();
 
   return (
-    <div className="w-64 border-r bg-white flex flex-col h-screen sticky top-0">
+    <div className="w-60 border-r bg-white flex flex-col h-screen sticky top-0">
       {/* Logo section at the top of sidebar */}
       <Logo />
       
