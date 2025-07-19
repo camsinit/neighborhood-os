@@ -54,8 +54,12 @@ const DebugPage = () => {
         </div>
         
         {/* Main Debug Interface */}
-        <Tabs defaultValue="activities" className="w-full">
+        <Tabs defaultValue="emails" className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-6">
+            <TabsTrigger value="emails" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Emails
+            </TabsTrigger>
             <TabsTrigger value="activities" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Activities
@@ -67,10 +71,6 @@ const DebugPage = () => {
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
               Testing
-            </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Emails
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
