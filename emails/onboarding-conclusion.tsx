@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Body,
@@ -43,16 +44,16 @@ export const OnboardingConclusionEmail = ({
         </Link>
         
         <Text style={text}>
-          Neighborhood modules let your community customize NeighborhoodOS for what matters to you. Think of it as the difference between a one-size-fits-all t-shirt and something actually tailored to fit.
+          Neighborhood modules let your community customize neighborhoodOS for what matters to you. Think of it as the difference between a one-size-fits-all t-shirt and something actually tailored to fit.
         </Text>
         
         <Text style={text}>
-          That's a wrap on your NeighborhoodOS tour! You're all set to dive in and start connecting with your neighbors. Remember - the best neighborhood connections happen when people just show up and are genuinely helpful.
+          That's a wrap on your neighborhoodOS tour! You're all set to dive in and start connecting with your neighbors. Remember - the best neighborhood connections happen when people just show up and are genuinely helpful.
         </Text>
         
         <Text style={footer}>
           Your neighborhood, your way,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

@@ -48,7 +48,7 @@ export const OnboardingGoodsEmail = ({
         
         <Text style={footer}>
           Happy treasure hunting,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

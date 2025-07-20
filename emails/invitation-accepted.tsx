@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Body,
@@ -39,7 +40,7 @@ export const InvitationAcceptedEmail = ({
     mainMessage: `${accepterName} has joined ${neighborhoodName}.`,
     detail: `As the neighborhood admin, you can see all members in your neighborhood directory and help new neighbors get connected.`,
     closing: `Keep building your community!`,
-    signature: `Best,\nThe NeighborhoodOS Team`,
+    signature: `Best,\nThe neighborhoodOS Team`,
     ctaText: 'View Member Directory',
     ctaUrl: directoryUrl
   } : {
@@ -47,7 +48,7 @@ export const InvitationAcceptedEmail = ({
     mainMessage: `${accepterName} has accepted your invitation to join ${neighborhoodName}.`,
     detail: `Your neighborhood is growing! ${accepterName} is now part of the community and can start connecting with neighbors, sharing skills, and participating in events.`,
     closing: `Thanks for helping grow your neighborhood`,
-    signature: `The NeighborhoodOS Team`,
+    signature: `The neighborhoodOS Team`,
     ctaText: 'Explore Your Neighborhood',
     ctaUrl: dashboardUrl
   };

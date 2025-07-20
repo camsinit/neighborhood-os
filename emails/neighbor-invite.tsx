@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Body,
@@ -27,7 +28,7 @@ export const NeighborInviteEmail = ({
 }: NeighborInviteEmailProps) => (
   <Html>
     <Head />
-    <Preview>{inviterName} invited you to join {neighborhoodName} on NeighborhoodOS</Preview>
+    <Preview>{inviterName} invited you to join {neighborhoodName} on neighborhoodOS</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>You're invited to join {neighborhoodName}!</Heading>
@@ -35,7 +36,7 @@ export const NeighborInviteEmail = ({
         <Text style={greeting}>Hi there!</Text>
         
         <Text style={text}>
-          {inviterName} thought you'd be a great addition to the {neighborhoodName} community on NeighborhoodOS.
+          {inviterName} thought you'd be a great addition to the {neighborhoodName} community on neighborhoodOS.
         </Text>
         
         <Text style={text}>
@@ -56,7 +57,7 @@ export const NeighborInviteEmail = ({
         
         <Text style={footer}>
           Welcome to the neighborhood,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

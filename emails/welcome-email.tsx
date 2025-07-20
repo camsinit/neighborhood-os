@@ -1,3 +1,4 @@
+
 import {
   Body,
   Container,
@@ -28,7 +29,7 @@ export const WelcomeEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
-          <Heading style={h1}>Welcome to NeighborhoodOS! 👋</Heading>
+          <Heading style={h1}>Welcome to neighborhoodOS! 👋</Heading>
         </Section>
         
         <Section style={contentSection}>
@@ -63,7 +64,7 @@ export const WelcomeEmail = ({
         <Section style={footerSection}>
           <Text style={footer}>
             Best regards,<br />
-            The NeighborhoodOS Team
+            The neighborhoodOS Team
           </Text>
         </Section>
       </Container>

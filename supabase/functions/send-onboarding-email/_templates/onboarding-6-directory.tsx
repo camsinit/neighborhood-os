@@ -42,7 +42,7 @@ export const OnboardingDirectoryEmail = ({
         
         <Text style={footer}>
           Connecting neighbors, one introduction at a time,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

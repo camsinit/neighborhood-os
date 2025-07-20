@@ -46,7 +46,7 @@ export const OnboardingSkillsEmail = ({
         
         <Text style={footer}>
           Share away,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

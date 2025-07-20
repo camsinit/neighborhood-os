@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Body,
@@ -49,7 +50,7 @@ export const WaitlistWelcomeEmail = ({
       <Preview>
         {hasSubmittedSurvey 
           ? "Thanks for your neighborhood instigator survey!" 
-          : "Welcome to the NeighborhoodOS waitlist!"
+          : "Welcome to the neighborhoodOS waitlist!"
         }
       </Preview>
       <Body style={main}>
@@ -87,7 +88,7 @@ export const WaitlistWelcomeEmail = ({
           ) : (
             <>
               <Text style={text}>
-                Welcome to the NeighborhoodOS waitlist! You're officially in line for something that might actually make your neighborhood more connected (without the awkward forced interactions).
+                Welcome to the neighborhoodOS waitlist! You're officially in line for something that might actually make your neighborhood more connected (without the awkward forced interactions).
               </Text>
               
               <Text style={text}>
@@ -110,7 +111,7 @@ export const WaitlistWelcomeEmail = ({
           
           <Text style={footer}>
             Thanks for being part of the neighborhoodOS community (even though it doesn't fully exist yet),<br />
-            The NeighborhoodOS Team
+            The neighborhoodOS Team
           </Text>
         </Container>
       </Body>

@@ -244,7 +244,7 @@ export const WeeklySummaryEmail = ({
 
 export default WeeklySummaryEmail;
 
-// Styles matching NeighborhoodOS design system
+// Styles matching neighborhoodOS design system
 const main = {
   backgroundColor: '#ffffff',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

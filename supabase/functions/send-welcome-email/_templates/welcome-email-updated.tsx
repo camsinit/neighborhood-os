@@ -39,7 +39,7 @@ export const WelcomeEmail = ({
         <Text style={greeting}>Hey {firstName},</Text>
         
         <Text style={text}>
-          Welcome to {neighborhoodName} on NeighborhoodOS! 
+          Welcome to {neighborhoodName} on neighborhoodOS! 
         </Text>
         
         <Text style={text}>
@@ -90,7 +90,7 @@ export const WelcomeEmail = ({
         
         <Text style={footer}>
           Welcome aboard,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

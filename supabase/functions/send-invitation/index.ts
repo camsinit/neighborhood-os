@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
@@ -29,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     const inviteUrl = `https://neighborhoodos.com/join/${inviteCode}`;
 
     const emailResponse = await resend.emails.send({
-      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
+      from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
       to: [email],
       subject: `You're invited to join ${neighborhoodName}`,
       html: `
@@ -37,11 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
           <h2 style="color: #333;">You're invited to join ${neighborhoodName}!</h2>
           
           <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            Hi there! ${inviterName} has invited you to join their neighborhood community on Neighborhood OS.
+            Hi there! ${inviterName} has invited you to join their neighborhood community on neighborhoodOS.
           </p>
           
           <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            Neighborhood OS is a platform where neighbors can:
+            neighborhoodOS is a platform where neighbors can:
           </p>
           
           <ul style="color: #555; font-size: 16px; line-height: 1.6;">
@@ -81,9 +80,10 @@ const handler = async (req: Request): Promise<Response> => {
     logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
 
     return successResponse({ emailResponse }, "Invitation email sent successfully");
+
   } catch (error: any) {
     logger.error("Error in send-invitation function", error);
-    return errorResponse(error.message || "Failed to send invitation email", 500);
+    return errorResponse(error.message, "Failed to send invitation email");
   }
 };
 

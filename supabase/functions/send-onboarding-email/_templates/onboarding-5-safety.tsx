@@ -46,7 +46,7 @@ export const OnboardingSafetyEmail = ({
         
         <Text style={footer}>
           Stay informed,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

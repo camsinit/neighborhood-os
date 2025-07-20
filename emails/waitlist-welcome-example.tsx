@@ -32,17 +32,17 @@ export const WaitlistWelcomeExample = ({
 }: WaitlistWelcomeProps) => (
   <Html>
     <Head />
-    <Preview>Welcome to the NeighborhoodOS waitlist! Your neighborhood vision matters.</Preview>
+    <Preview>Welcome to the neighborhoodOS waitlist! Your neighborhood vision matters.</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Welcome to the NeighborhoodOS Waitlist!</Heading>
+        <Heading style={h1}>Welcome to the neighborhoodOS Waitlist!</Heading>
         
         <Text style={text}>
           Hi {firstName}! 👋
         </Text>
         
         <Text style={text}>
-          Thank you for your interest in bringing NeighborhoodOS to {neighborhoodName} in {city}, {state}! 
+          Thank you for your interest in bringing neighborhoodOS to {neighborhoodName} in {city}, {state}! 
           We're excited about your vision to connect your neighbors through technology.
         </Text>
 
@@ -69,7 +69,7 @@ export const WaitlistWelcomeExample = ({
         
         <Text style={footer}>
           Best regards,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>

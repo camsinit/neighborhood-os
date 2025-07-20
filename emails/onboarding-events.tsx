@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Body,
@@ -52,7 +53,7 @@ export const OnboardingEventsEmail = ({
         
         <Text style={footer}>
           Happy event hunting,<br />
-          The NeighborhoodOS Team
+          The neighborhoodOS Team
         </Text>
       </Container>
     </Body>
