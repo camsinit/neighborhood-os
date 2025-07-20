@@ -126,7 +126,24 @@ export const NotificationSettingsTab: React.FC = () => {
         if (data && data.notification_preferences) {
           // Validate and type-cast the notification preferences
           if (isValidNotificationPreferences(data.notification_preferences)) {
-            setPreferences(data.notification_preferences);
+            // Ensure all in-app notifications are defaulted to true
+            const basePrefs = data.notification_preferences as NotificationPreferences;
+            const updatedPreferences: NotificationPreferences = {
+              ...basePrefs,
+              in_app: {
+                ...basePrefs.in_app,
+                page_specific: {
+                  events: true,
+                  safety: true,
+                  care: true,
+                  goods: true,
+                  skills: true,
+                  neighbors: true
+                },
+                new_neighbors: true
+              }
+            };
+            setPreferences(updatedPreferences);
           } else {
             console.warn('[NotificationSettingsTab] Invalid notification preferences format, using defaults');
           }
@@ -403,7 +420,7 @@ export const NotificationSettingsTab: React.FC = () => {
                 key={setting.key}
                 fieldName="notification_preferences" 
                 value={preferences}
-                debounceMs={0}
+                debounceMs={500}
               >
                 <div className="grid grid-cols-12 gap-4 items-center rounded-lg border p-4 hover:bg-gray-50">
                   {/* Title and description */}
