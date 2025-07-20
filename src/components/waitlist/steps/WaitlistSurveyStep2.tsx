@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,7 +17,7 @@ export const WaitlistSurveyStep2 = ({
   onFieldChange 
 }: WaitlistSurveyStep2Props) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-0.5">
       <div className="text-center mb-6">
         {/* Space for any intro text if needed */}
       </div>
@@ -31,9 +32,9 @@ export const WaitlistSurveyStep2 = ({
           type="number" 
           min="0" 
           max="100" 
-          value={formData.neighborsToOnboard} 
+          value={formData.neighborsToOnboard === 0 ? "" : formData.neighborsToOnboard} 
           onChange={e => onFieldChange('neighborsToOnboard', parseInt(e.target.value) || 0)} 
-          placeholder="0" 
+          placeholder="Enter number" 
           className="mt-2" 
         />
       </div>
