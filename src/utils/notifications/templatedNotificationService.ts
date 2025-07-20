@@ -242,31 +242,6 @@ export async function createCareResponseNotification(
   });
 }
 
-/**
- * Helper function to create a skill session confirmation notification
- */
-export async function createSkillSessionConfirmedNotification(
-  recipientId: string,
-  actorId: string,
-  sessionId: string,
-  skillTitle: string,
-  actorName: string
-): Promise<string | null> {
-  return createTemplatedNotification({
-    templateId: 'skill_session_confirmed',
-    recipientUserId: recipientId,
-    actorUserId: actorId,
-    contentId: sessionId,
-    variables: {
-      actor: actorName,
-      title: skillTitle
-    },
-    metadata: {
-      sessionId,
-      type: 'confirmation'
-    }
-  });
-}
 
 /**
  * Helper function to create a skill session cancellation notification
@@ -302,6 +277,5 @@ export default {
   createSafetyCommentNotification,
   createGoodsResponseNotification,
   createCareResponseNotification,
-  createSkillSessionConfirmedNotification,
   createSkillSessionCancelledNotification
 };

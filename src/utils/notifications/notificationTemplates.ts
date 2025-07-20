@@ -60,16 +60,6 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone is interested in a skill you offer'
   },
 
-  skill_session_confirmed: {
-    id: 'skill_session_confirmed',
-    template: '{{actor}} confirmed your {{title}} session',
-    contentType: 'skill_sessions',
-    notificationType: 'skills',
-    actionType: 'view',
-    actionLabel: 'View Session',
-    relevanceScore: 3, // High - session confirmed
-    description: 'When your skill session request is confirmed'
-  },
 
   skill_session_cancelled: {
     id: 'skill_session_cancelled',

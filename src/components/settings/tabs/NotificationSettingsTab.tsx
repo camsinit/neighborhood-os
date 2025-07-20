@@ -1,29 +1,46 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { AutoSaveField } from '../AutoSaveField';
 import { SettingsCard } from '../SettingsCard';
-import { FormSection } from '../FormSection';
 
 /**
- * Notification preferences structure
+ * Complete notification preferences structure including email settings
  */
 interface NotificationPreferences {
-  involved_only: boolean;
-  page_specific: {
-    events: boolean;
-    safety: boolean;
-    care: boolean;
-    goods: boolean;
-    skills: boolean;
-    neighbors: boolean;
+  in_app: {
+    involved_only: boolean;
+    page_specific: {
+      events: boolean;
+      safety: boolean;
+      care: boolean;
+      goods: boolean;
+      skills: boolean;
+      neighbors: boolean;
+    };
+    all_activity: boolean;
+    new_neighbors: boolean;
   };
-  all_activity: boolean;
-  new_neighbors: boolean;
+  email: {
+    enabled: boolean;
+    frequency: 'immediate' | 'daily' | 'weekly' | 'off';
+    types: {
+      event_rsvp: boolean;
+      safety_comment: boolean;
+      safety_emergency: boolean;
+      goods_response: boolean;
+      skill_session_request: boolean;
+      weekly_summary: boolean;
+    };
+    digest_settings: {
+      day_of_week: string;
+      time_of_day: string;
+    };
+  };
 }
 
 /**
@@ -33,43 +50,58 @@ function isValidNotificationPreferences(data: any): data is NotificationPreferen
   return (
     data &&
     typeof data === 'object' &&
-    typeof data.involved_only === 'boolean' &&
-    data.page_specific &&
-    typeof data.page_specific === 'object' &&
-    typeof data.page_specific.events === 'boolean' &&
-    typeof data.page_specific.safety === 'boolean' &&
-    typeof data.page_specific.care === 'boolean' &&
-    typeof data.page_specific.goods === 'boolean' &&
-    typeof data.page_specific.skills === 'boolean' &&
-    typeof data.page_specific.neighbors === 'boolean' &&
-    typeof data.all_activity === 'boolean' &&
-    typeof data.new_neighbors === 'boolean'
+    data.in_app &&
+    typeof data.in_app === 'object' &&
+    typeof data.in_app.involved_only === 'boolean' &&
+    data.in_app.page_specific &&
+    typeof data.in_app.page_specific === 'object' &&
+    data.email &&
+    typeof data.email === 'object' &&
+    typeof data.email.enabled === 'boolean'
   );
 }
 
 /**
  * NotificationSettingsTab Component
  * 
- * Handles notification preferences with auto-saving functionality
- * using the new card-based layout design.
+ * Handles notification preferences for both in-app and email notifications
+ * with auto-saving functionality using the card-based layout design.
  */
 export const NotificationSettingsTab: React.FC = () => {
   // Get current user
   const user = useUser();
   
-  // State for notification preferences
+  // State for notification preferences - use the complete structure
   const [preferences, setPreferences] = useState<NotificationPreferences>({
-    involved_only: true,
-    page_specific: {
-      events: true,
-      safety: true,
-      care: true,
-      goods: true,
-      skills: true,
-      neighbors: true
+    in_app: {
+      involved_only: true,
+      page_specific: {
+        events: true,
+        safety: true,
+        care: true,
+        goods: true,
+        skills: true,
+        neighbors: true
+      },
+      all_activity: false,
+      new_neighbors: true
     },
-    all_activity: false,
-    new_neighbors: true
+    email: {
+      enabled: false,
+      frequency: 'weekly',
+      types: {
+        event_rsvp: false,
+        safety_comment: false,
+        safety_emergency: true,
+        goods_response: false,
+        skill_session_request: false,
+        weekly_summary: true
+      },
+      digest_settings: {
+        day_of_week: 'Sunday',
+        time_of_day: '09:00'
+      }
+    }
   });
   
   // Loading state
@@ -111,21 +143,75 @@ export const NotificationSettingsTab: React.FC = () => {
   }, [user?.id]);
 
   /**
-   * Update a top-level preference field
+   * Update an in-app preference field
    */
-  const updatePreference = (field: keyof Omit<NotificationPreferences, 'page_specific'>, value: boolean) => {
-    setPreferences(prev => ({ ...prev, [field]: value }));
+  const updateInAppPreference = (field: keyof Omit<NotificationPreferences['in_app'], 'page_specific'>, value: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      in_app: {
+        ...prev.in_app,
+        [field]: value
+      }
+    }));
   };
 
   /**
-   * Update a page-specific preference field
+   * Update a page-specific in-app preference field
    */
-  const updatePageSpecific = (page: keyof NotificationPreferences['page_specific'], value: boolean) => {
+  const updatePageSpecific = (page: keyof NotificationPreferences['in_app']['page_specific'], value: boolean) => {
     setPreferences(prev => ({
       ...prev,
-      page_specific: {
-        ...prev.page_specific,
-        [page]: value
+      in_app: {
+        ...prev.in_app,
+        page_specific: {
+          ...prev.in_app.page_specific,
+          [page]: value
+        }
+      }
+    }));
+  };
+
+  /**
+   * Update an email preference field
+   */
+  const updateEmailPreference = (field: keyof Omit<NotificationPreferences['email'], 'types' | 'digest_settings'>, value: boolean | string) => {
+    setPreferences(prev => ({
+      ...prev,
+      email: {
+        ...prev.email,
+        [field]: value
+      }
+    }));
+  };
+
+  /**
+   * Update an email type preference field
+   */
+  const updateEmailType = (type: keyof NotificationPreferences['email']['types'], value: boolean) => {
+    setPreferences(prev => ({
+      ...prev,
+      email: {
+        ...prev.email,
+        types: {
+          ...prev.email.types,
+          [type]: value
+        }
+      }
+    }));
+  };
+
+  /**
+   * Update digest settings
+   */
+  const updateDigestSettings = (field: keyof NotificationPreferences['email']['digest_settings'], value: string) => {
+    setPreferences(prev => ({
+      ...prev,
+      email: {
+        ...prev.email,
+        digest_settings: {
+          ...prev.email.digest_settings,
+          [field]: value
+        }
       }
     }));
   };
@@ -138,6 +224,15 @@ export const NotificationSettingsTab: React.FC = () => {
     { key: 'goods' as const, label: 'Goods Exchange', description: 'Available items and requests' },
     { key: 'skills' as const, label: 'Skills Sharing', description: 'Skill offers and session requests' },
     { key: 'neighbors' as const, label: 'Neighbor Activity', description: 'General neighbor interactions' }
+  ];
+
+  // Email notification types configuration
+  const emailTypes = [
+    { key: 'event_rsvp' as const, label: 'Event RSVPs', description: 'When someone RSVPs to your events' },
+    { key: 'safety_comment' as const, label: 'Safety Comments', description: 'Comments on your safety updates' },
+    { key: 'safety_emergency' as const, label: 'Emergency Alerts', description: 'Critical safety notifications' },
+    { key: 'goods_response' as const, label: 'Goods Responses', description: 'Responses to your goods posts' },
+    { key: 'weekly_summary' as const, label: 'Weekly Summary', description: 'Summary of neighborhood activity' }
   ];
 
   // Show loading state
@@ -155,106 +250,255 @@ export const NotificationSettingsTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* General Preferences Card */}
+      {/* In-App Notifications Section */}
       <SettingsCard 
-        title="General Preferences" 
-        description="Control your overall notification experience"
+        title="In-App Notifications" 
+        description="Control notifications you see within the app (all enabled by default)"
       >
-        <AutoSaveField 
-          fieldName="notification_preferences" 
-          value={preferences}
-          debounceMs={0}
-        >
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label className="text-base">Notifications About You</Label>
-              <p className="text-sm text-gray-500">
-                Only receive notifications about activity that directly involves you
-              </p>
+        <div className="space-y-6">
+          {/* General in-app preferences */}
+          <AutoSaveField 
+            fieldName="notification_preferences" 
+            value={preferences}
+            debounceMs={0}
+          >
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <Label className="text-base">Notifications About You</Label>
+                <p className="text-sm text-gray-500">
+                  Only receive notifications about activity that directly involves you
+                </p>
+              </div>
+              <Switch
+                checked={preferences.in_app.involved_only}
+                onCheckedChange={(value) => updateInAppPreference('involved_only', value)}
+              />
             </div>
-            <Switch
-              checked={preferences.involved_only}
-              onCheckedChange={(value) => updatePreference('involved_only', value)}
-            />
+          </AutoSaveField>
+
+          {/* Page-specific notifications */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Content Types</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pageSpecificSettings.map(({ key, label, description }) => (
+                <AutoSaveField 
+                  key={key}
+                  fieldName="notification_preferences" 
+                  value={preferences}
+                  debounceMs={0}
+                >
+                  <div className="flex items-start justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5 flex-1 mr-4">
+                      <Label className="text-base">{label}</Label>
+                      <p className="text-sm text-gray-500">
+                        {description}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={preferences.in_app.page_specific[key]}
+                      onCheckedChange={(value) => updatePageSpecific(key, value)}
+                    />
+                  </div>
+                </AutoSaveField>
+              ))}
+            </div>
           </div>
-        </AutoSaveField>
+
+          {/* Community notifications */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Community Activity</h4>
+            <div className="space-y-4">
+              <AutoSaveField 
+                fieldName="notification_preferences" 
+                value={preferences}
+                debounceMs={0}
+              >
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">All Community Activity</Label>
+                    <p className="text-sm text-gray-500">
+                      Receive notifications about all new activity in your community
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.in_app.all_activity}
+                    onCheckedChange={(value) => updateInAppPreference('all_activity', value)}
+                  />
+                </div>
+              </AutoSaveField>
+
+              <AutoSaveField 
+                fieldName="notification_preferences" 
+                value={preferences}
+                debounceMs={0}
+              >
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">New Neighbor Notifications</Label>
+                    <p className="text-sm text-gray-500">
+                      Get notified when new neighbors join your community
+                    </p>
+                  </div>
+                  <Switch
+                    checked={preferences.in_app.new_neighbors}
+                    onCheckedChange={(value) => updateInAppPreference('new_neighbors', value)}
+                  />
+                </div>
+              </AutoSaveField>
+            </div>
+          </div>
+        </div>
       </SettingsCard>
-      
-      {/* Page-specific Notifications Card */}
+
+      {/* Email Notifications Section */}
       <SettingsCard 
-        title="Page-Specific Notifications" 
-        description="Choose which types of content you want to be notified about"
+        title="Email Notifications" 
+        description="Choose when and how you receive email notifications (weekly summary enabled by default)"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pageSpecificSettings.map(({ key, label, description }) => (
+        <div className="space-y-6">
+          {/* Master email toggle */}
+          <AutoSaveField 
+            fieldName="notification_preferences" 
+            value={preferences}
+            debounceMs={0}
+          >
+            <div className="flex items-center justify-between rounded-lg border p-4 bg-blue-50">
+              <div className="space-y-0.5">
+                <Label className="text-base font-medium">Enable Email Notifications</Label>
+                <p className="text-sm text-gray-600">
+                  Master control for all email notifications
+                </p>
+              </div>
+              <Switch
+                checked={preferences.email.enabled}
+                onCheckedChange={(value) => updateEmailPreference('enabled', value)}
+              />
+            </div>
+          </AutoSaveField>
+
+          {/* Email frequency - only show if emails are enabled */}
+          {preferences.email.enabled && (
             <AutoSaveField 
-              key={key}
               fieldName="notification_preferences" 
               value={preferences}
               debounceMs={0}
             >
-              <div className="flex items-start justify-between rounded-lg border p-4">
-                <div className="space-y-0.5 flex-1 mr-4">
-                  <Label className="text-base">{label}</Label>
-                  <p className="text-sm text-gray-500">
-                    {description}
-                  </p>
+              <div className="rounded-lg border p-4">
+                <div className="space-y-3">
+                  <Label className="text-base">Email Frequency</Label>
+                  <Select
+                    value={preferences.email.frequency}
+                    onValueChange={(value: any) => updateEmailPreference('frequency', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="immediate">Immediate</SelectItem>
+                      <SelectItem value="daily">Daily Digest</SelectItem>
+                      <SelectItem value="weekly">Weekly Digest</SelectItem>
+                      <SelectItem value="off">Off</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Switch
-                  checked={preferences.page_specific[key]}
-                  onCheckedChange={(value) => updatePageSpecific(key, value)}
-                />
               </div>
             </AutoSaveField>
-          ))}
-        </div>
-      </SettingsCard>
+          )}
 
-      {/* Community Notifications Card */}
-      <SettingsCard 
-        title="Community Notifications" 
-        description="Stay informed about your neighborhood community"
-      >
-        <div className="space-y-4">
-          {/* All activity notifications */}
-          <AutoSaveField 
-            fieldName="notification_preferences" 
-            value={preferences}
-            debounceMs={0}
-          >
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <Label className="text-base">All Community Activity</Label>
-                <p className="text-sm text-gray-500">
-                  Receive notifications about all new activity in your community
-                </p>
+          {/* Email types - only show if emails are enabled */}
+          {preferences.email.enabled && (
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Email Types</h4>
+              <div className="space-y-4">
+                {emailTypes.map(({ key, label, description }) => (
+                  <AutoSaveField 
+                    key={key}
+                    fieldName="notification_preferences" 
+                    value={preferences}
+                    debounceMs={0}
+                  >
+                    <div className="flex items-start justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5 flex-1 mr-4">
+                        <Label className="text-base">{label}</Label>
+                        <p className="text-sm text-gray-500">
+                          {description}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={preferences.email.types[key]}
+                        onCheckedChange={(value) => updateEmailType(key, value)}
+                      />
+                    </div>
+                  </AutoSaveField>
+                ))}
               </div>
-              <Switch
-                checked={preferences.all_activity}
-                onCheckedChange={(value) => updatePreference('all_activity', value)}
-              />
             </div>
-          </AutoSaveField>
+          )}
 
-          {/* New neighbor notifications */}
-          <AutoSaveField 
-            fieldName="notification_preferences" 
-            value={preferences}
-            debounceMs={0}
-          >
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <Label className="text-base">New Neighbor Notifications</Label>
-                <p className="text-sm text-gray-500">
-                  Get notified when new neighbors join your community
-                </p>
+          {/* Weekly digest settings - only show if weekly summary is enabled */}
+          {preferences.email.enabled && preferences.email.types.weekly_summary && (
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Weekly Summary Settings</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <AutoSaveField 
+                  fieldName="notification_preferences" 
+                  value={preferences}
+                  debounceMs={0}
+                >
+                  <div className="rounded-lg border p-4">
+                    <div className="space-y-3">
+                      <Label className="text-sm">Day of Week</Label>
+                      <Select
+                        value={preferences.email.digest_settings.day_of_week}
+                        onValueChange={(value) => updateDigestSettings('day_of_week', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sunday">Sunday</SelectItem>
+                          <SelectItem value="Monday">Monday</SelectItem>
+                          <SelectItem value="Tuesday">Tuesday</SelectItem>
+                          <SelectItem value="Wednesday">Wednesday</SelectItem>
+                          <SelectItem value="Thursday">Thursday</SelectItem>
+                          <SelectItem value="Friday">Friday</SelectItem>
+                          <SelectItem value="Saturday">Saturday</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </AutoSaveField>
+
+                <AutoSaveField 
+                  fieldName="notification_preferences" 
+                  value={preferences}
+                  debounceMs={0}
+                >
+                  <div className="rounded-lg border p-4">
+                    <div className="space-y-3">
+                      <Label className="text-sm">Time of Day</Label>
+                      <Select
+                        value={preferences.email.digest_settings.time_of_day}
+                        onValueChange={(value) => updateDigestSettings('time_of_day', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="06:00">6:00 AM</SelectItem>
+                          <SelectItem value="09:00">9:00 AM</SelectItem>
+                          <SelectItem value="12:00">12:00 PM</SelectItem>
+                          <SelectItem value="15:00">3:00 PM</SelectItem>
+                          <SelectItem value="18:00">6:00 PM</SelectItem>
+                          <SelectItem value="21:00">9:00 PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </AutoSaveField>
               </div>
-              <Switch
-                checked={preferences.new_neighbors}
-                onCheckedChange={(value) => updatePreference('new_neighbors', value)}
-              />
             </div>
-          </AutoSaveField>
+          )}
         </div>
       </SettingsCard>
     </div>

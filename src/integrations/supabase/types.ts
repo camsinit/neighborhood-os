@@ -1304,6 +1304,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      should_user_receive_email_notification: {
+        Args: {
+          p_user_id: string
+          p_notification_type: string
+          p_content_type: string
+        }
+        Returns: boolean
+      }
       simple_membership_check: {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
