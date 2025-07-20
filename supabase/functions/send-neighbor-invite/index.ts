@@ -4,16 +4,19 @@ import { Resend } from "npm:resend@2.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { NeighborInviteEmail } from './_templates/neighbor-invite.tsx';
+// Import shared CORS utilities for consistent header handling
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse,
+  createLogger 
+} from '../_shared/cors.ts';
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Create logger for this function
+const logger = createLogger('send-neighbor-invite');
 
 /**
  * URL Generation Utilities for Email Templates
@@ -55,9 +58,10 @@ interface NeighborInviteRequest {
  * Uses Resend to deliver personalized invitation emails
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) {
+    return corsResponse;
   }
 
   try {
@@ -71,18 +75,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!recipientEmail || !inviterName || !neighborhoodName || !inviteUrl) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required fields: recipientEmail, inviterName, neighborhoodName, inviteUrl" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error("Missing required fields in request", {
+        hasRecipientEmail: !!recipientEmail,
+        hasInviterName: !!inviterName,
+        hasNeighborhoodName: !!neighborhoodName,
+        hasInviteUrl: !!inviteUrl
+      });
+      return errorResponse("Missing required fields: recipientEmail, inviterName, neighborhoodName, inviteUrl", 400);
     }
 
-    console.log(`Sending neighbor invite from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`);
+    logger.info(`Sending neighbor invite from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`);
 
     // Extract invite code from URL to generate tracked URL
     const urlParts = inviteUrl.split('/');
@@ -106,32 +108,17 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        messageId: emailResponse.data?.id 
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
+    // Return success response using shared utility
+    return successResponse(
+      { messageId: emailResponse.data?.id }, 
+      "Invitation email sent successfully"
     );
   } catch (error: any) {
-    console.error("Error in send-neighbor-invite function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to send invitation email" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in send-neighbor-invite function", error);
+    // Return error response using shared utility
+    return errorResponse(error, 500);
   }
 };
 
