@@ -139,8 +139,8 @@ const UnifiedInviteDialog = ({
       const baseUrl = getBaseUrl();
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
 
-      // Send the email via edge function
-      const { error: emailError } = await supabase.functions.invoke('send-neighbor-invite', {
+      // Send the email via edge function using the correct function name
+      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
         body: {
           recipientEmail: email.trim(),
           inviterName: user.user_metadata?.display_name || user.email,
