@@ -1,59 +1,129 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-import { renderAsync } from 'npm:@react-email/components@0.0.22';
-import React from 'npm:react@18.3.1';
-import { BasicInvitationEmail } from './_templates/basic-invitation.tsx';
-import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { renderAsync } from 'npm:@react-email/components@0.0.22'
+import * as React from 'npm:react@18.3.1'
+import { BasicInvitationEmail } from './_templates/basic-invitation.tsx'
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const logger = createLogger('send-invitation');
+// Initialize clients
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const resendApiKey = Deno.env.get('RESEND_API_KEY')!
 
-interface InviteEmailRequest {
-  email: string;
-  inviterName: string;
-  neighborhoodName: string;
-  inviteCode: string;
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+
+interface InvitationRequest {
+  recipientEmail: string
+  inviterName: string
+  neighborhoodName: string
+  inviteUrl: string
 }
 
-const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests using shared utility
-  const corsResponse = handleCorsPreflightRequest(req);
-  if (corsResponse) {
-    return corsResponse;
+/**
+ * Send invitation email to a new neighbor
+ * This function renders the basic invitation template and sends it via Resend
+ */
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { 
+      headers: { 
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      } 
+    })
   }
 
   try {
-    logger.info('Processing invitation email request');
+    // Parse the request body to get invitation details
+    const requestData = await req.json()
+    const { recipientEmail, inviterName, neighborhoodName, inviteUrl }: InvitationRequest = requestData
 
-    const { email, inviterName, neighborhoodName, inviteCode }: InviteEmailRequest = await req.json();
+    // Validate required fields
+    if (!recipientEmail || !inviterName || !neighborhoodName || !inviteUrl) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Missing required fields: recipientEmail, inviterName, neighborhoodName, inviteUrl" 
+        }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    }
 
-    // Create the invite URL
-    const inviteUrl = `https://neighborhoodos.com/join/${inviteCode}`;
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(recipientEmail)) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid email format" }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+    }
 
-    // Render React Email template
-    const html = await renderAsync(
+    console.log(`Sending invitation from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`)
+
+    // Render the email template
+    const emailHtml = await renderAsync(
       React.createElement(BasicInvitationEmail, {
         inviterName,
         neighborhoodName,
-        inviteUrl,
+        inviteUrl
       })
-    );
+    )
 
-    const emailResponse = await resend.emails.send({
-      from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
-      to: [email],
-      subject: `${inviterName} invited you to join ${neighborhoodName}`,
-      html,
-    });
+    // Send the email via Resend
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'neighborhoodOS <hello@neighborhoodos.com>',
+        to: [recipientEmail],
+        subject: `${inviterName} invited you to join ${neighborhoodName}`,
+        html: emailHtml,
+      }),
+    })
 
-    logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.json()
+      console.error('Resend API error:', errorData)
+      throw new Error(`Resend API error: ${errorData.message || 'Unknown error'}`)
+    }
 
-    return successResponse({ emailResponse }, "Invitation email sent successfully");
+    const emailData = await emailResponse.json()
+    console.log(`Invitation email sent successfully to: ${recipientEmail}`)
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Invitation sent successfully',
+        emailId: emailData.data?.id 
+      }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
 
   } catch (error: any) {
-    logger.error("Error in send-invitation function", error);
-    return errorResponse(error.message, "Failed to send invitation email");
+    console.error('Error sending invitation email:', error)
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: 'Failed to send invitation email',
+        details: error.message 
+      }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
-};
-
-serve(handler);
+})
