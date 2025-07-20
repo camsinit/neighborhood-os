@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { X, ChevronRight } from "lucide-react";
@@ -50,15 +51,20 @@ const WaitlistSurveyPopover = ({
   const handleSubmit = () => {
     submitSurvey(formData);
   };
-  return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
-            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Join Neighborhood Waitlist</h3>
-            <div></div>
+            <div className="flex flex-col items-center text-center flex-1 px-8">
+              <h3 className="text-lg font-semibold whitespace-nowrap">Join Neighborhood Waitlist</h3>
+              <p className="text-sm text-gray-600 mt-1">Jump the waitlist by adding your neighborhood info below.</p>
+            </div>
+            <div className="w-6"></div>
           </DialogTitle>
         </DialogHeader>
 
@@ -117,6 +123,8 @@ const WaitlistSurveyPopover = ({
           )}
         </div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
+
 export default WaitlistSurveyPopover;
