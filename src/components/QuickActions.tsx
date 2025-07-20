@@ -1,28 +1,33 @@
+
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AddEventDialog from "./AddEventDialog";
 import SafetyUpdateForm from "./safety/SafetyUpdateForm";
 import SkillsPageSelector from "./skills/SkillsPageSelector";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
+import EventForm from "./events/EventForm";
+import { SkillsProvider } from "@/contexts/SkillsContext";
+import { useNeighborhood } from "@/contexts/neighborhood";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * QuickActions component displays common actions for users to interact with the community.
  * 
  * This includes:
- * - Adding events
- * - Sharing or requesting items (goods) - now using proper goods forms
- * - Sharing or requesting skills - now using Sheet consistently
- * - Adding safety updates - now using Sheet consistently
+ * - Adding events - NOW using Sheet pattern for consistency
+ * - Sharing or requesting items (goods) - using proper goods forms
+ * - Sharing or requesting skills - NOW wrapped in SkillsProvider to fix context error
+ * - Adding safety updates - using Sheet consistently
  * 
- * All actions now use Sheet components for consistency across the app.
+ * All actions now use Sheet components for complete consistency across the app.
  */
 const QuickActions = () => {
   const navigate = useNavigate();
+  const { currentNeighborhood } = useNeighborhood();
   
   // State for controlling various sheets
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -30,12 +35,42 @@ const QuickActions = () => {
   const [isGoodsSheetOpen, setIsGoodsSheetOpen] = useState(false);
   const [isSkillSheetOpen, setIsSkillSheetOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
+  
+  // Event-specific state for neighborhood timezone
+  const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
+
+  // Fetch neighborhood timezone when event sheet opens
+  useEffect(() => {
+    const fetchNeighborhoodTimezone = async () => {
+      if (currentNeighborhood?.id) {
+        console.log('[QuickActions] Fetching timezone for neighborhood:', currentNeighborhood.id);
+        const { data, error } = await supabase
+          .from('neighborhoods')
+          .select('timezone')
+          .eq('id', currentNeighborhood.id)
+          .single();
+          
+        if (data && !error) {
+          setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
+          console.log(`[QuickActions] Using timezone: ${data.timezone || 'America/Los_Angeles'}`);
+        } else {
+          console.warn('[QuickActions] Could not fetch neighborhood timezone, using default');
+        }
+      }
+    };
+    
+    // Only fetch when event sheet is opened
+    if (isAddEventOpen && currentNeighborhood) {
+      fetchNeighborhoodTimezone();
+    }
+  }, [isAddEventOpen, currentNeighborhood]);
 
   // Goods/Items actions (orange theme)
   const goodsActions = [{
     icon: Package,
     label: "Share an item",
     onClick: () => {
+      console.log('[QuickActions] Opening goods sheet for sharing');
       setInitialRequestType("offer");
       setIsGoodsSheetOpen(true);
     },
@@ -44,17 +79,19 @@ const QuickActions = () => {
     icon: Package,
     label: "Request an item",
     onClick: () => {
+      console.log('[QuickActions] Opening goods sheet for requesting');
       setInitialRequestType("need");
       setIsGoodsSheetOpen(true);
     },
     moduleTheme: 'goods' as const
   }];
 
-  // Skills actions (green theme) - now using Sheet
+  // Skills actions (green theme) - now using Sheet with SkillsProvider
   const skillsActions = [{
     icon: Wrench,
     label: "Share a skill",
     onClick: () => {
+      console.log('[QuickActions] Opening skills sheet for sharing');
       setIsSkillSheetOpen(true);
     },
     moduleTheme: 'skills' as const
@@ -62,23 +99,36 @@ const QuickActions = () => {
     icon: HelpCircle,
     label: "Request a skill",
     onClick: () => {
+      console.log('[QuickActions] Opening skills sheet for requesting');
       setIsSkillSheetOpen(true);
     },
     moduleTheme: 'skills' as const
   }];
 
-  // Events & Safety actions (blue and red themes)
+  // Events & Safety actions (blue and red themes) - now both using Sheet
   const otherActions = [{
     icon: Calendar,
     label: "Add Event",
-    onClick: () => setIsAddEventOpen(true),
+    onClick: () => {
+      console.log('[QuickActions] Opening event sheet');
+      setIsAddEventOpen(true);
+    },
     moduleTheme: 'calendar' as const
   }, {
     icon: AlertTriangle,
     label: "Add Safety Update",
-    onClick: () => setIsSafetyUpdateOpen(true),
+    onClick: () => {
+      console.log('[QuickActions] Opening safety update sheet');
+      setIsSafetyUpdateOpen(true);
+    },
     moduleTheme: 'safety' as const
   }];
+
+  // Event added handler with proper cleanup
+  const handleEventAdded = () => {
+    console.log('[QuickActions] Event added successfully');
+    setIsAddEventOpen(false);
+  };
 
   // Skill added handler - simple refresh without complex context dependencies
   const handleSkillAdded = () => {
@@ -129,14 +179,36 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Event Dialog - keeping existing implementation */}
-      <AddEventDialog 
-        open={isAddEventOpen} 
-        onOpenChange={setIsAddEventOpen} 
-        onAddEvent={() => {}} 
-      />
+      {/* Event Sheet - NOW using Sheet pattern for consistency */}
+      <Sheet open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.calendar.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.calendar.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              Add New Event
+            </SheetTitle>
+            <div className="text-sm text-gray-500">
+              All times are in {neighborhoodTimezone.replace('_', ' ')} timezone
+            </div>
+          </SheetHeader>
+          <div className="mt-6">
+            <EventForm 
+              onClose={() => setIsAddEventOpen(false)}
+              onAddEvent={handleEventAdded}
+              neighborhoodTimezone={neighborhoodTimezone}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
       
-      {/* Safety Update Sheet - now using Sheet consistently */}
+      {/* Safety Update Sheet - using Sheet consistently */}
       <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
         <SheetContent 
           side="right" 
@@ -184,7 +256,7 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Skills Sheet - now using Sheet consistently */}
+      {/* Skills Sheet - NOW wrapped in SkillsProvider to fix context error */}
       <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
         <SheetContent 
           side="right" 
@@ -201,10 +273,13 @@ const QuickActions = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <SkillsPageSelector 
-              onSkillAdded={handleSkillAdded} 
-              multiCategoryMode={true}
-            />
+            {/* FIXED: Wrap SkillsPageSelector in SkillsProvider to fix context error */}
+            <SkillsProvider>
+              <SkillsPageSelector 
+                onSkillAdded={handleSkillAdded} 
+                multiCategoryMode={true}
+              />
+            </SkillsProvider>
           </div>
         </SheetContent>
       </Sheet>
