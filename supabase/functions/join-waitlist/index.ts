@@ -126,7 +126,7 @@ serve(async (req) => {
       );
 
       await resend.emails.send({
-        from: 'neighborhoodOS <hello@resend.dev>',
+        from: 'Cam from neighborhoodOS <hello@resend.dev>',
         to: [email],
         subject: 'Welcome to neighborhoodOS - You\'re on the waitlist!',
         html,

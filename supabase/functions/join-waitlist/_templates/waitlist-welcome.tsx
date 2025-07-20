@@ -38,8 +38,6 @@ export const WaitlistWelcomeEmail = ({
   aiCodingExperience,
   openSourceInterest,
 }: WaitlistWelcomeEmailProps) => {
-  const hasSubmittedSurvey = firstName && lastName && neighborhoodName && city && state;
-  
   return (
   <Html>
     <Head />
@@ -48,59 +46,28 @@ export const WaitlistWelcomeEmail = ({
       <Container style={container}>
         <Heading style={h1}>Welcome to neighborhoodOS!</Heading>
         
-        {hasSubmittedSurvey ? (
-          <>
-            <Text style={text}>
-              Thanks for submitting your neighborhood instigator survey, {firstName}! Here's what you shared with us:
-            </Text>
-            
-            <Section style={listContainer}>
-              <Text style={listItem}><strong>Neighborhood:</strong> {neighborhoodName} in {city}, {state}</Text>
-              <Text style={listItem}><strong>Neighbors to onboard:</strong> {neighborsToOnboard || 0}</Text>
-              <Text style={listItem}><strong>AI/Coding experience:</strong> {aiCodingExperience}</Text>
-              <Text style={listItem}><strong>Open source interest:</strong> {openSourceInterest}</Text>
-            </Section>
-            
-            <Text style={text}>
-              We'll be analyzing responses from neighborhood instigators like yourself to determine the launch order. 
-              You'll be notified when we're ready to onboard new neighborhoods.
-            </Text>
-            
-            <Text style={text}>
-              As a neighborhood instigator, you'll be the admin for {neighborhoodName} and responsible for inviting your neighbors once we launch.
-            </Text>
-          </>
-        ) : (
-          <>
-            <Text style={text}>
-              Thank you for joining our waitlist! We're excited to have you as part of the neighborhoodOS community.
-            </Text>
-            
-            <Text style={text}>
-              neighborhoodOS is building the future of neighborhood connection - a platform where neighbors can:
-            </Text>
-            
-            <Section style={listContainer}>
-              <Text style={listItem}>• Share and request items with neighbors</Text>
-              <Text style={listItem}>• Offer and find skills within your community</Text>
-              <Text style={listItem}>• Stay informed about neighborhood events and safety</Text>
-              <Text style={listItem}>• Connect with neighbors who share your interests</Text>
-            </Section>
-            
-            <Text style={text}>
-              You'll be among the first to know when we launch in your area. Complete our quick survey to help us prioritize neighborhood launches.
-            </Text>
-            
-            <Section style={buttonContainer}>
-              <Button
-                style={button}
-                href={`${baseUrl}/?survey=true&email=${encodeURIComponent(userEmail)}`}
-              >
-                Complete Survey
-              </Button>
-            </Section>
-          </>
-        )}
+        <Text style={text}>
+          Thank you for joining our waitlist! We're excited to have you here.
+        </Text>
+        
+        <Text style={text}>
+          We're building a simple platform to help neighbors:
+        </Text>
+        
+        <Section style={listContainer}>
+          <Text style={listItem}>• Share and request items</Text>
+          <Text style={listItem}>• Offer and find skills</Text>
+          <Text style={listItem}>• Stay informed</Text>
+          <Text style={listItem}>• Connect with neighbors</Text>
+        </Section>
+        
+        <Text style={text}>
+          You'll be among the first to know when we launch in your area.
+        </Text>
+        
+        <Text style={text}>
+          Stay tuned!
+        </Text>
         
         <Hr style={hr} />
         
