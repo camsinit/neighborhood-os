@@ -81,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to all recipients
     const emailPromises = recipientEmails.map(email => 
       resend.emails.send({
-        from: "NeighborhoodOS <hello@neighborhoodos.com>",
+        from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
         to: [email],
         subject,
         html,

@@ -111,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send the welcome email using React Email template
     const emailResponse = await resend.emails.send({
-      from: "NeighborhoodOS <hello@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
       to: [recipientEmail],
       subject: `Welcome to ${neighborhoodName}, ${firstName}!`,
       html,

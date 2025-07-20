@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     const inviteUrl = `https://neighborhoodos.com/join/${inviteCode}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Neighborhood OS <invites@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
       to: [email],
       subject: `You're invited to join ${neighborhoodName}`,
       html: `

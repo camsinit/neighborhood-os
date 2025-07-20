@@ -94,7 +94,7 @@ async function processEmailByType(email: any): Promise<{success: boolean, messag
       
       try {
         const emailResponse = await resend.emails.send({
-          from: "NeighborhoodOS <noreply@neighborhoodos.com>",
+          from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
           to: [recipient_email],
           subject: template.subject,
           text: template.text,
