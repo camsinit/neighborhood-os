@@ -16,15 +16,15 @@ export const WaitlistSurveyStep1 = ({
 }: WaitlistSurveyStep1Props) => {
   return (
     <div className="space-y-4">
-      {/* Email field - editable */}
+      {/* Email field - auto-populated and read-only */}
       <div>
         <Label htmlFor="email">Email Address</Label>
         <Input 
           id="email" 
           type="email" 
           value={formData.email} 
-          onChange={e => onFieldChange('email', e.target.value)} 
-          placeholder="Enter your email address" 
+          readOnly
+          className="bg-muted" 
         />
       </div>
 
