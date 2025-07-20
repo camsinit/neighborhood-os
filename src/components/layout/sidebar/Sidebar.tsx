@@ -44,8 +44,8 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
         {/* All navigation items including Home at the top */}
         <FeatureNavigation />
 
-        {/* Divider before bottom actions */}
-        <div className="my-4 h-px bg-gray-200" />
+        {/* Divider before bottom actions - now matches the profile divider */}
+        <div className="my-4 h-px bg-gray-100" />
 
         {/* Settings and Invite buttons - settings now navigates to page */}
         <ActionButtons />
