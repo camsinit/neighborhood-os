@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import SafetyArchiveDialog from "./SafetyArchiveDialog";
@@ -35,10 +34,14 @@ const logger = createLogger('SafetyUpdates');
  * and provides functionality to create, view, and edit updates
  * Now uses database triggers for notifications and the unified SafetyComments component
  * Includes support for displaying uploaded images
+ * Updated to use Sheet through prop instead of internal dialog
  */
-const SafetyUpdates = () => {
+interface SafetyUpdatesProps {
+  onAddUpdate?: () => void; // Callback to open the add update sheet
+}
+
+const SafetyUpdates = ({ onAddUpdate }: SafetyUpdatesProps = {}) => {
   // State to control dialog visibility
-  const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
   
@@ -127,7 +130,7 @@ const SafetyUpdates = () => {
           updates={safetyUpdates}
           isLoading={isLoading}
           onUpdateClick={setSelectedUpdate}
-          onAddUpdate={() => setIsAddUpdateOpen(true)} // Pass the function to open the dialog
+          onAddUpdate={onAddUpdate} // Pass the callback to open the sheet
         />
       </div>
 
@@ -142,12 +145,6 @@ const SafetyUpdates = () => {
         </Button>
       </div>
 
-      {/* Safety Update Dialog */}
-      <AddSafetyUpdateDialogNew 
-        open={isAddUpdateOpen}
-        onOpenChange={setIsAddUpdateOpen}
-      />
-      
       {/* Archive dialog */}
       <SafetyArchiveDialog
         open={isArchiveOpen}

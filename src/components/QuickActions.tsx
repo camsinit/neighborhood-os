@@ -1,11 +1,10 @@
-
 import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddEventDialog from "./AddEventDialog";
-import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
-import AddSkillPopover from "./skills/AddSkillPopover";
+import SafetyUpdateForm from "./safety/SafetyUpdateForm";
+import SkillsPageSelector from "./skills/SkillsPageSelector";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
@@ -17,24 +16,22 @@ import { moduleThemeColors } from "@/theme/moduleTheme";
  * This includes:
  * - Adding events
  * - Sharing or requesting items (goods) - now using proper goods forms
- * - Sharing or requesting skills
- * - Adding safety updates
+ * - Sharing or requesting skills - now using Sheet consistently
+ * - Adding safety updates - now using Sheet consistently
  * 
- * Now organized into columns by module type for better usability
- * Updated to use the same safety dialog as the Safety Page for consistency
- * Updated to use proper goods forms instead of generic support request forms
+ * All actions now use Sheet components for consistency across the app.
  */
 const QuickActions = () => {
   const navigate = useNavigate();
   
-  // State for controlling various dialogs and sheets
+  // State for controlling various sheets
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [isGoodsSheetOpen, setIsGoodsSheetOpen] = useState(false);
-  const [isSkillPopoverOpen, setIsSkillPopoverOpen] = useState(false);
+  const [isSkillSheetOpen, setIsSkillSheetOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
 
-  // Goods/Items actions (orange theme) - now open proper goods sheet
+  // Goods/Items actions (orange theme)
   const goodsActions = [{
     icon: Package,
     label: "Share an item",
@@ -53,19 +50,19 @@ const QuickActions = () => {
     moduleTheme: 'goods' as const
   }];
 
-  // Skills actions (green theme) - now open proper skills popover
+  // Skills actions (green theme) - now using Sheet
   const skillsActions = [{
     icon: Wrench,
     label: "Share a skill",
     onClick: () => {
-      setIsSkillPopoverOpen(true);
+      setIsSkillSheetOpen(true);
     },
     moduleTheme: 'skills' as const
   }, {
     icon: HelpCircle,
     label: "Request a skill",
     onClick: () => {
-      setIsSkillPopoverOpen(true);
+      setIsSkillSheetOpen(true);
     },
     moduleTheme: 'skills' as const
   }];
@@ -82,6 +79,12 @@ const QuickActions = () => {
     onClick: () => setIsSafetyUpdateOpen(true),
     moduleTheme: 'safety' as const
   }];
+
+  // Skill added handler - simple refresh without complex context dependencies
+  const handleSkillAdded = () => {
+    console.log('[QuickActions] Skill added successfully');
+    // Keep sheet open so users can add more skills if they want
+  };
 
   /**
    * ActionColumn component for displaying a column of actions with a header
@@ -101,16 +104,16 @@ const QuickActions = () => {
     }>;
     moduleType: "goods" | "skills" | "calendar" | "safety";
   }) => <div className="flex flex-col gap-2">
-      {/* Column heading with colored accent - using primary (fully saturated) color for border */}
+      {/* Column heading with colored accent */}
       <h3 className="text-sm font-semibold mb-2 pb-1 border-b-2" style={{
       borderColor: moduleThemeColors[moduleType].primary
     }}>
         {title}
       </h3>
       
-      {/* Actions in this column with enhanced styling but less saturated colors */}
+      {/* Actions in this column */}
       <div className="space-y-3">
-        {actions.map(action => <ModuleButton key={action.label} moduleTheme={action.moduleTheme} variant="pastel" // Keeping pastel variant for buttons
+        {actions.map(action => <ModuleButton key={action.label} moduleTheme={action.moduleTheme} variant="pastel" 
       className="w-full justify-start shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-2px]" onClick={action.onClick}>
             <action.icon className="h-5 w-5 mr-2" />
             <span className="text-sm font-medium">{action.label}</span>
@@ -126,17 +129,34 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Dialog and Sheet components - now using the same panels as individual pages */}
+      {/* Event Dialog - keeping existing implementation */}
       <AddEventDialog 
         open={isAddEventOpen} 
         onOpenChange={setIsAddEventOpen} 
         onAddEvent={() => {}} 
       />
       
-      <AddSafetyUpdateDialogNew 
-        open={isSafetyUpdateOpen} 
-        onOpenChange={setIsSafetyUpdateOpen} 
-      />
+      {/* Safety Update Sheet - now using Sheet consistently */}
+      <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.safety.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              Share Safety Update
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <SafetyUpdateForm onSuccess={() => setIsSafetyUpdateOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
       
       {/* Goods Sheet - same as used on GoodsPage */}
       <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
@@ -164,14 +184,30 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Skills Popover - same as used on SkillsPage */}
-      <AddSkillPopover
-        open={isSkillPopoverOpen}
-        onOpenChange={setIsSkillPopoverOpen}
-        onSkillAdded={() => {
-          // Optional: Add any callback logic here
-        }}
-      />
+      {/* Skills Sheet - now using Sheet consistently */}
+      <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.skills.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              Add Skills to Share
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <SkillsPageSelector 
+              onSkillAdded={handleSkillAdded} 
+              multiCategoryMode={true}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>;
 };
 

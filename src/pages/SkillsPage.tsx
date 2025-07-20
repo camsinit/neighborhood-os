@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useSkillsPageState } from '@/hooks/useSkillsPageState';
 import { 
   createTabChangeHandler,
@@ -10,7 +11,8 @@ import {
 } from '@/utils/skillsPageHandlers';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
-import AddSkillPopover from '@/components/skills/AddSkillPopover';
+import SkillsPageSelector from '@/components/skills/SkillsPageSelector';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
@@ -21,8 +23,7 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
  * skills onboarding before viewing neighborhood skills. Shows a blur overlay with
  * onboarding dialog until the user shares their own skills.
  * 
- * REFACTORED: Extracted state management and handlers into separate modules
- * for better maintainability and testability.
+ * Now uses Sheet for adding skills (consistent with other pages).
  */
 function SkillsPage() {
   // Get all state and derived values from custom hook
@@ -98,13 +99,31 @@ function SkillsPage() {
         </div>
       </ModuleLayout>
       
-      {/* Unified Add Skill Popover */}
-      <AddSkillPopover
-        open={isSkillDialogOpen}
-        onOpenChange={setIsSkillDialogOpen}
-        selectedCategory={getTypedCategory(category)} // Auto-populate with current category if viewing one
-        onSkillAdded={handleSkillAdded}
-      />
+      {/* Sheet for adding skills - consistent with other pages */}
+      <Sheet open={isSkillDialogOpen} onOpenChange={setIsSkillDialogOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.skills.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              Add Skills to Share
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <SkillsPageSelector 
+              selectedCategory={getTypedCategory(category)} 
+              onSkillAdded={handleSkillAdded} 
+              multiCategoryMode={!category}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </SkillsProvider>
   );
 }

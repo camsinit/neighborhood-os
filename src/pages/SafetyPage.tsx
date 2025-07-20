@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SafetyUpdates from '@/components/SafetyUpdates';
-import AddSafetyUpdateDialogNew from '@/components/safety/AddSafetyUpdateDialogNew';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
-import { Sheet } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import SafetySheetContent from '@/components/safety/SafetySheetContent';
+import SafetyUpdateForm from '@/components/safety/SafetyUpdateForm';
 import { useSafetyUpdates } from '@/utils/queries/useSafetyUpdates';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
@@ -14,11 +14,12 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
  * 
  * Displays the safety updates with universal sheet management
  * and supports highlighting specific updates from deep links.
+ * Now uses Sheet for adding new safety updates (consistent with other pages).
  */
 function SafetyPage() {
   const { data: safetyUpdates } = useSafetyUpdates();
   
-  // Universal page controller for sheet management
+  // Universal page controller for sheet management (viewing existing updates)
   const {
     isSheetOpen,
     sheetItem,
@@ -32,8 +33,8 @@ function SafetyPage() {
     pageName: 'SafetyPage'
   });
   
-  // State for dialog controls
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // State for add update sheet
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   
   return (
     <>
@@ -50,22 +51,38 @@ function SafetyPage() {
             boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
           }}
         >
-          <SafetyUpdates />
+          <SafetyUpdates onAddUpdate={() => setIsAddSheetOpen(true)} />
         </div>
       </ModuleLayout>
 
-      {/* Universal sheet management */}
+      {/* Sheet for viewing existing updates */}
       {isSheetOpen && sheetItem && (
         <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
           <SafetySheetContent update={sheetItem} onOpenChange={closeSheet} />
         </Sheet>
       )}
 
-      {/* Render the AddSafetyUpdateDialogNew component */}
-      <AddSafetyUpdateDialogNew 
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
+      {/* Sheet for adding new safety updates - consistent with other pages */}
+      <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+        <SheetContent 
+          side="right" 
+          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: moduleThemeColors.safety.primary + '40',
+            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
+          }}
+        >
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold">
+              Share Safety Update
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            <SafetyUpdateForm onSuccess={() => setIsAddSheetOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
