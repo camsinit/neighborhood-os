@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { X, ChevronRight } from "lucide-react";
@@ -58,11 +57,10 @@ const WaitlistSurveyPopover = ({
             <Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
               <X className="h-4 w-4" />
             </Button>
-            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Additional Information</h3>
+            <h3 className="text-lg font-semibold absolute left-1/2 transform -translate-x-1/2">Join Neighborhood Waitlist</h3>
             <div></div>
           </DialogTitle>
         </DialogHeader>
-
 
         {/* Carousel content */}
         <div className="min-h-[300px] py-0 -mt-4 -mb-4">
