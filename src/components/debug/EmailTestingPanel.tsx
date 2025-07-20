@@ -217,21 +217,6 @@ export const EmailTestingPanel: React.FC = () => {
       }
     },
     {
-      id: 'neighbor-invite',
-      name: 'Personalized Neighbor Invite',
-      description: 'Personalized invitation from an existing neighbor with custom message and neighborhood highlights',
-      icon: <Users className="w-5 h-5" />,
-      category: 'invitations',
-      functionName: 'send-neighbor-invite',
-      sampleData: {
-        recipientEmail: '',
-        inviterName: 'Jordan Smith',
-        neighborhoodName: 'Maple Street Neighborhood',
-        personalMessage: 'Hi! I think you\'d love being part of our neighborhood community. We have great events and everyone is really friendly!',
-        inviteCode: 'TEST123'
-      }
-    },
-    {
       id: 'invitation-accepted',
       name: 'Invitation Accepted',
       description: 'Notification sent to the inviter when someone accepts their invitation to join the neighborhood',
