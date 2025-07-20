@@ -62,11 +62,6 @@ const WaitlistSurveyPopover = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Progress indicator */}
-        <div className="flex justify-center space-x-2 mb-0">
-          <div className={cn("h-2 w-2 rounded-full", currentPage === 0 ? "bg-blue-600" : "bg-gray-300")} />
-          <div className={cn("h-2 w-2 rounded-full", currentPage === 1 ? "bg-blue-600" : "bg-gray-300")} />
-        </div>
 
         {/* Carousel content */}
         <div className="min-h-[300px] py-0 -mt-4 -mb-[50px]">
