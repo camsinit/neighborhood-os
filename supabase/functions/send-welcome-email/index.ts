@@ -1,18 +1,21 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { WelcomeEmail } from './_templates/welcome-email.tsx';
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Create a logger for this function
+const logger = createLogger('send-welcome-email');
 
 /**
  * URL Generation Utilities for Email Templates
@@ -65,10 +68,9 @@ interface WelcomeEmailRequest {
  * Uses plain-text template with minimal HTML fallback
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body
@@ -80,18 +82,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!recipientEmail || !firstName || !neighborhoodName) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required fields: recipientEmail, firstName, neighborhoodName" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error("Missing required fields in request");
+      return errorResponse("Missing required fields: recipientEmail, firstName, neighborhoodName", 400);
     }
 
-    console.log(`Sending welcome email to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
+    logger.info(`Sending welcome email to ${firstName} (${recipientEmail}) for ${neighborhoodName}`);
 
     // Generate email links with UTM tracking
     const homeLink = getWelcomeURL(getHomeLink);
@@ -117,32 +112,13 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Welcome email sent successfully:", emailResponse);
+    logger.info("Welcome email sent successfully:", emailResponse);
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        messageId: emailResponse.data?.id 
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse({ messageId: emailResponse.data?.id });
+
   } catch (error: any) {
-    console.error("Error in send-welcome-email function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to send welcome email" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in send-welcome-email function:", error);
+    return errorResponse(error.message || "Failed to send welcome email");
   }
 };
 

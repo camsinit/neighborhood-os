@@ -5,6 +5,12 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { WaitlistWelcomeEmail } from './_templates/waitlist-welcome.tsx';
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Create a Supabase client with the service role key for admin permissions
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -14,6 +20,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Initialize Resend client for sending emails
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+// Create a logger for this function
+const logger = createLogger('join-waitlist');
+
 /**
  * Edge Function to handle waitlist signups
  * 
@@ -21,17 +30,9 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
  * table in the database. It includes validation and error handling.
  */
 serve(async (req) => {
-  // Set up CORS headers for the response - updated to include x-application-name
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-application-name",
-  };
-
-  // Handle preflight OPTIONS request
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers, status: 204 });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body to get the email
@@ -40,22 +41,18 @@ serve(async (req) => {
 
     // Validate email
     if (!email) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Email is required" }),
-        { headers, status: 400 }
-      );
+      logger.error("Email is required but not provided");
+      return errorResponse("Email is required", 400);
     }
 
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid email format" }),
-        { headers, status: 400 }
-      );
+      logger.error("Invalid email format provided");
+      return errorResponse("Invalid email format", 400);
     }
 
-    console.log(`Processing waitlist signup for email: ${email}`);
+    logger.info(`Processing waitlist signup for email: ${email}`);
     
     // Insert email into waitlist table
     const { data, error } = await supabase
@@ -65,23 +62,14 @@ serve(async (req) => {
 
     // Check for errors
     if (error) {
-      console.error("Database error:", error);
+      logger.error("Database error:", error);
       
       // Handle duplicate email error specifically
       if (error.code === '23505') { // Unique violation
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "You're already on our waitlist!"
-          }),
-          { headers, status: 200 }
-        );
+        return successResponse(null, "You're already on our waitlist!");
       }
       
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to join waitlist" }),
-        { headers, status: 500 }
-      );
+      return errorResponse("Failed to join waitlist");
     }
 
     // Send Slack notification for new waitlist signup
@@ -102,12 +90,12 @@ serve(async (req) => {
       });
       
       if (!slackResponse.ok) {
-        console.error("Failed to send Slack notification:", slackResponse.status);
+        logger.error("Failed to send Slack notification:", slackResponse.status);
       } else {
-        console.log("Slack notification sent successfully");
+        logger.info("Slack notification sent successfully");
       }
     } catch (slackError) {
-      console.error("Error sending Slack notification:", slackError);
+      logger.error("Error sending Slack notification:", slackError);
       // Don't fail the main request if Slack fails
     }
 
@@ -127,29 +115,17 @@ serve(async (req) => {
         html,
       });
 
-      console.log(`Welcome email sent successfully to: ${email}`);
+      logger.info(`Welcome email sent successfully to: ${email}`);
     } catch (emailError) {
-      console.error("Error sending welcome email:", emailError);
+      logger.error("Error sending welcome email:", emailError);
       // Don't fail the waitlist signup if email sending fails
     }
 
     // Success response
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Successfully joined the waitlist",
-        data
-      }),
-      { headers, status: 200 }
-    );
+    return successResponse(data, "Successfully joined the waitlist");
     
   } catch (error) {
-    console.error("Error processing request:", error);
-    
-    // General error response
-    return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
-      { headers, status: 500 }
-    );
+    logger.error("Error processing request:", error);
+    return errorResponse("Internal server error");
   }
 });

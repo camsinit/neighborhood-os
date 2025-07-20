@@ -1,9 +1,14 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
+
+// Create a logger for this function
+const logger = createLogger('slack');
 
 /**
  * Interface for waitlist signup notification
@@ -37,7 +42,7 @@ async function sendSlackMessage(message: any): Promise<void> {
   const webhookUrl = Deno.env.get('SLACK_WEBHOOK_URL');
   
   if (!webhookUrl) {
-    console.error('SLACK_WEBHOOK_URL not configured');
+    logger.error('SLACK_WEBHOOK_URL not configured');
     throw new Error('Slack webhook URL not configured');
   }
 
@@ -50,7 +55,7 @@ async function sendSlackMessage(message: any): Promise<void> {
   });
 
   if (!response.ok) {
-    console.error('Failed to send Slack message:', response.status, response.statusText);
+    logger.error('Failed to send Slack message:', response.status, response.statusText);
     throw new Error(`Failed to send Slack message: ${response.status}`);
   }
 }
@@ -59,7 +64,7 @@ async function sendSlackMessage(message: any): Promise<void> {
  * Formats and sends waitlist signup notification to Slack
  */
 export async function notifyWaitlistSignup(data: WaitlistNotification): Promise<void> {
-  console.log('[Slack] Sending waitlist signup notification:', data.email);
+  logger.info('Sending waitlist signup notification:', data.email);
   
   const message = {
     text: "🎉 New Waitlist Signup!",
@@ -97,14 +102,14 @@ export async function notifyWaitlistSignup(data: WaitlistNotification): Promise<
   };
 
   await sendSlackMessage(message);
-  console.log('[Slack] Waitlist notification sent successfully');
+  logger.info('Waitlist notification sent successfully');
 }
 
 /**
  * Formats and sends survey submission notification to Slack
  */
 export async function notifySurveySubmission(data: SurveyNotification): Promise<void> {
-  console.log('[Slack] Sending survey submission notification:', data.email);
+  logger.info('Sending survey submission notification:', data.email);
   
   const message = {
     text: "📝 Waitlist Survey Completed!",
@@ -181,7 +186,7 @@ export async function notifySurveySubmission(data: SurveyNotification): Promise<
   };
 
   await sendSlackMessage(message);
-  console.log('[Slack] Survey notification sent successfully');
+  logger.info('Survey notification sent successfully');
 }
 
 /**
@@ -189,15 +194,14 @@ export async function notifySurveySubmission(data: SurveyNotification): Promise<
  * Can be called directly or used as a module
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     const { type, data } = await req.json();
     
-    console.log('[Slack] Received notification request:', type);
+    logger.info('Received notification request:', type);
 
     switch (type) {
       case 'waitlist_signup':
@@ -212,28 +216,11 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error(`Unknown notification type: ${type}`);
     }
 
-    return new Response(
-      JSON.stringify({ success: true, message: 'Notification sent successfully' }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse(null, 'Notification sent successfully');
+
   } catch (error: any) {
-    console.error('[Slack] Error in notification handler:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...corsHeaders 
-        },
-      }
-    );
+    logger.error('Error in notification handler:', error);
+    return errorResponse(error.message);
   }
 };
 

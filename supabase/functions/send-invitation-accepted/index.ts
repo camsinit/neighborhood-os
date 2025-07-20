@@ -1,18 +1,21 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { InvitationAcceptedEmail } from './_templates/invitation-accepted.tsx';
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Initialize Resend with API key from environment
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Create a logger for this function
+const logger = createLogger('send-invitation-accepted');
 
 /**
  * Interface for invitation accepted notification request
@@ -29,10 +32,9 @@ interface InvitationAcceptedRequest {
  * Notifies both the person who sent the invite and the neighborhood admin
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body
@@ -45,18 +47,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!recipientEmails || !recipientEmails.length || !accepterName || !neighborhoodName) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required fields: recipientEmails, accepterName, neighborhoodName" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error("Missing required fields in request");
+      return errorResponse("Missing required fields: recipientEmails, accepterName, neighborhoodName", 400);
     }
 
-    console.log(`Sending invitation accepted notification for ${accepterName} joining ${neighborhoodName}`);
+    logger.info(`Sending invitation accepted notification for ${accepterName} joining ${neighborhoodName}`);
 
     // Generate URLs with UTM tracking
     const directoryUrl = `https://neighborhoodos.com/neighbors?utm_source=email&utm_medium=email&utm_campaign=invitation_accepted`;
@@ -89,33 +84,16 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const emailResponses = await Promise.all(emailPromises);
-    console.log("Invitation accepted emails sent successfully:", emailResponses);
+    logger.info("Invitation accepted emails sent successfully:", emailResponses);
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        messageIds: emailResponses.map(r => r.data?.id),
-        recipientCount: recipientEmails.length
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse({
+      messageIds: emailResponses.map(r => r.data?.id),
+      recipientCount: recipientEmails.length
+    });
+
   } catch (error: any) {
-    console.error("Error in send-invitation-accepted function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to send invitation accepted notification" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in send-invitation-accepted function:", error);
+    return errorResponse(error.message || "Failed to send invitation accepted notification");
   }
 };
 

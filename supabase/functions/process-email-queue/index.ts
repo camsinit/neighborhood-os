@@ -1,15 +1,27 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Resend } from "npm:resend@2.0.0";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-console.log('[process-email-queue] Starting email queue processing');
+// Create a logger for this function
+const logger = createLogger('process-email-queue');
 
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
+
   try {
     // Fetch pending emails from the queue
     const { data: pendingEmails, error: fetchError } = await supabase
@@ -20,22 +32,16 @@ const handler = async (req: Request): Promise<Response> => {
       .limit(10); // Process up to 10 emails at a time
 
     if (fetchError) {
-      console.error('[process-email-queue] Error fetching emails:', fetchError);
+      logger.error('Error fetching emails:', fetchError);
       throw fetchError;
     }
 
     if (!pendingEmails || pendingEmails.length === 0) {
-      console.log('[process-email-queue] No pending emails found');
-      return new Response(JSON.stringify({ 
-        message: 'No pending emails to process',
-        processed: 0 
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      logger.info('No pending emails found');
+      return successResponse({ processed: 0 }, 'No pending emails to process');
     }
 
-    console.log(`[process-email-queue] Found ${pendingEmails.length} pending emails`);
+    logger.info(`Found ${pendingEmails.length} pending emails`);
 
     let successCount = 0;
     let errorCount = 0;
@@ -64,10 +70,10 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('id', id);
 
         successCount++;
-        console.log(`[process-email-queue] Email ${id} sent successfully`);
+        logger.info(`Email ${id} sent successfully`);
 
       } catch (emailError: any) {
-        console.error(`[process-email-queue] Error sending email ${id}:`, emailError);
+        logger.error(`Error sending email ${id}:`, emailError);
         
         // Mark as failed with error details
         await supabase
@@ -83,27 +89,17 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`[process-email-queue] Processing complete. Success: ${successCount}, Errors: ${errorCount}`);
+    logger.info(`Processing complete. Success: ${successCount}, Errors: ${errorCount}`);
 
-    return new Response(JSON.stringify({ 
-      message: 'Email processing complete',
+    return successResponse({
       processed: pendingEmails.length,
       successful: successCount,
       failed: errorCount
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    }, 'Email processing complete');
 
   } catch (error: any) {
-    console.error('[process-email-queue] Critical error:', error);
-    return new Response(JSON.stringify({ 
-      error: 'Failed to process email queue',
-      details: error.message 
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    logger.error('Critical error:', error);
+    return errorResponse('Failed to process email queue');
   }
 };
 

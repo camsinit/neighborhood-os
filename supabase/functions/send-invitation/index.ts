@@ -1,8 +1,15 @@
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
 import { BasicInvitationEmail } from './_templates/basic-invitation.tsx'
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Initialize clients
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -10,6 +17,9 @@ const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const resendApiKey = Deno.env.get('RESEND_API_KEY')!
 
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+
+// Create a logger for this function
+const logger = createLogger('send-invitation');
 
 interface InvitationRequest {
   recipientEmail: string
@@ -23,16 +33,9 @@ interface InvitationRequest {
  * This function renders the basic invitation template and sends it via Resend
  */
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: { 
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
-      } 
-    })
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body to get invitation details
@@ -41,31 +44,18 @@ serve(async (req) => {
 
     // Validate required fields
     if (!recipientEmail || !inviterName || !neighborhoodName || !inviteUrl) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Missing required fields: recipientEmail, inviterName, neighborhoodName, inviteUrl" 
-        }),
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
+      logger.error("Missing required fields in request");
+      return errorResponse("Missing required fields: recipientEmail, inviterName, neighborhoodName, inviteUrl", 400);
     }
 
     // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(recipientEmail)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid email format" }),
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
+      logger.error("Invalid email format provided");
+      return errorResponse("Invalid email format", 400);
     }
 
-    console.log(`Sending invitation from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`)
+    logger.info(`Sending invitation from ${inviterName} to ${recipientEmail} for ${neighborhoodName}`);
 
     // Render the email template
     const emailHtml = await renderAsync(
@@ -93,37 +83,20 @@ serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json()
-      console.error('Resend API error:', errorData)
+      logger.error('Resend API error:', errorData);
       throw new Error(`Resend API error: ${errorData.message || 'Unknown error'}`)
     }
 
     const emailData = await emailResponse.json()
-    console.log(`Invitation email sent successfully to: ${recipientEmail}`)
+    logger.info(`Invitation email sent successfully to: ${recipientEmail}`);
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Invitation sent successfully',
-        emailId: emailData.data?.id 
-      }),
-      { 
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
+    return successResponse(
+      { emailId: emailData.data?.id }, 
+      'Invitation sent successfully'
+    );
 
   } catch (error: any) {
-    console.error('Error sending invitation email:', error)
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'Failed to send invitation email',
-        details: error.message 
-      }),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
+    logger.error('Error sending invitation email:', error);
+    return errorResponse('Failed to send invitation email');
   }
 })

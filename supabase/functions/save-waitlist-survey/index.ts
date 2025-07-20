@@ -5,6 +5,12 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
 import React from 'npm:react@18.3.1';
 import { WaitlistWelcomeEmail } from './_templates/waitlist-welcome.tsx';
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Create a Supabase client with the service role key for admin permissions
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
@@ -14,6 +20,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Initialize Resend client for sending emails
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+// Create a logger for this function
+const logger = createLogger('save-waitlist-survey');
+
 /**
  * Edge Function to handle waitlist survey submissions
  * 
@@ -21,17 +30,9 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
  * It includes validation and links to the existing waitlist entry via email
  */
 serve(async (req) => {
-  // Set up CORS headers for the response
-  const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-application-name",
-  };
-
-  // Handle preflight OPTIONS request
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers, status: 204 });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body to get the survey data
@@ -50,18 +51,14 @@ serve(async (req) => {
 
     // Validate required fields
     if (!email || !firstName || !lastName || !neighborhoodName || !city || !state) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Missing required fields" }),
-        { headers, status: 400 }
-      );
+      logger.error("Missing required fields in request");
+      return errorResponse("Missing required fields", 400);
     }
 
     // Validate numeric field (allow 0 as a valid value)
     if (neighborsToOnboard == null || typeof neighborsToOnboard !== 'number' || neighborsToOnboard < 0) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid neighbor count" }),
-        { headers, status: 400 }
-      );
+      logger.error("Invalid neighbor count provided");
+      return errorResponse("Invalid neighbor count", 400);
     }
 
     // Validate experience and interest fields
@@ -69,20 +66,16 @@ serve(async (req) => {
     const validInterest = ['Not Interested', 'Not Very Interested', 'Somewhat Interested', 'Interested', 'Very Interested'];
     
     if (!validExperience.includes(aiCodingExperience)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid AI coding experience value" }),
-        { headers, status: 400 }
-      );
+      logger.error("Invalid AI coding experience value");
+      return errorResponse("Invalid AI coding experience value", 400);
     }
     
     if (!validInterest.includes(openSourceInterest)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid open source interest value" }),
-        { headers, status: 400 }
-      );
+      logger.error("Invalid open source interest value");
+      return errorResponse("Invalid open source interest value", 400);
     }
 
-    console.log(`Processing survey submission for email: ${email}`);
+    logger.info(`Processing survey submission for email: ${email}`);
     
     // Check if this email exists in the waitlist
     const { data: waitlistEntry, error: waitlistError } = await supabase
@@ -92,11 +85,8 @@ serve(async (req) => {
       .single();
 
     if (waitlistError || !waitlistEntry) {
-      console.error("Email not found in waitlist:", waitlistError);
-      return new Response(
-        JSON.stringify({ success: false, error: "Email not found in waitlist" }),
-        { headers, status: 400 }
-      );
+      logger.error("Email not found in waitlist:", waitlistError);
+      return errorResponse("Email not found in waitlist", 400);
     }
 
     // Insert survey response into database
@@ -117,23 +107,14 @@ serve(async (req) => {
 
     // Check for errors
     if (error) {
-      console.error("Database error:", error);
+      logger.error("Database error:", error);
       
       // Handle duplicate email error specifically
       if (error.code === '23505') { // Unique violation
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            message: "Survey already completed for this email!"
-          }),
-          { headers, status: 200 }
-        );
+        return successResponse(null, "Survey already completed for this email!");
       }
       
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to save survey response" }),
-        { headers, status: 500 }
-      );
+      return errorResponse("Failed to save survey response");
     }
 
     // Send Slack notification for survey submission
@@ -163,12 +144,12 @@ serve(async (req) => {
       });
       
       if (!slackResponse.ok) {
-        console.error("Failed to send Slack survey notification:", slackResponse.status);
+        logger.error("Failed to send Slack survey notification:", slackResponse.status);
       } else {
-        console.log("Slack survey notification sent successfully");
+        logger.info("Slack survey notification sent successfully");
       }
     } catch (slackError) {
-      console.error("Error sending Slack survey notification:", slackError);
+      logger.error("Error sending Slack survey notification:", slackError);
       // Don't fail the main request if Slack fails
     }
 
@@ -196,32 +177,20 @@ serve(async (req) => {
         html,
       });
 
-      console.log(`Updated waitlist welcome email sent successfully to: ${email}`);
+      logger.info(`Updated waitlist welcome email sent successfully to: ${email}`);
     } catch (emailError) {
-      console.error("Error sending updated waitlist welcome email:", emailError);
+      logger.error("Error sending updated waitlist welcome email:", emailError);
       // Don't fail the survey submission if email sending fails
     }
 
     // Success response with priority score
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Survey submitted successfully",
-        data: {
-          id: data[0]?.id,
-          priorityScore: data[0]?.priority_score
-        }
-      }),
-      { headers, status: 200 }
-    );
+    return successResponse({
+      id: data[0]?.id,
+      priorityScore: data[0]?.priority_score
+    }, "Survey submitted successfully");
     
   } catch (error) {
-    console.error("Error processing survey:", error);
-    
-    // General error response
-    return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
-      { headers, status: 500 }
-    );
+    logger.error("Error processing survey:", error);
+    return errorResponse("Internal server error");
   }
 });

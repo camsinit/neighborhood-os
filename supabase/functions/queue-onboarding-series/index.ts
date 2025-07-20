@@ -1,17 +1,20 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  handleCorsPreflightRequest, 
+  successResponse, 
+  errorResponse, 
+  createLogger 
+} from "../_shared/cors.ts";
 
 // Create a Supabase client with the service role key for admin permissions
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// CORS headers for browser requests
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// Create a logger for this function
+const logger = createLogger('queue-onboarding-series');
 
 /**
  * Interface for onboarding series request
@@ -29,10 +32,9 @@ interface OnboardingSeriesRequest {
  * Called when a user completes onboarding after accepting an invite
  */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Handle CORS preflight requests using shared utility
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     // Parse the request body
@@ -46,18 +48,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Validate required fields
     if (!userEmail || !firstName || !neighborhoodName || !userId || !neighborhoodId) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Missing required fields: userEmail, firstName, neighborhoodName, userId, neighborhoodId" 
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        }
-      );
+      logger.error("Missing required fields in request");
+      return errorResponse("Missing required fields: userEmail, firstName, neighborhoodName, userId, neighborhoodId", 400);
     }
 
-    console.log(`Queuing onboarding series for ${firstName} (${userEmail}) in ${neighborhoodName}`);
+    logger.info(`Queuing onboarding series for ${firstName} (${userEmail}) in ${neighborhoodName}`);
 
     // Create the 7-part email series with proper intervals
     const emailEntries = [];
@@ -97,37 +92,19 @@ const handler = async (req: Request): Promise<Response> => {
       .insert(emailEntries);
 
     if (error) {
-      console.error("Error queuing onboarding series:", error);
+      logger.error("Error queuing onboarding series:", error);
       throw error;
     }
 
-    console.log(`Successfully queued ${emailEntries.length} onboarding emails for ${firstName}`);
+    logger.info(`Successfully queued ${emailEntries.length} onboarding emails for ${firstName}`);
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Onboarding series queued successfully",
-        emailCount: emailEntries.length
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
+    return successResponse({
+      emailCount: emailEntries.length
+    }, "Onboarding series queued successfully");
+
   } catch (error: any) {
-    console.error("Error in queue-onboarding-series function:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to queue onboarding series" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    logger.error("Error in queue-onboarding-series function:", error);
+    return errorResponse(error.message || "Failed to queue onboarding series");
   }
 };
 
