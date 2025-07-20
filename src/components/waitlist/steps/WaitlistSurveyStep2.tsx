@@ -59,7 +59,7 @@ export const WaitlistSurveyStep2 = ({
       </div>
 
       {/* Open Source Interest */}
-      <div>
+      <div className="pb-4">
         <Label htmlFor="openSourceInterest">Are you interested in open-source software?</Label>
         <Select 
           value={formData.openSourceInterest} 

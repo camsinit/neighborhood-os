@@ -64,7 +64,7 @@ const WaitlistSurveyPopover = ({
 
 
         {/* Carousel content */}
-        <div className="min-h-[300px] py-0 -mt-4 -mb-[50px]">
+        <div className="min-h-[300px] py-0 -mt-4 mb-6">
           {isFirstStep ? (
             <WaitlistSurveyStep1 formData={formData} onFieldChange={updateField} />
           ) : (
