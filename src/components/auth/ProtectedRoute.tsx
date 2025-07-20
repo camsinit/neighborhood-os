@@ -47,18 +47,21 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Check if we're in guest onboarding mode
   const { isGuestOnboardingMode } = useGuestOnboardingMode();
 
-  // Debug info - this helps us track auth and routing issues
-  console.log("[ProtectedRoute] Checking route access:", {
-    path: location.pathname,
-    isLoadingAuth,
-    isLoadingNeighborhood,
-    isCheckingOnboarding,
-    hasUser: !!user,
-    hasNeighborhood: !!currentNeighborhood,
-    needsOnboarding,
-    neighborhoodError: error ? true : false,
-    isGuestOnboardingMode
-  });
+  // Debug info - only log in debug mode to reduce console noise
+  const isDebugMode = window.location.search.includes('debug=true');
+  if (isDebugMode) {
+    console.log("[ProtectedRoute] Checking route access:", {
+      path: location.pathname,
+      isLoadingAuth,
+      isLoadingNeighborhood,
+      isCheckingOnboarding,
+      hasUser: !!user,
+      hasNeighborhood: !!currentNeighborhood,
+      needsOnboarding,
+      neighborhoodError: error ? true : false,
+      isGuestOnboardingMode
+    });
+  }
 
   // Show loading spinner while checking authentication and neighborhood
   if (isLoadingAuth || (isLoadingNeighborhood && user) || (isCheckingOnboarding && user)) {
@@ -78,20 +81,26 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Special case: Allow unauthenticated access to onboarding page if in guest mode
   if (isOnboardingPage(location) && !user && isGuestOnboardingMode) {
-    console.log("[ProtectedRoute] Allowing unauthenticated access to onboarding (guest mode)");
+    if (isDebugMode) {
+      console.log("[ProtectedRoute] Allowing unauthenticated access to onboarding (guest mode)");
+    }
     return <>{children}</>;
   }
 
   // If not authenticated, redirect to landing page (except for guest onboarding)
   if (!user || !session) {
-    console.log("[ProtectedRoute] User not authenticated, redirecting to landing page");
+    if (isDebugMode) {
+      console.log("[ProtectedRoute] User not authenticated, redirecting to landing page");
+    }
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   
   // If user needs to complete onboarding, redirect to onboarding page
   // Don't redirect if we're already on the onboarding page to avoid loops
   if (needsOnboarding && !isOnboardingPage(location)) {
-    console.log("[ProtectedRoute] User needs to complete onboarding, redirecting");
+    if (isDebugMode) {
+      console.log("[ProtectedRoute] User needs to complete onboarding, redirecting");
+    }
     return <Navigate to="/onboarding" replace />;
   }
   
@@ -102,7 +111,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // If user has no neighborhood and trying to access a page that requires one,
   // redirect to join page - except for the join page itself and home page to avoid loops
   if (!currentNeighborhood && !isJoin && !isHome) {
-    console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
+    if (isDebugMode) {
+      console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
+    }
     // Show loading state briefly to prevent jarring redirect
     setTimeout(() => {
       // This will be handled by the redirect logic

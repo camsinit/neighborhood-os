@@ -62,7 +62,10 @@ export function stopDevServerPolling(): void {
     pollTimeoutId = null;
   }
   isPolling = false;
-  console.log('[DevServer] Stopped development server polling');
+  // Only log in debug mode to reduce console noise
+  if (window.location.search.includes('debug=true')) {
+    console.log('[DevServer] Stopped development server polling');
+  }
 }
 
 /**

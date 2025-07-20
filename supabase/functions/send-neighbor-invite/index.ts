@@ -108,7 +108,22 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
+    // Check if Resend API key is configured
+    if (!Deno.env.get("RESEND_API_KEY")) {
+      logger.error("RESEND_API_KEY environment variable is not set");
+      return errorResponse("Email service not configured", 500);
+    }
+
+    // Check for Resend API errors
+    if (emailResponse.error) {
+      logger.error("Resend API error", emailResponse.error);
+      return errorResponse(`Email service error: ${emailResponse.error.message}`, 500);
+    }
+
+    logger.info("Email sent successfully", { 
+      messageId: emailResponse.data?.id,
+      emailResponse: emailResponse
+    });
 
     // Return success response using shared utility
     return successResponse(
