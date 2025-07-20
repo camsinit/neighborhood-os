@@ -28,6 +28,7 @@ const logger = createLogger('join-waitlist');
  * 
  * This function receives an email address and adds it to the waitlist
  * table in the database. It includes validation and error handling.
+ * Now always sends confirmation emails, even for duplicate signups.
  */
 serve(async (req) => {
   // Handle CORS preflight requests using shared utility
@@ -54,52 +55,68 @@ serve(async (req) => {
 
     logger.info(`Processing waitlist signup for email: ${email}`);
     
-    // Insert email into waitlist table
-    const { data, error } = await supabase
+    // Check if email already exists in waitlist
+    const { data: existingEmail, error: checkError } = await supabase
       .from("waitlist")
-      .insert({ email })
-      .select("id, email");
+      .select("id, email")
+      .eq("email", email)
+      .single();
 
-    // Check for errors
-    if (error) {
-      logger.error("Database error:", error);
-      
-      // Handle duplicate email error specifically
-      if (error.code === '23505') { // Unique violation
-        return successResponse(null, "You're already on our waitlist!");
-      }
-      
-      return errorResponse("Failed to join waitlist");
+    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
+      logger.error("Error checking existing email:", checkError);
+      return errorResponse("Failed to process waitlist signup");
     }
 
-    // Send Slack notification for new waitlist signup
-    try {
-      const slackResponse = await fetch(`https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/slack`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-        },
-        body: JSON.stringify({
-          type: 'waitlist_signup',
-          data: {
-            email,
-            timestamp: new Date().toISOString(),
-          }
-        }),
-      });
-      
-      if (!slackResponse.ok) {
-        logger.error("Failed to send Slack notification:", slackResponse.status);
-      } else {
-        logger.info("Slack notification sent successfully");
+    let isNewSignup = !existingEmail;
+    let waitlistData = existingEmail;
+
+    // If email doesn't exist, insert it into the waitlist
+    if (isNewSignup) {
+      const { data, error } = await supabase
+        .from("waitlist")
+        .insert({ email })
+        .select("id, email");
+
+      if (error) {
+        logger.error("Database error:", error);
+        return errorResponse("Failed to join waitlist");
       }
-    } catch (slackError) {
-      logger.error("Error sending Slack notification:", slackError);
-      // Don't fail the main request if Slack fails
+
+      waitlistData = data?.[0];
+      logger.info(`New email added to waitlist: ${email}`);
+
+      // Send Slack notification for new waitlist signup only
+      try {
+        const slackResponse = await fetch(`https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/slack`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+          },
+          body: JSON.stringify({
+            type: 'waitlist_signup',
+            data: {
+              email,
+              timestamp: new Date().toISOString(),
+            }
+          }),
+        });
+        
+        if (!slackResponse.ok) {
+          logger.error("Failed to send Slack notification:", slackResponse.status);
+        } else {
+          logger.info("Slack notification sent successfully");
+        }
+      } catch (slackError) {
+        logger.error("Error sending Slack notification:", slackError);
+        // Don't fail the main request if Slack fails
+      }
+    } else {
+      logger.info(`Email already exists in waitlist: ${email}`);
     }
 
-    // Send welcome email after successful waitlist signup
+    // Always send welcome email (for both new and existing signups)
+    let emailSent = false;
     try {
       const html = await renderAsync(
         React.createElement(WaitlistWelcomeEmail, {
@@ -115,14 +132,23 @@ serve(async (req) => {
         html,
       });
 
+      emailSent = true;
       logger.info(`Welcome email sent successfully to: ${email}`);
     } catch (emailError) {
       logger.error("Error sending welcome email:", emailError);
       // Don't fail the waitlist signup if email sending fails
     }
 
-    // Success response
-    return successResponse(data, "Successfully joined the waitlist");
+    // Success response with appropriate messaging
+    const message = isNewSignup 
+      ? "Successfully joined the waitlist" 
+      : "You're already on our waitlist!";
+    
+    return successResponse({
+      ...waitlistData,
+      isNewSignup,
+      emailSent
+    }, message);
     
   } catch (error) {
     logger.error("Error processing request:", error);
