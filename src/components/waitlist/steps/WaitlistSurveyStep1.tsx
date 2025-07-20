@@ -16,7 +16,7 @@ export const WaitlistSurveyStep1 = ({
   onFieldChange 
 }: WaitlistSurveyStep1Props) => {
   return (
-    <div className="space-y-4 pt-0.5">
+    <div className="space-y-4 pt-5 -mb-2.5">
       {/* Name fields */}
       <div className="grid grid-cols-2 gap-4">
         <div>
