@@ -61,7 +61,7 @@ const FeatureNavigation = () => {
   ];
 
   return (
-    <div className="space-y-1 pt-[40px]">
+    <div className="space-y-1 pt-4">
       {navigationItems.map((item) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;

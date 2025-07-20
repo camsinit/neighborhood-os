@@ -36,6 +36,9 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       {/* User profile card at the top of sidebar */}
       <UserProfileCard />
       
+      {/* Divider between profile and navigation */}
+      <div className="mx-3 h-px bg-gray-200" />
+      
       {/* Navigation menu section */}
       <nav className="flex-1 px-3 overflow-y-auto">
         {/* All navigation items including Home at the top */}
