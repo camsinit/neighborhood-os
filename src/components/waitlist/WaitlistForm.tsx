@@ -40,11 +40,24 @@ const WaitlistForm = () => {
       });
       return;
     }
+
+    // Show popover immediately for better UX - don't wait for backend
+    setSubmittedEmail(email);
+    setShowSurvey(true);
+    setEmail(""); // Clear the form immediately
+
+    // Show optimistic success message
+    toast({
+      title: "Welcome to the waitlist!",
+      description: "Please take a moment to tell us more about yourself."
+    });
+
+    // Handle the actual signup in the background
     setIsSubmitting(true);
     try {
       console.log("Submitting waitlist signup for:", email);
 
-      // Call the existing join-waitlist edge function
+      // Call the existing join-waitlist edge function in background
       const {
         data,
         error
@@ -53,31 +66,17 @@ const WaitlistForm = () => {
           email
         }
       });
+      
       if (error) {
         console.error("Error joining waitlist:", error);
-        throw new Error("Failed to join waitlist");
+        // Don't show error to user since they already see success - log for debugging
+        console.warn("Background waitlist signup failed, but user experience preserved");
+      } else {
+        console.log("Background waitlist signup successful:", data);
       }
-      console.log("Waitlist signup successful:", data);
-
-      // Show success message
-      toast({
-        title: "Welcome to the waitlist!",
-        description: "Please take a moment to tell us more about yourself."
-      });
-
-      // Store the email and show the survey popover
-      setSubmittedEmail(email);
-      setShowSurvey(true);
-
-      // Clear the form
-      setEmail("");
     } catch (error: any) {
-      console.error("Waitlist signup error:", error);
-      toast({
-        title: "Something went wrong",
-        description: error.message || "Failed to join waitlist. Please try again.",
-        variant: "destructive"
-      });
+      console.error("Background waitlist signup error:", error);
+      // Don't disrupt user experience with backend errors
     } finally {
       setIsSubmitting(false);
     }
