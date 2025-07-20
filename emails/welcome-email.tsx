@@ -13,51 +13,58 @@ import {
 import * as React from 'react'
 
 interface WelcomeEmailProps {
-  userName?: string
-  userEmail?: string
-  loginUrl?: string
+  firstName?: string
+  neighborhoodName?: string
+  homeLink?: string
+  skillsLink?: string
+  createEventLink?: string
 }
 
 export const WelcomeEmail = ({
-  userName = 'there',
-  userEmail = 'user@example.com',
-  loginUrl = 'https://yourapp.com/login'
+  firstName = 'there',
+  neighborhoodName = 'your neighborhood',
+  homeLink = 'https://neighborhoodos.com/dashboard',
+  skillsLink = 'https://neighborhoodos.com/skills',
+  createEventLink = 'https://neighborhoodos.com/events/create'
 }: WelcomeEmailProps) => (
   <Html>
     <Head />
-    <Preview>Welcome to our neighborhood platform!</Preview>
+    <Preview>Welcome to your neighborhood community!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={logoSection}>
-          <Heading style={h1}>Welcome to neighborhoodOS! 👋</Heading>
+          <Heading style={h1}>Welcome to {neighborhoodName}! 👋</Heading>
         </Section>
         
         <Section style={contentSection}>
           <Text style={text}>
-            Hi {userName},
+            Hi {firstName},
           </Text>
           
           <Text style={text}>
-            We're excited to welcome you to our neighborhood platform! You're now part of a community that helps neighbors connect, share resources, and support each other.
+            Welcome to {neighborhoodName}! You're now connected with your neighbors through neighborhoodOS, a platform that helps local communities thrive together.
           </Text>
           
           <Text style={text}>
-            Here's what you can do:
+            Here's how you can get started:
           </Text>
           
           <ul style={list}>
-            <li style={listItem}>🏠 Connect with neighbors nearby</li>
-            <li style={listItem}>🤝 Share skills and resources</li>
-            <li style={listItem}>📅 Join local events</li>
-            <li style={listItem}>🚨 Stay updated on safety alerts</li>
+            <li style={listItem}>🏠 <Button style={inlineButton} href={homeLink}>Explore your neighborhood</Button> - See what's happening locally</li>
+            <li style={listItem}>🤝 <Button style={inlineButton} href={skillsLink}>Share your skills</Button> - Offer help or find someone with the skills you need</li>
+            <li style={listItem}>📅 <Button style={inlineButton} href={createEventLink}>Create an event</Button> - Organize gatherings and bring neighbors together</li>
           </ul>
           
-          <Button style={button} href={loginUrl}>
-            Get Started
+          <Text style={text}>
+            Your neighbors are excited to meet you and build stronger connections in {neighborhoodName}. Jump in whenever you're ready!
+          </Text>
+          
+          <Button style={button} href={homeLink}>
+            Visit Your Neighborhood
           </Button>
           
           <Text style={smallText}>
-            If you have any questions, just reply to this email. We're here to help!
+            Questions? Just reply to this email - we're here to help you make the most of your neighborhood community.
           </Text>
         </Section>
         
@@ -137,6 +144,17 @@ const button = {
   display: 'block',
   padding: '12px 20px',
   margin: '32px 0',
+}
+
+const inlineButton = {
+  backgroundColor: '#007ee6',
+  borderRadius: '3px',
+  color: '#fff',
+  fontSize: '14px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  padding: '4px 8px',
+  display: 'inline',
 }
 
 const smallText = {
