@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { X, ChevronRight } from "lucide-react";
@@ -64,7 +65,7 @@ const WaitlistSurveyPopover = ({
 
 
         {/* Carousel content */}
-        <div className="min-h-[300px] py-0 -mt-4 mb-6">
+        <div className="min-h-[300px] py-0 -mt-4 -mb-4">
           {isFirstStep ? (
             <WaitlistSurveyStep1 formData={formData} onFieldChange={updateField} />
           ) : (
