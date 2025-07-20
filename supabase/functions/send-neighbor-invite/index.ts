@@ -65,6 +65,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if Resend API key is configured FIRST
+    if (!Deno.env.get("RESEND_API_KEY")) {
+      logger.error("RESEND_API_KEY environment variable is not set");
+      return errorResponse("Email service not configured", 500);
+    }
+
     // Parse the request body
     const { 
       recipientEmail, 
@@ -100,29 +106,41 @@ const handler = async (req: Request): Promise<Response> => {
       })
     );
 
-    // Send the invitation email using React Email template
+    logger.info(`Attempting to send email using verified domain`);
+
+    // Send the invitation email using React Email template with verified domain
     const emailResponse = await resend.emails.send({
-      from: "NeighborhoodOS <hello@neighborhoodos.com>",
+      from: "NeighborhoodOS <hello@updates.neighborhoodos.com>",
       to: [recipientEmail],
       subject: `Your neighbor ${inviterName} invited you to join ${neighborhoodName} on NeighborhoodOS`,
       html,
     });
 
-    // Check if Resend API key is configured
-    if (!Deno.env.get("RESEND_API_KEY")) {
-      logger.error("RESEND_API_KEY environment variable is not set");
-      return errorResponse("Email service not configured", 500);
-    }
+    logger.info("Resend API call completed", { 
+      hasError: !!emailResponse.error,
+      hasData: !!emailResponse.data,
+      messageId: emailResponse.data?.id
+    });
 
     // Check for Resend API errors
     if (emailResponse.error) {
-      logger.error("Resend API error", emailResponse.error);
+      logger.error("Resend API error details", {
+        error: emailResponse.error,
+        errorMessage: emailResponse.error.message,
+        errorName: emailResponse.error.name
+      });
       return errorResponse(`Email service error: ${emailResponse.error.message}`, 500);
     }
 
+    if (!emailResponse.data?.id) {
+      logger.error("No message ID returned from Resend", { emailResponse });
+      return errorResponse("Email service did not return a message ID", 500);
+    }
+
     logger.info("Email sent successfully", { 
-      messageId: emailResponse.data?.id,
-      emailResponse: emailResponse
+      messageId: emailResponse.data.id,
+      recipientEmail: recipientEmail,
+      subject: `Your neighbor ${inviterName} invited you to join ${neighborhoodName} on NeighborhoodOS`
     });
 
     // Return success response using shared utility
