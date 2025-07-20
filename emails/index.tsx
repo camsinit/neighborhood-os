@@ -2,6 +2,7 @@ import * as React from 'react';
 
 // Core email templates
 export { WelcomeEmail } from './welcome-email';
+export { default as BasicInvitation } from './basic-invitation';
 export { default as InvitationAccepted } from './invitation-accepted';
 export { default as WaitlistWelcome } from './waitlist-welcome';
 export { default as WeeklySummary } from './weekly-summary';

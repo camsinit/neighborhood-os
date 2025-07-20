@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import React from 'npm:react@18.3.1';
+import { BasicInvitationEmail } from './_templates/basic-invitation.tsx';
 import { handleCorsPreflightRequest, errorResponse, successResponse, createLogger } from '../_shared/cors.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -27,56 +30,20 @@ const handler = async (req: Request): Promise<Response> => {
     // Create the invite URL
     const inviteUrl = `https://neighborhoodos.com/join/${inviteCode}`;
 
+    // Render React Email template
+    const html = await renderAsync(
+      React.createElement(BasicInvitationEmail, {
+        inviterName,
+        neighborhoodName,
+        inviteUrl,
+      })
+    );
+
     const emailResponse = await resend.emails.send({
       from: "neighborhoodOS <hello@updates.neighborhoodos.com>",
       to: [email],
       subject: `${inviterName} invited you to join ${neighborhoodName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">You're invited to join ${neighborhoodName}!</h2>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            Hey there neighbor!
-          </p>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            ${inviterName} thought you'd be a great addition to the ${neighborhoodName} neighborhood on neighborhoodOS.
-          </p>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            It's a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.
-          </p>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            Ready to see what your neighbors are up to?
-          </p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${inviteUrl}" 
-               style="background-color: #0EA5E9; color: white; padding: 12px 24px; 
-                      text-decoration: none; border-radius: 6px; font-weight: 600;
-                      display: inline-block;">
-              Join ${neighborhoodName}
-            </a>
-          </div>
-          
-          <p style="color: #777; font-size: 14px; line-height: 1.6;">
-            Or copy and paste this link into your browser: ${inviteUrl}
-          </p>
-          
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.6;">
-            Welcome to the neighborhood,<br />
-            Cam
-          </p>
-          
-          <p style="color: #999; font-size: 12px;">
-            You're receiving this because ${inviterName} invited you to join their neighborhood.
-            If you didn't expect this invitation, you can safely ignore this email.
-          </p>
-        </div>
-      `,
+      html,
     });
 
     logger.info("Email sent successfully", { messageId: emailResponse.data?.id });
