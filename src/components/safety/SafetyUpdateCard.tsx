@@ -75,7 +75,7 @@ const SafetyUpdateCard = ({
 
   return (
     <Card 
-      className={`p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 relative ${typeStyles.border}`} 
+      className="p-4 cursor-pointer hover:shadow-md transition-all duration-300 border-l-4 border-l-red-500 relative" 
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}

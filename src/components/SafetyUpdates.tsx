@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import EditSafetyUpdateDialog from "./safety/EditSafetyUpdateDialog";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
-import AddSafetyUpdateDialogNew from "./safety/AddSafetyUpdateDialogNew";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
