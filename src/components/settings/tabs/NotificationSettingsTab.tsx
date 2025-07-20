@@ -248,114 +248,128 @@ export const NotificationSettingsTab: React.FC = () => {
     );
   }
 
+  // Combined notification settings for unified list view
+  const allNotificationSettings = [
+    {
+      key: 'event_rsvp',
+      title: 'Event RSVPs',
+      description: 'When someone RSVPs to your events',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.events,
+      emailChecked: preferences.email.types.event_rsvp,
+      onInAppChange: (value: boolean) => updatePageSpecific('events', value),
+      onEmailChange: (value: boolean) => updateEmailType('event_rsvp', value)
+    },
+    {
+      key: 'safety_comment',
+      title: 'Safety Comments',
+      description: 'Comments on your safety updates',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.safety,
+      emailChecked: preferences.email.types.safety_comment,
+      onInAppChange: (value: boolean) => updatePageSpecific('safety', value),
+      onEmailChange: (value: boolean) => updateEmailType('safety_comment', value)
+    },
+    {
+      key: 'safety_emergency',
+      title: 'Emergency Alerts',
+      description: 'Critical safety notifications',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.safety,
+      emailChecked: preferences.email.types.safety_emergency,
+      onInAppChange: (value: boolean) => updatePageSpecific('safety', value),
+      onEmailChange: (value: boolean) => updateEmailType('safety_emergency', value)
+    },
+    {
+      key: 'care_requests',
+      title: 'Care Requests',
+      description: 'New care requests and responses',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.care,
+      emailChecked: preferences.email.types.goods_response, // Closest match
+      onInAppChange: (value: boolean) => updatePageSpecific('care', value),
+      onEmailChange: (value: boolean) => updateEmailType('goods_response', value)
+    },
+    {
+      key: 'goods_exchange',
+      title: 'Goods Exchange',
+      description: 'Available items and requests',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.goods,
+      emailChecked: preferences.email.types.goods_response,
+      onInAppChange: (value: boolean) => updatePageSpecific('goods', value),
+      onEmailChange: (value: boolean) => updateEmailType('goods_response', value)
+    },
+    {
+      key: 'skills_sharing',
+      title: 'Skills Sharing',
+      description: 'Skill offers and session requests',
+      hasInApp: true,
+      hasEmail: true,
+      inAppChecked: preferences.in_app.page_specific.skills,
+      emailChecked: preferences.email.types.skill_session_request,
+      onInAppChange: (value: boolean) => updatePageSpecific('skills', value),
+      onEmailChange: (value: boolean) => updateEmailType('skill_session_request', value)
+    },
+    {
+      key: 'neighbor_activity',
+      title: 'Neighbor Activity',
+      description: 'General neighbor interactions',
+      hasInApp: true,
+      hasEmail: false, // No email equivalent
+      inAppChecked: preferences.in_app.page_specific.neighbors,
+      emailChecked: false,
+      onInAppChange: (value: boolean) => updatePageSpecific('neighbors', value),
+      onEmailChange: () => {}
+    },
+    {
+      key: 'new_neighbors',
+      title: 'New Neighbors',
+      description: 'When new neighbors join your community',
+      hasInApp: true,
+      hasEmail: false, // No email equivalent
+      inAppChecked: preferences.in_app.new_neighbors,
+      emailChecked: false,
+      onInAppChange: (value: boolean) => updateInAppPreference('new_neighbors', value),
+      onEmailChange: () => {}
+    },
+    {
+      key: 'all_activity',
+      title: 'All Community Activity',
+      description: 'All new activity in your community',
+      hasInApp: true,
+      hasEmail: false, // No email equivalent
+      inAppChecked: preferences.in_app.all_activity,
+      emailChecked: false,
+      onInAppChange: (value: boolean) => updateInAppPreference('all_activity', value),
+      onEmailChange: () => {}
+    },
+    {
+      key: 'weekly_summary',
+      title: 'Weekly Summary',
+      description: 'Summary of neighborhood activity',
+      hasInApp: false, // Email only
+      hasEmail: true,
+      inAppChecked: false,
+      emailChecked: preferences.email.types.weekly_summary,
+      onInAppChange: () => {},
+      onEmailChange: (value: boolean) => updateEmailType('weekly_summary', value)
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      {/* In-App Notifications Section */}
+      {/* Notification Settings */}
       <SettingsCard 
-        title="In-App Notifications" 
-        description="Control notifications you see within the app (all enabled by default)"
+        title="Notification Settings" 
+        description="Control how you receive notifications (in-app notifications enabled by default)"
       >
-        <div className="space-y-6">
-          {/* General in-app preferences */}
-          <AutoSaveField 
-            fieldName="notification_preferences" 
-            value={preferences}
-            debounceMs={0}
-          >
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <Label className="text-base">Notifications About You</Label>
-                <p className="text-sm text-gray-500">
-                  Only receive notifications about activity that directly involves you
-                </p>
-              </div>
-              <Switch
-                checked={preferences.in_app.involved_only}
-                onCheckedChange={(value) => updateInAppPreference('involved_only', value)}
-              />
-            </div>
-          </AutoSaveField>
-
-          {/* Page-specific notifications */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Content Types</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pageSpecificSettings.map(({ key, label, description }) => (
-                <AutoSaveField 
-                  key={key}
-                  fieldName="notification_preferences" 
-                  value={preferences}
-                  debounceMs={0}
-                >
-                  <div className="flex items-start justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5 flex-1 mr-4">
-                      <Label className="text-base">{label}</Label>
-                      <p className="text-sm text-gray-500">
-                        {description}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={preferences.in_app.page_specific[key]}
-                      onCheckedChange={(value) => updatePageSpecific(key, value)}
-                    />
-                  </div>
-                </AutoSaveField>
-              ))}
-            </div>
-          </div>
-
-          {/* Community notifications */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Community Activity</h4>
-            <div className="space-y-4">
-              <AutoSaveField 
-                fieldName="notification_preferences" 
-                value={preferences}
-                debounceMs={0}
-              >
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">All Community Activity</Label>
-                    <p className="text-sm text-gray-500">
-                      Receive notifications about all new activity in your community
-                    </p>
-                  </div>
-                  <Switch
-                    checked={preferences.in_app.all_activity}
-                    onCheckedChange={(value) => updateInAppPreference('all_activity', value)}
-                  />
-                </div>
-              </AutoSaveField>
-
-              <AutoSaveField 
-                fieldName="notification_preferences" 
-                value={preferences}
-                debounceMs={0}
-              >
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">New Neighbor Notifications</Label>
-                    <p className="text-sm text-gray-500">
-                      Get notified when new neighbors join your community
-                    </p>
-                  </div>
-                  <Switch
-                    checked={preferences.in_app.new_neighbors}
-                    onCheckedChange={(value) => updateInAppPreference('new_neighbors', value)}
-                  />
-                </div>
-              </AutoSaveField>
-            </div>
-          </div>
-        </div>
-      </SettingsCard>
-
-      {/* Email Notifications Section */}
-      <SettingsCard 
-        title="Email Notifications" 
-        description="Choose when and how you receive email notifications (weekly summary enabled by default)"
-      >
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Master email toggle */}
           <AutoSaveField 
             fieldName="notification_preferences" 
@@ -376,68 +390,60 @@ export const NotificationSettingsTab: React.FC = () => {
             </div>
           </AutoSaveField>
 
-          {/* Email frequency - only show if emails are enabled */}
-          {preferences.email.enabled && (
-            <AutoSaveField 
-              fieldName="notification_preferences" 
-              value={preferences}
-              debounceMs={0}
-            >
-              <div className="rounded-lg border p-4">
-                <div className="space-y-3">
-                  <Label className="text-base">Email Frequency</Label>
-                  <Select
-                    value={preferences.email.frequency}
-                    onValueChange={(value: any) => updateEmailPreference('frequency', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="immediate">Immediate</SelectItem>
-                      <SelectItem value="daily">Daily Digest</SelectItem>
-                      <SelectItem value="weekly">Weekly Digest</SelectItem>
-                      <SelectItem value="off">Off</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </AutoSaveField>
-          )}
-
-          {/* Email types - only show if emails are enabled */}
-          {preferences.email.enabled && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Email Types</h4>
-              <div className="space-y-4">
-                {emailTypes.map(({ key, label, description }) => (
-                  <AutoSaveField 
-                    key={key}
-                    fieldName="notification_preferences" 
-                    value={preferences}
-                    debounceMs={0}
-                  >
-                    <div className="flex items-start justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5 flex-1 mr-4">
-                        <Label className="text-base">{label}</Label>
-                        <p className="text-sm text-gray-500">
-                          {description}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={preferences.email.types[key]}
-                        onCheckedChange={(value) => updateEmailType(key, value)}
-                      />
-                    </div>
-                  </AutoSaveField>
-                ))}
-              </div>
+          {/* Notification list */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-600">
+              <div className="col-span-6">Notification Type</div>
+              <div className="col-span-3 text-center">In-App</div>
+              <div className="col-span-3 text-center">Email</div>
             </div>
-          )}
+            
+            {allNotificationSettings.map((setting) => (
+              <AutoSaveField 
+                key={setting.key}
+                fieldName="notification_preferences" 
+                value={preferences}
+                debounceMs={0}
+              >
+                <div className="grid grid-cols-12 gap-4 items-center rounded-lg border p-4 hover:bg-gray-50">
+                  {/* Title and description */}
+                  <div className="col-span-6">
+                    <div className="font-medium text-gray-900">{setting.title}</div>
+                    <div className="text-sm text-gray-500">{setting.description}</div>
+                  </div>
+                  
+                  {/* In-app toggle */}
+                  <div className="col-span-3 flex justify-center">
+                    {setting.hasInApp ? (
+                      <Switch
+                        checked={setting.inAppChecked}
+                        onCheckedChange={setting.onInAppChange}
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-sm">—</span>
+                    )}
+                  </div>
+                  
+                  {/* Email toggle */}
+                  <div className="col-span-3 flex justify-center">
+                    {setting.hasEmail ? (
+                      <Switch
+                        checked={setting.emailChecked && preferences.email.enabled}
+                        onCheckedChange={setting.onEmailChange}
+                        disabled={!preferences.email.enabled}
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-sm">—</span>
+                    )}
+                  </div>
+                </div>
+              </AutoSaveField>
+            ))}
+          </div>
 
           {/* Weekly digest settings - only show if weekly summary is enabled */}
           {preferences.email.enabled && preferences.email.types.weekly_summary && (
-            <div>
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h4 className="text-sm font-medium text-gray-900 mb-3">Weekly Summary Settings</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <AutoSaveField 
@@ -445,27 +451,25 @@ export const NotificationSettingsTab: React.FC = () => {
                   value={preferences}
                   debounceMs={0}
                 >
-                  <div className="rounded-lg border p-4">
-                    <div className="space-y-3">
-                      <Label className="text-sm">Day of Week</Label>
-                      <Select
-                        value={preferences.email.digest_settings.day_of_week}
-                        onValueChange={(value) => updateDigestSettings('day_of_week', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Sunday">Sunday</SelectItem>
-                          <SelectItem value="Monday">Monday</SelectItem>
-                          <SelectItem value="Tuesday">Tuesday</SelectItem>
-                          <SelectItem value="Wednesday">Wednesday</SelectItem>
-                          <SelectItem value="Thursday">Thursday</SelectItem>
-                          <SelectItem value="Friday">Friday</SelectItem>
-                          <SelectItem value="Saturday">Saturday</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">Day of Week</Label>
+                    <Select
+                      value={preferences.email.digest_settings.day_of_week}
+                      onValueChange={(value) => updateDigestSettings('day_of_week', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sunday">Sunday</SelectItem>
+                        <SelectItem value="Monday">Monday</SelectItem>
+                        <SelectItem value="Tuesday">Tuesday</SelectItem>
+                        <SelectItem value="Wednesday">Wednesday</SelectItem>
+                        <SelectItem value="Thursday">Thursday</SelectItem>
+                        <SelectItem value="Friday">Friday</SelectItem>
+                        <SelectItem value="Saturday">Saturday</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </AutoSaveField>
 
@@ -474,26 +478,24 @@ export const NotificationSettingsTab: React.FC = () => {
                   value={preferences}
                   debounceMs={0}
                 >
-                  <div className="rounded-lg border p-4">
-                    <div className="space-y-3">
-                      <Label className="text-sm">Time of Day</Label>
-                      <Select
-                        value={preferences.email.digest_settings.time_of_day}
-                        onValueChange={(value) => updateDigestSettings('time_of_day', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="06:00">6:00 AM</SelectItem>
-                          <SelectItem value="09:00">9:00 AM</SelectItem>
-                          <SelectItem value="12:00">12:00 PM</SelectItem>
-                          <SelectItem value="15:00">3:00 PM</SelectItem>
-                          <SelectItem value="18:00">6:00 PM</SelectItem>
-                          <SelectItem value="21:00">9:00 PM</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">Time of Day</Label>
+                    <Select
+                      value={preferences.email.digest_settings.time_of_day}
+                      onValueChange={(value) => updateDigestSettings('time_of_day', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="06:00">6:00 AM</SelectItem>
+                        <SelectItem value="09:00">9:00 AM</SelectItem>
+                        <SelectItem value="12:00">12:00 PM</SelectItem>
+                        <SelectItem value="15:00">3:00 PM</SelectItem>
+                        <SelectItem value="18:00">6:00 PM</SelectItem>
+                        <SelectItem value="21:00">9:00 PM</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </AutoSaveField>
               </div>
