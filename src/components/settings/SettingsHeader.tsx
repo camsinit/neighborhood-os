@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { User, Bell, Users } from "lucide-react";
+import { User, Bell } from "lucide-react";
 
 /**
  * Settings tab item interface
@@ -31,19 +31,13 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
   activeTab,
   onTabChange
 }) => {
-  // Tab items configuration with icons and descriptions
+  // Tab items configuration with icons and descriptions - removed neighbor profile
   const tabs: SettingsTab[] = [
     {
       id: 'account',
       label: 'Account',
       icon: User,
       description: 'Profile & preferences'
-    },
-    {
-      id: 'neighbor',
-      label: 'Neighbor Profile',
-      icon: Users,
-      description: 'Skills & visibility'
     },
     {
       id: 'notifications',
