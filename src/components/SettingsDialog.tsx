@@ -16,7 +16,6 @@ import {
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { AccountTab } from "./settings/AccountTab";
-import { NeighborTab } from "./settings/NeighborTab";
 import { NotificationsTab } from "./settings/NotificationsTab";
 import { useSettingsForm } from "./settings/hooks/useSettingsForm";
 import { SettingsHeader } from "./settings/components/SettingsHeader";
@@ -77,18 +76,14 @@ const SettingsDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (
             loading={loading}
           />
           <Tabs defaultValue="account" className="w-full flex-1">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="account">Account</TabsTrigger>
-              <TabsTrigger value="neighbor">Neighbor Profile</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-4 overflow-y-auto h-[calc(96vh-12rem)] px-1">
                 <TabsContent value="account">
                   <AccountTab form={form} />
-                </TabsContent>
-                <TabsContent value="neighbor">
-                  <NeighborTab form={form} />
                 </TabsContent>
                 <TabsContent value="notifications">
                   <NotificationsTab form={form} />

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { SettingsLayout } from '@/components/settings/SettingsLayout';
 import { AccountSettingsTab } from '@/components/settings/tabs/AccountSettingsTab';
-import { NeighborSettingsTab } from '@/components/settings/tabs/NeighborSettingsTab';
 import { NotificationSettingsTab } from '@/components/settings/tabs/NotificationSettingsTab';
 
 /**
@@ -22,8 +21,6 @@ function SettingsPage() {
     switch (activeTab) {
       case 'account':
         return <AccountSettingsTab />;
-      case 'neighbor':
-        return <NeighborSettingsTab />;
       case 'notifications':
         return <NotificationSettingsTab />;
       default:
