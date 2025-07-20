@@ -106,7 +106,7 @@ const WaitlistSurveyPopover = ({
               }
               onClose();
             }}
-            className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
+            className="text-sm text-blue-600 hover:text-blue-700 underline transition-colors"
           >
             I just want to stay in the loop
           </button>
