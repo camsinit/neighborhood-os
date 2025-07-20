@@ -105,9 +105,9 @@ const WaitlistForm = () => {
               shimmerDuration="3s"
               background="#ffffff"
               rainbowEffect={true}
-              className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px]" 
+              className="flex-1 text-sm sm:text-base pl-[12px] sm:pl-[15px] focus:outline-none" 
               style={{ height: '40px' }} 
-              required 
+              required
             />
             <Button type="submit" disabled={isSubmitting} className="px-4 sm:px-8 text-sm sm:text-base font-medium rounded-[30px] whitespace-nowrap" style={{
               height: '40px'
