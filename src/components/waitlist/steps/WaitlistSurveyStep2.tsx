@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,7 +33,7 @@ export const WaitlistSurveyStep2 = ({
           max="100" 
           value={formData.neighborsToOnboard === 0 ? "" : formData.neighborsToOnboard} 
           onChange={e => onFieldChange('neighborsToOnboard', parseInt(e.target.value) || 0)} 
-          placeholder="Enter number" 
+          placeholder="Enter number of neighbors" 
           className="mt-2" 
         />
       </div>
