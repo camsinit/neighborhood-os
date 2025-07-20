@@ -26,7 +26,7 @@ export async function notifySafetyComment(
 ): Promise<boolean> {
   try {
     // Log that we're using the database trigger system for targeted notifications only
-    logger.info('Safety comment notification handled by database triggers (notifications only, no activity)', {
+    logger.debug('Safety comment notification handled by database triggers', {
       commentId, safetyUpdateId
     });
     
@@ -54,7 +54,7 @@ export async function notifySafetyChange(
 ): Promise<boolean> {
   try {
     // Log that we're using the database trigger system
-    logger.debug('Safety change notification is handled by database triggers', {
+    logger.debug('Safety change notification handled by database triggers', {
       safetyUpdateId, action
     });
     

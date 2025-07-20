@@ -1,10 +1,13 @@
 
 /**
- * Safe fetch utility with retry limits and proper error handling
+ * Safe fetch utility with retry limits and minimal logging
  * 
  * This utility prevents infinite loops by limiting retry attempts
  * and providing graceful degradation when requests fail
  */
+import { createLogger } from './logger';
+
+const logger = createLogger('safeFetch');
 
 interface SafeFetchOptions extends RequestInit {
   maxRetries?: number;
@@ -40,7 +43,7 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
   
   // If we've exceeded max retries, throw the last error
   if (retryState.attempts >= maxRetries) {
-    console.warn(`[safeFetch] Max retries (${maxRetries}) exceeded for ${url}`, retryState.lastError);
+    logger.warn(`Max retries (${maxRetries}) exceeded for ${url}`, retryState.lastError);
     throw retryState.lastError || new Error(`Max retries exceeded for ${url}`);
   }
 
@@ -53,9 +56,9 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    // Only log on first attempt or errors to reduce console noise
+    // Only log on first attempt to reduce noise
     if (retryState.attempts === 1) {
-      console.log(`[safeFetch] Attempting ${url}`);
+      logger.debug(`Fetching ${url}`);
     }
 
     // Make the fetch request
@@ -91,9 +94,10 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
       throw fetchError;
     }
 
-    // Log the error and schedule retry
-    console.warn(`[safeFetch] Attempt ${retryState.attempts} failed for ${url}:`, fetchError.message);
-    console.log(`[safeFetch] Retrying in ${retryDelay}ms...`);
+    // Only log retries, not every attempt
+    if (retryState.attempts > 1) {
+      logger.debug(`Retry ${retryState.attempts - 1}/${maxRetries - 1} for ${url}: ${fetchError.message}`);
+    }
 
     // Wait before retrying
     await new Promise(resolve => setTimeout(resolve, retryDelay));
@@ -111,15 +115,8 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
 export function resetRetryCounters(url?: string): void {
   if (url) {
     retryTracker.delete(url);
-    // Only log reset in debug mode to reduce console noise
-    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
-      console.log(`[safeFetch] Reset retry counter for ${url}`);
-    }
   } else {
     retryTracker.clear();
-    if (process.env.NODE_ENV === 'development' && window.location.search.includes('debug=true')) {
-      console.log('[safeFetch] Reset all retry counters');
-    }
   }
 }
 

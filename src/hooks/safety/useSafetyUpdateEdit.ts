@@ -38,12 +38,12 @@ export const useSafetyUpdateEdit = (onSuccess?: () => void) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Updating safety update with cleaned database triggers:", {
+      logger.debug("Updating safety update:", {
         updateId,
         userId: user.id,
         title: formData.title,
         type: formData.type,
-        hasImage: !!formData.imageUrl // Log image presence
+        hasImage: !!formData.imageUrl
       });
 
       // Update the safety update - database triggers handle activity updates
@@ -78,7 +78,7 @@ export const useSafetyUpdateEdit = (onSuccess?: () => void) => {
         onSuccess();
       }
       
-      logger.debug("Safety update edit completed successfully");
+      logger.info("Safety update edit completed successfully");
       
       return data;
     } catch (err) {

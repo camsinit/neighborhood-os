@@ -1,7 +1,7 @@
 
 /**
- * Simplified logging utility
- * Reduced verbosity and better performance
+ * Centralized logging utility with environment-aware configuration
+ * Provides clean, consistent logging across the application
  */
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
@@ -9,12 +9,22 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 interface LoggerConfig {
   minLevel: LogLevel;
   enabled: boolean;
+  debugMode: boolean;
 }
 
-// More conservative configuration - only essential logging
+// Check for debug mode from URL parameters or environment
+const isDebugMode = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.search.includes('debug=true');
+  }
+  return process.env.NODE_ENV === 'development';
+};
+
+// Production-ready configuration with minimal logging by default
 const config: LoggerConfig = {
-  minLevel: 'warn', // Only warnings and errors by default
-  enabled: process.env.NODE_ENV === 'development'
+  minLevel: process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+  enabled: true,
+  debugMode: isDebugMode()
 };
 
 const LOG_LEVEL_PRIORITY = {
@@ -25,11 +35,19 @@ const LOG_LEVEL_PRIORITY = {
 };
 
 /**
- * Create a logger instance
+ * Create a logger instance for a specific module
+ * 
+ * @param moduleName - Name of the module/component using the logger
+ * @returns Logger instance with debug, info, warn, error methods
  */
 export function createLogger(moduleName: string) {
   const shouldLog = (level: LogLevel): boolean => {
-    return config.enabled && LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[config.minLevel];
+    if (!config.enabled) return false;
+    
+    // In debug mode, allow all levels
+    if (config.debugMode && level === 'debug') return true;
+    
+    return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[config.minLevel];
   };
 
   const formatMessage = (message: string): string => {
@@ -64,18 +82,25 @@ export function createLogger(moduleName: string) {
 }
 
 /**
- * Set log level
+ * Set global log level
  */
 export function setLogLevel(level: LogLevel): void {
   config.minLevel = level;
 }
 
 /**
- * Enable/disable logging
+ * Enable/disable all logging
  */
 export function setLoggingEnabled(enabled: boolean): void {
   config.enabled = enabled;
 }
 
-// Default logger
+/**
+ * Toggle debug mode programmatically
+ */
+export function setDebugMode(enabled: boolean): void {
+  config.debugMode = enabled;
+}
+
+// Default logger for general app use
 export default createLogger('App');

@@ -47,13 +47,13 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
       setError(null);
       
       // Log the operation for debugging
-      logger.debug("Creating safety update with cleaned database triggers:", {
+      logger.debug("Creating safety update:", {
         userId: user.id,
         neighborhoodId: neighborhood.id,
         title: formData.title,
         type: formData.type,
         hasDescription: !!formData.description,
-        hasImage: !!formData.imageUrl // Log image presence
+        hasImage: !!formData.imageUrl
       });
 
       // Insert the safety update - database triggers handle everything else automatically
@@ -80,8 +80,7 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
       logger.info("Safety update created successfully:", {
         safetyUpdateId: data?.[0]?.id,
         title: formData.title,
-        hasImage: !!formData.imageUrl,
-        note: "Database triggers handle activities and notifications automatically"
+        hasImage: !!formData.imageUrl
       });
 
       // Success handling
@@ -100,8 +99,6 @@ export const useSafetyUpdateCreate = (onSuccess?: () => void) => {
       if (onSuccess) {
         onSuccess();
       }
-      
-      logger.debug("Safety update creation completed successfully");
       
       return data;
     } catch (err) {

@@ -20,7 +20,7 @@ export const createEvent = async (
   eventTitle: string
 ): Promise<any> => {
   // Log event creation attempt
-  logger.debug("Creating event with database triggers:", eventData);
+  logger.debug("Creating event:", { title: eventTitle, userId });
 
   // Insert the event into the database - triggers handle everything else
   const { data, error } = await supabase
@@ -34,7 +34,7 @@ export const createEvent = async (
     throw error;
   }
 
-  logger.info("Event created successfully - database triggers handle activities/notifications:", {
+  logger.info("Event created successfully:", {
     eventId: data?.[0]?.id,
     title: eventTitle
   });
@@ -59,7 +59,7 @@ export const updateEvent = async (
   eventTitle: string
 ): Promise<any> => {
   // Log event update attempt
-  logger.debug("Updating event with database triggers:", { eventId, eventData });
+  logger.debug("Updating event:", { eventId, title: eventTitle });
 
   // Update the event in the database - triggers handle activity updates
   const { data, error } = await supabase
@@ -74,7 +74,7 @@ export const updateEvent = async (
     throw error;
   }
 
-  logger.info("Event updated successfully - database triggers handle activity updates:", {
+  logger.info("Event updated successfully:", {
     eventId,
     title: eventTitle
   });
