@@ -115,9 +115,6 @@ const WaitlistForm = () => {
               {isSubmitting ? "Joining..." : "Join Waitlist"}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground" style={{ marginTop: '15px' }}>
-            Join the waitlist if you're a neighborhood leader who wants early-access
-          </p>
         </div>
       </form>
 
