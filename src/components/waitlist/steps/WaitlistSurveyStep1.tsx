@@ -16,18 +16,6 @@ export const WaitlistSurveyStep1 = ({
 }: WaitlistSurveyStep1Props) => {
   return (
     <div className="space-y-4">
-      {/* Email field - auto-populated and read-only */}
-      <div>
-        <Label htmlFor="email">Email Address</Label>
-        <Input 
-          id="email" 
-          type="email" 
-          value={formData.email} 
-          readOnly
-          className="bg-muted" 
-        />
-      </div>
-
       {/* Name fields */}
       <div className="grid grid-cols-2 gap-4">
         <div>

@@ -53,7 +53,6 @@ export const useWaitlistSurveyForm = (initialEmail: string) => {
    */
   const validateStep1 = () => {
     return !!(
-      formData.email && 
       formData.firstName && 
       formData.lastName && 
       formData.neighborhoodName && 
