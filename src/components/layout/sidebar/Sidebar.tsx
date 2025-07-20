@@ -37,7 +37,7 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
       <UserProfileCard />
       
       {/* Divider between profile and navigation */}
-      <div className="mx-3 h-px bg-gray-200" />
+      <div className="mx-3 h-px bg-gray-100" />
       
       {/* Navigation menu section */}
       <nav className="flex-1 px-3 overflow-y-auto">
