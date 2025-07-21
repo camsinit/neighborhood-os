@@ -102,7 +102,7 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
             />
           )}
           <p className="text-base font-medium text-gray-900 truncate">
-            {groupText}
+            {groupText.charAt(0).toUpperCase() + groupText.slice(1)}
           </p>
         </div>
 
