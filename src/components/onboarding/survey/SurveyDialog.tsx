@@ -25,6 +25,7 @@ interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onComplete?: (formData: any) => void;
+  onWelcomeComplete?: () => void; // Called when user clicks "Get Started" on welcome screen
   submissionState?: FormSubmissionState;
 }
 
@@ -41,6 +42,7 @@ const SurveyDialog = ({
   open,
   onOpenChange,
   onComplete,
+  onWelcomeComplete,
   submissionState,
 }: SurveyDialogProps) => {
   const user = useUser();
@@ -85,7 +87,10 @@ const SurveyDialog = ({
   
   // Handle final completion when user clicks "Get Started" from welcome screen
   const handleFinalComplete = () => {
-    // This is called after the welcome screen, form data was already submitted
+    // Call the parent's welcome completion handler to trigger navigation
+    onWelcomeComplete?.();
+    
+    // Then handle the local state cleanup
     setShowWelcomeScreen(false);
     onOpenChange(false);
   };

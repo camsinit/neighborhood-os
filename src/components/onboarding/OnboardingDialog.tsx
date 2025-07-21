@@ -16,7 +16,17 @@ import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
  * It wraps the survey dialog and handles the completion of onboarding.
  * Now uses a unified onboarding flow that assumes new users without accounts.
  * 
- * UPDATED: 
+ * UPDATED FLOW: 
+ * 1. User completes survey steps (including profile picture selection)
+ * 2. Form submission happens and profile is created
+ * 3. Welcome screen displays with confetti animation
+ * 4. User clicks "Get Started" button to proceed to dashboard
+ * 5. Navigation to /home happens after welcome screen interaction
+ * 
+ * This ensures users see the welcome message and confetti before being
+ * rushed to the dashboard, creating a better onboarding experience.
+ * 
+ * PREVIOUS BEHAVIOR: 
  * - No longer handles invite processing - now done in useFormSubmission
  * - Pre-loads neighborhood activity during onboarding for better UX
  */
@@ -57,24 +67,21 @@ const OnboardingDialog = ({
       console.log("[OnboardingDialog] Unified onboarding result:", success);
       
       if (success) {
-        console.log("[OnboardingDialog] Onboarding completed successfully, navigating to home");
+        console.log("[OnboardingDialog] Onboarding completed successfully");
         console.log("[OnboardingDialog] Activity feed pre-loaded:", isPreloaded ? "Yes" : "No");
-        
-        // We don't need to handle invitation processing here anymore since
-        // it's now handled in the useFormSubmission hook
         
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Show success message
+        // Show success message - but don't navigate yet
+        // Let the welcome screen with confetti display first
         showSuccessToast(
           "Welcome to your neighborhood!",
           "Your profile is complete and the activity feed is ready."
         );
         
-        // Close dialog and navigate to home
-        onOpenChange(false);
-        navigate("/home");
+        // Don't navigate here - let the survey dialog show the welcome screen first
+        // Navigation will happen when the user clicks "Get Started" on the welcome screen
       }
       // Error handling is done in the submit function
     } catch (error: any) {
@@ -88,11 +95,22 @@ const OnboardingDialog = ({
     }
   };
   
+  // Handle the final completion when user clicks "Get Started" on welcome screen
+  // This is called after the welcome screen with confetti
+  const handleWelcomeComplete = () => {
+    console.log("[OnboardingDialog] Welcome screen completed, navigating to home");
+    
+    // Close dialog and navigate to home
+    onOpenChange(false);
+    navigate("/home");
+  };
+  
   return (
     <SurveyDialog 
       open={open} 
       onOpenChange={onOpenChange} 
       onComplete={handleOnboardingComplete} 
+      onWelcomeComplete={handleWelcomeComplete}
       submissionState={submissionState}
     />
   );
