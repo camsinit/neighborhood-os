@@ -4,22 +4,23 @@ import { Activity, useActivities } from "@/hooks/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
+import GroupedActivityItem from "./GroupedActivityItem";
+import SkillsActivityPanel from "./SkillsActivityPanel";
 import ActivityDetailsSheet from "./ActivityDetailsSheet";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, RefreshCw } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { createLogger } from '@/utils/logger';
 import { groupByTimeInterval, getNonEmptyTimeGroups } from '@/utils/timeGrouping';
+import { groupActivities, ActivityGroup } from '@/utils/activityGrouping';
 
 // Create a dedicated logger for this component
 const logger = createLogger('ActivityFeed');
 
 /**
  * Component to display the feed of neighborhood activities
- * Now with load more button and initial limit of 4 items
+ * Now with activity grouping to prevent flooding from bulk operations like skills onboarding
  * Also listens for events to auto-refresh the feed when new content is added
- * 
- * ENHANCED: Added debugging for neighbor join activities and goods activities specifically
  */
 const ActivityFeed = () => {
   // State for controlling displayed items
@@ -32,23 +33,22 @@ const ActivityFeed = () => {
   } = useActivities();
   
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<ActivityGroup | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [groupPanelOpen, setGroupPanelOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  // Enhanced logging for debugging neighbor join and goods activities
+  // Enhanced logging for debugging
   useEffect(() => {
     logger.info("Component mounted, listening for activity updates");
 
-    // Log if we have data with specific focus on neighbor and goods activities
     if (activities) {
       logger.info(`Activities loaded: ${activities.length}`);
       
-      // Debug: Log neighbor join activities specifically
       const neighborJoinActivities = activities.filter(activity => 
         activity.activity_type === 'neighbor_joined'
       );
       
-      // Debug: Log goods activities specifically
       const goodsActivities = activities.filter(activity => 
         activity.activity_type === 'good_shared' || activity.activity_type === 'good_requested'
       );
@@ -62,8 +62,6 @@ const ActivityFeed = () => {
             actor_id: a.actor_id 
           }))
         );
-      } else {
-        logger.info("No neighbor join activities found in current feed");
       }
       
       if (goodsActivities.length > 0) {
@@ -76,12 +74,9 @@ const ActivityFeed = () => {
             actor_id: a.actor_id 
           }))
         );
-      } else {
-        logger.info("No goods activities found in current feed");
       }
     }
 
-    // Set up periodic refetching every 30 seconds
     const intervalId = setInterval(() => {
       logger.info("Performing automatic periodic refresh");
       refetch();
@@ -114,22 +109,29 @@ const ActivityFeed = () => {
     };
   }, [activities, refetch]);
 
-  // Manual refresh handler with enhanced logging
+  // Manual refresh handler
   const handleManualRefresh = () => {
-    logger.info("Manual refresh triggered - checking for new neighbor and goods activities");
+    logger.info("Manual refresh triggered");
     refetch();
     setLastRefresh(new Date());
     toast(`Feed refreshed - Last updated: ${new Date().toLocaleTimeString()}`);
   };
 
-  // Handler for when activities need special handling (like deleted items)
+  // Handler for individual activity actions
   const handleActivityAction = (activity: Activity) => {
     logger.info(`Activity action triggered for ${activity.id}`);
     setSelectedActivity(activity);
     setSheetOpen(true);
   };
 
-  // Filter out deleted activities and log what we're showing
+  // Handler for grouped activity clicks
+  const handleGroupClick = (group: ActivityGroup) => {
+    logger.info(`Group clicked with ${group.count} activities`);
+    setSelectedGroup(group);
+    setGroupPanelOpen(true);
+  };
+
+  // Filter out deleted activities
   const filteredActivities = activities?.filter(activity => {
     const isDeleted = !!activity.metadata?.deleted;
     if (isDeleted) {
@@ -138,20 +140,21 @@ const ActivityFeed = () => {
     return !isDeleted;
   }) || [];
 
-  // Enhanced logging for what we're actually displaying
+  // Group activities to prevent flooding
+  const activityGroups = groupActivities(filteredActivities);
+  
+  // Enhanced logging for what we're displaying
   useEffect(() => {
-    if (filteredActivities.length > 0) {
-      logger.info(`Displaying ${Math.min(displayCount, filteredActivities.length)} activities out of ${filteredActivities.length} total`);
+    if (activityGroups.length > 0) {
+      const totalActivities = activityGroups.reduce((sum, group) => sum + group.count, 0);
+      logger.info(`Displaying ${Math.min(displayCount, activityGroups.length)} groups representing ${totalActivities} total activities`);
       
-      // Log the activity types we're showing for debugging
-      const activityTypeBreakdown = filteredActivities.reduce((acc, activity) => {
-        acc[activity.activity_type] = (acc[activity.activity_type] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      logger.info("Activity type breakdown:", activityTypeBreakdown);
+      const groupedCount = activityGroups.filter(g => g.type === 'grouped').length;
+      if (groupedCount > 0) {
+        logger.info(`${groupedCount} groups are consolidated (3+ similar activities)`);
+      }
     }
-  }, [filteredActivities, displayCount]);
+  }, [activityGroups, displayCount]);
 
   // Display loading skeletons while data is being fetched
   if (isLoading) {
@@ -171,7 +174,7 @@ const ActivityFeed = () => {
   }
 
   // Display a message when there are no activities
-  if (!filteredActivities?.length) {
+  if (!activityGroups?.length) {
     logger.info("No activities to display");
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg border border-gray-200">
@@ -186,29 +189,35 @@ const ActivityFeed = () => {
     );
   }
   
-  logger.info("Rendering activity feed with data");
+  logger.info("Rendering activity feed with grouped data");
 
   // Group activities by time intervals and render with section headers
-  const groupedActivities = groupByTimeInterval(filteredActivities);
+  const groupedActivities = groupByTimeInterval(
+    activityGroups.map(group => group.primaryActivity)
+  );
   const timeGroups = getNonEmptyTimeGroups(groupedActivities);
   
   // Calculate how many items to display across all groups
   let itemsDisplayed = 0;
-  const displayGroups = timeGroups.map(([interval, items]) => {
+  const displayGroups = timeGroups.map(([interval, primaryActivities]) => {
     const remainingCount = displayCount - itemsDisplayed;
     if (remainingCount <= 0) {
       return [interval, []] as const;
     }
     
-    const itemsToShow = items.slice(0, remainingCount);
-    itemsDisplayed += itemsToShow.length;
-    return [interval, itemsToShow] as const;
-  }).filter(([, items]) => items.length > 0);
+    // Get the corresponding activity groups for these primary activities
+    const groupsToShow = activityGroups.filter(group => 
+      primaryActivities.includes(group.primaryActivity)
+    ).slice(0, remainingCount);
+    
+    itemsDisplayed += groupsToShow.length;
+    return [interval, groupsToShow] as const;
+  }).filter(([, groups]) => groups.length > 0);
 
   return (
     <>      
       <div className="p-6 bg-white rounded-lg border border-gray-200">
-        {displayGroups.map(([interval, items], groupIndex) => (
+        {displayGroups.map(([interval, groups], groupIndex) => (
           <div key={interval}>
             {/* Time interval section header */}
             <h3 className={`text-sm font-medium text-gray-500 mb-2 ${groupIndex === 0 ? 'mt-0' : 'mt-6'}`}>
@@ -217,19 +226,27 @@ const ActivityFeed = () => {
             
             {/* Activities in this time group */}
             <div className="space-y-4 mb-2">
-              {items.map(activity => (
-                <ActivityItem 
-                  key={activity.id} 
-                  activity={activity} 
-                  onAction={handleActivityAction}
-                />
+              {groups.map(group => (
+                group.type === 'grouped' ? (
+                  <GroupedActivityItem
+                    key={group.id}
+                    group={group}
+                    onGroupClick={handleGroupClick}
+                  />
+                ) : (
+                  <ActivityItem 
+                    key={group.id} 
+                    activity={group.primaryActivity} 
+                    onAction={handleActivityAction}
+                  />
+                )
               ))}
             </div>
           </div>
         ))}
         
         {/* Load more button */}
-        {displayCount < filteredActivities.length && (
+        {displayCount < activityGroups.length && (
           <div className="flex justify-center pt-4">
             <Button 
               variant="outline" 
@@ -243,10 +260,18 @@ const ActivityFeed = () => {
         )}
       </div>
 
+      {/* Individual activity details sheet */}
       <ActivityDetailsSheet 
         activity={selectedActivity} 
         open={sheetOpen} 
         onOpenChange={setSheetOpen} 
+      />
+
+      {/* Grouped activities panel */}
+      <SkillsActivityPanel
+        group={selectedGroup}
+        open={groupPanelOpen}
+        onOpenChange={setGroupPanelOpen}
       />
     </>
   );
