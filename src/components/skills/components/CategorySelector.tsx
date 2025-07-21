@@ -25,41 +25,54 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   }));
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold">Choose a Skill Category</h3>
-        <p className="text-sm text-muted-foreground">
+    <div className="bg-background p-6 space-y-6">
+      {/* Header with skills theme accent */}
+      <div className="text-center space-y-3">
+        <div className="w-12 h-1 mx-auto rounded-full" style={{ backgroundColor: 'hsl(var(--skills-color))' }} />
+        <h3 className="text-xl font-semibold text-foreground">Choose a Skill Category</h3>
+        <p className="text-muted-foreground">
           Select a category to see available skills you can offer to your neighbors.
         </p>
       </div>
 
-      {/* Category grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+      {/* Category grid with improved styling */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-80 overflow-y-auto">
         {availableCategories.map((category) => (
           <div
             key={category.key}
-            className="p-4 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 hover:border-green-500"
+            className="group relative p-4 bg-card border border-border rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md hover:border-[hsl(var(--skills-color))] hover:bg-[hsl(var(--skills-light))]"
             onClick={() => onCategorySelect(category.key)}
           >
             <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{category.title}</h4>
-                <p className="text-xs text-muted-foreground mt-1">
+              <div className="flex-1 space-y-1">
+                <h4 className="font-medium text-card-foreground group-hover:text-[hsl(var(--skills-color))] transition-colors">
+                  {category.title}
+                </h4>
+                <p className="text-sm text-muted-foreground">
                   {category.description}
                 </p>
               </div>
-              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[hsl(var(--skills-color))] transition-colors" />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Session summary */}
+      {/* Session summary with skills theme */}
       {selectedSkillsCount > 0 && (
-        <div className="space-y-2 border-t pt-4">
+        <div className="border-t border-border pt-4">
           <div className="text-center">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors bg-secondary text-secondary-foreground">
+            <div 
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors"
+              style={{ 
+                backgroundColor: 'hsl(var(--skills-light))', 
+                color: 'hsl(var(--skills-color))' 
+              }}
+            >
+              <div 
+                className="w-2 h-2 rounded-full" 
+                style={{ backgroundColor: 'hsl(var(--skills-color))' }}
+              />
               {selectedSkillsCount} skills added this session
             </div>
           </div>

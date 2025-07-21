@@ -158,9 +158,9 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
     );
   }
 
-  // Render skill selection view
+  // Render skill selection view  
   return (
-    <div className="space-y-6">
+    <div className="bg-background min-h-full">
       {/* Header with back button for multi-category mode */}
       <SkillsPageHeader
         categoryTitle={categoryTitle}
@@ -168,33 +168,36 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
         onBackToCategories={handleBackToCategories}
       />
 
-      {/* Selected skills display */}
-      <SelectedSkillsDisplay
-        selectedSkills={selectedSkills}
-        currentCategory={currentCategory}
-        onRemoveSkill={removeSkill}
-      />
+      {/* Content area with proper spacing */}
+      <div className="p-6 space-y-6">
+        {/* Selected skills display */}
+        <SelectedSkillsDisplay
+          selectedSkills={selectedSkills}
+          currentCategory={currentCategory}
+          onRemoveSkill={removeSkill}
+        />
 
-      {/* Skills grid - FIXED: Ensure proper handler connection */}
-      <SkillGrid
-        skills={categorySkills}
-        selectedSkills={getSelectedSkillNames()}
-        onSkillSelect={handleSkillSelection} // This now has proper debugging and error handling
-      />
+        {/* Skills grid - FIXED: Ensure proper handler connection */}
+        <SkillGrid
+          skills={categorySkills}
+          selectedSkills={getSelectedSkillNames()}
+          onSkillSelect={handleSkillSelection} // This now has proper debugging and error handling
+        />
 
-      {/* Custom skill input */}
-      <CustomSkillInput
-        categoryTitle={categoryTitle}
-        onAddCustomSkill={(skillName) => {
-          console.log('🎯 [SkillsPageSelector] Custom skill add requested:', { skillName, currentCategory });
-          if (currentCategory) {
-            handleCustomSkillAdd(skillName, currentCategory);
-          } else {
-            console.error('❌ Cannot add custom skill without category');
-            toast.error('Please select a category first');
-          }
-        }}
-      />
+        {/* Custom skill input */}
+        <CustomSkillInput
+          categoryTitle={categoryTitle}
+          onAddCustomSkill={(skillName) => {
+            console.log('🎯 [SkillsPageSelector] Custom skill add requested:', { skillName, currentCategory });
+            if (currentCategory) {
+              handleCustomSkillAdd(skillName, currentCategory);
+            } else {
+              console.error('❌ Cannot add custom skill without category');
+              toast.error('Please select a category first');
+            }
+          }}
+        />
+      </div>
 
       {/* Special skill details dialog */}
       <SpecialSkillDialog
