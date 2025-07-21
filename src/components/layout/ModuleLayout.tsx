@@ -45,6 +45,7 @@ const ModuleLayout = ({
   const [hasCompletedSurvey, setHasCompletedSurvey] = useState(false);
   const [skillsSurveyStep, setSkillsSurveyStep] = useState(0);
   const [skillsSurveyTotal, setSkillsSurveyTotal] = useState(7);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(showSkillsOnboardingOverlay);
   const {
     toast
   } = useToast();
@@ -52,6 +53,7 @@ const ModuleLayout = ({
   const {
     saveSkills
   } = useSkillsManagement();
+  
   // Get theme colors for this module
   const themeConfig = moduleThemeColors[themeColor];
 
@@ -91,12 +93,16 @@ const ModuleLayout = ({
       }).eq('id', user.id);
       if (profileError) throw profileError;
       logger.info("Skills onboarding marked as completed");
+      
+      // Hide the overlay immediately
+      setIsOverlayVisible(false);
+      
       toast({
         title: "Skills Shared!",
         description: selectedSkills.length > 0 ? `Added ${selectedSkills.length} skills to your profile.` : "Skills onboarding completed. You can add skills anytime!"
       });
 
-      // Call the completion handler from parent
+      // Call the completion handler from parent to update the page state
       onSkillsOnboardingComplete?.();
     } catch (error) {
       logger.error("Error completing skills onboarding:", error);
@@ -154,9 +160,10 @@ const ModuleLayout = ({
     }
     return "1 of 8";
   };
-  return <div className={showSkillsOnboardingOverlay ? "relative min-h-screen" : "min-h-screen bg-gray-50"}>
+  
+  return <div className={isOverlayVisible ? "relative min-h-screen" : "min-h-screen bg-gray-50"}>
       {/* Main content - conditionally blurred for skills onboarding */}
-      <div className={showSkillsOnboardingOverlay ? "min-h-screen bg-gray-50 blur-sm" : ""}>
+      <div className={isOverlayVisible ? "min-h-screen bg-gray-50 blur-sm" : ""}>
         {/* Header section with proper left-alignment */}
         <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 pb-6">
           {/* Title - theme-colored and left-aligned */}
@@ -187,7 +194,7 @@ const ModuleLayout = ({
       </div>
 
       {/* Skills onboarding overlay with full onboarding flow */}
-      {showSkillsOnboardingOverlay && <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
+      {isOverlayVisible && <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
           <Card className="w-[600px] max-h-[90vh] overflow-y-auto pointer-events-auto">
             
             
