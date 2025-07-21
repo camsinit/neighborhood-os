@@ -353,10 +353,9 @@ export const NotificationSettingsTab: React.FC = () => {
         <div className="space-y-4">
           {/* Notification list */}
           <div className="space-y-2">
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-600">
-              <div className="col-span-6">Notification Type</div>
-              <div className="col-span-3 text-center">In-App</div>
-              <div className="col-span-3 text-center">Email</div>
+            <div className="flex justify-between items-center px-4 py-2 text-sm font-medium text-gray-600">
+              <div>Notification Type</div>
+              <div>Email</div>
             </div>
             
             {allNotificationSettings.map((setting) => (
@@ -366,27 +365,15 @@ export const NotificationSettingsTab: React.FC = () => {
                 value={preferences}
                 debounceMs={500}
               >
-                <div className="grid grid-cols-12 gap-4 items-center rounded-lg border p-4 hover:bg-gray-50">
+                <div className="flex justify-between items-center rounded-lg border p-4 hover:bg-gray-50">
                   {/* Title and description */}
-                  <div className="col-span-6 flex items-center gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="font-medium text-gray-900 w-40 flex-shrink-0">{setting.title}</div>
                     <div className="text-sm text-gray-500">{setting.description}</div>
                   </div>
                   
-                  {/* In-app toggle */}
-                  <div className="col-span-3 flex justify-center">
-                    {setting.hasInApp ? (
-                      <Switch
-                        checked={setting.inAppChecked}
-                        onCheckedChange={setting.onInAppChange}
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-sm">—</span>
-                    )}
-                  </div>
-                  
                   {/* Email toggle */}
-                  <div className="col-span-3 flex justify-center">
+                  <div className="flex justify-center">
                     {setting.hasEmail ? (
                       <div className="opacity-50">
                         <Switch
