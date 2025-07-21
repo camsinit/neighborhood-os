@@ -5,6 +5,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFormSubmission } from "@/hooks/useFormSubmission";
 import { usePendingInviteHandler } from "./hooks/usePendingInviteHandler";
+import { useActivityPreload } from "@/hooks/useActivityPreload";
 import SurveyDialog from "./survey/SurveyDialog";
 import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
 
@@ -15,7 +16,9 @@ import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
  * It wraps the survey dialog and handles the completion of onboarding.
  * Now uses a unified onboarding flow that assumes new users without accounts.
  * 
- * UPDATED: No longer handles invite processing - now done in useFormSubmission
+ * UPDATED: 
+ * - No longer handles invite processing - now done in useFormSubmission
+ * - Pre-loads neighborhood activity during onboarding for better UX
  */
 interface OnboardingDialogProps {
   open: boolean;
@@ -38,6 +41,9 @@ const OnboardingDialog = ({
   const { submitForm, submissionState } = useFormSubmission();
   const { clearPendingInvite } = usePendingInviteHandler();
   
+  // Pre-load activity feed when dialog is open to ensure smooth experience after onboarding
+  const { isPreloaded } = useActivityPreload(open);
+  
   // Handle completion of onboarding - now expects formData parameter
   const handleOnboardingComplete = async (formData: any) => {
     console.log("[OnboardingDialog] handleOnboardingComplete called");
@@ -52,12 +58,19 @@ const OnboardingDialog = ({
       
       if (success) {
         console.log("[OnboardingDialog] Onboarding completed successfully, navigating to home");
+        console.log("[OnboardingDialog] Activity feed pre-loaded:", isPreloaded ? "Yes" : "No");
         
         // We don't need to handle invitation processing here anymore since
         // it's now handled in the useFormSubmission hook
         
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
+        
+        // Show success message
+        showSuccessToast(
+          "Welcome to your neighborhood!",
+          "Your profile is complete and the activity feed is ready."
+        );
         
         // Close dialog and navigate to home
         onOpenChange(false);
