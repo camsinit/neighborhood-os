@@ -87,9 +87,9 @@ export function NotificationDrawer() {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <Bell className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No notifications yet</p>
+                <p>No new notifications</p>
                 <p className="text-sm text-gray-400 mt-1">
-                  You'll see updates from your neighborhood here
+                  Share a quick action above to create some neighborhood activity and notifications!
                 </p>
               </div>
             )}
