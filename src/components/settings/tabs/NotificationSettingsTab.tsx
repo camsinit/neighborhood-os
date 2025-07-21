@@ -368,8 +368,8 @@ export const NotificationSettingsTab: React.FC = () => {
               >
                 <div className="grid grid-cols-12 gap-4 items-center rounded-lg border p-4 hover:bg-gray-50">
                   {/* Title and description */}
-                  <div className="col-span-6 flex items-center justify-between">
-                    <div className="font-medium text-gray-900">{setting.title}</div>
+                  <div className="col-span-6 flex items-center gap-4">
+                    <div className="font-medium text-gray-900 w-40 flex-shrink-0">{setting.title}</div>
                     <div className="text-sm text-gray-500">{setting.description}</div>
                   </div>
                   
