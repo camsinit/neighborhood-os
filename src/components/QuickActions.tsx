@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SafetyUpdateForm from "./safety/SafetyUpdateForm";
 import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { AppSheetContent } from "@/components/ui/app-sheet-content";
 import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
@@ -181,12 +182,9 @@ const QuickActions = () => {
 
       {/* Event Sheet - Clean white background with blue accent */}
       <Sheet open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
-          style={{
-            borderLeftColor: moduleThemeColors.calendar.primary
-          }}
+          moduleTheme="calendar"
         >
           <SheetHeader className="border-b border-border/40 pb-4">
             <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
@@ -204,17 +202,14 @@ const QuickActions = () => {
               neighborhoodTimezone={neighborhoodTimezone}
             />
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
       
       {/* Safety Update Sheet - Clean white background with red accent */}
       <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
-          style={{
-            borderLeftColor: moduleThemeColors.safety.primary
-          }}
+          moduleTheme="safety"
         >
           <SheetHeader className="border-b border-border/40 pb-4">
             <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
@@ -225,17 +220,14 @@ const QuickActions = () => {
           <div className="mt-6">
             <SafetyUpdateForm onSuccess={() => setIsSafetyUpdateOpen(false)} />
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
       
       {/* Goods Sheet - Clean white background with orange accent */}
       <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
-          style={{
-            borderLeftColor: moduleThemeColors.goods.primary
-          }}
+          moduleTheme="goods"
         >
           <SheetHeader className="border-b border-border/40 pb-4">
             <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
@@ -250,17 +242,14 @@ const QuickActions = () => {
               mode="create"
             />
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
       
       {/* Skills Sheet - Clean white background with green accent */}
       <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
-          style={{
-            borderLeftColor: moduleThemeColors.skills.primary
-          }}
+          moduleTheme="skills"
         >
           <SheetHeader className="border-b border-border/40 pb-4">
             <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
@@ -278,7 +267,7 @@ const QuickActions = () => {
               />
             </SkillsProvider>
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
     </div>;
 };

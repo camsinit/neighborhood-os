@@ -13,7 +13,8 @@ import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import SkillsSidePanelSelector from '@/components/skills/SkillsSidePanelSelector';
 import SkillRequestSheet from '@/components/skills/SkillRequestSheet'; // NEW: Import skill request sheet
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { AppSheetContent } from '@/components/ui/app-sheet-content';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
@@ -116,14 +117,9 @@ function SkillsPage() {
       
       {/* Sheet for adding skills - consistent with other pages */}
       <Sheet open={isSkillDialogOpen} onOpenChange={setIsSkillDialogOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.skills.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
-          }}
+          moduleTheme="skills"
         >
           <SheetHeader>
           </SheetHeader>
@@ -135,7 +131,7 @@ function SkillsPage() {
               onClose={() => setIsSkillDialogOpen(false)}
             />
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
 
       {/* NEW: Sheet for requesting skills */}

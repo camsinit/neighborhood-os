@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SafetyUpdates from '@/components/SafetyUpdates';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { AppSheetContent } from '@/components/ui/app-sheet-content';
 import SafetySheetContent from '@/components/safety/SafetySheetContent';
 import SafetyUpdateForm from '@/components/safety/SafetyUpdateForm';
 import { useSafetyUpdates } from '@/utils/queries/useSafetyUpdates';
@@ -64,14 +65,9 @@ function SafetyPage() {
 
       {/* Sheet for adding new safety updates - consistent with other pages */}
       <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-        <SheetContent 
+        <AppSheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.safety.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
-          }}
+          moduleTheme="safety"
         >
           <SheetHeader>
             <SheetTitle className="text-lg font-semibold">
@@ -81,7 +77,7 @@ function SafetyPage() {
           <div className="mt-6">
             <SafetyUpdateForm onSuccess={() => setIsAddSheetOpen(false)} />
           </div>
-        </SheetContent>
+        </AppSheetContent>
       </Sheet>
     </>
   );
