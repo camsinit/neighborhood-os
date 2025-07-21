@@ -28,10 +28,6 @@ export const SelectedSkillsOverlay = ({
   // State to control whether the overlay is expanded
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Don't render if no skills are selected
-  if (selectedSkills.length === 0) {
-    return null;
-  }
 
   return (
     <div className="relative z-10">
@@ -42,7 +38,7 @@ export const SelectedSkillsOverlay = ({
           className="w-full flex items-center justify-between text-sm font-medium text-green-700 hover:text-green-800 transition-colors"
         >
           <span>
-            {selectedSkills.length} skill{selectedSkills.length !== 1 ? 's' : ''} selected
+            {selectedSkills.length === 0 ? '0 skills selected' : `${selectedSkills.length} skill${selectedSkills.length !== 1 ? 's' : ''} selected`}
           </span>
           {isExpanded ? (
             <ChevronUp className="h-4 w-4" />

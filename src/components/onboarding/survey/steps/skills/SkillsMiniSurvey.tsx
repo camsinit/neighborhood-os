@@ -297,12 +297,6 @@ export const SkillsMiniSurvey = ({
 
   return (
     <div className="space-y-4">
-      {/* Selected skills overlay - only show on category steps */}
-      <SelectedSkillsOverlay 
-        selectedSkills={skillsWithDetails}
-        onRemoveSkill={removeSkill}
-      />
-
       {/* Condensed category header */}
       <div className="text-center space-y-1">
         <h3 className="text-base font-semibold">{currentCategory?.title}</h3>
@@ -310,6 +304,12 @@ export const SkillsMiniSurvey = ({
           Select any {currentCategory?.title.toLowerCase()} skills you have.
         </p>
       </div>
+
+      {/* Selected skills overlay - now positioned below header */}
+      <SelectedSkillsOverlay 
+        selectedSkills={skillsWithDetails}
+        onRemoveSkill={removeSkill}
+      />
 
       {/* Condensed skills grid for current category */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto">
