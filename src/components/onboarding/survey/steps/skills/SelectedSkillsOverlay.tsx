@@ -36,10 +36,10 @@ export const SelectedSkillsOverlay = ({
   return (
     <div className="relative z-10">
       {/* Collapsible header bar - always visible when skills are selected */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3">
+      <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-3">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors"
+          className="w-full flex items-center justify-between text-sm font-medium text-green-700 hover:text-green-800 transition-colors"
         >
           <span>
             {selectedSkills.length} skill{selectedSkills.length !== 1 ? 's' : ''} selected
