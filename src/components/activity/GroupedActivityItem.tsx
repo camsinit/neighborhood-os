@@ -117,7 +117,7 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               borderColor: `${activityColor}30`
             }}
           >
-            {group.count} items
+            View {group.count} {primaryActivity.activity_type.includes('skill') ? 'Skills' : 'Items'}
           </Badge>
           <ChevronRight 
             className="h-4 w-4 text-gray-400" 
