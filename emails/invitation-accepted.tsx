@@ -11,52 +11,73 @@ import {
   Text,
 } from '@react-email/components';
 
-interface InvitationAcceptedEmailProps {
-  accepterName: string;
-  neighborhoodName: string;
-  isAdminNotification: boolean;
-  directoryUrl?: string;
-  dashboardUrl?: string;
+// Import unified email types for consistent relationship-aware messaging
+import type { ActorRecipientEmailProps, AdminNotificationEmailProps } from '../src/types/emailTypes'
+
+interface InvitationAcceptedEmailProps extends ActorRecipientEmailProps {
+  // Invitation acceptance specific properties
+  isAdminNotification: boolean;        // Determines if this is for admin or inviter
+  directoryUrl?: string;               // Link to member directory for admins
+  dashboardUrl?: string;               // Link to dashboard for inviters
+  
+  // Community context for admins
+  communityStats?: {
+    totalMembers: number;
+    weeklyActivity: number;
+  };
 }
 
 /**
  * Email template for notifying when someone accepts a neighborhood invitation
- * Adapts message based on whether it's for the inviter or admin
+ * Now uses unified system with relationship-aware messaging:
+ * - For inviter: "John accepted YOUR invitation" (personal ownership)
+ * - For admin: "New member joined your neighborhood: John" (administrative awareness)
  */
 export const InvitationAcceptedEmail = ({
-  accepterName = 'Someone',
+  // Unified base properties
+  recipientName = 'Neighbor',
   neighborhoodName = 'Your Neighborhood',
+  fromName = 'neighborhoodOS',
+  homeUrl = 'https://neighborhoodos.com/dashboard',
+  
+  // Actor-recipient properties - the accepter is the "actor"
+  actorName = 'Someone',              // e.g., "John" or "Your neighbor John"
+  actorAvatarUrl,                     // Optional avatar
+  contentTitle = neighborhoodName,    // What they joined
+  
+  // Invitation acceptance specific properties  
   isAdminNotification = false,
   directoryUrl = 'https://neighborhoodos.com/neighbors',
   dashboardUrl = 'https://neighborhoodos.com/dashboard',
+  communityStats,
 }: InvitationAcceptedEmailProps) => {
-  // Different content based on recipient type
-  const subject = isAdminNotification 
-    ? `New member joined ${neighborhoodName}: ${accepterName}`
-    : `${accepterName} accepted your invitation to ${neighborhoodName}`;
-
+  
+  // Relationship-aware content based on recipient type
+  // The unified parameter resolver handles this, but templates can still customize
   const content = isAdminNotification ? {
     greeting: `Great news!`,
-    mainMessage: `${accepterName} has joined ${neighborhoodName}.`,
-    detail: `As the neighborhood admin, you can see all members in your neighborhood directory and help new neighbors get connected.`,
+    mainMessage: `${actorName} has joined ${neighborhoodName}.`,
+    detail: communityStats 
+      ? `Your community now has ${communityStats.totalMembers} members. As the neighborhood admin, you can see all members in your directory and help new neighbors get connected.`
+      : `As the neighborhood admin, you can see all members in your neighborhood directory and help new neighbors get connected.`,
     closing: `Keep building your community!`,
-    signature: `Best,\nThe neighborhoodOS Team`,
+    signature: `Best,\nThe ${fromName} Team`,
     ctaText: 'View Member Directory',
     ctaUrl: directoryUrl
   } : {
-    greeting: `Good news!`,
-    mainMessage: `${accepterName} has accepted your invitation to join ${neighborhoodName}.`,
-    detail: `Your neighborhood is growing! ${accepterName} is now part of the community and can start connecting with neighbors, sharing skills, and participating in events.`,
+    greeting: `Good news, ${recipientName}!`,
+    mainMessage: `${actorName} accepted your invitation to join ${neighborhoodName}.`,
+    detail: `Your neighborhood is growing! ${actorName} is now part of the community and can start connecting with neighbors, sharing skills, and participating in events.`,
     closing: `Thanks for helping grow your neighborhood`,
-    signature: `The neighborhoodOS Team`,
-    ctaText: 'Explore Your Neighborhood',
+    signature: `The ${fromName} Team`,
+    ctaText: 'Explore Your Neighborhood', 
     ctaUrl: dashboardUrl
   };
 
   return (
     <Html>
       <Head />
-      <Preview>{subject}</Preview>
+    <Preview>{content.mainMessage}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>{content.greeting}</Heading>
