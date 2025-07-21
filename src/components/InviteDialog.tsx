@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import { Neighborhood } from "@/contexts/neighborhood/types";
@@ -43,6 +44,29 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     error, 
     refreshNeighborhoodData
   } = useNeighborhood();
+
+  // Fetch user's profile to get the correct display name
+  // This ensures we show the user's actual name instead of their email address
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile for invitation:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   // Use effect to detect if we're stuck in a loading state for too long
   useEffect(() => {
@@ -188,11 +212,18 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
       if (inviteError) throw inviteError;
 
-      // Send email via edge function
+      // Send email via edge function using the profile display_name
+      // Use the profile display_name first, fallback to a friendly neighbor greeting
+      // instead of showing the email address to recipients
+      const inviterDisplayName = profile?.display_name || 
+                                 user.user_metadata?.display_name || 
+                                 user.email?.split('@')[0] || 
+                                 'Your neighbor';
+
       const { error: emailError } = await supabase.functions.invoke('send-invitation', {
         body: {
           email: email.trim(),
-          inviterName: user.user_metadata?.display_name || 'A neighbor',
+          inviterName: inviterDisplayName,
           neighborhoodName: currentNeighborhood.name,
           inviteCode: inviteCode
         }

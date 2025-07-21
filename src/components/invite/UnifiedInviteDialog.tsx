@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser } from "@supabase/auth-helpers-react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/NeighborhoodContext";
 import EmailInviteSection from "./EmailInviteSection";
@@ -51,6 +52,29 @@ const UnifiedInviteDialog = ({
   // Get required hooks for user and neighborhood context
   const user = useUser();
   const { currentNeighborhood } = useNeighborhood();
+
+  // Fetch user's profile to get the correct display name
+  // This ensures we show the user's actual name instead of their email address
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile for invitation:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   /**
    * Generates a unique invitation link and copies it to clipboard
@@ -151,10 +175,17 @@ const UnifiedInviteDialog = ({
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
 
       // Send the email via edge function in the background
+      // Use the profile display_name first, fallback to a friendly neighbor greeting
+      // instead of showing the email address to recipients
+      const inviterDisplayName = profile?.display_name || 
+                                 user.user_metadata?.display_name || 
+                                 user.email?.split('@')[0] || 
+                                 'Your neighbor';
+      
       supabase.functions.invoke('send-invitation', {
         body: {
           recipientEmail: invitedEmail,
-          inviterName: user.user_metadata?.display_name || user.email,
+          inviterName: inviterDisplayName,
           neighborhoodName: currentNeighborhood.name,
           inviteUrl: inviteUrl
         }
