@@ -107,7 +107,7 @@ function CalendarPage() {
     <>
       <ModuleLayout
         title="Community Calendar"
-        description="Upcoming events in your neighborhood"
+        description="The neighborhood calendar is the perfect place for you to share any gathering or happening that you'd like neighbors to know about."
         themeColor="calendar"
       >
         <div 
