@@ -327,7 +327,7 @@ export const SkillsMiniSurvey = ({
                 <Checkbox
                   checked={selected}
                   onChange={() => {}} // Handled by parent div click
-                  className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+                  className="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 border-green-500 data-[state=unchecked]:border-green-500"
                 />
                 <span className="text-xs font-medium truncate">{skill}</span>
                 {SPECIAL_SKILLS[skill as keyof typeof SPECIAL_SKILLS] && (
