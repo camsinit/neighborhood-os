@@ -108,7 +108,7 @@ export const PasswordInput = ({
       {showValidation && validation && (showRequirements || !validation.isValid) && value && (
         <div className="bg-gray-50 rounded-lg p-3 space-y-2">
           <p className="text-sm font-medium text-gray-700">Password requirements:</p>
-          <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-y-1 gap-x-3">
             {validation.requirements.map((requirement) => (
               <div key={requirement.id} className="flex items-center space-x-2 text-sm">
                 {requirement.met ? (
