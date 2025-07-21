@@ -167,7 +167,7 @@ const SkillsSidePanelSelector: React.FC<SkillsSidePanelSelectorProps> = ({
         </div>
 
         {/* Category selection */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <CompactCategorySelector
             onCategorySelect={handleCategorySelect}
             selectedSkillsCount={selectedSkills.length}

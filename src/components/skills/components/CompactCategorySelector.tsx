@@ -35,7 +35,7 @@ const CompactCategorySelector: React.FC<CompactCategorySelectorProps> = ({
     );
 
   return (
-    <div className="space-y-6 p-6">
+    <>
       {/* Header with skills theme accent - optimized for side panels */}
       <div className="text-center space-y-3">
         <div className="w-12 h-1 mx-auto rounded-full bg-skills" />
@@ -59,7 +59,7 @@ const CompactCategorySelector: React.FC<CompactCategorySelectorProps> = ({
       </div>
 
       {/* Single-column category list - optimized for side panel width */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
+      <div className="space-y-2">
         {availableCategories.map((category) => (
           <div
             key={category.key}
@@ -100,7 +100,7 @@ const CompactCategorySelector: React.FC<CompactCategorySelectorProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
