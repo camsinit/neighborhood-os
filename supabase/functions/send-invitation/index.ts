@@ -1,4 +1,5 @@
 
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
@@ -66,7 +67,7 @@ serve(async (req) => {
       })
     )
 
-    // Send the email via Resend
+    // Send the email via Resend using the verified domain
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -74,7 +75,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'neighborhoodOS <hello@neighborhoodos.com>',
+        from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
         to: [recipientEmail],
         subject: `${inviterName} invited you to join ${neighborhoodName}`,
         html: emailHtml,
@@ -100,3 +101,4 @@ serve(async (req) => {
     return errorResponse('Failed to send invitation email');
   }
 })
+
