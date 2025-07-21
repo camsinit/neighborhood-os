@@ -160,7 +160,7 @@ const SkillsPageSelector: React.FC<SkillsPageSelectorProps> = ({
 
   // Render skill selection view  
   return (
-    <div className="bg-background min-h-full">
+    <div className="bg-white min-h-full">
       {/* Header with back button for multi-category mode */}
       <SkillsPageHeader
         categoryTitle={categoryTitle}

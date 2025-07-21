@@ -179,22 +179,21 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Event Sheet - NOW using Sheet pattern for consistency */}
+      {/* Event Sheet - Clean white background with blue accent */}
       <Sheet open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.calendar.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.calendar.primary}10`
+            borderLeftColor: moduleThemeColors.calendar.primary
           }}
         >
-          <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
+          <SheetHeader className="border-b border-border/40 pb-4">
+            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <Calendar className="h-5 w-5" style={{ color: moduleThemeColors.calendar.primary }} />
               Add New Event
             </SheetTitle>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-muted-foreground">
               All times are in {neighborhoodTimezone.replace('_', ' ')} timezone
             </div>
           </SheetHeader>
@@ -208,19 +207,18 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Safety Update Sheet - using Sheet consistently */}
+      {/* Safety Update Sheet - Clean white background with red accent */}
       <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.safety.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
+            borderLeftColor: moduleThemeColors.safety.primary
           }}
         >
-          <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
+          <SheetHeader className="border-b border-border/40 pb-4">
+            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" style={{ color: moduleThemeColors.safety.primary }} />
               Share Safety Update
             </SheetTitle>
           </SheetHeader>
@@ -230,19 +228,18 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Goods Sheet - same as used on GoodsPage */}
+      {/* Goods Sheet - Clean white background with orange accent */}
       <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.goods.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.goods.primary}10`
+            borderLeftColor: moduleThemeColors.goods.primary
           }}
         >
-          <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
+          <SheetHeader className="border-b border-border/40 pb-4">
+            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <Package className="h-5 w-5" style={{ color: moduleThemeColors.goods.primary }} />
               {initialRequestType === "offer" ? "Offer an Item" : "Request an Item"}
             </SheetTitle>
           </SheetHeader>
@@ -256,19 +253,18 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Skills Sheet - NOW wrapped in SkillsProvider to fix context error */}
+      {/* Skills Sheet - Clean white background with green accent */}
       <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.skills.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
+            borderLeftColor: moduleThemeColors.skills.primary
           }}
         >
-          <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
+          <SheetHeader className="border-b border-border/40 pb-4">
+            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <Wrench className="h-5 w-5" style={{ color: moduleThemeColors.skills.primary }} />
               Add Skills to Share
             </SheetTitle>
           </SheetHeader>
