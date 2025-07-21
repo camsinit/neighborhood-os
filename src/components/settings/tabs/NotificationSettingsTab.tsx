@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { showInfoToast } from "@/utils/toast";
 import { AutoSaveField } from '../AutoSaveField';
 import { SettingsCard } from '../SettingsCard';
 
@@ -150,7 +150,7 @@ export const NotificationSettingsTab: React.FC = () => {
         }
       } catch (error: any) {
         console.error('[NotificationSettingsTab] Error loading preferences:', error);
-        toast.error('Failed to load notification settings');
+        showInfoToast('Failed to load notification settings');
       } finally {
         setIsLoading(false);
       }
@@ -189,48 +189,34 @@ export const NotificationSettingsTab: React.FC = () => {
   };
 
   /**
-   * Update an email preference field
+   * Show coming soon message for email features
+   */
+  const handleEmailComingSoon = () => {
+    showInfoToast("Email notifications aren't ready yet but are coming soon!");
+  };
+
+  /**
+   * Update an email preference field (disabled for now)
    */
   const updateEmailPreference = (field: keyof Omit<NotificationPreferences['email'], 'types' | 'digest_settings'>, value: boolean | string) => {
-    setPreferences(prev => ({
-      ...prev,
-      email: {
-        ...prev.email,
-        [field]: value
-      }
-    }));
+    // For now, just show coming soon message
+    handleEmailComingSoon();
   };
 
   /**
-   * Update an email type preference field
+   * Update an email type preference field (disabled for now)
    */
   const updateEmailType = (type: keyof NotificationPreferences['email']['types'], value: boolean) => {
-    setPreferences(prev => ({
-      ...prev,
-      email: {
-        ...prev.email,
-        types: {
-          ...prev.email.types,
-          [type]: value
-        }
-      }
-    }));
+    // For now, just show coming soon message
+    handleEmailComingSoon();
   };
 
   /**
-   * Update digest settings
+   * Update digest settings (disabled for now)
    */
   const updateDigestSettings = (field: keyof NotificationPreferences['email']['digest_settings'], value: string) => {
-    setPreferences(prev => ({
-      ...prev,
-      email: {
-        ...prev.email,
-        digest_settings: {
-          ...prev.email.digest_settings,
-          [field]: value
-        }
-      }
-    }));
+    // For now, just show coming soon message
+    handleEmailComingSoon();
   };
 
   // Page-specific notification settings configuration
@@ -400,10 +386,12 @@ export const NotificationSettingsTab: React.FC = () => {
                   Master control for all email notifications
                 </p>
               </div>
-              <Switch
-                checked={preferences.email.enabled}
-                onCheckedChange={(value) => updateEmailPreference('enabled', value)}
-              />
+              <div className="opacity-50">
+                <Switch
+                  checked={false}
+                  onCheckedChange={handleEmailComingSoon}
+                />
+              </div>
             </div>
           </AutoSaveField>
 
@@ -444,11 +432,12 @@ export const NotificationSettingsTab: React.FC = () => {
                   {/* Email toggle */}
                   <div className="col-span-3 flex justify-center">
                     {setting.hasEmail ? (
-                      <Switch
-                        checked={setting.emailChecked && preferences.email.enabled}
-                        onCheckedChange={setting.onEmailChange}
-                        disabled={!preferences.email.enabled}
-                      />
+                      <div className="opacity-50">
+                        <Switch
+                          checked={false}
+                          onCheckedChange={handleEmailComingSoon}
+                        />
+                      </div>
                     ) : (
                       <span className="text-gray-400 text-sm">—</span>
                     )}
@@ -458,66 +447,29 @@ export const NotificationSettingsTab: React.FC = () => {
             ))}
           </div>
 
-          {/* Weekly digest settings - only show if weekly summary is enabled */}
-          {preferences.email.enabled && preferences.email.types.weekly_summary && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Weekly Summary Settings</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <AutoSaveField 
-                  fieldName="notification_preferences" 
-                  value={preferences}
-                  debounceMs={0}
-                >
-                  <div className="space-y-2">
-                    <Label className="text-sm">Day of Week</Label>
-                    <Select
-                      value={preferences.email.digest_settings.day_of_week}
-                      onValueChange={(value) => updateDigestSettings('day_of_week', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sunday">Sunday</SelectItem>
-                        <SelectItem value="Monday">Monday</SelectItem>
-                        <SelectItem value="Tuesday">Tuesday</SelectItem>
-                        <SelectItem value="Wednesday">Wednesday</SelectItem>
-                        <SelectItem value="Thursday">Thursday</SelectItem>
-                        <SelectItem value="Friday">Friday</SelectItem>
-                        <SelectItem value="Saturday">Saturday</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </AutoSaveField>
-
-                <AutoSaveField 
-                  fieldName="notification_preferences" 
-                  value={preferences}
-                  debounceMs={0}
-                >
-                  <div className="space-y-2">
-                    <Label className="text-sm">Time of Day</Label>
-                    <Select
-                      value={preferences.email.digest_settings.time_of_day}
-                      onValueChange={(value) => updateDigestSettings('time_of_day', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="06:00">6:00 AM</SelectItem>
-                        <SelectItem value="09:00">9:00 AM</SelectItem>
-                        <SelectItem value="12:00">12:00 PM</SelectItem>
-                        <SelectItem value="15:00">3:00 PM</SelectItem>
-                        <SelectItem value="18:00">6:00 PM</SelectItem>
-                        <SelectItem value="21:00">9:00 PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </AutoSaveField>
+          {/* Weekly digest settings - coming soon */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg opacity-50">
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Weekly Summary Settings</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm">Day of Week</Label>
+                <Select disabled onValueChange={handleEmailComingSoon}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Coming soon" />
+                  </SelectTrigger>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm">Time of Day</Label>
+                <Select disabled onValueChange={handleEmailComingSoon}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Coming soon" />
+                  </SelectTrigger>
+                </Select>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </SettingsCard>
     </div>
