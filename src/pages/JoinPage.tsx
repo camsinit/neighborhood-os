@@ -390,7 +390,7 @@ const JoinPage = () => {
           </div>
           <CardTitle className="text-2xl">Join {neighborhood?.name}</CardTitle>
           <CardDescription>
-            You've been invited to join this neighborhood community
+            You've been invited to join our neighborhood!
           </CardDescription>
         </CardHeader>
         
@@ -481,19 +481,8 @@ const JoinPage = () => {
                 >
                   Manual Sign-up Flow
                 </Button>
-                
-                <p className="text-xs text-gray-500 text-center">
-                  Connect with Google for the fastest setup, or create an account manually
-                </p>
               </div>
             )}
-          </div>
-
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-xs text-gray-500">
-              By joining, you'll be able to connect with your neighbors and participate in community activities.
-            </p>
           </div>
         </CardContent>
       </Card>
