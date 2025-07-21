@@ -291,7 +291,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       return resend.emails.send({
-        from: `${neighborhood.name} <weekly@resend.dev>`,
+        from: `NeighborhoodOS <weekly@updates.neighborhoodos.com>`,
         to: [recipient.email],
         subject: `Your ${neighborhood.name} weekly summary`,
         html,

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@4.0.0";
@@ -171,7 +170,7 @@ serve(async (req) => {
       );
 
       await resend.emails.send({
-        from: 'neighborhoodOS <hello@resend.dev>',
+        from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
         to: [email],
         subject: 'Thanks for your neighborhood instigator survey!',
         html,
