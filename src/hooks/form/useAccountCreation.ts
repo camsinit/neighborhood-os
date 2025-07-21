@@ -80,7 +80,22 @@ export const useAccountCreation = () => {
       return authData.user.id;
     } catch (error) {
       console.error('[useAccountCreation] Error creating user account:', error);
-      throw new Error('Failed to create user account');
+      
+      // Handle specific error cases with more helpful messages
+      if (error instanceof Error) {
+        if (error.message.includes('User already registered') || error.message.includes('already been registered')) {
+          throw new Error('An account with this email already exists. Please try signing in instead.');
+        }
+        if (error.message.includes('Invalid email')) {
+          throw new Error('Please enter a valid email address.');
+        }
+        if (error.message.includes('Password')) {
+          throw new Error('Password does not meet requirements. Please check the password criteria.');
+        }
+      }
+      
+      // Fallback to generic error message
+      throw new Error('Failed to create user account. Please try again.');
     }
   };
 
