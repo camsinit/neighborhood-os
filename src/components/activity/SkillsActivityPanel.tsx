@@ -148,12 +148,6 @@ const SkillsActivityPanel = ({ group, open, onOpenChange }: SkillsActivityPanelP
                 <p className="font-medium text-gray-900 truncate">
                   {activity.title}
                 </p>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  {new Date(activity.created_at).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </p>
               </div>
             </div>
           ))}
