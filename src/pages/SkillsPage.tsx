@@ -12,6 +12,7 @@ import {
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import SkillsPageSelector from '@/components/skills/SkillsPageSelector';
+import SkillRequestSheet from '@/components/skills/SkillRequestSheet'; // NEW: Import skill request sheet
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
@@ -44,6 +45,8 @@ function SkillsPage() {
     setSearchParams,
     isSkillDialogOpen,
     setIsSkillDialogOpen,
+    isSkillRequestSheetOpen,        // NEW: Include skill request sheet state
+    setIsSkillRequestSheetOpen,     // NEW: Include skill request sheet setter
     searchInputRef
   } = useSkillsPageState();
 
@@ -106,6 +109,7 @@ function SkillsPage() {
             getTypedCategory={getTypedCategory}
             setSearchParams={setSearchParams}
             setIsSkillDialogOpen={setIsSkillDialogOpen}
+            setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen} // NEW: Pass skill request sheet handler
           />
         </div>
       </ModuleLayout>
@@ -135,6 +139,12 @@ function SkillsPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* NEW: Sheet for requesting skills */}
+      <SkillRequestSheet 
+        open={isSkillRequestSheetOpen} 
+        onOpenChange={setIsSkillRequestSheetOpen} 
+      />
     </SkillsProvider>
   );
 }

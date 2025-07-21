@@ -20,6 +20,7 @@ interface TabsViewProps {
   handleTabChange: (value: string) => void;
   setSearchParams: (params: URLSearchParams) => void;
   setIsSkillDialogOpen: (open: boolean) => void;
+  setIsSkillRequestSheetOpen: (open: boolean) => void; // NEW: Add skill request sheet handler
   getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
 }
 
@@ -32,6 +33,7 @@ const TabsView: React.FC<TabsViewProps> = ({
   handleTabChange,
   setSearchParams,
   setIsSkillDialogOpen,
+  setIsSkillRequestSheetOpen, // NEW: Destructure skill request sheet handler
   getTypedCategory
 }) => {
   return (
@@ -44,6 +46,7 @@ const TabsView: React.FC<TabsViewProps> = ({
         handleTabChange={handleTabChange}
         setSearchParams={setSearchParams}
         setIsSkillDialogOpen={setIsSkillDialogOpen}
+        setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen} // NEW: Pass skill request handler
       />
       
       <ThemedTabsContent value="offers" className="mt-0">

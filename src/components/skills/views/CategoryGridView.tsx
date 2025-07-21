@@ -18,6 +18,7 @@ interface CategoryGridViewProps {
   handleTabChange: (value: string) => void;
   setSearchParams: (params: URLSearchParams) => void;
   setIsSkillDialogOpen: (open: boolean) => void;
+  setIsSkillRequestSheetOpen: (open: boolean) => void; // NEW: Add skill request sheet handler
   onCategoryClick: (selectedCategory: SkillCategory) => void;
 }
 
@@ -29,6 +30,7 @@ const CategoryGridView: React.FC<CategoryGridViewProps> = ({
   handleTabChange,
   setSearchParams,
   setIsSkillDialogOpen,
+  setIsSkillRequestSheetOpen, // NEW: Destructure skill request sheet handler
   onCategoryClick
 }) => {
   return (
@@ -41,6 +43,7 @@ const CategoryGridView: React.FC<CategoryGridViewProps> = ({
         handleTabChange={handleTabChange}
         setSearchParams={setSearchParams}
         setIsSkillDialogOpen={setIsSkillDialogOpen}
+        setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen} // NEW: Pass skill request handler
       />
       
       <SkillCategoryGrid onCategoryClick={onCategoryClick} />

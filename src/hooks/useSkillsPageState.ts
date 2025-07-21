@@ -28,6 +28,9 @@ export const useSkillsPageState = () => {
   // Dialog state for adding skills
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
   
+  // Sheet state for requesting skills (NEW)
+  const [isSkillRequestSheetOpen, setIsSkillRequestSheetOpen] = useState(false);
+  
   // Reference for the search input field
   const searchInputRef = useRef<HTMLInputElement>(null);
   
@@ -39,9 +42,11 @@ export const useSkillsPageState = () => {
     searchParams,
     setSearchParams,
     
-    // Dialog state
+    // Dialog and sheet state
     isSkillDialogOpen,
     setIsSkillDialogOpen,
+    isSkillRequestSheetOpen,        // NEW: Export skill request sheet state
+    setIsSkillRequestSheetOpen,     // NEW: Export skill request sheet setter
     
     // Refs
     searchInputRef,
