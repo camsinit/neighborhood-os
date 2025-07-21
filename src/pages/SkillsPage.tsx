@@ -11,7 +11,7 @@ import {
 } from '@/utils/skillsPageHandlers';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
-import SkillsPageSelector from '@/components/skills/SkillsPageSelector';
+import SkillsSidePanelSelector from '@/components/skills/SkillsSidePanelSelector';
 import SkillRequestSheet from '@/components/skills/SkillRequestSheet'; // NEW: Import skill request sheet
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
@@ -131,10 +131,11 @@ function SkillsPage() {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <SkillsPageSelector 
+            <SkillsSidePanelSelector 
               selectedCategory={getTypedCategory(category)} 
               onSkillAdded={handleSkillAdded} 
               multiCategoryMode={!category}
+              onClose={() => setIsSkillDialogOpen(false)}
             />
           </div>
         </SheetContent>

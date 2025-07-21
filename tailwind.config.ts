@@ -79,6 +79,23 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Module-specific color tokens for consistent theming
+				skills: {
+					DEFAULT: 'hsl(var(--skills-color))',
+					light: 'hsl(var(--skills-light))'
+				},
+				calendar: {
+					DEFAULT: 'hsl(var(--calendar-color))',
+					light: 'hsl(var(--calendar-light))'
+				},
+				goods: {
+					DEFAULT: 'hsl(var(--goods-color))',
+					light: 'hsl(var(--goods-light))'
+				},
+				safety: {
+					DEFAULT: 'hsl(var(--safety-color))',
+					light: 'hsl(var(--safety-light))'
 				}
 			},
 			keyframes: {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SafetyUpdateForm from "./safety/SafetyUpdateForm";
-import SkillsPageSelector from "./skills/SkillsPageSelector";
+import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
@@ -269,11 +269,12 @@ const QuickActions = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            {/* FIXED: Wrap SkillsPageSelector in SkillsProvider to fix context error */}
+            {/* ENHANCED: Use new SkillsSidePanelSelector optimized for side panels */}
             <SkillsProvider>
-              <SkillsPageSelector 
+              <SkillsSidePanelSelector 
                 onSkillAdded={handleSkillAdded} 
                 multiCategoryMode={true}
+                onClose={() => setIsSkillSheetOpen(false)}
               />
             </SkillsProvider>
           </div>
