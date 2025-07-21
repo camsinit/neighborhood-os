@@ -15,6 +15,7 @@ import SkillsPageSelector from '@/components/skills/SkillsPageSelector';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
+import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 
 /**
  * SkillsPage - Main page component for the Skills Exchange
@@ -26,6 +27,14 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
  * Now uses Sheet for adding skills (consistent with other pages).
  */
 function SkillsPage() {
+  // Get skills onboarding state and refresh function
+  const {
+    hasCompletedSkillsOnboarding,
+    isLoading: isOnboardingLoading,
+    error: onboardingError,
+    refreshOnboardingStatus
+  } = useSkillsOnboarding();
+
   // Get all state and derived values from custom hook
   const {
     view,
@@ -35,10 +44,7 @@ function SkillsPage() {
     setSearchParams,
     isSkillDialogOpen,
     setIsSkillDialogOpen,
-    searchInputRef,
-    hasCompletedSkillsOnboarding,
-    isOnboardingLoading,
-    onboardingError
+    searchInputRef
   } = useSkillsPageState();
 
   // Create handler functions using the utility factory functions
@@ -46,7 +52,12 @@ function SkillsPage() {
   const handleCategoryClick = createCategoryClickHandler(setSearchParams, searchParams);
   const handleBackToCategories = createBackToCategoriesHandler(setSearchParams, searchParams);
   const handleSkillAdded = createSkillAddedHandler();
-  const handleSkillsOnboardingComplete = createSkillsOnboardingCompleteHandler();
+  
+  // Create skills onboarding complete handler that refreshes the status
+  const handleSkillsOnboardingComplete = async () => {
+    // Refresh the onboarding status to ensure we have the latest state
+    await refreshOnboardingStatus();
+  };
 
   // Show loading state while checking onboarding status
   if (isOnboardingLoading) {

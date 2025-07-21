@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
@@ -21,50 +22,50 @@ export const useSkillsOnboarding = () => {
   /**
    * Check if user has completed skills onboarding
    */
-  useEffect(() => {
-    const checkSkillsOnboardingStatus = async () => {
-      if (!user) {
-        setIsLoading(false);
-        setHasCompletedSkillsOnboarding(false);
-        return;
+  const checkSkillsOnboardingStatus = useCallback(async () => {
+    if (!user) {
+      setIsLoading(false);
+      setHasCompletedSkillsOnboarding(false);
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("completed_skills_onboarding")
+        .eq("id", user.id)
+        .single();
+      
+      if (error) {
+        // If profile doesn't exist, user hasn't completed skills onboarding
+        if (error.code === 'PGRST116') {
+          setHasCompletedSkillsOnboarding(false);
+        } else {
+          throw error;
+        }
+      } else {
+        setHasCompletedSkillsOnboarding(data?.completed_skills_onboarding || false);
       }
       
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("completed_skills_onboarding")
-          .eq("id", user.id)
-          .single();
-        
-        if (error) {
-          // If profile doesn't exist, user hasn't completed skills onboarding
-          if (error.code === 'PGRST116') {
-            setHasCompletedSkillsOnboarding(false);
-          } else {
-            throw error;
-          }
-        } else {
-          setHasCompletedSkillsOnboarding(data?.completed_skills_onboarding || false);
-        }
-        
-        logger.info("Skills onboarding status checked:", {
-          userId: user.id,
-          completed: data?.completed_skills_onboarding || false
-        });
-      } catch (err: any) {
-        logger.error("Error checking skills onboarding status:", err);
-        setError(err);
-        setHasCompletedSkillsOnboarding(false); // Default to not completed on error
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    checkSkillsOnboardingStatus();
+      logger.info("Skills onboarding status checked:", {
+        userId: user.id,
+        completed: data?.completed_skills_onboarding || false
+      });
+    } catch (err: any) {
+      logger.error("Error checking skills onboarding status:", err);
+      setError(err);
+      setHasCompletedSkillsOnboarding(false); // Default to not completed on error
+    } finally {
+      setIsLoading(false);
+    }
   }, [user]);
+  
+  useEffect(() => {
+    checkSkillsOnboardingStatus();
+  }, [checkSkillsOnboardingStatus]);
   
   /**
    * Mark skills onboarding as completed
@@ -116,11 +117,20 @@ export const useSkillsOnboarding = () => {
     }
   };
   
+  /**
+   * Refresh the onboarding status from the database
+   * Useful when the status might have changed externally
+   */
+  const refreshOnboardingStatus = useCallback(() => {
+    return checkSkillsOnboardingStatus();
+  }, [checkSkillsOnboardingStatus]);
+  
   return {
     hasCompletedSkillsOnboarding,
     isLoading,
     error,
     completeSkillsOnboarding,
     resetSkillsOnboarding,
+    refreshOnboardingStatus, // New function to refresh the status
   };
 };
