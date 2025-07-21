@@ -97,6 +97,8 @@ const UnifiedInviteDialog = ({
 
   /**
    * Sends an email invitation to the specified email address
+   * Shows immediate success feedback after creating the invitation record,
+   * then sends the email in the background for better user experience.
    */
   const sendEmailInvite = async () => {
     // Clear previous errors
@@ -120,6 +122,7 @@ const UnifiedInviteDialog = ({
     }
     
     setIsSendingEmail(true);
+    
     try {
       // Generate a unique invite code for this email invitation
       const inviteCode = crypto.randomUUID();
@@ -135,29 +138,40 @@ const UnifiedInviteDialog = ({
       
       if (inviteError) throw inviteError;
 
-      // Create the invitation URL
+      // Show immediate success message after creating the invitation record
+      // This gives the user instant feedback instead of waiting for email delivery
+      const invitedEmail = email.trim();
+      setEmail(''); // Clear the form immediately
+      setIsSendingEmail(false); // Reset the sending state immediately
+      toast.success(`Invitation sent to ${invitedEmail}!`);
+
+      // Continue sending the email in the background
+      // This doesn't block the user interface
       const baseUrl = getBaseUrl();
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
 
-      // Send the email via edge function using the correct function name
-      const { error: emailError } = await supabase.functions.invoke('send-invitation', {
+      // Send the email via edge function in the background
+      supabase.functions.invoke('send-invitation', {
         body: {
-          recipientEmail: email.trim(),
+          recipientEmail: invitedEmail,
           inviterName: user.user_metadata?.display_name || user.email,
           neighborhoodName: currentNeighborhood.name,
           inviteUrl: inviteUrl
         }
+      }).then(({ error: emailError }) => {
+        if (emailError) {
+          // Log the error for debugging, but don't disturb the user
+          // since they already got success feedback
+          console.error("[UnifiedInviteDialog] Background email sending failed:", emailError);
+        } else {
+          console.log("[UnifiedInviteDialog] Email sent successfully in background");
+        }
       });
 
-      if (emailError) throw emailError;
-
-      // Success! Clear form and show message
-      setEmail('');
-      toast.success(`Invitation sent to ${email}!`);
     } catch (error: any) {
-      console.error("[UnifiedInviteDialog] Error sending email invite:", error);
-      toast.error("Failed to send email invitation. Please try again.");
-    } finally {
+      // Only show error if the invitation record creation failed
+      console.error("[UnifiedInviteDialog] Error creating invitation:", error);
+      toast.error("Failed to create invitation. Please try again.");
       setIsSendingEmail(false);
     }
   };
