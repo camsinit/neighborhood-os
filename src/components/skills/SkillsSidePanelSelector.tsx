@@ -155,16 +155,6 @@ const SkillsSidePanelSelector: React.FC<SkillsSidePanelSelectorProps> = ({
   if (currentStep === 'categories') {
     return (
       <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-border">
-          <div className="w-1 h-6 rounded-full bg-skills" />
-          <h2 className="text-lg font-semibold text-foreground">Add Skills to Share</h2>
-          {onClose && (
-            <Button variant="ghost" size="sm" className="ml-auto" onClick={onClose}>
-              ✕
-            </Button>
-          )}
-        </div>
 
         {/* Category selection */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
