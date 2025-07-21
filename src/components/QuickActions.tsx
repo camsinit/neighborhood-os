@@ -185,7 +185,7 @@ const QuickActions = () => {
           side="right" 
           className="w-[400px] sm:w-[540px] overflow-y-auto bg-white relative"
           style={{
-            background: `linear-gradient(to right, ${moduleThemeColors.calendar.primary}15 0%, ${moduleThemeColors.calendar.primary}08 20px, transparent 60px), white`
+            background: `linear-gradient(to right, ${moduleThemeColors.calendar.primary}20 0%, ${moduleThemeColors.calendar.primary}10 5px, transparent 15px), white`
           }}
         >
           <SheetHeader className="border-b border-border/40 pb-4">
@@ -207,13 +207,13 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Safety Update Sheet - Clean white background with red accent */}
+      {/* Safety Update Sheet - Clean white background with gradient accent */}
       <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white relative"
           style={{
-            borderLeftColor: moduleThemeColors.safety.primary
+            background: `linear-gradient(to right, ${moduleThemeColors.safety.primary}20 0%, ${moduleThemeColors.safety.primary}10 5px, transparent 15px), white`
           }}
         >
           <SheetHeader className="border-b border-border/40 pb-4">
@@ -228,13 +228,13 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Goods Sheet - Clean white background with orange accent */}
+      {/* Goods Sheet - Clean white background with gradient accent */}
       <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white relative"
           style={{
-            borderLeftColor: moduleThemeColors.goods.primary
+            background: `linear-gradient(to right, ${moduleThemeColors.goods.primary}20 0%, ${moduleThemeColors.goods.primary}10 5px, transparent 15px), white`
           }}
         >
           <SheetHeader className="border-b border-border/40 pb-4">
@@ -253,13 +253,13 @@ const QuickActions = () => {
         </SheetContent>
       </Sheet>
       
-      {/* Skills Sheet - Clean white background with green accent */}
+      {/* Skills Sheet - Clean white background with gradient accent */}
       <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white relative"
           style={{
-            borderLeftColor: moduleThemeColors.skills.primary
+            background: `linear-gradient(to right, ${moduleThemeColors.skills.primary}20 0%, ${moduleThemeColors.skills.primary}10 5px, transparent 15px), white`
           }}
         >
           <SheetHeader className="border-b border-border/40 pb-4">
