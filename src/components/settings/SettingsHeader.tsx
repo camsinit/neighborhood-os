@@ -83,12 +83,6 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                   )} />
                   <span className="font-medium">{tab.label}</span>
                 </div>
-                <p className={cn(
-                  "mt-1 text-xs",
-                  isActive ? "text-purple-500" : "text-gray-400"
-                )}>
-                  {tab.description}
-                </p>
                 
                 {/* Active tab indicator */}
                 <div
