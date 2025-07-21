@@ -12,20 +12,55 @@ import {
 } from '@react-email/components'
 import * as React from 'react'
 
-interface WelcomeEmailProps {
-  firstName?: string
-  neighborhoodName?: string
-  homeLink?: string
-  skillsLink?: string
-  createEventLink?: string
+// Import unified email types for consistency across all templates
+import type { BaseEmailProps } from '../src/types/emailTypes'
+
+interface WelcomeEmailProps extends BaseEmailProps {
+  // Welcome-specific properties
+  skillsUrl?: string         // Link to skills exchange with UTM tracking
+  createEventUrl?: string    // Link to create events with UTM tracking
+  
+  // Template-specific customization
+  welcomeMessage?: string    // Optional personalized welcome message
+  nextSteps?: Array<{        // Optional next steps customization
+    icon: string
+    title: string
+    description: string
+    url: string
+  }>
 }
 
 export const WelcomeEmail = ({
-  firstName = 'there',
+  // Use unified base properties for consistent naming and URL generation
+  recipientName = 'there',
   neighborhoodName = 'your neighborhood',
-  homeLink = 'https://neighborhoodos.com/dashboard',
-  skillsLink = 'https://neighborhoodos.com/skills',
-  createEventLink = 'https://neighborhoodos.com/events/create'
+  homeUrl = 'https://neighborhoodos.com/dashboard',
+  skillsUrl = 'https://neighborhoodos.com/skills',
+  createEventUrl = 'https://neighborhoodos.com/events/create',
+  fromName = 'neighborhoodOS',
+  
+  // Welcome-specific properties with sensible defaults
+  welcomeMessage,
+  nextSteps = [
+    {
+      icon: '🏠',
+      title: 'Explore your neighborhood',
+      description: 'See what\'s happening locally',
+      url: homeUrl
+    },
+    {
+      icon: '🤝',
+      title: 'Share your skills',
+      description: 'Offer help or find someone with the skills you need',
+      url: skillsUrl || 'https://neighborhoodos.com/skills'
+    },
+    {
+      icon: '📅',
+      title: 'Create an event',
+      description: 'Organize gatherings and bring neighbors together',
+      url: createEventUrl || 'https://neighborhoodos.com/events/create'
+    }
+  ]
 }: WelcomeEmailProps) => (
   <Html>
     <Head />
@@ -38,28 +73,33 @@ export const WelcomeEmail = ({
         
         <Section style={contentSection}>
           <Text style={text}>
-            Hi {firstName},
+            Hi {recipientName},
           </Text>
           
           <Text style={text}>
-            Welcome to {neighborhoodName}! You're now connected with your neighbors through neighborhoodOS, a platform that helps local communities thrive together.
+            {welcomeMessage || 
+              `Welcome to ${neighborhoodName}! You're now connected with your neighbors through neighborhoodOS, a platform that helps local communities thrive together.`
+            }
           </Text>
           
           <Text style={text}>
             Here's how you can get started:
           </Text>
           
+          {/* Render next steps dynamically - allows for future customization */}
           <ul style={list}>
-            <li style={listItem}>🏠 <Button style={inlineButton} href={homeLink}>Explore your neighborhood</Button> - See what's happening locally</li>
-            <li style={listItem}>🤝 <Button style={inlineButton} href={skillsLink}>Share your skills</Button> - Offer help or find someone with the skills you need</li>
-            <li style={listItem}>📅 <Button style={inlineButton} href={createEventLink}>Create an event</Button> - Organize gatherings and bring neighbors together</li>
+            {nextSteps.map((step, index) => (
+              <li key={index} style={listItem}>
+                {step.icon} <Button style={inlineButton} href={step.url}>{step.title}</Button> - {step.description}
+              </li>
+            ))}
           </ul>
           
           <Text style={text}>
             Your neighbors are excited to meet you and build stronger connections in {neighborhoodName}. Jump in whenever you're ready!
           </Text>
           
-          <Button style={button} href={homeLink}>
+          <Button style={button} href={homeUrl}>
             Visit Your Neighborhood
           </Button>
           
@@ -71,7 +111,7 @@ export const WelcomeEmail = ({
         <Section style={footerSection}>
           <Text style={footer}>
             Best regards,<br />
-            The neighborhoodOS Team
+            The {fromName} Team
           </Text>
         </Section>
       </Container>
