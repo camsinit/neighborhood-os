@@ -267,7 +267,7 @@ export const NotificationSettingsTab: React.FC = () => {
     {
       key: 'safety_comment',
       title: 'Safety Comments',
-      description: 'Comments on your safety updates',
+      description: 'When someone comments on your safety updates',
       hasInApp: true,
       hasEmail: true,
       inAppChecked: preferences.in_app.page_specific.safety,
@@ -278,7 +278,7 @@ export const NotificationSettingsTab: React.FC = () => {
     {
       key: 'safety_emergency',
       title: 'Emergency Alerts',
-      description: 'Critical safety notifications',
+      description: 'When neighbors report emergencies in your area',
       hasInApp: true,
       hasEmail: true,
       inAppChecked: preferences.in_app.page_specific.safety,
@@ -287,20 +287,9 @@ export const NotificationSettingsTab: React.FC = () => {
       onEmailChange: (value: boolean) => updateEmailType('safety_emergency', value)
     },
     {
-      key: 'care_requests',
-      title: 'Care Requests',
-      description: 'New care requests and responses',
-      hasInApp: true,
-      hasEmail: true,
-      inAppChecked: preferences.in_app.page_specific.care,
-      emailChecked: preferences.email.types.goods_response, // Closest match
-      onInAppChange: (value: boolean) => updatePageSpecific('care', value),
-      onEmailChange: (value: boolean) => updateEmailType('goods_response', value)
-    },
-    {
       key: 'goods_exchange',
       title: 'Goods Exchange',
-      description: 'Available items and requests',
+      description: 'When someone responds to your shared items or requests',
       hasInApp: true,
       hasEmail: true,
       inAppChecked: preferences.in_app.page_specific.goods,
@@ -311,7 +300,7 @@ export const NotificationSettingsTab: React.FC = () => {
     {
       key: 'skills_sharing',
       title: 'Skills Sharing',
-      description: 'Skill offers and session requests',
+      description: 'When someone requests help with your offered skills',
       hasInApp: true,
       hasEmail: true,
       inAppChecked: preferences.in_app.page_specific.skills,
@@ -322,7 +311,7 @@ export const NotificationSettingsTab: React.FC = () => {
     {
       key: 'neighbor_activity',
       title: 'Neighbor Activity',
-      description: 'General neighbor interactions',
+      description: 'When neighbors interact with your posts and updates',
       hasInApp: true,
       hasEmail: false, // No email equivalent
       inAppChecked: preferences.in_app.page_specific.neighbors,
@@ -342,20 +331,9 @@ export const NotificationSettingsTab: React.FC = () => {
       onEmailChange: () => {}
     },
     {
-      key: 'all_activity',
-      title: 'All Community Activity',
-      description: 'All new activity in your community',
-      hasInApp: true,
-      hasEmail: false, // No email equivalent
-      inAppChecked: preferences.in_app.all_activity,
-      emailChecked: false,
-      onInAppChange: (value: boolean) => updateInAppPreference('all_activity', value),
-      onEmailChange: () => {}
-    },
-    {
       key: 'weekly_summary',
       title: 'Weekly Summary',
-      description: 'Summary of neighborhood activity',
+      description: 'Weekly digest of activity relevant to you',
       hasInApp: false, // Email only
       hasEmail: true,
       inAppChecked: false,
