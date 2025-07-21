@@ -179,13 +179,13 @@ const QuickActions = () => {
         <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
       </div>
 
-      {/* Event Sheet - Clean white background with blue accent */}
+      {/* Event Sheet - Clean white background with gradient accent */}
       <Sheet open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
         <SheetContent 
           side="right" 
-          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white border-l-4"
+          className="w-[400px] sm:w-[540px] overflow-y-auto bg-white relative"
           style={{
-            borderLeftColor: moduleThemeColors.calendar.primary
+            background: `linear-gradient(to right, ${moduleThemeColors.calendar.primary}15 0%, ${moduleThemeColors.calendar.primary}08 20px, transparent 60px), white`
           }}
         >
           <SheetHeader className="border-b border-border/40 pb-4">
