@@ -373,28 +373,6 @@ export const NotificationSettingsTab: React.FC = () => {
         description="Control how you receive notifications (in-app notifications enabled by default)"
       >
         <div className="space-y-4">
-          {/* Master email toggle */}
-          <AutoSaveField 
-            fieldName="notification_preferences" 
-            value={preferences}
-            debounceMs={0}
-          >
-            <div className="flex items-center justify-between rounded-lg border p-4 bg-blue-50">
-              <div className="space-y-0.5">
-                <Label className="text-base font-medium">Enable Email Notifications</Label>
-                <p className="text-sm text-gray-600">
-                  Master control for all email notifications
-                </p>
-              </div>
-              <div className="opacity-50">
-                <Switch
-                  checked={false}
-                  onCheckedChange={handleEmailComingSoon}
-                />
-              </div>
-            </div>
-          </AutoSaveField>
-
           {/* Notification list */}
           <div className="space-y-2">
             <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-600">
