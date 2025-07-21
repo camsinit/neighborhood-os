@@ -71,7 +71,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                 className={cn(
                   "group relative min-w-0 flex-1 overflow-hidden py-4 px-1 text-center text-sm font-medium hover:text-gray-700 focus:z-10 focus:outline-none",
                   isActive
-                    ? "text-purple-600 border-purple-500"
+                    ? "text-blue-600 border-blue-500"
                     : "text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300"
                 )}
                 aria-current={isActive ? 'page' : undefined}
@@ -79,7 +79,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                 <div className="flex items-center justify-center space-x-2">
                   <Icon className={cn(
                     "h-5 w-5",
-                    isActive ? "text-purple-600" : "text-gray-400 group-hover:text-gray-500"
+                    isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-500"
                   )} />
                   <span className="font-medium">{tab.label}</span>
                 </div>
@@ -88,7 +88,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                 <div
                   className={cn(
                     "absolute bottom-0 left-0 right-0 h-0.5 transition-colors",
-                    isActive ? "bg-purple-500" : "bg-transparent"
+                    isActive ? "bg-blue-500" : "bg-transparent"
                   )}
                   aria-hidden="true"
                 />

@@ -133,12 +133,7 @@ export const AutoSaveField: React.FC<AutoSaveFieldProps> = ({
           </div>
         );
       case 'saved':
-        return (
-          <div className="flex items-center gap-1 text-green-600 text-xs">
-            <Check className="h-3 w-3" />
-            <span>Saved</span>
-          </div>
-        );
+        return null; // Hide the saved indicator
       case 'error':
         return (
           <div className="flex items-center gap-1 text-red-600 text-xs">
