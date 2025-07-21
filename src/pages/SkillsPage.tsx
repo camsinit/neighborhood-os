@@ -126,9 +126,6 @@ function SkillsPage() {
           }}
         >
           <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
-              Add Skills to Share
-            </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
             <SkillsSidePanelSelector 
