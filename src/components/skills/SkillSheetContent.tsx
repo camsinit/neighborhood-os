@@ -1,3 +1,4 @@
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import ModuleButton from "@/components/ui/module-button";
@@ -18,6 +19,8 @@ import { ContactMethodDisplay } from "./components/ContactMethodDisplay";
  * 
  * Shows skill details, all neighbors who offer this skill, and action buttons
  * for "Have this skill?" and "Contact" functionality.
+ * 
+ * Updated to show ALL providers including current user for transparency
  */
 interface SkillSheetContentProps {
   skillTitle: string;
@@ -37,7 +40,7 @@ const SkillSheetContent = ({
   // Track which provider's contact info is revealed
   const [revealedContactId, setRevealedContactId] = useState<string | null>(null);
 
-  // Use the hook to fetch skill providers with contact info
+  // Use the hook to fetch skill providers with contact info (now includes current user)
   const { data: providers = [], isLoading: loading } = useSkillProviders(skillTitle, skillCategory);
 
   // Function to close the sheet
@@ -73,7 +76,7 @@ const SkillSheetContent = ({
     getNeighborhoodId();
   }, [user]);
 
-  // Check if current user offers this skill
+  // Check if current user offers this skill (now that we include all providers)
   useEffect(() => {
     if (providers.length > 0 && user) {
       setUserHasSkill(providers.some(p => p.user_id === user.id));
@@ -167,6 +170,7 @@ const SkillSheetContent = ({
     }
   };
   const categoryStyle = categoryColors[skillCategory] || categoryColors.technology;
+  
   return <SheetContent className="sm:max-w-md overflow-y-auto">
       <SheetHeader className="mb-4">
         <SheetTitle className="text-xl font-bold flex justify-between items-start">
@@ -181,7 +185,7 @@ const SkillSheetContent = ({
       </SheetHeader>
 
       <div className="space-y-6">
-        {/* Skill overview */}
+        {/* Skill overview - now shows accurate count including current user */}
         <div>
           <h3 className="font-semibold text-lg mb-2">Skill Overview</h3>
           <p className="text-gray-600">
@@ -212,7 +216,7 @@ const SkillSheetContent = ({
           )}
         </div>
 
-        {/* Providers list */}
+        {/* Providers list - now includes current user with "(You)" indicator */}
         <div>
           <h3 className="font-semibold text-lg mb-3">Neighbors with this skill</h3>
           {loading ? <div className="text-gray-500">Loading...</div> : providers.length === 0 ? <div className="text-gray-500">No neighbors currently offer this skill.</div> : <div className="space-y-4">
@@ -241,6 +245,7 @@ const SkillSheetContent = ({
                       )}
                     </div>
                     
+                    {/* Only show Contact button for other users, not current user */}
                     {provider.user_id !== user?.id && (
                       <Button 
                         size="sm" 
@@ -253,7 +258,7 @@ const SkillSheetContent = ({
                     )}
                   </div>
                   
-                  {/* Contact info display */}
+                  {/* Contact info display - only for other users */}
                   {provider.user_id !== user?.id && (
                     <ContactMethodDisplay 
                       provider={provider} 

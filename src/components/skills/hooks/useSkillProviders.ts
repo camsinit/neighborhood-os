@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -28,7 +29,7 @@ export interface SkillProvider {
  * This hook handles all the complex logic for determining contact preferences
  * and fetching the actual contact information they want to share
  * 
- * Updated to fetch real email addresses using the secure function
+ * Updated to include ALL providers including the current user for transparency
  */
 export const useSkillProviders = (skillTitle: string, skillCategory: string) => {
   const user = useUser();
@@ -49,7 +50,7 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
 
       if (!userNeighborhood) return [];
 
-      // Fetch skill providers with their contact preferences and profile info
+      // Fetch ALL skill providers including the current user for transparency
       const { data: skills, error } = await supabase
         .from('skills_exchange')
         .select(`
@@ -68,8 +69,8 @@ export const useSkillProviders = (skillTitle: string, skillCategory: string) => 
         .eq('skill_category', skillCategory)
         .eq('title', skillTitle)
         .eq('request_type', 'offer')
-        .eq('is_archived', false)
-        .neq('user_id', user.id); // Don't include current user
+        .eq('is_archived', false);
+        // REMOVED: .neq('user_id', user.id) - now includes current user
 
       if (error) throw error;
 
