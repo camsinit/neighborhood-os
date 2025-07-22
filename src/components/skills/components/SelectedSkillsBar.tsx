@@ -32,7 +32,7 @@ const SelectedSkillsBar: React.FC<SelectedSkillsBarProps> = ({
 
   return (
     <div 
-      className="sticky bottom-0 left-0 right-0 bg-background border-t border-border p-4 space-y-3"
+      className="bg-background border-t border-border p-4 space-y-3"
       style={{ boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.05)' }}
     >
       {/* Skills count and action button */}

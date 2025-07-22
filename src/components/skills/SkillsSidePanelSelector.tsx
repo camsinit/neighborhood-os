@@ -177,7 +177,7 @@ const SkillsSidePanelSelector: React.FC<SkillsSidePanelSelectorProps> = ({
 
   // Render skills step
   return (
-    <div className="flex flex-col h-full">
+    <div className="relative flex flex-col h-full">
       {/* Header with navigation */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
         {multiCategoryMode && (
@@ -206,29 +206,33 @@ const SkillsSidePanelSelector: React.FC<SkillsSidePanelSelectorProps> = ({
         )}
       </div>
 
-      {/* Skills selection content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Skills list - the main improvement: list instead of grid */}
-        <SkillList
-          skills={categorySkills}
-          selectedSkills={getSelectedSkillNames()}
-          onSkillSelect={handleSkillSelection}
-        />
+      {/* Skills selection content with proper bottom padding for selected skills bar */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-6 pb-32">
+          {/* Skills list - the main improvement: list instead of grid */}
+          <SkillList
+            skills={categorySkills}
+            selectedSkills={getSelectedSkillNames()}
+            onSkillSelect={handleSkillSelection}
+          />
 
-        {/* Custom skill input */}
-        <CustomSkillInput
-          categoryTitle={categoryTitle}
-          onAddCustomSkill={handleCustomSkill}
-        />
+          {/* Custom skill input */}
+          <CustomSkillInput
+            categoryTitle={categoryTitle}
+            onAddCustomSkill={handleCustomSkill}
+          />
+        </div>
       </div>
 
-      {/* Selected skills bar */}
-      <SelectedSkillsBar
-        selectedSkills={selectedSkills.filter(skill => skill.category === currentCategory)}
-        onRemoveSkill={removeSkill}
-        onFinish={onClose}
-        isVisible={selectedSkills.some(skill => skill.category === currentCategory)}
-      />
+      {/* Selected skills bar - positioned absolutely to avoid layout issues */}
+      <div className="absolute bottom-0 left-0 right-0">
+        <SelectedSkillsBar
+          selectedSkills={selectedSkills.filter(skill => skill.category === currentCategory)}
+          onRemoveSkill={removeSkill}
+          onFinish={onClose}
+          isVisible={selectedSkills.some(skill => skill.category === currentCategory)}
+        />
+      </div>
 
       {/* Special skill details dialog */}
       <SpecialSkillDialog
