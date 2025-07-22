@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
 
 /**
- * Interface for neighborhood preview data
+ * Interface for neighborhood preview data from the invite function
  */
 interface NeighborhoodPreview {
   id: string;
@@ -18,6 +18,9 @@ interface NeighborhoodPreview {
   state?: string;
   created_at: string;
   memberCount: number;
+  inviterDisplayName: string;
+  inviterAvatarUrl?: string;
+  inviteHeaderImageUrl?: string;
 }
 
 /**
@@ -102,14 +105,17 @@ const JoinPage = () => {
           return;
         }
 
-        // Set the neighborhood preview data
+        // Set the neighborhood preview data with inviter information
         const neighborhoodPreview = {
           id: result.neighborhood_id,
           name: result.neighborhood_name,
           city: result.neighborhood_city,
           state: result.neighborhood_state,
           created_at: result.neighborhood_created_at,
-          memberCount: result.member_count || 0
+          memberCount: result.member_count || 0,
+          inviterDisplayName: result.inviter_display_name,
+          inviterAvatarUrl: result.inviter_avatar_url,
+          inviteHeaderImageUrl: result.invite_header_image_url
         };
         
         console.log("[JoinPage] Setting neighborhood preview:", neighborhoodPreview);
@@ -384,13 +390,53 @@ const JoinPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
-            <Users className="h-8 w-8 text-blue-600" />
+        {/* Header Image - renders above the card content if available */}
+        {neighborhood?.inviteHeaderImageUrl && (
+          <div className="w-full h-32 overflow-hidden rounded-t-lg">
+            <img 
+              src={neighborhood.inviteHeaderImageUrl} 
+              alt="Neighborhood invite header"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <CardTitle className="text-2xl">Join {neighborhood?.name}</CardTitle>
+        )}
+        
+        <CardHeader className="text-center">
+          {/* Inviter's Profile Image or Default Icon */}
+          <div className="mx-auto mb-4 w-fit">
+            {neighborhood?.inviterAvatarUrl ? (
+              <img 
+                src={neighborhood.inviterAvatarUrl} 
+                alt={`${neighborhood.inviterDisplayName}'s profile`}
+                className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-lg"
+              />
+            ) : (
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+            )}
+          </div>
+          
+          <CardTitle className="text-2xl">
+            Join us on{' '}
+            <a 
+              href="https://neighborhoodos.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              neighborhoodOS
+            </a>
+          </CardTitle>
+          
           <CardDescription>
-            You've been invited to join our neighborhood!
+            {neighborhood?.inviterDisplayName && neighborhood?.name ? (
+              <>
+                {neighborhood.inviterDisplayName} invited you to join the {neighborhood.name} neighborhood.
+              </>
+            ) : (
+              'You\'ve been invited to join this neighborhood community'
+            )}
           </CardDescription>
         </CardHeader>
         

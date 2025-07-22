@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Settings, Shield, Trash2, UserCheck } from 'lucide-react';
+import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X } from 'lucide-react';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,8 +43,12 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     timezone: 'America/Los_Angeles',
     isPublic: true,
     requireApproval: false,
-    allowInvites: true
+    allowInvites: true,
+    inviteHeaderImageUrl: ''
   });
+  
+  // State for image upload
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Initialize form data when neighborhood data loads
   useEffect(() => {
@@ -58,7 +62,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         timezone: neighborhood.timezone || 'America/Los_Angeles',
         isPublic: true, // Not stored in current schema
         requireApproval: false, // Not stored in current schema
-        allowInvites: true // Not stored in current schema
+        allowInvites: true, // Not stored in current schema
+        inviteHeaderImageUrl: neighborhood.invite_header_image_url || ''
       });
     }
   }, [currentNeighborhood]);
@@ -80,6 +85,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           city: formData.city || null,
           state: formData.state || null,
           timezone: formData.timezone,
+          invite_header_image_url: formData.inviteHeaderImageUrl || null,
         })
         .eq('id', currentNeighborhood.id);
 
@@ -116,6 +122,78 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       title: "Feature Coming Soon", 
       description: "Neighborhood deletion will be implemented with multiple confirmation steps.",
     });
+  };
+
+  // Handle image upload for invite header
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isReadOnly) return;
+    
+    const file = event.target.files?.[0];
+    if (!file || !currentNeighborhood) return;
+
+    // Check file type and size
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "File Too Large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+    
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `invite-header-${currentNeighborhood.id}-${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('neighborhood-assets')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('neighborhood-assets')
+        .getPublicUrl(fileName);
+
+      if (urlData?.publicUrl) {
+        // Update form data with the new image URL
+        setFormData(prev => ({ ...prev, inviteHeaderImageUrl: urlData.publicUrl }));
+        
+        toast({
+          title: "Image Uploaded",
+          description: "Header image uploaded successfully. Don't forget to save your changes.",
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Remove header image
+  const handleRemoveImage = () => {
+    if (isReadOnly) return;
+    setFormData(prev => ({ ...prev, inviteHeaderImageUrl: '' }));
   };
 
   return (
@@ -215,6 +293,70 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                 disabled={isReadOnly}
               />
             </div>
+          </div>
+
+          {/* Invite Header Image Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="invite-header">Invite Header Image</Label>
+            <p className="text-sm text-muted-foreground">
+              Upload an image that will appear at the top of your neighborhood invite links.
+            </p>
+            
+            {formData.inviteHeaderImageUrl ? (
+              <div className="space-y-2">
+                <div className="relative w-full h-32 rounded-lg overflow-hidden border">
+                  <img 
+                    src={formData.inviteHeaderImageUrl} 
+                    alt="Invite header preview"
+                    className="w-full h-full object-cover"
+                  />
+                  {!isReadOnly && (
+                    <button
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {!isReadOnly && (
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={isUploadingImage}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isUploadingImage ? 'Uploading...' : 'Change Image'}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              !isReadOnly && (
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-600">
+                    {isUploadingImage ? 'Uploading...' : 'Click to upload header image'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    PNG, JPG up to 5MB
+                  </p>
+                </div>
+              )
+            )}
+            
+            {!isReadOnly && (
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                disabled={isUploadingImage}
+              />
+            )}
           </div>
 
           {!isReadOnly && (

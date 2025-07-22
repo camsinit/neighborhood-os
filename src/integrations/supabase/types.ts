@@ -539,6 +539,7 @@ export type Database = {
           created_by: string
           geo_boundary: Json | null
           id: string
+          invite_header_image_url: string | null
           name: string
           state: string | null
           timezone: string
@@ -551,6 +552,7 @@ export type Database = {
           created_by: string
           geo_boundary?: Json | null
           id?: string
+          invite_header_image_url?: string | null
           name: string
           state?: string | null
           timezone?: string
@@ -563,6 +565,7 @@ export type Database = {
           created_by?: string
           geo_boundary?: Json | null
           id?: string
+          invite_header_image_url?: string | null
           name?: string
           state?: string | null
           timezone?: string
@@ -1196,6 +1199,7 @@ export type Database = {
           created_by: string
           geo_boundary: Json | null
           id: string
+          invite_header_image_url: string | null
           name: string
           state: string | null
           timezone: string
@@ -1221,6 +1225,10 @@ export type Database = {
           neighborhood_created_at: string
           member_count: number
           invitation_status: string
+          inviter_id: string
+          inviter_display_name: string
+          inviter_avatar_url: string
+          invite_header_image_url: string
         }[]
       }
       get_neighborhood_members: {
