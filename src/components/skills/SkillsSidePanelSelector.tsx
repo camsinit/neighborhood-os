@@ -207,21 +207,19 @@ const SkillsSidePanelSelector: React.FC<SkillsSidePanelSelectorProps> = ({
       </div>
 
       {/* Skills selection content with proper bottom padding for selected skills bar */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-6 pb-32">
-          {/* Skills list - the main improvement: list instead of grid */}
-          <SkillList
-            skills={categorySkills}
-            selectedSkills={getSelectedSkillNames()}
-            onSkillSelect={handleSkillSelection}
-          />
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-32">
+        {/* Skills list - the main improvement: list instead of grid */}
+        <SkillList
+          skills={categorySkills}
+          selectedSkills={getSelectedSkillNames()}
+          onSkillSelect={handleSkillSelection}
+        />
 
-          {/* Custom skill input */}
-          <CustomSkillInput
-            categoryTitle={categoryTitle}
-            onAddCustomSkill={handleCustomSkill}
-          />
-        </div>
+        {/* Custom skill input */}
+        <CustomSkillInput
+          categoryTitle={categoryTitle}
+          onAddCustomSkill={handleCustomSkill}
+        />
       </div>
 
       {/* Selected skills bar - positioned absolutely to avoid layout issues */}
