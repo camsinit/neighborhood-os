@@ -73,6 +73,20 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Check if there are unsaved changes by comparing with original neighborhood data
+  const hasUnsavedChanges = () => {
+    if (!currentNeighborhood) return false;
+    const neighborhood = currentNeighborhood as any;
+    
+    return (
+      formData.name !== (neighborhood.name || '') ||
+      formData.city !== (neighborhood.city || '') ||
+      formData.state !== (neighborhood.state || '') ||
+      formData.timezone !== (neighborhood.timezone || 'America/Los_Angeles') ||
+      formData.inviteHeaderImageUrl !== (neighborhood.invite_header_image_url || '')
+    );
+  };
+
   const handleSaveSettings = async () => {
     if (isReadOnly || !currentNeighborhood) return;
     
@@ -198,7 +212,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Save Button */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
@@ -209,12 +223,27 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             }
           </p>
         </div>
-        {isReadOnly && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <Shield className="h-4 w-4 text-yellow-600" />
-            <span className="text-sm text-yellow-700">Read Only</span>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {!isReadOnly && (
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={!hasUnsavedChanges()}
+              className={`transition-colors ${
+                hasUnsavedChanges() 
+                  ? 'bg-primary hover:bg-primary/90' 
+                  : 'bg-primary/30 hover:bg-primary/40 text-primary-foreground/60'
+              }`}
+            >
+              Save Changes
+            </Button>
+          )}
+          {isReadOnly && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <Shield className="h-4 w-4 text-yellow-600" />
+              <span className="text-sm text-yellow-700">Read Only</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Basic Settings */}
@@ -359,13 +388,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             )}
           </div>
 
-          {!isReadOnly && (
-            <div className="flex justify-end">
-              <Button onClick={handleSaveSettings}>
-                Save Changes
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
 
