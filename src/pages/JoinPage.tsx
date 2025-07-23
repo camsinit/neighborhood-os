@@ -418,15 +418,7 @@ const JoinPage = () => {
           </div>
           
           <CardTitle className="text-2xl">
-            Join us on{' '}
-            <a 
-              href="https://neighborhoodos.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              neighborhoodOS
-            </a>
+            Join our neighborhood!
           </CardTitle>
           
           <CardDescription>
@@ -529,6 +521,18 @@ const JoinPage = () => {
                 </Button>
               </div>
             )}
+          </div>
+          
+          {/* Subtitle link to neighborhoodOS */}
+          <div className="text-center mt-4">
+            <a 
+              href="https://neighborhoodos.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 hover:text-gray-700 underline font-light"
+            >
+              Want to learn more about neighborhoodOS?
+            </a>
           </div>
         </CardContent>
       </Card>
