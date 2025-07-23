@@ -27,7 +27,8 @@ export const useProfileManagement = () => {
         address_visible: false,
         years_lived_here: calculateYearsLived(formData.yearMovedIn),
         // skills removed - no longer collected during onboarding
-        completed_onboarding: true,
+        // Only mark onboarding as complete if user has uploaded a profile photo
+        completed_onboarding: !!avatarUrl,
       };
 
       console.log("[useProfileManagement] Upserting profile for user:", userId);
@@ -44,10 +45,10 @@ export const useProfileManagement = () => {
       
       console.log("[useProfileManagement] Profile upserted successfully");
 
-      // Trigger onboarding email series if user came from an invite
+      // Trigger onboarding email series only if user completed full onboarding (has avatar) and came from an invite
       try {
         const pendingInviteCode = localStorage.getItem('pendingInviteCode');
-        if (pendingInviteCode) {
+        if (pendingInviteCode && avatarUrl) {
           console.log("[useProfileManagement] User completed onboarding from invite, triggering email series");
           
           // Get user's neighborhood info for the email series
