@@ -424,7 +424,7 @@ const JoinPage = () => {
           <CardDescription>
             {neighborhood?.inviterDisplayName && neighborhood?.name ? (
               <>
-                {neighborhood.inviterDisplayName} invited you to join the {neighborhood.name} neighborhood group on neighborhoodOS
+                {neighborhood.inviterDisplayName} invited you to join the {neighborhood.name} neighborhood.
               </>
             ) : (
               'You\'ve been invited to join this neighborhood community'
