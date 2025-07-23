@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Check, X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { validatePassword, getStrengthColor, getStrengthLabel } from "@/utils/passwordValidation";
+import { PasswordRequirementsOverlay } from "@/components/onboarding/survey/steps/contact/PasswordRequirementsOverlay";
 
 /**
  * Enhanced Password Input Component for Authentication
@@ -88,40 +89,18 @@ export const PasswordInput = ({
         </Button>
       </div>
 
-      {/* Password strength indicator (only when validation is enabled) */}
+      {/* Password strength indicator with dropdown overlay */}
       {showValidation && validation && value && (
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-sm">
-            <span>Password strength:</span>
-            <span className={getStrengthColor(validation.strength)}>
-              {getStrengthLabel(validation.strength)}
-            </span>
-          </div>
+        <div className="space-y-3">
           <Progress 
             value={validation.score} 
             className="h-2"
           />
-        </div>
-      )}
-
-      {/* Requirements checklist (only when validation is enabled and requirements should be shown) */}
-      {showValidation && validation && (showRequirements || !validation.isValid) && value && (
-        <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-          <p className="text-sm font-medium text-gray-700">Password requirements:</p>
-          <div className="space-y-1">
-            {validation.requirements.map((requirement) => (
-              <div key={requirement.id} className="flex items-center space-x-2 text-xs">
-                {requirement.met ? (
-                  <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
-                ) : (
-                  <X className="h-3 w-3 text-red-500 flex-shrink-0" />
-                )}
-                <span className={`whitespace-nowrap ${requirement.met ? "text-green-700" : "text-red-600"}`}>
-                  {requirement.label}
-                </span>
-              </div>
-            ))}
-          </div>
+          <PasswordRequirementsOverlay 
+            validation={validation}
+            getStrengthColor={getStrengthColor}
+            getStrengthLabel={getStrengthLabel}
+          />
         </div>
       )}
 
