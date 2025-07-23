@@ -183,7 +183,8 @@ export const BasicInfoStep = ({
           <SelectTrigger className={errors.yearMovedIn ? "border-red-500" : ""}>
             <SelectValue placeholder="Select year..." />
           </SelectTrigger>
-          <SelectContent>
+          {/* Limit dropdown height to show 8 years before scrolling */}
+          <SelectContent className="max-h-64 overflow-y-auto">
             {yearOptions.map((year) => (
               <SelectItem key={year} value={year.toString()}>
                 {year}
