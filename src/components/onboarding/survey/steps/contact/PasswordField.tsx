@@ -81,15 +81,15 @@ export const PasswordField = ({
         {(showRequirements || !validation.isValid) && password && (
           <div className="bg-gray-50 rounded-lg p-3 space-y-2">
             <p className="text-sm font-medium text-gray-700">Password requirements:</p>
-            <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+            <div className="space-y-1">
               {validation.requirements.map((requirement) => (
-                <div key={requirement.id} className="flex items-center space-x-2 text-sm">
+                <div key={requirement.id} className="flex items-center space-x-2 text-xs">
                   {requirement.met ? (
-                    <Check className="h-4 w-4 text-green-500" />
+                    <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
                   ) : (
-                    <X className="h-4 w-4 text-red-500" />
+                    <X className="h-3 w-3 text-red-500 flex-shrink-0" />
                   )}
-                  <span className={requirement.met ? "text-green-700" : "text-red-600"}>
+                  <span className={`whitespace-nowrap ${requirement.met ? "text-green-700" : "text-red-600"}`}>
                     {requirement.label}
                   </span>
                 </div>
