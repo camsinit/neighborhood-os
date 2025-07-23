@@ -11,7 +11,7 @@
  * - Steward: Read-only access (isReadOnly prop)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +20,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X } from 'lucide-react';
+import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, Loader2 } from 'lucide-react';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
 import type { Tables } from '@/integrations/supabase/types';
 
 interface AdminSettingsProps {
@@ -47,8 +48,78 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     inviteHeaderImageUrl: ''
   });
   
-  // State for image upload
+  // State for image upload and auto-save
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Auto-save function with debouncing
+  const autoSave = useCallback(async (fieldName: string, value: string | boolean) => {
+    if (isReadOnly || !currentNeighborhood) return;
+    
+    setSaveStatus('saving');
+    
+    try {
+      // Map form field names to database column names
+      const dbFieldMap: Record<string, string> = {
+        name: 'name',
+        city: 'city',
+        state: 'state',
+        timezone: 'timezone',
+        inviteHeaderImageUrl: 'invite_header_image_url'
+      };
+      
+      const dbField = dbFieldMap[fieldName];
+      if (!dbField) {
+        // Fields not stored in database (description, privacy settings)
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+        return;
+      }
+      
+      // Update the specific field in the database
+      const updateData: Record<string, any> = {
+        [dbField]: value || null
+      };
+      
+      const { error } = await supabase
+        .from('neighborhoods')
+        .update(updateData)
+        .eq('id', currentNeighborhood.id);
+
+      if (error) throw error;
+
+      // Refresh the neighborhood data to reflect changes
+      await refreshNeighborhoodData();
+      
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (error) {
+      console.error(`Error auto-saving ${fieldName}:`, error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      
+      toast({
+        title: "Auto-save Failed",
+        description: `Failed to save ${fieldName}. Please try again.`,
+        variant: "destructive",
+      });
+    }
+  }, [isReadOnly, currentNeighborhood, refreshNeighborhoodData, toast]);
+
+  // Simple debounce implementation
+  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+  
+  const debouncedAutoSave = useCallback((fieldName: string, value: string | boolean) => {
+    // Clear existing timer for this field
+    if (debounceTimers.current[fieldName]) {
+      clearTimeout(debounceTimers.current[fieldName]);
+    }
+    
+    // Set new timer
+    debounceTimers.current[fieldName] = setTimeout(() => {
+      autoSave(fieldName, value);
+    }, 1000);
+  }, [autoSave]);
 
   // Initialize form data when neighborhood data loads
   useEffect(() => {
@@ -71,6 +142,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Trigger auto-save for this field
+    debouncedAutoSave(field, value);
   };
 
   // Check if there are unsaved changes by comparing with original neighborhood data
@@ -185,11 +258,15 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
       if (urlData?.publicUrl) {
         // Update form data with the new image URL
-        setFormData(prev => ({ ...prev, inviteHeaderImageUrl: urlData.publicUrl }));
+        const newImageUrl = urlData.publicUrl;
+        setFormData(prev => ({ ...prev, inviteHeaderImageUrl: newImageUrl }));
+        
+        // Trigger auto-save for the new image URL
+        autoSave('inviteHeaderImageUrl', newImageUrl);
         
         toast({
           title: "Image Uploaded",
-          description: "Header image uploaded successfully. Don't forget to save your changes.",
+          description: "Header image uploaded and saved successfully.",
         });
       }
     } catch (error) {
@@ -208,34 +285,51 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const handleRemoveImage = () => {
     if (isReadOnly) return;
     setFormData(prev => ({ ...prev, inviteHeaderImageUrl: '' }));
+    // Trigger auto-save to remove the image URL
+    autoSave('inviteHeaderImageUrl', '');
   };
 
   return (
     <div className="space-y-6">
-      {/* Header with Save Button */}
+      {/* Header with Auto-save Status */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
           <p className="text-gray-600">
             {isReadOnly 
               ? "View neighborhood configuration (read-only access)"
-              : "Configure your neighborhood settings"
+              : "Configure your neighborhood settings - changes save automatically"
             }
           </p>
         </div>
         <div className="flex items-center gap-4">
           {!isReadOnly && (
-            <Button 
-              onClick={handleSaveSettings}
-              disabled={!hasUnsavedChanges()}
-              className={`transition-colors ${
-                hasUnsavedChanges() 
-                  ? 'bg-primary hover:bg-primary/90' 
-                  : 'bg-primary/30 hover:bg-primary/40 text-primary-foreground/60'
-              }`}
-            >
-              Save Changes
-            </Button>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-lg border">
+              {saveStatus === 'saving' && (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm text-blue-700">Saving...</span>
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <Check className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-700">Saved</span>
+                </>
+              )}
+              {saveStatus === 'error' && (
+                <>
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-700">Save failed</span>
+                </>
+              )}
+              {saveStatus === 'idle' && (
+                <>
+                  <Settings className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm text-gray-500">Auto-save enabled</span>
+                </>
+              )}
+            </div>
           )}
           {isReadOnly && (
             <div className="flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-lg">
