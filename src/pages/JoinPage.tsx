@@ -418,13 +418,13 @@ const JoinPage = () => {
           </div>
           
           <CardTitle className="text-2xl">
-            Join our neighborhood!
+            Welcome Neighbor!
           </CardTitle>
           
           <CardDescription>
             {neighborhood?.inviterDisplayName && neighborhood?.name ? (
               <>
-                {neighborhood.inviterDisplayName} invited you to join the {neighborhood.name} neighborhood.
+                {neighborhood.inviterDisplayName} invited you to join the {neighborhood.name} neighborhood group on neighborhoodOS
               </>
             ) : (
               'You\'ve been invited to join this neighborhood community'
