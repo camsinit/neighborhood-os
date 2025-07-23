@@ -348,8 +348,13 @@ const JoinPage = () => {
   if (isLoading) {
     console.log("[JoinPage] Rendering loading state");
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen relative bg-background flex items-center justify-center p-4">
+        {/* Rainbow background effect for loading state */}
+        <div className="absolute inset-0 opacity-10 filter blur-[120px]" style={{
+          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+          zIndex: 0
+        }} />
+        <Card className="w-full max-w-md relative z-10">
           <CardContent className="p-6">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -365,8 +370,13 @@ const JoinPage = () => {
   if (error) {
     console.log("[JoinPage] Rendering error state:", error);
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen relative bg-background flex items-center justify-center p-4">
+        {/* Rainbow background effect for error state */}
+        <div className="absolute inset-0 opacity-10 filter blur-[120px]" style={{
+          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+          zIndex: 0
+        }} />
+        <Card className="w-full max-w-md relative z-10">
           <CardContent className="p-6">
             <div className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -388,8 +398,22 @@ const JoinPage = () => {
   console.log("[JoinPage] Neighborhood:", neighborhood?.name);
   
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center p-4 bg-background">
+      {/* Rainbow background effect - same as hero section */}
+      <div className="absolute inset-0 opacity-10 filter blur-[120px]" style={{
+        background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+        zIndex: 0
+      }} />
+      
+      {/* Focused rainbow effect around the invite card */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-full max-w-md h-96 rounded-3xl blur-2xl opacity-40" style={{
+          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+          transform: "scale(1.05)",
+          zIndex: 1
+        }} />
+      </div>
+      <Card className="w-full max-w-md relative z-10">
         {/* Header Image - renders above the card content if available */}
         {neighborhood?.inviteHeaderImageUrl && (
           <div className="w-full h-32 overflow-hidden rounded-t-lg">
