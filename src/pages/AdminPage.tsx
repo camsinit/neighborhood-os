@@ -73,23 +73,23 @@ const AdminPage = () => {
         </div>
 
         {/* Admin Tabs */}
-        <Tabs defaultValue="dashboard" className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+        <Tabs defaultValue="members" className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Dashboard</span>
-            </TabsTrigger>
             <TabsTrigger value="members" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Members</span>
             </TabsTrigger>
-            <TabsTrigger value="invitations" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              <span className="hidden sm:inline">Invitations</span>
-            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="invitations" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">Invitations</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
@@ -98,21 +98,20 @@ const AdminPage = () => {
           </TabsList>
 
           {/* Tab Content */}
-          <TabsContent value="dashboard" className="space-y-6">
-            <AdminDashboard />
-          </TabsContent>
-
           <TabsContent value="members" className="space-y-6">
             <AdminMembers />
           </TabsContent>
 
+          <TabsContent value="settings" className="space-y-6">
+            <AdminSettings isReadOnly={!isAdmin} />
+          </TabsContent>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            <AdminDashboard />
+          </TabsContent>
 
           <TabsContent value="invitations" className="space-y-6">
             <AdminInvitations />
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-6">
-            <AdminSettings isReadOnly={!isAdmin} />
           </TabsContent>
 
           <TabsContent value="reports" className="space-y-6">
