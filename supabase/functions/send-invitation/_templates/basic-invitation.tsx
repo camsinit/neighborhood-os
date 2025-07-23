@@ -14,6 +14,7 @@ interface BasicInvitationEmailProps {
   inviterName: string;
   neighborhoodName: string;
   inviteUrl: string;
+  inviterAvatarUrl?: string;
 }
 
 /**
@@ -24,13 +25,23 @@ export const BasicInvitationEmail = ({
   inviterName = 'Your neighbor',
   neighborhoodName = 'your neighborhood',
   inviteUrl = 'https://neighborhoodos.com',
+  inviterAvatarUrl,
 }: BasicInvitationEmailProps) => (
   <Html>
     <Head />
     <Preview>{inviterName} invited you to join {neighborhoodName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>You're invited to join {neighborhoodName}!</Heading>
+        <div style={titleContainer}>
+          {inviterAvatarUrl && (
+            <img 
+              src={inviterAvatarUrl} 
+              alt={`${inviterName}'s profile`}
+              style={avatarImage}
+            />
+          )}
+          <Heading style={h1}>You're invited to join {neighborhoodName}!</Heading>
+        </div>
         
         <Text style={greeting}>Hey there neighbor!</Text>
         
@@ -136,4 +147,18 @@ const footer = {
   fontSize: '12px',
   lineHeight: '18px',
   margin: '32px 0 0',
+};
+
+const titleContainer = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  marginBottom: '20px',
+};
+
+const avatarImage = {
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  objectFit: 'cover' as const,
 };

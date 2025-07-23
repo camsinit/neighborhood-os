@@ -31,11 +31,7 @@ const logger = createLogger('send-invitation');
 function resolveActorDisplayName(profile: any, email: string, isActor: boolean = true): string {
   const baseName = profile?.display_name || profile?.first_name || extractNameFromEmail(email);
   
-  // For invitations, the actor (inviter) becomes "Your neighbor [Name]" to the recipient
-  if (isActor) {
-    return `Your neighbor ${baseName}`;
-  }
-  
+  // For invitations, just return the actor's name without "Your neighbor" prefix
   return baseName;
 }
 
@@ -125,7 +121,7 @@ serve(async (req) => {
         // Get inviter profile for name resolution  
         const { data: profileData } = await supabase
           .from('profiles')
-          .select('display_name, first_name, bio')
+          .select('display_name, first_name, bio, avatar_url')
           .eq('id', inviterId)
           .single();
           
@@ -191,7 +187,12 @@ serve(async (req) => {
 
     // Render the email template with unified parameters
     const emailHtml = await renderAsync(
-      React.createElement(BasicInvitationEmail, emailParams)
+      React.createElement(BasicInvitationEmail, {
+        inviterName: actorName,
+        neighborhoodName: resolvedNeighborhoodName,
+        inviteUrl,
+        inviterAvatarUrl: inviterProfile?.avatar_url,
+      })
     )
 
     // Send the email via Resend using consistent from address and subject
