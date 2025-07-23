@@ -77,7 +77,9 @@ export function useNeighborhoodData(user: User | null) {
     // Call the fetch function when the user/fetchAttempts changes
     // and auth state is stable
     if (isAuthStable) {
-      fetchNeighborhood();
+      // Force refresh if fetchAttempts > 0 (indicates a manual refresh)
+      const forceRefresh = fetchAttempts > 0;
+      fetchNeighborhood(forceRefresh);
     }
   }, [isAuthStable, user, fetchAttempts, fetchNeighborhood]);
 

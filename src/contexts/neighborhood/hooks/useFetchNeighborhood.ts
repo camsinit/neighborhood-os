@@ -38,7 +38,7 @@ export function useFetchNeighborhood(
   const [currentNeighborhood, setCurrentNeighborhood] = useState<Neighborhood | null>(null);
 
   // The main fetch function that retrieves neighborhood data using direct queries
-  const fetchNeighborhood = useCallback(async () => {
+  const fetchNeighborhood = useCallback(async (forceRefresh = false) => {
     // Skip if no user is logged in
     if (!user) {
       setIsLoading(false);
@@ -49,18 +49,18 @@ export function useFetchNeighborhood(
     const startTime = startFetch();
     
     try {
-      // If we already have a current neighborhood, we're done
-      if (currentNeighborhood) {
+      // If we already have a current neighborhood and not forcing refresh, we're done
+      if (currentNeighborhood && !forceRefresh) {
         completeFetch(startTime);
         return;
       }
 
       logger.debug("Fetching neighborhoods for user:", user.id);
 
-      // First, check if user created any neighborhoods
+      // First, check if user created any neighborhoods - fetch all required fields
       const { data: createdNeighborhoods, error: createdError } = await supabase
         .from('neighborhoods')
-        .select('id, name, created_by')
+        .select('id, name, created_by, city, state, timezone, invite_header_image_url, zip, address, geo_boundary, created_at')
         .eq('created_by', user.id)
         .limit(1);
 
@@ -79,7 +79,7 @@ export function useFetchNeighborhood(
         return;
       }
 
-      // If no created neighborhoods, check membership
+      // If no created neighborhoods, check membership - fetch all required fields
       const { data: membershipData, error: membershipError } = await supabase
         .from('neighborhood_members')
         .select(`
@@ -87,7 +87,15 @@ export function useFetchNeighborhood(
           neighborhoods:neighborhood_id (
             id,
             name,
-            created_by
+            created_by,
+            city,
+            state,
+            timezone,
+            invite_header_image_url,
+            zip,
+            address,
+            geo_boundary,
+            created_at
           )
         `)
         .eq('user_id', user.id)
