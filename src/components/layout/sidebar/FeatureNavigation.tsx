@@ -68,8 +68,8 @@ const FeatureNavigation = () => {
         
         return (
           <React.Fragment key={item.path}>
-            {/* Add divider between Home and Calendar */}
-            {index === 1 && <div className="my-4 h-px bg-gray-100" />}
+            {/* Add divider between Home and Calendar with matching spacing */}
+            {index === 1 && <div className="my-3 h-px bg-gray-100" />}
             
             <NavLink
               to={item.path}
