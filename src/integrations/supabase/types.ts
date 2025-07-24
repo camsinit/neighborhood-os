@@ -723,6 +723,39 @@ export type Database = {
           },
         ]
       }
+      security_audit_log: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          target_user_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          target_user_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       shared_items: {
         Row: {
           content_id: string
@@ -1134,15 +1167,10 @@ export type Database = {
         Returns: {
           id: string
           name: string
-          created_by: string
           city: string
           state: string
-          timezone: string
-          invite_header_image_url: string
-          zip: string
-          address: string
-          geo_boundary: Json
           created_at: string
+          created_by: string
           member_count: number
         }[]
       }
@@ -1259,6 +1287,14 @@ export type Database = {
       is_user_in_neighborhood: {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          p_action_type: string
+          p_target_user_id?: string
+          p_details?: Json
+        }
+        Returns: undefined
       }
       remove_neighborhood_member: {
         Args: {
