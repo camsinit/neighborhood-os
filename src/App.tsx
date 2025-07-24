@@ -24,6 +24,7 @@ import SharePage from "./pages/SharePage";
 import AdminPage from "./pages/AdminPage";
 import { NeighborhoodProvider } from "@/contexts/neighborhood";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import NeighborhoodAwareProtectedRoute from "@/components/auth/NeighborhoodAwareProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import SuperAdminRoute from "@/components/auth/SuperAdminRoute";
@@ -89,7 +90,9 @@ const App = () => {
                     }
                   />
                   
-                  {/* Protected app routes */}
+                  {/* Protected app routes - with neighborhood-aware routing */}
+                  
+                  {/* Legacy routes - redirect to neighborhood-specific URLs */}
                   <Route
                     path="/home"
                     element={
@@ -100,6 +103,19 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  
+                  {/* Neighborhood-specific routes */}
+                  <Route
+                    path="/n/:neighborhoodId/home"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <HomePage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  {/* Legacy routes - these will redirect to neighborhood-specific URLs */}
                   <Route
                     path="/calendar"
                     element={
@@ -178,6 +194,88 @@ const App = () => {
                           <AdminPage />
                         </MainLayout>
                       </ProtectedRoute>
+                    }
+                  />
+                  
+                  {/* Neighborhood-specific routes */}
+                  <Route
+                    path="/n/:neighborhoodId/calendar"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <CalendarPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/skills"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <SkillsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/goods"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <GoodsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/safety"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <SafetyPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/neighbors"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <NeighborsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/modules"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <ModulesPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/settings"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <SettingsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/n/:neighborhoodId/admin"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <AdminPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
                     }
                   />
                   <Route

@@ -1,15 +1,17 @@
 
 /**
- * Simplified Neighborhood Context Provider
+ * Enhanced Neighborhood Context Provider
  * 
- * This provider has been streamlined to support only one neighborhood per user.
- * Removed core contributor functionality and multiple neighborhood switching.
+ * Now supports URL-based neighborhood selection for super admins
+ * while maintaining single neighborhood per user for regular users.
  */
 import React, { createContext, useContext } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useParams } from 'react-router-dom';
 import { useNeighborhoodData } from './useNeighborhoodData';
 import { Neighborhood, NeighborhoodContextType } from './types';
 import { useUser } from '@supabase/auth-helpers-react';
+import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 
 // Create the context with a default value
 const NeighborhoodContext = createContext<NeighborhoodContextType>({
@@ -27,9 +29,9 @@ const NeighborhoodContext = createContext<NeighborhoodContextType>({
 export const useNeighborhood = () => useContext(NeighborhoodContext);
 
 /**
- * Neighborhood provider component
+ * Enhanced neighborhood provider component
  * 
- * Manages single neighborhood data and provides it to child components
+ * Now supports URL-based neighborhood selection for super admins
  */
 export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({ 
   children 
@@ -37,19 +39,26 @@ export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({
   // Get the current authenticated user
   const user = useUser();
   
-  // Initialize the neighborhood data hook - simplified version
+  // Get neighborhood ID from URL params (for super admin routing)
+  const params = useParams();
+  const neighborhoodIdFromUrl = params.neighborhoodId;
+  
+  // Check if user is super admin
+  const { isSuperAdmin, isLoading: isLoadingSuperAdmin } = useSuperAdminAccess();
+  
+  // Initialize the neighborhood data hook with URL awareness
   const { 
     currentNeighborhood,
     isLoading, 
     error,
     setCurrentNeighborhood,
     refreshNeighborhoodData,
-  } = useNeighborhoodData(user);
+  } = useNeighborhoodData(user, neighborhoodIdFromUrl, isSuperAdmin);
 
-  // Create the context value with the simplified data model
+  // Create the context value with enhanced data model
   const contextValue: NeighborhoodContextType = {
     currentNeighborhood,
-    isLoading,
+    isLoading: isLoading || isLoadingSuperAdmin,
     error,
     setCurrentNeighborhood,
     refreshNeighborhoodData,

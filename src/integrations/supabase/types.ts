@@ -68,75 +68,6 @@ export type Database = {
           },
         ]
       }
-      care_requests: {
-        Row: {
-          archived_at: string | null
-          archived_by: string | null
-          care_category: string
-          care_request_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          is_archived: boolean | null
-          is_read: boolean | null
-          neighborhood_id: string
-          request_type: string
-          support_type: string
-          title: string
-          user_id: string
-          valid_until: string
-        }
-        Insert: {
-          archived_at?: string | null
-          archived_by?: string | null
-          care_category: string
-          care_request_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_archived?: boolean | null
-          is_read?: boolean | null
-          neighborhood_id: string
-          request_type: string
-          support_type: string
-          title: string
-          user_id: string
-          valid_until: string
-        }
-        Update: {
-          archived_at?: string | null
-          archived_by?: string | null
-          care_category?: string
-          care_request_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_archived?: boolean | null
-          is_read?: boolean | null
-          neighborhood_id?: string
-          request_type?: string
-          support_type?: string
-          title?: string
-          user_id?: string
-          valid_until?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "care_requests_archived_by_fkey"
-            columns: ["archived_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "care_requests_neighborhood_id_fkey"
-            columns: ["neighborhood_id"]
-            isOneToOne: false
-            referencedRelation: "neighborhoods"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       debug_settings: {
         Row: {
           created_at: string | null
@@ -1188,6 +1119,23 @@ export type Database = {
           created_at: string
           metadata: Json
           neighborhood_id: string
+        }[]
+      }
+      get_all_neighborhoods_for_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          created_by: string
+          city: string
+          state: string
+          timezone: string
+          invite_header_image_url: string
+          zip: string
+          address: string
+          geo_boundary: Json
+          created_at: string
+          member_count: number
         }[]
       }
       get_all_neighborhoods_safe: {
