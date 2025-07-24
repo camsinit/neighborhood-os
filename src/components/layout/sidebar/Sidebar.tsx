@@ -6,7 +6,6 @@ import { useNeighborhood } from "@/contexts/neighborhood";
 import UserProfileCard from './UserProfileCard';
 import FeatureNavigation from './FeatureNavigation';
 import ActionButtons from './ActionButtons';
-import { SuperAdminNeighborhoodSelector } from './SuperAdminNeighborhoodSelector';
 
 /**
  * Props for the Sidebar component - onOpenSettings no longer needed
@@ -36,9 +35,6 @@ const Sidebar = ({ onOpenSettings }: SidebarProps) => {
     <div className="w-60 border-r bg-white flex flex-col h-screen sticky top-0">
       {/* User profile card at the top of sidebar */}
       <UserProfileCard />
-      
-      {/* Super Admin Neighborhood Selector - only visible to super admins */}
-      <SuperAdminNeighborhoodSelector />
       
       {/* Navigation menu section */}
       <nav className="flex-1 px-3 overflow-y-auto">

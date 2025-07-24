@@ -40,8 +40,8 @@ const WaitlistAdmin = () => {
         // Check if user has admin role
         const { data, error } = await supabase
           .rpc('check_user_role', {
-            user_id: session.user.id,
-            required_role: 'admin'
+            user_uuid: session.user.id,
+            role_name: 'admin'
           });
           
         if (error) throw error;
