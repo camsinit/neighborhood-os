@@ -405,13 +405,26 @@ const JoinPage = () => {
         zIndex: 0
       }} />
       
-      {/* Focused rainbow effect around the invite card */}
+      {/* Focused rainbow effect around the invite card - enhanced to match hero section */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-full max-w-md h-96 rounded-3xl blur-2xl opacity-40" style={{
-          background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
-          transform: "scale(1.05)",
-          zIndex: 1
-        }} />
+        {/* Primary rainbow glow - larger and more prominent */}
+        <div 
+          className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-60" 
+          style={{
+            background: "linear-gradient(135deg, #3b82f6, #10b981, #f59e0b, #ef4444, #8b5cf6, #ec4899, #06b6d4)",
+            transform: "scale(1.2)",
+            zIndex: 1
+          }} 
+        />
+        {/* Secondary rainbow glow - smaller and more focused */}
+        <div 
+          className="absolute w-[350px] h-[350px] rounded-full blur-2xl opacity-50" 
+          style={{
+            background: "linear-gradient(135deg, #8b5cf6, #ec4899, #06b6d4, #3b82f6, #10b981, #f59e0b)",
+            transform: "scale(1.1)",
+            zIndex: 2
+          }} 
+        />
       </div>
       <Card className="w-full max-w-md relative z-10">
         {/* Header Image - renders above the card content if available */}
