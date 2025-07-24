@@ -1049,6 +1049,14 @@ export type Database = {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
+      assign_user_role: {
+        Args: {
+          target_user_id: string
+          target_role: Database["public"]["Enums"]["user_role"]
+          assigned_by_user_id?: string
+        }
+        Returns: boolean
+      }
       backfill_neighborhood_ids: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1075,8 +1083,8 @@ export type Database = {
       }
       check_user_role: {
         Args: {
-          user_id: string
-          required_role: Database["public"]["Enums"]["user_role"]
+          user_uuid: string
+          role_name: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
       }
@@ -1257,6 +1265,14 @@ export type Database = {
           creator_uuid: string
           member_uuid: string
           neighborhood_uuid: string
+        }
+        Returns: boolean
+      }
+      remove_user_role: {
+        Args: {
+          target_user_id: string
+          target_role: Database["public"]["Enums"]["user_role"]
+          removed_by_user_id?: string
         }
         Returns: boolean
       }
