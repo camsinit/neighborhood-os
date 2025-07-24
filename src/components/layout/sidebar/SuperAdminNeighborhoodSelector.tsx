@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, Users, MapPin } from 'lucide-react';
+import { ChevronDown, Users, MapPin, Plus } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +108,19 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      {/* Create New Neighborhood Button - Non-functional placeholder */}
+      <Button 
+        variant="ghost" 
+        className="w-full mt-2 text-sm font-normal justify-start"
+        onClick={() => {
+          // TODO: Implement create neighborhood functionality
+          console.log('Create neighborhood clicked');
+        }}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Create Neighborhood
+      </Button>
     </div>
   );
 };
