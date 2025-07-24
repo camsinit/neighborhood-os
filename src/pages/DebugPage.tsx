@@ -18,6 +18,7 @@ import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
+import { SuperAdminNeighborhoodSelector } from '@/components/layout/sidebar/SuperAdminNeighborhoodSelector';
 
 
 /**
@@ -169,7 +170,7 @@ const DebugPage = () => {
             <EmailTestingPanel />
           </TabsContent>
           
-          {/* Users Debug Tab - Placeholder for future implementation */}
+          {/* Users Debug Tab - Super Admin Tools */}
           <TabsContent value="users" className="mt-4">
             <Card>
               <CardHeader>
@@ -178,14 +179,21 @@ const DebugPage = () => {
                   Users Debug
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">User System Debugging</h3>
-                  <p className="text-muted-foreground">
-                    User debugging tools are coming soon. This will include:
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Super Admin Tools</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Switch between neighborhoods to debug user and system issues across different communities.
                   </p>
-                  <ul className="text-sm text-muted-foreground mt-4 space-y-1">
+                  <SuperAdminNeighborhoodSelector />
+                </div>
+                
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium mb-2">Future User Debugging Tools</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Additional user debugging tools are coming soon:
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• User authentication status tracking</li>
                     <li>• Role and permission analysis</li>
                     <li>• Neighborhood membership diagnostics</li>
