@@ -62,27 +62,31 @@ const FeatureNavigation = () => {
 
   return (
     <div className="space-y-1 pt-4">
-      {navigationItems.map((item) => {
+      {navigationItems.map((item, index) => {
         const isActive = location.pathname === item.path;
         const Icon = item.icon;
         
         return (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
-              isActive
-                ? item.activeColor
-                : "text-gray-900"
-            )}
-          >
-            <Icon className={cn(
-              "h-5 w-5 flex-shrink-0",
-              isActive ? item.activeColor : item.activeColor
-            )} />
-            {item.label}
-          </NavLink>
+          <React.Fragment key={item.path}>
+            {/* Add divider between Home and Calendar */}
+            {index === 1 && <div className="my-4 h-px bg-gray-100" />}
+            
+            <NavLink
+              to={item.path}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                isActive
+                  ? item.activeColor
+                  : "text-gray-900"
+              )}
+            >
+              <Icon className={cn(
+                "h-5 w-5 flex-shrink-0",
+                isActive ? item.activeColor : item.activeColor
+              )} />
+              {item.label}
+            </NavLink>
+          </React.Fragment>
         );
       })}
     </div>
