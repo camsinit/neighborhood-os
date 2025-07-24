@@ -60,6 +60,10 @@ const DebugPage = () => {
               <Mail className="w-4 h-4" />
               Emails
             </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Users
+            </TabsTrigger>
             <TabsTrigger value="activities" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
               Activities
@@ -71,10 +75,6 @@ const DebugPage = () => {
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
               Testing
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Users
             </TabsTrigger>
             <TabsTrigger value="logging" className="flex items-center gap-2">
               <Bug className="w-4 h-4" />
