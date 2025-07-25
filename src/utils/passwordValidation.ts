@@ -56,65 +56,36 @@ export interface PasswordValidationResult {
  * @returns PasswordValidationResult with detailed feedback
  */
 export const validatePassword = (password: string): PasswordValidationResult => {
-  // Define all password requirements
+  // Simplified requirements for elder-friendly accessibility
   const requirements: PasswordRequirement[] = [
     {
       id: 'length',
-      label: 'At least 8 characters',
-      test: (pwd) => pwd.length >= 8,
+      label: 'At least 6 characters',
+      test: (pwd) => pwd.length >= 6, // Reduced from 8 to 6
       met: false
     },
     {
-      id: 'uppercase',
-      label: 'One uppercase letter (A-Z)',
-      test: (pwd) => /[A-Z]/.test(pwd),
+      id: 'hasLetters',
+      label: 'Contains letters',
+      test: (pwd) => /[a-zA-Z]/.test(pwd), // Just needs any letters
       met: false
     },
     {
-      id: 'lowercase',
-      label: 'One lowercase letter (a-z)',
-      test: (pwd) => /[a-z]/.test(pwd),
-      met: false
-    },
-    {
-      id: 'number',
-      label: 'One number (0-9)',
+      id: 'hasNumbers',
+      label: 'Contains at least one number',
       test: (pwd) => /\d/.test(pwd),
       met: false
     },
+    // Removed uppercase/lowercase requirements
+    // Removed special character requirements  
+    // Removed complex pattern checking
+    // Simplified weak password check to just the most obvious ones
     {
-      id: 'special',
-      label: 'One special character (!@#$%^&*)',
-      test: (pwd) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
-      met: false
-    },
-    {
-      id: 'notCommon',
-      label: 'Not a common weak password or pattern',
+      id: 'notTooSimple',
+      label: 'Not too simple (avoid "password" or "123456")',
       test: (pwd) => {
-        // Check exact matches against common weak passwords
-        const isCommonPassword = COMMON_WEAK_PASSWORDS.includes(pwd.toLowerCase());
-        if (isCommonPassword) return false;
-        
-        // Check against weak patterns
-        const matchesWeakPattern = WEAK_PATTERNS.some(pattern => pattern.test(pwd));
-        return !matchesWeakPattern;
-      },
-      met: false
-    },
-    {
-      id: 'complexity',
-      label: 'Avoid simple patterns (use random characters)',
-      test: (pwd) => {
-        // Ensure password has good entropy and isn't too predictable
-        const hasVariedCharacters = pwd.length >= 10 || 
-          (pwd.split('').filter((char, index) => pwd.indexOf(char) === index).length >= pwd.length * 0.7);
-        
-        // Avoid consecutive characters or simple patterns
-        const noConsecutiveChars = !/(.)\1{2,}/.test(pwd); // No 3+ repeated chars
-        const noSequentialChars = !/(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|123|234|345|456|567|678|789)/i.test(pwd);
-        
-        return hasVariedCharacters && noConsecutiveChars && noSequentialChars;
+        const verySimple = ['password', '123456', '12345678', 'qwerty', 'abc123'];
+        return !verySimple.includes(pwd.toLowerCase());
       },
       met: false
     }
@@ -129,18 +100,18 @@ export const validatePassword = (password: string): PasswordValidationResult => 
   const metCount = requirements.filter(req => req.met).length;
   const score = Math.round((metCount / requirements.length) * 100);
 
-  // Determine overall validity
-  const isValid = metCount === requirements.length;
+  // More lenient validity check - accept "fair" and above for elder accessibility
+  const isValid = score >= 50; // Was: metCount === requirements.length
 
-  // Determine strength level
+  // Determine strength level - more lenient for accessibility
   let strength: PasswordValidationResult['strength'];
   if (score === 100) {
     strength = 'strong';
-  } else if (score >= 80) {
+  } else if (score >= 75) { // Lowered from 80
     strength = 'good';
-  } else if (score >= 60) {
+  } else if (score >= 50) { // Lowered from 60
     strength = 'fair';
-  } else if (score >= 40) {
+  } else if (score >= 25) { // Lowered from 40
     strength = 'weak';
   } else {
     strength = 'very-weak';
@@ -212,15 +183,15 @@ export const getStrengthColor = (strength: PasswordValidationResult['strength'])
 export const getStrengthLabel = (strength: PasswordValidationResult['strength']): string => {
   switch (strength) {
     case 'very-weak':
-      return 'Too Weak - Cannot Proceed';
+      return 'Too Simple - Cannot Proceed';
     case 'weak':
-      return 'Too Weak - Cannot Proceed';
-    case 'fair':
       return 'Almost There - Cannot Proceed';
+    case 'fair':
+      return 'Good Enough - Ready to Proceed!';
     case 'good':
-      return 'Close - Cannot Proceed Yet';
+      return 'Great - Ready to Proceed!';
     case 'strong':
-      return 'Perfect - Ready to Proceed!';
+      return 'Excellent - Ready to Proceed!';
     default:
       return '';
   }
