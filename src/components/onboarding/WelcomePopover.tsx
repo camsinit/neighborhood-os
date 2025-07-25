@@ -81,13 +81,13 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
 
       {/* Backdrop with blur effect - animated entrance */}
       <div 
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 animate-fade-in"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 fade-in"
         onClick={handleBackdropClick}
         style={{ animationDelay: '0.1s' }}
       >
         {/* Welcome popover card - enhanced entrance animation */}
         <div 
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-scale-in"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative scale-animation"
           style={{ 
             animationDelay: '0.2s',
             animationDuration: '0.4s',
