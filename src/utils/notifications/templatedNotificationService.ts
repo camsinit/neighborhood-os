@@ -115,6 +115,31 @@ export async function createEventRSVPNotification(
   });
 }
 
+/**
+ * Helper function to create a skill session request notification
+ */
+export async function createSkillSessionRequestNotification(
+  skillProviderId: string,
+  requesterId: string,
+  skillId: string,
+  skillTitle: string,
+  requesterName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'skill_session_request',
+    recipientUserId: skillProviderId,
+    actorUserId: requesterId,
+    contentId: skillId,
+    variables: {
+      actor: requesterName,
+      title: skillTitle
+    },
+    metadata: {
+      skillId,
+      type: 'session_request'
+    }
+  });
+}
 
 /**
  * Helper function to create a new neighbor notification
@@ -191,13 +216,66 @@ export async function createGoodsResponseNotification(
   });
 }
 
+/**
+ * Helper function to create a care response notification
+ */
+export async function createCareResponseNotification(
+  requesterId: string,
+  responderId: string,
+  careId: string,
+  careTitle: string,
+  responderName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'care_response',
+    recipientUserId: requesterId,
+    actorUserId: responderId,
+    contentId: careId,
+    variables: {
+      actor: responderName,
+      title: careTitle
+    },
+    metadata: {
+      careId,
+      type: 'response'
+    }
+  });
+}
 
 
+/**
+ * Helper function to create a skill session cancellation notification
+ */
+export async function createSkillSessionCancelledNotification(
+  recipientId: string,
+  actorId: string,
+  sessionId: string,
+  skillTitle: string,
+  actorName: string
+): Promise<string | null> {
+  return createTemplatedNotification({
+    templateId: 'skill_session_cancelled',
+    recipientUserId: recipientId,
+    actorUserId: actorId,
+    contentId: sessionId,
+    variables: {
+      actor: actorName,
+      title: skillTitle
+    },
+    metadata: {
+      sessionId,
+      type: 'cancellation'
+    }
+  });
+}
 
 export default {
   createTemplatedNotification,
   createEventRSVPNotification,
+  createSkillSessionRequestNotification,
   createNeighborJoinedNotification,
   createSafetyCommentNotification,
-  createGoodsResponseNotification
+  createGoodsResponseNotification,
+  createCareResponseNotification,
+  createSkillSessionCancelledNotification
 };

@@ -111,8 +111,10 @@ export const EMAIL_SUBJECTS = {
   RSVP_TO_EVENT: '{{actorName}} is attending your {{contentTitle}}',
   
   // Skill Exchange
-  SKILL_OFFERED: '{{actorName}} is offering: {{contentTitle}}',
-  SKILL_REQUESTED: '{{actorName}} wants help with: {{contentTitle}}',
+  SKILL_REQUEST: '{{actorName}} wants help with: {{contentTitle}}',
+  SKILL_RESPONSE: '{{actorName}} can help with: {{contentTitle}}',
+  SKILL_SESSION_CONFIRMED: 'Skill session confirmed: {{contentTitle}}',
+  SKILL_SESSION_CANCELLED: 'Skill session cancelled: {{contentTitle}}',
   
   // Safety & Community  
   SAFETY_EMERGENCY: '🚨 Emergency Alert in {{neighborhoodName}}: {{contentTitle}}',
@@ -187,7 +189,7 @@ export const EMAIL_TEMPLATE_CONFIG = {
   // Skills  
   'skill-request': {
     fromAddress: EMAIL_CONFIG.FROM_ADDRESSES.NOTIFICATIONS,
-    subjectTemplate: EMAIL_SUBJECTS.SKILL_REQUESTED,
+    subjectTemplate: EMAIL_SUBJECTS.SKILL_REQUEST,
     utmCampaign: UTM_CAMPAIGNS.SKILL_REQUEST,
     relationship: 'requester-provider' as const,
   },

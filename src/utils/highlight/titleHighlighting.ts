@@ -43,45 +43,31 @@ export const highlightTitleContent = (
   const toPattern = /\s+to\s+(.+?)(?:\s+(?:event|skill|session))?$/i;
   contentMatch = title.match(toPattern);
   
-  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill", "commented on your Event Title")
+  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill")
   if (!contentMatch) {
-    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request|report|event|about))?$/i;
+    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request))?$/i;
     contentMatch = title.match(yourPattern);
   }
   
-  // Pattern 2a: Special case for "commented on your [title] about" format
+  // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session")
   if (!contentMatch) {
-    const commentedPattern = /commented on your (.+?) about/i;
-    contentMatch = title.match(commentedPattern);
-  }
-  
-  // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session", "confirmed: Session Title")
-  if (!contentMatch) {
-    const colonPattern = /:\s*(.+)$/;
+    const colonPattern = /:\s*([^:]+)$/;
     contentMatch = title.match(colonPattern);
   }
   
-  // Pattern 4: Text inside quotes (e.g., "shared 'Community BBQ'")
+  // Pattern 4: Quoted content (e.g., "John is offering "Lawn Mower"")
   if (!contentMatch) {
-    const quotesPattern = /['"`]([^'"`]+)['"`]/;
-    contentMatch = title.match(quotesPattern);
+    const quotePattern = /"([^"]+)"|'([^']+)'/;
+    contentMatch = title.match(quotePattern);
   }
   
-  // Pattern 5: Text after "is" action words (e.g., "John is hosting Community BBQ", "is offering Help", "is looking for Advice")
+  // Pattern 5: Content after specific verbs
   if (!contentMatch) {
-    const isPattern = /\bis\s+(hosting|offering|sharing|looking\s+for|attending)\s+(.+)$/i;
-    const isMatch = title.match(isPattern);
-    if (isMatch) {
-      contentMatch = [isMatch[0], isMatch[2]]; // Extract just the content part
-    }
-  }
-  
-  // Pattern 6: Action-based patterns (e.g., "updated: Title", "cancelled: Session", "rescheduled: Meeting")
-  if (!contentMatch) {
-    const actionPattern = /\b(updated|cancelled|rescheduled|confirmed|created|shared|posted):\s*(.+)$/i;
-    const actionMatch = title.match(actionPattern);
-    if (actionMatch) {
-      contentMatch = [actionMatch[0], actionMatch[2]];
+    const verbPattern = /(hosting|offering|requesting|created|shared|confirmed|cancelled)\s+(.+?)(?:\s+(?:event|skill|session|item))?$/i;
+    const verbMatch = title.match(verbPattern);
+    
+    if (verbMatch && verbMatch[2]) {
+      contentMatch = [verbMatch[0], verbMatch[2]];
     }
   }
   
