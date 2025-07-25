@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { User, MessageSquare, Edit, Trash2, Send, Loader2, ImagePlus, X } from "lucide-react";
+import { User, MessageSquare, Edit, Trash2, Send, Loader2, ImagePlus, X, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { useSafetyComments, useCreateComment, useUpdateComment, useDeleteComment, SafetyComment } from "@/hooks/useSafetyComments";
 import { useAutoResizeTextarea } from "@/components/hooks/use-auto-resize-textarea";
@@ -279,6 +279,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               <p className="text-sm text-gray-500 mb-4">
                 Start the discussion by leaving a comment.
               </p>
+              <ChevronDown className="h-5 w-5 text-gray-400 mx-auto" />
               
             </div>
           </div> : comments.map(comment => <CommentItem key={comment.id} comment={comment} onEdit={handleEditComment} onDelete={handleDeleteComment} isEditing={editingCommentId === comment.id} isOwner={user?.id === comment.user_id} isUpdating={updateCommentMutation.isPending} isDeleting={deleteCommentMutation.isPending} />)}
