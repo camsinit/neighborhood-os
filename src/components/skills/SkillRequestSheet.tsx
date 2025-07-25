@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet } from '@/components/ui/sheet';
+import { AppSheetContent } from '@/components/ui/app-sheet-content';
+import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { SkillCategory } from './types/skillTypes';
 import { SKILL_CATEGORIES } from '@/components/onboarding/survey/steps/skills/skillCategories';
-import { moduleThemeColors } from '@/theme/moduleTheme';
+import { MessageSquare } from 'lucide-react';
 
 /**
  * SkillRequestSheet - Enhanced skill request form in a side panel
@@ -148,28 +149,24 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent 
+      <AppSheetContent 
         side="right" 
-        className="w-[400px] sm:w-[540px] overflow-y-auto"
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          borderColor: moduleThemeColors.skills.primary + '40',
-          boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
-        }}
+        moduleTheme="skills"
       >
-        <SheetHeader className="space-y-3">
-          <SheetTitle className="text-lg font-semibold text-gray-900">
+        <SheetHeader className="border-b border-border/40 pb-4">
+          <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-blue-600" />
             Request Help from Neighbors
           </SheetTitle>
-          <p className="text-sm text-gray-600">
+        </SheetHeader>
+
+        <div className="mt-6">
+          <p className="text-sm text-gray-600 mb-4">
             Let your neighbors know what you need help with. Be specific about your requirements
             so the right person can reach out to assist you.
           </p>
-        </SheetHeader>
-
-        <div className="w-full max-w-sm mx-auto mt-6">
-          <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Skill title input - compact styling like goods form */}
+          <div className="w-full max-w-sm mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="skill-title">What do you need help with?</Label>
               <Input
@@ -230,18 +227,15 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
               <Button
                 type="submit"
                 disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()}
-                style={{ 
-                  backgroundColor: moduleThemeColors.skills.primary,
-                  borderColor: moduleThemeColors.skills.primary 
-                }}
-                className="hover:opacity-90"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {isSubmitting ? 'Creating Request...' : 'Request Help'}
               </Button>
             </div>
           </form>
         </div>
-      </SheetContent>
+      </div>
+    </AppSheetContent>
     </Sheet>
   );
 };
