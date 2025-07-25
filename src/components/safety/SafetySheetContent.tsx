@@ -71,6 +71,41 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
   };
 
   /**
+   * Format time ago in simplified format (2hr, 5d, etc.)
+   */
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}m`;
+    }
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours}hr`;
+    }
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+      return `${diffInDays}d`;
+    }
+    
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks < 4) {
+      return `${diffInWeeks}w`;
+    }
+    
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) {
+      return `${diffInMonths}mo`;
+    }
+    
+    const diffInYears = Math.floor(diffInDays / 365);
+    return `${diffInYears}y`;
+  };
+
+  /**
    * Get safety type configuration for consistent theming
    */
   const getSafetyTypeConfig = (type: string) => {
@@ -269,7 +304,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                     {/* Reporting Date - moved to top right */}
                     <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
                       <Calendar className="h-4 w-4" />
-                      <span>Reported {formatDistanceToNow(new Date(update.created_at))} ago</span>
+                      <span>Reported {formatTimeAgo(new Date(update.created_at))} ago</span>
                     </div>
                   </div>
                   
