@@ -72,14 +72,20 @@ const OnboardingDialog = ({
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Set a flag in localStorage to show the welcome popover on the home page
-        localStorage.setItem('showWelcomePopover', 'true');
-        
-        // Close the onboarding dialog
-        onOpenChange(false);
-        
-        // Navigate directly to home page where the welcome popover will appear
-        navigate("/home");
+        // Add a small delay to let the "Complete Setup" button animation finish
+        // This creates a more natural transition feeling
+        setTimeout(() => {
+          // Set a flag in localStorage to show the welcome popover on the home page
+          localStorage.setItem('showWelcomePopover', 'true');
+          
+          // Close the onboarding dialog with a fade-out effect
+          onOpenChange(false);
+          
+          // Navigate to home page after the dialog close animation
+          setTimeout(() => {
+            navigate("/home");
+          }, 200); // Wait for dialog close animation
+        }, 300); // Small delay for button click feedback
       }
       // Error handling is done in the submit function
     } catch (error: any) {

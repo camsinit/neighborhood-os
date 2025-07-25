@@ -79,17 +79,25 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
         }}
       />
 
-      {/* Backdrop with blur effect */}
+      {/* Backdrop with blur effect - animated entrance */}
       <div 
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 animate-fade-in"
         onClick={handleBackdropClick}
+        style={{ animationDelay: '0.1s' }}
       >
-        {/* Welcome popover card */}
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-scale-in">
+        {/* Welcome popover card - enhanced entrance animation */}
+        <div 
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-scale-in"
+          style={{ 
+            animationDelay: '0.2s',
+            animationDuration: '0.4s',
+            animationFillMode: 'both'
+          }}
+        >
           {/* Close button - positioned absolutely in top-right */}
           <button
             onClick={onDismiss}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors opacity-60 hover:opacity-100"
             aria-label="Close welcome message"
           >
             <X className="h-5 w-5" />
@@ -114,7 +122,7 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
               <Button 
                 onClick={onDismiss}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 Get Started
