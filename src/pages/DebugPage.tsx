@@ -109,7 +109,7 @@ const DebugPage = () => {
                     Test the complete invite-to-onboarding flow: invitation landing page → profile setup → welcome.
                   </p>
                   <div className="flex flex-wrap gap-3">
-                    <Button 
+                     <Button 
                       variant="outline" 
                       onClick={() => {
                         // Simulate OAuth data for consistent test flow
@@ -126,6 +126,20 @@ const DebugPage = () => {
                     >
                       <TestTube className="w-4 h-4" />
                       Test Unified Onboarding Flow
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        // Set the localStorage flag to trigger welcome popover
+                        console.log('[DebugPage] Triggering Welcome Popover test');
+                        localStorage.setItem('showWelcomePopover', 'true');
+                        // Navigate to home to display the welcome popover
+                        window.location.href = '/home';
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <TestTube className="w-4 h-4" />
+                      Test Welcome Popover
                     </Button>
                   </div>
                 </div>
