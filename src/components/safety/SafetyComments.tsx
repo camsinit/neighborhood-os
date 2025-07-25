@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { useQuery } from '@tanstack/react-query';
@@ -7,38 +6,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  User, 
-  MessageSquare, 
-  Edit, 
-  Trash2, 
-  Send,
-  Loader2,
-  ImagePlus,
-  X
-} from "lucide-react";
+import { User, MessageSquare, Edit, Trash2, Send, Loader2, ImagePlus, X } from "lucide-react";
 import { format } from "date-fns";
-import { 
-  useSafetyComments, 
-  useCreateComment, 
-  useUpdateComment, 
-  useDeleteComment,
-  SafetyComment 
-} from "@/hooks/useSafetyComments";
+import { useSafetyComments, useCreateComment, useUpdateComment, useDeleteComment, SafetyComment } from "@/hooks/useSafetyComments";
 import { useAutoResizeTextarea } from "@/components/hooks/use-auto-resize-textarea";
 import { uploadImage } from "@/components/goods/utils/imageUpload";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface SafetyCommentsProps {
   safetyUpdateId: string;
   className?: string;
@@ -55,30 +29,33 @@ const CommentItem: React.FC<{
   isOwner: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
-}> = ({ comment, onEdit, onDelete, isEditing, isOwner, isUpdating, isDeleting }) => {
+}> = ({
+  comment,
+  onEdit,
+  onDelete,
+  isEditing,
+  isOwner,
+  isUpdating,
+  isDeleting
+}) => {
   const [editContent, setEditContent] = useState(comment.content);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-
   const handleSaveEdit = () => {
     if (editContent.trim() !== comment.content) {
       onEdit(comment.id, editContent);
     }
     setIsEditMode(false);
   };
-
   const handleCancelEdit = () => {
     setEditContent(comment.content);
     setIsEditMode(false);
   };
-
   const handleDelete = () => {
     onDelete(comment.id);
     setShowDeleteDialog(false);
   };
-
-  return (
-    <>
+  return <>
       <div className="flex gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
         <Avatar className="h-10 w-10 flex-shrink-0">
           <AvatarImage src={comment.profiles?.avatar_url || ''} />
@@ -98,75 +75,32 @@ const CommentItem: React.FC<{
               </p>
             </div>
             
-            {isOwner && !isEditMode && (
-              <div className="flex gap-1 ml-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditMode(true)}
-                  disabled={isEditing || isUpdating}
-                  className="h-7 w-7 p-0 hover:bg-gray-200"
-                >
+            {isOwner && !isEditMode && <div className="flex gap-1 ml-2">
+                <Button variant="ghost" size="sm" onClick={() => setIsEditMode(true)} disabled={isEditing || isUpdating} className="h-7 w-7 p-0 hover:bg-gray-200">
                   <Edit className="h-3 w-3" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowDeleteDialog(true)}
-                  disabled={isEditing || isDeleting}
-                  className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
-                >
-                  {isDeleting ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-3 w-3" />
-                  )}
+                <Button variant="ghost" size="sm" onClick={() => setShowDeleteDialog(true)} disabled={isEditing || isDeleting} className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600">
+                  {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
           
-          {isEditMode ? (
-            <div className="space-y-2">
-              <Textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="min-h-[80px] text-sm"
-                placeholder="Write your comment..."
-                disabled={isUpdating}
-              />
+          {isEditMode ? <div className="space-y-2">
+              <Textarea value={editContent} onChange={e => setEditContent(e.target.value)} className="min-h-[80px] text-sm" placeholder="Write your comment..." disabled={isUpdating} />
               <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancelEdit}
-                  disabled={isUpdating}
-                  className="h-8"
-                >
+                <Button variant="outline" size="sm" onClick={handleCancelEdit} disabled={isUpdating} className="h-8">
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveEdit}
-                  disabled={isUpdating || !editContent.trim() || editContent.trim() === comment.content}
-                  className="h-8"
-                >
-                  {isUpdating ? (
-                    <>
+                <Button size="sm" onClick={handleSaveEdit} disabled={isUpdating || !editContent.trim() || editContent.trim() === comment.content} className="h-8">
+                  {isUpdating ? <>
                       <Loader2 className="h-3 w-3 animate-spin mr-1" />
                       Saving...
-                    </>
-                  ) : (
-                    'Save'
-                  )}
+                    </> : 'Save'}
                 </Button>
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+            </div> : <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
               {comment.content}
-            </p>
-          )}
+            </p>}
         </div>
       </div>
 
@@ -180,67 +114,65 @@ const CommentItem: React.FC<{
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              {isDeleting ? (
-                <>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+              {isDeleting ? <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
+                </> : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
+    </>;
 };
 
 /**
  * Main SafetyComments Component
  * Unified component that replaces both SafetyUpdateComments and SafetyUpdateComment
  */
-export const SafetyComments: React.FC<SafetyCommentsProps> = ({ 
-  safetyUpdateId, 
-  className = "" 
+export const SafetyComments: React.FC<SafetyCommentsProps> = ({
+  safetyUpdateId,
+  className = ""
 }) => {
   const user = useUser();
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  
+
   // Image upload state
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  
+
   // Auto-resize textarea hook with reduced min height
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ 
-    minHeight: 50, 
-    maxHeight: 200 
+  const {
+    textareaRef,
+    adjustHeight
+  } = useAutoResizeTextarea({
+    minHeight: 50,
+    maxHeight: 200
   });
 
   // Fetch current user's profile for avatar
-  const { data: currentUserProfile } = useQuery({
+  const {
+    data: currentUserProfile
+  } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
-        .from('profiles')
-        .select('avatar_url, display_name')
-        .eq('id', user.id)
-        .single();
+      const {
+        data
+      } = await supabase.from('profiles').select('avatar_url, display_name').eq('id', user.id).single();
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id
   });
 
   // Use our custom hooks
-  const { data: comments = [], isLoading, error } = useSafetyComments(safetyUpdateId);
+  const {
+    data: comments = [],
+    isLoading,
+    error
+  } = useSafetyComments(safetyUpdateId);
   const createCommentMutation = useCreateComment(safetyUpdateId);
   const updateCommentMutation = useUpdateComment(safetyUpdateId);
   const deleteCommentMutation = useDeleteComment(safetyUpdateId);
@@ -251,7 +183,6 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
       toast.error("You must be logged in to upload images");
       return;
     }
-
     setIsUploadingImage(true);
     try {
       const imageUrl = await uploadImage(file, user.id);
@@ -282,19 +213,15 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
     e.preventDefault();
     setIsDragOver(true);
   };
-
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
   };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
-    
     if (imageFile) {
       handleImageUpload(imageFile);
     } else {
@@ -306,85 +233,59 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   const removeUploadedImage = () => {
     setUploadedImage(null);
   };
-
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !user) return;
-
     await createCommentMutation.mutateAsync(newComment);
     setNewComment('');
     setUploadedImage(null); // Clear image after posting
   };
-
   const handleEditComment = async (commentId: string, content: string) => {
     setEditingCommentId(commentId);
-    await updateCommentMutation.mutateAsync({ commentId, content });
+    await updateCommentMutation.mutateAsync({
+      commentId,
+      content
+    });
     setEditingCommentId(null);
   };
-
   const handleDeleteComment = async (commentId: string) => {
     await deleteCommentMutation.mutateAsync(commentId);
   };
-
   if (error) {
-    return (
-      <Card className={className}>
+    return <Card className={className}>
         <CardContent className="p-6">
           <div className="text-center text-red-600">
             <p>Failed to load comments. Please try again.</p>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <div className={`space-y-4 ${className}`}>
+  return <div className={`space-y-4 ${className}`}>
       {/* Header with comment count */}
 
       {/* Comments List */}
       <div className="space-y-3">
-        {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-3 p-4 bg-gray-50 rounded-lg animate-pulse">
+        {isLoading ? <div className="space-y-3">
+            {[1, 2, 3].map(i => <div key={i} className="flex gap-3 p-4 bg-gray-50 rounded-lg animate-pulse">
                 <div className="h-10 w-10 bg-gray-200 rounded-full flex-shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-1/4" />
                   <div className="h-3 bg-gray-200 rounded w-full" />
                   <div className="h-3 bg-gray-200 rounded w-3/4" />
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : comments.length === 0 ? (
-          <div className="text-center py-4 px-4 rounded-lg">
+              </div>)}
+          </div> : comments.length === 0 ? <div className="text-center py-4 px-4 border-2 border-dashed border-gray-200 rounded-lg">
             <div className="max-w-sm mx-auto">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet!</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Start the discussion by leaving a comment below.
+                Be the first to comment!
               </p>
-              
+              <div className="w-24 h-1 bg-gray-200 rounded-full mx-auto"></div>
             </div>
-          </div>
-        ) : (
-          comments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              onEdit={handleEditComment}
-              onDelete={handleDeleteComment}
-              isEditing={editingCommentId === comment.id}
-              isOwner={user?.id === comment.user_id}
-              isUpdating={updateCommentMutation.isPending}
-              isDeleting={deleteCommentMutation.isPending}
-            />
-          ))
-        )}
+          </div> : comments.map(comment => <CommentItem key={comment.id} comment={comment} onEdit={handleEditComment} onDelete={handleDeleteComment} isEditing={editingCommentId === comment.id} isOwner={user?.id === comment.user_id} isUpdating={updateCommentMutation.isPending} isDeleting={deleteCommentMutation.isPending} />)}
       </div>
 
       {/* Comment Form */}
-      {user && (
-        <Card className="border-gray-200">
+      {user && <Card className="border-gray-200">
           <CardContent className="p-4">
             <div className="flex gap-3">
               <Avatar className="h-10 w-10 flex-shrink-0">
@@ -396,117 +297,58 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               
               <div className="flex-1 space-y-3">
                 {/* Image Preview - Show uploaded image at the top */}
-                {uploadedImage && (
-                  <div className="relative inline-block">
-                    <img 
-                      src={uploadedImage} 
-                      alt="Uploaded attachment" 
-                      className="max-w-32 max-h-32 rounded-lg border border-gray-200 object-cover"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={removeUploadedImage}
-                      className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
-                    >
+                {uploadedImage && <div className="relative inline-block">
+                    <img src={uploadedImage} alt="Uploaded attachment" className="max-w-32 max-h-32 rounded-lg border border-gray-200 object-cover" />
+                    <Button variant="ghost" size="sm" onClick={removeUploadedImage} className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full">
                       <X className="h-3 w-3" />
                     </Button>
-                  </div>
-                )}
+                  </div>}
 
                 {/* Textarea with drag & drop functionality */}
-                <div 
-                  className={`relative ${isDragOver ? 'ring-2 ring-blue-400 ring-opacity-75 rounded-md' : ''}`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <Textarea
-                    ref={textareaRef}
-                    placeholder="Share a comment or image here"
-                    value={newComment}
-                    onChange={(e) => {
-                      setNewComment(e.target.value);
-                      adjustHeight();
-                    }}
-                    className={`min-h-[50px] resize-none ${isDragOver ? 'bg-blue-50' : ''}`}
-                    disabled={createCommentMutation.isPending}
-                  />
-                  {isDragOver && (
-                    <div className="absolute inset-0 bg-blue-50 bg-opacity-50 rounded-md flex items-center justify-center pointer-events-none">
+                <div className={`relative ${isDragOver ? 'ring-2 ring-blue-400 ring-opacity-75 rounded-md' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+                  <Textarea ref={textareaRef} placeholder="Share a comment or image here" value={newComment} onChange={e => {
+                setNewComment(e.target.value);
+                adjustHeight();
+              }} className={`min-h-[50px] resize-none ${isDragOver ? 'bg-blue-50' : ''}`} disabled={createCommentMutation.isPending} />
+                  {isDragOver && <div className="absolute inset-0 bg-blue-50 bg-opacity-50 rounded-md flex items-center justify-center pointer-events-none">
                       <p className="text-blue-600 font-medium">Drop image here</p>
-                    </div>
-                  )}
+                    </div>}
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
                     {/* Hidden file input for image upload */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileInputChange}
-                      className="hidden"
-                      id="image-upload"
-                      disabled={isUploadingImage}
-                    />
+                    <input type="file" accept="image/*" onChange={handleFileInputChange} className="hidden" id="image-upload" disabled={isUploadingImage} />
                     
                     {/* Image upload button - left aligned */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById('image-upload')?.click()}
-                      disabled={isUploadingImage}
-                      className="h-9"
-                    >
-                      {isUploadingImage ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <ImagePlus className="h-4 w-4" />
-                      )}
+                    <Button variant="outline" size="sm" onClick={() => document.getElementById('image-upload')?.click()} disabled={isUploadingImage} className="h-9">
+                      {isUploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
                     </Button>
                   </div>
                   
                   {/* Submit button - right aligned */}
-                  <Button
-                    onClick={handleSubmitComment}
-                    disabled={
-                      createCommentMutation.isPending || 
-                      !newComment.trim() || 
-                      newComment.length > 500
-                    }
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    {createCommentMutation.isPending ? (
-                      <>
+                  <Button onClick={handleSubmitComment} disabled={createCommentMutation.isPending || !newComment.trim() || newComment.length > 500} className="bg-red-500 hover:bg-red-600">
+                    {createCommentMutation.isPending ? <>
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         Posting...
-                      </>
-                    ) : (
-                      <>
+                      </> : <>
                         <Send className="h-4 w-4 mr-2" />
                         Post Comment
-                      </>
-                    )}
+                      </>}
                   </Button>
                 </div>
               </div>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
-      {!user && (
-        <Card className="border-gray-200 bg-gray-50">
+      {!user && <Card className="border-gray-200 bg-gray-50">
           <CardContent className="p-4">
             <p className="text-center text-gray-600">
               Please sign in to join the conversation
             </p>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 };
-
 export default SafetyComments;
