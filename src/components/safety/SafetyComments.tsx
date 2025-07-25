@@ -369,9 +369,6 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
         ) : comments.length === 0 ? (
           <div className="text-center py-4 px-4 border-2 border-dashed border-gray-200 rounded-lg">
             <div className="max-w-sm mx-auto">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="h-8 w-8 text-gray-400" />
-              </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet</h3>
               <p className="text-sm text-gray-500 mb-4">
                 Be the first to share your thoughts and start the conversation
