@@ -173,7 +173,14 @@ export function NotificationItem({ notification, variant = 'drawer' }: Notificat
           {/* Title and Time/Archive */}
           <div className="flex justify-between items-start gap-2">
             <div className={`text-sm leading-tight flex-1 ${!notification.is_read ? 'font-semibold' : 'font-medium'}`}>
-              {highlightTitleContent(notification.title, notification.content_type)}
+              {/* Special handling for neighbor notifications to show name in purple */}
+              {notification.content_type === 'neighbors' && notification.notification_type === 'neighbor_welcome' ? (
+                <span>
+                  <span style={{ color: '#8B5FFF', fontWeight: '600' }}>{actorName}</span> joined
+                </span>
+              ) : (
+                highlightTitleContent(notification.title, notification.content_type)
+              )}
             </div>
             
             {/* Date/Archive toggle on hover */}

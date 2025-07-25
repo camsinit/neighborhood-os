@@ -164,10 +164,10 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone reports suspicious activity in your neighborhood'
   },
 
-  // Neighbors Module
+  // Neighbors Module - simplified template
   neighbor_joined: {
     id: 'neighbor_joined',
-    template: '{{actor}} joined your neighborhood',
+    template: '{{actor}} joined',
     contentType: 'neighbors',
     notificationType: 'neighbor_welcome',
     actionType: 'view',
