@@ -212,15 +212,15 @@ export const getStrengthColor = (strength: PasswordValidationResult['strength'])
 export const getStrengthLabel = (strength: PasswordValidationResult['strength']): string => {
   switch (strength) {
     case 'very-weak':
-      return 'Very Weak';
+      return 'Too Weak - Cannot Proceed';
     case 'weak':
-      return 'Weak';
+      return 'Too Weak - Cannot Proceed';
     case 'fair':
-      return 'Fair';
+      return 'Almost There - Cannot Proceed';
     case 'good':
-      return 'Good';
+      return 'Close - Cannot Proceed Yet';
     case 'strong':
-      return 'Strong';
+      return 'Perfect - Ready to Proceed!';
     default:
       return '';
   }
