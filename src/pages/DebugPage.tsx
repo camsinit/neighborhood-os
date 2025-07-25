@@ -63,7 +63,7 @@ const DebugPage = () => {
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Users
+              Neighborhoods
             </TabsTrigger>
             <TabsTrigger value="activities" className="flex items-center gap-2">
               <Activity className="w-4 h-4" />
@@ -176,28 +176,28 @@ const DebugPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Users Debug
+                  Neighborhood Debug
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Super Admin Tools</h3>
+                  <h3 className="text-lg font-medium mb-2">Neighborhood Switcher</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Switch between neighborhoods to debug user and system issues across different communities.
+                    Switch between different neighborhoods to debug community-specific issues, view neighborhood data, and test features across communities.
                   </p>
                   <SuperAdminNeighborhoodSelector />
                 </div>
                 
                 <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium mb-2">Future User Debugging Tools</h3>
+                  <h3 className="text-lg font-medium mb-2">Future Neighborhood Debugging Tools</h3>
                   <p className="text-muted-foreground mb-4">
-                    Additional user debugging tools are coming soon:
+                    Additional neighborhood debugging tools are coming soon:
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• User authentication status tracking</li>
-                    <li>• Role and permission analysis</li>
-                    <li>• Neighborhood membership diagnostics</li>
-                    <li>• Profile completion status</li>
+                    <li>• Neighborhood configuration analysis</li>
+                    <li>• Community health metrics</li>
+                    <li>• Member activity patterns</li>
+                    <li>• Event and activity diagnostics</li>
                   </ul>
                 </div>
               </CardContent>
