@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import ModuleButton from "@/components/ui/module-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,87 +174,193 @@ const SkillSheetContent = ({
   };
   const categoryStyle = categoryColors[skillCategory] || categoryColors.technology;
   
-  return <SheetContent className="sm:max-w-md overflow-y-auto">
-      <SheetHeader className="mb-4">
-        <SheetTitle className="text-xl font-bold flex justify-between items-start">
-          <div className="flex flex-col gap-2">
-            <span>{skillTitle}</span>
-            
-          </div>
-          <div className="flex items-center gap-2">
-            <ShareButton contentType="skills" contentId={skillTitle || ''} neighborhoodId={neighborhoodId} size="sm" variant="ghost" />
-          </div>
-        </SheetTitle>
-      </SheetHeader>
-
+  return (
+    <SheetContent className="sm:max-w-md overflow-y-auto">
       <div className="space-y-6">
-        {/* Skill overview - now shows accurate count including current user */}
-        <div>
-          <h3 className="font-semibold text-lg mb-2">Skill Overview</h3>
-          <p className="text-gray-600">
-            {providers.length} neighbor{providers.length !== 1 ? 's' : ''} offer{providers.length === 1 ? 's' : ''} this skill in your area.
-          </p>
+        {/* Enhanced Skill Header Section with Green Skills Theming */}
+        <div 
+          className="p-6 rounded-xl border-2"
+          style={{ 
+            background: 'linear-gradient(135deg, hsl(var(--skills-light)) 0%, hsl(var(--background)) 100%)',
+            borderColor: 'hsl(var(--skills-color) / 0.2)'
+          }}
+        >
+          {/* Skill Title and Category */}
+          <div className="space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{skillTitle}</h2>
+                <Badge 
+                  className={`${categoryStyle.bg} ${categoryStyle.text} text-sm font-medium px-3 py-1`}
+                >
+                  {skillCategory.charAt(0).toUpperCase() + skillCategory.slice(1)}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShareButton 
+                  contentType="skills" 
+                  contentId={skillTitle || ''} 
+                  neighborhoodId={neighborhoodId} 
+                  size="sm" 
+                  variant="ghost" 
+                />
+              </div>
+            </div>
+            
+            {/* Skill Statistics */}
+            <div className="flex items-center gap-4 flex-wrap text-sm">
+              <div 
+                className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                style={{ 
+                  backgroundColor: 'hsl(var(--skills-color))', 
+                  color: 'white' 
+                }}
+              >
+                <Users className="h-4 w-4" />
+                {providers.length} {providers.length === 1 ? 'neighbor offers' : 'neighbors offer'} this skill
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-3">
-          {/* Have this skill / Remove skill buttons */}
-          {!userHasSkill ? (
-            <ModuleButton 
-              onClick={handleAddSkill} 
-              moduleTheme="skills"
-              variant="filled"
-              className="flex items-center gap-2"
+        {/* Action Buttons Section */}
+        <div className="space-y-3">
+          <h3 
+            className="font-semibold text-lg flex items-center gap-2"
+            style={{ color: 'hsl(var(--skills-color))' }}
+          >
+            <Lightbulb className="w-5 h-5" />
+            Quick Actions
+          </h3>
+          
+          <div className="space-y-2">
+            {!userHasSkill ? (
+              <ModuleButton 
+                onClick={handleAddSkill} 
+                moduleTheme="skills"
+                variant="filled"
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                I have this skill too!
+              </ModuleButton>
+            ) : (
+              <Button 
+                onClick={handleRemoveSkill} 
+                variant="outline" 
+                className="w-full flex items-center justify-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
+              >
+                Remove myself from this skill
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Skill Providers Section */}
+        <div>
+          <h3 
+            className="font-semibold text-lg mb-4 flex items-center gap-2"
+            style={{ color: 'hsl(var(--skills-color))' }}
+          >
+            <Users className="w-5 h-5" />
+            Neighbors with this skill
+          </h3>
+          
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300 mx-auto mb-4"></div>
+              Loading neighbors...
+            </div>
+          ) : providers.length === 0 ? (
+            <div 
+              className="text-center py-8 rounded-lg border-2 border-dashed"
+              style={{ 
+                backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
+                borderColor: 'hsl(var(--skills-color) / 0.1)' 
+              }}
             >
-              <Plus className="h-4 w-4" />
-              Have this skill?
-            </ModuleButton>
+              <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-gray-500">No neighbors currently offer this skill.</p>
+              <p className="text-sm text-gray-400 mt-1">Be the first to share your expertise!</p>
+            </div>
           ) : (
-            <Button 
-              onClick={handleRemoveSkill} 
-              variant="outline" 
-              className="flex items-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
-            >
-              Remove myself from this skill
-            </Button>
-          )}
-        </div>
-
-        {/* Providers list - now includes current user with "(You)" indicator */}
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Neighbors with this skill</h3>
-          {loading ? <div className="text-gray-500">Loading...</div> : providers.length === 0 ? <div className="text-gray-500">No neighbors currently offer this skill.</div> : <div className="space-y-4">
+            <div className="space-y-3">
               {providers.map(provider => (
-                <div key={provider.user_id} className="flex flex-col gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {provider.user_profiles?.display_name?.[0] || '?'}
-                      </AvatarFallback>
-                    </Avatar>
+                <div 
+                  key={provider.user_id} 
+                  className="rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
+                    borderColor: 'hsl(var(--skills-color) / 0.1)' 
+                  }}
+                >
+                  {/* Provider Header */}
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                        <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
+                        <AvatarFallback 
+                          style={{ 
+                            backgroundColor: 'hsl(var(--skills-color) / 0.1)', 
+                            color: 'hsl(var(--skills-color))' 
+                          }}
+                        >
+                          {provider.user_profiles?.display_name?.[0] || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* Skills accent ring */}
+                      <div 
+                        className="absolute inset-0 rounded-full border-2 opacity-20"
+                        style={{ borderColor: 'hsl(var(--skills-color))' }}
+                      />
+                    </div>
                     
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">
-                        {provider.user_profiles?.display_name || 'Anonymous'}
-                        {provider.user_id === user?.id && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
-                      </h4>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-gray-900">
+                          {provider.user_profiles?.display_name || 'Anonymous'}
+                        </h4>
+                        {provider.user_id === user?.id && (
+                          <span 
+                            className="text-xs font-medium px-2 py-1 rounded-full"
+                            style={{ 
+                              backgroundColor: 'hsl(var(--skills-color) / 0.15)', 
+                              color: 'hsl(var(--skills-color))' 
+                            }}
+                          >
+                            You
+                          </span>
+                        )}
+                      </div>
                       
-                      {provider.skill_description && <p className="text-sm text-gray-600 mt-1">{provider.skill_description}</p>}
+                      {provider.skill_description && (
+                        <p className="text-sm text-gray-600 mb-2">{provider.skill_description}</p>
+                      )}
                       
                       {provider.time_preferences && provider.time_preferences.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-1">
+                        <div 
+                          className="flex items-center gap-2 text-xs px-2 py-1 rounded-md w-fit"
+                          style={{ 
+                            backgroundColor: 'hsl(var(--skills-color) / 0.08)', 
+                            color: 'hsl(var(--skills-color))' 
+                          }}
+                        >
+                          <Clock className="h-3 w-3" />
                           Available: {provider.time_preferences.join(', ')}
-                        </p>
+                        </div>
                       )}
                     </div>
                     
-                    {/* Only show Contact button for other users, not current user */}
+                    {/* Contact Button for other users */}
                     {provider.user_id !== user?.id && (
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="border-green-500 text-green-600 hover:bg-green-50"
+                        className="flex-shrink-0"
+                        style={{ 
+                          borderColor: 'hsl(var(--skills-color))', 
+                          color: 'hsl(var(--skills-color))' 
+                        }}
                         onClick={() => handleContactClick(provider.user_id)}
                       >
                         {revealedContactId === provider.user_id ? 'Hide Contact' : 'Contact'}
@@ -262,24 +368,28 @@ const SkillSheetContent = ({
                     )}
                   </div>
                   
-                  {/* Contact info display - only for other users */}
+                  {/* Contact Info Display */}
                   {provider.user_id !== user?.id && (
-                    <ContactMethodDisplay 
-                      provider={provider} 
-                      isRevealed={revealedContactId === provider.user_id} 
-                    />
+                    <div className="mt-3">
+                      <ContactMethodDisplay 
+                        provider={provider} 
+                        isRevealed={revealedContactId === provider.user_id} 
+                      />
+                    </div>
                   )}
                 </div>
               ))}
-            </div>}
+            </div>
+          )}
         </div>
       </div>
       
-      {/* Request Skill Sheet - Opens when user clicks "Request This Skill" */}
+      {/* Request Skill Sheet */}
       <SkillRequestSheet 
         open={isRequestSheetOpen}
         onOpenChange={setIsRequestSheetOpen}
       />
-    </SheetContent>;
+    </SheetContent>
+  );
 };
 export default SkillSheetContent;
