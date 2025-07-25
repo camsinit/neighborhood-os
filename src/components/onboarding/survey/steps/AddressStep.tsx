@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Address Step Component
@@ -49,12 +51,27 @@ export const AddressStep = ({
   useEffect(() => {
     validateAddress(address);
   }, [address, touched]);
-  return <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="address">Home Address</Label>
-        <Input id="address" value={address} onChange={e => onAddressChange(e.target.value)} onBlur={handleAddressBlur} className={error ? "border-red-500" : ""} required />
-        {error && <p className="text-sm text-red-500">{error}</p>}
-        
+  return (
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="address">Home Address</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                <p className="text-sm">
+                  Only neighborhood admins have access to your address and it won't be shared publicly.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <Input id="address" value={address} onChange={e => onAddressChange(e.target.value)} onBlur={handleAddressBlur} className={error ? "border-red-500" : ""} required />
+          {error && <p className="text-sm text-red-500">{error}</p>}
+        </div>
       </div>
-    </div>;
+    </TooltipProvider>
+  );
 };
