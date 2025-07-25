@@ -55,25 +55,33 @@ export const highlightTitleContent = (
     contentMatch = title.match(commentedPattern);
   }
   
-  // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session")
+  // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session", "confirmed: Session Title")
   if (!contentMatch) {
-    const colonPattern = /:\s*([^:]+)$/;
+    const colonPattern = /:\s*(.+)$/;
     contentMatch = title.match(colonPattern);
   }
   
-  // Pattern 4: Quoted content (e.g., "John is offering "Lawn Mower"")
+  // Pattern 4: Text inside quotes (e.g., "shared 'Community BBQ'")
   if (!contentMatch) {
-    const quotePattern = /"([^"]+)"|'([^']+)'/;
-    contentMatch = title.match(quotePattern);
+    const quotesPattern = /['"`]([^'"`]+)['"`]/;
+    contentMatch = title.match(quotesPattern);
   }
   
-  // Pattern 5: Content after specific verbs
+  // Pattern 5: Text after "is" action words (e.g., "John is hosting Community BBQ", "is offering Help", "is looking for Advice")
   if (!contentMatch) {
-    const verbPattern = /(hosting|offering|requesting|created|shared|confirmed|cancelled)\s+(.+?)(?:\s+(?:event|skill|session|item))?$/i;
-    const verbMatch = title.match(verbPattern);
-    
-    if (verbMatch && verbMatch[2]) {
-      contentMatch = [verbMatch[0], verbMatch[2]];
+    const isPattern = /\bis\s+(hosting|offering|sharing|looking\s+for|attending)\s+(.+)$/i;
+    const isMatch = title.match(isPattern);
+    if (isMatch) {
+      contentMatch = [isMatch[0], isMatch[2]]; // Extract just the content part
+    }
+  }
+  
+  // Pattern 6: Action-based patterns (e.g., "updated: Title", "cancelled: Session", "rescheduled: Meeting")
+  if (!contentMatch) {
+    const actionPattern = /\b(updated|cancelled|rescheduled|confirmed|created|shared|posted):\s*(.+)$/i;
+    const actionMatch = title.match(actionPattern);
+    if (actionMatch) {
+      contentMatch = [actionMatch[0], actionMatch[2]];
     }
   }
   

@@ -33,7 +33,7 @@ interface NotificationPreferences {
       safety_comment: boolean;
       safety_emergency: boolean;
       goods_response: boolean;
-      skill_session_request: boolean;
+      
       weekly_summary: boolean;
     };
     digest_settings: {
@@ -94,7 +94,7 @@ export const NotificationSettingsTab: React.FC = () => {
         safety_comment: false,
         safety_emergency: true,
         goods_response: false,
-        skill_session_request: false,
+        
         weekly_summary: true
       },
       digest_settings: {
@@ -300,13 +300,13 @@ export const NotificationSettingsTab: React.FC = () => {
     {
       key: 'skills_sharing',
       title: 'Skills Sharing',
-      description: 'When someone requests help with your offered skills',
+      description: 'When someone is interested in your skills or posts new skill requests',
       hasInApp: true,
       hasEmail: true,
       inAppChecked: preferences.in_app.page_specific.skills,
-      emailChecked: preferences.email.types.skill_session_request,
+      emailChecked: preferences.email.types.goods_response, // Reuse existing email type for now
       onInAppChange: (value: boolean) => updatePageSpecific('skills', value),
-      onEmailChange: (value: boolean) => updateEmailType('skill_session_request', value)
+      onEmailChange: (value: boolean) => updateEmailType('goods_response', value)
     },
     {
       key: 'neighbor_activity',

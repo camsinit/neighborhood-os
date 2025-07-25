@@ -59,50 +59,39 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone comments on your event'
   },
 
-  // Skills Module  
-  skill_session_request: {
-    id: 'skill_session_request',
-    template: '{{actor}} is interested in your {{title}} skill',
-    contentType: 'skills',
-    notificationType: 'skills',
-    actionType: 'respond',
-    actionLabel: 'View Interest',
-    relevanceScore: 3, // High - direct request
-    description: 'When someone is interested in a skill you offer'
-  },
-
-
-  skill_session_cancelled: {
-    id: 'skill_session_cancelled',
-    template: '{{actor}} cancelled the {{title}} session',
-    contentType: 'skill_sessions',
-    notificationType: 'skills',
-    actionType: 'view',
-    actionLabel: 'View Details',
-    relevanceScore: 2, // Medium - need to know but not urgent
-    description: 'When your skill session is cancelled'
-  },
+  // Skills Module
 
   skill_offered: {
     id: 'skill_offered',
     template: '{{actor}} is offering {{title}}',
     contentType: 'skills',
     notificationType: 'skills',
-    actionType: 'view',
-    actionLabel: 'View Skill',
-    relevanceScore: 1, // Low - general interest
+    actionType: 'learn',
+    actionLabel: 'Learn More',
+    relevanceScore: 2, // Medium - might be useful
     description: 'When someone offers a new skill in your neighborhood'
   },
 
   skill_requested: {
     id: 'skill_requested',
-    template: '{{actor}} is looking to learn {{title}}',
+    template: '{{actor}} is looking for help with {{title}}',
+    contentType: 'skills',
+    notificationType: 'skills',
+    actionType: 'help',
+    actionLabel: 'Offer Help',
+    relevanceScore: 2, // Medium - you might be able to help
+    description: 'When someone requests help with a skill you might have'
+  },
+
+  skill_interest: {
+    id: 'skill_interest',
+    template: '{{actor}} is interested in your {{title}} skill',
     contentType: 'skills',
     notificationType: 'skills',
     actionType: 'respond',
-    actionLabel: 'Help Out',
-    relevanceScore: 2, // Medium - you might be able to help
-    description: 'When someone requests to learn a skill you might offer'
+    actionLabel: 'Respond',
+    relevanceScore: 3, // High - direct interest in your skill
+    description: 'When someone expresses interest in a skill you offer'
   },
 
   // Goods Module
@@ -196,39 +185,6 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone new joins the neighborhood'
   },
 
-  // Care/Support Module
-  care_offered: {
-    id: 'care_offered',
-    template: '{{actor}} is offering {{title}}',
-    contentType: 'care',
-    notificationType: 'care',
-    actionType: 'view',
-    actionLabel: 'View Offer',
-    relevanceScore: 1, // Low - general community support
-    description: 'When someone offers care or support in your neighborhood'
-  },
-
-  care_requested: {
-    id: 'care_requested',
-    template: '{{actor}} is looking for {{title}}',
-    contentType: 'care',
-    notificationType: 'care',
-    actionType: 'respond',
-    actionLabel: 'Help Out',
-    relevanceScore: 2, // Medium - you might be able to help
-    description: 'When someone requests care or support you might provide'
-  },
-
-  care_response: {
-    id: 'care_response',
-    template: '{{actor}} can help with your {{title}} request',
-    contentType: 'care',
-    notificationType: 'care',
-    actionType: 'respond',
-    actionLabel: 'View Response',
-    relevanceScore: 3, // High - direct help offered
-    description: 'When someone responds to your care request'
-  }
 };
 
 /**
