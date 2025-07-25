@@ -9,7 +9,7 @@ export const safetyUpdateSchema = z.object({
     message: "Description must be at least 3 characters.",
   }),
   // Updated to use neighborhood update categories
-  type: z.enum(["Housing/Rentals", "Suspicious Activity", "Ideas & Inspiration"], {
+  type: z.enum(["Housing/Rentals", "Suspicious Activity", "Ideas & Inspiration", "Break-in", "Emergency", "Question"], {
     required_error: "Please select a type.",
   }),
   imageUrl: z.string().optional(),
@@ -21,6 +21,9 @@ export type SafetyUpdateFormData = z.infer<typeof safetyUpdateSchema>;
 export const SAFETY_UPDATE_TYPES = [
   { value: "Housing/Rentals", label: "Housing/Rentals" },
   { value: "Suspicious Activity", label: "Suspicious Activity" },
-  { value: "Ideas & Inspiration", label: "Ideas & Inspiration" }
+  { value: "Ideas & Inspiration", label: "Ideas & Inspiration" },
+  { value: "Break-in", label: "Break-in" },
+  { value: "Emergency", label: "Emergency" },
+  { value: "Question", label: "Question" }
 ];
 
