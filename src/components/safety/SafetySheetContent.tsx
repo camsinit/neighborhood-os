@@ -367,7 +367,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
 
         {/* Content section with improved styling */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
+          <div className="px-6 pb-6 space-y-6">
 
             {/* Image section */}
             {update.image_url && (
