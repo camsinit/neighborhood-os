@@ -180,7 +180,7 @@ export function ImageField({ form }: ImageFieldProps) {
                       <>
                         <Image className="w-8 h-8 mb-2 text-gray-500" />
                         <p className="text-sm text-gray-500">
-                          <span className="font-medium">Click to upload</span> or drag and drop
+                          <span className="font-medium">Click to upload</span>
                         </p>
                         <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
                       </>
