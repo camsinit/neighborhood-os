@@ -44,9 +44,19 @@ export const ProfileImageStep = ({
       return;
     }
 
+    // Clear existing image states before setting new image
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setCroppedImage(null);
+
     // Store original image and open crop dialog
     setOriginalImage(file);
     setShowCropDialog(true);
+
+    // Clear the input value so the same file can be selected again if needed
+    event.target.value = '';
   };
 
   // Handle crop completion
