@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SafetyUpdateForm from "./safety/SafetyUpdateForm";
 import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
+import SkillRequestSheet from "./skills/SkillRequestSheet";
 import { Sheet, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AppSheetContent } from "@/components/ui/app-sheet-content";
 import GoodsForm from "./goods/GoodsForm";
@@ -35,6 +36,7 @@ const QuickActions = () => {
   const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
   const [isGoodsSheetOpen, setIsGoodsSheetOpen] = useState(false);
   const [isSkillSheetOpen, setIsSkillSheetOpen] = useState(false);
+  const [isSkillRequestSheetOpen, setIsSkillRequestSheetOpen] = useState(false);
   const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   
   // Event-specific state for neighborhood timezone
@@ -100,8 +102,8 @@ const QuickActions = () => {
     icon: HelpCircle,
     label: "Request a skill",
     onClick: () => {
-      console.log('[QuickActions] Opening skills sheet for requesting');
-      setIsSkillSheetOpen(true);
+      console.log('[QuickActions] Opening skill request sheet');
+      setIsSkillRequestSheetOpen(true);
     },
     moduleTheme: 'skills' as const
   }];
@@ -269,6 +271,12 @@ const QuickActions = () => {
           </div>
         </AppSheetContent>
       </Sheet>
+      
+      {/* Skill Request Sheet - Uses the same SkillRequestSheet component from Skills page */}
+      <SkillRequestSheet 
+        open={isSkillRequestSheetOpen}
+        onOpenChange={setIsSkillRequestSheetOpen}
+      />
     </div>;
 };
 
