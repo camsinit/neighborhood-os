@@ -44,6 +44,22 @@
   100% { transform: scale(1); }
 }
 
+/* Scale-in animation for popover entrance */
+.scale-in {
+  animation: scale-in-entrance 0.4s ease-out;
+}
+
+@keyframes scale-in-entrance {
+  0% { 
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Notification-specific animations */
 .notification-enter {
   opacity: 0;

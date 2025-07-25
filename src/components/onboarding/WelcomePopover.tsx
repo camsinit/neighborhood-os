@@ -87,7 +87,7 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
       >
         {/* Welcome popover card - enhanced entrance animation */}
         <div 
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative scale-animation"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative scale-in"
           style={{ 
             animationDelay: '0.2s',
             animationDuration: '0.4s',
