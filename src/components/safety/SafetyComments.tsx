@@ -340,16 +340,6 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Header with comment count */}
-      <div className="flex items-center gap-2">
-        <MessageSquare className="h-5 w-5 text-gray-600" />
-        <h3 className="font-semibold text-lg text-gray-900">
-          Comments {comments.length > 0 && (
-            <span className="text-sm font-normal text-gray-500">
-              ({comments.length})
-            </span>
-          )}
-        </h3>
-      </div>
 
       {/* Comments List */}
       <div className="space-y-3">
