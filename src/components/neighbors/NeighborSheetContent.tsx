@@ -52,14 +52,6 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
 
   return (
     <SheetContent className="sm:max-w-md overflow-y-auto">
-      <SheetHeader className="mb-4">
-        <SheetTitle className="text-xl font-bold flex justify-between items-start">
-          <span>{neighbor.profiles?.display_name || 'Neighbor'}</span>
-          <div className="flex items-center gap-2">
-            {/* Share functionality could be added here if needed */}
-          </div>
-        </SheetTitle>
-      </SheetHeader>
 
       <div className="space-y-6">
         {/* Enhanced Profile Section with Purple Accents */}
