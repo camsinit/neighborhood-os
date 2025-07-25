@@ -371,7 +371,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
             <div className="max-w-sm mx-auto">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Be the first to comment
+                Be the first to comment!
               </p>
               <div className="w-24 h-1 bg-gray-200 rounded-full mx-auto"></div>
             </div>
