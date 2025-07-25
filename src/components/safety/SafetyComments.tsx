@@ -279,7 +279,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               <p className="text-sm text-gray-500 mb-4">
                 Be the first to comment!
               </p>
-              <div className="w-24 h-1 bg-gray-200 rounded-full mx-auto"></div>
+              
             </div>
           </div> : comments.map(comment => <CommentItem key={comment.id} comment={comment} onEdit={handleEditComment} onDelete={handleDeleteComment} isEditing={editingCommentId === comment.id} isOwner={user?.id === comment.user_id} isUpdating={updateCommentMutation.isPending} isDeleting={deleteCommentMutation.isPending} />)}
       </div>
