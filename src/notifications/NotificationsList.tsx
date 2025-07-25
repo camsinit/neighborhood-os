@@ -134,17 +134,16 @@ export function NotificationsList() {
             }
           })()}
           
-          {/* View Archive button - only show if not viewing archive and there are current notifications */}
+          {/* View Archive - small icon with text */}
           {!showArchived && notifications.length > 0 && (
             <div className="flex justify-center pt-4">
-              <Button 
-                variant="outline" 
+              <button 
                 onClick={handleViewArchive}
-                className="w-full max-w-[200px]"
+                className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
               >
-                <Archive className="h-4 w-4 mr-2" />
-                View Archive
-              </Button>
+                <Archive className="h-4 w-4" />
+                <span className="text-sm">View Archive</span>
+              </button>
             </div>
           )}
         </div>
