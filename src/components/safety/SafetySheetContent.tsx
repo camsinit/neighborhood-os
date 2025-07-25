@@ -289,16 +289,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                           You
                         </span>
                       )}
-                      {/* Safety Reporter badge */}
-                      <span 
-                        className="px-2 py-0.5 text-xs font-medium rounded-full"
-                        style={{ 
-                          backgroundColor: safetyTheme.primary, 
-                          color: 'white' 
-                        }}
-                      >
-                        Safety Reporter
-                      </span>
                     </div>
                     
                     {/* Reporting Date - moved to top right */}
