@@ -192,47 +192,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
             background: `linear-gradient(135deg, ${safetyTheme.primary}08 0%, ${safetyTheme.primary}03 50%, white 100%)`
           }}
         >
-          {/* Top actions bar */}
-          <div className="flex items-center justify-between mb-4">
-            <Badge 
-              variant="outline" 
-              className="bg-red-100 text-red-800 border-red-200 font-medium border"
-            >
-              <TypeIcon className="w-3 h-3 mr-1.5" />
-              {typeConfig.label}
-            </Badge>
-            
-            {user?.id === update.user_id && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditMode(true)}
-                  className="text-gray-600 hover:text-gray-800 h-8 px-3"
-                >
-                  <Edit className="w-4 h-4 mr-1" />
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="text-red-600 hover:text-red-800 h-8 px-3"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Title */}
-          <h1 className="text-xl font-bold text-gray-900 mb-4 leading-tight">
-            {update.title}
-          </h1>
-
-          {/* Enhanced author section with comprehensive neighbor information - similar to neighbor directory */}
+          {/* Enhanced author section with comprehensive neighbor information */}
           <div 
             className="p-6 rounded-xl border-2"
             style={{
@@ -240,47 +200,86 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               borderColor: `${safetyTheme.primary}20`
             }}
           >
-            {/* Dynamic Layout: Avatar + Info Side by Side */}
-            <div className="flex items-start gap-6">
-              {/* Avatar Section */}
+            {/* Title and Badge Row */}
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <Badge 
+                    variant="outline" 
+                    className="bg-red-100 text-red-800 border-red-200 font-medium border"
+                  >
+                    <TypeIcon className="w-3 h-3 mr-1.5" />
+                    {typeConfig.label}
+                  </Badge>
+                  
+                  {/* Action buttons for owner */}
+                  {user?.id === update.user_id && (
+                    <div className="flex items-center gap-2 ml-auto">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditMode(true)}
+                        className="text-gray-600 hover:text-gray-800 h-8 px-3"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="text-red-600 hover:text-red-800 h-8 px-3"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        {isDeleting ? "Deleting..." : "Delete"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                  {update.title}
+                </h1>
+              </div>
+            </div>
+
+            {/* Compact Author Info Layout */}
+            <div className="flex items-start gap-4">
+              {/* Smaller Avatar Section */}
               <div className="flex-shrink-0">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
+                  <Avatar className="h-12 w-12 border-2 border-white shadow-md">
                     <AvatarImage src={update.profiles?.avatar_url || ''} />
                     <AvatarFallback 
-                      className="text-lg"
+                      className="text-sm"
                       style={{ backgroundColor: `${safetyTheme.primary}15`, color: safetyTheme.primary }}
                     >
-                      <User className="h-6 w-6" />
+                      <User className="h-4 w-4" />
                     </AvatarFallback>
                   </Avatar>
-                  {/* Safety indicator dot */}
+                  {/* Safety indicator dot - smaller */}
                   <div 
-                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center"
+                    className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border border-white flex items-center justify-center"
                     style={{ backgroundColor: safetyTheme.primary }}
                   >
-                    <Shield className="w-3 h-3 text-white" />
+                    <Shield className="w-2 h-2 text-white" />
                   </div>
-                  {/* Safety accent ring */}
-                  <div 
-                    className="absolute inset-0 rounded-full border-2 opacity-20"
-                    style={{ borderColor: safetyTheme.primary }}
-                  />
                 </div>
               </div>
 
-              {/* Comprehensive Info Section */}
+              {/* Compact Info Section */}
               <div className="flex-1 min-w-0">
-                <div className="space-y-3">
-                  {/* Name, badges, and reported time - top row */}
+                <div className="space-y-2">
+                  {/* Name, You badge, and Timestamp in one row */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-xl font-bold text-gray-900">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-lg font-bold text-gray-900">
                         {update.profiles?.display_name || 'Anonymous'}
                       </h3>
                       {isCurrentUser && (
                         <span 
-                          className="text-sm font-medium px-2 py-1 rounded-full"
+                          className="text-xs font-medium px-2 py-0.5 rounded-full"
                           style={{ 
                             backgroundColor: `${safetyTheme.primary}15`, 
                             color: safetyTheme.primary 
@@ -291,9 +290,9 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                       )}
                     </div>
                     
-                    {/* Reporting Date - moved to top right */}
-                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
-                      <Calendar className="h-4 w-4" />
+                    {/* Timestamp - top right */}
+                    <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0">
+                      <Calendar className="h-3.5 w-3.5" />
                       <span>{formatTimeAgo(new Date(update.created_at))}</span>
                     </div>
                   </div>
