@@ -204,7 +204,7 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
       
       {/* Activity content with enhanced interactivity - vertically centered with icon */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between h-full">
           <div className="text-sm">
             {/* For neighbor activities, display as-is */}
             {(activity.activity_type === 'neighbor_joined' || activity.activity_type === 'profile_updated') ? (
