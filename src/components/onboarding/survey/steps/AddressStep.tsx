@@ -66,7 +66,7 @@ export const AddressStep = ({
         />
         {error && <p className="text-sm text-red-500">{error}</p>}
         <p className="text-sm text-muted-foreground">
-          Your address will only be visible to Neighborhood Admins for emergency purposes.
+          Your address will only be visible to neighborhood admins
         </p>
       </div>
     </div>
