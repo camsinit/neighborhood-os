@@ -77,7 +77,7 @@ function GoodsPage() {
   return (
     <>
       <ModuleLayout
-        title="Freebies & Exchanges"
+        title="Freebies"
         description="Share items with your neighbors or find what you need"
         themeColor="goods"
       >
