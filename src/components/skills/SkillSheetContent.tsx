@@ -288,16 +288,16 @@ const SkillSheetContent = ({
               {providers.map(provider => (
                 <div 
                   key={provider.user_id} 
-                  className="rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md"
+                  className="rounded-lg border p-3 transition-all duration-200 hover:shadow-md group"
                   style={{ 
                     backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
                     borderColor: 'hsl(var(--skills-color) / 0.1)' 
                   }}
                 >
-                  {/* Provider Header */}
-                  <div className="flex items-start gap-4">
-                    <div className="relative">
-                      <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                  {/* Compact Provider Layout */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="h-10 w-10 border border-white shadow-sm">
                         <AvatarImage src={provider.user_profiles?.avatar_url || undefined} />
                         <AvatarFallback 
                           style={{ 
@@ -308,21 +308,16 @@ const SkillSheetContent = ({
                           {provider.user_profiles?.display_name?.[0] || '?'}
                         </AvatarFallback>
                       </Avatar>
-                      {/* Skills accent ring */}
-                      <div 
-                        className="absolute inset-0 rounded-full border-2 opacity-20"
-                        style={{ borderColor: 'hsl(var(--skills-color))' }}
-                      />
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-gray-900">
+                        <h4 className="font-medium text-gray-900 text-sm">
                           {provider.user_profiles?.display_name || 'Anonymous'}
                         </h4>
                         {provider.user_id === user?.id && (
                           <span 
-                            className="text-xs font-medium px-2 py-1 rounded-full"
+                            className="text-xs font-medium px-1.5 py-0.5 rounded-full"
                             style={{ 
                               backgroundColor: 'hsl(var(--skills-color) / 0.15)', 
                               color: 'hsl(var(--skills-color))' 
@@ -331,23 +326,22 @@ const SkillSheetContent = ({
                             You
                           </span>
                         )}
+                        {provider.time_preferences && provider.time_preferences.length > 0 && (
+                          <div 
+                            className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-md ml-auto"
+                            style={{ 
+                              backgroundColor: 'hsl(var(--skills-color) / 0.08)', 
+                              color: 'hsl(var(--skills-color))' 
+                            }}
+                          >
+                            <Clock className="h-3 w-3" />
+                            {provider.time_preferences.join(', ')}
+                          </div>
+                        )}
                       </div>
                       
                       {provider.skill_description && (
-                        <p className="text-sm text-gray-600 mb-2">{provider.skill_description}</p>
-                      )}
-                      
-                      {provider.time_preferences && provider.time_preferences.length > 0 && (
-                        <div 
-                          className="flex items-center gap-2 text-xs px-2 py-1 rounded-md w-fit"
-                          style={{ 
-                            backgroundColor: 'hsl(var(--skills-color) / 0.08)', 
-                            color: 'hsl(var(--skills-color))' 
-                          }}
-                        >
-                          <Clock className="h-3 w-3" />
-                          Available: {provider.time_preferences.join(', ')}
-                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed">{provider.skill_description}</p>
                       )}
                     </div>
                     
@@ -356,24 +350,24 @@ const SkillSheetContent = ({
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-shrink-0"
+                        className="flex-shrink-0 text-xs h-8"
                         style={{ 
                           borderColor: 'hsl(var(--skills-color))', 
                           color: 'hsl(var(--skills-color))' 
                         }}
                         onClick={() => handleContactClick(provider.user_id)}
                       >
-                        {revealedContactId === provider.user_id ? 'Hide Contact' : 'Contact'}
+                        {revealedContactId === provider.user_id ? 'Hide' : 'Contact'}
                       </Button>
                     )}
                   </div>
                   
                   {/* Contact Info Display */}
-                  {provider.user_id !== user?.id && (
-                    <div className="mt-3">
+                  {provider.user_id !== user?.id && revealedContactId === provider.user_id && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
                       <ContactMethodDisplay 
                         provider={provider} 
-                        isRevealed={revealedContactId === provider.user_id} 
+                        isRevealed={true} 
                       />
                     </div>
                   )}
