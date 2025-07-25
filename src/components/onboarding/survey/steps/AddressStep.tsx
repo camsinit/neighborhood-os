@@ -54,7 +54,7 @@ export const AddressStep = ({
         <Label htmlFor="address">Home Address</Label>
         <Input id="address" value={address} onChange={e => onAddressChange(e.target.value)} onBlur={handleAddressBlur} className={error ? "border-red-500" : ""} required />
         {error && <p className="text-sm text-red-500">{error}</p>}
-        <p className="text-sm text-muted-foreground">Your address will only be visible to neighborhood admins</p>
+        
       </div>
     </div>;
 };
