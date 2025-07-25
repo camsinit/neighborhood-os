@@ -365,7 +365,7 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
               className="absolute w-0.5" 
               style={{ 
                 backgroundColor: 'hsl(var(--neighbors-color) / 0.2)',
-                left: '19px', // Precisely centered on 40px wide icons (20px - 0.5px for line width)
+                left: '28px', // Accounting for px-2 padding (8px) + icon center (20px) = 28px
                 top: '20px', // Start from center of first icon
                 height: `calc(100% - 3rem)` // Extends from first icon to near the last icon
               }}
