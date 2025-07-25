@@ -25,6 +25,29 @@ import { HighlightableItemType } from '@/utils/highlight/types';
 import { getActivityColor } from '@/components/activity/utils/activityHelpers';
 
 /**
+ * Format time distance in a short, concise format
+ * Examples: "2m", "5hr", "3d", "2w", "1mo", "2yr"
+ */
+const formatShortTimeDistance = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+
+  if (diffMinutes < 1) return 'now';
+  if (diffMinutes < 60) return `${diffMinutes}m`;
+  if (diffHours < 24) return `${diffHours}hr`;
+  if (diffDays < 7) return `${diffDays}d`;
+  if (diffWeeks < 4) return `${diffWeeks}w`;
+  if (diffMonths < 12) return `${diffMonths}mo`;
+  return `${diffYears}yr`;
+};
+
+/**
  * Props for the NeighborActivityTimeline component
  */
 interface NeighborActivityTimelineProps {
@@ -221,7 +244,7 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
           </div>
           <div className="flex items-center text-xs text-gray-500">
             <Clock className="w-3 h-3 mr-1" />
-            {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+            {formatShortTimeDistance(new Date(activity.created_at))}
           </div>
         </div>
         
