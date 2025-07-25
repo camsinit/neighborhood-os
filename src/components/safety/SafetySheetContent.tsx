@@ -237,50 +237,49 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               {/* Comprehensive Info Section */}
               <div className="flex-1 min-w-0">
                 <div className="space-y-3">
-                  {/* Name and You Badge */}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h3 className="text-xl font-bold text-gray-900">
-                      {update.profiles?.display_name || 'Anonymous'}
-                    </h3>
-                    {isCurrentUser && (
+                  {/* Name, badges, and reported time - top row */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        {update.profiles?.display_name || 'Anonymous'}
+                      </h3>
+                      {isCurrentUser && (
+                        <span 
+                          className="text-sm font-medium px-2 py-1 rounded-full"
+                          style={{ 
+                            backgroundColor: `${safetyTheme.primary}15`, 
+                            color: safetyTheme.primary 
+                          }}
+                        >
+                          You
+                        </span>
+                      )}
+                      {/* Safety Reporter badge */}
                       <span 
-                        className="text-sm font-medium px-2 py-1 rounded-full"
+                        className="px-2 py-0.5 text-xs font-medium rounded-full"
                         style={{ 
-                          backgroundColor: `${safetyTheme.primary}15`, 
-                          color: safetyTheme.primary 
+                          backgroundColor: safetyTheme.primary, 
+                          color: 'white' 
                         }}
                       >
-                        You
+                        Safety Reporter
                       </span>
-                    )}
-                    {/* Safety Reporter badge */}
-                    <span 
-                      className="px-2 py-0.5 text-xs font-medium rounded-full"
-                      style={{ 
-                        backgroundColor: safetyTheme.primary, 
-                        color: 'white' 
-                      }}
-                    >
-                      Safety Reporter
-                    </span>
-                  </div>
-                  
-                  {/* Metadata Row */}
-                  <div className="flex items-center gap-4 flex-wrap text-sm">
-                    {/* Reporting Date */}
-                    <div className="flex items-center gap-2 text-gray-600">
+                    </div>
+                    
+                    {/* Reporting Date - moved to top right */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
                       <Calendar className="h-4 w-4" />
                       <span>Reported {formatDistanceToNow(new Date(update.created_at))} ago</span>
                     </div>
-
-                    {/* Location if available */}
-                    {update.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-gray-500" />
-                        <span className="text-gray-600 truncate text-sm">{update.location}</span>
-                      </div>
-                    )}
                   </div>
+                  
+                  {/* Location metadata - simplified */}
+                  {update.location && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                      <span className="text-gray-600 truncate">{update.location}</span>
+                    </div>
+                  )}
 
                   {/* Contact Information - Show if neighbor has made it visible */}
                   {(update.profiles?.email_visible || update.profiles?.phone_visible || update.profiles?.address_visible) && (
