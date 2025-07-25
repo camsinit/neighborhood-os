@@ -48,6 +48,17 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone creates a new event in your neighborhood'
   },
 
+  event_comment: {
+    id: 'event_comment',
+    template: '{{actor}} commented on your {{title}}',
+    contentType: 'events',
+    notificationType: 'event',
+    actionType: 'view',
+    actionLabel: 'View Comment',
+    relevanceScore: 2, // Medium - follow-up on your content
+    description: 'When someone comments on your event'
+  },
+
   // Skills Module  
   skill_session_request: {
     id: 'skill_session_request',

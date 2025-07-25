@@ -43,10 +43,16 @@ export const highlightTitleContent = (
   const toPattern = /\s+to\s+(.+?)(?:\s+(?:event|skill|session))?$/i;
   contentMatch = title.match(toPattern);
   
-  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill")
+  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill", "commented on your Event Title")
   if (!contentMatch) {
-    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request))?$/i;
+    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request|report|event|about))?$/i;
     contentMatch = title.match(yourPattern);
+  }
+  
+  // Pattern 2a: Special case for "commented on your [title] about" format
+  if (!contentMatch) {
+    const commentedPattern = /commented on your (.+?) about/i;
+    contentMatch = title.match(commentedPattern);
   }
   
   // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session")
