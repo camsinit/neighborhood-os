@@ -207,8 +207,8 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
   
   return (
     <div 
-      className={`relative flex items-center space-x-3 py-2 ${
-        isClickable ? 'cursor-pointer hover:bg-gray-50/50 rounded-lg p-2 -m-2 transition-colors hover:border hover:border-gray-200' : 'hover:border hover:border-gray-200 rounded-lg p-2 -m-2 transition-colors'
+      className={`relative flex items-center space-x-3 py-2 px-2 rounded-lg transition-all duration-200 ${
+        isClickable ? 'cursor-pointer hover:bg-gray-50/50 hover:shadow-sm' : 'hover:shadow-sm'
       }`}
       onClick={isClickable ? handleItemClick : undefined}
       data-neighbor-activity-id={activity.id}
