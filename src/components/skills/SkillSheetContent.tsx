@@ -223,39 +223,6 @@ const SkillSheetContent = ({
           </div>
         </div>
 
-        {/* Action Buttons Section */}
-        <div className="space-y-3">
-          <h3 
-            className="font-semibold text-lg flex items-center gap-2"
-            style={{ color: 'hsl(var(--skills-color))' }}
-          >
-            <Lightbulb className="w-5 h-5" />
-            Quick Actions
-          </h3>
-          
-          <div className="space-y-2">
-            {!userHasSkill ? (
-              <ModuleButton 
-                onClick={handleAddSkill} 
-                moduleTheme="skills"
-                variant="filled"
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                I have this skill too!
-              </ModuleButton>
-            ) : (
-              <Button 
-                onClick={handleRemoveSkill} 
-                variant="outline" 
-                className="w-full flex items-center justify-center gap-2 border-red-500 text-red-600 hover:bg-red-50"
-              >
-                Remove myself from this skill
-              </Button>
-            )}
-          </div>
-        </div>
-
         {/* Skill Providers Section */}
         <div>
           <h3 
