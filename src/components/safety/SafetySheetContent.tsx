@@ -196,7 +196,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
           <div className="flex items-center justify-between mb-4">
             <Badge 
               variant="outline" 
-              className={`${typeConfig.color} font-medium border`}
+              className="bg-red-100 text-red-800 border-red-200 font-medium border"
             >
               <TypeIcon className="w-3 h-3 mr-1.5" />
               {typeConfig.label}
