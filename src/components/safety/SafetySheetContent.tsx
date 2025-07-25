@@ -406,7 +406,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               </div>
             )}
 
-            <Separator className="my-6" />
+            
 
             {/* Comments section */}
             <div className="space-y-4">
