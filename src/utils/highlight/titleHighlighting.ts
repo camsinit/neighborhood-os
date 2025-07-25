@@ -43,9 +43,9 @@ export const highlightTitleContent = (
   const toPattern = /\s+to\s+(.+?)(?:\s+(?:event|skill|session))?$/i;
   contentMatch = title.match(toPattern);
   
-  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill")
+  // Pattern 2: Text after "your" (e.g., "interested in your Cooking skill", "commented on your Safety Update")
   if (!contentMatch) {
-    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request))?$/i;
+    const yourPattern = /\s+your\s+(.+?)(?:\s+(?:skill|session|request|report))?$/i;
     contentMatch = title.match(yourPattern);
   }
   

@@ -131,7 +131,7 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
   // Safety Module
   safety_comment: {
     id: 'safety_comment',
-    template: '{{actor}} commented on your {{title}} report',
+    template: '{{actor}} commented on your {{title}}',
     contentType: 'safety',
     notificationType: 'safety',
     actionType: 'view',
