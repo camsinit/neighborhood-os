@@ -19,7 +19,7 @@
 
 /* Input field styling to match chat input */
 .input-chat-style {
-  @apply rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200;
+  @apply rounded-lg border border-gray-200 focus:border-primary focus:outline-none transition-all duration-200;
 }
 
 /* Button styling inspired by chat interaction buttons */
