@@ -198,18 +198,6 @@ const SkillSheetContent = ({
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          {/* Request Skill button - Always visible for users who don't have the skill */}
-          {!userHasSkill && (
-            <Button 
-              onClick={() => setIsRequestSheetOpen(true)}
-              variant="outline"
-              className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Request This Skill
-            </Button>
-          )}
-          
           {/* Have this skill / Remove skill buttons */}
           {!userHasSkill ? (
             <ModuleButton 
