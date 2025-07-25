@@ -294,7 +294,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                     {/* Reporting Date - moved to top right */}
                     <div className="flex items-center gap-2 text-sm text-gray-600 flex-shrink-0">
                       <Calendar className="h-4 w-4" />
-                      <span>Reported {formatTimeAgo(new Date(update.created_at))} ago</span>
+                      <span>{formatTimeAgo(new Date(update.created_at))}</span>
                     </div>
                   </div>
                   
