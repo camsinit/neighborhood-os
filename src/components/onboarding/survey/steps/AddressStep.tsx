@@ -56,7 +56,7 @@ export const AddressStep = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label htmlFor="address">Home Address</Label>
+            <Label htmlFor="address">Home Address *</Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
