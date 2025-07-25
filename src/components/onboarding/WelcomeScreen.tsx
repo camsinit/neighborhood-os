@@ -56,10 +56,10 @@ export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
 
   return (
     <div className="relative">
-      {/* Full-screen confetti canvas */}
+      {/* Full-screen confetti canvas - positioned behind the welcome card */}
       <Confetti
         ref={confettiRef}
-        className="fixed inset-0 pointer-events-none z-50"
+        className="fixed inset-0 pointer-events-none z-10"
         manualstart={true}
         options={{
           particleCount: 100,
@@ -68,8 +68,9 @@ export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
         }}
       />
       
-      {/* Minimalist welcome content */}
-      <div className="text-center space-y-6 relative z-20 p-6">
+      {/* Welcome card with semi-transparent background - positioned above confetti but below overlay */}
+      <div className="fixed inset-0 flex items-center justify-center z-20 p-6">
+        <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-xl max-w-md w-full p-8 text-center space-y-6">
         {/* Simple welcome title */}
         <div className="space-y-3">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -82,16 +83,17 @@ export const WelcomeScreen = ({ onGetStarted }: WelcomeScreenProps) => {
           </p>
         </div>
 
-        {/* Clean action button */}
-        <div className="pt-4">
-          <Button 
-            onClick={onGetStarted}
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
-          >
-            <Sparkles className="mr-2 h-4 w-4" />
-            Get Started
-          </Button>
+          {/* Clean action button */}
+          <div className="pt-4">
+            <Button 
+              onClick={onGetStarted}
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Get Started
+            </Button>
+          </div>
         </div>
       </div>
     </div>
