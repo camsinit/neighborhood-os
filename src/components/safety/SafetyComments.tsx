@@ -321,7 +321,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               
               <div className="flex-1 space-y-3">
                 <Textarea
-                  placeholder="Share a comment"
+                  placeholder="Have something to contribute? Share here (thoughtfully & considerately, of course!)"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="min-h-[100px] resize-none"
