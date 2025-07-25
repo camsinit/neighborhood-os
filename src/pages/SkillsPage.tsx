@@ -1,32 +1,30 @@
 
 import React, { useState } from 'react';
-import { useSkillsPageState } from '@/hooks/useSkillsPageState';
+import { useSearchParams } from 'react-router-dom';
 import { 
   createTabChangeHandler,
   createCategoryClickHandler,
   createBackToCategoriesHandler,
   getTypedCategory,
-  createSkillAddedHandler,
-  createSkillsOnboardingCompleteHandler
+  createSkillAddedHandler
 } from '@/utils/skillsPageHandlers';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SkillsPageContent from '@/components/skills/SkillsPageContent';
 import SkillsSidePanelSelector from '@/components/skills/SkillsSidePanelSelector';
-import SkillRequestSheet from '@/components/skills/SkillRequestSheet'; // NEW: Import skill request sheet
 import { Sheet, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AppSheetContent } from '@/components/ui/app-sheet-content';
+import SkillSheetContent from '@/components/skills/SkillSheetContent';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
+import { usePageSheetController } from '@/hooks/usePageSheetController';
+import { fetchSkillByTitle } from '@/services/skills/skillFetcher';
 
 /**
  * SkillsPage - Main page component for the Skills Exchange
  * 
- * This component implements a "contribute to view" approach where users must complete
- * skills onboarding before viewing neighborhood skills. Shows a blur overlay with
- * onboarding dialog until the user shares their own skills.
- * 
- * Now uses Sheet for adding skills (consistent with other pages).
+ * Now uses unified sheet system for URL-based navigation and deep linking.
+ * Simplified state management using usePageSheetController like NeighborsPage.
  */
 function SkillsPage() {
   // Get skills onboarding state and refresh function
@@ -37,19 +35,30 @@ function SkillsPage() {
     refreshOnboardingStatus
   } = useSkillsOnboarding();
 
-  // Get all state and derived values from custom hook
+  // URL search parameters for view, category, and search
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get current view from URL params (offers, requests, mine)
+  const view = searchParams.get('view') || 'offers';
+  // Get selected category from URL params
+  const category = searchParams.get('category');
+  // Get search query from URL params
+  const searchQuery = searchParams.get('search') || '';
+  
+  // Local state for skill add dialog
+  const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
+
+  // Universal page controller for skill sheet management
   const {
-    view,
-    category,
-    searchQuery,
-    searchParams,
-    setSearchParams,
-    isSkillDialogOpen,
-    setIsSkillDialogOpen,
-    isSkillRequestSheetOpen,        // NEW: Include skill request sheet state
-    setIsSkillRequestSheetOpen,     // NEW: Include skill request sheet setter
-    searchInputRef
-  } = useSkillsPageState();
+    isSheetOpen,
+    sheetItem,
+    openSheet,
+    closeSheet
+  } = usePageSheetController({
+    contentType: 'skills',
+    fetchItem: fetchSkillByTitle,
+    pageName: 'SkillsPage'
+  });
 
   // Create handler functions using the utility factory functions
   const handleTabChange = createTabChangeHandler(setSearchParams, searchParams);
@@ -103,14 +112,12 @@ function SkillsPage() {
             category={category}
             searchQuery={searchQuery}
             searchParams={searchParams}
-            searchInputRef={searchInputRef}
             handleTabChange={handleTabChange}
             handleCategoryClick={handleCategoryClick}
             handleBackToCategories={handleBackToCategories}
             getTypedCategory={getTypedCategory}
             setSearchParams={setSearchParams}
             setIsSkillDialogOpen={setIsSkillDialogOpen}
-            setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen} // NEW: Pass skill request sheet handler
           />
         </div>
       </ModuleLayout>
@@ -134,11 +141,16 @@ function SkillsPage() {
         </AppSheetContent>
       </Sheet>
 
-      {/* NEW: Sheet for requesting skills */}
-      <SkillRequestSheet 
-        open={isSkillRequestSheetOpen} 
-        onOpenChange={setIsSkillRequestSheetOpen} 
-      />
+      {/* Universal sheet for skill details */}
+      {isSheetOpen && sheetItem && (
+        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+          <SkillSheetContent 
+            skillTitle={sheetItem.title}
+            skillCategory={sheetItem.category}
+            onOpenChange={closeSheet}
+          />
+        </Sheet>
+      )}
     </SkillsProvider>
   );
 }

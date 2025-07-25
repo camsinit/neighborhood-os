@@ -11,14 +11,12 @@ interface SkillsPageContentProps {
   category: string | null;
   searchQuery: string;
   searchParams: URLSearchParams;
-  searchInputRef: React.RefObject<HTMLInputElement>;
   handleTabChange: (value: string) => void;
   handleCategoryClick: (selectedCategory: SkillCategory) => void;
   handleBackToCategories: () => void;
   getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
   setSearchParams: (searchParams: URLSearchParams) => void;
   setIsSkillDialogOpen: (open: boolean) => void;
-  setIsSkillRequestSheetOpen: (open: boolean) => void; // NEW: Add skill request sheet handler
 }
 
 const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
@@ -26,14 +24,12 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
   category,
   searchQuery,
   searchParams,
-  searchInputRef,
   handleTabChange,
   handleCategoryClick,
   handleBackToCategories,
   getTypedCategory,
   setSearchParams,
-  setIsSkillDialogOpen,
-  setIsSkillRequestSheetOpen // NEW: Destructure skill request sheet handler
+  setIsSkillDialogOpen
 }) => {
   return (
     <div className="space-y-6">
@@ -55,11 +51,9 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
             view={view}
             searchQuery={searchQuery}
             searchParams={searchParams}
-            searchInputRef={searchInputRef}
             handleTabChange={handleTabChange}
             setSearchParams={setSearchParams}
             setIsSkillDialogOpen={setIsSkillDialogOpen}
-            setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen} // NEW: Pass skill request handler
           />
 
           {/* Show different content based on the selected view */}
