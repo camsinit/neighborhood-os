@@ -77,7 +77,7 @@ export const BasicInvitationEmail = ({
         </Text>
         
         <Text style={text}>
-          Ready to see what your neighbors are up to?
+          Ready to connect with your neighbors?
         </Text>
         
         <Link href={inviteUrl} style={ctaButton}>
