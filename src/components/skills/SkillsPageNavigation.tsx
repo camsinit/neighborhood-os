@@ -21,6 +21,8 @@ interface SkillsPageNavigationProps {
   handleTabChange: (value: string) => void;
   setSearchParams: (params: URLSearchParams) => void;
   setIsSkillDialogOpen: (open: boolean) => void;
+  // Function to open the skill request sheet
+  setIsSkillRequestSheetOpen?: (open: boolean) => void;
 }
 
 const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
@@ -29,7 +31,8 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
   searchParams,
   handleTabChange,
   setSearchParams,
-  setIsSkillDialogOpen
+  setIsSkillDialogOpen,
+  setIsSkillRequestSheetOpen
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between">
@@ -75,7 +78,19 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
       
       {/* Action buttons section */}
       <div className="flex gap-2 shrink-0">
-        {/* Add Skill button */}
+        {/* Request Skill button - allows users to request help from neighbors */}
+        {setIsSkillRequestSheetOpen && (
+          <Button 
+            variant="outline"
+            className="whitespace-nowrap flex items-center gap-1.5 border-blue-500 text-blue-600 hover:bg-blue-50"
+            onClick={() => setIsSkillRequestSheetOpen(true)}
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span>Request</span>
+          </Button>
+        )}
+        
+        {/* Add Skill button - allows users to offer skills to neighbors */}
         <Button 
           className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
           onClick={() => setIsSkillDialogOpen(true)}

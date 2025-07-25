@@ -14,6 +14,7 @@ import SkillsSidePanelSelector from '@/components/skills/SkillsSidePanelSelector
 import { Sheet, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AppSheetContent } from '@/components/ui/app-sheet-content';
 import SkillSheetContent from '@/components/skills/SkillSheetContent';
+import SkillRequestSheet from '@/components/skills/SkillRequestSheet';
 import { SkillsProvider } from '@/contexts/SkillsContext';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
@@ -47,6 +48,8 @@ function SkillsPage() {
   
   // Local state for skill add dialog
   const [isSkillDialogOpen, setIsSkillDialogOpen] = useState(false);
+  // Local state for skill request sheet
+  const [isSkillRequestSheetOpen, setIsSkillRequestSheetOpen] = useState(false);
 
   // Universal page controller for skill sheet management
   const {
@@ -118,6 +121,7 @@ function SkillsPage() {
             getTypedCategory={getTypedCategory}
             setSearchParams={setSearchParams}
             setIsSkillDialogOpen={setIsSkillDialogOpen}
+            setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen}
           />
         </div>
       </ModuleLayout>
@@ -140,6 +144,12 @@ function SkillsPage() {
           </div>
         </AppSheetContent>
       </Sheet>
+
+      {/* Skill Request Sheet - For requesting help from neighbors */}
+      <SkillRequestSheet 
+        open={isSkillRequestSheetOpen}
+        onOpenChange={setIsSkillRequestSheetOpen}
+      />
 
       {/* Universal sheet for skill details */}
       {isSheetOpen && sheetItem && (

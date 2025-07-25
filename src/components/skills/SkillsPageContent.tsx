@@ -17,6 +17,8 @@ interface SkillsPageContentProps {
   getTypedCategory: (categoryString: string | null) => SkillCategory | undefined;
   setSearchParams: (searchParams: URLSearchParams) => void;
   setIsSkillDialogOpen: (open: boolean) => void;
+  // Function to open the skill request sheet
+  setIsSkillRequestSheetOpen?: (open: boolean) => void;
 }
 
 const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
@@ -29,7 +31,8 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
   handleBackToCategories,
   getTypedCategory,
   setSearchParams,
-  setIsSkillDialogOpen
+  setIsSkillDialogOpen,
+  setIsSkillRequestSheetOpen
 }) => {
   return (
     <div className="space-y-6">
@@ -54,6 +57,7 @@ const SkillsPageContent: React.FC<SkillsPageContentProps> = ({
             handleTabChange={handleTabChange}
             setSearchParams={setSearchParams}
             setIsSkillDialogOpen={setIsSkillDialogOpen}
+            setIsSkillRequestSheetOpen={setIsSkillRequestSheetOpen}
           />
 
           {/* Show different content based on the selected view */}
