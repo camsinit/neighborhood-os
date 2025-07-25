@@ -26,7 +26,7 @@ export const SafetyTypeField = ({ form }: SafetyTypeFieldProps) => {
           <FormControl>
             <ToggleGroup 
               type="single" 
-              value={field.value}  
+              value={field.value || ""}  // Handle undefined values
               onValueChange={(value) => value && field.onChange(value)}
               className="flex flex-wrap gap-2 justify-start"
             >

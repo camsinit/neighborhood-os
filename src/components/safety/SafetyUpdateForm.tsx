@@ -29,7 +29,7 @@ export default function SafetyUpdateForm({ onSuccess, existingData, updateId }: 
     defaultValues: {
       title: existingData?.title || "",
       description: existingData?.description || "",
-      type: existingData?.type || "Housing/Rentals", // Set Housing/Rentals as default
+      type: existingData?.type, // No default type selected
       imageUrl: existingData?.imageUrl || "", // Include imageUrl in default values
     },
   });
