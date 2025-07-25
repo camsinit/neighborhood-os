@@ -194,12 +194,17 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
         >
           {/* Enhanced author section with comprehensive neighbor information */}
           <div 
-            className="p-6 rounded-xl border-2"
+            className="p-6 rounded-xl border-2 relative"
             style={{
               background: `linear-gradient(135deg, ${safetyTheme.primary}08 0%, ${safetyTheme.primary}03 50%, white 100%)`,
               borderColor: `${safetyTheme.primary}20`
             }}
           >
+            {/* Timestamp in top right corner */}
+            <div className="absolute top-4 right-4 flex items-center gap-1 text-sm text-gray-600">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{formatTimeAgo(new Date(update.created_at))}</span>
+            </div>
             {/* Title and Action buttons row */}
             <div className="flex items-start justify-between gap-4 mb-3">
               <h1 className="text-xl font-bold text-gray-900 leading-tight flex-1">
@@ -270,30 +275,22 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               {/* Compact Info Section */}
               <div className="flex-1 min-w-0">
                 <div className="space-y-2">
-                  {/* Name, You badge, and Timestamp in one row */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {update.profiles?.display_name || 'Anonymous'}
-                      </h3>
-                      {isCurrentUser && (
-                        <span 
-                          className="text-xs font-medium px-2 py-0.5 rounded-full"
-                          style={{ 
-                            backgroundColor: `${safetyTheme.primary}15`, 
-                            color: safetyTheme.primary 
-                          }}
-                        >
-                          You
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Timestamp - top right */}
-                    <div className="flex items-center gap-1 text-sm text-gray-600 flex-shrink-0">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{formatTimeAgo(new Date(update.created_at))}</span>
-                    </div>
+                  {/* Name and You badge - simplified */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {update.profiles?.display_name || 'Anonymous'}
+                    </h3>
+                    {isCurrentUser && (
+                      <span 
+                        className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{ 
+                          backgroundColor: `${safetyTheme.primary}15`, 
+                          color: safetyTheme.primary 
+                        }}
+                      >
+                        You
+                      </span>
+                    )}
                   </div>
                   
                   {/* Location metadata - simplified */}
