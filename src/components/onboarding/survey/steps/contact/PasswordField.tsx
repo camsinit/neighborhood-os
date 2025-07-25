@@ -64,17 +64,11 @@ export const PasswordField = ({
         
         {/* Password strength indicator with dropdown overlay */}
         {password && (
-          <div className="space-y-3">
-            <Progress 
-              value={validation.score} 
-              className="h-2"
-            />
             <PasswordRequirementsOverlay 
               validation={validation}
               getStrengthColor={getStrengthColor}
               getStrengthLabel={getStrengthLabel}
             />
-          </div>
         )}
 
       </div>
