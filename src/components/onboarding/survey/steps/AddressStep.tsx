@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Address Step Component
@@ -26,6 +25,9 @@ export const AddressStep = ({
 
   // Track if field has been touched by the user to prevent immediate error display
   const [touched, setTouched] = useState(false);
+
+  // Track if info message is visible when info button is clicked
+  const [showInfo, setShowInfo] = useState(false);
 
   // Validate address and notify parent
   const validateAddress = (value: string) => {
@@ -52,26 +54,28 @@ export const AddressStep = ({
     validateAddress(address);
   }, [address, touched]);
   return (
-    <TooltipProvider>
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="address">Home Address *</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help hover:text-foreground transition-colors" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                <p className="text-sm">
-                  Only neighborhood admins have access to your address and it won't be shared publicly.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <Input id="address" value={address} onChange={e => onAddressChange(e.target.value)} onBlur={handleAddressBlur} className={error ? "border-red-500" : ""} required />
-          {error && <p className="text-sm text-red-500">{error}</p>}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="address">Home Address *</Label>
+          <button
+            type="button"
+            onClick={() => setShowInfo(!showInfo)}
+            className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+          >
+            <Info className="h-4 w-4" />
+          </button>
         </div>
+        {showInfo && (
+          <div className="bg-muted p-3 rounded-md border">
+            <p className="text-sm text-muted-foreground">
+              Only neighborhood admins have access to your address and it won't be shared publicly.
+            </p>
+          </div>
+        )}
+        <Input id="address" value={address} onChange={e => onAddressChange(e.target.value)} onBlur={handleAddressBlur} className={error ? "border-red-500" : ""} required />
+        {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
