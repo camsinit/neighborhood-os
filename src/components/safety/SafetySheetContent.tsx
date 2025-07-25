@@ -370,7 +370,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                   {/* Description section integrated into author card */}
                   {update.description && (
                     <div className="mt-4 space-y-2">
-                      <h4 className="font-medium text-gray-900 text-sm">Description</h4>
+                      
                       <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
                         {update.description}
                       </p>
