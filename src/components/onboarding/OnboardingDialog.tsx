@@ -60,7 +60,6 @@ const OnboardingDialog = ({
     console.log("[OnboardingDialog] Form data:", formData);
     
     try {
-      
       console.log("[OnboardingDialog] Starting unified onboarding submission");
       // Unified onboarding flow - creates account and sets up profile
       const success = await submitForm(formData);
@@ -73,8 +72,14 @@ const OnboardingDialog = ({
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Don't navigate here - let the survey dialog show the welcome screen first
-        // Navigation will happen when the user clicks "Get Started" on the welcome screen
+        // Set a flag in localStorage to show the welcome popover on the home page
+        localStorage.setItem('showWelcomePopover', 'true');
+        
+        // Close the onboarding dialog
+        onOpenChange(false);
+        
+        // Navigate directly to home page where the welcome popover will appear
+        navigate("/home");
       }
       // Error handling is done in the submit function
     } catch (error: any) {
@@ -88,22 +93,11 @@ const OnboardingDialog = ({
     }
   };
   
-  // Handle the final completion when user clicks "Get Started" on welcome screen
-  // This is called after the welcome screen with confetti
-  const handleWelcomeComplete = () => {
-    console.log("[OnboardingDialog] Welcome screen completed, navigating to home");
-    
-    // Close dialog and navigate to home
-    onOpenChange(false);
-    navigate("/home");
-  };
-  
   return (
     <SurveyDialog 
       open={open} 
       onOpenChange={onOpenChange} 
       onComplete={handleOnboardingComplete} 
-      onWelcomeComplete={handleWelcomeComplete}
       submissionState={submissionState}
     />
   );

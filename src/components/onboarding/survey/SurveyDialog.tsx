@@ -4,7 +4,7 @@ import { SurveyProgress } from "./SurveyProgress";
 import { SurveyStepRenderer } from "./SurveyStepRenderer";
 import { SurveyNavigation } from "./SurveyNavigation";
 import { useSurveyState } from "./hooks/useSurveyState";
-import { WelcomeScreen } from "../WelcomeScreen";
+
 import { useState, useEffect } from "react";
 import { FormSubmissionState } from "./types/surveyTypes";
 import { Progress } from "@/components/ui/progress";
@@ -25,7 +25,6 @@ interface SurveyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onComplete?: (formData: any) => void;
-  onWelcomeComplete?: () => void; // Called when user clicks "Get Started" on welcome screen
   submissionState?: FormSubmissionState;
 }
 
@@ -42,13 +41,11 @@ const SurveyDialog = ({
   open,
   onOpenChange,
   onComplete,
-  onWelcomeComplete,
   submissionState,
 }: SurveyDialogProps) => {
   const user = useUser();
   
-  // Track if survey is completed and showing welcome screen
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
+  // Track initialization state
   const [isInitialized, setIsInitialized] = useState(false);
   
   // Use custom hook for survey state management
@@ -78,21 +75,11 @@ const SurveyDialog = ({
   // Get unified steps for all users
   const steps = getSteps();
   
-  // Handle survey completion - pass form data to completion handler
+  // Handle survey completion - pass form data to completion handler and close dialog
   const handleSurveyComplete = () => {
+    console.log("[SurveyDialog] Survey completed, calling onComplete");
     // Pass form data to completion handler immediately
     onComplete?.(formData);
-    setShowWelcomeScreen(true);
-  };
-  
-  // Handle final completion when user clicks "Get Started" from welcome screen
-  const handleFinalComplete = () => {
-    // Call the parent's welcome completion handler to trigger navigation
-    onWelcomeComplete?.();
-    
-    // Then handle the local state cleanup
-    setShowWelcomeScreen(false);
-    onOpenChange(false);
   };
   
   // Handle dialog close request
@@ -111,17 +98,6 @@ const SurveyDialog = ({
       onOpenChange(open);
     }
   };
-  
-  // Show welcome screen after survey completion
-  if (showWelcomeScreen) {
-    return (
-      <Dialog open={open} onOpenChange={handleCloseRequest}>
-        <DialogContent className="sm:max-w-[500px]" hideCloseButton>
-          <WelcomeScreen onGetStarted={handleFinalComplete} />
-        </DialogContent>
-      </Dialog>
-    );
-  }
   
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
