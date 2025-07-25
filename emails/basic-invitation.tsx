@@ -89,7 +89,7 @@ export const BasicInvitationEmail = ({
         </Text>
         
         <Text style={signOff}>
-          Welcome to the neighborhood,<br />
+          Welcome to neighborhoodOS,<br />
           The {fromName} Team
         </Text>
         
