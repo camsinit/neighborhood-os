@@ -194,7 +194,7 @@ const ModuleLayout = ({
       </div>
 
       {/* Skills onboarding overlay with full onboarding flow */}
-      {isOverlayVisible && <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
+      {isOverlayVisible && <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6 bg-black/30">
           <Card className="w-[600px] max-h-[90vh] overflow-y-auto pointer-events-auto">
             
             
