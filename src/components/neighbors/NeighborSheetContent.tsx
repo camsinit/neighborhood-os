@@ -154,27 +154,6 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
             </div>
           </div>
 
-          {/* Bio Section - Now integrated within the same card */}
-          {neighbor.profiles?.bio && (
-            <div className="border-t pt-4 mt-6" style={{ borderColor: 'hsl(var(--neighbors-color) / 0.1)' }}>
-              <h4 
-                className="font-semibold text-base mb-3 flex items-center gap-2"
-                style={{ color: 'hsl(var(--neighbors-color))' }}
-              >
-                <User className="w-4 h-4" />
-                About
-              </h4>
-              <div 
-                className="p-4 rounded-lg border"
-                style={{ 
-                  backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
-                  borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
-                }}
-              >
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">{neighbor.profiles.bio}</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Activity Timeline */}
