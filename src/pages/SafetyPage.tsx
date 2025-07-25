@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import SafetyUpdates from '@/components/SafetyUpdates';
@@ -18,8 +17,10 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
  * Now uses Sheet for adding new safety updates (consistent with other pages).
  */
 function SafetyPage() {
-  const { data: safetyUpdates } = useSafetyUpdates();
-  
+  const {
+    data: safetyUpdates
+  } = useSafetyUpdates();
+
   // Universal page controller for sheet management (viewing existing updates)
   const {
     isSheetOpen,
@@ -33,54 +34,36 @@ function SafetyPage() {
     },
     pageName: 'SafetyPage'
   });
-  
+
   // State for add update sheet
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
-  
-  return (
-    <>
-      <ModuleLayout
-        title="Updates"
-        description="Stay informed about safety in your community"
-        themeColor="safety"
-      >
-        <div 
-          className="backdrop-blur-sm rounded-lg p-6 shadow-lg border"
-          style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderColor: moduleThemeColors.safety.primary + '40',
-            boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
-          }}
-        >
+  return <>
+      <ModuleLayout title="Updates" description="Stay informed about safety in your community" themeColor="safety">
+        <div className="backdrop-blur-sm rounded-lg p-6 shadow-lg border" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: moduleThemeColors.safety.primary + '40',
+        boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.safety.primary}10`
+      }}>
           <SafetyUpdates onAddUpdate={() => setIsAddSheetOpen(true)} />
         </div>
       </ModuleLayout>
 
       {/* Sheet for viewing existing updates */}
-      {isSheetOpen && sheetItem && (
-        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
+      {isSheetOpen && sheetItem && <Sheet open={isSheetOpen} onOpenChange={open => !open && closeSheet()}>
           <SafetySheetContent update={sheetItem} onOpenChange={closeSheet} />
-        </Sheet>
-      )}
+        </Sheet>}
 
       {/* Sheet for adding new safety updates - consistent with other pages */}
       <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-        <AppSheetContent 
-          side="right" 
-          moduleTheme="safety"
-        >
+        <AppSheetContent side="right" moduleTheme="safety">
           <SheetHeader>
-            <SheetTitle className="text-lg font-semibold">
-              Share Safety Update
-            </SheetTitle>
+            <SheetTitle className="text-lg font-semibold">Share Update</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
             <SafetyUpdateForm onSuccess={() => setIsAddSheetOpen(false)} />
           </div>
         </AppSheetContent>
       </Sheet>
-    </>
-  );
+    </>;
 }
-
 export default SafetyPage;
