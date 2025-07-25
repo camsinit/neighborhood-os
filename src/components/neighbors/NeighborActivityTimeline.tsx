@@ -362,9 +362,9 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
           {/* Continuous timeline line positioned behind all icons - perfectly centered */}
           {activities.length > 1 && (
             <div 
-              className="absolute w-0.5" 
+              className="absolute w-0.5 border-l-2 border-dotted" 
               style={{ 
-                backgroundColor: 'hsl(var(--neighbors-color) / 0.2)',
+                borderColor: 'hsl(var(--neighbors-color) / 0.2)',
                 left: '28px', // Accounting for px-2 padding (8px) + icon center (20px) = 28px
                 top: '20px', // Start from center of first icon
                 height: `calc(100% - 3rem)` // Extends from first icon to near the last icon
