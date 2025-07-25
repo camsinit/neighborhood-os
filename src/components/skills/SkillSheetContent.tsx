@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import ModuleButton from "@/components/ui/module-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy } from "lucide-react";
+import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -345,8 +345,8 @@ const SkillSheetContent = ({
                       )}
                     </div>
                     
-                    {/* Contact Button for other users */}
-                    {provider.user_id !== user?.id && (
+                    {/* Action buttons - Contact for others, Remove for current user */}
+                    {provider.user_id !== user?.id ? (
                       <Button 
                         size="sm" 
                         variant="outline" 
@@ -358,6 +358,20 @@ const SkillSheetContent = ({
                         onClick={() => handleContactClick(provider.user_id)}
                       >
                         {revealedContactId === provider.user_id ? 'Hide' : 'Contact'}
+                      </Button>
+                    ) : (
+                      /* Green trash icon for current user to remove their skill */
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="flex-shrink-0 h-8 w-8 p-0 hover:bg-red-50"
+                        style={{ 
+                          color: 'hsl(var(--skills-color))' 
+                        }}
+                        onClick={handleRemoveSkill}
+                        title="Remove this skill"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
