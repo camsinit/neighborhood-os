@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Clock, Edit, Trash2, Shield, MapPin, Calendar } from 'lucide-react';
+import { AlertTriangle, Clock, Edit, Trash2, Shield, MapPin, Calendar, User, Mail, Phone } from 'lucide-react';
 import SafetyUpdateForm from './SafetyUpdateForm';
 import SafetyComments from './SafetyComments';
 import { formatDistanceToNow } from 'date-fns';
@@ -99,6 +99,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
 
   const typeConfig = getSafetyTypeConfig(update.type);
   const TypeIcon = typeConfig.icon;
+  const isCurrentUser = user?.id === update.user_id;
 
   /**
    * Render edit mode form
@@ -197,62 +198,152 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
             {update.title}
           </h1>
 
-          {/* Enhanced author section with themed styling - matches neighbor directory pattern */}
+          {/* Enhanced author section with comprehensive neighbor information - similar to neighbor directory */}
           <div 
-            className="flex items-center gap-3 p-4 rounded-xl border"
+            className="p-6 rounded-xl border-2"
             style={{
-              backgroundColor: `${safetyTheme.primary}05`,
+              background: `linear-gradient(135deg, ${safetyTheme.primary}08 0%, ${safetyTheme.primary}03 50%, white 100%)`,
               borderColor: `${safetyTheme.primary}20`
             }}
           >
-            <div className="relative">
-              <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                <AvatarImage 
-                  src={update.profiles?.avatar_url || ''} 
-                  alt={update.profiles?.display_name || 'User'} 
-                />
-                <AvatarFallback 
-                  className="text-sm font-semibold"
-                  style={{ backgroundColor: `${safetyTheme.primary}15`, color: safetyTheme.primary }}
-                >
-                  {(update.profiles?.display_name || 'U')[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Safety indicator dot */}
-              <div 
-                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center"
-                style={{ backgroundColor: safetyTheme.primary }}
-              >
-                <Shield className="w-2.5 h-2.5 text-white" />
-              </div>
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900 truncate">
-                  {update.profiles?.display_name || 'Anonymous'}
-                </h3>
-                <span 
-                  className="px-2 py-0.5 text-xs font-medium rounded-full"
-                  style={{ 
-                    backgroundColor: `${safetyTheme.primary}15`, 
-                    color: safetyTheme.primary 
-                  }}
-                >
-                  Safety Reporter
-                </span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>{formatDistanceToNow(new Date(update.created_at))} ago</span>
-                </div>
-                {update.location && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="truncate">{update.location}</span>
+            {/* Dynamic Layout: Avatar + Info Side by Side */}
+            <div className="flex items-start gap-6">
+              {/* Avatar Section */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
+                    <AvatarImage src={update.profiles?.avatar_url || ''} />
+                    <AvatarFallback 
+                      className="text-lg"
+                      style={{ backgroundColor: `${safetyTheme.primary}15`, color: safetyTheme.primary }}
+                    >
+                      <User className="h-6 w-6" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Safety indicator dot */}
+                  <div 
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center"
+                    style={{ backgroundColor: safetyTheme.primary }}
+                  >
+                    <Shield className="w-3 h-3 text-white" />
                   </div>
-                )}
+                  {/* Safety accent ring */}
+                  <div 
+                    className="absolute inset-0 rounded-full border-2 opacity-20"
+                    style={{ borderColor: safetyTheme.primary }}
+                  />
+                </div>
+              </div>
+
+              {/* Comprehensive Info Section */}
+              <div className="flex-1 min-w-0">
+                <div className="space-y-3">
+                  {/* Name and You Badge */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {update.profiles?.display_name || 'Anonymous'}
+                    </h3>
+                    {isCurrentUser && (
+                      <span 
+                        className="text-sm font-medium px-2 py-1 rounded-full"
+                        style={{ 
+                          backgroundColor: `${safetyTheme.primary}15`, 
+                          color: safetyTheme.primary 
+                        }}
+                      >
+                        You
+                      </span>
+                    )}
+                    {/* Safety Reporter badge */}
+                    <span 
+                      className="px-2 py-0.5 text-xs font-medium rounded-full"
+                      style={{ 
+                        backgroundColor: safetyTheme.primary, 
+                        color: 'white' 
+                      }}
+                    >
+                      Safety Reporter
+                    </span>
+                  </div>
+                  
+                  {/* Metadata Row */}
+                  <div className="flex items-center gap-4 flex-wrap text-sm">
+                    {/* Reporting Date */}
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span>Reported {formatDistanceToNow(new Date(update.created_at))} ago</span>
+                    </div>
+
+                    {/* Location if available */}
+                    {update.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-gray-500" />
+                        <span className="text-gray-600 truncate text-sm">{update.location}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Contact Information - Show if neighbor has made it visible */}
+                  {(update.profiles?.email_visible || update.profiles?.phone_visible || update.profiles?.address_visible) && (
+                    <div className="space-y-2">
+                      {/* Email if visible */}
+                      {update.profiles?.email_visible && update.profiles?.email && (
+                        <div 
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
+                          style={{ 
+                            backgroundColor: `${safetyTheme.primary}05`, 
+                            color: safetyTheme.primary 
+                          }}
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          <span className="truncate">{update.profiles.email}</span>
+                        </div>
+                      )}
+                      
+                      {/* Phone if visible */}
+                      {update.profiles?.phone_visible && update.profiles?.phone_number && (
+                        <div 
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
+                          style={{ 
+                            backgroundColor: `${safetyTheme.primary}05`, 
+                            color: safetyTheme.primary 
+                          }}
+                        >
+                          <Phone className="h-3.5 w-3.5" />
+                          <span>{update.profiles.phone_number}</span>
+                        </div>
+                      )}
+
+                      {/* Address if visible */}
+                      {update.profiles?.address_visible && update.profiles?.address && (
+                        <div 
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
+                          style={{ 
+                            backgroundColor: `${safetyTheme.primary}05`, 
+                            color: safetyTheme.primary 
+                          }}
+                        >
+                          <MapPin className="h-3.5 w-3.5" />
+                          <span className="truncate">{update.profiles.address}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Years lived here - prominent safety badge */}
+                  {update.profiles?.years_lived_here && (
+                    <div 
+                      className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium w-fit"
+                      style={{ 
+                        backgroundColor: safetyTheme.primary, 
+                        color: 'white' 
+                      }}
+                    >
+                      <Shield className="h-4 w-4" />
+                      {update.profiles.years_lived_here} {update.profiles.years_lived_here === 1 ? 'year' : 'years'} in neighborhood
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
