@@ -1,18 +1,12 @@
 
-import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "@/components/ui/share-button";
 import EventForm from "../events/EventForm";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Calendar } from "lucide-react";
-import { 
-  EnhancedSheetContent, 
-  ProfileCard, 
-  SectionHeader, 
-  ContentSection 
-} from "@/components/ui/enhanced-sheet-content";
+import { Edit, Trash } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -148,61 +142,48 @@ const EventSheetContent = ({
     </Button>
   );
 
-  // Prepare event metadata for ProfileCard
-  const eventMetadata = [
-    {
-      icon: Calendar,
-      text: format(parseISO(event.time), 'MMM dd, yyyy'),
-      prominent: true
-    }
-  ];
-
-  // Prepare actions for the profile card
-  const eventActions = (
-    <div className="flex items-center gap-2">
-      {!isEditing && (
-        <ShareButton
-          contentType="events"
-          contentId={event.id}
-          neighborhoodId={event.neighborhood_id}
-          size="sm"
-          variant="ghost"
-        />
-      )}
-      {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
-       (isHost && !isEditing && (
-         <Button
-           variant="ghost"
-           size="sm"
-           onClick={() => setIsEditing(true)}
-           className="text-foreground"
-         >
-           <Edit className="h-4 w-4 mr-2" />
-           Edit
-         </Button>
-       ))}
-      {isEditing && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsEditing(false)}
-        >
-          Cancel
-        </Button>
-      )}
-    </div>
-  );
-
   return (
     <>
-      {isEditing ? (
-        <SheetContent className="sm:max-w-md overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="text-xl font-bold flex justify-between items-start">
-              <span>Edit Event</span>
-              {eventActions}
-            </SheetTitle>
-          </SheetHeader>
+      <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetHeader className="mb-4">
+          <SheetTitle className="text-xl font-bold flex justify-between items-start">
+            <span>{isEditing ? "Edit Event" : event.title}</span>
+            <div className="flex items-center gap-2">
+              {!isEditing && (
+                <ShareButton
+                  contentType="events"
+                  contentId={event.id}
+                  neighborhoodId={event.neighborhood_id}
+                  size="sm"
+                  variant="ghost"
+                />
+              )}
+              {(EditButton && <EditButton onSheetClose={handleSheetClose} />) || 
+               (isHost && !isEditing && (
+                 <Button
+                   variant="ghost"
+                   size="sm"
+                   onClick={() => setIsEditing(true)}
+                   className="text-foreground"
+                 >
+                   <Edit className="h-4 w-4 mr-2" />
+                   Edit
+                 </Button>
+               ))}
+              {isEditing && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </SheetTitle>
+        </SheetHeader>
+
+        {isEditing ? (
           <div className="space-y-4">
             <div className="mb-4 text-sm text-muted-foreground">
               All times are in {neighborhoodTimezone.replace('_', ' ')} timezone
@@ -216,68 +197,35 @@ const EventSheetContent = ({
               neighborhoodTimezone={neighborhoodTimezone}
             />
           </div>
-        </SheetContent>
-      ) : (
-        <EnhancedSheetContent moduleTheme="calendar">
-          {/* Enhanced Event Header using standardized ProfileCard */}
-          <ProfileCard
-            name={event.title}
-            avatarUrl={undefined} // Events don't have avatars
-            isCurrentUser={false}
-            metadata={eventMetadata}
-            moduleTheme="calendar"
-          >
-            {/* Event actions in the profile area */}
-            {eventActions}
-          </ProfileCard>
-
-          {/* Event Details Sections */}
-          <div>
-            <SectionHeader
-              title="Event Details"
-              icon={Calendar}
-              moduleTheme="calendar"
+        ) : (
+          <div className="space-y-6">
+            {/* Event details using our new components */}
+            <EventDateTime 
+              date={event.time} 
+              neighborhoodTimezone={neighborhoodTimezone} 
             />
-            <div className="space-y-4">
-              <ContentSection moduleTheme="calendar">
-                <EventDateTime 
-                  date={event.time} 
-                  neighborhoodTimezone={neighborhoodTimezone} 
-                />
-              </ContentSection>
-              
-              <ContentSection moduleTheme="calendar">
-                <EventLocation location={event.location} />
-              </ContentSection>
-              
-              <ContentSection moduleTheme="calendar">
-                <EventHost 
-                  hostName={event.profiles?.display_name} 
-                  isCurrentUserHost={isHost} 
-                />
-              </ContentSection>
-              
-              {event.description && (
-                <ContentSection moduleTheme="calendar">
-                  <EventDescription description={event.description} />
-                </ContentSection>
-              )}
-            </div>
-          </div>
-
-          {/* RSVP Section */}
-          <div>
+            
+            <EventLocation location={event.location} />
+            
+            <EventHost 
+              hostName={event.profiles?.display_name} 
+              isCurrentUserHost={isHost} 
+            />
+            
+            <EventDescription description={event.description} />
+            
+            {/* RSVP button */}
             <EventRSVPButton 
               eventId={event.id} 
               isHost={isHost}
               neighborhoodId={event.neighborhood_id}
             />
+            
+            {/* Attendees section */}
+            <EventAttendeesList eventId={event.id} />
           </div>
-
-          {/* Attendees Section */}
-          <EventAttendeesList eventId={event.id} />
-        </EnhancedSheetContent>
-      )}
+        )}
+      </SheetContent>
 
       {/* Delete confirmation dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
