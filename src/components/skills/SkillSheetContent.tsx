@@ -13,6 +13,7 @@ import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
 import { useSkillProviders, SkillProvider } from "./hooks/useSkillProviders";
 import { ContactMethodDisplay } from "./components/ContactMethodDisplay";
+import SkillRequestSheet from "./SkillRequestSheet";
 
 /**
  * SkillSheetContent - Displays detailed skill information in a side sheet
@@ -39,6 +40,8 @@ const SkillSheetContent = ({
   const [neighborhoodId, setNeighborhoodId] = useState<string>('');
   // Track which provider's contact info is revealed
   const [revealedContactId, setRevealedContactId] = useState<string | null>(null);
+  // State for Request Skill sheet
+  const [isRequestSheetOpen, setIsRequestSheetOpen] = useState(false);
 
   // Use the hook to fetch skill providers with contact info (now includes current user)
   const { data: providers = [], isLoading: loading } = useSkillProviders(skillTitle, skillCategory);
@@ -195,6 +198,19 @@ const SkillSheetContent = ({
 
         {/* Action buttons */}
         <div className="flex gap-3">
+          {/* Request Skill button - Always visible for users who don't have the skill */}
+          {!userHasSkill && (
+            <Button 
+              onClick={() => setIsRequestSheetOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Request This Skill
+            </Button>
+          )}
+          
+          {/* Have this skill / Remove skill buttons */}
           {!userHasSkill ? (
             <ModuleButton 
               onClick={handleAddSkill} 
@@ -270,6 +286,12 @@ const SkillSheetContent = ({
             </div>}
         </div>
       </div>
+      
+      {/* Request Skill Sheet - Opens when user clicks "Request This Skill" */}
+      <SkillRequestSheet 
+        open={isRequestSheetOpen}
+        onOpenChange={setIsRequestSheetOpen}
+      />
     </SheetContent>;
 };
 export default SkillSheetContent;
