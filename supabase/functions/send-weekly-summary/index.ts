@@ -21,6 +21,7 @@ const corsHeaders = {
 interface WeeklySummaryRequest {
   neighborhoodId: string;
   testEmail?: string; // Optional: for testing purposes
+  previewOnly?: boolean; // Optional: for preview mode (returns HTML without sending)
 }
 
 /**
@@ -129,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
-    const { neighborhoodId, testEmail }: WeeklySummaryRequest = await req.json();
+    const { neighborhoodId, testEmail, previewOnly }: WeeklySummaryRequest = await req.json();
     
     // Calculate date range for the past week
     const weekAgo = new Date();
@@ -271,24 +272,46 @@ const handler = async (req: Request): Promise<Response> => {
     const aiContent = await generateAIContent(neighborhood.name, stats, highlights);
     console.log('AI content generated:', aiContent);
 
+    // Generate the email HTML
+    const html = await renderAsync(
+      React.createElement(WeeklySummaryEmail, {
+        neighborhoodName: neighborhood.name,
+        memberName: testEmail ? 'Test User' : 'Neighbor',
+        weekOf,
+        baseUrl: `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}`,
+        stats,
+        highlights,
+        aiContent, // Pass AI-generated content to email template
+      })
+    );
+
+    // If preview mode, return the HTML without sending
+    if (previewOnly) {
+      console.log('Preview mode: returning HTML without sending emails');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          html,
+          stats,
+          highlights,
+          preview: true
+        }), 
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
     // Determine recipients (test email or all members)
     const recipients = testEmail ? [{ email: testEmail, name: 'Test User' }] : memberEmails;
 
     // Send emails
     const emailPromises = recipients.map(async (recipient) => {
       if (!recipient.email) return null;
-
-      const html = await renderAsync(
-        React.createElement(WeeklySummaryEmail, {
-          neighborhoodName: neighborhood.name,
-          memberName: recipient.name,
-          weekOf,
-          baseUrl: `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}`,
-          stats,
-          highlights,
-          aiContent, // Pass AI-generated content to email template
-        })
-      );
 
       return resend.emails.send({
         from: `NeighborhoodOS <weekly@updates.neighborhoodos.com>`,

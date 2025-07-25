@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   Mail, 
   Send, 
@@ -27,7 +28,8 @@ import {
   BookOpen,
   MessageSquare,
   CreditCard,
-  Edit
+  Edit,
+  Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -76,6 +78,11 @@ export const EmailTestingPanel: React.FC = () => {
   
   // State for tracking test results
   const [testResults, setTestResults] = useState<Record<string, EmailTestResult>>({});
+  
+  // State for email preview
+  const [previewHtml, setPreviewHtml] = useState<string>('');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewTitle, setPreviewTitle] = useState<string>('');
   
   // Toast notifications hook
   const { toast } = useToast();
@@ -238,9 +245,8 @@ export const EmailTestingPanel: React.FC = () => {
       category: 'notifications',
       functionName: 'send-weekly-summary',
       sampleData: {
-        recipientEmail: '',
-        neighborhoodName: 'Maple Street Neighborhood',
-        weekOf: new Date().toISOString().split('T')[0]
+        neighborhoodId: 'c0e4e442-74c1-4b34-8388-b19f7b1c6a5d', // Piedmont Ave neighborhood
+        testEmail: '' // Will be filled with the test email
       }
     },
     {
@@ -486,6 +492,82 @@ export const EmailTestingPanel: React.FC = () => {
     }
   };
 
+  /**
+   * Function to preview an email (renders without sending)
+   * 
+   * @param config - Email configuration object
+   */
+  const previewEmail = async (config: EmailConfig) => {
+    // Use saved email for testing, fall back to input if not saved
+    const emailToUse = isEmailSaved ? savedTestEmail : testEmailInput;
+    
+    if (!emailToUse?.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter and save an email address first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Set loading state for this email
+    setLoadingStates(prev => ({ ...prev, [config.id]: true }));
+
+    try {
+      // Prepare the data with the test email and preview flag
+      const emailData = {
+        ...config.sampleData,
+        recipientEmail: emailToUse,
+        email: emailToUse,
+        testEmail: emailToUse,
+        previewOnly: true // Special flag for preview mode
+      };
+
+      console.log(`[EmailTestingPanel] Starting email preview for ${config.name}`);
+      console.log(`[EmailTestingPanel] Preview data:`, emailData);
+
+      // Call the appropriate edge function with preview flag
+      const { data, error } = await supabase.functions.invoke(config.functionName, {
+        body: emailData
+      });
+
+      console.log(`[EmailTestingPanel] Preview response:`, { data, error });
+
+      if (error) {
+        console.error(`[EmailTestingPanel] Preview error:`, error);
+        throw error;
+      }
+
+      if (data?.html) {
+        // Show the rendered HTML in preview modal
+        setPreviewHtml(data.html);
+        setPreviewTitle(config.name);
+        setIsPreviewOpen(true);
+        
+        console.log(`[EmailTestingPanel] ✅ Email preview loaded successfully for ${config.name}`);
+        
+        toast({
+          title: "Preview Ready!",
+          description: `${config.name} preview loaded`,
+        });
+      } else {
+        throw new Error('No HTML content returned from preview');
+      }
+
+    } catch (error: any) {
+      console.error(`[EmailTestingPanel] ❌ Error previewing ${config.name}:`, error);
+      
+      toast({
+        title: "Preview Failed",
+        description: `Failed to preview ${config.name}: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, [config.id]: false }));
+    }
+  };
+
   // Handle saving the email address
   const handleSaveEmail = async () => {
     if (!testEmailInput?.trim()) {
@@ -708,6 +790,24 @@ export const EmailTestingPanel: React.FC = () => {
 
                     {/* Action & Status */}
                     <div className="col-span-2 flex items-center gap-2">
+                      {/* Preview button - only show for weekly summary */}
+                      {config.id === 'weekly-summary' && (
+                        <Button
+                          onClick={() => previewEmail(config)}
+                          disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
+                          size="sm"
+                          variant="ghost"
+                          className="flex items-center gap-1"
+                        >
+                          {loadingStates[config.id] ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Eye className="w-3 h-3" />
+                          )}
+                          Preview
+                        </Button>
+                      )}
+                      
                       <Button
                         onClick={() => sendTestEmail(config)}
                         disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
@@ -808,6 +908,26 @@ export const EmailTestingPanel: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Email Preview Sheet */}
+      <Sheet open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <SheetContent className="w-[80vw] max-w-4xl">
+          <SheetHeader>
+            <SheetTitle>Email Preview: {previewTitle}</SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6 h-[calc(100vh-120px)] overflow-auto border rounded-lg bg-white">
+            {previewHtml && (
+              <iframe
+                srcDoc={previewHtml}
+                className="w-full h-full border-0"
+                title="Email Preview"
+                sandbox="allow-same-origin"
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
