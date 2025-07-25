@@ -273,7 +273,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                   <div className="h-3 bg-gray-200 rounded w-3/4" />
                 </div>
               </div>)}
-          </div> : comments.length === 0 ? <div className="text-center py-4 px-4 border-2 border-dashed border-gray-200 rounded-lg">
+          </div> : comments.length === 0 ? <div className="text-center py-4 px-4 rounded-lg">
             <div className="max-w-sm mx-auto">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No comments yet!</h3>
               <p className="text-sm text-gray-500 mb-4">
