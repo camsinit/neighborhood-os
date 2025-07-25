@@ -328,6 +328,7 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
   // Show empty state or activities
   return (
     <div>
+      {/* Recent Activity heading sits above the container */}
       <h3 
         className="font-semibold text-lg mb-4 flex items-center gap-2"
         style={{ color: 'hsl(var(--neighbors-color))' }}
@@ -336,7 +337,15 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
         Recent Activity
       </h3>
       
-      {!activities || activities.length === 0 ? (
+      {/* Container with matching profile box styling */}
+      <div 
+        className="p-6 rounded-xl border-2"
+        style={{ 
+          background: 'linear-gradient(135deg, hsl(var(--neighbors-light)) 0%, hsl(var(--background)) 100%)',
+          borderColor: 'hsl(var(--neighbors-color) / 0.2)'
+        }}
+      >
+        {!activities || activities.length === 0 ? (
         <div className="text-center py-6">
           <Users 
             className="w-12 h-12 mx-auto mb-3 opacity-30"
@@ -385,6 +394,7 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
           )}
         </div>
       )}
+      </div>
     </div>
   );
 };
