@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { Settings } from "lucide-react";
@@ -18,9 +18,6 @@ import { supabase } from "@/integrations/supabase/client";
 const UserProfileCard = () => {
   // Get current authenticated user from Supabase
   const user = useUser();
-  
-  // Get navigation function for handling clicks
-  const navigate = useNavigate();
   
   // Get current neighborhood context
   const { currentNeighborhood } = useNeighborhood();
@@ -66,19 +63,7 @@ const UserProfileCard = () => {
   };
 
   return (
-    <div 
-      className="p-4 rounded-bl-lg rounded-br-lg shadow border border-border/20 cursor-pointer hover:bg-accent/50 transition-colors"
-      onClick={() => navigate('/settings')}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          navigate('/settings');
-        }
-      }}
-      aria-label="Open user settings"
-    >
+    <div className="p-4 bg-muted/40">
       <div className="flex items-center gap-3">
         {/* User Avatar */}
         <Avatar className="h-10 w-10">

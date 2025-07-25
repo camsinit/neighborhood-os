@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Confetti, ConfettiRef } from "@/components/ui/confetti";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { useNeighborhoodMembers } from "@/hooks/useNeighborhoodMembers";
-import { Sparkles, Users } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 
 /**
  * WelcomePopover component
@@ -21,10 +19,6 @@ interface WelcomePopoverProps {
 export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) => {
   // Get the current neighborhood data for personalized welcome message
   const neighborhood = useCurrentNeighborhood();
-  
-  // Get neighborhood members to show profile photos in the button
-  const { data: members } = useNeighborhoodMembers();
-  
   const confettiRef = useRef<ConfettiRef>(null);
 
   // Trigger confetti effects when component becomes visible
@@ -85,34 +79,32 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
         }}
       />
 
-      {/* Backdrop with blur effect - more white, less gray for better confetti visibility */}
+      {/* Backdrop with blur effect - animated entrance */}
       <div 
-        className="fixed inset-0 bg-white/40 backdrop-blur-sm z-40 flex items-center justify-center p-4 animate-fade-in"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 flex items-center justify-center p-4 animate-fade-in"
         onClick={handleBackdropClick}
         style={{ animationDelay: '0.1s' }}
       >
         {/* Welcome popover card - enhanced entrance animation */}
         <div 
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-scale-in overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative animate-scale-in"
           style={{ 
             animationDelay: '0.2s',
             animationDuration: '0.4s',
             animationFillMode: 'both'
           }}
         >
-          {/* Neighborhood Cover Photo Header */}
-          {neighborhood?.invite_header_image_url && (
-            <div className="w-full h-32 overflow-hidden">
-              <img 
-                src={neighborhood.invite_header_image_url} 
-                alt={`${neighborhood.name} neighborhood`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+          {/* Close button - positioned absolutely in top-right */}
+          <button
+            onClick={onDismiss}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors opacity-60 hover:opacity-100"
+            aria-label="Close welcome message"
+          >
+            <X className="h-5 w-5" />
+          </button>
 
           {/* Welcome content */}
-          <div className="p-8 text-center space-y-6">
+          <div className="text-center space-y-6">
             {/* Welcome title */}
             <div className="space-y-3">
               <h1 className="text-2xl font-bold text-gray-900">
@@ -125,29 +117,15 @@ export const WelcomePopover = ({ isVisible, onDismiss }: WelcomePopoverProps) =>
               </p>
             </div>
 
-            {/* Action button with neighbor avatars */}
+            {/* Action button */}
             <div className="pt-4">
               <Button 
                 onClick={onDismiss}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg flex items-center gap-3"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
               >
-                <Sparkles className="h-4 w-4" />
-                Join your neighbors
-                
-                {/* Overlapping neighbor profile photos */}
-                {members && members.length > 0 && (
-                  <div className="flex -space-x-2 ml-2">
-                    {members.slice(0, 3).map((member, index) => (
-                      <Avatar key={member.user_id} className="h-6 w-6 border-2 border-white">
-                        <AvatarImage src={member.avatar_url || ''} />
-                        <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                          <Users className="h-3 w-3" />
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                )}
+                <Sparkles className="mr-2 h-4 w-4" />
+                Get Started
               </Button>
             </div>
           </div>

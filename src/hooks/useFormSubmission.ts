@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { SurveyFormData, FormSubmissionState } from "@/components/onboarding/survey/types/surveyTypes";
 import { useAccountCreation } from "./form/useAccountCreation";
@@ -32,7 +31,6 @@ const logger = createLogger('useFormSubmission');
  */
 export const useFormSubmission = () => {
   const user = useUser();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   // Import the individual hooks for each concern
@@ -220,12 +218,6 @@ export const useFormSubmission = () => {
         error: null,
         success: true,
       });
-
-      // Force refresh neighborhood context and activities after successful onboarding
-      // This ensures the new member sees the latest neighborhood data
-      queryClient.invalidateQueries({ queryKey: ['neighborhood'] });
-      queryClient.invalidateQueries({ queryKey: ['activities'] });
-      queryClient.invalidateQueries({ queryKey: ['current-neighborhood'] });
 
       sonnerToast.success("Welcome to the neighborhood!", {
         description: "Your account and profile have been created successfully.",
