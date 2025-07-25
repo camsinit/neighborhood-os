@@ -371,17 +371,9 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                   {update.description && (
                     <div className="mt-4 space-y-2">
                       <h4 className="font-medium text-gray-900 text-sm">Description</h4>
-                      <div 
-                        className="p-3 rounded-lg border"
-                        style={{ 
-                          backgroundColor: `${safetyTheme.primary}05`, 
-                          borderColor: `${safetyTheme.primary}15` 
-                        }}
-                      >
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
-                          {update.description}
-                        </p>
-                      </div>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
+                        {update.description}
+                      </p>
                     </div>
                   )}
                 </div>
