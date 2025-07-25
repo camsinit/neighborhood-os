@@ -339,9 +339,8 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
       
       {/* Container with matching profile box styling */}
       <div 
-        className="p-6 rounded-xl border-2"
+        className="px-6 pb-6 pt-3 rounded-xl border-2 bg-white"
         style={{ 
-          background: 'linear-gradient(135deg, hsl(var(--neighbors-light)) 0%, hsl(var(--background)) 100%)',
           borderColor: 'hsl(var(--neighbors-color) / 0.2)'
         }}
       >
