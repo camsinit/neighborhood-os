@@ -19,6 +19,7 @@ import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
 import { useSkillsOnboarding } from '@/hooks/useSkillsOnboarding';
 import { SuperAdminNeighborhoodSelector } from '@/components/layout/sidebar/SuperAdminNeighborhoodSelector';
+import { WelcomePopover } from '@/components/onboarding/WelcomePopover';
 
 
 /**
@@ -37,6 +38,7 @@ const DebugPage = () => {
   const [showOnboardingTest, setShowOnboardingTest] = useState(false);
   const [showSurveyTest, setShowSurveyTest] = useState(false);
   const [showSkillsOnboardingTest, setShowSkillsOnboardingTest] = useState(false);
+  const [showWelcomePopoverTest, setShowWelcomePopoverTest] = useState(false);
   
   // Skills onboarding hook for testing functions
   const { resetSkillsOnboarding } = useSkillsOnboarding();
@@ -129,13 +131,7 @@ const DebugPage = () => {
                     </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => {
-                        // Set the localStorage flag to trigger welcome popover
-                        console.log('[DebugPage] Triggering Welcome Popover test');
-                        localStorage.setItem('showWelcomePopover', 'true');
-                        // Navigate to home to display the welcome popover
-                        window.location.href = '/home';
-                      }}
+                      onClick={() => setShowWelcomePopoverTest(true)}
                       className="flex items-center gap-2"
                     >
                       <TestTube className="w-4 h-4" />
@@ -244,7 +240,12 @@ const DebugPage = () => {
           open={showSkillsOnboardingTest}
           onOpenChange={setShowSkillsOnboardingTest}
           onComplete={() => setShowSkillsOnboardingTest(false)}
-          
+        />
+        
+        {/* Welcome Popover for direct UI testing and editing */}
+        <WelcomePopover
+          isVisible={showWelcomePopoverTest}
+          onDismiss={() => setShowWelcomePopoverTest(false)}
         />
         
     </div>
