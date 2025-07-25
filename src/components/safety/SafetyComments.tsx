@@ -423,7 +423,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                 >
                   <Textarea
                     ref={textareaRef}
-                    placeholder="Share a comment (you can drag & drop images here too)"
+                    placeholder="Share a comment or image here"
                     value={newComment}
                     onChange={(e) => {
                       setNewComment(e.target.value);
