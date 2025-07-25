@@ -71,7 +71,7 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
           }}
         >
           {/* Dynamic Layout: Avatar + Info Side by Side */}
-          <div className="flex items-start gap-6 mb-6">
+          <div className="flex items-start gap-6">
             {/* Avatar Section */}
             <div className="flex-shrink-0">
               <div className="relative">
@@ -164,7 +164,7 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
 
           {/* Bio Section - Now integrated within the same card */}
           {neighbor.profiles?.bio && (
-            <div className="border-t pt-4" style={{ borderColor: 'hsl(var(--neighbors-color) / 0.1)' }}>
+            <div className="border-t pt-4 mt-6" style={{ borderColor: 'hsl(var(--neighbors-color) / 0.1)' }}>
               <h4 
                 className="font-semibold text-base mb-3 flex items-center gap-2"
                 style={{ color: 'hsl(var(--neighbors-color))' }}
