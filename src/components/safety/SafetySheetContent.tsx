@@ -401,8 +401,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               </div>
             )}
 
-            
-
             {/* Comments section */}
             <div className="space-y-4">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
