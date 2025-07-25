@@ -196,6 +196,7 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
       {/* Activity icon with activity-specific colors and solid background to break the line */}
       <div 
         className={`relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm bg-white ${displayProps.bgColor}`}
+        style={{ borderColor: 'hsl(var(--neighbors-color) / 0.2)' }}
       >
         <IconComponent 
           className={`w-5 h-5 ${displayProps.color}`}
