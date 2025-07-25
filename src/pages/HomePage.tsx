@@ -17,12 +17,17 @@ const HomePage = () => {
     const shouldShowWelcome = localStorage.getItem('showWelcomePopover');
     if (shouldShowWelcome === 'true') {
       console.log("[HomePage] Showing welcome popover from onboarding completion");
-      // Small delay to let the page settle and dashboard load smoothly
-      setTimeout(() => {
-        setShowWelcomePopover(true);
-      }, 300); // Brief delay for smooth transition
-      // Clear the flag so it doesn't show again on subsequent visits
+      
+      // Clear the flag immediately to prevent duplicate shows
       localStorage.removeItem('showWelcomePopover');
+      
+      // Brief delay for smooth page load, then show popover
+      const timer = setTimeout(() => {
+        setShowWelcomePopover(true);
+      }, 400); // Slightly longer delay for smoother experience
+      
+      // Cleanup timer on unmount
+      return () => clearTimeout(timer);
     }
   }, []);
 

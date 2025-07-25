@@ -8,6 +8,7 @@ import { usePendingInviteHandler } from "./hooks/usePendingInviteHandler";
 import { useActivityPreload } from "@/hooks/useActivityPreload";
 import SurveyDialog from "./survey/SurveyDialog";
 import { extractOAuthUserData, isOAuthUser } from "@/utils/oauthDataExtraction";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 /**
  * OnboardingDialog component
@@ -54,7 +55,7 @@ const OnboardingDialog = ({
   // Pre-load activity feed when dialog is open to ensure smooth experience after onboarding
   const { isPreloaded } = useActivityPreload(open);
   
-  // Handle completion of onboarding - now expects formData parameter
+  // Handle completion of onboarding - simplified transition flow
   const handleOnboardingComplete = async (formData: any) => {
     console.log("[OnboardingDialog] handleOnboardingComplete called");
     console.log("[OnboardingDialog] Form data:", formData);
@@ -72,40 +73,42 @@ const OnboardingDialog = ({
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Add a small delay to let the "Complete Setup" button animation finish
-        // This creates a more natural transition feeling
-        setTimeout(() => {
-          // Set a flag in localStorage to show the welcome popover on the home page
-          localStorage.setItem('showWelcomePopover', 'true');
-          
-          // Close the onboarding dialog with a fade-out effect
-          onOpenChange(false);
-          
-          // Navigate to home page after the dialog close animation
-          setTimeout(() => {
-            navigate("/home");
-          }, 200); // Wait for dialog close animation
-        }, 300); // Small delay for button click feedback
+        // Simplified transition: Set welcome flag and navigate immediately
+        // The welcome popover will handle its own animation timing
+        localStorage.setItem('showWelcomePopover', 'true');
+        onOpenChange(false);
+        navigate("/home");
       }
       // Error handling is done in the submit function
     } catch (error: any) {
       console.error("[OnboardingDialog] Error completing onboarding:", error);
       
-      // Show error toast
+      // Show error toast with retry guidance
       showErrorToast(
-        "Error",
-        "Failed to complete profile setup. Please try again."
+        "Setup Failed",
+        "Failed to complete profile setup. Please try again or refresh the page."
       );
     }
   };
   
   return (
-    <SurveyDialog 
-      open={open} 
-      onOpenChange={onOpenChange} 
-      onComplete={handleOnboardingComplete} 
-      submissionState={submissionState}
-    />
+    <ErrorBoundary
+      fallback={
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <h2 className="text-xl font-semibold mb-4">Onboarding Error</h2>
+          <p className="text-gray-600 mb-4">
+            There was an issue with the setup process. Please refresh the page to try again.
+          </p>
+        </div>
+      }
+    >
+      <SurveyDialog 
+        open={open} 
+        onOpenChange={onOpenChange} 
+        onComplete={handleOnboardingComplete} 
+        submissionState={submissionState}
+      />
+    </ErrorBoundary>
   );
 };
 
