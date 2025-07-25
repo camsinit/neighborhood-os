@@ -157,7 +157,7 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
           boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px ${moduleThemeColors.skills.primary}10`
         }}
       >
-        <SheetHeader className="space-y-4">
+        <SheetHeader className="space-y-3">
           <SheetTitle className="text-lg font-semibold text-gray-900">
             Request Help from Neighbors
           </SheetTitle>
@@ -167,97 +167,80 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
           </p>
         </SheetHeader>
 
-        <Separator className="my-6" />
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Skill title input - kept concise for easy browsing */}
-          <div className="space-y-2">
-            <Label htmlFor="skill-title" className="text-sm font-medium text-gray-700">
-              What do you need help with? <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="skill-title"
-              value={skillTitle}
-              onChange={(e) => setSkillTitle(e.target.value)}
-              placeholder="e.g., Computer repair, Garden help"
-              maxLength={50}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500">
-              Keep it short and clear: 2-5 words describing what you need
-            </p>
-          </div>
-
-          {/* Category selection using standardized categories */}
-          <div className="space-y-2">
-            <Label htmlFor="category" className="text-sm font-medium text-gray-700">
-              Category <span className="text-red-500">*</span>
-            </Label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select the most relevant category" />
-              </SelectTrigger>
-              <SelectContent className="z-[200]">
-                {SKILL_CATEGORY_OPTIONS.map((category) => (
-                  <SelectItem key={category.value} value={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500">
-              Choose the category that best matches your request
-            </p>
-          </div>
-
-          <Separator />
-
-          {/* NEW: Details section for comprehensive information */}
-          <div className="space-y-2">
-            <Label htmlFor="skill-details" className="text-sm font-medium text-gray-700">
-              Details <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="skill-details"
-              value={skillDetails}
-              onChange={(e) => setSkillDetails(e.target.value)}
-              placeholder="Please provide more details about what you need help with. For example:
-• What specific task or problem needs to be solved?
-• What level of experience or expertise is needed?
-• Any time constraints or preferences?
-• What materials or tools do you have available?
-• Any other relevant information that would help someone assist you?"
-              className="w-full min-h-[120px] resize-y"
-              maxLength={1000}
-            />
-            <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>Provide context to help neighbors understand your specific needs</span>
-              <span>{skillDetails.length}/1000</span>
+        <div className="w-full max-w-sm mx-auto mt-6">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Skill title input - compact styling like goods form */}
+            <div className="space-y-1">
+              <Label htmlFor="skill-title">What do you need help with?</Label>
+              <Input
+                id="skill-title"
+                value={skillTitle}
+                onChange={(e) => setSkillTitle(e.target.value)}
+                placeholder="e.g., Computer repair, Garden help"
+                maxLength={50}
+                required
+                className="w-full"
+              />
             </div>
-          </div>
 
-          {/* Form action buttons */}
-          <Separator />
-          
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleClose(false)}
-              disabled={isSubmitting}
-              className="px-6"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()}
-              className="px-6 bg-green-500 hover:bg-green-600 text-white"
-            >
-              {isSubmitting ? 'Creating Request...' : 'Request Help'}
-            </Button>
-          </div>
-        </form>
+            {/* Category selection using compact styling */}
+            <div className="space-y-1">
+              <Label htmlFor="category">Category</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent className="z-[200]">
+                  {SKILL_CATEGORY_OPTIONS.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Details section with compact styling */}
+            <div className="space-y-1">
+              <Label htmlFor="skill-details">Details</Label>
+              <Textarea
+                id="skill-details"
+                value={skillDetails}
+                onChange={(e) => setSkillDetails(e.target.value)}
+                placeholder="Describe what you need help with, any time constraints, level of expertise needed, etc."
+                className="min-h-[80px] w-full resize-none"
+                maxLength={1000}
+                required
+              />
+              <div className="text-xs text-gray-500 text-right">
+                {skillDetails.length}/1000
+              </div>
+            </div>
+
+            {/* Form action buttons - matching goods form style */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleClose(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()}
+                style={{ 
+                  backgroundColor: moduleThemeColors.skills.primary,
+                  borderColor: moduleThemeColors.skills.primary 
+                }}
+                className="hover:opacity-90"
+              >
+                {isSubmitting ? 'Creating Request...' : 'Request Help'}
+              </Button>
+            </div>
+          </form>
+        </div>
       </SheetContent>
     </Sheet>
   );
