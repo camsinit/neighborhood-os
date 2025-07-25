@@ -2,10 +2,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Mail, Phone, Calendar, MessageSquare, Star } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Users, Home } from "lucide-react";
 import { format } from "date-fns";
 import { UserWithRole } from "@/types/roles";
 import { useUser } from '@supabase/auth-helpers-react';
+import NeighborActivityTimeline from './NeighborActivityTimeline';
 
 /**
  * NeighborSheetContent - Side panel component for displaying detailed neighbor profile information
@@ -45,31 +46,80 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
       </SheetHeader>
 
       <div className="space-y-6">
-        {/* Profile Section */}
-        <div className="flex flex-col items-center space-y-4 p-4 rounded-lg bg-gray-50">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={neighbor.profiles?.avatar_url || ''} />
-            <AvatarFallback className="text-2xl">
-              <User className="h-8 w-8" />
-            </AvatarFallback>
-          </Avatar>
+        {/* Enhanced Profile Section with Purple Accents */}
+        <div 
+          className="flex flex-col items-center space-y-4 p-6 rounded-xl border-2"
+          style={{ 
+            background: 'linear-gradient(135deg, hsl(var(--neighbors-light)) 0%, hsl(var(--background)) 100%)',
+            borderColor: 'hsl(var(--neighbors-color) / 0.2)'
+          }}
+        >
+          <div className="relative">
+            <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
+              <AvatarImage src={neighbor.profiles?.avatar_url || ''} />
+              <AvatarFallback 
+                className="text-3xl"
+                style={{ backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', color: 'hsl(var(--neighbors-color))' }}
+              >
+                <User className="h-10 w-10" />
+              </AvatarFallback>
+            </Avatar>
+            {/* Purple accent ring */}
+            <div 
+              className="absolute inset-0 rounded-full border-2 opacity-20"
+              style={{ borderColor: 'hsl(var(--neighbors-color))' }}
+            />
+          </div>
           
-          <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold">
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl font-bold text-gray-900">
               {neighbor.profiles?.display_name || 'Neighbor'}
-              {isCurrentUser && <span className="text-sm text-gray-500 font-normal"> (You)</span>}
+              {isCurrentUser && (
+                <span 
+                  className="text-sm font-normal ml-2 px-2 py-1 rounded-full"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', 
+                    color: 'hsl(var(--neighbors-color))' 
+                  }}
+                >
+                  You
+                </span>
+              )}
             </h3>
             
-            {/* Join Date */}
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4" />
-              <span>Joined {format(new Date(neighbor.created_at || new Date()), 'MMM yyyy')}</span>
+            <div className="flex items-center justify-center gap-6 text-sm">
+              {/* Join Date */}
+              <div className="flex items-center gap-2 text-gray-600">
+                <Calendar className="h-4 w-4" />
+                <span>Joined {format(new Date(neighbor.created_at || new Date()), 'MMM yyyy')}</span>
+              </div>
+
+              {/* Years lived here - prominent purple badge */}
+              {neighbor.profiles?.years_lived_here && (
+                <div 
+                  className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--neighbors-color))', 
+                    color: 'white' 
+                  }}
+                >
+                  <Home className="h-4 w-4" />
+                  {neighbor.profiles.years_lived_here} {neighbor.profiles.years_lived_here === 1 ? 'year' : 'years'} here
+                </div>
+              )}
             </div>
 
-            {/* Years lived here */}
-            {neighbor.profiles?.years_lived_here && (
-              <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">
-                📍 {neighbor.profiles.years_lived_here} {neighbor.profiles.years_lived_here === 1 ? 'year' : 'years'} in the area
+            {/* Email prominently displayed if visible */}
+            {neighbor.profiles?.email_visible && neighbor.profiles?.email && (
+              <div 
+                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+                style={{ 
+                  backgroundColor: 'hsl(var(--neighbors-color) / 0.05)', 
+                  color: 'hsl(var(--neighbors-color))' 
+                }}
+              >
+                <Mail className="h-4 w-4" />
+                {neighbor.profiles.email}
               </div>
             )}
           </div>
@@ -78,50 +128,96 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
         {/* Bio Section */}
         {neighbor.profiles?.bio && (
           <div>
-            <h3 className="font-semibold text-lg mb-2">About</h3>
-            <p className="text-gray-600 whitespace-pre-wrap">{neighbor.profiles.bio}</p>
+            <h3 
+              className="font-semibold text-lg mb-3 flex items-center gap-2"
+              style={{ color: 'hsl(var(--neighbors-color))' }}
+            >
+              <User className="w-5 h-5" />
+              About
+            </h3>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{ 
+                backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
+                borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
+              }}
+            >
+              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{neighbor.profiles.bio}</p>
+            </div>
           </div>
         )}
 
-        {/* Contact Information */}
-        <div>
-          <h3 className="font-semibold text-lg mb-3">Contact Information</h3>
-          <div className="space-y-2">
-            {neighbor.profiles?.email_visible && neighbor.profiles?.email && (
-              <div className="flex items-center gap-3 p-2 rounded bg-gray-50">
-                <Mail className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{neighbor.profiles.email}</span>
-              </div>
-            )}
-            
-            {neighbor.profiles?.phone_visible && neighbor.profiles?.phone_number && (
-              <div className="flex items-center gap-3 p-2 rounded bg-gray-50">
-                <Phone className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{neighbor.profiles.phone_number}</span>
-              </div>
-            )}
-            
-            {neighbor.profiles?.address_visible && neighbor.profiles?.address && (
-              <div className="flex items-center gap-3 p-2 rounded bg-gray-50">
-                <MapPin className="h-4 w-4 text-gray-500" />
-                <span className="text-sm">{neighbor.profiles.address}</span>
-              </div>
-            )}
-            
-            {!neighbor.profiles?.email_visible && !neighbor.profiles?.phone_visible && !neighbor.profiles?.address_visible && (
-              <p className="text-gray-500 text-sm italic">Contact information not shared</p>
-            )}
-          </div>
-        </div>
+        {/* Activity Timeline */}
+        <NeighborActivityTimeline 
+          neighborId={neighbor.id} 
+          neighborName={neighbor.profiles?.display_name || 'This neighbor'} 
+        />
 
-        {/* Skills Section - Commented out since skills field doesn't exist in current type */}
-        {/* Future enhancement: Add skills display when available in profile data */}
+        {/* Contact Information */}
+        {(neighbor.profiles?.phone_visible || neighbor.profiles?.address_visible) && (
+          <div>
+            <h3 
+              className="font-semibold text-lg mb-3 flex items-center gap-2"
+              style={{ color: 'hsl(var(--neighbors-color))' }}
+            >
+              <Mail className="w-5 h-5" />
+              Contact Information
+            </h3>
+            <div className="space-y-3">
+              {neighbor.profiles?.phone_visible && neighbor.profiles?.phone_number && (
+                <div 
+                  className="flex items-center gap-3 p-3 rounded-lg border"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
+                    borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
+                  }}
+                >
+                  <Phone 
+                    className="h-4 w-4" 
+                    style={{ color: 'hsl(var(--neighbors-color))' }} 
+                  />
+                  <span className="text-sm font-medium">{neighbor.profiles.phone_number}</span>
+                </div>
+              )}
+              
+              {neighbor.profiles?.address_visible && neighbor.profiles?.address && (
+                <div 
+                  className="flex items-center gap-3 p-3 rounded-lg border"
+                  style={{ 
+                    backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
+                    borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
+                  }}
+                >
+                  <MapPin 
+                    className="h-4 w-4" 
+                    style={{ color: 'hsl(var(--neighbors-color))' }} 
+                  />
+                  <span className="text-sm font-medium">{neighbor.profiles.address}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Access Needs */}
         {neighbor.profiles?.access_needs && (
           <div>
-            <h3 className="font-semibold text-lg mb-2">Accessibility Notes</h3>
-            <p className="text-gray-600 text-sm">{neighbor.profiles.access_needs}</p>
+            <h3 
+              className="font-semibold text-lg mb-3 flex items-center gap-2"
+              style={{ color: 'hsl(var(--neighbors-color))' }}
+            >
+              <Users className="w-5 h-5" />
+              Accessibility Notes
+            </h3>
+            <div 
+              className="p-4 rounded-lg border"
+              style={{ 
+                backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
+                borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
+              }}
+            >
+              <p className="text-gray-700 text-sm leading-relaxed">{neighbor.profiles.access_needs}</p>
+            </div>
           </div>
         )}
 
@@ -131,8 +227,15 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
         )}
 
         {isCurrentUser && (
-          <div className="pt-4 border-t">
-            <Button variant="outline" className="w-full">
+          <div className="pt-6 border-t border-gray-200">
+            <Button 
+              variant="outline" 
+              className="w-full border-2 font-medium"
+              style={{ 
+                borderColor: 'hsl(var(--neighbors-color))', 
+                color: 'hsl(var(--neighbors-color))' 
+              }}
+            >
               Edit Profile
             </Button>
           </div>
