@@ -210,10 +210,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
                 {update.title}
               </h1>
-              <div className="flex items-center gap-1 text-sm text-gray-600">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>{formatTimeAgo(new Date(update.created_at))}</span>
-              </div>
             </div>
             
             {/* Action buttons row */}
