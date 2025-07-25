@@ -73,13 +73,6 @@ const OnboardingDialog = ({
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Show success message - but don't navigate yet
-        // Let the welcome screen with confetti display first
-        showSuccessToast(
-          "Welcome to your neighborhood!",
-          "Your profile is complete and the activity feed is ready."
-        );
-        
         // Don't navigate here - let the survey dialog show the welcome screen first
         // Navigation will happen when the user clicks "Get Started" on the welcome screen
       }
