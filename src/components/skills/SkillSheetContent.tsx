@@ -1,5 +1,4 @@
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import ModuleButton from "@/components/ui/module-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +7,12 @@ import { MessageSquare, Plus, Users, Star, Clock, Lightbulb, Copy, Trash2 } from
 import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  EnhancedSheetContent, 
+  ProfileCard, 
+  SectionHeader, 
+  ContentSection 
+} from "@/components/ui/enhanced-sheet-content";
 
 import ShareButton from "@/components/ui/share-button";
 import { SkillCategory } from "./types/skillTypes";
@@ -174,64 +179,53 @@ const SkillSheetContent = ({
   };
   const categoryStyle = categoryColors[skillCategory] || categoryColors.technology;
   
-  return (
-    <SheetContent className="sm:max-w-md overflow-y-auto">
-      <div className="space-y-6">
-        {/* Enhanced Skill Header Section with Green Skills Theming */}
-        <div 
-          className="p-6 rounded-xl border-2"
-          style={{ 
-            background: 'linear-gradient(135deg, hsl(var(--skills-light)) 0%, hsl(var(--background)) 100%)',
-            borderColor: 'hsl(var(--skills-color) / 0.2)'
-          }}
-        >
-          {/* Skill Title and Category */}
-          <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{skillTitle}</h2>
-                <Badge 
-                  className={`${categoryStyle.bg} ${categoryStyle.text} text-sm font-medium px-3 py-1`}
-                >
-                  {skillCategory.charAt(0).toUpperCase() + skillCategory.slice(1)}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShareButton 
-                  contentType="skills" 
-                  contentId={skillTitle || ''} 
-                  neighborhoodId={neighborhoodId} 
-                  size="sm" 
-                  variant="ghost" 
-                />
-              </div>
-            </div>
-            
-            {/* Skill Statistics */}
-            <div className="flex items-center gap-4 flex-wrap text-sm">
-              <div 
-                className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
-                style={{ 
-                  backgroundColor: 'hsl(var(--skills-color))', 
-                  color: 'white' 
-                }}
-              >
-                <Users className="h-4 w-4" />
-                {providers.length} {providers.length === 1 ? 'neighbor offers' : 'neighbors offer'} this skill
-              </div>
-            </div>
-          </div>
-        </div>
+  // Prepare metadata for the skill header
+  const skillMetadata = [
+    {
+      icon: Users,
+      text: `${providers.length} ${providers.length === 1 ? 'neighbor offers' : 'neighbors offer'} this skill`,
+      prominent: true
+    }
+  ];
 
-        {/* Skill Providers Section */}
+  // Prepare badges for the skill
+  const skillBadges = [
+    {
+      text: skillCategory.charAt(0).toUpperCase() + skillCategory.slice(1),
+      variant: 'secondary' as const
+    }
+  ];
+
+  return (
+    <EnhancedSheetContent moduleTheme="skills">
+      {/* Enhanced Skill Header using standardized ProfileCard */}
+      <ProfileCard
+        name={skillTitle}
+        avatarUrl={undefined} // Skills don't have avatars
+        isCurrentUser={false}
+        badges={skillBadges}
+        metadata={skillMetadata}
+        moduleTheme="skills"
+      >
+        {/* Additional actions in the profile area */}
+        <div className="flex items-center gap-2 mt-3">
+          <ShareButton 
+            contentType="skills" 
+            contentId={skillTitle || ''} 
+            neighborhoodId={neighborhoodId} 
+            size="sm" 
+            variant="ghost" 
+          />
+        </div>
+      </ProfileCard>
+
+        {/* Skill Providers Section using standardized components */}
         <div>
-          <h3 
-            className="font-semibold text-lg mb-4 flex items-center gap-2"
-            style={{ color: 'hsl(var(--skills-color))' }}
-          >
-            <Users className="w-5 h-5" />
-            Neighbors with this skill
-          </h3>
+          <SectionHeader
+            title="Neighbors with this skill"
+            icon={Users}
+            moduleTheme="skills"
+          />
           
           {loading ? (
             <div className="text-center py-8 text-gray-500">
@@ -239,27 +233,18 @@ const SkillSheetContent = ({
               Loading neighbors...
             </div>
           ) : providers.length === 0 ? (
-            <div 
-              className="text-center py-8 rounded-lg border-2 border-dashed"
-              style={{ 
-                backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
-                borderColor: 'hsl(var(--skills-color) / 0.1)' 
-              }}
-            >
+            <ContentSection moduleTheme="skills" className="text-center py-8 border-2 border-dashed">
               <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p className="text-gray-500">No neighbors currently offer this skill.</p>
               <p className="text-sm text-gray-400 mt-1">Be the first to share your expertise!</p>
-            </div>
+            </ContentSection>
           ) : (
             <div className="space-y-3">
               {providers.map(provider => (
-                <div 
+                <ContentSection 
                   key={provider.user_id} 
-                  className="rounded-lg border p-3 transition-all duration-200 hover:shadow-md group"
-                  style={{ 
-                    backgroundColor: 'hsl(var(--skills-color) / 0.02)', 
-                    borderColor: 'hsl(var(--skills-color) / 0.1)' 
-                  }}
+                  moduleTheme="skills"
+                  className="p-3 transition-all duration-200 hover:shadow-md group border"
                 >
                   {/* Compact Provider Layout */}
                   <div className="flex items-center gap-3">
@@ -352,19 +337,18 @@ const SkillSheetContent = ({
                       />
                     </div>
                   )}
-                </div>
+                </ContentSection>
               ))}
             </div>
           )}
         </div>
-      </div>
       
       {/* Request Skill Sheet */}
       <SkillRequestSheet 
         open={isRequestSheetOpen}
         onOpenChange={setIsRequestSheetOpen}
       />
-    </SheetContent>
+    </EnhancedSheetContent>
   );
 };
 export default SkillSheetContent;
