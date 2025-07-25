@@ -48,104 +48,117 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
       <div className="space-y-6">
         {/* Enhanced Profile Section with Purple Accents */}
         <div 
-          className="flex flex-col items-center space-y-4 p-6 rounded-xl border-2"
+          className="p-6 rounded-xl border-2"
           style={{ 
             background: 'linear-gradient(135deg, hsl(var(--neighbors-light)) 0%, hsl(var(--background)) 100%)',
             borderColor: 'hsl(var(--neighbors-color) / 0.2)'
           }}
         >
-          <div className="relative">
-            <Avatar className="h-28 w-28 border-4 border-white shadow-lg">
-              <AvatarImage src={neighbor.profiles?.avatar_url || ''} />
-              <AvatarFallback 
-                className="text-3xl"
-                style={{ backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', color: 'hsl(var(--neighbors-color))' }}
-              >
-                <User className="h-10 w-10" />
-              </AvatarFallback>
-            </Avatar>
-            {/* Purple accent ring */}
-            <div 
-              className="absolute inset-0 rounded-full border-2 opacity-20"
-              style={{ borderColor: 'hsl(var(--neighbors-color))' }}
-            />
-          </div>
-          
-          <div className="text-center space-y-3">
-            <h3 className="text-2xl font-bold text-gray-900">
-              {neighbor.profiles?.display_name || 'Neighbor'}
-              {isCurrentUser && (
-                <span 
-                  className="text-sm font-normal ml-2 px-2 py-1 rounded-full"
-                  style={{ 
-                    backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', 
-                    color: 'hsl(var(--neighbors-color))' 
-                  }}
-                >
-                  You
-                </span>
-              )}
-            </h3>
-            
-            <div className="flex items-center justify-center gap-6 text-sm">
-              {/* Join Date */}
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="h-4 w-4" />
-                <span>Joined {format(new Date(neighbor.created_at || new Date()), 'MMM yyyy')}</span>
-              </div>
-
-              {/* Years lived here - prominent purple badge */}
-              {neighbor.profiles?.years_lived_here && (
+          {/* Dynamic Layout: Avatar + Info Side by Side */}
+          <div className="flex items-start gap-6 mb-6">
+            {/* Avatar Section */}
+            <div className="flex-shrink-0">
+              <div className="relative">
+                <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                  <AvatarImage src={neighbor.profiles?.avatar_url || ''} />
+                  <AvatarFallback 
+                    className="text-2xl"
+                    style={{ backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', color: 'hsl(var(--neighbors-color))' }}
+                  >
+                    <User className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                {/* Purple accent ring */}
                 <div 
-                  className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
-                  style={{ 
-                    backgroundColor: 'hsl(var(--neighbors-color))', 
-                    color: 'white' 
-                  }}
-                >
-                  <Home className="h-4 w-4" />
-                  {neighbor.profiles.years_lived_here} {neighbor.profiles.years_lived_here === 1 ? 'year' : 'years'} here
-                </div>
-              )}
+                  className="absolute inset-0 rounded-full border-2 opacity-20"
+                  style={{ borderColor: 'hsl(var(--neighbors-color))' }}
+                />
+              </div>
             </div>
 
-            {/* Email prominently displayed if visible */}
-            {neighbor.profiles?.email_visible && neighbor.profiles?.email && (
+            {/* Info Section */}
+            <div className="flex-1 min-w-0">
+              <div className="space-y-3">
+                {/* Name and You Badge */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {neighbor.profiles?.display_name || 'Neighbor'}
+                  </h3>
+                  {isCurrentUser && (
+                    <span 
+                      className="text-sm font-normal px-2 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: 'hsl(var(--neighbors-color) / 0.1)', 
+                        color: 'hsl(var(--neighbors-color))' 
+                      }}
+                    >
+                      You
+                    </span>
+                  )}
+                </div>
+                
+                {/* Metadata Row */}
+                <div className="flex items-center gap-4 flex-wrap text-sm">
+                  {/* Join Date */}
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>Joined {format(new Date(neighbor.created_at || new Date()), 'MMM yyyy')}</span>
+                  </div>
+
+                  {/* Years lived here - prominent purple badge */}
+                  {neighbor.profiles?.years_lived_here && (
+                    <div 
+                      className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                      style={{ 
+                        backgroundColor: 'hsl(var(--neighbors-color))', 
+                        color: 'white' 
+                      }}
+                    >
+                      <Home className="h-4 w-4" />
+                      {neighbor.profiles.years_lived_here} {neighbor.profiles.years_lived_here === 1 ? 'year' : 'years'} here
+                    </div>
+                  )}
+                </div>
+
+                {/* Email prominently displayed if visible */}
+                {neighbor.profiles?.email_visible && neighbor.profiles?.email && (
+                  <div 
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-fit"
+                    style={{ 
+                      backgroundColor: 'hsl(var(--neighbors-color) / 0.05)', 
+                      color: 'hsl(var(--neighbors-color))' 
+                    }}
+                  >
+                    <Mail className="h-4 w-4" />
+                    {neighbor.profiles.email}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bio Section - Now integrated within the same card */}
+          {neighbor.profiles?.bio && (
+            <div className="border-t pt-4" style={{ borderColor: 'hsl(var(--neighbors-color) / 0.1)' }}>
+              <h4 
+                className="font-semibold text-base mb-3 flex items-center gap-2"
+                style={{ color: 'hsl(var(--neighbors-color))' }}
+              >
+                <User className="w-4 h-4" />
+                About
+              </h4>
               <div 
-                className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+                className="p-4 rounded-lg border"
                 style={{ 
-                  backgroundColor: 'hsl(var(--neighbors-color) / 0.05)', 
-                  color: 'hsl(var(--neighbors-color))' 
+                  backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
+                  borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
                 }}
               >
-                <Mail className="h-4 w-4" />
-                {neighbor.profiles.email}
+                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-sm">{neighbor.profiles.bio}</p>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bio Section */}
-        {neighbor.profiles?.bio && (
-          <div>
-            <h3 
-              className="font-semibold text-lg mb-3 flex items-center gap-2"
-              style={{ color: 'hsl(var(--neighbors-color))' }}
-            >
-              <User className="w-5 h-5" />
-              About
-            </h3>
-            <div 
-              className="p-4 rounded-lg border"
-              style={{ 
-                backgroundColor: 'hsl(var(--neighbors-color) / 0.02)', 
-                borderColor: 'hsl(var(--neighbors-color) / 0.1)' 
-              }}
-            >
-              <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{neighbor.profiles.bio}</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Activity Timeline */}
         <NeighborActivityTimeline 
