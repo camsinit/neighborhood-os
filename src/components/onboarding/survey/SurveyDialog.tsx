@@ -34,6 +34,7 @@ const getSteps = () => {
     { title: "Basic Information" },
     { title: "Contact & Address" },
     { title: "Profile Photo" },
+    { title: "Neighborhood Agreements" },
   ];
 };
 

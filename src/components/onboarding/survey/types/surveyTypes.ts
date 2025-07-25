@@ -22,6 +22,14 @@ export interface SurveyFormData {
   yearMovedIn: number | null;
   address: string;
   
+  // Neighborhood agreements
+  agreements: {
+    communication: boolean;
+    authenticity: boolean;
+    followThrough: boolean;
+    respectfulness: boolean;
+  };
+  
   // Auth-specific fields
   password?: string; // Only for manual signup
   profileImage?: File | null; // Only if uploading new image

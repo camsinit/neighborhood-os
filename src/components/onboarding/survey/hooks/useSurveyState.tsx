@@ -34,6 +34,12 @@ export const useSurveyState = () => {
     email: "",
     password: "",
     address: "",
+    agreements: {
+      communication: false,
+      authenticity: false,
+      followThrough: false,
+      respectfulness: false,
+    },
     profileImage: null,
   });
   
@@ -92,14 +98,15 @@ export const useSurveyState = () => {
                  formData.email.includes("@");
         }
       
-      case 2: // Address & Contact
-        return formData.address.trim() !== "";
-      
-      case 3: // Profile Image (final step)
+      case 2: // Profile Image
         // OAuth users might have a profile image URL, manual users need to upload
         return formData.authMethod === 'oauth' ? 
           !!(formData.profileImageUrl || formData.profileImage !== null) :
           formData.profileImage !== null;
+      
+      case 3: // Neighborhood Agreements (final step)
+        // All agreements must be accepted
+        return Object.values(formData.agreements).every(value => value === true);
       
       default:
         return true;

@@ -49,6 +49,12 @@ export const createManualSignupFormData = (): SurveyFormData => {
     email: '',
     address: '',
     yearMovedIn: null,
+    agreements: {
+      communication: false,
+      authenticity: false,
+      followThrough: false,
+      respectfulness: false,
+    },
     password: '',
     profileImage: null,
   };

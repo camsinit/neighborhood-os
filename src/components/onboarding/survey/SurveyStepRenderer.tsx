@@ -5,6 +5,7 @@ import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { ContactInfoStep } from "./steps/ContactInfoStep";
 import { AddressStep } from "./steps/AddressStep";
 import { ProfileImageStep } from "./steps/ProfileImageStep";
+import { AgreementsStep, AgreementState } from "./steps/AgreementsStep";
 // EnhancedSkillsStep removed - skills onboarding moved to Skills page
 
 /**
@@ -74,6 +75,14 @@ export const SurveyStepRenderer = ({
         <ProfileImageStep
           onImageChange={handleProfileImageChange}
           initialImageUrl={formData.profileImageUrl}
+        />
+      );
+    case 3:
+      return (
+        <AgreementsStep
+          agreementState={formData.agreements}
+          onAgreementChange={(agreements: AgreementState) => handleChange('agreements', agreements)}
+          onValidation={handleValidation}
         />
       );
     default:
