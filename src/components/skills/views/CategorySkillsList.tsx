@@ -184,37 +184,6 @@ const CategorySkillsList: React.FC<CategorySkillsListProps> = ({
               )}
             </div>
             
-            {/* Action buttons that appear on hover - positioned between title and profiles */}
-            {skillGroup.userOwnsSkill && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-4">
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditSkill(skillGroup.userSkillId, skillGroup.title);
-                    }}
-                    disabled={isUpdating}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 w-8 p-0 border-red-500 text-red-600 hover:bg-red-50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteSkill(skillGroup.userSkillId, skillGroup.title);
-                    }}
-                    disabled={isUpdating}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
             
             {/* Profile images on the right */}
             <div className="flex items-center">
