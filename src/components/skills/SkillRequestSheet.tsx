@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { SkillCategory } from './types/skillTypes';
 import { SKILL_CATEGORIES } from '@/components/onboarding/survey/steps/skills/skillCategories';
 import { MessageSquare } from 'lucide-react';
+import { moduleThemeColors } from '@/theme/moduleTheme';
 
 /**
  * SkillRequestSheet - Enhanced skill request form in a side panel
@@ -155,7 +156,7 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
       >
         <SheetHeader className="border-b border-border/40 pb-4">
           <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-blue-600" />
+            <MessageSquare className="h-5 w-5" style={{ color: moduleThemeColors.skills.primary }} />
             Request Help from Neighbors
           </SheetTitle>
         </SheetHeader>
@@ -227,7 +228,11 @@ const SkillRequestSheet: React.FC<SkillRequestSheetProps> = ({ open, onOpenChang
               <Button
                 type="submit"
                 disabled={isSubmitting || !skillTitle.trim() || !selectedCategory || !skillDetails.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                style={{ 
+                  backgroundColor: moduleThemeColors.skills.primary,
+                  borderColor: moduleThemeColors.skills.primary 
+                }}
+                className="hover:opacity-90 text-white"
               >
                 {isSubmitting ? 'Creating Request...' : 'Request Help'}
               </Button>
