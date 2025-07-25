@@ -63,7 +63,7 @@ const UserProfileCard = () => {
   };
 
   return (
-    <div className="p-4 bg-muted/40">
+    <div className="p-4 rounded-bl-lg rounded-br-lg shadow-lg">
       <div className="flex items-center gap-3">
         {/* User Avatar */}
         <Avatar className="h-10 w-10">
