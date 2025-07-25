@@ -77,14 +77,6 @@ export const PasswordField = ({
           </div>
         )}
 
-        
-        {/* Success message */}
-        {validation.isValid && password && !passwordError && (
-          <p className="text-sm text-green-600 flex items-center space-x-1">
-            <Check className="h-4 w-4" />
-            <span>Password meets all security requirements</span>
-          </p>
-        )}
       </div>
     </div>
   );
