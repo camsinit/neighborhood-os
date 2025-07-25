@@ -122,7 +122,13 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
           </div>
           <div className="flex-1 p-6">
             <SafetyUpdateForm 
-              update={update}
+              updateId={update.id}
+              existingData={{
+                title: update.title,
+                description: update.description,
+                type: update.type,
+                imageUrl: update.image_url
+              }}
               onSuccess={() => {
                 setIsEditMode(false);
                 queryClient.invalidateQueries({ queryKey: ['safety-updates'] });
@@ -139,12 +145,12 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
   }
 
   /**
-   * Main view mode with enhanced styling
+   * Main view mode with enhanced styling matching neighbor directory
    */
   return (
     <SheetContent side="right" className="w-full sm:max-w-lg p-0">
       <div className="h-full flex flex-col">
-        {/* Enhanced header section with gradient background */}
+        {/* Enhanced header section with gradient background - matches neighbor directory pattern */}
         <div 
           className="relative p-6 border-b"
           style={{
@@ -191,7 +197,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
             {update.title}
           </h1>
 
-          {/* Enhanced author section with themed styling */}
+          {/* Enhanced author section with themed styling - matches neighbor directory pattern */}
           <div 
             className="flex items-center gap-3 p-4 rounded-xl border"
             style={{
