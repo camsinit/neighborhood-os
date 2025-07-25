@@ -73,6 +73,12 @@ const getActivityBadgeLabel = (activityType: string): string => {
     case 'safety_update':
       return 'Safety Update';
       
+    // Neighbor activities
+    case 'neighbor_joined':
+      return 'New Neighbor';
+    case 'profile_updated':
+      return 'Profile Updated';
+      
     default:
       return 'Update';
   }
@@ -82,6 +88,11 @@ const getActivityBadgeLabel = (activityType: string): string => {
  * Map activity types to highlightable item types
  */
 const getHighlightableType = (activityType: string): HighlightableItemType => {
+  // Handle neighbor activities specifically
+  if (activityType === 'neighbor_joined' || activityType === 'profile_updated') {
+    return 'neighbors';
+  }
+  
   // Extract the base type from activity_type (e.g., skill_offered → skills)
   const baseType = activityType.split('_')[0];
   
