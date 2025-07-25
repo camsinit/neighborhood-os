@@ -60,18 +60,6 @@ const Header = ({
             Quick Actions
           </h2>
           
-          {/* Show create neighborhood option if user has access and no neighborhood */}
-          {canCreateNeighborhood && !currentNeighborhood && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowCreateDialog(true)}
-              className="text-blue-600 hover:text-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Create neighborhood
-            </Button>
-          )}
         </div>
         
         {/* Right side - notifications now embedded in main content */}
