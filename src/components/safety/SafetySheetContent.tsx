@@ -244,16 +244,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               )}
             </div>
 
-            {/* Badge underneath title */}
-            <div className="mb-4">
-              <Badge 
-                variant="outline" 
-                className="bg-red-100 text-red-800 border-red-200 font-medium border"
-              >
-                <TypeIcon className="w-3 h-3 mr-1.5" />
-                {typeConfig.label}
-              </Badge>
-            </div>
 
             {/* Compact Author Info Layout */}
             <div className="flex items-start gap-4">
@@ -282,11 +272,18 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               {/* Compact Info Section */}
               <div className="flex-1 min-w-0">
                 <div className="space-y-2">
-                  {/* Name and You badge - simplified */}
+                  {/* Name, badge, and You badge - simplified */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-lg font-bold text-gray-900">
                       {update.profiles?.display_name || 'Anonymous'}
                     </h3>
+                    <Badge 
+                      variant="outline" 
+                      className="bg-red-100 text-red-800 border-red-200 font-medium border"
+                    >
+                      <TypeIcon className="w-3 h-3 mr-1.5" />
+                      {typeConfig.label}
+                    </Badge>
                     {isCurrentUser && (
                       <span 
                         className="text-xs font-medium px-2 py-0.5 rounded-full"
