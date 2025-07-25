@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Activity } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import QuickActions from "@/components/QuickActions";
@@ -10,6 +11,9 @@ import { WelcomePopover } from "@/components/onboarding/WelcomePopover";
 const HomePage = () => {
   // State for controlling the welcome popover visibility
   const [showWelcomePopover, setShowWelcomePopover] = useState(false);
+  
+  // Get query client to refresh data when needed
+  const queryClient = useQueryClient();
 
   // Check if we should show the welcome popover on component mount
   useEffect(() => {
@@ -35,6 +39,12 @@ const HomePage = () => {
   const handleDismissWelcome = () => {
     console.log("[HomePage] Dismissing welcome popover");
     setShowWelcomePopover(false);
+    
+    // Refresh neighborhood context and activities when welcome popover is dismissed
+    // This ensures the new member sees the latest activity data
+    queryClient.invalidateQueries({ queryKey: ['activities'] });
+    queryClient.invalidateQueries({ queryKey: ['neighborhood'] });
+    queryClient.invalidateQueries({ queryKey: ['current-neighborhood'] });
   };
 
   return (

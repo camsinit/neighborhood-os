@@ -1,5 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { showSuccessToast, showErrorToast } from "@/utils/toast";
 import { useUser } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +42,7 @@ const OnboardingDialog = ({
   onOpenChange
 }: OnboardingDialogProps) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const user = useUser();
   
@@ -78,6 +80,13 @@ const OnboardingDialog = ({
         localStorage.setItem('showWelcomePopover', 'true');
         onOpenChange(false);
         navigate("/home");
+        
+        // Force refresh activities after navigation to ensure new member sees content
+        // Small delay to allow navigation to complete first
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['activities'] });
+          queryClient.invalidateQueries({ queryKey: ['neighborhood'] });
+        }, 100);
       }
       // Error handling is done in the submit function
     } catch (error: any) {
