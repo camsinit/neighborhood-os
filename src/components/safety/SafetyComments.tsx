@@ -367,7 +367,7 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
             ))}
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center py-12 px-6">
+          <div className="text-center py-6 px-6">
             <div className="max-w-sm mx-auto">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare className="h-8 w-8 text-gray-400" />
