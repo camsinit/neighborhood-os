@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Mail, Phone, Calendar, Users, Home } from "lucide-react";
+import { User, MapPin, Mail, Phone, Calendar, Users, Home, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { UserWithRole } from "@/types/roles";
 import { useUser } from '@supabase/auth-helpers-react';
@@ -26,6 +26,22 @@ interface NeighborSheetContentProps {
 const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentProps) => {
   const currentUser = useUser();
   const isCurrentUser = currentUser?.id === neighbor.id;
+
+  // Function to copy email to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // You could add a toast notification here if desired
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  // Function to truncate email for display
+  const truncateEmail = (email: string, maxLength: number = 25) => {
+    if (email.length <= maxLength) return email;
+    return email.slice(0, maxLength - 3) + '...';
+  };
 
   // Function to close the sheet
   const handleSheetClose = () => {
@@ -123,14 +139,23 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
                 {/* Email prominently displayed if visible */}
                 {neighbor.profiles?.email_visible && neighbor.profiles?.email && (
                   <div 
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-fit"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium max-w-full"
                     style={{ 
                       backgroundColor: 'hsl(var(--neighbors-color) / 0.05)', 
                       color: 'hsl(var(--neighbors-color))' 
                     }}
                   >
-                    <Mail className="h-4 w-4" />
-                    {neighbor.profiles.email}
+                    <Mail className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate flex-1 min-w-0">
+                      {truncateEmail(neighbor.profiles.email)}
+                    </span>
+                    <button
+                      onClick={() => copyToClipboard(neighbor.profiles.email)}
+                      className="flex-shrink-0 p-1 rounded hover:bg-black/5 transition-colors"
+                      title="Copy email address"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
                   </div>
                 )}
               </div>
