@@ -22,6 +22,7 @@ import { useNeighborActivities } from './hooks/useNeighborActivities';
 import { Activity, ActivityType } from '@/utils/queries/activities/types';
 import { createItemNavigationService } from '@/services/navigation/ItemNavigationService';
 import { HighlightableItemType } from '@/utils/highlight/types';
+import { getActivityColor } from '@/components/activity/utils/activityHelpers';
 
 /**
  * Props for the NeighborActivityTimeline component
@@ -30,6 +31,24 @@ interface NeighborActivityTimelineProps {
   neighborId: string;
   neighborName: string;
 }
+
+/**
+ * Parses activity title to extract the item name 
+ * Example: "Safety Update: Suspicious Activity" -> "Suspicious Activity"
+ */
+const parseActivityItemName = (title: string, activityType: ActivityType): string => {
+  // For most activities, remove the prefix to get the actual item name
+  if (title.includes(': ')) {
+    return title.split(': ')[1] || title;
+  }
+  
+  // For neighbor activities, return as-is
+  if (activityType === 'neighbor_joined' || activityType === 'profile_updated') {
+    return title;
+  }
+  
+  return title;
+};
 
 /**
  * Maps activity types to their display properties (icon, color, label)
@@ -41,63 +60,63 @@ const getActivityDisplayProps = (activityType: ActivityType) => {
         icon: Calendar,
         color: 'text-blue-500',
         bgColor: 'bg-blue-50',
-        label: 'created an event'
+        label: 'Created'
       };
     case 'safety_update':
       return {
         icon: Shield,
         color: 'text-red-500',
         bgColor: 'bg-red-50',
-        label: 'shared a safety update'
+        label: 'Shared'
       };
     case 'good_shared':
       return {
         icon: Gift,
         color: 'text-orange-500',
         bgColor: 'bg-orange-50',
-        label: 'shared an item'
+        label: 'Shared'
       };
     case 'good_requested':
       return {
         icon: Gift,
         color: 'text-orange-500',
         bgColor: 'bg-orange-50',
-        label: 'requested an item'
+        label: 'Requested'
       };
     case 'skill_offered':
       return {
         icon: Brain,
         color: 'text-green-500',
         bgColor: 'bg-green-50',
-        label: 'offered a skill'
+        label: 'Offered'
       };
     case 'skill_requested':
       return {
         icon: Brain,
         color: 'text-green-500',
         bgColor: 'bg-green-50',
-        label: 'requested help with a skill'
+        label: 'Requested'
       };
     case 'neighbor_joined':
       return {
         icon: Users,
         color: 'text-purple-500',
         bgColor: 'bg-purple-50',
-        label: 'joined the neighborhood'
+        label: 'Joined the neighborhood'
       };
     case 'profile_updated':
       return {
         icon: User,
         color: 'text-gray-500',
         bgColor: 'bg-gray-50',
-        label: 'updated their profile'
+        label: 'Updated their profile'
       };
     default:
       return {
         icon: MessageSquare,
         color: 'text-gray-500',
         bgColor: 'bg-gray-50',
-        label: 'was active'
+        label: 'Was active'
       };
   }
 };
@@ -136,6 +155,9 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
   const displayProps = getActivityDisplayProps(activity.activity_type);
   const IconComponent = displayProps.icon;
   
+  // Parse the item name from the activity title
+  const itemName = parseActivityItemName(activity.title, activity.activity_type);
+  
   // Create navigation service instance
   const navigationService = createItemNavigationService(navigate);
   
@@ -171,46 +193,43 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
         [`data-${getHighlightableType(activity.activity_type)}-id`]: activity.content_id
       } : {})}
     >
-      {/* Enhanced timeline line with better connectivity */}
+      {/* Enhanced timeline line with better connectivity - centered on icon */}
       {!isLast && (
         <div 
-          className="absolute left-[19px] top-10 bottom-2 w-0.5"
-          style={{ backgroundColor: 'hsl(var(--neighbors-color) / 0.25)' }}
+          className="absolute left-5 top-10 bottom-2 w-0.5 bg-gray-200"
         />
       )}
       
-      {/* Enhanced activity icon with better styling */}
+      {/* Activity icon with activity-specific colors */}
       <div 
-        className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm`}
-        style={{ 
-          borderColor: 'hsl(var(--neighbors-color) / 0.4)',
-          backgroundColor: 'hsl(var(--neighbors-color) / 0.1)'
-        }}
+        className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm ${displayProps.bgColor}`}
       >
         <IconComponent 
-          className="w-5 h-5" 
-          style={{ color: 'hsl(var(--neighbors-color))' }}
+          className={`w-5 h-5 ${displayProps.color}`}
         />
       </div>
       
       {/* Activity content with enhanced interactivity */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <p className={`text-sm font-medium ${isClickable ? 'hover:underline' : ''}`}>
-            {activity.title}
-          </p>
+          <div className={`text-sm ${isClickable ? 'hover:underline' : ''}`}>
+            {/* For neighbor activities, display as-is */}
+            {(activity.activity_type === 'neighbor_joined' || activity.activity_type === 'profile_updated') ? (
+              <span className="font-medium">{displayProps.label}</span>
+            ) : (
+              <span>
+                <span className="font-medium">{displayProps.label}</span>
+                <span className={`ml-1 font-medium ${displayProps.color}`}>
+                  {itemName}
+                </span>
+              </span>
+            )}
+          </div>
           <div className="flex items-center text-xs text-gray-500">
             <Clock className="w-3 h-3 mr-1" />
             {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
           </div>
         </div>
-        
-        <p className="text-xs text-gray-600 mt-1">
-          {displayProps.label}
-          {isClickable && (
-            <span className="ml-1 text-purple-600 text-xs">• Click to view</span>
-          )}
-        </p>
         
         {/* Show formatted date for older activities */}
         {new Date().getTime() - new Date(activity.created_at).getTime() > 7 * 24 * 60 * 60 * 1000 && (
