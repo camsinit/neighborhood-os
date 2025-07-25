@@ -23,6 +23,7 @@ import {
   useDeleteComment,
   SafetyComment 
 } from "@/hooks/useSafetyComments";
+import { useAutoResizeTextarea } from "@/components/hooks/use-auto-resize-textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -207,6 +208,12 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   const user = useUser();
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  
+  // Auto-resize textarea hook with reduced min height
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({ 
+    minHeight: 50, 
+    maxHeight: 200 
+  });
 
   // Fetch current user's profile for avatar
   const { data: currentUserProfile } = useQuery({
@@ -321,10 +328,14 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               
               <div className="flex-1 space-y-3">
                 <Textarea
+                  ref={textareaRef}
                   placeholder="Share a comment"
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="min-h-[100px] resize-none"
+                  onChange={(e) => {
+                    setNewComment(e.target.value);
+                    adjustHeight();
+                  }}
+                  className="min-h-[50px] resize-none"
                   disabled={createCommentMutation.isPending}
                 />
                 
