@@ -167,7 +167,7 @@ export function ImageField({ form }: ImageFieldProps) {
             ) : (
               // Upload area when no image is selected
               <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     {isUploading ? (
                       // Loading state
