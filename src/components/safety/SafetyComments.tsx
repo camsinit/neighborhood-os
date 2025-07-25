@@ -13,7 +13,9 @@ import {
   Edit, 
   Trash2, 
   Send,
-  Loader2
+  Loader2,
+  ImagePlus,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 import { 
@@ -24,6 +26,8 @@ import {
   SafetyComment 
 } from "@/hooks/useSafetyComments";
 import { useAutoResizeTextarea } from "@/components/hooks/use-auto-resize-textarea";
+import { uploadImage } from "@/components/goods/utils/imageUpload";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -209,6 +213,11 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   
+  // Image upload state
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  
   // Auto-resize textarea hook with reduced min height
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({ 
     minHeight: 50, 
@@ -236,11 +245,74 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
   const updateCommentMutation = useUpdateComment(safetyUpdateId);
   const deleteCommentMutation = useDeleteComment(safetyUpdateId);
 
+  // Handle image upload
+  const handleImageUpload = async (file: File) => {
+    if (!user?.id) {
+      toast.error("You must be logged in to upload images");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const imageUrl = await uploadImage(file, user.id);
+      if (imageUrl) {
+        setUploadedImage(imageUrl);
+        toast.success("Image uploaded successfully");
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+    // Reset the input value so the same file can be selected again
+    event.target.value = '';
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (imageFile) {
+      handleImageUpload(imageFile);
+    } else {
+      toast.error("Please drop an image file");
+    }
+  };
+
+  // Remove uploaded image
+  const removeUploadedImage = () => {
+    setUploadedImage(null);
+  };
+
   const handleSubmitComment = async () => {
     if (!newComment.trim() || !user) return;
 
     await createCommentMutation.mutateAsync(newComment);
     setNewComment('');
+    setUploadedImage(null); // Clear image after posting
   };
 
   const handleEditComment = async (commentId: string, content: string) => {
@@ -327,43 +399,106 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
               </Avatar>
               
               <div className="flex-1 space-y-3">
-                <Textarea
-                  ref={textareaRef}
-                  placeholder="Share a comment"
-                  value={newComment}
-                  onChange={(e) => {
-                    setNewComment(e.target.value);
-                    adjustHeight();
-                  }}
-                  className="min-h-[50px] resize-none"
-                  disabled={createCommentMutation.isPending}
-                />
+                {/* Image Preview - Show uploaded image at the top */}
+                {uploadedImage && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={uploadedImage} 
+                      alt="Uploaded attachment" 
+                      className="max-w-32 max-h-32 rounded-lg border border-gray-200 object-cover"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeUploadedImage}
+                      className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Textarea with drag & drop functionality */}
+                <div 
+                  className={`relative ${isDragOver ? 'ring-2 ring-blue-400 ring-opacity-75 rounded-md' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <Textarea
+                    ref={textareaRef}
+                    placeholder="Share a comment (you can drag & drop images here too)"
+                    value={newComment}
+                    onChange={(e) => {
+                      setNewComment(e.target.value);
+                      adjustHeight();
+                    }}
+                    className={`min-h-[50px] resize-none ${isDragOver ? 'bg-blue-50' : ''}`}
+                    disabled={createCommentMutation.isPending}
+                  />
+                  {isDragOver && (
+                    <div className="absolute inset-0 bg-blue-50 bg-opacity-50 rounded-md flex items-center justify-center pointer-events-none">
+                      <p className="text-blue-600 font-medium">Drop image here</p>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="flex justify-between items-center">
-                  <p className="text-xs text-gray-500">
-                    {newComment.length}/500 characters
-                  </p>
-                  <Button
-                    onClick={handleSubmitComment}
-                    disabled={
-                      createCommentMutation.isPending || 
-                      !newComment.trim() || 
-                      newComment.length > 500
-                    }
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    {createCommentMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Posting...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4 mr-2" />
-                        Post Comment
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-4">
+                    <p className="text-xs text-gray-500">
+                      {newComment.length}/500 characters
+                    </p>
+                    
+                    {/* Hidden file input for image upload */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                      id="image-upload"
+                      disabled={isUploadingImage}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {/* Image upload button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => document.getElementById('image-upload')?.click()}
+                      disabled={isUploadingImage}
+                      className="h-9"
+                    >
+                      {isUploadingImage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ImagePlus className="h-4 w-4" />
+                      )}
+                    </Button>
+                    
+                    {/* Submit button */}
+                    <Button
+                      onClick={handleSubmitComment}
+                      disabled={
+                        createCommentMutation.isPending || 
+                        !newComment.trim() || 
+                        newComment.length > 500
+                      }
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      {createCommentMutation.isPending ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Post Comment
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
