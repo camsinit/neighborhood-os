@@ -22,25 +22,33 @@ interface ImageCropDialogProps {
   onCropComplete: (croppedImageBlob: Blob) => void;
 }
 
-// Helper function to create a centered crop with 1:1 aspect ratio
+// Helper function to create a centered crop with 1:1 aspect ratio that ensures perfect circle
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
   aspect: number,
 ) {
-  return centerCrop(
-    makeAspectCrop(
-      {
-        unit: '%',
-        width: 90,
-      },
-      aspect,
-      mediaWidth,
-      mediaHeight,
-    ),
-    mediaWidth,
-    mediaHeight,
-  )
+  // Calculate the size for a perfect square crop based on the smaller dimension
+  const minDimension = Math.min(mediaWidth, mediaHeight);
+  
+  // Use 80% of the smaller dimension to ensure the crop fits well within the image
+  const cropSize = Math.min(minDimension * 0.8, Math.min(mediaWidth, mediaHeight));
+  
+  // Calculate the crop as a percentage of the image dimensions
+  const cropWidthPercent = (cropSize / mediaWidth) * 100;
+  const cropHeightPercent = (cropSize / mediaHeight) * 100;
+  
+  // Center the crop both horizontally and vertically
+  const xPercent = (100 - cropWidthPercent) / 2;
+  const yPercent = (100 - cropHeightPercent) / 2;
+  
+  return {
+    unit: '%' as const,
+    width: cropWidthPercent,
+    height: cropHeightPercent,
+    x: xPercent,
+    y: yPercent,
+  };
 }
 
 export const ImageCropDialog = ({
@@ -69,12 +77,20 @@ export const ImageCropDialog = ({
     }
   });
 
-  // Handle image load to set initial crop
+  // Handle image load to set initial crop - ensures perfect circle from the start
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    if (aspect) {
-      const { width, height } = e.currentTarget;
-      setCrop(centerAspectCrop(width, height, aspect));
-    }
+    const { width, height } = e.currentTarget;
+    // Always set a perfectly centered, square crop that will display as a circle
+    const initialCrop = centerAspectCrop(width, height, 1);
+    setCrop(initialCrop);
+    // Also set the completed crop so preview works immediately
+    setCompletedCrop({
+      unit: 'px',
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+    });
   }
 
   // Generate cropped image canvas for preview
@@ -140,9 +156,18 @@ export const ImageCropDialog = ({
   // Reset transformations
   const handleReset = () => {
     setScale(1);
-    if (imgRef.current && aspect) {
+    if (imgRef.current) {
       const { width, height } = imgRef.current;
-      setCrop(centerAspectCrop(width, height, aspect));
+      const resetCrop = centerAspectCrop(width, height, 1);
+      setCrop(resetCrop);
+      // Also reset the completed crop for immediate preview update
+      setCompletedCrop({
+        unit: 'px',
+        x: (resetCrop.x / 100) * width,
+        y: (resetCrop.y / 100) * height,
+        width: (resetCrop.width / 100) * width,
+        height: (resetCrop.height / 100) * height,
+      });
     }
   };
 
