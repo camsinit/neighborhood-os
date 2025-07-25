@@ -463,10 +463,8 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                       id="image-upload"
                       disabled={isUploadingImage}
                     />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    {/* Image upload button */}
+                    
+                    {/* Image upload button - left aligned */}
                     <Button
                       variant="outline"
                       size="sm"
@@ -480,30 +478,30 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                         <ImagePlus className="h-4 w-4" />
                       )}
                     </Button>
-                    
-                    {/* Submit button */}
-                    <Button
-                      onClick={handleSubmitComment}
-                      disabled={
-                        createCommentMutation.isPending || 
-                        !newComment.trim() || 
-                        newComment.length > 500
-                      }
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      {createCommentMutation.isPending ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Posting...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Post Comment
-                        </>
-                      )}
-                    </Button>
                   </div>
+                  
+                  {/* Submit button - right aligned */}
+                  <Button
+                    onClick={handleSubmitComment}
+                    disabled={
+                      createCommentMutation.isPending || 
+                      !newComment.trim() || 
+                      newComment.length > 500
+                    }
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    {createCommentMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Posting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Post Comment
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
