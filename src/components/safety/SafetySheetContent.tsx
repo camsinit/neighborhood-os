@@ -205,12 +205,19 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               <Calendar className="h-3.5 w-3.5" />
               <span>{formatTimeAgo(new Date(update.created_at))}</span>
             </div>
-            {/* Title and Action buttons row */}
-            <div className="flex items-start justify-between gap-4 mb-3">
-              <h1 className="text-xl font-bold text-gray-900 leading-tight flex-1">
+            {/* Title and date container */}
+            <div className="space-y-2 mb-3">
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">
                 {update.title}
               </h1>
-              
+              <div className="flex items-center gap-1 text-sm text-gray-600">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{formatTimeAgo(new Date(update.created_at))}</span>
+              </div>
+            </div>
+            
+            {/* Action buttons row */}
+            <div className="flex items-end justify-end gap-4 mb-3">
               {/* Action buttons for owner */}
               {user?.id === update.user_id && (
                 <div className="flex items-center gap-2">
