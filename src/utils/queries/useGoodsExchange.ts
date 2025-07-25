@@ -7,8 +7,7 @@ import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
  * This hook fetches all goods exchange items from the database
  * Now properly filtered by current neighborhood
  * 
- * It's specific to the Goods page and doesn't interact with the support_requests table
- * or any other page's data.
+ * It's specific to the Goods page and doesn't interact with deprecated tables.
  */
 export const useGoodsExchange = () => {
   // Get the current neighborhood context

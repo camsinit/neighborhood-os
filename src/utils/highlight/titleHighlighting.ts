@@ -49,19 +49,37 @@ export const highlightTitleContent = (
     contentMatch = title.match(yourPattern);
   }
   
-  // Pattern 3: Text after a colon (e.g., "John is hosting: Work Session")
+  // Pattern 3: "New item offered/requested: [title]" format
+  if (!contentMatch) {
+    const newItemPattern = /^New item (?:offered|requested):\s*(.+)$/i;
+    contentMatch = title.match(newItemPattern);
+  }
+  
+  // Pattern 4: Status patterns like "confirmed:", "cancelled:", "rescheduled:", "updated:"
+  if (!contentMatch) {
+    const statusPattern = /^(?:confirmed|cancelled|rescheduled|updated):\s*(.+)$/i;
+    contentMatch = title.match(statusPattern);
+  }
+  
+  // Pattern 5: "shared a [type] update: [title]" format
+  if (!contentMatch) {
+    const sharedUpdatePattern = /shared a \w+ update:\s*(.+)$/i;
+    contentMatch = title.match(sharedUpdatePattern);
+  }
+  
+  // Pattern 6: Text after a colon (e.g., "John is hosting: Work Session")
   if (!contentMatch) {
     const colonPattern = /:\s*([^:]+)$/;
     contentMatch = title.match(colonPattern);
   }
   
-  // Pattern 4: Quoted content (e.g., "John is offering "Lawn Mower"")
+  // Pattern 7: Quoted content (e.g., "John is offering "Lawn Mower"")
   if (!contentMatch) {
     const quotePattern = /"([^"]+)"|'([^']+)'/;
     contentMatch = title.match(quotePattern);
   }
   
-  // Pattern 5: Content after specific verbs
+  // Pattern 8: Content after specific verbs
   if (!contentMatch) {
     const verbPattern = /(hosting|offering|requesting|created|shared|confirmed|cancelled)\s+(.+?)(?:\s+(?:event|skill|session|item))?$/i;
     const verbMatch = title.match(verbPattern);
@@ -111,20 +129,20 @@ const getModuleType = (contentType: string): keyof typeof moduleThemeColors | un
   // Convert contentType to lowercase for case-insensitive matching
   const type = contentType.toLowerCase();
   
-  // Map content types to module types
+  // Map content types to module types (including deprecated types)
   if (type.includes('event')) {
     return 'calendar';
   }
-  if (type.includes('skill')) {
+  if (type.includes('skill') || type === 'skill_sessions') {
     return 'skills';
   }
-  if (type.includes('good')) {
+  if (type.includes('good') || type === 'goods_exchange') {
     return 'goods';
   }
   if (type.includes('safety')) {
     return 'safety';
   }
-  if (type.includes('neighbor')) {
+  if (type.includes('neighbor') || type === 'care' || type === 'care_requests' || type === 'support_requests') {
     return 'neighbors';
   }
   

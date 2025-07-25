@@ -17,8 +17,8 @@ import { toast } from "sonner";
  */
 interface ArchiveButtonProps {
   requestId: string;
-  // Make tableName a union type of valid table names instead of a generic string
-  tableName: "goods_exchange" | "skills_exchange" | "support_requests";
+  // Removed support_requests from valid table names (deprecated)
+  tableName: "goods_exchange" | "skills_exchange";
   onArchiveComplete?: () => void;
 }
 

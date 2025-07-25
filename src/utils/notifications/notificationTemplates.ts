@@ -61,16 +61,7 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
   },
 
 
-  skill_session_cancelled: {
-    id: 'skill_session_cancelled',
-    template: '{{actor}} cancelled the {{title}} session',
-    contentType: 'skill_sessions',
-    notificationType: 'skills',
-    actionType: 'view',
-    actionLabel: 'View Details',
-    relevanceScore: 2, // Medium - need to know but not urgent
-    description: 'When your skill session is cancelled'
-  },
+  // skill_session_cancelled template removed - skill sessions deprecated
 
   skill_offered: {
     id: 'skill_offered',

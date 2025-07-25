@@ -95,7 +95,7 @@ export const useRemoveNeighbor = () => {
           .eq('user_id', userId)
           .eq('neighborhood_id', currentNeighborhood.id),
 
-        // Note: care_requests table doesn't exist in current schema
+        // Note: support_requests and care_requests tables have been deprecated
       ]);
 
       console.log('[useRemoveNeighbor] Archived user content successfully');

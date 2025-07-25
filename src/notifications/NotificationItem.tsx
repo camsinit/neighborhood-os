@@ -32,9 +32,8 @@ const CONTENT_TYPE_COLORS: Record<string, string> = {
   'events': '#3B82F6',
   'event': '#3B82F6',
   
-  // Skills
+  // Skills (skill_sessions deprecated)
   'skills': '#22C55E',
-  'skill_sessions': '#22C55E',
   'skill': '#22C55E',
   
   // Goods/Freebies
@@ -77,7 +76,6 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
     case 'safety':
       return 'safety';
     case 'skills':
-    case 'skill_sessions':
       return 'skills';
     case 'goods':
       return 'goods';
