@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Calendar, AlertTriangle, Construction, Eye, Edit, Trash } from "lucide-react";
+import { User, Calendar, AlertTriangle, Construction, Eye, Edit, Trash, Info } from "lucide-react";
 import { format } from "date-fns";
 import ShareButton from "@/components/ui/share-button";
 import { useUser } from '@supabase/auth-helpers-react';
@@ -224,7 +224,10 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
             {/* Description */}
             {update.description && (
               <div>
-                <h3 className="font-semibold text-lg mb-2">Details</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="h-5 w-5 text-gray-600" />
+                  <h3 className="font-semibold text-lg">Details</h3>
+                </div>
                 <p className="text-gray-600 whitespace-pre-wrap">{update.description}</p>
               </div>
             )}
