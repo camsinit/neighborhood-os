@@ -81,8 +81,7 @@ const SkillsPageNavigation: React.FC<SkillsPageNavigationProps> = ({
         {/* Request Skill button - allows users to request help from neighbors */}
         {setIsSkillRequestSheetOpen && (
           <Button 
-            variant="outline"
-            className="whitespace-nowrap flex items-center gap-1.5 border-blue-500 text-blue-600 hover:bg-blue-50"
+            className="whitespace-nowrap flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white"
             onClick={() => setIsSkillRequestSheetOpen(true)}
           >
             <MessageSquare className="h-4 w-4" />
