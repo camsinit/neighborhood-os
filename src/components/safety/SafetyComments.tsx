@@ -454,10 +454,6 @@ export const SafetyComments: React.FC<SafetyCommentsProps> = ({
                 
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-4">
-                    <p className="text-xs text-gray-500">
-                      {newComment.length}/500 characters
-                    </p>
-                    
                     {/* Hidden file input for image upload */}
                     <input
                       type="file"
