@@ -342,6 +342,24 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
                       {update.profiles.years_lived_here} {update.profiles.years_lived_here === 1 ? 'year' : 'years'} in neighborhood
                     </div>
                   )}
+
+                  {/* Description section integrated into author card */}
+                  {update.description && (
+                    <div className="mt-4 space-y-2">
+                      <h4 className="font-medium text-gray-900 text-sm">Description</h4>
+                      <div 
+                        className="p-3 rounded-lg border"
+                        style={{ 
+                          backgroundColor: `${safetyTheme.primary}05`, 
+                          borderColor: `${safetyTheme.primary}15` 
+                        }}
+                      >
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm">
+                          {update.description}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -351,23 +369,6 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
         {/* Content section with improved styling */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            {/* Description section */}
-            {update.description && (
-              <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <div 
-                    className="w-1 h-5 rounded-full"
-                    style={{ backgroundColor: safetyTheme.primary }}
-                  />
-                  Description
-                </h3>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {update.description}
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Image section */}
             {update.image_url && (
