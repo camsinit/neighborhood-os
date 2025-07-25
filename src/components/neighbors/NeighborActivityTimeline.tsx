@@ -193,16 +193,9 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
         [`data-${getHighlightableType(activity.activity_type)}-id`]: activity.content_id
       } : {})}
     >
-      {/* Enhanced timeline line with better connectivity - centered on icon */}
-      {!isLast && (
-        <div 
-          className="absolute left-5 top-10 bottom-2 w-0.5 bg-gray-200"
-        />
-      )}
-      
-      {/* Activity icon with activity-specific colors */}
+      {/* Activity icon with activity-specific colors and solid background to break the line */}
       <div 
-        className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm ${displayProps.bgColor}`}
+        className={`relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm bg-white ${displayProps.bgColor}`}
       >
         <IconComponent 
           className={`w-5 h-5 ${displayProps.color}`}
@@ -333,7 +326,17 @@ const NeighborActivityTimeline: React.FC<NeighborActivityTimelineProps> = ({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="relative space-y-2">
+          {/* Continuous timeline line positioned behind all icons */}
+          {activities.length > 1 && (
+            <div 
+              className="absolute left-5 top-5 w-0.5 bg-gray-200" 
+              style={{ 
+                height: `calc(100% - 3rem)` // Extends from first icon to near the last icon
+              }}
+            />
+          )}
+          
           {activities.map((activity, index) => (
             <ActivityItem
               key={activity.id}
