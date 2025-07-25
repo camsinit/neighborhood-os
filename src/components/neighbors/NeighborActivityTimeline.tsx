@@ -228,21 +228,35 @@ const ActivityItem: React.FC<{ activity: Activity; isLast: boolean }> = ({
       
       {/* Activity content with enhanced interactivity - vertically centered with icon */}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <div className="flex items-center justify-between h-full">
-          <div className="text-sm">
+        <div className="flex items-center justify-between h-full group">
+          <div className="text-sm flex-1 min-w-0 relative">
             {/* For neighbor activities, display as-is */}
             {(activity.activity_type === 'neighbor_joined' || activity.activity_type === 'profile_updated') ? (
-              <span className="font-medium">{displayProps.label}</span>
+              <span className="font-medium truncate block group-hover:hidden">{displayProps.label}</span>
             ) : (
-              <span>
+              <span className="truncate block group-hover:hidden">
                 <span className="font-medium">{displayProps.label}</span>
                 <span className={`ml-1 font-medium ${displayProps.color}`}>
                   {itemName}
                 </span>
               </span>
             )}
+            
+            {/* Full text on hover - can overlay the time */}
+            <div className="absolute top-0 left-0 right-0 z-10 bg-white/95 backdrop-blur-sm px-2 py-1 rounded shadow-lg border border-gray-200 hidden group-hover:block">
+              {(activity.activity_type === 'neighbor_joined' || activity.activity_type === 'profile_updated') ? (
+                <span className="font-medium text-sm">{displayProps.label}</span>
+              ) : (
+                <span className="text-sm">
+                  <span className="font-medium">{displayProps.label}</span>
+                  <span className={`ml-1 font-medium ${displayProps.color}`}>
+                    {itemName}
+                  </span>
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center text-xs text-gray-500">
+          <div className="flex items-center text-xs text-gray-500 flex-shrink-0 ml-2">
             <Clock className="w-3 h-3 mr-1" />
             {formatShortTimeDistance(new Date(activity.created_at))}
           </div>
