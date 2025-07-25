@@ -187,7 +187,7 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
       <div className="h-full flex flex-col">
         {/* Enhanced header section with gradient background - matches neighbor directory pattern */}
         <div 
-          className="relative p-6 border-b"
+          className="relative p-6"
           style={{
             background: `linear-gradient(135deg, ${safetyTheme.primary}08 0%, ${safetyTheme.primary}03 50%, white 100%)`
           }}
