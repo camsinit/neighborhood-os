@@ -200,48 +200,47 @@ const SafetySheetContent = ({ update, onOpenChange }: SafetySheetContentProps) =
               borderColor: `${safetyTheme.primary}20`
             }}
           >
-            {/* Title and Badge Row */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <Badge 
-                    variant="outline" 
-                    className="bg-red-100 text-red-800 border-red-200 font-medium border"
+            {/* Title and Action buttons row */}
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <h1 className="text-xl font-bold text-gray-900 leading-tight flex-1">
+                {update.title}
+              </h1>
+              
+              {/* Action buttons for owner */}
+              {user?.id === update.user_id && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditMode(true)}
+                    className="text-gray-600 hover:text-gray-800 h-8 px-3"
                   >
-                    <TypeIcon className="w-3 h-3 mr-1.5" />
-                    {typeConfig.label}
-                  </Badge>
-                  
-                  {/* Action buttons for owner */}
-                  {user?.id === update.user_id && (
-                    <div className="flex items-center gap-2 ml-auto">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditMode(true)}
-                        className="text-gray-600 hover:text-gray-800 h-8 px-3"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="text-red-600 hover:text-red-800 h-8 px-3"
-                      >
-                        <Trash2 className="w-4 h-4 mr-1" />
-                        {isDeleting ? "Deleting..." : "Delete"}
-                      </Button>
-                    </div>
-                  )}
+                    <Edit className="w-4 h-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="text-red-600 hover:text-red-800 h-8 px-3"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </Button>
                 </div>
-                
-                <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                  {update.title}
-                </h1>
-              </div>
+              )}
+            </div>
+
+            {/* Badge underneath title */}
+            <div className="mb-4">
+              <Badge 
+                variant="outline" 
+                className="bg-red-100 text-red-800 border-red-200 font-medium border"
+              >
+                <TypeIcon className="w-3 h-3 mr-1.5" />
+                {typeConfig.label}
+              </Badge>
             </div>
 
             {/* Compact Author Info Layout */}
