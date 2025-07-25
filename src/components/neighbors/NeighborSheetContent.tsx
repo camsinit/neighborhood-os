@@ -127,19 +127,7 @@ const NeighborSheetContent = ({ neighbor, onOpenChange }: NeighborSheetContentPr
 
         {/* Action Buttons */}
         {!isCurrentUser && (
-          <div className="space-y-3 pt-4 border-t">
-            <Button className="w-full flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Send Message
-            </Button>
-            
-            {(neighbor.profiles?.email_visible || neighbor.profiles?.phone_visible) && (
-              <Button variant="outline" className="w-full flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Add to Favorites
-              </Button>
-            )}
-          </div>
+          <></>
         )}
 
         {isCurrentUser && (
