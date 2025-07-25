@@ -1,3 +1,4 @@
+
 /**
  * NotificationsList Component
  * 
@@ -41,7 +42,7 @@ export function NotificationsList() {
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Bell className="h-6 w-6" />
-            Notifications
+            Personal Notifications
             {unreadCount > 0 && (
               <div className="relative">
                 <div className="h-6 w-6 bg-red-500 rounded-full" />
