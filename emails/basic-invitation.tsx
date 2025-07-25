@@ -45,7 +45,7 @@ export const BasicInvitationEmail = ({
 }: BasicInvitationEmailProps) => (
   <Html>
     <Head />
-    <Preview>{actorName} invited you to join {neighborhoodName}</Preview>
+    <Preview>{actorName} invited you to join {neighborhoodName} - your operating system for a caring neighborhood</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>You're invited to join {neighborhoodName}!</Heading>
