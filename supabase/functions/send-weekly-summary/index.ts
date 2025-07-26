@@ -4,6 +4,7 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import React from 'npm:react@18.3.1'
 import { WeeklySummaryEmail } from './_templates/weekly-summary.tsx'
+import { corsHeaders, handleCorsPreflightRequest, successResponse, errorResponse } from '../_shared/cors.ts'
 
 // Initialize Claude API client
 const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY");
@@ -12,11 +13,6 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 interface WeeklySummaryRequest {
   neighborhoodId: string;
@@ -124,9 +120,8 @@ Return as JSON with these 4 keys.`;
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     const supabase = createClient(supabaseUrl, supabaseKey)
