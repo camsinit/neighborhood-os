@@ -175,23 +175,6 @@ export const CreateNeighborhoodDialog: React.FC<CreateNeighborhoodDialogProps> =
               )}
             />
 
-            {/* Address Field (Optional) */}
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address (Optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="e.g., 123 Main Street" 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* Timezone Field */}
             <FormField
