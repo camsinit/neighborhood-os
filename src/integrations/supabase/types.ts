@@ -1121,6 +1121,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_neighborhood_as_super_admin: {
+        Args: {
+          neighborhood_name: string
+          neighborhood_city?: string
+          neighborhood_state?: string
+          neighborhood_address?: string
+          neighborhood_timezone?: string
+        }
+        Returns: string
+      }
       create_unified_system_notification: {
         Args: {
           p_user_id: string
