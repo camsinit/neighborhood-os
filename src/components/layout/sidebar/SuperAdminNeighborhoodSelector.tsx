@@ -4,7 +4,7 @@
  * Allows super admins to switch between different neighborhoods easily.
  * Only visible to users with super_admin role.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronDown, Users, MapPin, Plus } from 'lucide-react';
 import { 
@@ -19,6 +19,8 @@ import { Button } from '@/components/ui/button';
 import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { useSuperAdminNeighborhoods } from '@/hooks/useSuperAdminNeighborhoods';
 import { useNeighborhood } from '@/contexts/neighborhood';
+import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeighborhoodDialog';
+import { useSuperAdminCreateNeighborhood } from '@/hooks/useSuperAdminCreateNeighborhood';
 
 export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const { isSuperAdmin } = useSuperAdminAccess();
   const { currentNeighborhood } = useNeighborhood();
   const { data: neighborhoods = [], isLoading } = useSuperAdminNeighborhoods();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
   // Don't render if not super admin
   if (!isSuperAdmin) {
@@ -109,18 +112,21 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
         </DropdownMenuContent>
       </DropdownMenu>
       
-      {/* Create New Neighborhood Button - Non-functional placeholder */}
+      {/* Create New Neighborhood Button */}
       <Button 
         variant="ghost" 
         className="w-full mt-2 text-sm font-normal justify-start"
-        onClick={() => {
-          // TODO: Implement create neighborhood functionality
-          console.log('Create neighborhood clicked');
-        }}
+        onClick={() => setIsCreateDialogOpen(true)}
       >
         <Plus className="h-4 w-4 mr-2" />
         Create Neighborhood
       </Button>
+
+      {/* Create Neighborhood Dialog */}
+      <CreateNeighborhoodDialog 
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      />
     </div>
   );
 };

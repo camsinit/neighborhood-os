@@ -26,6 +26,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateNeighborhood } from '@/hooks/useCreateNeighborhood';
+import { useSuperAdminCreateNeighborhood } from '@/hooks/useSuperAdminCreateNeighborhood';
+import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 
 /**
  * Form data interface for creating a new neighborhood
@@ -56,7 +58,16 @@ export const CreateNeighborhoodDialog: React.FC<CreateNeighborhoodDialogProps> =
   open,
   onOpenChange,
 }) => {
+  // Check if user is super admin to use appropriate creation hook
+  const { isSuperAdmin } = useSuperAdminAccess();
+  
+  // Use super admin hook if user is super admin, otherwise use regular hook
   const { createNeighborhood, isCreating } = useCreateNeighborhood();
+  const { createNeighborhoodAsSuperAdmin, isCreating: isSuperAdminCreating } = useSuperAdminCreateNeighborhood();
+  
+  // Determine which creation function and loading state to use
+  const handleCreateNeighborhood = isSuperAdmin ? createNeighborhoodAsSuperAdmin : createNeighborhood;
+  const isCreatingNeighborhood = isSuperAdmin ? isSuperAdminCreating : isCreating;
 
   // Initialize form with react-hook-form
   const form = useForm<CreateNeighborhoodFormData>({
@@ -73,7 +84,7 @@ export const CreateNeighborhoodDialog: React.FC<CreateNeighborhoodDialogProps> =
    * Handle form submission
    */
   const onSubmit = async (data: CreateNeighborhoodFormData) => {
-    const result = await createNeighborhood(data);
+    const result = await handleCreateNeighborhood(data);
     
     if (result) {
       // Close dialog and reset form on success
@@ -217,15 +228,15 @@ export const CreateNeighborhoodDialog: React.FC<CreateNeighborhoodDialogProps> =
                 type="button"
                 variant="outline"
                 onClick={() => handleDialogClose(false)}
-                disabled={isCreating}
+                disabled={isCreatingNeighborhood}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={isCreating}
+                disabled={isCreatingNeighborhood}
               >
-                {isCreating ? 'Creating...' : 'Create Neighborhood'}
+                {isCreatingNeighborhood ? 'Creating...' : 'Create Neighborhood'}
               </Button>
             </div>
           </form>
