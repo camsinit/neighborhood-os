@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Activity, useActivities } from "@/hooks/useActivities";
+import { Activity, usePaginatedActivities } from "@/hooks/useActivities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import ActivityItem from "./ActivityItem";
@@ -29,8 +29,11 @@ const ActivityFeed = () => {
     data: activities,
     isLoading,
     refetch,
-    isRefetching
-  } = useActivities();
+    isRefetching,
+    loadMoreActivities,
+    isLoadingMore,
+    hasMoreData
+  } = usePaginatedActivities();
   
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<ActivityGroup | null>(null);
@@ -245,16 +248,25 @@ const ActivityFeed = () => {
           </div>
         ))}
         
-        {/* Load more button */}
-        {displayCount < activityGroups.length && (
+        {/* Load more button - shows when there are more items locally OR more data available from server */}
+        {(displayCount < activityGroups.length || hasMoreData) && (
           <div className="flex justify-center pt-4">
             <Button 
               variant="outline" 
-              onClick={() => setDisplayCount(prev => prev + 4)} 
+              onClick={() => {
+                // If we have more local items to show, expand display count
+                if (displayCount < activityGroups.length) {
+                  setDisplayCount(prev => prev + 4);
+                } else if (hasMoreData) {
+                  // Otherwise, load more from server
+                  loadMoreActivities();
+                }
+              }}
+              disabled={isLoadingMore}
               className="w-full max-w-[200px]"
             >
-              <ChevronDown className="h-4 w-4 mr-2" />
-              Load More
+              <ChevronDown className={`h-4 w-4 mr-2 ${isLoadingMore ? 'animate-spin' : ''}`} />
+              {isLoadingMore ? 'Loading...' : 'Load More'}
             </Button>
           </div>
         )}

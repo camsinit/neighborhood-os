@@ -8,7 +8,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Activity, ActivityType, ActivityMetadata } from "@/utils/queries/activities/types";
 
 // Re-export types for consistency
@@ -41,11 +41,16 @@ const normalizeMetadata = (metadata: any): ActivityMetadata | null => {
 /**
  * Optimized activity fetching function with proper type casting
  * Combines all the complex logic from multiple services into one efficient query
+ * Now supports pagination with offset and limit parameters
  */
-const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[]> => {
+const fetchActivities = async (
+  neighborhoodId: string | null, 
+  limit: number = 20, 
+  offset: number = 0
+): Promise<Activity[]> => {
   if (!neighborhoodId) return [];
   
-  // Single optimized query with all necessary joins
+  // Single optimized query with all necessary joins and pagination support
   const { data: rawActivities, error } = await supabase
     .from('activities')
     .select(`
@@ -66,7 +71,7 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
     `)
     .eq('neighborhood_id', neighborhoodId)
     .order('created_at', { ascending: false })
-    .limit(20);
+    .range(offset, offset + limit - 1); // Supabase uses range for pagination
 
   if (error) throw error;
   
@@ -87,7 +92,7 @@ const fetchActivities = async (neighborhoodId: string | null): Promise<Activity[
 };
 
 /**
- * Main activities hook with real-time updates
+ * Main activities hook with real-time updates (original behavior)
  */
 export const useActivities = () => {
   const neighborhood = useCurrentNeighborhood();
@@ -127,4 +132,104 @@ export const useActivities = () => {
   }, [neighborhood?.id, query]);
   
   return query;
+};
+
+/**
+ * Hook for paginated activities with load more functionality
+ * Returns activities with ability to load more older items
+ */
+export const usePaginatedActivities = () => {
+  const neighborhood = useCurrentNeighborhood();
+  const [allActivities, setAllActivities] = useState<Activity[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  
+  // Initial load of activities
+  const query = useQuery({
+    queryKey: ["activities", neighborhood?.id],
+    queryFn: () => fetchActivities(neighborhood?.id || null, 20, 0),
+    enabled: !!neighborhood?.id,
+    refetchInterval: 30000, // 30 seconds
+    staleTime: 15000, // 15 seconds
+  });
+
+  // Update allActivities when initial data changes
+  useEffect(() => {
+    if (query.data) {
+      setAllActivities(query.data);
+      // If we got fewer than 20 items, there's no more data
+      setHasMoreData(query.data.length >= 20);
+    }
+  }, [query.data]);
+
+  // Function to load more activities
+  const loadMoreActivities = async () => {
+    if (!neighborhood?.id || isLoadingMore || !hasMoreData) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const moreActivities = await fetchActivities(
+        neighborhood.id, 
+        20, 
+        allActivities.length
+      );
+      
+      if (moreActivities.length === 0) {
+        setHasMoreData(false);
+      } else {
+        // Filter out any duplicates based on ID
+        const newActivities = moreActivities.filter(
+          newActivity => !allActivities.some(existing => existing.id === newActivity.id)
+        );
+        setAllActivities(prev => [...prev, ...newActivities]);
+        
+        // If we got fewer than 20 new items, there's no more data
+        if (moreActivities.length < 20) {
+          setHasMoreData(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading more activities:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Set up real-time subscription for activities
+  useEffect(() => {
+    if (!neighborhood?.id) return;
+    
+    const channel = supabase
+      .channel('activities-changes-paginated')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities',
+          filter: `neighborhood_id=eq.${neighborhood.id}`
+        },
+        () => {
+          // When new activities are added, refetch the initial page
+          // This keeps the most recent activities up to date
+          query.refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [neighborhood?.id, query]);
+  
+  return {
+    data: allActivities,
+    isLoading: query.isLoading,
+    isRefetching: query.isRefetching,
+    refetch: query.refetch,
+    loadMoreActivities,
+    isLoadingMore,
+    hasMoreData,
+    error: query.error
+  };
 };
