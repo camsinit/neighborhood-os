@@ -2,7 +2,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-// Removed lovable-tagger import to prevent blocked requests
+import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    // Component tagger disabled to prevent blocked analytics requests
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
