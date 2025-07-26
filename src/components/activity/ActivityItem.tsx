@@ -216,7 +216,7 @@ const ActivityItem = ({
               style={{ color: activityColor }} 
             />
           )}
-          <p className="text-base font-medium text-gray-900 truncate">
+          <p className="text-base font-medium text-foreground truncate">
             {activity.title}
           </p>
         </div>

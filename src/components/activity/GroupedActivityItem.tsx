@@ -101,8 +101,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               style={{ color: activityColor }} 
             />
           )}
-          <p className="text-base font-medium text-gray-900 truncate">
-            {groupText.charAt(0).toUpperCase() + groupText.slice(1)}
+          <p className="text-base font-medium text-foreground truncate">
+            {primaryActivity.profiles.display_name || "A neighbor"} {groupText}
           </p>
         </div>
 
