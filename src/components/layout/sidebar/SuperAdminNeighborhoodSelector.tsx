@@ -20,7 +20,7 @@ import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { useSuperAdminNeighborhoods } from '@/hooks/useSuperAdminNeighborhoods';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeighborhoodDialog';
-import { useSuperAdminCreateNeighborhood } from '@/hooks/useSuperAdminCreateNeighborhood';
+
 
 export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const navigate = useNavigate();
