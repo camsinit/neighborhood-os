@@ -22,7 +22,7 @@ const isDebugMode = () => {
 
 // Production-ready configuration with minimal logging by default
 const config: LoggerConfig = {
-  minLevel: process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+  minLevel: process.env.NODE_ENV === 'production' ? 'error' : 'error', // Only show errors
   enabled: true,
   debugMode: isDebugMode()
 };
