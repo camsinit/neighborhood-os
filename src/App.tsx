@@ -278,6 +278,22 @@ const App = () => {
                       </NeighborhoodAwareProtectedRoute>
                     }
                   />
+                  
+                  {/* Neighborhood-specific debug route - Super Admin only */}
+                  <Route
+                    path="/n/:neighborhoodId/debug"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <SuperAdminRoute>
+                          <MainLayout>
+                            <DebugPage />
+                          </MainLayout>
+                        </SuperAdminRoute>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  
+                  {/* Legacy debug route - Super Admin only */}
                   <Route
                     path="/debug"
                     element={
