@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSuperAdminAccess } from './useSuperAdminAccess';
 
 /**
  * Hook for creating new neighborhoods
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
  */
 export const useCreateNeighborhood = () => {
   const user = useUser();
+  const { isSuperAdmin } = useSuperAdminAccess();
   const [isCreating, setIsCreating] = useState(false);
 
   /**
@@ -34,7 +36,43 @@ export const useCreateNeighborhood = () => {
     setIsCreating(true);
 
     try {
-      // Create the neighborhood record
+      // Super admins use special function to bypass membership constraints
+      if (isSuperAdmin) {
+        const { data: newNeighborhoodId, error: rpcError } = await supabase.rpc(
+          'create_neighborhood_as_super_admin',
+          {
+            neighborhood_name: neighborhoodData.name,
+            neighborhood_city: neighborhoodData.city,
+            neighborhood_state: neighborhoodData.state,
+            neighborhood_address: neighborhoodData.address || '',
+            neighborhood_timezone: neighborhoodData.timezone,
+          }
+        );
+
+        if (rpcError) {
+          console.error('Error creating neighborhood as super admin:', rpcError);
+          toast.error('Failed to create neighborhood');
+          return null;
+        }
+
+        // Fetch the created neighborhood details
+        const { data: newNeighborhood, error: fetchError } = await supabase
+          .from('neighborhoods')
+          .select()
+          .eq('id', newNeighborhoodId)
+          .single();
+
+        if (fetchError) {
+          console.error('Error fetching created neighborhood:', fetchError);
+          toast.error('Failed to fetch created neighborhood');
+          return null;
+        }
+
+        toast.success(`Neighborhood "${neighborhoodData.name}" created successfully!`);
+        return newNeighborhood;
+      }
+
+      // Regular user flow: create neighborhood and add membership
       const { data: newNeighborhood, error: neighborhoodError } = await supabase
         .from('neighborhoods')
         .insert({
@@ -43,7 +81,7 @@ export const useCreateNeighborhood = () => {
           state: neighborhoodData.state,
           address: neighborhoodData.address || '',
           timezone: neighborhoodData.timezone,
-          created_by: user.id, // Add the required created_by field
+          created_by: user.id,
         })
         .select()
         .single();
