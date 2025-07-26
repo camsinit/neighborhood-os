@@ -89,15 +89,6 @@ export const AgreementsStep = ({
 
   return (
     <div className="space-y-6">
-      {/* Header explaining the agreements */}
-      <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold text-foreground">
-          Neighborhood Agreements
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          To create a welcoming community, we ask everyone to agree to these basic principles:
-        </p>
-      </div>
 
       {/* List of agreements with checkboxes */}
       <div className="space-y-4">
@@ -130,10 +121,6 @@ export const AgreementsStep = ({
         ))}
       </div>
 
-      {/* Footer note about community standards */}
-      <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-        By checking these boxes, you're helping us build a neighborhood where everyone feels welcome and supported.
-      </div>
     </div>
   );
 };
