@@ -1333,6 +1333,10 @@ export type Database = {
         Args: { user_uuid: string; neighborhood_uuid: string }
         Returns: boolean
       }
+      join_neighborhood_as_super_admin: {
+        Args: { neighborhood_uuid: string }
+        Returns: boolean
+      }
       log_security_event: {
         Args: {
           p_action_type: string

@@ -8,38 +8,36 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Enhanced neighborhood creation data including membership control
+// Simplified neighborhood creation data (super admins now always observe)
 interface SuperAdminNeighborhoodData {
   name: string;
   city?: string;
   state?: string;
   address?: string;
   timezone?: string;
-  joinAsMember: boolean; // New field to control super admin membership
 }
 
 export const useSuperAdminNeighborhoodCreation = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   /**
-   * Creates a neighborhood using the super admin function with membership control
-   * @param neighborhoodData - The neighborhood data including membership preference
+   * Creates a neighborhood as a ghost admin (observer mode only)
+   * @param neighborhoodData - The neighborhood data
    * @returns The created neighborhood ID or null if failed
    */
   const createNeighborhood = async (neighborhoodData: SuperAdminNeighborhoodData): Promise<string | null> => {
     setIsCreating(true);
     
     try {
-      console.log('[useSuperAdminNeighborhoodCreation] Creating neighborhood:', neighborhoodData);
+      console.log('[useSuperAdminNeighborhoodCreation] Creating neighborhood as observer:', neighborhoodData);
       
-      // Call the super admin neighborhood creation function with options
+      // Call the updated super admin neighborhood creation function (no membership)
       const { data, error } = await supabase.rpc('create_neighborhood_as_super_admin_with_options', {
         neighborhood_name: neighborhoodData.name,
         neighborhood_city: neighborhoodData.city || null,
         neighborhood_state: neighborhoodData.state || null, 
         neighborhood_address: neighborhoodData.address || null,
-        neighborhood_timezone: neighborhoodData.timezone || 'America/Los_Angeles',
-        join_as_member: neighborhoodData.joinAsMember
+        neighborhood_timezone: neighborhoodData.timezone || 'America/Los_Angeles'
       });
 
       if (error) {
@@ -50,8 +48,7 @@ export const useSuperAdminNeighborhoodCreation = () => {
 
       console.log('[useSuperAdminNeighborhoodCreation] Neighborhood created successfully:', data);
       
-      const membershipStatus = neighborhoodData.joinAsMember ? 'as member' : 'as observer';
-      toast.success(`Neighborhood "${neighborhoodData.name}" created successfully ${membershipStatus}!`);
+      toast.success(`Neighborhood "${neighborhoodData.name}" created successfully as observer!`);
       
       return data; // This is the neighborhood ID
       
@@ -107,9 +104,41 @@ export const useSuperAdminNeighborhoodCreation = () => {
     }
   };
 
+  /**
+   * Allows super admin to join as an actual member of a neighborhood
+   * @param neighborhoodId - The ID of the neighborhood to join
+   * @returns Success status
+   */
+  const joinAsActualMember = async (neighborhoodId: string): Promise<boolean> => {
+    try {
+      console.log('[useSuperAdminNeighborhoodCreation] Joining neighborhood as member:', neighborhoodId);
+      
+      const { data, error } = await supabase.rpc('join_neighborhood_as_super_admin', {
+        neighborhood_uuid: neighborhoodId
+      });
+
+      if (error) {
+        console.error('[useSuperAdminNeighborhoodCreation] Error joining neighborhood:', error);
+        toast.error(`Failed to join neighborhood: ${error.message}`);
+        return false;
+      }
+
+      console.log('[useSuperAdminNeighborhoodCreation] Successfully joined as member:', data);
+      toast.success('Successfully joined neighborhood as member!');
+      
+      return true;
+      
+    } catch (error: any) {
+      console.error('[useSuperAdminNeighborhoodCreation] Unexpected error joining:', error);
+      toast.error('An unexpected error occurred while joining the neighborhood.');
+      return false;
+    }
+  };
+
   return {
     createNeighborhood,
     createAdminInvitation,
+    joinAsActualMember,
     isCreating
   };
 };

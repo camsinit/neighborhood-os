@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, Users, MapPin, Plus } from 'lucide-react';
+import { ChevronDown, Users, MapPin, Plus, Eye, UserCheck } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { useSuperAdminNeighborhoods } from '@/hooks/useSuperAdminNeighborhoods';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeighborhoodDialog';
+import { useGhostMode } from '@/hooks/useActualMembership';
 
 
 export const SuperAdminNeighborhoodSelector: React.FC = () => {
@@ -29,6 +30,9 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const { currentNeighborhood } = useNeighborhood();
   const { data: neighborhoods = [], isLoading } = useSuperAdminNeighborhoods();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  
+  // Check ghost mode status for current neighborhood
+  const { isGhostMode, isActualMember } = useGhostMode(currentNeighborhood?.id || null);
   
   // Don't render if not super admin
   if (!isSuperAdmin) {
@@ -65,7 +69,24 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
           >
             <div className="flex items-center space-x-2">
               <MapPin className="h-4 w-4" />
-              <span className="truncate">{currentNeighborhoodName}</span>
+              <div className="flex flex-col items-start min-w-0">
+                <span className="truncate text-sm">{currentNeighborhoodName}</span>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  {isGhostMode ? (
+                    <>
+                      <Eye className="h-3 w-3" />
+                      Observer
+                    </>
+                  ) : isActualMember ? (
+                    <>
+                      <UserCheck className="h-3 w-3" />
+                      Member
+                    </>
+                  ) : (
+                    'Admin'
+                  )}
+                </div>
+              </div>
             </div>
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>

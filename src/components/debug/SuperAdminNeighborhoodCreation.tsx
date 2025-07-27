@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Mail, Loader2, UserPlus, Eye } from 'lucide-react';
+import { Plus, Mail, Loader2, Eye } from 'lucide-react';
 import { useSuperAdminNeighborhoodCreation } from '@/hooks/useSuperAdminNeighborhoodCreation';
 import { toast } from 'sonner';
 
@@ -22,7 +22,6 @@ interface NeighborhoodFormData {
   state: string;
   address: string;
   timezone: string;
-  joinAsMember: boolean;
 }
 
 interface AdminInvitationData {
@@ -37,8 +36,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
     city: '',
     state: '',
     address: '',
-    timezone: 'America/Los_Angeles',
-    joinAsMember: false
+    timezone: 'America/Los_Angeles'
   });
 
   // State for admin invitation
@@ -52,7 +50,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
   const [createdNeighborhoodName, setCreatedNeighborhoodName] = useState<string>('');
   const [isInviting, setIsInviting] = useState(false);
 
-  const { createNeighborhood, createAdminInvitation, isCreating } = useSuperAdminNeighborhoodCreation();
+  const { createNeighborhood, createAdminInvitation, joinAsActualMember, isCreating } = useSuperAdminNeighborhoodCreation();
 
   /**
    * Handles form input changes for neighborhood creation
@@ -100,8 +98,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
       city: formData.city || undefined,
       state: formData.state || undefined,
       address: formData.address || undefined,
-      timezone: formData.timezone,
-      joinAsMember: formData.joinAsMember
+      timezone: formData.timezone
     });
 
     if (neighborhoodId) {
@@ -114,8 +111,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
         city: '',
         state: '',
         address: '',
-        timezone: 'America/Los_Angeles',
-        joinAsMember: false
+        timezone: 'America/Los_Angeles'
       });
 
       console.log('[SuperAdminNeighborhoodCreation] Neighborhood created successfully:', neighborhoodId);
@@ -181,7 +177,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
             Create New Neighborhood
           </CardTitle>
           <CardDescription>
-            Create a new neighborhood with control over your membership status
+            Create a new neighborhood as an observer for debugging and oversight
           </CardDescription>
         </CardHeader>
         
@@ -264,30 +260,15 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
               />
             </div>
 
-            {/* Membership Control */}
-            <div className="flex items-center justify-between rounded-lg border border-border p-4">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  {formData.joinAsMember ? (
-                    <UserPlus className="h-4 w-4 text-primary" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  )}
-                  <Label className="text-sm font-medium">
-                    {formData.joinAsMember ? 'Join as Member' : 'Observer Only'}
-                  </Label>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {formData.joinAsMember 
-                    ? 'You will be added as an active member of this neighborhood'
-                    : 'You will only observe this neighborhood without participating'
-                  }
-                </p>
+            {/* Ghost Admin Info */}
+            <div className="rounded-lg border border-border p-4 bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Observer Mode</Label>
               </div>
-              <Switch
-                checked={formData.joinAsMember}
-                onCheckedChange={(checked) => handleFormChange('joinAsMember', checked)}
-              />
+              <p className="text-xs text-muted-foreground">
+                Super admins create neighborhoods as observers by default. You can view and debug without participating in community activities.
+              </p>
             </div>
 
             {/* Submit Button */}
