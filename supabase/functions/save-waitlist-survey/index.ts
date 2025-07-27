@@ -88,6 +88,14 @@ serve(async (req) => {
       return errorResponse("Email not found in waitlist", 400);
     }
 
+    // Calculate priority score using database function
+    const { data: priorityData } = await supabase
+      .rpc('calculate_priority_score', {
+        neighbors_count: neighborsToOnboard,
+        ai_experience: aiCodingExperience,
+        open_source: openSourceInterest
+      });
+
     // Insert survey response into database
     const { data, error } = await supabase
       .from("waitlist_survey_responses")
@@ -100,7 +108,8 @@ serve(async (req) => {
         state,
         neighbors_to_onboard: neighborsToOnboard,
         ai_coding_experience: aiCodingExperience,
-        open_source_interest: openSourceInterest
+        open_source_interest: openSourceInterest,
+        priority_score: priorityData || 0
       })
       .select("id, priority_score");
 
