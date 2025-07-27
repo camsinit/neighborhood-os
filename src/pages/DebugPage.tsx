@@ -14,6 +14,8 @@ import { RLSDiagnosticsPanel } from '@/components/debug/RLSDiagnosticsPanel';
 import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
 import { EmailTestingPanel } from '@/components/debug/EmailTestingPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
+import { SuperAdminNeighborhoodCreation } from '@/components/debug/SuperAdminNeighborhoodCreation';
+import { WaitlistManagementPanel } from '@/components/debug/WaitlistManagementPanel';
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
@@ -180,35 +182,29 @@ const DebugPage = () => {
             <EmailTestingPanel />
           </TabsContent>
           
-          {/* Users Debug Tab - Super Admin Tools */}
-          <TabsContent value="users" className="mt-4">
+          {/* Neighborhoods Tab - Enhanced Super Admin Tools */}
+          <TabsContent value="users" className="mt-4 space-y-6">
+            {/* Super Admin Neighborhood Creation */}
+            <SuperAdminNeighborhoodCreation />
+            
+            {/* Waitlist Management */}
+            <WaitlistManagementPanel />
+            
+            {/* Neighborhood Switcher */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5" />
-                  Neighborhood Debug
+                  Neighborhood Switcher
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent>
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Neighborhood Switcher</h3>
+                  <h3 className="text-lg font-medium mb-2">Current Neighborhood</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Switch between different neighborhoods to debug community-specific issues, view neighborhood data, and test features across communities.
                   </p>
                   <SuperAdminNeighborhoodSelector />
-                </div>
-                
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium mb-2">Future Neighborhood Debugging Tools</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Additional neighborhood debugging tools are coming soon:
-                  </p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Neighborhood configuration analysis</li>
-                    <li>• Community health metrics</li>
-                    <li>• Member activity patterns</li>
-                    <li>• Event and activity diagnostics</li>
-                  </ul>
                 </div>
               </CardContent>
             </Card>

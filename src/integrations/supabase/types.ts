@@ -1074,6 +1074,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_admin_invitation: {
+        Args: { invitation_code: string }
+        Returns: Json
+      }
       add_initial_super_admin: {
         Args: { admin_email: string }
         Returns: undefined
