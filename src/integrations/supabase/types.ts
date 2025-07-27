@@ -1121,6 +1121,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_admin_invitation: {
+        Args: {
+          target_email: string
+          target_neighborhood_id: string
+          invitation_message?: string
+        }
+        Returns: string
+      }
       create_neighborhood_as_super_admin: {
         Args: {
           neighborhood_name: string
