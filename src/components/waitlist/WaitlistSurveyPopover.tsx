@@ -34,7 +34,7 @@ const WaitlistSurveyPopover = ({
   
   // Custom hooks for form management
   const { formData, updateField, validateStep1, validateStep2 } = useWaitlistSurveyForm(userEmail);
-  const { currentPage, goToNext, isFirstStep, isLastStep } = useWaitlistSurveyNavigation();
+  const { currentPage, goToNext, goToPrevious, isFirstStep, isLastStep } = useWaitlistSurveyNavigation();
   const { isSubmitting, submitSurvey } = useWaitlistSurveySubmit(onClose);
 
   /**
@@ -74,37 +74,47 @@ const WaitlistSurveyPopover = ({
 
         {/* Navigation buttons */}
         <div className="flex justify-between pt-4">
-          <button 
-            type="button"
-            onClick={async () => {
-              try {
-                // Call join-waitlist function to ensure confirmation email is sent
-                const response = await fetch('https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/join-waitlist', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ email: userEmail }),
-                });
+          {isFirstStep ? (
+            <button 
+              type="button"
+              onClick={async () => {
+                try {
+                  // Call join-waitlist function to ensure confirmation email is sent
+                  const response = await fetch('https://nnwzfliblfuldwxpuata.supabase.co/functions/v1/join-waitlist', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: userEmail }),
+                  });
 
-                const result = await response.json();
-                
-                toast({
-                  title: "Thanks for your interest!",
-                  description: "We'll keep you in the loop on all neighborhoodOS updates! Check your email for confirmation."
-                });
-              } catch (error) {
-                toast({
-                  title: "Thanks for your interest!",
-                  description: "We'll keep you in the loop on all neighborhoodOS updates!"
-                });
-              }
-              onClose();
-            }}
-            className="text-sm text-blue-600 hover:text-blue-700 underline transition-colors"
-          >
-            I just want to stay in the loop
-          </button>
+                  const result = await response.json();
+                  
+                  toast({
+                    title: "Thanks for your interest!",
+                    description: "We'll keep you in the loop on all neighborhoodOS updates! Check your email for confirmation."
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Thanks for your interest!",
+                    description: "We'll keep you in the loop on all neighborhoodOS updates!"
+                  });
+                }
+                onClose();
+              }}
+              className="text-sm text-blue-600 hover:text-blue-700 underline transition-colors"
+            >
+              I just want to stay in the loop
+            </button>
+          ) : (
+            <Button 
+              variant="outline" 
+              onClick={goToPrevious}
+              className="flex items-center gap-2"
+            >
+              Back
+            </Button>
+          )}
 
           {isFirstStep ? (
             <Button onClick={goToNext} disabled={!canProceed()} className="flex items-center gap-2">
