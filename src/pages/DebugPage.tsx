@@ -58,7 +58,7 @@ const DebugPage = () => {
         </div>
         
         {/* Main Debug Interface */}
-        <Tabs defaultValue="emails" className="w-full">
+        <Tabs defaultValue="users" className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
