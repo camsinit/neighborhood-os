@@ -39,13 +39,12 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
     return null;
   }
 
-  // Handle neighborhood selection
+  // Simplified and reliable neighborhood selection handler
   const handleNeighborhoodSelect = (neighborhoodId: string) => {
-    // Navigate to the same page but with the new neighborhood ID
     const currentPath = window.location.pathname;
     const pathWithoutNeighborhood = currentPath.replace(/^\/n\/[^\/]+/, '');
     const newPath = `/n/${neighborhoodId}${pathWithoutNeighborhood || '/home'}`;
-    navigate(newPath);
+    navigate(newPath, { replace: true }); // Use replace to avoid navigation history buildup
   };
 
   // Get the current neighborhood from URL params

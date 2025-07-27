@@ -31,7 +31,7 @@ interface AdminInvitationData {
 }
 
 export const SuperAdminNeighborhoodCreation: React.FC = () => {
-  // Form state for neighborhood creation
+  // Simplified state management - combine related states
   const [formData, setFormData] = useState<NeighborhoodFormData>({
     name: '',
     city: '',
@@ -40,45 +40,30 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
     timezone: 'America/Los_Angeles'
   });
 
-  // State for admin invitation
   const [invitationData, setInvitationData] = useState<AdminInvitationData>({
     email: '',
     message: ''
   });
 
-  // Track created neighborhood for invitation functionality
-  const [createdNeighborhoodId, setCreatedNeighborhoodId] = useState<string | null>(null);
-  const [createdNeighborhoodName, setCreatedNeighborhoodName] = useState<string>('');
-  
-  // Toggle state for showing/hiding the creation form
-  const [isFormExpanded, setIsFormExpanded] = useState<boolean>(false);
-  const [isInviting, setIsInviting] = useState(false);
+  // Single state object for UI management
+  const [uiState, setUiState] = useState({
+    isFormExpanded: false,
+    isInviting: false,
+    createdNeighborhoodId: null as string | null,
+    createdNeighborhoodName: ''
+  });
 
   const { createNeighborhood, createAdminInvitation, joinAsActualMember, isCreating } = useSuperAdminNeighborhoodCreation();
 
-  /**
-   * Handles form input changes for neighborhood creation
-   */
-  const handleFormChange = (field: keyof NeighborhoodFormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // Simplified event handlers - no need for detailed comments for simple functions
+  const handleFormChange = (field: keyof NeighborhoodFormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  /**
-   * Handles form input changes for admin invitation
-   */
   const handleInvitationChange = (field: keyof AdminInvitationData, value: string) => {
-    setInvitationData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setInvitationData(prev => ({ ...prev, [field]: value }));
   };
 
-  /**
-   * Validates the neighborhood creation form
-   */
   const validateForm = (): boolean => {
     if (!formData.name.trim()) {
       toast.error('Neighborhood name is required');
@@ -92,10 +77,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
    */
   const handleCreateNeighborhood = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-
-    console.log('[SuperAdminNeighborhoodCreation] Creating neighborhood:', formData);
 
     const neighborhoodId = await createNeighborhood({
       name: formData.name,
@@ -106,8 +88,11 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
     });
 
     if (neighborhoodId) {
-      setCreatedNeighborhoodId(neighborhoodId);
-      setCreatedNeighborhoodName(formData.name);
+      setUiState(prev => ({
+        ...prev,
+        createdNeighborhoodId: neighborhoodId,
+        createdNeighborhoodName: formData.name
+      }));
       
       // Reset form
       setFormData({
@@ -117,8 +102,6 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
         address: '',
         timezone: 'America/Los_Angeles'
       });
-
-      console.log('[SuperAdminNeighborhoodCreation] Neighborhood created successfully:', neighborhoodId);
     }
   };
 
@@ -128,7 +111,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
   const handleSendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!createdNeighborhoodId) {
+    if (!uiState.createdNeighborhoodId) {
       toast.error('Please create a neighborhood first before sending invitations.');
       return;
     }
@@ -138,36 +121,25 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
       return;
     }
 
-    setIsInviting(true);
+    setUiState(prev => ({ ...prev, isInviting: true }));
 
     try {
-      console.log('[SuperAdminNeighborhoodCreation] Sending admin invitation:', {
-        email: invitationData.email,
-        neighborhoodId: createdNeighborhoodId,
-        message: invitationData.message
-      });
-
       const invitationId = await createAdminInvitation(
         invitationData.email,
-        createdNeighborhoodId,
+        uiState.createdNeighborhoodId,
         invitationData.message || undefined
       );
 
       if (invitationId) {
-        // Reset invitation form
-        setInvitationData({
-          email: '',
-          message: ''
-        });
-        
-        // Clear created neighborhood state to allow for new creation
-        setCreatedNeighborhoodId(null);
-        setCreatedNeighborhoodName('');
-
-        console.log('[SuperAdminNeighborhoodCreation] Admin invitation sent successfully:', invitationId);
+        setInvitationData({ email: '', message: '' });
+        setUiState(prev => ({
+          ...prev,
+          createdNeighborhoodId: null,
+          createdNeighborhoodName: ''
+        }));
       }
     } finally {
-      setIsInviting(false);
+      setUiState(prev => ({ ...prev, isInviting: false }));
     }
   };
 
@@ -176,7 +148,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
       {/* Compact Toggle for Neighborhood Creation */}
       <Button
         variant="outline"
-        onClick={() => setIsFormExpanded(!isFormExpanded)}
+        onClick={() => setUiState(prev => ({ ...prev, isFormExpanded: !prev.isFormExpanded }))}
         className="w-full justify-between h-auto p-3"
       >
         <div className="flex items-center gap-2">
@@ -186,7 +158,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
             (Observer Mode)
           </span>
         </div>
-        {isFormExpanded ? (
+        {uiState.isFormExpanded ? (
           <ChevronDown className="h-4 w-4" />
         ) : (
           <ChevronRight className="h-4 w-4" />
@@ -194,7 +166,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
       </Button>
 
       {/* Expandable Neighborhood Creation Form */}
-      {isFormExpanded && (
+      {uiState.isFormExpanded && (
         <Card>
           <CardContent className="pt-6">
           <form onSubmit={handleCreateNeighborhood} className="space-y-4">
@@ -317,7 +289,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
       )}
 
       {/* Admin Invitation Section */}
-      {createdNeighborhoodId && (
+      {uiState.createdNeighborhoodId && (
         <>
           <Separator />
           
@@ -328,7 +300,7 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
                 Invite Neighborhood Admin
               </CardTitle>
               <CardDescription>
-                Send an admin invitation for "{createdNeighborhoodName}"
+                Send an admin invitation for "{uiState.createdNeighborhoodName}"
               </CardDescription>
             </CardHeader>
             
@@ -364,10 +336,10 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
 
                 <Button
                   type="submit"
-                  disabled={isInviting}
+                  disabled={uiState.isInviting}
                   className="w-full"
                 >
-                  {isInviting ? (
+                  {uiState.isInviting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Sending Invitation...

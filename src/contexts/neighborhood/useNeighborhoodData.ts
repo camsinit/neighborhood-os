@@ -53,11 +53,10 @@ export function useNeighborhoodData(
       return;
     }
 
-    // Don't refetch if we already have the right neighborhood (unless forced)
+    // More reliable neighborhood switching - always fetch when URL changes
     const targetId = isSuperAdmin && neighborhoodIdFromUrl ? neighborhoodIdFromUrl : null;
-    if (!forceRefresh && currentNeighborhood && 
-        ((targetId && currentNeighborhood.id === targetId) || 
-         (!targetId && currentNeighborhood))) {
+    if (!forceRefresh && currentNeighborhood && targetId && currentNeighborhood.id === targetId) {
+      setIsLoading(false);
       return;
     }
 
