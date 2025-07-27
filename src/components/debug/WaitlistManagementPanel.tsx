@@ -96,57 +96,62 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
   };
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-sm font-medium text-foreground">
+    <div className="border border-border bg-card rounded-lg p-3">
+      {/* Compact header row with all key info */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          {/* Name and email in compact form */}
+          <div className="min-w-0">
+            <div className="font-medium text-sm text-foreground truncate">
               {response.first_name} {response.last_name}
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
+            </div>
+            <div className="text-xs text-muted-foreground truncate">
               {response.email}
-            </CardDescription>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Star className="h-3 w-3 text-primary" />
-            <span className="text-xs font-medium text-primary">{response.priority_score}</span>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
-        {/* Neighborhood Info */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          
+          {/* Location info */}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
             <MapPin className="h-3 w-3" />
-            <span>{response.neighborhood_name}</span>
+            <span className="truncate">{response.city}, {response.state}</span>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {response.city}, {response.state}
+          
+          {/* Neighborhood name */}
+          <div className="text-xs font-medium text-foreground truncate">
+            "{response.neighborhood_name}"
           </div>
         </div>
+        
+        {/* Priority score */}
+        <div className="flex items-center gap-1 shrink-0">
+          <Star className="h-3 w-3 text-primary" />
+          <span className="text-xs font-medium text-primary">{response.priority_score}</span>
+        </div>
+      </div>
 
-        {/* Response Details */}
-        <div className="flex flex-wrap gap-1">
-          <Badge variant="secondary" className="text-xs">
+      {/* Compact info row with badges and actions */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Badges in horizontal layout */}
+        <div className="flex gap-1 min-w-0 flex-1">
+          <Badge variant="secondary" className="text-xs px-1.5 py-0.5 shrink-0">
             {response.neighbors_to_onboard} neighbors
           </Badge>
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs px-1.5 py-0.5 shrink-0 truncate">
             {response.ai_coding_experience}
           </Badge>
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs px-1.5 py-0.5 shrink-0 truncate">
             {response.open_source_interest}
           </Badge>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        {/* Compact action buttons */}
+        <div className="flex gap-1 shrink-0">
           <Button
             size="sm"
             variant="default"
             onClick={handleCreateNeighborhood}
             disabled={isCreating || createdNeighborhoodId !== null}
-            className="flex-1"
+            className="h-7 px-2 text-xs"
           >
             {isCreating ? (
               <>
@@ -161,7 +166,7 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
             ) : (
               <>
                 <UserPlus className="h-3 w-3 mr-1" />
-                Create Neighborhood
+                Create
               </>
             )}
           </Button>
@@ -171,7 +176,7 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
             variant="outline"
             onClick={handleSendAdminInvitation}
             disabled={!createdNeighborhoodId || isInviting}
-            className="flex-1"
+            className="h-7 px-2 text-xs"
           >
             {isInviting ? (
               <>
@@ -181,13 +186,13 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
             ) : (
               <>
                 <Mail className="h-3 w-3 mr-1" />
-                Send Admin Invite
+                Invite
               </>
             )}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -277,7 +282,7 @@ export const WaitlistManagementPanel: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {waitlistResponses.map((response) => (
             <WaitlistItem
               key={response.id}
