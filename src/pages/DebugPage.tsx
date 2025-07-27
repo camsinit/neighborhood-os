@@ -61,13 +61,13 @@ const DebugPage = () => {
         {/* Main Debug Interface */}
         <Tabs defaultValue="emails" className="w-full">
           <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="emails" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Emails
-            </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Neighborhoods
+            </TabsTrigger>
+            <TabsTrigger value="emails" className="flex items-center gap-2">
+              <Mail className="w-4 h-4" />
+              Emails
             </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <TestTube className="w-4 h-4" />
