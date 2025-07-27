@@ -5,7 +5,7 @@
  * Now supports URL-based neighborhood selection for super admins
  * while maintaining single neighborhood per user for regular users.
  */
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useParams } from 'react-router-dom';
 import { useNeighborhoodData } from './useNeighborhoodData';
@@ -46,6 +46,18 @@ export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({
   // Check if user is super admin
   const { isSuperAdmin, isLoading: isLoadingSuperAdmin } = useSuperAdminAccess();
   
+  // Add debug logging for URL parameter changes (for problematic user)
+  useEffect(() => {
+    if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      console.log('[DEBUG - User 74bf...] NeighborhoodProvider - URL params changed:', {
+        neighborhoodIdFromUrl,
+        isSuperAdmin,
+        isLoadingSuperAdmin,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [neighborhoodIdFromUrl, isSuperAdmin, isLoadingSuperAdmin, user?.id]);
+
   // Initialize the neighborhood data hook with URL awareness
   const { 
     currentNeighborhood,

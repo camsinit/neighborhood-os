@@ -72,7 +72,8 @@ export function useNeighborhoodData(
   useEffect(() => {
     if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
       console.log('[DEBUG - User 74bf...] useNeighborhoodData - enhanced mode:', {
-        currentNeighborhood,
+        currentNeighborhood: currentNeighborhood?.name,
+        currentNeighborhoodId: currentNeighborhood?.id,
         isLoading,
         error,
         shouldUseSuperAdminMode,
@@ -99,6 +100,16 @@ export function useNeighborhoodData(
     if (isAuthStable) {
       const forceRefresh = fetchAttempts > 0;
       
+      // Add debug logging for the problematic user
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        console.log('[DEBUG - User 74bf...] useNeighborhoodData - triggering fetch:', {
+          shouldUseSuperAdminMode,
+          neighborhoodIdFromUrl,
+          forceRefresh,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       if (shouldUseSuperAdminMode) {
         // Use super admin mode - fetch by ID
         superAdminNeighborhoodHook.fetchNeighborhoodById(forceRefresh);
@@ -112,7 +123,7 @@ export function useNeighborhoodData(
     user, 
     fetchAttempts, 
     shouldUseSuperAdminMode,
-    neighborhoodIdFromUrl,
+    neighborhoodIdFromUrl, // This ensures re-fetch when URL parameter changes
     regularNeighborhoodHook.fetchNeighborhood,
     superAdminNeighborhoodHook.fetchNeighborhoodById
   ]);

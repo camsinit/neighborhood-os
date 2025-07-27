@@ -41,14 +41,32 @@ export function useFetchNeighborhoodById(
 
   // The main fetch function that retrieves neighborhood data by ID
   const fetchNeighborhoodById = useCallback(async (forceRefresh = false) => {
+    // Add debug logging for the problematic user
+    if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+      logger.debug("[DEBUG - User 74bf...] fetchNeighborhoodById called:", {
+        neighborhoodId,
+        currentNeighborhoodId: currentNeighborhood?.id,
+        forceRefresh,
+        isSuperAdmin,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // Skip if no user, no neighborhood ID, or not super admin
     if (!user || !neighborhoodId || !isSuperAdmin) {
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        logger.debug("[DEBUG - User 74bf...] Skipping fetch:", { user: !!user, neighborhoodId, isSuperAdmin });
+      }
       setIsLoading(false);
       return;
     }
 
-    // If we already have the current neighborhood and not forcing refresh, we're done
+    // Always fetch if the neighborhood ID is different, or if forcing refresh
+    // Remove the early return that was preventing switching between neighborhoods
     if (currentNeighborhood?.id === neighborhoodId && !forceRefresh) {
+      if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+        logger.debug("[DEBUG - User 74bf...] Already have this neighborhood, skipping");
+      }
       setIsLoading(false);
       return;
     }
@@ -74,6 +92,13 @@ export function useFetchNeighborhoodById(
 
       if (neighborhood) {
         logger.debug("Found neighborhood:", neighborhood.name);
+        if (user?.id === '74bf3085-8275-4eb2-a721-8c8e91b3d3d8') {
+          logger.debug("[DEBUG - User 74bf...] Setting new neighborhood:", {
+            from: currentNeighborhood?.name,
+            to: neighborhood.name,
+            id: neighborhood.id
+          });
+        }
         setCurrentNeighborhood(neighborhood as Neighborhood);
         completeFetch(startTime);
         return;
@@ -92,7 +117,8 @@ export function useFetchNeighborhoodById(
     user, 
     neighborhoodId,
     isSuperAdmin,
-    currentNeighborhood,
+    // Remove currentNeighborhood from dependencies to avoid stale closures
+    // that prevent switching between neighborhoods
     startFetch,
     completeFetch,
     handleFetchError,
