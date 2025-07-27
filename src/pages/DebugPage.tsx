@@ -15,7 +15,6 @@ import { ActivityDebugPanel } from '@/components/debug/ActivityDebugPanel';
 import { EmailTestingPanel } from '@/components/debug/EmailTestingPanel';
 import LoggingControls from '@/components/debug/LoggingControls';
 import { SuperAdminNeighborhoodCreation } from '@/components/debug/SuperAdminNeighborhoodCreation';
-import { WaitlistManagementPanel } from '@/components/debug/WaitlistManagementPanel';
 import OnboardingDialog from '@/components/onboarding/OnboardingDialog';
 import SurveyDialog from '@/components/onboarding/SurveyDialog';
 import { SkillsOnboardingDialog } from '@/components/skills/SkillsOnboardingDialog';
@@ -205,9 +204,6 @@ const DebugPage = () => {
             
             {/* Super Admin Neighborhood Creation */}
             <SuperAdminNeighborhoodCreation />
-            
-            {/* Waitlist Management */}
-            <WaitlistManagementPanel />
           </TabsContent>
           
           {/* Logging Controls Tab */}

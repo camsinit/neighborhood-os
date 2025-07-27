@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Plus, Mail, Loader2, Eye, ChevronDown, ChevronRight } from 'lucide-react';
+import { WaitlistManagementPanel } from './WaitlistManagementPanel';
 import { useSuperAdminNeighborhoodCreation } from '@/hooks/useSuperAdminNeighborhoodCreation';
 import { toast } from 'sonner';
 
@@ -304,6 +305,13 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
               )}
             </Button>
           </form>
+          
+          {/* Separator between form and waitlist */}
+          <div className="border-t border-border my-6"></div>
+          
+          {/* Waitlist Management integrated within same container */}
+          <WaitlistManagementPanel />
+          
           </CardContent>
         </Card>
       )}
