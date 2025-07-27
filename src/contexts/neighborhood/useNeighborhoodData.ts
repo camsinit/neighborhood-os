@@ -53,9 +53,12 @@ export function useNeighborhoodData(
       return;
     }
 
-    // More reliable neighborhood switching - always fetch when URL changes
+    // Use a ref to check current neighborhood without including it in dependencies
+    const currentId = currentNeighborhood?.id;
     const targetId = isSuperAdmin && neighborhoodIdFromUrl ? neighborhoodIdFromUrl : null;
-    if (!forceRefresh && currentNeighborhood && targetId && currentNeighborhood.id === targetId) {
+    
+    // Skip fetch if we already have the target neighborhood (unless forced)
+    if (!forceRefresh && currentId && targetId && currentId === targetId) {
       setIsLoading(false);
       return;
     }
@@ -68,7 +71,8 @@ export function useNeighborhoodData(
         userId: user.id,
         isSuperAdmin,
         neighborhoodIdFromUrl,
-        targetId
+        targetId,
+        currentId
       });
 
       let neighborhood: Neighborhood | null = null;
@@ -127,7 +131,17 @@ export function useNeighborhoodData(
         }
       }
 
-      setCurrentNeighborhood(neighborhood);
+      // Only update state if the neighborhood actually changed
+      setCurrentNeighborhood(prev => {
+        if (prev?.id !== neighborhood?.id) {
+          logger.debug("Neighborhood changed:", { 
+            from: prev?.id, 
+            to: neighborhood?.id 
+          });
+          return neighborhood;
+        }
+        return prev;
+      });
       
     } catch (err: any) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -136,7 +150,7 @@ export function useNeighborhoodData(
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthStable, user, isSuperAdmin, neighborhoodIdFromUrl, currentNeighborhood]);
+  }, [isAuthStable, user, isSuperAdmin, neighborhoodIdFromUrl]); // REMOVED currentNeighborhood from dependencies
 
   // Manual refresh function
   const refreshNeighborhoodData = useCallback(() => {

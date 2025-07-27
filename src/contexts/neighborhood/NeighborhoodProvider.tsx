@@ -5,7 +5,7 @@
  * Now supports URL-based neighborhood selection for super admins
  * while maintaining single neighborhood per user for regular users.
  */
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { useParams } from 'react-router-dom';
 import { useNeighborhoodData } from './useNeighborhoodData';
@@ -67,14 +67,14 @@ export const NeighborhoodProvider: React.FC<{ children: React.ReactNode }> = ({
     refreshNeighborhoodData,
   } = useNeighborhoodData(user, neighborhoodIdFromUrl, isSuperAdmin);
 
-  // Create the context value with enhanced data model
-  const contextValue: NeighborhoodContextType = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue: NeighborhoodContextType = useMemo(() => ({
     currentNeighborhood,
     isLoading: isLoading || isLoadingSuperAdmin,
     error,
     setCurrentNeighborhood,
     refreshNeighborhoodData,
-  };
+  }), [currentNeighborhood, isLoading, isLoadingSuperAdmin, error, setCurrentNeighborhood, refreshNeighborhoodData]);
 
   return (
     <NeighborhoodContext.Provider value={contextValue}>
