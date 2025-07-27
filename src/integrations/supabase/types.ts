@@ -1313,6 +1313,10 @@ export type Database = {
           joined_at: string
         }[]
       }
+      is_actual_member: {
+        Args: { user_uuid: string; neighborhood_uuid: string }
+        Returns: boolean
+      }
       is_super_admin: {
         Args: { user_uuid: string }
         Returns: boolean
