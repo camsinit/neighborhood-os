@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Mail, Loader2, Eye } from 'lucide-react';
+import { Plus, Mail, Loader2, Eye, ChevronDown, ChevronRight } from 'lucide-react';
 import { useSuperAdminNeighborhoodCreation } from '@/hooks/useSuperAdminNeighborhoodCreation';
 import { toast } from 'sonner';
 
@@ -48,6 +48,9 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
   // Track created neighborhood for invitation functionality
   const [createdNeighborhoodId, setCreatedNeighborhoodId] = useState<string | null>(null);
   const [createdNeighborhoodName, setCreatedNeighborhoodName] = useState<string>('');
+  
+  // Toggle state for showing/hiding the creation form
+  const [isFormExpanded, setIsFormExpanded] = useState<boolean>(false);
   const [isInviting, setIsInviting] = useState(false);
 
   const { createNeighborhood, createAdminInvitation, joinAsActualMember, isCreating } = useSuperAdminNeighborhoodCreation();
@@ -169,19 +172,30 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Neighborhood Creation Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Create New Neighborhood
-          </CardTitle>
-          <CardDescription>
-            Create a new neighborhood as an observer for debugging and oversight
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
+      {/* Compact Toggle for Neighborhood Creation */}
+      <Button
+        variant="outline"
+        onClick={() => setIsFormExpanded(!isFormExpanded)}
+        className="w-full justify-between h-auto p-3"
+      >
+        <div className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          <span className="font-medium">Create New Neighborhood</span>
+          <span className="text-sm text-muted-foreground">
+            (Observer Mode)
+          </span>
+        </div>
+        {isFormExpanded ? (
+          <ChevronDown className="h-4 w-4" />
+        ) : (
+          <ChevronRight className="h-4 w-4" />
+        )}
+      </Button>
+
+      {/* Expandable Neighborhood Creation Form */}
+      {isFormExpanded && (
+        <Card>
+          <CardContent className="pt-6">
           <form onSubmit={handleCreateNeighborhood} className="space-y-4">
             {/* Basic Information */}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -290,8 +304,9 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Admin Invitation Section */}
       {createdNeighborhoodId && (
