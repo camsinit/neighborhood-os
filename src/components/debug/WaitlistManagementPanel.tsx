@@ -277,7 +277,7 @@ export const WaitlistManagementPanel: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-3">
           {waitlistResponses.map((response) => (
             <WaitlistItem
               key={response.id}
