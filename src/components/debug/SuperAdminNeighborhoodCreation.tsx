@@ -277,16 +277,14 @@ export const SuperAdminNeighborhoodCreation: React.FC = () => {
               )}
             </Button>
           </form>
-          
-          {/* Separator between form and waitlist */}
-          <div className="border-t border-border my-6"></div>
-          
-          {/* Waitlist Management integrated within same container */}
-          <WaitlistManagementPanel />
-          
           </CardContent>
         </Card>
       )}
+
+      {/* Waitlist Management - Separate section */}
+      <div>
+        <WaitlistManagementPanel />
+      </div>
 
       {/* Admin Invitation Section */}
       {uiState.createdNeighborhoodId && (
