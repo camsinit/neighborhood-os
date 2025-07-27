@@ -1144,14 +1144,22 @@ export type Database = {
         Returns: string
       }
       create_neighborhood_as_super_admin_with_options: {
-        Args: {
-          neighborhood_name: string
-          neighborhood_city?: string
-          neighborhood_state?: string
-          neighborhood_address?: string
-          neighborhood_timezone?: string
-          join_as_member?: boolean
-        }
+        Args:
+          | {
+              neighborhood_name: string
+              neighborhood_city?: string
+              neighborhood_state?: string
+              neighborhood_address?: string
+              neighborhood_timezone?: string
+            }
+          | {
+              neighborhood_name: string
+              neighborhood_city?: string
+              neighborhood_state?: string
+              neighborhood_address?: string
+              neighborhood_timezone?: string
+              join_as_member?: boolean
+            }
         Returns: string
       }
       create_unified_system_notification: {
