@@ -184,12 +184,6 @@ const DebugPage = () => {
           
           {/* Neighborhoods Tab - Enhanced Super Admin Tools */}
           <TabsContent value="users" className="mt-4 space-y-6">
-            {/* Super Admin Neighborhood Creation */}
-            <SuperAdminNeighborhoodCreation />
-            
-            {/* Waitlist Management */}
-            <WaitlistManagementPanel />
-            
             {/* Neighborhood Switcher */}
             <Card>
               <CardHeader>
@@ -208,6 +202,12 @@ const DebugPage = () => {
                 </div>
               </CardContent>
             </Card>
+            
+            {/* Super Admin Neighborhood Creation */}
+            <SuperAdminNeighborhoodCreation />
+            
+            {/* Waitlist Management */}
+            <WaitlistManagementPanel />
           </TabsContent>
           
           {/* Logging Controls Tab */}
