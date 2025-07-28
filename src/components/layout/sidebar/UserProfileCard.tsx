@@ -103,7 +103,7 @@ const UserProfileCard = () => {
         
         {/* Settings Gear Icon */}
         <Link 
-          to="/settings" 
+          to={currentNeighborhood ? `/n/${currentNeighborhood.id}/settings` : "/settings"}
           className="p-1 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
           aria-label="Open settings"
         >
