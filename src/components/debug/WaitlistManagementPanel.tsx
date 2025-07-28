@@ -10,9 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, UserPlus, Copy, MapPin, Star, Check } from 'lucide-react';
+import { Loader2, Copy, MapPin, Star, Check, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSuperAdminNeighborhoodCreation } from '@/hooks/useSuperAdminNeighborhoodCreation';
+import { getTimezoneForState } from '@/utils/timezone';
 
 // Type definition for waitlist survey response
 interface WaitlistSurveyResponse {
@@ -54,11 +55,12 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
     setIsProcessing(true);
     
     try {
+      // Create neighborhood data with automatically detected timezone based on state
       const neighborhoodData = {
         name: response.neighborhood_name,
         city: response.city,
         state: response.state,
-        timezone: 'America/Los_Angeles', // Default timezone
+        timezone: getTimezoneForState(response.state), // Automatically detect timezone based on state
         joinAsMember: false // Super admin creates as observer only for waitlist neighborhoods
       };
 
