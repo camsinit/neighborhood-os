@@ -4,9 +4,9 @@
  * Allows super admins to switch between different neighborhoods easily.
  * Only visible to users with super_admin role.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, Users, MapPin, Plus, Eye, UserCheck } from 'lucide-react';
+import { ChevronDown, Users, MapPin, Eye, UserCheck } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { useSuperAdminNeighborhoods } from '@/hooks/useSuperAdminNeighborhoods';
 import { useNeighborhood } from '@/contexts/neighborhood';
-import { CreateNeighborhoodDialog } from '@/components/neighborhoods/CreateNeighborhoodDialog';
 import { useGhostMode } from '@/hooks/useActualMembership';
 
 
@@ -29,7 +28,6 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const { isSuperAdmin } = useSuperAdminAccess();
   const { currentNeighborhood } = useNeighborhood();
   const { data: neighborhoods = [], isLoading } = useSuperAdminNeighborhoods();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   
   // Check ghost mode status for current neighborhood
   const { isGhostMode, isActualMember } = useGhostMode(currentNeighborhood?.id || null);
@@ -131,22 +129,6 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      
-      {/* Create New Neighborhood Button */}
-      <Button 
-        variant="ghost" 
-        className="w-full mt-2 text-sm font-normal justify-start"
-        onClick={() => setIsCreateDialogOpen(true)}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Create Neighborhood
-      </Button>
-
-      {/* Create Neighborhood Dialog */}
-      <CreateNeighborhoodDialog 
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-      />
     </div>
   );
 };

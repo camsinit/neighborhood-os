@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useNeighborhood } from "@/contexts/neighborhood";
-import { Settings } from "lucide-react";
+import { Settings, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useGhostMode } from "@/hooks/useActualMembership";
 
 /**
  * UserProfileCard component
@@ -21,6 +22,9 @@ const UserProfileCard = () => {
   
   // Get current neighborhood context
   const { currentNeighborhood } = useNeighborhood();
+  
+  // Check if user is in ghost mode for this neighborhood
+  const { isGhostMode } = useGhostMode(currentNeighborhood?.id || null);
 
   // Fetch user profile data from our profiles table
   const { data: profile } = useQuery({
@@ -65,22 +69,28 @@ const UserProfileCard = () => {
   return (
     <div className="p-4 bg-muted/40">
       <div className="flex items-center gap-3">
-        {/* User Avatar */}
-        <Avatar className="h-10 w-10">
-          <AvatarImage 
-            src={profile?.avatar_url || undefined} 
-            alt={`${displayName}'s profile picture`} 
-          />
-          <AvatarFallback className="bg-primary/10 text-primary font-medium">
-            {getInitials(displayName)}
-          </AvatarFallback>
-        </Avatar>
+        {/* User Avatar - Show ghost mode indicator if in ghost mode */}
+        {isGhostMode ? (
+          <div className="h-10 w-10 rounded-full bg-warning/10 border border-warning/20 flex items-center justify-center">
+            <Eye className="h-5 w-5 text-warning" />
+          </div>
+        ) : (
+          <Avatar className="h-10 w-10">
+            <AvatarImage 
+              src={profile?.avatar_url || undefined} 
+              alt={`${displayName}'s profile picture`} 
+            />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {getInitials(displayName)}
+            </AvatarFallback>
+          </Avatar>
+        )}
         
         {/* User Info Section */}
         <div className="flex-1 min-w-0">
-          {/* User Display Name */}
+          {/* User Display Name or Ghost Mode Status */}
           <div className="font-medium text-sm text-foreground truncate">
-            {displayName}
+            {isGhostMode ? "Observer Mode" : displayName}
           </div>
           
           {/* Current Neighborhood Name */}
