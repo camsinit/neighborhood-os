@@ -15,10 +15,10 @@ export const isJoinPage = (location: Location): boolean => {
 };
 
 /**
- * Check if the current path is the home page
+ * Check if the current path is the home page (legacy or neighborhood-aware)
  */
 export const isHomePage = (location: Location): boolean => {
-  return location.pathname === '/home';
+  return location.pathname === '/home' || location.pathname.includes('/home');
 };
 
 /**

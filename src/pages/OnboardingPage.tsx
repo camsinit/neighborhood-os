@@ -64,9 +64,9 @@ const OnboardingPage = () => {
           // If profile doesn't exist, user needs onboarding
           setNeedsOnboarding(true);
         } else if (data?.completed_onboarding) {
-          console.log("[OnboardingPage] User has completed onboarding - redirecting to home");
+          console.log("[OnboardingPage] User has completed onboarding - redirecting to dashboard");
           setNeedsOnboarding(false);
-          navigate("/home");
+          navigate("/dashboard");
         } else {
           console.log("[OnboardingPage] User needs to complete onboarding");
           setNeedsOnboarding(true);
@@ -109,7 +109,7 @@ const OnboardingPage = () => {
       open={needsOnboarding} 
       onOpenChange={(open) => {
         if (!open) {
-          navigate("/home");
+          navigate("/dashboard");
         }
       }}
     />

@@ -37,10 +37,10 @@ const SuperAdminRoute = ({ children }: SuperAdminRouteProps) => {
     );
   }
 
-  // If user is not a super admin, show error and redirect
+  // If user is not a super admin, show error and redirect to their neighborhood home
   if (!isSuperAdmin) {
     toast.error('Access denied. Super Admin privileges required.');
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // User has super admin access, render the protected content

@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import UnifiedInviteDialog from "@/components/invite/UnifiedInviteDialog";
 import { useSuperAdminAccess } from "@/hooks/useSuperAdminAccess";
 import { useCanAccessAdminPage } from "@/hooks/useCanAccessAdminPage";
+import { useCurrentNeighborhood } from "@/hooks/useCurrentNeighborhood";
 import { cn } from "@/lib/utils";
 
 /**
@@ -29,6 +30,9 @@ interface ActionButtonsProps {
 const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   // Get current user for profile image
   const user = useUser();
+  
+  // Get current neighborhood for routing
+  const currentNeighborhood = useCurrentNeighborhood();
   
   // Check if user has super admin access for debug page
   const { isSuperAdmin } = useSuperAdminAccess();
@@ -58,6 +62,15 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
   const displayName = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User';
   
   /**
+   * Generate neighborhood-aware path for navigation
+   */
+  const getNeighborhoodAwarePath = (path: string): string => {
+    return currentNeighborhood?.id 
+      ? `/n/${currentNeighborhood.id}${path}` 
+      : path; // Fallback for legacy routes
+  };
+
+  /**
    * Handle invite button click - open the unified invite dialog
    */
   const handleInviteClick = () => {
@@ -79,7 +92,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
 
       {/* Modules navigation - using bold on hover instead of color change */}
       <NavLink
-        to="/modules"
+        to={getNeighborhoodAwarePath("/modules")}
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
@@ -96,7 +109,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {/* Admin navigation - only visible to admins and stewards */}
       {canAccessAdmin && (
         <NavLink
-          to="/admin"
+          to={getNeighborhoodAwarePath("/admin")}
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-3 py-2 text-gray-900 rounded-lg transition-all",
@@ -114,7 +127,7 @@ const ActionButtons = ({ onOpenSettings }: ActionButtonsProps) => {
       {/* Debug navigation - only visible to Super Admins, styled consistently */}
       {isSuperAdmin && (
         <NavLink
-          to="/debug"
+          to={getNeighborhoodAwarePath("/debug")}
           className={({ isActive }) =>
             cn(
               "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",

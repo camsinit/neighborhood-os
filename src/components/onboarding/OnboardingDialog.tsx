@@ -73,11 +73,11 @@ const OnboardingDialog = ({
         // Clear the pending invite from localStorage since it's been processed
         clearPendingInvite();
         
-        // Simplified transition: Set welcome flag and navigate immediately
+        // Simplified transition: Set welcome flag and navigate to dashboard
         // The welcome popover will handle its own animation timing
         localStorage.setItem('showWelcomePopover', 'true');
         onOpenChange(false);
-        navigate("/home");
+        navigate("/dashboard");
       }
       // Error handling is done in the submit function
     } catch (error: any) {

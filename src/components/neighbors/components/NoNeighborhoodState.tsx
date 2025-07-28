@@ -69,10 +69,10 @@ export const NoNeighborhoodState = () => {
       
       if (joinError) throw joinError;
       
-      // Success! Refresh neighborhood data and navigate home
+      // Success! Refresh neighborhood data and navigate to dashboard
       toast.success("Successfully joined Terrific Terrace!");
       await refreshNeighborhoodData();
-      navigate("/home");
+      navigate("/dashboard");
       
     } catch (err) {
       console.error("Error joining test neighborhood:", err);

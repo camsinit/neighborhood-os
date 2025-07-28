@@ -9,6 +9,7 @@ import { HighlightableItemType } from './types';
 
 /**
  * Maps item types to their respective routes in the application
+ * These are base routes that will be made neighborhood-aware by the navigation function
  */
 export const routeMap: Record<HighlightableItemType, string> = {
   safety: "/safety",
