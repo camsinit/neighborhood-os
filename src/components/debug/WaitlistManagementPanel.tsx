@@ -274,7 +274,8 @@ export const WaitlistManagementPanel: React.FC = () => {
   const processedCount = processedResponses.size;
 
   return (
-    <div className="space-y-4">
+    <Card>
+      <CardContent className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -307,6 +308,7 @@ export const WaitlistManagementPanel: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
