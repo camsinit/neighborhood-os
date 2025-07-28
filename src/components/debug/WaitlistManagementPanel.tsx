@@ -4,7 +4,7 @@
  * This component displays waitlist survey responses and provides functionality
  * for super admins to create neighborhoods from waitlist data and send admin invitations.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,9 @@ interface WaitlistSurveyResponse {
   created_at: string;
 }
 
+// Button state type for clarity
+type ButtonState = 'create' | 'create-invite' | 'copy-invite';
+
 interface WaitlistItemProps {
   response: WaitlistSurveyResponse;
   onNeighborhoodCreated: (neighborhoodId: string, response: WaitlistSurveyResponse) => void;
@@ -44,8 +47,74 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [buttonState, setButtonState] = useState<ButtonState>('create');
+  const [isLoadingInitialState, setIsLoadingInitialState] = useState(true);
   
   const { createNeighborhood, createAdminInvitation, isCreating } = useSuperAdminNeighborhoodCreation();
+
+  /**
+   * Check on mount if a neighborhood and/or invitation already exists for this waitlist entry
+   */
+  useEffect(() => {
+    const checkExistingState = async () => {
+      try {
+        console.log('[WaitlistItem] Checking existing state for:', response.neighborhood_name);
+        
+        // First, check if a neighborhood already exists with matching name, city, and state
+        const { data: existingNeighborhoods, error: neighborhoodError } = await supabase
+          .from('neighborhoods')
+          .select('id')
+          .eq('name', response.neighborhood_name)
+          .eq('city', response.city)
+          .eq('state', response.state);
+
+        if (neighborhoodError) {
+          console.error('[WaitlistItem] Error checking existing neighborhoods:', neighborhoodError);
+          return;
+        }
+
+        // If we found a matching neighborhood
+        if (existingNeighborhoods && existingNeighborhoods.length > 0) {
+          const neighborhoodId = existingNeighborhoods[0].id;
+          setCreatedNeighborhoodId(neighborhoodId);
+          
+          // Now check if an invitation exists for this email and neighborhood
+          const { data: existingInvitations, error: invitationError } = await supabase
+            .from('invitations')
+            .select('invite_code')
+            .eq('email', response.email)
+            .eq('neighborhood_id', neighborhoodId)
+            .eq('status', 'pending');
+
+          if (invitationError) {
+            console.error('[WaitlistItem] Error checking existing invitations:', invitationError);
+            setButtonState('create-invite');
+            return;
+          }
+
+          // If we found an invitation
+          if (existingInvitations && existingInvitations.length > 0) {
+            setInviteCode(existingInvitations[0].invite_code);
+            setButtonState('copy-invite');
+            console.log('[WaitlistItem] Found existing invitation:', existingInvitations[0].invite_code);
+          } else {
+            setButtonState('create-invite');
+            console.log('[WaitlistItem] Neighborhood exists but no invitation found');
+          }
+        } else {
+          setButtonState('create');
+          console.log('[WaitlistItem] No existing neighborhood found');
+        }
+      } catch (error) {
+        console.error('[WaitlistItem] Error checking existing state:', error);
+        setButtonState('create'); // Default to create on error
+      } finally {
+        setIsLoadingInitialState(false);
+      }
+    };
+
+    checkExistingState();
+  }, [response.neighborhood_name, response.city, response.state, response.email]);
 
   /**
    * Creates a neighborhood and automatically generates admin invitation
@@ -68,6 +137,7 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
       
       if (neighborhoodId) {
         setCreatedNeighborhoodId(neighborhoodId);
+        setButtonState('create-invite');
         onNeighborhoodCreated(neighborhoodId, response);
         console.log('[WaitlistItem] Neighborhood created successfully:', neighborhoodId);
         
@@ -90,8 +160,49 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
             
           if (invitation && !error) {
             setInviteCode(invitation.invite_code);
+            setButtonState('copy-invite');
             console.log('[WaitlistItem] Admin invitation created with code:', invitation.invite_code);
           }
+        }
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * Creates just an admin invitation for an existing neighborhood
+   */
+  const handleCreateInvitation = async () => {
+    if (!createdNeighborhoodId) {
+      toast.error('No neighborhood found to create invitation for');
+      return;
+    }
+
+    console.log('[WaitlistItem] Creating invitation for existing neighborhood:', createdNeighborhoodId);
+    setIsProcessing(true);
+    
+    try {
+      const invitationMessage = `Hi ${response.first_name}! You've been selected to become the admin of ${response.neighborhood_name}. Welcome to your neighborhood!`;
+      
+      const invitationId = await createAdminInvitation(
+        response.email,
+        createdNeighborhoodId,
+        invitationMessage
+      );
+
+      if (invitationId) {
+        // Fetch the invitation to get the invite code
+        const { data: invitation, error } = await supabase
+          .from('invitations')
+          .select('invite_code')
+          .eq('id', invitationId)
+          .single();
+          
+        if (invitation && !error) {
+          setInviteCode(invitation.invite_code);
+          setButtonState('copy-invite');
+          console.log('[WaitlistItem] Admin invitation created with code:', invitation.invite_code);
         }
       }
     } finally {
@@ -176,17 +287,26 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
         <div className="flex gap-1 shrink-0">
           <Button
             size="sm"
-            variant={inviteCode ? "outline" : "default"}
-            onClick={inviteCode ? handleCopyInviteLink : handleCreateNeighborhood}
-            disabled={isProcessing || (isCreating && !inviteCode)}
+            variant={buttonState === 'copy-invite' ? "outline" : "default"}
+            onClick={
+              buttonState === 'create' ? handleCreateNeighborhood :
+              buttonState === 'create-invite' ? handleCreateInvitation :
+              handleCopyInviteLink
+            }
+            disabled={isLoadingInitialState || isProcessing || isCreating}
             className="h-7 px-2 text-xs"
           >
-            {isProcessing || isCreating ? (
+            {isLoadingInitialState ? (
               <>
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Creating...
+                Loading...
               </>
-            ) : inviteCode ? (
+            ) : isProcessing || isCreating ? (
+              <>
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                {buttonState === 'create' ? 'Creating...' : 'Inviting...'}
+              </>
+            ) : buttonState === 'copy-invite' ? (
               copySuccess ? (
                 <>
                   <Check className="h-3 w-3 mr-1" />
@@ -198,6 +318,11 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
                   Copy Invite
                 </>
               )
+            ) : buttonState === 'create-invite' ? (
+              <>
+                <UserPlus className="h-3 w-3 mr-1" />
+                Create Invite
+              </>
             ) : (
               <>
                 <UserPlus className="h-3 w-3 mr-1" />
