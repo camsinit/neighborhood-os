@@ -114,13 +114,25 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     }
   }
   
-  // If we're on a legacy route and have a current neighborhood, redirect to neighborhood-specific URL
-  if (!isNeighborhoodRoute && currentNeighborhood?.id && !isJoin && !isHome) {
+  // Handle legacy routes - redirect to neighborhood-aware URLs if we have a neighborhood
+  if (!isNeighborhoodRoute && currentNeighborhood?.id && !isJoin) {
     const newPath = `/n/${currentNeighborhood.id}${location.pathname}`;
     if (isDebugMode) {
       console.log("[NeighborhoodAwareProtectedRoute] Redirecting legacy route to neighborhood-specific URL:", newPath);
     }
     return <Navigate to={newPath} replace />;
+  }
+  
+  // If no neighborhood context but user is on a legacy route, show loading
+  if (!isNeighborhoodRoute && !currentNeighborhood && !isJoin && !error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading neighborhood...</p>
+        </div>
+      </div>
+    );
   }
   
   // If user has no neighborhood and trying to access a page that requires one,

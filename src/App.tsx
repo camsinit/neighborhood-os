@@ -90,112 +90,7 @@ const App = () => {
                     }
                   />
                   
-                  {/* Protected app routes - with neighborhood-aware routing */}
-                  
-                  {/* Legacy routes - redirect to neighborhood-specific URLs */}
-                  <Route
-                    path="/home"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <HomePage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Neighborhood-specific routes */}
-                  <Route
-                    path="/n/:neighborhoodId/home"
-                    element={
-                      <NeighborhoodAwareProtectedRoute>
-                        <MainLayout>
-                          <HomePage />
-                        </MainLayout>
-                      </NeighborhoodAwareProtectedRoute>
-                    }
-                  />
-                  {/* Legacy routes - these will redirect to neighborhood-specific URLs */}
-                  <Route
-                    path="/calendar"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <CalendarPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/skills"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <SkillsPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/goods"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <GoodsPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/safety"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <SafetyPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/neighbors"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <NeighborsPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/modules"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <ModulesPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/settings"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <SettingsPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <AdminPage />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
+                  {/* All routes now use neighborhood-aware routing */}
                   
                   {/* Neighborhood-specific routes */}
                   <Route
@@ -279,7 +174,19 @@ const App = () => {
                     }
                   />
                   
-                  {/* Neighborhood-specific debug route - Super Admin only */}
+                  {/* Neighborhood-specific routes with MainLayout */}
+                  <Route
+                    path="/n/:neighborhoodId/home"
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <HomePage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  
+                  {/* Debug route - Super Admin only */}
                   <Route
                     path="/n/:neighborhoodId/debug"
                     element={
@@ -290,20 +197,6 @@ const App = () => {
                           </MainLayout>
                         </SuperAdminRoute>
                       </NeighborhoodAwareProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Legacy debug route - Super Admin only */}
-                  <Route
-                    path="/debug"
-                    element={
-                      <ProtectedRoute>
-                        <SuperAdminRoute>
-                          <MainLayout>
-                            <DebugPage />
-                          </MainLayout>
-                        </SuperAdminRoute>
-                      </ProtectedRoute>
                     }
                   />
                 </Routes>

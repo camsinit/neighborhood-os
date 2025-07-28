@@ -90,17 +90,17 @@ const Index = () => {
       return;
     }
     
-    // If authenticated and has neighborhood, redirect to home page
+    // If authenticated and has neighborhood, redirect to neighborhood-aware home page
     if (currentNeighborhood) {
-      console.log("[Dashboard] User authenticated with neighborhood, redirecting to home page");
-      navigate("/home", { replace: true });
+      console.log("[Dashboard] User authenticated with neighborhood, redirecting to neighborhood-aware home page");
+      navigate(`/n/${currentNeighborhood.id}/home`, { replace: true });
       return;
     }
     
-    // If there was an error loading neighborhood data or no neighborhood, redirect to home anyway
+    // If there was an error loading neighborhood data or no neighborhood, redirect to legacy home
     // Let the home page handle the "no neighborhood" state instead of forcing join page
     if (!currentNeighborhood || error) {
-      console.log("[Dashboard] User authenticated but no neighborhood, redirecting to home page to handle gracefully");
+      console.log("[Dashboard] User authenticated but no neighborhood, redirecting to legacy home page to handle gracefully");
       navigate("/home", { replace: true });
       return;
     }
