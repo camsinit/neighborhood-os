@@ -53,15 +53,19 @@ export function useNeighborhoodData(
       return;
     }
 
-    // For super admins, always fetch if the URL has a neighborhood ID that's different from current
+    // Log URL parameter changes for debugging
+    logger.debug("URL neighborhood parameter changed:", { neighborhoodIdFromUrl, isSuperAdmin });
+
+    // For super admins, check if we need to update the neighborhood context
     if (isSuperAdmin && neighborhoodIdFromUrl) {
       const currentId = currentNeighborhood?.id;
-      // Skip only if we already have this exact neighborhood loaded (unless forced)
+      // Only skip if we already have this exact neighborhood loaded AND it's not a forced refresh
       if (!forceRefresh && currentId === neighborhoodIdFromUrl) {
-        logger.debug("Super admin: already have target neighborhood", { currentId, targetId: neighborhoodIdFromUrl });
+        logger.debug("Super admin: already have target neighborhood loaded", { currentId, targetId: neighborhoodIdFromUrl });
         setIsLoading(false);
         return;
       }
+      logger.debug("Super admin: switching neighborhoods", { from: currentId, to: neighborhoodIdFromUrl });
     }
 
     setIsLoading(true);
