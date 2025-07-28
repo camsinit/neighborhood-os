@@ -36,7 +36,7 @@ const LandingPage = () => {
         
         {/* Conditional shimmer button - Dashboard for authenticated users, Login for unauthenticated */}
         {session ? (
-          <Link to="/dashboard">
+          <Link to="/dashboard" /* This stays as /dashboard as it's the entry point that handles routing */>
             <ShimmerButton 
               shimmerColor="#ffffff"
               shimmerDuration="2s"
