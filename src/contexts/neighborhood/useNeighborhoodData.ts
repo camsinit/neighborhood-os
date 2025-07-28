@@ -53,14 +53,15 @@ export function useNeighborhoodData(
       return;
     }
 
-    // Use a ref to check current neighborhood without including it in dependencies
-    const currentId = currentNeighborhood?.id;
-    const targetId = isSuperAdmin && neighborhoodIdFromUrl ? neighborhoodIdFromUrl : null;
-    
-    // Skip fetch if we already have the target neighborhood (unless forced)
-    if (!forceRefresh && currentId && targetId && currentId === targetId) {
-      setIsLoading(false);
-      return;
+    // For super admins, always fetch if the URL has a neighborhood ID that's different from current
+    if (isSuperAdmin && neighborhoodIdFromUrl) {
+      const currentId = currentNeighborhood?.id;
+      // Skip only if we already have this exact neighborhood loaded (unless forced)
+      if (!forceRefresh && currentId === neighborhoodIdFromUrl) {
+        logger.debug("Super admin: already have target neighborhood", { currentId, targetId: neighborhoodIdFromUrl });
+        setIsLoading(false);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -71,8 +72,7 @@ export function useNeighborhoodData(
         userId: user.id,
         isSuperAdmin,
         neighborhoodIdFromUrl,
-        targetId,
-        currentId
+        currentNeighborhoodId: currentNeighborhood?.id
       });
 
       let neighborhood: Neighborhood | null = null;
