@@ -150,7 +150,7 @@ export function useNeighborhoodData(
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthStable, user, isSuperAdmin, neighborhoodIdFromUrl]); // REMOVED currentNeighborhood from dependencies
+  }, [isAuthStable, user, isSuperAdmin, neighborhoodIdFromUrl, currentNeighborhood?.id]); // Include currentNeighborhood.id to fix stale closure
 
   // Manual refresh function
   const refreshNeighborhoodData = useCallback(() => {
