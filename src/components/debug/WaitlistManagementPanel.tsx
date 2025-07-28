@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, UserPlus, Mail, MapPin, Star } from 'lucide-react';
+import { Loader2, UserPlus, Copy, MapPin, Star, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSuperAdminNeighborhoodCreation } from '@/hooks/useSuperAdminNeighborhoodCreation';
 
@@ -40,58 +40,84 @@ interface WaitlistItemProps {
  */
 const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCreated }) => {
   const [createdNeighborhoodId, setCreatedNeighborhoodId] = useState<string | null>(null);
-  const [isInviting, setIsInviting] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   
   const { createNeighborhood, createAdminInvitation, isCreating } = useSuperAdminNeighborhoodCreation();
 
   /**
-   * Creates a neighborhood from the waitlist response data
+   * Creates a neighborhood and automatically generates admin invitation
    */
   const handleCreateNeighborhood = async () => {
     console.log('[WaitlistItem] Creating neighborhood for response:', response);
+    setIsProcessing(true);
     
-    const neighborhoodData = {
-      name: response.neighborhood_name,
-      city: response.city,
-      state: response.state,
-      timezone: 'America/Los_Angeles', // Default timezone
-      joinAsMember: false // Super admin creates as observer only for waitlist neighborhoods
-    };
+    try {
+      const neighborhoodData = {
+        name: response.neighborhood_name,
+        city: response.city,
+        state: response.state,
+        timezone: 'America/Los_Angeles', // Default timezone
+        joinAsMember: false // Super admin creates as observer only for waitlist neighborhoods
+      };
 
-    const neighborhoodId = await createNeighborhood(neighborhoodData);
-    
-    if (neighborhoodId) {
-      setCreatedNeighborhoodId(neighborhoodId);
-      onNeighborhoodCreated(neighborhoodId, response);
-      console.log('[WaitlistItem] Neighborhood created successfully:', neighborhoodId);
+      const neighborhoodId = await createNeighborhood(neighborhoodData);
+      
+      if (neighborhoodId) {
+        setCreatedNeighborhoodId(neighborhoodId);
+        onNeighborhoodCreated(neighborhoodId, response);
+        console.log('[WaitlistItem] Neighborhood created successfully:', neighborhoodId);
+        
+        // Automatically create admin invitation
+        const invitationMessage = `Hi ${response.first_name}! You've been selected to become the admin of ${response.neighborhood_name}. Welcome to your neighborhood!`;
+        
+        const invitationId = await createAdminInvitation(
+          response.email,
+          neighborhoodId,
+          invitationMessage
+        );
+
+        if (invitationId) {
+          // Fetch the invitation to get the invite code
+          const { data: invitation, error } = await supabase
+            .from('invitations')
+            .select('invite_code')
+            .eq('id', invitationId)
+            .single();
+            
+          if (invitation && !error) {
+            setInviteCode(invitation.invite_code);
+            console.log('[WaitlistItem] Admin invitation created with code:', invitation.invite_code);
+          }
+        }
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   /**
-   * Sends admin invitation to the waitlist respondent
+   * Copies the admin invitation link to clipboard
    */
-  const handleSendAdminInvitation = async () => {
-    if (!createdNeighborhoodId) {
-      toast.error('Please create the neighborhood first before sending invitation.');
+  const handleCopyInviteLink = async () => {
+    if (!inviteCode) {
+      toast.error('No invite code available');
       return;
     }
 
-    setIsInviting(true);
+    const inviteLink = `https://neighborhoodos.com/join/${inviteCode}`;
     
     try {
-      const invitationMessage = `Hi ${response.first_name}! You've been selected to become the admin of ${response.neighborhood_name}. Welcome to your neighborhood!`;
+      await navigator.clipboard.writeText(inviteLink);
+      setCopySuccess(true);
+      toast.success('Invite link copied to clipboard!');
       
-      const invitationId = await createAdminInvitation(
-        response.email,
-        createdNeighborhoodId,
-        invitationMessage
-      );
-
-      if (invitationId) {
-        console.log('[WaitlistItem] Admin invitation sent successfully:', invitationId);
-      }
-    } finally {
-      setIsInviting(false);
+      // Reset copy success indicator after 2 seconds
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('[WaitlistItem] Failed to copy invite link:', error);
+      toast.error('Failed to copy link to clipboard');
     }
   };
 
@@ -144,49 +170,36 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
           </Badge>
         </div>
 
-        {/* Compact action buttons */}
+        {/* Compact action button */}
         <div className="flex gap-1 shrink-0">
           <Button
             size="sm"
-            variant="default"
-            onClick={handleCreateNeighborhood}
-            disabled={isCreating || createdNeighborhoodId !== null}
+            variant={inviteCode ? "outline" : "default"}
+            onClick={inviteCode ? handleCopyInviteLink : handleCreateNeighborhood}
+            disabled={isProcessing || (isCreating && !inviteCode)}
             className="h-7 px-2 text-xs"
           >
-            {isCreating ? (
+            {isProcessing || isCreating ? (
               <>
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                 Creating...
               </>
-            ) : createdNeighborhoodId ? (
-              <>
-                <UserPlus className="h-3 w-3 mr-1" />
-                Created ✓
-              </>
+            ) : inviteCode ? (
+              copySuccess ? (
+                <>
+                  <Check className="h-3 w-3 mr-1" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3 mr-1" />
+                  Copy Invite
+                </>
+              )
             ) : (
               <>
                 <UserPlus className="h-3 w-3 mr-1" />
                 Create
-              </>
-            )}
-          </Button>
-          
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleSendAdminInvitation}
-            disabled={!createdNeighborhoodId || isInviting}
-            className="h-7 px-2 text-xs"
-          >
-            {isInviting ? (
-              <>
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Inviting...
-              </>
-            ) : (
-              <>
-                <Mail className="h-3 w-3 mr-1" />
-                Invite
               </>
             )}
           </Button>
