@@ -41,8 +41,11 @@ const WaitlistForm = () => {
       return;
     }
 
+    // Store email before clearing form
+    const emailToSubmit = email;
+    
     // Show popover immediately for better UX - don't wait for backend
-    setSubmittedEmail(email);
+    setSubmittedEmail(emailToSubmit);
     setShowSurvey(true);
     setEmail(""); // Clear the form immediately
 
@@ -55,7 +58,7 @@ const WaitlistForm = () => {
     // Handle the actual signup in the background
     setIsSubmitting(true);
     try {
-      console.log("Submitting waitlist signup for:", email);
+      console.log("Submitting waitlist signup for:", emailToSubmit);
 
       // Call the existing join-waitlist edge function in background
       const {
@@ -63,7 +66,7 @@ const WaitlistForm = () => {
         error
       } = await supabase.functions.invoke("join-waitlist", {
         body: {
-          email
+          email: emailToSubmit
         }
       });
       
