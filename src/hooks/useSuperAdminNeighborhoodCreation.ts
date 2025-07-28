@@ -37,7 +37,8 @@ export const useSuperAdminNeighborhoodCreation = () => {
         neighborhood_city: neighborhoodData.city || null,
         neighborhood_state: neighborhoodData.state || null, 
         neighborhood_address: neighborhoodData.address || null,
-        neighborhood_timezone: neighborhoodData.timezone || 'America/Los_Angeles'
+        neighborhood_timezone: neighborhoodData.timezone || 'America/Los_Angeles',
+        join_as_member: false // Explicitly specify to resolve function ambiguity
       });
 
       if (error) {
