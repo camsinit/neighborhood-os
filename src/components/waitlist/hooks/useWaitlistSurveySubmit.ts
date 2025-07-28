@@ -14,6 +14,17 @@ export const useWaitlistSurveySubmit = (onClose: () => void) => {
    * Submit the survey data
    */
   const submitSurvey = async (formData: SurveyData) => {
+    // Validation: Ensure email is not empty before submission
+    if (!formData.email || !formData.email.trim()) {
+      console.error("Cannot submit survey - email is empty:", formData);
+      toast({
+        title: "Email required",
+        description: "Please ensure your email is provided before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       console.log("Submitting waitlist survey:", formData);

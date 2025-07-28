@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 /**
  * Survey form data interface
@@ -34,6 +34,18 @@ export const useWaitlistSurveyForm = (initialEmail: string) => {
     aiCodingExperience: "",
     openSourceInterest: ""
   });
+
+  // Effect to update email when initialEmail changes
+  // This fixes the issue where useState only uses the initial value on first render
+  useEffect(() => {
+    if (initialEmail && initialEmail !== formData.email) {
+      console.log("Updating form email from:", formData.email, "to:", initialEmail);
+      setFormData(prev => ({
+        ...prev,
+        email: initialEmail
+      }));
+    }
+  }, [initialEmail, formData.email]);
 
   // Debug: Log the actual form data email
   console.log("Form data email:", formData.email);
