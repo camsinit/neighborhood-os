@@ -6,7 +6,7 @@
  * and creates a consistent pattern for deep linking and navigation.
  */
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { HighlightableItemType } from '@/utils/highlight/types';
 import { highlightItem } from '@/utils/highlight';
 import { createLogger } from '@/utils/logger';
@@ -46,8 +46,9 @@ export function usePageSheetController({
   fetchItem,
   pageName = contentType
 }: UsePageSheetControllerOptions): UsePageSheetControllerReturn {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // State for sheet management
   const [sheetItem, setSheetItem] = useState<any | null>(null);
@@ -144,11 +145,11 @@ export function usePageSheetController({
       setSheetItem(item);
     }
     
-    // Update URL to include detail parameter
+    // Update URL to include detail parameter while preserving neighborhood context
     const newParams = new URLSearchParams(searchParams);
     newParams.set('detail', cleanedId);
     newParams.set('type', contentType);
-    setSearchParams(newParams);
+    navigate(`${location.pathname}?${newParams.toString()}`);
   };
   
   // Function to close the sheet
@@ -159,11 +160,11 @@ export function usePageSheetController({
     setSheetItem(null);
     setIsLoadingSheetItem(false);
     
-    // Remove detail parameter from URL
+    // Remove detail parameter from URL while preserving neighborhood context
     const newParams = new URLSearchParams(searchParams);
     newParams.delete('detail');
     newParams.delete('type');
-    setSearchParams(newParams);
+    navigate(`${location.pathname}?${newParams.toString()}`);
   };
   
   return {
