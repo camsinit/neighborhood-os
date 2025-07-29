@@ -59,7 +59,7 @@ const DebugPage = () => {
         
         {/* Main Debug Interface */}
         <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Neighborhoods
@@ -72,28 +72,52 @@ const DebugPage = () => {
               <TestTube className="w-4 h-4" />
               Testing
             </TabsTrigger>
-            <TabsTrigger value="activities" className="flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Activities
-            </TabsTrigger>
-            <TabsTrigger value="rls" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
-              RLS Policies
-            </TabsTrigger>
-            <TabsTrigger value="logging" className="flex items-center gap-2">
+            <TabsTrigger value="debug" className="flex items-center gap-2">
               <Bug className="w-4 h-4" />
-              Logging
+              Debug Tools
             </TabsTrigger>
           </TabsList>
           
-          {/* Activities Debug Tab */}
-          <TabsContent value="activities" className="mt-4">
-            <ActivityDebugPanel />
-          </TabsContent>
-          
-          {/* RLS Diagnostics Tab */}
-          <TabsContent value="rls" className="mt-4">
-            <RLSDiagnosticsPanel />
+          {/* Combined Debug Tools Tab */}
+          <TabsContent value="debug" className="mt-4 space-y-6">
+            {/* Activities Debug Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  Activities Debug
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActivityDebugPanel />
+              </CardContent>
+            </Card>
+            
+            {/* RLS Diagnostics Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-5 h-5" />
+                  RLS Diagnostics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RLSDiagnosticsPanel />
+              </CardContent>
+            </Card>
+            
+            {/* Logging Controls Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bug className="w-5 h-5" />
+                  Logging Controls
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LoggingControls embedded />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           {/* Testing Tab - Onboarding and other testing tools */}
@@ -206,10 +230,6 @@ const DebugPage = () => {
             <SuperAdminNeighborhoodCreation />
           </TabsContent>
           
-          {/* Logging Controls Tab */}
-          <TabsContent value="logging" className="mt-4">
-            <LoggingControls />
-          </TabsContent>
         </Tabs>
         
         {/* Testing Dialogs - Only render when needed */}
