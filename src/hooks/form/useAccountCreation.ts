@@ -11,6 +11,7 @@ import { queueEmail, queueOnboardingSeries } from "@/utils/email/emailQueue";
 export const useAccountCreation = () => {
   /**
    * Create user account if they don't have one and queue welcome emails
+   * Returns user ID if account was created or already exists
    */
   const createUserAccount = async (
     formData: SurveyFormData, 
@@ -24,60 +25,81 @@ export const useAccountCreation = () => {
     try {
       console.log("[useAccountCreation] Creating user account for:", formData.email);
       
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // First, check if user already exists by attempting to sign in
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            display_name: `${formData.firstName} ${formData.lastName}`.trim()
-          }
-        }
+        password: formData.password
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create user account');
-
-      console.log("[useAccountCreation] User account created successfully:", authData.user.id);
-
-      // Queue welcome email and onboarding series if neighborhood info is provided
-      if (neighborhoodName && neighborhoodId) {
-        console.log("[useAccountCreation] Queueing welcome email and onboarding series");
-        
-        // Queue immediate welcome email
-        const welcomeResult = await queueEmail({
-          recipient_email: formData.email,
-          template_type: 'welcome',
-          template_data: {
-            firstName: formData.firstName,
-            neighborhoodName: neighborhoodName
-          },
-          scheduled_for: new Date(), // Send immediately
-          neighborhood_id: neighborhoodId,
-          user_id: authData.user.id
-        });
-
-        if (!welcomeResult.success) {
-          console.error("[useAccountCreation] Failed to queue welcome email:", welcomeResult.error);
-          // Don't fail account creation if email queueing fails
-        }
-
-        // Queue 7-part onboarding series
-        const onboardingResult = await queueOnboardingSeries(
-          formData.email,
-          formData.firstName,
-          neighborhoodName,
-          neighborhoodId,
-          authData.user.id
-        );
-
-        if (!onboardingResult.success) {
-          console.error("[useAccountCreation] Failed to queue onboarding series:", onboardingResult.error);
-          // Don't fail account creation if email queueing fails
-        }
+      // If sign-in was successful, user already exists and is now authenticated
+      if (signInData.user && !signInError) {
+        console.log("[useAccountCreation] User already exists and signed in successfully:", signInData.user.id);
+        return signInData.user.id;
       }
 
-      return authData.user.id;
+      // If sign-in failed due to invalid credentials, try to create new account
+      if (signInError && signInError.message.includes('Invalid login credentials')) {
+        console.log("[useAccountCreation] User doesn't exist, creating new account");
+        
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              display_name: `${formData.firstName} ${formData.lastName}`.trim()
+            }
+          }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('Failed to create user account');
+
+        console.log("[useAccountCreation] User account created successfully:", authData.user.id);
+
+        // Queue welcome email and onboarding series if neighborhood info is provided
+        if (neighborhoodName && neighborhoodId) {
+          console.log("[useAccountCreation] Queueing welcome email and onboarding series");
+          
+          // Queue immediate welcome email
+          const welcomeResult = await queueEmail({
+            recipient_email: formData.email,
+            template_type: 'welcome',
+            template_data: {
+              firstName: formData.firstName,
+              neighborhoodName: neighborhoodName
+            },
+            scheduled_for: new Date(), // Send immediately
+            neighborhood_id: neighborhoodId,
+            user_id: authData.user.id
+          });
+
+          if (!welcomeResult.success) {
+            console.error("[useAccountCreation] Failed to queue welcome email:", welcomeResult.error);
+            // Don't fail account creation if email queueing fails
+          }
+
+          // Queue 7-part onboarding series
+          const onboardingResult = await queueOnboardingSeries(
+            formData.email,
+            formData.firstName,
+            neighborhoodName,
+            neighborhoodId,
+            authData.user.id
+          );
+
+          if (!onboardingResult.success) {
+            console.error("[useAccountCreation] Failed to queue onboarding series:", onboardingResult.error);
+            // Don't fail account creation if email queueing fails
+          }
+        }
+
+        return authData.user.id;
+      }
+
+      // If we get here, there was some other sign-in error
+      throw signInError || new Error('Unexpected authentication error');
+
     } catch (error) {
       console.error('[useAccountCreation] Error creating user account:', error);
       
