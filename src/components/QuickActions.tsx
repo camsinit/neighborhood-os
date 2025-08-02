@@ -1,5 +1,5 @@
 
-import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench } from "lucide-react";
+import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -176,7 +176,10 @@ const QuickActions = () => {
   
   return <div className="w-full">
       {/* Quick Actions heading */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <Zap className="h-6 w-6" />
+        Quick Actions
+      </h2>
       
       {/* Three-column grid for organized actions */}
       <div className="grid grid-cols-3 gap-6">
