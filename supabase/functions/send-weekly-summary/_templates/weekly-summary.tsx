@@ -55,10 +55,9 @@ interface WeeklySummaryEmailProps {
     }>
   }
   aiContent: {
-    welcomeMessage: string
-    weeklyInsight: string
-    communitySpotlight: string
-    callToAction: string
+    newNeighborWelcome: string
+    pastWeekRecap: string
+    weekAheadPreview: string
   }
 }
 
@@ -81,10 +80,18 @@ export const WeeklySummaryEmail = ({
         
         <Text style={greeting}>Hi {memberName},</Text>
         
-        {/* AI-Generated Welcome Message */}
+        {/* AI-Generated New Neighbor Welcome (only if there are new neighbors) */}
+        {aiContent.newNeighborWelcome && (
+          <Section style={aiSection}>
+            <Heading style={h2}>👋 Welcome New Neighbors!</Heading>
+            <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.newNeighborWelcome }} />
+          </Section>
+        )}
+
+        {/* AI-Generated Past Week Recap */}
         <Section style={aiSection}>
-          <Text style={aiText}>{aiContent.welcomeMessage}</Text>
-          <Text style={aiText}>{aiContent.weeklyInsight}</Text>
+          <Heading style={h2}>📅 This Past Week</Heading>
+          <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.pastWeekRecap }} />
         </Section>
 
         {/* Stats Section */}
@@ -196,18 +203,10 @@ export const WeeklySummaryEmail = ({
           </>
         )}
 
-        {/* AI-Generated Community Spotlight */}
+        {/* AI-Generated Week Ahead Preview */}
         <Section style={aiSection}>
-          <Heading style={h2}>🌟 Community Spotlight</Heading>
-          <Text style={aiText}>{aiContent.communitySpotlight}</Text>
-        </Section>
-
-        <Hr style={divider} />
-
-        {/* AI-Generated Call to Action */}
-        <Section style={aiSection}>
-          <Heading style={h2}>Stay Connected</Heading>
-          <Text style={aiText}>{aiContent.callToAction}</Text>
+          <Heading style={h2}>🔮 Week Ahead</Heading>
+          <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.weekAheadPreview }} />
           <Link href={getWeeklySummaryDashboardURL()} style={ctaButton}>
             Visit Your Neighborhood Dashboard
           </Link>

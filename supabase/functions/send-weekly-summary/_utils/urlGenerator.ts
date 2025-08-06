@@ -46,3 +46,29 @@ export const getWeeklySummaryDashboardURL = (): string => {
 export const getWeeklySummarySettingsURL = (): string => {
   return addEmailTrackingParams(`${getEmailBaseUrl()}/settings`, "weekly_summary_settings", "email");
 };
+
+// Individual item URL generators with deep linking support
+export const getProfileURL = (neighborhoodId: string, userId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/neighbors?highlight=profile&type=profile&id=${userId}`;
+  return addEmailTrackingParams(url, "weekly_summary_profile", "email");
+};
+
+export const getEventURL = (neighborhoodId: string, eventId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/events?highlight=event&type=event&id=${eventId}`;
+  return addEmailTrackingParams(url, "weekly_summary_event", "email");
+};
+
+export const getGoodsURL = (neighborhoodId: string, goodsId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/goods?highlight=goods&type=goods_exchange&id=${goodsId}`;
+  return addEmailTrackingParams(url, "weekly_summary_goods_item", "email");
+};
+
+export const getSkillURL = (neighborhoodId: string, skillId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/skills?highlight=skill&type=skills_exchange&id=${skillId}`;
+  return addEmailTrackingParams(url, "weekly_summary_skill", "email");
+};
+
+export const getSafetyURL = (neighborhoodId: string, safetyId: string): string => {
+  const url = `${getEmailBaseUrl()}/n/${neighborhoodId}/safety?highlight=safety&type=safety_updates&id=${safetyId}`;
+  return addEmailTrackingParams(url, "weekly_summary_safety_item", "email");
+};
