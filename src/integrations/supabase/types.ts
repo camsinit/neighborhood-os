@@ -1244,6 +1244,14 @@ export type Database = {
           is_creator: boolean
         }[]
       }
+      get_neighborhood_emails_for_digest: {
+        Args: { target_neighborhood_id: string }
+        Returns: {
+          user_id: string
+          email: string
+          display_name: string
+        }[]
+      }
       get_neighborhood_from_invite: {
         Args: { invite_code_param: string }
         Returns: {
