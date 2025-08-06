@@ -471,6 +471,7 @@ export type Database = {
           geo_boundary: Json | null
           id: string
           invite_header_image_url: string | null
+          last_weekly_digest_sent: string | null
           name: string
           state: string | null
           timezone: string
@@ -484,6 +485,7 @@ export type Database = {
           geo_boundary?: Json | null
           id?: string
           invite_header_image_url?: string | null
+          last_weekly_digest_sent?: string | null
           name: string
           state?: string | null
           timezone?: string
@@ -497,6 +499,7 @@ export type Database = {
           geo_boundary?: Json | null
           id?: string
           invite_header_image_url?: string | null
+          last_weekly_digest_sent?: string | null
           name?: string
           state?: string | null
           timezone?: string
@@ -1225,6 +1228,7 @@ export type Database = {
           geo_boundary: Json | null
           id: string
           invite_header_image_url: string | null
+          last_weekly_digest_sent: string | null
           name: string
           state: string | null
           timezone: string
