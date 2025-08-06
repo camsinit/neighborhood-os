@@ -85,3 +85,28 @@ export const getWelcomeURL = (baseFunction: () => string): string => {
 export const getInviteURL = (inviteCode: string): string => {
   return addEmailTrackingParams(getInviteLink(inviteCode), "neighbor_invite", "email");
 };
+
+// Weekly digest specific URL generators with UTM tracking
+export const getWeeklySummaryURL = (section: string): string => {
+  return addEmailTrackingParams(getHomeLink(), `weekly_summary_${section}`, "email");
+};
+
+export const getWeeklySummaryEventsURL = (): string => {
+  return addEmailTrackingParams(getEventsLink(), "weekly_summary_events", "email");
+};
+
+export const getWeeklySummarySkillsURL = (): string => {
+  return addEmailTrackingParams(getSkillsLink(), "weekly_summary_skills", "email");
+};
+
+export const getWeeklySummaryGoodsURL = (): string => {
+  return addEmailTrackingParams(getFreebiesLink(), "weekly_summary_goods", "email");
+};
+
+export const getWeeklySummarySafetyURL = (): string => {
+  return addEmailTrackingParams(getUpdatesLink(), "weekly_summary_safety", "email");
+};
+
+export const getWeeklySummarySettingsURL = (): string => {
+  return addEmailTrackingParams(getModulesLink(), "weekly_summary_settings", "email");
+};
