@@ -11,6 +11,14 @@ import {
   Hr,
 } from 'npm:@react-email/components@0.0.22'
 import * as React from 'npm:react@18.3.1'
+import {
+  getWeeklySummaryEventsURL,
+  getWeeklySummarySkillsURL,
+  getWeeklySummaryGoodsURL,
+  getWeeklySummarySafetyURL,
+  getWeeklySummaryDashboardURL,
+  getWeeklySummarySettingsURL,
+} from '../_utils/urlGenerator.ts'
 
 interface WeeklySummaryEmailProps {
   neighborhoodName: string
@@ -117,7 +125,7 @@ export const WeeklySummaryEmail = ({
                   </Text>
                 </div>
               ))}
-              <Link href={`${baseUrl}/calendar`} style={sectionLink}>
+              <Link href={getWeeklySummaryEventsURL()} style={sectionLink}>
                 View all gatherings →
               </Link>
             </Section>
@@ -138,7 +146,7 @@ export const WeeklySummaryEmail = ({
                   </Text>
                 </div>
               ))}
-              <Link href={`${baseUrl}/skills`} style={sectionLink}>
+              <Link href={getWeeklySummarySkillsURL()} style={sectionLink}>
                 Browse all skills →
               </Link>
             </Section>
@@ -159,7 +167,7 @@ export const WeeklySummaryEmail = ({
                   </Text>
                 </div>
               ))}
-              <Link href={`${baseUrl}/goods`} style={sectionLink}>
+              <Link href={getWeeklySummaryGoodsURL()} style={sectionLink}>
                 See all available items →
               </Link>
             </Section>
@@ -180,7 +188,7 @@ export const WeeklySummaryEmail = ({
                   </Text>
                 </div>
               ))}
-              <Link href={`${baseUrl}/safety`} style={sectionLink}>
+              <Link href={getWeeklySummarySafetyURL()} style={sectionLink}>
                 View all safety updates →
               </Link>
             </Section>
@@ -200,7 +208,7 @@ export const WeeklySummaryEmail = ({
         <Section style={aiSection}>
           <Heading style={h2}>Stay Connected</Heading>
           <Text style={aiText}>{aiContent.callToAction}</Text>
-          <Link href={baseUrl} style={ctaButton}>
+          <Link href={getWeeklySummaryDashboardURL()} style={ctaButton}>
             Visit Your Neighborhood Dashboard
           </Link>
         </Section>
@@ -214,7 +222,7 @@ export const WeeklySummaryEmail = ({
           </Text>
           <Text style={footerText}>
             You're receiving this because you're a member of {neighborhoodName}. 
-            <Link href={`${baseUrl}/settings`} style={link}>Update your notification preferences</Link>
+            <Link href={getWeeklySummarySettingsURL()} style={link}>Update your notification preferences</Link>
           </Text>
         </Section>
       </Container>

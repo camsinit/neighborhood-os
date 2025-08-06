@@ -17,3 +17,9 @@ enabled = false  # Disabled as functionality moved to database triggers
 
 [functions.slack]
 verify_jwt = false
+
+[functions.send-weekly-summary]
+verify_jwt = true
+
+[functions.schedule-weekly-digests]
+verify_jwt = false  # Public function to be called by cron

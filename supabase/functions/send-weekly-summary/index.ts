@@ -143,28 +143,22 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Neighborhood not found');
     }
 
-    // Get neighborhood members for email sending
-    const { data: members } = await supabase
-      .from('neighborhood_members')
-      .select(`
-        user_id,
-        profiles!inner(
-          display_name,
-          email:id
-        )
-      `)
-      .eq('neighborhood_id', neighborhoodId)
-      .eq('status', 'active');
+    // Use the new efficient function to get member emails with preferences
+    const { data: memberEmails, error: emailsError } = await supabase
+      .rpc('get_neighborhood_emails_for_digest', { 
+        target_neighborhood_id: neighborhoodId 
+      });
 
-    // Get auth users to get actual email addresses
-    const { data: { users } } = await supabase.auth.admin.listUsers();
-    const memberEmails = members?.map(member => {
-      const user = users?.find(u => u.id === member.user_id);
-      return {
-        email: user?.email,
-        name: member.profiles?.display_name || 'Neighbor'
-      };
-    }).filter(m => m.email) || [];
+    if (emailsError) {
+      console.error('Error fetching member emails:', emailsError);
+      throw new Error(`Failed to get member emails: ${emailsError.message}`);
+    }
+
+    // Transform the data to match expected format
+    const formattedEmails = memberEmails?.map(member => ({
+      email: member.email,
+      name: member.display_name || 'Neighbor'
+    })) || [];
 
     // Gather weekly statistics
     const [eventsData, goodsData, skillsData, safetyData, newMembersData] = await Promise.all([
@@ -273,7 +267,7 @@ const handler = async (req: Request): Promise<Response> => {
         neighborhoodName: neighborhood.name,
         memberName: testEmail ? 'Test User' : 'Neighbor',
         weekOf,
-        baseUrl: `${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}`,
+        baseUrl: 'https://neighborhoodos.com', // Use production URL directly
         stats,
         highlights,
         aiContent, // Pass AI-generated content to email template
@@ -302,7 +296,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Determine recipients (test email or all members)
-    const recipients = testEmail ? [{ email: testEmail, name: 'Test User' }] : memberEmails;
+    const recipients = testEmail ? [{ email: testEmail, name: 'Test User' }] : formattedEmails;
 
     // Send emails
     const emailPromises = recipients.map(async (recipient) => {

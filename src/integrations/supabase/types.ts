@@ -1304,6 +1304,15 @@ export type Database = {
           email: string
         }[]
       }
+      get_neighborhoods_ready_for_digest: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          neighborhood_id: string
+          neighborhood_name: string
+          timezone: string
+          last_sent: string
+        }[]
+      }
       get_user_current_neighborhood: {
         Args: { user_uuid: string }
         Returns: string
