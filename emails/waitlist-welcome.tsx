@@ -56,7 +56,7 @@ export const WaitlistWelcomeEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>
-            Hey {firstName}!
+            {hasSubmittedSurvey ? `Hey ${firstName}!` : 'Hey there!'}
           </Heading>
           
           {hasSubmittedSurvey ? (
@@ -88,26 +88,24 @@ export const WaitlistWelcomeEmail = ({
           ) : (
             <>
               <Text style={text}>
-                Welcome to the neighborhoodOS waitlist! You're officially in line for something that might actually make your neighborhood more connected (without the awkward forced interactions).
+                Welcome to the neighborhoodOS waitlist!
               </Text>
               
               <Text style={text}>
-                We're building this thing thoughtfully, which means we're not rushing to launch everywhere at once. 
-                You'll be among the first to know when your area is ready.
+                We're building the platform to help you create a more connected and caring neighborhood. We're building it thoughtfully, which means we're not rushing to launch everywhere at once. You'll be among the first to know when your area is ready.
               </Text>
               
               <Text style={text}>
-                In the meantime, maybe start noticing which neighbors you actually want to connect with. 
-                That's about as much prep work as you need.
+                In the meantime, maybe start noticing which neighbors you actually want to connect with. That's about as much prep work as you need.
+              </Text>
+              
+              <Text style={text}>
+                Questions? Just reply to this email. We're real people who actually read these.
               </Text>
             </>
           )}
           
           <Hr style={hr} />
-          
-          <Text style={footer}>
-            Questions? Just reply to this email. We're real people who actually read these.
-          </Text>
           
           <Text style={footer}>
             Thanks for being part of the neighborhoodOS community (even though it doesn't fully exist yet),<br />
