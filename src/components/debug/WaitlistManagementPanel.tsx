@@ -400,7 +400,7 @@ export const WaitlistManagementPanel: React.FC = () => {
 
   return (
     <Card>
-      <CardContent className="space-y-4 pt-[25px]">
+      <CardContent className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
