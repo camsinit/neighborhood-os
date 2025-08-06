@@ -214,7 +214,7 @@ export const EmailTestingPanel: React.FC = () => {
       name: 'Basic Invitation',
       description: 'Standard neighborhood invitation email with invite code and basic neighborhood information',
       icon: <Mail className="w-5 h-5" />,
-      category: 'invitations',
+      category: 'waitlist',
       functionName: 'send-invitation',
       sampleData: {
         recipientEmail: '',
@@ -344,7 +344,8 @@ export const EmailTestingPanel: React.FC = () => {
 
   // Helper function to group emails by category
   const getEmailsByCategory = () => {
-    const categories = ['onboarding', 'notifications', 'invitations', 'waitlist'];
+    // Define the desired order: waitlist first, then notifications, then onboarding
+    const categories = ['waitlist', 'notifications', 'onboarding'];
     const grouped: Record<string, EmailConfig[]> = {};
     
     categories.forEach(category => {
