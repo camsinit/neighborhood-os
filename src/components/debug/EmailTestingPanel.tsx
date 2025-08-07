@@ -791,23 +791,6 @@ export const EmailTestingPanel: React.FC = () => {
 
                     {/* Action & Status */}
                     <div className="col-span-2 flex items-center gap-2">
-                      {/* Preview button - only show for weekly summary */}
-                      {config.id === 'weekly-summary' && (
-                        <Button
-                          onClick={() => previewEmail(config)}
-                          disabled={loadingStates[config.id] || (!isEmailSaved && !testEmailInput?.trim())}
-                          size="sm"
-                          variant="ghost"
-                          className="flex items-center gap-1"
-                        >
-                          {loadingStates[config.id] ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Eye className="w-3 h-3" />
-                          )}
-                          Preview
-                        </Button>
-                      )}
                       
                       <Button
                         onClick={() => sendTestEmail(config)}
