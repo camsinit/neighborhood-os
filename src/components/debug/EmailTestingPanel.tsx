@@ -381,7 +381,13 @@ export const EmailTestingPanel: React.FC = () => {
     // Use saved email for testing, fall back to input if not saved
     const emailToUse = isEmailSaved ? savedTestEmail : testEmailInput;
     
+    console.log(`[EmailTestingPanel] Test email button clicked for config:`, config.id);
+    console.log(`[EmailTestingPanel] Email to use:`, emailToUse);
+    console.log(`[EmailTestingPanel] Is email saved:`, isEmailSaved);
+    console.log(`[EmailTestingPanel] Test email input:`, testEmailInput);
+    
     if (!emailToUse?.trim()) {
+      console.log(`[EmailTestingPanel] No email provided, showing error toast`);
       toast({
         title: "Email Required",
         description: "Please enter and save an email address first",
@@ -391,6 +397,7 @@ export const EmailTestingPanel: React.FC = () => {
     }
 
     // Set loading state for this email
+    console.log(`[EmailTestingPanel] Setting loading state for:`, config.id);
     setLoadingStates(prev => ({ ...prev, [config.id]: true }));
 
     try {
@@ -398,6 +405,7 @@ export const EmailTestingPanel: React.FC = () => {
       const emailData = {
         ...config.sampleData,
         recipientEmail: emailToUse,
+        testEmail: emailToUse, // Add testEmail field for weekly summary
         email: emailToUse // For functions that use 'email' instead of 'recipientEmail'
       };
 
