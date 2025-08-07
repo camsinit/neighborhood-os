@@ -79,7 +79,7 @@ const FeatureNavigation = () => {
         const Icon = item.icon;
         
         return (
-          <React.Fragment key={item.path}>
+          <div key={item.path}>
             {/* Add divider between Home and Calendar with matching spacing */}
             {index === 1 && <div className="my-3 h-px bg-gray-100" />}
             
@@ -98,7 +98,7 @@ const FeatureNavigation = () => {
               )} />
               {item.label}
             </NavLink>
-          </React.Fragment>
+          </div>
         );
       })}
     </div>

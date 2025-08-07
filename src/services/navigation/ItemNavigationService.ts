@@ -100,13 +100,27 @@ export class ItemNavigationService {
     try {
       logger.info(`Navigating to ${type} with ID: ${id}`);
       
-      // Get the target route
-      const route = ROUTE_MAP[type];
-      if (!route) {
+      // Get the base route pattern - we need to build neighborhood-aware routes
+      const baseRoute = ROUTE_MAP[type];
+      if (!baseRoute) {
         const error = `No route defined for content type: ${type}`;
         logger.error(error);
         return { success: false, error };
       }
+      
+      // Build the full neighborhood-aware route
+      // Extract neighborhood ID from current URL or use the current path context
+      const currentPath = window.location.pathname;
+      const neighborhoodMatch = currentPath.match(/\/n\/([^\/]+)/);
+      
+      if (!neighborhoodMatch) {
+        const error = `Cannot determine neighborhood context for navigation`;
+        logger.error(error);
+        return { success: false, error };
+      }
+      
+      const neighborhoodId = neighborhoodMatch[1];
+      const fullRoute = `/n/${neighborhoodId}${baseRoute}`;
       
       // Build URL with parameters including highlight info and context
       const searchParams = new URLSearchParams({
@@ -135,10 +149,10 @@ export class ItemNavigationService {
         searchParams.set('view', options.calendarView);
       }
       
-      const fullRoute = `${route}?${searchParams.toString()}`;
+      const fullRouteWithParams = `${fullRoute}?${searchParams.toString()}`;
       
       // Navigate to the route
-      this.navigate(fullRoute, { replace });
+      this.navigate(fullRouteWithParams, { replace });
       
       // Set up highlighting with timeout
       const highlightPromise = this.attemptHighlight(type, id, highlightTimeout);
@@ -300,11 +314,15 @@ export class ItemNavigationService {
     currentPath: string,
     options: NavigationOptions = {}
   ): Promise<NavigationResult> {
-    // If we're already on the correct page, just highlight
-    const targetRoute = ROUTE_MAP[type];
+    // Extract neighborhood-aware route comparison  
+    const baseTargetRoute = ROUTE_MAP[type];
     const currentBasePath = currentPath.split('?')[0];
     
-    if (currentBasePath === targetRoute) {
+    // Check if we're already on the correct neighborhood-aware page
+    const neighborhoodMatch = currentPath.match(/\/n\/([^\/]+)(\/.*)/);
+    const currentRoute = neighborhoodMatch ? neighborhoodMatch[2] : currentPath;
+    
+    if (currentRoute === baseTargetRoute) {
       logger.info(`Already on correct page for ${type}, just highlighting`);
       
       try {
