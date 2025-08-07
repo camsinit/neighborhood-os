@@ -58,51 +58,52 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
     const createGoodsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/goods?create=true`;
     const createSafetyUrl = `https://neighborhoodos.com/n/${neighborhoodId}/safety?create=true`;
     
-    // Create a comprehensive prompt for Claude to generate engaging content in 3-section format
-    const prompt = `You are writing a weekly neighborhood newsletter for "${neighborhoodName}". 
+    // Create a friendly, letter-like prompt for Claude to generate personal neighborhood content
+    const prompt = `You are writing a personal weekly letter to a neighbor in "${neighborhoodName}" - imagine you're a friendly neighbor who knows what's happening in the community and wants to share updates in a warm, conversational way.
 
-ACTIVITY LEVEL: ${isLowActivity ? 'LOW - Focus on encouraging neighbor participation' : 'NORMAL - Celebrate ongoing activities'}
+WRITING STYLE: Write like a friendly neighbor, not a corporate newsletter. Use natural, conversational language. Think "letter from a friend" not "company announcement." Be warm, inclusive, and encouraging.
+
+ACTIVITY LEVEL: ${isLowActivity ? 'LOW - Gently encourage neighbors to start activities with friendly suggestions' : 'NORMAL - Celebrate what happened and build excitement for what\'s coming'}
 
 NEW NEIGHBORS THIS WEEK:
 ${newNeighbors.length > 0 ? 
   newNeighbors.map(n => `- ${n.name} (Profile: ${n.profileUrl})`).join('\n') : 
   '- No new neighbors this week'}
 
-PAST WEEK RECAP (What happened):
+WHAT HAPPENED THIS WEEK:
 Completed Events: ${pastWeekActivities.completedEvents.map(e => `"${e.title}" (${e.url})`).join(', ') || 'None'}
 Items Claimed/Archived: ${pastWeekActivities.archivedGoods.map(g => `"${g.title}" (${g.url})`).join(', ') || 'None'}
 Skills Sessions Completed: ${pastWeekActivities.completedSkills.map(s => `"${s.title}" (${s.url})`).join(', ') || 'None'}
 New Safety Updates: ${pastWeekActivities.safetyUpdates.map(s => `"${s.title}" (${s.url})`).join(', ') || 'None'}
 New Profile Updates: ${pastWeekActivities.profileUpdates || 'None'}
 
-WEEK AHEAD PREVIEW (What's coming up):
+WHAT'S COMING UP:
 Upcoming Events: ${upcomingActivities.events.map(e => `"${e.title}" on ${e.date} (${e.url})`).join(', ') || 'None'}
 New Skills Available: ${upcomingActivities.skills.map(s => `"${s.title}" - ${s.requestType} (${s.url})`).join(', ') || 'None'}
 New Items Shared: ${upcomingActivities.goods.map(g => `"${g.title}" in ${g.category} (${g.url})`).join(', ') || 'None'}
 
-QUICK ACTIVITY CREATION LINKS (Always include these when appropriate):
+WAYS TO GET INVOLVED (include these links naturally when encouraging participation):
 - Create Event: ${createEventUrl}
 - Share/Request Skills: ${createSkillUrl}  
 - Share/Request Items: ${createGoodsUrl}
 - Post Safety Update: ${createSafetyUrl}
 
-Please generate exactly 3 sections for the newsletter in HTML format with working hyperlinks:
+Write exactly 3 sections in a personal, letter-like tone:
 
-1. newNeighborWelcome: (ONLY if there are new neighbors) Write a warm welcome message mentioning each new neighbor by name with clickable links to their profiles. If no new neighbors, return empty string.
+1. newNeighborWelcome: (ONLY if new neighbors joined) Write a genuine welcome like you're introducing them at a coffee shop. Mention them by name with links to their profiles. If no new neighbors, return empty string.
 
-2. pastWeekRecap: Summarize what actually happened this past week. Include provided URLs as clickable links. ${isLowActivity ? 'IMPORTANT: Since activity was low, focus on encouraging participation. Suggest specific, easy activities neighbors can create: "It was a quiet week - perfect time to organize a coffee meetup, share a skill, or offer help to neighbors. <a href=\\"' + createEventUrl + '\\">Create an event</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> to get things started!"' : 'Be specific about actual activities that occurred and celebrate community engagement.'}
+2. pastWeekRecap: Share what happened this week like you're catching up with a friend. ${isLowActivity ? 'Since things were quiet, gently suggest that this might be a perfect time for someone to organize something simple. Include activity creation links naturally: "It was one of those peaceful weeks in the neighborhood - maybe the perfect time for someone to <a href=\\"' + createEventUrl + '\\">organize a coffee meet-up</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> they have?"' : 'Celebrate what actually happened and mention any highlights with enthusiasm.'}
 
-3. weekAheadPreview: Look ahead at upcoming activities. Include provided URLs as clickable links. ${isLowActivity ? 'IMPORTANT: Since few activities are planned, encourage neighbors to get involved: "The week ahead is wide open for new connections! Why not <a href=\\"' + createEventUrl + '\\">organize a neighborhood walk</a>, <a href=\\"' + createGoodsUrl + '\\">share something you no longer need</a>, or <a href=\\"' + createSkillUrl + '\\">offer to help with a skill you have</a>? Small gestures build strong communities."' : 'Focus on what neighbors can participate in and how to join activities.'}
+3. weekAheadPreview: Look ahead with optimism about what neighbors could do together. ${isLowActivity ? 'Since the calendar is open, paint a picture of possibilities: "The week ahead is full of possibility! Perfect timing for someone to <a href=\\"' + createEventUrl + '\\">organize a neighborhood walk</a>, <a href=\\"' + createGoodsUrl + '\\">share something they no longer need</a>, or <a href=\\"' + createSkillUrl + '\\">offer to help with something they\'re good at</a>. Sometimes the best connections start with the simplest gestures."' : 'Build excitement about what people can join and participate in.'}
 
-IMPORTANT: 
-- Use the exact URLs provided in parentheses as href attributes
-- Make titles and key phrases clickable links using <a href="URL">text</a>
-- Keep each section 2-3 sentences maximum
-- ${isLowActivity ? 'PRIORITY: Include at least one "create activity" link in pastWeekRecap and weekAheadPreview sections using the Quick Activity Creation Links provided above' : 'Focus on celebrating existing activities and encouraging participation'}
-- Return as JSON with these 3 keys: newNeighborWelcome, pastWeekRecap, weekAheadPreview
-- Include HTML formatting with proper <a> tags for all URLs provided
-
-Keep the tone warm, community-focused, and encouraging. ${isLowActivity ? 'Emphasize that every neighbor can help build community by creating simple activities.' : ''}`;
+WRITING GUIDELINES:
+- Write like you're talking to a neighbor over the fence
+- Use "we," "our," and "us" to create community feeling  
+- Keep each section 2-3 sentences, flowing naturally
+- Include clickable links naturally in the conversation
+- Avoid corporate language, emojis, or formal headers
+- Make it feel personal and authentic
+- Return as JSON: {"newNeighborWelcome": "", "pastWeekRecap": "", "weekAheadPreview": ""}`;
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {

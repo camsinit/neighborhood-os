@@ -72,158 +72,111 @@ export const WeeklySummaryEmail = ({
 }: WeeklySummaryEmailProps) => (
   <Html>
     <Head />
-    <Preview>Your {neighborhoodName} weekly neighborhood summary</Preview>
+    <Preview>Your weekly note from {neighborhoodName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Weekly Summary</Heading>
-        <Text style={subtitle}>{neighborhoodName} • Week of {weekOf}</Text>
+        
+        {/* Simple letter-style header */}
+        <Text style={letterHeader}>{neighborhoodName}</Text>
+        <Text style={dateText}>Week of {weekOf}</Text>
         
         <Text style={greeting}>Hi {memberName},</Text>
         
-        {/* AI-Generated New Neighbor Welcome (only if there are new neighbors) */}
+        {/* AI-Generated New Neighbor Welcome - simple paragraph style */}
         {aiContent.newNeighborWelcome && (
-          <Section style={aiSection}>
-            <Heading style={h2}>👋 Welcome New Neighbors!</Heading>
-            <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.newNeighborWelcome }} />
-          </Section>
+          <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.newNeighborWelcome }} />
         )}
 
-        {/* AI-Generated Past Week Recap */}
-        <Section style={aiSection}>
-          <Heading style={h2}>📅 This Past Week</Heading>
-          <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.pastWeekRecap }} />
-        </Section>
+        {/* AI-Generated Past Week Recap - simple paragraph style */}
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.pastWeekRecap }} />
 
-        {/* Stats Section */}
-        <Section style={statsSection}>
-          <Heading style={h2}>This Week's Activity</Heading>
-          <div style={statsGrid}>
-            <div style={statItem}>
-              <Text style={statNumber}>{stats.newMembers}</Text>
-              <Text style={statLabel}>New neighbors joined</Text>
-            </div>
-            <div style={statItem}>
-              <Text style={statNumber}>{stats.upcomingEvents}</Text>
-              <Text style={statLabel}>Upcoming gatherings</Text>
-            </div>
-            <div style={statItem}>
-              <Text style={statNumber}>{stats.activeSkillRequests}</Text>
-              <Text style={statLabel}>Skills requested</Text>
-            </div>
-            <div style={statItem}>
-              <Text style={statNumber}>{stats.availableItems}</Text>
-              <Text style={statLabel}>Items shared</Text>
-            </div>
-          </div>
-        </Section>
+        {/* Simple activity summary */}
+        {(stats.newMembers > 0 || stats.upcomingEvents > 0 || stats.activeSkillRequests > 0 || stats.availableItems > 0) && (
+          <Text style={paragraph}>
+            This week in numbers: {stats.newMembers > 0 && `${stats.newMembers} new neighbors joined us`}
+            {stats.newMembers > 0 && (stats.upcomingEvents > 0 || stats.activeSkillRequests > 0 || stats.availableItems > 0) && ', '}
+            {stats.upcomingEvents > 0 && `${stats.upcomingEvents} gatherings coming up`}
+            {stats.upcomingEvents > 0 && (stats.activeSkillRequests > 0 || stats.availableItems > 0) && ', '}
+            {stats.activeSkillRequests > 0 && `${stats.activeSkillRequests} neighbors looking for help`}
+            {stats.activeSkillRequests > 0 && stats.availableItems > 0 && ', '}
+            {stats.availableItems > 0 && `${stats.availableItems} free items shared`}.
+          </Text>
+        )}
 
-        <Hr style={divider} />
-
-        {/* Upcoming Events */}
+        {/* Upcoming events - simple list */}
         {highlights.events.length > 0 && (
           <>
-            <Section>
-              <Heading style={h2}>🗓️ Upcoming Gatherings</Heading>
-              {highlights.events.map((event, index) => (
-                <div key={index} style={listItem}>
-                  <Text style={itemTitle}>{event.title}</Text>
-                  <Text style={itemDetails}>
-                    {event.date} • {event.attendees} neighbors attending
-                  </Text>
-                </div>
-              ))}
-              <Link href={getWeeklySummaryEventsURL()} style={sectionLink}>
-                View all gatherings →
-              </Link>
-            </Section>
-            <Hr style={divider} />
+            <Text style={sectionHeading}>Coming up this week:</Text>
+            {highlights.events.map((event, index) => (
+              <Text key={index} style={listItemText}>
+                • <strong>{event.title}</strong> on {event.date} ({event.attendees} neighbors attending)
+              </Text>
+            ))}
+            <Text style={paragraph}>
+              <Link href={getWeeklySummaryEventsURL()} style={link}>See all upcoming gatherings</Link>
+            </Text>
           </>
         )}
 
-        {/* Skills Exchange */}
+        {/* Skills - simple list */}
         {highlights.skills.length > 0 && (
           <>
-            <Section>
-              <Heading style={h2}>🛠️ Skills & Help</Heading>
-              {highlights.skills.map((skill, index) => (
-                <div key={index} style={listItem}>
-                  <Text style={itemTitle}>{skill.title}</Text>
-                  <Text style={itemDetails}>
-                    {skill.requestType === 'offered' ? 'Offering' : 'Looking for'} • {skill.category}
-                  </Text>
-                </div>
-              ))}
-              <Link href={getWeeklySummarySkillsURL()} style={sectionLink}>
-                Browse all skills →
-              </Link>
-            </Section>
-            <Hr style={divider} />
+            <Text style={sectionHeading}>Skills & help available:</Text>
+            {highlights.skills.map((skill, index) => (
+              <Text key={index} style={listItemText}>
+                • <strong>{skill.title}</strong> ({skill.requestType === 'offered' ? 'someone offering help' : 'help needed'})
+              </Text>
+            ))}
+            <Text style={paragraph}>
+              <Link href={getWeeklySummarySkillsURL()} style={link}>Browse all skills and requests</Link>
+            </Text>
           </>
         )}
 
-        {/* Available Items */}
+        {/* Items - simple list */}
         {highlights.items.length > 0 && (
           <>
-            <Section>
-              <Heading style={h2}>📦 Free Items Available</Heading>
-              {highlights.items.map((item, index) => (
-                <div key={index} style={listItem}>
-                  <Text style={itemTitle}>{item.title}</Text>
-                  <Text style={itemDetails}>
-                    {item.category} • Posted {item.daysAgo} day{item.daysAgo !== 1 ? 's' : ''} ago
-                  </Text>
-                </div>
-              ))}
-              <Link href={getWeeklySummaryGoodsURL()} style={sectionLink}>
-                See all available items →
-              </Link>
-            </Section>
-            <Hr style={divider} />
+            <Text style={sectionHeading}>Free items available:</Text>
+            {highlights.items.map((item, index) => (
+              <Text key={index} style={listItemText}>
+                • <strong>{item.title}</strong> ({item.category}, posted {item.daysAgo} day{item.daysAgo !== 1 ? 's' : ''} ago)
+              </Text>
+            ))}
+            <Text style={paragraph}>
+              <Link href={getWeeklySummaryGoodsURL()} style={link}>See all available items</Link>
+            </Text>
           </>
         )}
 
-        {/* Safety Updates */}
+        {/* Safety updates - simple list */}
         {highlights.safety.length > 0 && (
           <>
-            <Section>
-              <Heading style={h2}>🚨 Safety Updates</Heading>
-              {highlights.safety.map((update, index) => (
-                <div key={index} style={listItem}>
-                  <Text style={itemTitle}>{update.title}</Text>
-                  <Text style={itemDetails}>
-                    {update.type} • {update.daysAgo} day{update.daysAgo !== 1 ? 's' : ''} ago
-                  </Text>
-                </div>
-              ))}
-              <Link href={getWeeklySummarySafetyURL()} style={sectionLink}>
-                View all safety updates →
-              </Link>
-            </Section>
-            <Hr style={divider} />
+            <Text style={sectionHeading}>Neighborhood safety updates:</Text>
+            {highlights.safety.map((update, index) => (
+              <Text key={index} style={listItemText}>
+                • <strong>{update.title}</strong> ({update.daysAgo} day{update.daysAgo !== 1 ? 's' : ''} ago)
+              </Text>
+            ))}
+            <Text style={paragraph}>
+              <Link href={getWeeklySummarySafetyURL()} style={link}>View all safety updates</Link>
+            </Text>
           </>
         )}
 
-        {/* AI-Generated Week Ahead Preview */}
-        <Section style={aiSection}>
-          <Heading style={h2}>🔮 Week Ahead</Heading>
-          <div style={aiText} dangerouslySetInnerHTML={{ __html: aiContent.weekAheadPreview }} />
-          <Link href={getWeeklySummaryDashboardURL()} style={ctaButton}>
-            Visit Your Neighborhood Dashboard
+        {/* AI-Generated Week Ahead Preview - simple paragraph */}
+        <Text style={paragraph} dangerouslySetInnerHTML={{ __html: aiContent.weekAheadPreview }} />
+
+        <Text style={paragraph}>
+          <Link href={getWeeklySummaryDashboardURL()} style={ctaLink}>
+            Visit your neighborhood dashboard
           </Link>
-        </Section>
+        </Text>
 
-        <Hr style={divider} />
-
-        {/* Footer */}
-        <Section style={footer}>
-          <Text style={footerText}>
-            This weekly summary helps keep our community connected and informed.
-          </Text>
-          <Text style={footerText}>
-            You're receiving this because you're a member of {neighborhoodName}. 
-            <Link href={getWeeklySummarySettingsURL()} style={link}>Update your notification preferences</Link>
-          </Text>
-        </Section>
+        {/* Simple footer */}
+        <Text style={footerText}>
+          Thanks for being part of what makes {neighborhoodName} a great place to live.{' '}
+          <Link href={getWeeklySummarySettingsURL()} style={link}>Update your email preferences</Link>
+        </Text>
       </Container>
     </Body>
   </Html>
@@ -231,155 +184,82 @@ export const WeeklySummaryEmail = ({
 
 export default WeeklySummaryEmail
 
-// Styles
+// Letter-style simple formatting
 const main = {
   backgroundColor: '#ffffff',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontFamily: 'Georgia, "Times New Roman", serif', // More letter-like font
+  lineHeight: '1.6',
 }
 
 const container = {
   margin: '0 auto',
-  padding: '20px 12px',
+  padding: '30px 40px',
   maxWidth: '600px',
 }
 
-const h1 = {
-  color: '#1a1a1a',
-  fontSize: '28px',
-  fontWeight: 'bold',
-  margin: '0 0 8px 0',
-}
-
-const subtitle = {
-  color: '#666666',
-  fontSize: '16px',
-  margin: '0 0 32px 0',
-}
-
-const h2 = {
-  color: '#1a1a1a',
-  fontSize: '20px',
-  fontWeight: '600',
-  margin: '24px 0 16px 0',
-}
-
-const greeting = {
-  color: '#1a1a1a',
-  fontSize: '16px',
-  margin: '0 0 16px 0',
-}
-
-const text = {
-  color: '#404040',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '0 0 24px 0',
-}
-
-const statsSection = {
-  backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
-  padding: '24px',
-  margin: '24px 0',
-}
-
-const statsGrid = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  gap: '16px',
-}
-
-const statItem = {
+const letterHeader = {
+  color: '#2c3e50',
+  fontSize: '22px',
+  fontWeight: 'normal',
+  margin: '0 0 5px 0',
   textAlign: 'center' as const,
 }
 
-const statNumber = {
-  color: '#1a1a1a',
-  fontSize: '24px',
-  fontWeight: 'bold',
-  margin: '0',
-}
-
-const statLabel = {
-  color: '#666666',
+const dateText = {
+  color: '#7f8c8d',
   fontSize: '14px',
-  margin: '4px 0 0 0',
+  margin: '0 0 30px 0',
+  textAlign: 'center' as const,
+  fontStyle: 'italic',
 }
 
-const listItem = {
-  borderLeft: '3px solid #e5e7eb',
-  paddingLeft: '16px',
-  marginBottom: '16px',
-}
-
-const itemTitle = {
-  color: '#1a1a1a',
+const greeting = {
+  color: '#2c3e50',
   fontSize: '16px',
-  fontWeight: '500',
-  margin: '0 0 4px 0',
+  margin: '0 0 20px 0',
 }
 
-const itemDetails = {
-  color: '#666666',
-  fontSize: '14px',
-  margin: '0',
+const paragraph = {
+  color: '#34495e',
+  fontSize: '16px',
+  lineHeight: '1.7',
+  margin: '0 0 20px 0',
 }
 
-const sectionLink = {
-  color: '#2563eb',
-  fontSize: '14px',
-  textDecoration: 'none',
-  fontWeight: '500',
+const sectionHeading = {
+  color: '#2c3e50',
+  fontSize: '16px',
+  fontWeight: '600',
+  margin: '25px 0 10px 0',
 }
 
-const divider = {
-  border: 'none',
-  borderTop: '1px solid #e5e7eb',
-  margin: '32px 0',
-}
-
-const footer = {
-  borderTop: '1px solid #e5e7eb',
-  paddingTop: '24px',
-  marginTop: '32px',
-}
-
-const footerText = {
-  color: '#666666',
-  fontSize: '14px',
-  lineHeight: '20px',
-  margin: '0 0 12px 0',
+const listItemText = {
+  color: '#34495e',
+  fontSize: '15px',
+  lineHeight: '1.6',
+  margin: '0 0 8px 0',
+  paddingLeft: '10px',
 }
 
 const link = {
-  color: '#2563eb',
+  color: '#3498db',
+  textDecoration: 'underline',
+}
+
+const ctaLink = {
+  color: '#2980b9',
   textDecoration: 'none',
-}
-
-// AI Content Styles
-const aiSection = {
-  backgroundColor: '#f3f4f6',
-  borderRadius: '8px',
-  padding: '20px',
-  margin: '20px 0',
-  borderLeft: '4px solid #667eea',
-}
-
-const aiText = {
-  color: '#374151',
-  fontSize: '16px',
-  lineHeight: '24px',
-  margin: '0 0 16px 0',
-}
-
-const ctaButton = {
-  backgroundColor: '#667eea',
-  color: '#ffffff',
-  padding: '12px 24px',
-  borderRadius: '6px',
-  textDecoration: 'none',
-  display: 'inline-block',
   fontWeight: '600',
-  fontSize: '16px',
-  marginTop: '16px',
+  borderBottom: '2px solid #3498db',
+  paddingBottom: '2px',
+}
+
+const footerText = {
+  color: '#7f8c8d',
+  fontSize: '14px',
+  lineHeight: '1.5',
+  margin: '30px 0 0 0',
+  paddingTop: '20px',
+  borderTop: '1px solid #ecf0f1',
+  fontStyle: 'italic',
 }
