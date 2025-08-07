@@ -40,8 +40,28 @@ async function generateAIContent(neighborhoodName: string, stats: any, highlight
   }
 
   try {
+    // Calculate total activity count to detect low-activity periods
+    const totalActivities = 
+      pastWeekActivities.completedEvents.length + 
+      pastWeekActivities.archivedGoods.length + 
+      pastWeekActivities.completedSkills.length + 
+      pastWeekActivities.safetyUpdates.length +
+      upcomingActivities.events.length + 
+      upcomingActivities.skills.length + 
+      upcomingActivities.goods.length;
+    
+    const isLowActivity = totalActivities <= 2; // Consider 2 or fewer activities as "low"
+    
+    // Create activity URLs for easy posting (using the same URL generation pattern)
+    const createEventUrl = `https://neighborhoodos.com/n/${neighborhoodId}/calendar?create=true`;
+    const createSkillUrl = `https://neighborhoodos.com/n/${neighborhoodId}/skills?create=true`;
+    const createGoodsUrl = `https://neighborhoodos.com/n/${neighborhoodId}/goods?create=true`;
+    const createSafetyUrl = `https://neighborhoodos.com/n/${neighborhoodId}/safety?create=true`;
+    
     // Create a comprehensive prompt for Claude to generate engaging content in 3-section format
     const prompt = `You are writing a weekly neighborhood newsletter for "${neighborhoodName}". 
+
+ACTIVITY LEVEL: ${isLowActivity ? 'LOW - Focus on encouraging neighbor participation' : 'NORMAL - Celebrate ongoing activities'}
 
 NEW NEIGHBORS THIS WEEK:
 ${newNeighbors.length > 0 ? 
@@ -60,23 +80,29 @@ Upcoming Events: ${upcomingActivities.events.map(e => `"${e.title}" on ${e.date}
 New Skills Available: ${upcomingActivities.skills.map(s => `"${s.title}" - ${s.requestType} (${s.url})`).join(', ') || 'None'}
 New Items Shared: ${upcomingActivities.goods.map(g => `"${g.title}" in ${g.category} (${g.url})`).join(', ') || 'None'}
 
+QUICK ACTIVITY CREATION LINKS (Always include these when appropriate):
+- Create Event: ${createEventUrl}
+- Share/Request Skills: ${createSkillUrl}  
+- Share/Request Items: ${createGoodsUrl}
+- Post Safety Update: ${createSafetyUrl}
+
 Please generate exactly 3 sections for the newsletter in HTML format with working hyperlinks:
 
 1. newNeighborWelcome: (ONLY if there are new neighbors) Write a warm welcome message mentioning each new neighbor by name with clickable links to their profiles. If no new neighbors, return empty string.
 
-2. pastWeekRecap: Summarize what actually happened this past week - events that took place, items that were claimed, skills sessions completed, etc. Include the provided URLs as clickable links. Be specific about actual activities that occurred.
+2. pastWeekRecap: Summarize what actually happened this past week. Include provided URLs as clickable links. ${isLowActivity ? 'IMPORTANT: Since activity was low, focus on encouraging participation. Suggest specific, easy activities neighbors can create: "It was a quiet week - perfect time to organize a coffee meetup, share a skill, or offer help to neighbors. <a href=\\"' + createEventUrl + '\\">Create an event</a> or <a href=\\"' + createSkillUrl + '\\">share a skill</a> to get things started!"' : 'Be specific about actual activities that occurred and celebrate community engagement.'}
 
-3. weekAheadPreview: Look ahead at the upcoming week - events coming up, new skills/items posted, etc. Include the provided URLs as clickable links. Focus on what neighbors can do or participate in.
+3. weekAheadPreview: Look ahead at upcoming activities. Include provided URLs as clickable links. ${isLowActivity ? 'IMPORTANT: Since few activities are planned, encourage neighbors to get involved: "The week ahead is wide open for new connections! Why not <a href=\\"' + createEventUrl + '\\">organize a neighborhood walk</a>, <a href=\\"' + createGoodsUrl + '\\">share something you no longer need</a>, or <a href=\\"' + createSkillUrl + '\\">offer to help with a skill you have</a>? Small gestures build strong communities."' : 'Focus on what neighbors can participate in and how to join activities.'}
 
 IMPORTANT: 
 - Use the exact URLs provided in parentheses as href attributes
 - Make titles and key phrases clickable links using <a href="URL">text</a>
 - Keep each section 2-3 sentences maximum
-- If a section has no content, write something brief and encouraging
+- ${isLowActivity ? 'PRIORITY: Include at least one "create activity" link in pastWeekRecap and weekAheadPreview sections using the Quick Activity Creation Links provided above' : 'Focus on celebrating existing activities and encouraging participation'}
 - Return as JSON with these 3 keys: newNeighborWelcome, pastWeekRecap, weekAheadPreview
 - Include HTML formatting with proper <a> tags for all URLs provided
 
-Keep the tone warm, community-focused, and engaging.`;
+Keep the tone warm, community-focused, and encouraging. ${isLowActivity ? 'Emphasize that every neighbor can help build community by creating simple activities.' : ''}`;
 
     // Call Claude API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
