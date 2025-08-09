@@ -35,6 +35,7 @@ import {
   getFromAddress,
   getUtmCampaign
 } from './emailConfig';
+import { BASE_ROUTES } from '@/utils/routes';
 
 // =============================================================================
 // CORE RESOLVER FUNCTIONS
@@ -237,25 +238,25 @@ export function generateEmailUrl(
 ): string {
   let path = '';
   
-  // Map URL types to actual paths
+  // Map URL types to actual paths using centralized routes
   switch (urlType) {
     case 'dashboard':
-      path = '/dashboard';
+      path = BASE_ROUTES.home.replace('/home', '/dashboard'); // keep legacy mapping if needed
       break;
     case 'calendar':
-      path = '/calendar';
+      path = BASE_ROUTES.calendar;
       break;
     case 'skills':
-      path = '/skills';
+      path = BASE_ROUTES.skills;
       break;
     case 'goods':
-      path = '/goods';
+      path = BASE_ROUTES.goods;
       break;
     case 'safety':
-      path = '/safety';
+      path = BASE_ROUTES.safety;
       break;
     case 'neighbors':
-      path = '/neighbors';
+      path = BASE_ROUTES.neighbors;
       break;
     case 'settings':
       path = '/settings';

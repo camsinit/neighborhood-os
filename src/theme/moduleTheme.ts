@@ -4,6 +4,7 @@
  * This file contains the theme configuration for all modules in the application.
  * It defines the colors, gradients, and other styling properties associated with each module theme.
  */
+import { BASE_ROUTES } from '@/utils/routes';
 
 // Theme color definitions for modules
 export const moduleThemeColors = {
@@ -72,7 +73,7 @@ export const coreModules: ModuleDefinition[] = [
     name: 'Calendar',
     description: 'Community events and gatherings',
     themeColor: 'calendar',
-    path: '/calendar',
+    path: BASE_ROUTES.calendar,
     icon: 'Calendar',
     isEnabled: true
   },
@@ -81,7 +82,7 @@ export const coreModules: ModuleDefinition[] = [
     name: 'Skills',
     description: 'Skills exchange and learning',
     themeColor: 'skills',
-    path: '/skills',
+    path: BASE_ROUTES.skills,
     icon: 'Brain',
     isEnabled: true
   },
@@ -90,7 +91,7 @@ export const coreModules: ModuleDefinition[] = [
     name: 'Freebies',
     description: 'Items exchange and sharing',
     themeColor: 'goods',
-    path: '/goods',
+    path: BASE_ROUTES.goods,
     icon: 'Gift',
     isEnabled: true
   },
@@ -99,7 +100,7 @@ export const coreModules: ModuleDefinition[] = [
     name: 'Updates',
     description: 'Neighborhood updates and information',
     themeColor: 'safety',
-    path: '/safety',
+    path: BASE_ROUTES.safety,
     icon: 'Info', // Changed from Shield to Info
     isEnabled: true
   },
@@ -108,7 +109,7 @@ export const coreModules: ModuleDefinition[] = [
     name: 'Neighbors',
     description: 'Community members directory',
     themeColor: 'neighbors',
-    path: '/neighbors',
+    path: BASE_ROUTES.neighbors,
     icon: 'Users',
     isEnabled: true
   }

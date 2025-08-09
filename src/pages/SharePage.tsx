@@ -9,6 +9,8 @@ import EventOverviewCard from '@/components/share/EventOverviewCard';
 import SafetyOverviewCard from '@/components/share/SafetyOverviewCard';
 import SkillsOverviewCard from '@/components/share/SkillsOverviewCard';
 import GoodsOverviewCard from '@/components/share/GoodsOverviewCard';
+// Centralized routes for consistent paths
+import { BASE_ROUTES } from '@/utils/routes';
 
 /**
  * Interface for shared item data from database
@@ -248,12 +250,13 @@ const SharePage = () => {
   const handleActionClick = () => {
     if (user) {
       // Authenticated user - navigate to item in dashboard
+      // Use centralized base routes to avoid hardcoded strings
       const routes = {
-        events: '/calendar',
-        safety: '/safety',
-        skills: '/skills',
-        goods: '/goods'
-      };
+        events: BASE_ROUTES.calendar,
+        safety: BASE_ROUTES.safety,
+        skills: BASE_ROUTES.skills,
+        goods: BASE_ROUTES.goods
+      } as const;
       
       const route = routes[sharedItem!.content_type];
       navigate(`${route}?highlight=${sharedItem!.content_id}`);

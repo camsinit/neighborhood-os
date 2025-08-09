@@ -1,6 +1,10 @@
 
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNeighborhoodQuery } from "@/hooks/useNeighborhoodQuery";
+import { createLogger } from "@/utils/logger";
+
+// Logger for consistent, env-aware output
+const logger = createLogger('useEventRSVPs');
 
 /**
  * Type definition for an RSVP with user profile information
@@ -20,20 +24,16 @@ export interface EventRSVP {
 
 /**
  * Custom hook that fetches RSVPs for a specific event
- * 
- * @param eventId - The ID of the event to fetch RSVPs for
- * @returns Query result containing RSVPs with user profile information
+ * Uses useNeighborhoodQuery to keep cache keys scoped by neighborhood for consistency
  */
 export const useEventRSVPs = (eventId: string) => {
-  return useQuery({
-    // Include event ID in query key for automatic refetching when it changes
-    queryKey: ["event-rsvps", eventId],
-    
-    // Only enable the query if we have an eventId
-    enabled: !!eventId,
-    
-    queryFn: async (): Promise<EventRSVP[]> => {
-      console.log("[useEventRSVPs] Fetching RSVPs and host for event:", eventId);
+  return useNeighborhoodQuery<EventRSVP[]>(
+    ["event-rsvps", eventId], // include eventId for proper cache scoping
+    async (_neighborhoodId: string): Promise<EventRSVP[]> => {
+      // If no eventId was provided, return an empty list early to avoid unnecessary queries
+      if (!eventId) return [];
+      
+      logger.info("Fetching RSVPs and host for event", { eventId });
       
       // First, fetch the event to get host information
       const { data: eventData, error: eventError } = await supabase
@@ -49,7 +49,7 @@ export const useEventRSVPs = (eventId: string) => {
         .single();
       
       if (eventError) {
-        console.error("[useEventRSVPs] Error fetching event:", eventError);
+        logger.error("Error fetching event", eventError);
         throw eventError;
       }
       
@@ -66,7 +66,7 @@ export const useEventRSVPs = (eventId: string) => {
         .eq("event_id", eventId);
         
       if (rsvpError) {
-        console.error("[useEventRSVPs] Error fetching RSVPs:", rsvpError);
+        logger.error("Error fetching RSVPs", rsvpError);
         throw rsvpError;
       }
       
@@ -88,8 +88,8 @@ export const useEventRSVPs = (eventId: string) => {
         } as EventRSVP & { isHost: boolean });
       }
       
-      console.log(`[useEventRSVPs] Found ${rsvpData?.length || 0} RSVPs + host for event ${eventId}`);
+      logger.info("Fetched RSVPs + host", { count: rsvpData?.length || 0, eventId });
       return attendees;
-    },
-  });
+    }
+  );
 };

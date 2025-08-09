@@ -1,9 +1,12 @@
 
 /**
- * This is a compatibility layer for Sonner toast
+ * DEPRECATED: use-toast compatibility layer (kept for backwards compatibility)
  * 
- * It provides a unified API that works with both the older toast system
- * and the newer Sonner toast implementation.
+ * Prefer importing toast utilities from "@/utils/toast" for new code:
+ *   - showSuccessToast, showErrorToast, showInfoToast, showWarningToast
+ *   - showToast, showLoadingToast, dismissToast
+ * 
+ * This adapter allows legacy components to keep working while we migrate.
  */
 import { toast as sonnerToast } from 'sonner';
 

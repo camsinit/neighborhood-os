@@ -273,16 +273,10 @@ export class ItemContextService {
         params.set('dialog', 'true');
       }
       
-      // Navigate with context
-      const routes = {
-        event: '/calendar',
-        skills: '/skills',
-        goods: '/goods',
-        safety: '/safety',
-        neighbors: '/neighbors'
-      };
-      
-      const targetRoute = routes[type];
+      // Navigate with context using centralized route map
+      // Import the base route from ROUTE_MAP to avoid hardcoding paths
+      const { ROUTE_MAP } = await import('@/utils/routes');
+      const targetRoute = ROUTE_MAP[type];
       const fullPath = `${targetRoute}?${params.toString()}`;
       
       logger.info(`Navigating with context to: ${fullPath}`);
