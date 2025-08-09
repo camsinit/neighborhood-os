@@ -6,6 +6,7 @@
  * and what redirects should happen.
  */
 import { Location } from "react-router-dom";
+import { BASE_ROUTES, isOnBaseRoute } from "@/utils/routes";
 
 /**
  * Check if the current path is a join page
@@ -18,7 +19,7 @@ export const isJoinPage = (location: Location): boolean => {
  * Check if the current path is the home page (legacy or neighborhood-aware)
  */
 export const isHomePage = (location: Location): boolean => {
-  return location.pathname === '/home' || location.pathname.includes('/home');
+  return isOnBaseRoute(location.pathname, BASE_ROUTES.home);
 };
 
 /**

@@ -2,6 +2,8 @@
 import { useLocation } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./Header";
+import { BASE_ROUTES, isOnBaseRoute } from "@/utils/routes";
+import { createLogger } from "@/utils/logger";
 
 /**
  * MainLayout component props
@@ -23,16 +25,19 @@ interface MainLayoutProps {
  * @param children - Content to render in the main area
  */
 const MainLayout = ({ children }: MainLayoutProps) => {
-  // Get the current location to determine if we're on the homepage
+  // Create a module-scoped logger instance for controlled logging
+  const logger = createLogger('MainLayout');
+  // Get the current location to determine if we're on the homepage (neighborhood-aware)
   const location = useLocation();
-  const isHomePage = location.pathname === '/home';
+  const isHomePage = isOnBaseRoute(location.pathname, BASE_ROUTES.home);
 
   /**
    * Handler for settings button click
    * This is now deprecated since settings is a page, but kept for header compatibility
    */
   const handleOpenSettings = () => {
-    console.log("Settings handled by navigation - this shouldn't be called");
+    // Use logger to make this visible only in debug/dev
+    logger.warn("Settings handled by navigation - this shouldn't be called");
   };
 
   return (

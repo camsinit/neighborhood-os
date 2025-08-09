@@ -3,6 +3,9 @@
 import { toast } from "sonner";
 import { GoodsCategory } from "../types/goodsFormTypes";
 import { processFileUpload, processMultipleFileUploads } from "../utils/imageHandling";
+import { createLogger } from "@/utils/logger";
+// Create a logger for this handlers hook to keep logging consistent
+const logger = createLogger('useGoodsFormHandlers');
 
 export const useGoodsFormHandlers = (
   isOfferForm: boolean,
@@ -70,7 +73,8 @@ export const useGoodsFormHandlers = (
   };
   
   const handleCategoryChange = (category: GoodsCategory) => {
-    console.log("Category changed to:", category);
+    // Log category change to help debug user interactions in the form
+    logger.info("Category changed", { category });
     setSelectedCategory(category);
     if (isOfferForm) {
       setItemFormData(prev => ({ ...prev, category }));

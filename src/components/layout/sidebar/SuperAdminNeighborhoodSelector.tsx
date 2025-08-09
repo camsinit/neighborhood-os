@@ -20,6 +20,7 @@ import { useSuperAdminAccess } from '@/hooks/useSuperAdminAccess';
 import { useSuperAdminNeighborhoods } from '@/hooks/useSuperAdminNeighborhoods';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useGhostMode } from '@/hooks/useActualMembership';
+import { BASE_ROUTES } from '@/utils/routes';
 
 
 export const SuperAdminNeighborhoodSelector: React.FC = () => {
@@ -41,7 +42,8 @@ export const SuperAdminNeighborhoodSelector: React.FC = () => {
   const handleNeighborhoodSelect = (neighborhoodId: string) => {
     const currentPath = window.location.pathname;
     const pathWithoutNeighborhood = currentPath.replace(/^\/n\/[^\/]+/, '');
-    const newPath = `/n/${neighborhoodId}${pathWithoutNeighborhood || '/home'}`;
+    // Use centralized route for home as fallback to avoid hardcoded paths
+    const newPath = `/n/${neighborhoodId}${pathWithoutNeighborhood || BASE_ROUTES.home}`;
     navigate(newPath, { replace: true }); // Use replace to avoid navigation history buildup
   };
 

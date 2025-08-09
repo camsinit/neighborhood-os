@@ -77,7 +77,8 @@ const QuickActions = () => {
     icon: Package,
     label: "Share an item",
     onClick: () => {
-      console.log('[QuickActions] Opening goods sheet for sharing');
+      // Use structured logging instead of console.log for controlled verbosity
+      logger.info('Opening goods sheet for sharing');
       setInitialRequestType("offer");
       setIsGoodsSheetOpen(true);
     },
@@ -86,7 +87,7 @@ const QuickActions = () => {
     icon: Package,
     label: "Request an item",
     onClick: () => {
-      console.log('[QuickActions] Opening goods sheet for requesting');
+      logger.info('Opening goods sheet for requesting');
       setInitialRequestType("need");
       setIsGoodsSheetOpen(true);
     },
@@ -98,7 +99,7 @@ const QuickActions = () => {
     icon: Wrench,
     label: "Share a skill",
     onClick: () => {
-      console.log('[QuickActions] Opening skills sheet for sharing');
+      logger.info('Opening skills sheet for sharing');
       setIsSkillSheetOpen(true);
     },
     moduleTheme: 'skills' as const
@@ -106,7 +107,7 @@ const QuickActions = () => {
     icon: HelpCircle,
     label: "Request a skill",
     onClick: () => {
-      console.log('[QuickActions] Opening skill request sheet');
+      logger.info('Opening skill request sheet');
       setIsSkillRequestSheetOpen(true);
     },
     moduleTheme: 'skills' as const
@@ -117,7 +118,7 @@ const QuickActions = () => {
     icon: Calendar,
     label: "Add Event",
     onClick: () => {
-      console.log('[QuickActions] Opening event sheet');
+      logger.info('Opening event sheet');
       setIsAddEventOpen(true);
     },
     moduleTheme: 'calendar' as const
@@ -125,7 +126,7 @@ const QuickActions = () => {
     icon: AlertTriangle,
     label: "Add Safety Update",
     onClick: () => {
-      console.log('[QuickActions] Opening safety update sheet');
+      logger.info('Opening safety update sheet');
       setIsSafetyUpdateOpen(true);
     },
     moduleTheme: 'safety' as const
@@ -133,13 +134,13 @@ const QuickActions = () => {
 
   // Event added handler with proper cleanup
   const handleEventAdded = () => {
-    console.log('[QuickActions] Event added successfully');
+    logger.info('Event added successfully');
     setIsAddEventOpen(false);
   };
 
   // Skill added handler - simple refresh without complex context dependencies
   const handleSkillAdded = () => {
-    console.log('[QuickActions] Skill added successfully');
+    logger.info('Skill added successfully');
     // Keep sheet open so users can add more skills if they want
   };
 

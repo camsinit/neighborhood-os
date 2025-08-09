@@ -7,6 +7,8 @@ import AuthHeader from "@/components/auth/AuthHeader";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BASE_ROUTES } from "@/utils/routes";
+import { createLogger } from "@/utils/logger";
 
 /**
  * Login page component
@@ -15,6 +17,8 @@ import { cn } from "@/lib/utils";
  * now styled to match our chat interface aesthetic.
  */
 const Login = () => {
+  // Logger for this page to avoid noisy console logs in production builds
+  const logger = createLogger('Login');
   // Get navigation and session context
   const navigate = useNavigate();
   const { session, isLoading } = useSessionContext();
@@ -22,8 +26,8 @@ const Login = () => {
   // Redirect authenticated users to home page
   useEffect(() => {
     if (!isLoading && session) {
-      console.log("[Login] User is already authenticated, redirecting to home page");
-      navigate("/home", { replace: true });
+      logger.info("[Login] User is already authenticated, redirecting to home page");
+      navigate(BASE_ROUTES.home, { replace: true });
     }
   }, [session, isLoading, navigate]);
 

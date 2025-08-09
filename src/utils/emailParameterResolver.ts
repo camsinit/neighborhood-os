@@ -346,10 +346,10 @@ function generateAdminUrl(context: EmailContext, config: EmailUrlConfig): string
   
   switch (context.content.type) {
     case 'neighbor_profile':
-      adminPath = '/neighbors'; // Member directory
+      adminPath = BASE_ROUTES.neighbors; // Member directory
       break;
     case 'event':
-      adminPath = '/calendar?view=admin';
+      adminPath = `${BASE_ROUTES.calendar}?view=admin`;
       break;
     default:
       adminPath = '/dashboard?view=admin';

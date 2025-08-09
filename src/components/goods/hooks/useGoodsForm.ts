@@ -7,6 +7,7 @@ import { useGoodsFormHandlers } from "./useGoodsFormHandlers";
 import { useGoodsFormSubmit } from "./useGoodsFormSubmit";
 import { GoodsFormProps } from "../types/goodsFormTypes";
 import { toast } from "sonner";
+import { createLogger } from "@/utils/logger";
 
 export const useGoodsForm = ({ 
   onClose, 
@@ -15,12 +16,14 @@ export const useGoodsForm = ({
   mode = 'create', // Add mode parameter
   requestId // Add requestId parameter (this will be the itemId for edit mode)
 }: Pick<GoodsFormProps, 'onClose' | 'initialValues' | 'initialRequestType' | 'mode' | 'requestId'>) => {
+  // Create a logger instance scoped to this hook
+  const logger = createLogger('useGoodsForm');
   // Get the current user and neighborhood
   const user = useUser();
   const neighborhood = useCurrentNeighborhood();
   
-  // Log the neighborhood data for debugging purposes
-  console.log("[useGoodsForm] Current neighborhood:", neighborhood);
+  // Log the neighborhood data for debugging purposes (debug level)
+  logger.debug("Current neighborhood", neighborhood);
   
   // We'll pass the initialRequestType directly to useGoodsFormState
   // since we've updated it to handle both "need" and "request"
@@ -53,7 +56,8 @@ export const useGoodsForm = ({
 
   // Ensure we have a neighborhood before submitting
   if (!neighborhood) {
-    console.warn("[useGoodsForm] No neighborhood selected");
+    // Surface as a warning but avoid breaking the flow
+    logger.warn("No neighborhood selected");
   }
   
   const { handleSubmit } = useGoodsFormSubmit(

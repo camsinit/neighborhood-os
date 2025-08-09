@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNeighborhood } from "@/contexts/neighborhood";
+import { createLogger } from "@/utils/logger";
 
 interface AddEventDialogProps {
   open: boolean;
@@ -19,6 +20,9 @@ interface AddEventDialogProps {
  * This dialog loads the current neighborhood's timezone and
  * displays the EventForm for creating new events.
  */
+// Create a module-scoped logger instance for controlled logging
+const logger = createLogger('AddEventDialog');
+
 const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEventDialogProps) => {
   // Get the current neighborhood
   const { currentNeighborhood } = useNeighborhood();
@@ -38,7 +42,8 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEven
           
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
-          console.log(`[AddEventDialog] Using timezone: ${data.timezone || 'America/Los_Angeles'}`);
+          // Use our logger for debug-friendly, environment-aware logging
+          logger.info('Using timezone', { timezone: data.timezone || 'America/Los_Angeles' });
         }
       }
     };

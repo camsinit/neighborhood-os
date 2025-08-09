@@ -6,6 +6,9 @@ import { submitGoodsForm } from "../utils/formSubmission";
 import { ItemFormData, RequestFormData } from "../types/goodsFormTypes";
 import { useEffect } from "react";
 import { unifiedEvents } from '@/utils/unifiedEventSystem';
+import { createLogger } from "@/utils/logger";
+// Create a logger for this hook to standardize log output
+const logger = createLogger('useGoodsFormSubmit');
 
 export const useGoodsFormSubmit = (
   isOfferForm: boolean,
@@ -21,10 +24,10 @@ export const useGoodsFormSubmit = (
   
   useEffect(() => {
     if (!userId) {
-      console.warn("useGoodsFormSubmit: No user ID provided");
+      logger.warn("No user ID provided");
     }
     if (!neighborhoodId) {
-      console.warn("useGoodsFormSubmit: No neighborhood ID provided");
+      logger.warn("No neighborhood ID provided");
     }
   }, [userId, neighborhoodId]);
   
@@ -38,7 +41,7 @@ export const useGoodsFormSubmit = (
     
     if (!neighborhoodId) {
       toast.error("No neighborhood selected");
-      console.error("Missing neighborhood ID in form submission", {
+      logger.error("Missing neighborhood ID in form submission", {
         userId,
         neighborhoodId,
         formType: isOfferForm ? "offer" : "request",
@@ -50,7 +53,7 @@ export const useGoodsFormSubmit = (
     
     if (mode === 'edit' && !itemId) {
       toast.error("Cannot update item: missing item ID");
-      console.error("Edit mode requires itemId", { 
+      logger.error("Edit mode requires itemId", { 
         mode, 
         itemId: {
           _type: typeof itemId,
@@ -80,7 +83,7 @@ export const useGoodsFormSubmit = (
         onClose();
       }
     } catch (error) {
-      console.error('Error submitting goods form:', error);
+      logger.error('Error submitting goods form', error as any);
       toast.error(`Failed to ${mode === 'edit' ? 'update' : 'submit'} ${isOfferForm ? 'offer' : 'request'}. Please try again.`);
     }
   };

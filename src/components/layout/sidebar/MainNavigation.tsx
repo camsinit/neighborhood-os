@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
+import { BASE_ROUTES, neighborhoodPath } from '@/utils/routes';
 
 /**
  * MainNavigation Component
@@ -15,10 +16,8 @@ import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 const MainNavigation = () => {
   const currentNeighborhood = useCurrentNeighborhood();
   
-  // Generate neighborhood-aware home path
-  const homePath = currentNeighborhood?.id 
-    ? `/n/${currentNeighborhood.id}/home` 
-    : '/home'; // Fallback for legacy routes
+  // Generate neighborhood-aware home path using our routes helper
+  const homePath = neighborhoodPath(BASE_ROUTES.home, currentNeighborhood?.id);
   
   return (
     <div className="space-y-1">

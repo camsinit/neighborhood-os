@@ -14,6 +14,8 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { BASE_ROUTES, neighborhoodPath } from "@/utils/routes";
+import { createLogger } from "@/utils/logger";
 
 /**
  * Dashboard entry component for authenticated users only
@@ -22,6 +24,8 @@ import { supabase } from "@/integrations/supabase/client";
  * onboarding status and neighborhood status. It shows a loading indicator while making this determination.
  */
 const Index = () => {
+  // Logger for this component to keep console tidy in production
+  const logger = createLogger('Dashboard');
   // Navigation hook for redirecting users
   const navigate = useNavigate();
   
@@ -69,12 +73,12 @@ const Index = () => {
   useEffect(() => {
     // Safety check: If we're still loading data, wait
     if (isLoadingNeighborhood || isCheckingOnboarding || !user) {
-      console.log("[Dashboard] Still loading data, waiting before routing...");
+      logger.debug("[Dashboard] Still loading data, waiting before routing...");
       return;
     }
     
     // Logging to help with debugging
-    console.log("[Dashboard] Routing decision point reached:", {
+    logger.info("[Dashboard] Routing decision point reached:", {
       needsOnboarding,
       hasNeighborhood: !!currentNeighborhood,
       neighborhoodId: currentNeighborhood?.id,
@@ -85,23 +89,23 @@ const Index = () => {
     
     // If user needs onboarding, redirect to onboarding page
     if (needsOnboarding) {
-      console.log("[Dashboard] User needs onboarding, redirecting to onboarding page");
+      logger.info("[Dashboard] User needs onboarding, redirecting to onboarding page");
       navigate("/onboarding", { replace: true });
       return;
     }
     
     // If authenticated and has neighborhood, redirect to neighborhood-aware home page
     if (currentNeighborhood) {
-      console.log("[Dashboard] User authenticated with neighborhood, redirecting to neighborhood-aware home page");
-      navigate(`/n/${currentNeighborhood.id}/home`, { replace: true });
+      logger.info("[Dashboard] User authenticated with neighborhood, redirecting to neighborhood-aware home page");
+      navigate(neighborhoodPath(BASE_ROUTES.home, currentNeighborhood.id), { replace: true });
       return;
     }
     
     // If there was an error loading neighborhood data or no neighborhood, redirect to legacy home
     // Let the home page handle the "no neighborhood" state instead of forcing join page
     if (!currentNeighborhood || error) {
-      console.log("[Dashboard] User authenticated but no neighborhood, redirecting to legacy home page to handle gracefully");
-      navigate("/home", { replace: true });
+      logger.info("[Dashboard] User authenticated but no neighborhood, redirecting to legacy home page to handle gracefully");
+      navigate(BASE_ROUTES.home, { replace: true });
       return;
     }
   }, [user, currentNeighborhood, isLoadingNeighborhood, navigate, error, needsOnboarding, isCheckingOnboarding]);
