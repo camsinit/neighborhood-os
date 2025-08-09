@@ -352,6 +352,7 @@ export type Database = {
           id: string
           invite_code: string
           inviter_id: string
+          is_admin_invite: boolean
           neighborhood_id: string
           status: string
         }
@@ -364,6 +365,7 @@ export type Database = {
           id?: string
           invite_code: string
           inviter_id: string
+          is_admin_invite?: boolean
           neighborhood_id: string
           status?: string
         }
@@ -376,6 +378,7 @@ export type Database = {
           id?: string
           invite_code?: string
           inviter_id?: string
+          is_admin_invite?: boolean
           neighborhood_id?: string
           status?: string
         }
@@ -1188,6 +1191,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: Json
       }
+      generate_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_share_code: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1404,6 +1411,10 @@ export type Database = {
       }
       user_created_neighborhood: {
         Args: { user_uuid: string; neighborhood_uuid: string }
+        Returns: boolean
+      }
+      user_is_neighborhood_admin: {
+        Args: { _user: string; _neighborhood: string }
         Returns: boolean
       }
       user_is_neighborhood_member: {
