@@ -52,21 +52,10 @@ const Header = ({
   return (
     <>
       {/* Removed the 'border-b' class from the header to remove the bottom border stroke */}
-      <header className="h-16 px-4 flex items-center justify-between">
-        {/* Left side - Quick Actions title and create neighborhood option if applicable */}
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Zap className="h-6 w-6" />
-            Quick Actions
-          </h2>
-          
-        </div>
-        
-        {/* Right side - notifications now embedded in main content */}
-        <div className="flex items-center gap-2">
-          {/* Notifications moved to main content area */}
-        </div>
-      </header>
+        {/*
+          Header element removed based on user request via Visual Edit.
+          We leave the component and dialog intact for compatibility.
+        */}
 
       {/* Create Neighborhood Dialog */}
       <CreateNeighborhoodDialog
