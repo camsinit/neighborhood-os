@@ -6,18 +6,17 @@
  * with their respective routing and DOM attributes
  */
 import { HighlightableItemType } from './types';
+// Import centralized route map to avoid duplication across the app
+import { ROUTE_MAP } from '@/utils/routes';
 
 /**
  * Maps item types to their respective routes in the application
  * These are base routes that will be made neighborhood-aware by the navigation function
+ *
+ * Note: We re-export the centralized ROUTE_MAP under the legacy name `routeMap`
+ * to maintain backward compatibility for existing imports in this folder.
  */
-export const routeMap: Record<HighlightableItemType, string> = {
-  safety: "/safety",
-  event: "/calendar", 
-  skills: "/skills",
-  goods: "/goods",
-  neighbors: "/neighbors"
-};
+export const routeMap: Record<HighlightableItemType, string> = ROUTE_MAP;
 
 /**
  * Maps item types to their data attributes for DOM selection

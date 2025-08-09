@@ -2,9 +2,10 @@
 /**
  * Navigate to an item and highlight it
  */
-import { routeMap } from './constants';
 import { highlightItem } from './highlightItem';
 import { HighlightableItemType } from './types';
+// Import centralized route helpers to build neighborhood-aware paths safely
+import { ROUTE_MAP, neighborhoodPath } from '@/utils/routes';
 
 /**
  * Navigate to an item and highlight it
@@ -22,9 +23,9 @@ export function navigateAndHighlight(
   showToast: boolean = false,
   neighborhoodId?: string
 ): void {
-  // Create neighborhood-aware route if neighborhoodId is provided
-  const basePath = routeMap[type];
-  const targetPath = neighborhoodId ? `/n/${neighborhoodId}${basePath}` : basePath;
+  // Create neighborhood-aware route using centralized route helpers
+  const basePath = ROUTE_MAP[type];
+  const targetPath = neighborhoodPath(basePath, neighborhoodId);
   
   // Navigate to the appropriate route
   navigate(targetPath);
