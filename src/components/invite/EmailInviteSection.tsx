@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, Send } from "lucide-react";
 
 /**
@@ -14,6 +15,10 @@ interface EmailInviteSectionProps {
   setEmailError: (error: string) => void;
   isSendingEmail: boolean;
   onSendEmailInvite: () => void;
+  // Admin toggle props (optional - only passed when user is admin)
+  isAdmin?: boolean;
+  inviteAsAdmin?: boolean;
+  setInviteAsAdmin?: (value: boolean) => void;
 }
 
 /**
@@ -28,7 +33,10 @@ const EmailInviteSection = ({
   emailError,
   setEmailError,
   isSendingEmail,
-  onSendEmailInvite
+  onSendEmailInvite,
+  isAdmin,
+  inviteAsAdmin,
+  setInviteAsAdmin
 }: EmailInviteSectionProps) => {
   return (
     <div className="space-y-4">
@@ -48,9 +56,25 @@ const EmailInviteSection = ({
       {/* Email input form with validation */}
       <div className="space-y-3">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
-            Email address
-          </Label>
+          {/* Email address label with admin toggle right next to it */}
+          <div className="flex items-center justify-between">
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email address
+            </Label>
+            {/* Admin toggle appears right next to the label */}
+            {isAdmin && setInviteAsAdmin && (
+              <div className="inline-flex items-center gap-2">
+                <Checkbox
+                  id="invite-as-admin"
+                  checked={inviteAsAdmin}
+                  onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
+                />
+                <Label htmlFor="invite-as-admin" className="text-sm text-muted-foreground">
+                  Invite as Admin
+                </Label>
+              </div>
+            )}
+          </div>
           <Input
             id="email"
             type="email"

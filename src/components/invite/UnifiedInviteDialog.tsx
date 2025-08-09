@@ -307,25 +307,6 @@ const UnifiedInviteDialog = ({
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Admin-only: Invite-as-Admin toggle placed top-right above the email field */}
-              {isAdmin && (
-                <div className="flex justify-end">
-                  {/* Keep it compact: checkbox and short label inline, aligned to the right */}
-                  <div className="inline-flex items-center gap-2">
-                    <Checkbox
-                      id="invite-as-admin"
-                      checked={inviteAsAdmin}
-                      // Radix Checkbox can pass boolean | 'indeterminate'; coerce to boolean
-                      onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
-                    />
-                    {/* Minimized label text as requested */}
-                    <Label htmlFor="invite-as-admin" className="text-sm text-muted-foreground">
-                      Invite as Admin
-                    </Label>
-                  </div>
-                </div>
-              )}
-
               {/* Email Invite Section */}
               <EmailInviteSection
                 email={email}
@@ -334,6 +315,10 @@ const UnifiedInviteDialog = ({
                 setEmailError={setEmailError}
                 isSendingEmail={isSendingEmail}
                 onSendEmailInvite={sendEmailInvite}
+                // Pass admin toggle props to be rendered within EmailInviteSection
+                isAdmin={isAdmin}
+                inviteAsAdmin={inviteAsAdmin}
+                setInviteAsAdmin={setInviteAsAdmin}
               />
 
               {/* Divider */}
