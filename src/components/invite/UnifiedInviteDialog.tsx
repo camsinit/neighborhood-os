@@ -297,7 +297,7 @@ const UnifiedInviteDialog = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 pb-0 px-2">
+        <div className="flex-1 pb-6 px-2">
           {/* Check if user has a neighborhood */}
           {!currentNeighborhood ? (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
