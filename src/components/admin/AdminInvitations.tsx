@@ -102,7 +102,8 @@ const AdminInvitations = () => {
   };
 
   const copyInviteLink = (inviteCode: string) => {
-    const link = `${window.location.origin}/join/${inviteCode}`;
+    // Always generate public, production-ready links for sharing
+    const link = `https://neighborhoodos.com/join/${inviteCode}`;
     navigator.clipboard.writeText(link);
     toast({
       title: "Link Copied",

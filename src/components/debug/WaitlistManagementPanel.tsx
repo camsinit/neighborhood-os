@@ -250,9 +250,8 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
     setIsProcessing(true);
 
     try {
-      // Build a safe invite URL. We prefer the current origin (so it works in previews),
-      // and fall back to production domain in non-browser contexts.
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://neighborhoodos.com';
+      // Build a stable invite URL that points to production
+      const baseUrl = 'https://neighborhoodos.com';
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
 
       // Call the existing edge function that sends invitation emails via Resend

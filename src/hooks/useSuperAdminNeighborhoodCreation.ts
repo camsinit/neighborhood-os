@@ -99,8 +99,8 @@ export const useSuperAdminNeighborhoodCreation = () => {
       const inviteCode = inviteRow?.invite_code;
       const neighborhoodName = neighborhoodRow?.name || 'your neighborhood';
 
-      // Build invite URL – prefer current origin so it works in staging/previews
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://neighborhoodos.com';
+      // Build invite URL for email — always use the public production domain
+      const baseUrl = 'https://neighborhoodos.com';
       const inviteUrl = inviteCode ? `${baseUrl}/join/${inviteCode}` : undefined;
 
       // 3) Fire-and-forget email via Edge Function if we have a URL

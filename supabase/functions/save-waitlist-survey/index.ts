@@ -166,7 +166,8 @@ serve(async (req) => {
       const html = await renderAsync(
         React.createElement(WaitlistWelcomeEmail, {
           userEmail: email,
-          baseUrl: supabaseUrl.replace('.supabase.co', '.lovableproject.com'),
+          // Always use the public production domain in emails so links work for everyone
+          baseUrl: 'https://neighborhoodos.com',
           firstName: firstName,
           lastName: lastName,
           neighborhoodName: neighborhoodName,

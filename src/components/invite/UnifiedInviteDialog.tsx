@@ -24,15 +24,8 @@ interface UnifiedInviteDialogProps {
  * Uses production domain in production, fallback to current origin for development
  */
 const getBaseUrl = (): string => {
-  // Check if we're in development/preview environment
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('lovableproject.com');
-
-  // If we're in development/preview, use the current origin for testing
-  if (isDevelopment) {
-    return window.location.origin;
-  }
-
-  // Otherwise, we're in production - use the production domain
+  // For email links we want a stable, public domain that works for recipients
+  // outside our preview environment. So we ALWAYS use production here.
   return 'https://neighborhoodos.com';
 };
 
