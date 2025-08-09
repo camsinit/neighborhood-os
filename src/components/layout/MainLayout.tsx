@@ -4,6 +4,7 @@ import Sidebar from "./sidebar";
 import Header from "./Header";
 import { BASE_ROUTES, isOnBaseRoute } from "@/utils/routes";
 import { createLogger } from "@/utils/logger";
+import AdminQuickstartOverlay from "@/components/admin/AdminQuickstartOverlay";
 
 /**
  * MainLayout component props
@@ -53,6 +54,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children}
         </main>
       </div>
+      {/* Admin Quickstart overlay mounts globally and shows only when one-time flag is set */}
+      <AdminQuickstartOverlay />
     </div>
   );
 };
