@@ -307,23 +307,21 @@ const UnifiedInviteDialog = ({
             </div>
           ) : (
             <div className="space-y-8">
-              {/* Admin-only: Toggle to invite as Admin (shown only to admins). We keep it simple with a checkbox. */}
+              {/* Admin-only: Invite-as-Admin toggle placed top-right above the email field */}
               {isAdmin && (
-                <div className="flex items-start gap-3">
-                  {/* Checkbox acts as our simple toggle */}
-                  <Checkbox
-                    id="invite-as-admin"
-                    checked={inviteAsAdmin}
-                    // Radix Checkbox passes boolean | 'indeterminate'; we coerce to boolean for state
-                    onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
-                  />
-                  <div className="space-y-1">
-                    {/* Label is associated to the checkbox for accessibility */}
-                    <Label htmlFor="invite-as-admin">Invite as Admin</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Admins can manage settings and members. If a pending admin invite already exists for this email,
-                      we’ll reuse the existing link.
-                    </p>
+                <div className="flex justify-end">
+                  {/* Keep it compact: checkbox and short label inline, aligned to the right */}
+                  <div className="inline-flex items-center gap-2">
+                    <Checkbox
+                      id="invite-as-admin"
+                      checked={inviteAsAdmin}
+                      // Radix Checkbox can pass boolean | 'indeterminate'; coerce to boolean
+                      onCheckedChange={(checked) => setInviteAsAdmin(Boolean(checked))}
+                    />
+                    {/* Minimized label text as requested */}
+                    <Label htmlFor="invite-as-admin" className="text-sm text-muted-foreground">
+                      Invite as Admin
+                    </Label>
                   </div>
                 </div>
               )}
