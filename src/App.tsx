@@ -91,7 +91,74 @@ const App = () => {
                     }
                   />
                   
-                  {/* All routes now use neighborhood-aware routing */}
+                  {/* Legacy base routes (no /n/:id)
+                      Teaching note: These let people type simple URLs like "/home".
+                      - If NOT authenticated: NeighborhoodAwareProtectedRoute immediately sends to LandingPage (/)
+                      - If authenticated AND has a neighborhood: it auto-redirects to /n/:id/<section>
+                      - If authenticated WITHOUT a neighborhood: it shows a gentle loading state/flow
+                  */}
+                  <Route
+                    path={BASE_ROUTES.home}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        {/* We still render the page + layout here for clarity;
+                            the guard may redirect before this renders for most cases */}
+                        <MainLayout>
+                          <HomePage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={BASE_ROUTES.calendar}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <CalendarPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={BASE_ROUTES.skills}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <SkillsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={BASE_ROUTES.goods}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <GoodsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={BASE_ROUTES.safety}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <SafetyPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path={BASE_ROUTES.neighbors}
+                    element={
+                      <NeighborhoodAwareProtectedRoute>
+                        <MainLayout>
+                          <NeighborsPage />
+                        </MainLayout>
+                      </NeighborhoodAwareProtectedRoute>
+                    }
+                  />
                   
                   {/* Neighborhood-specific routes */}
                   <Route
