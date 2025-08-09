@@ -7,6 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PasswordInput } from "./PasswordInput";
+import { createLogger } from "@/utils/logger";
+
+// Logger helps us replace scattered console.log calls with a consistent, configurable system
+const logger = createLogger('AuthForm');
 
 /**
  * Authentication Form Component
@@ -33,24 +37,24 @@ const AuthForm = () => {
 
   // Listen for auth state changes
   useEffect(() => {
-    console.log("[AuthForm] Setting up auth state change listener");
+    logger.info("Setting up auth state change listener");
     
     if (!supabase || !supabase.auth) {
-      console.error("[AuthForm] Supabase client or auth is not available");
+      logger.error("Supabase client or auth is not available");
       return;
     }
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[AuthForm] Auth state changed:", { event, sessionExists: !!session });
+      logger.info("Auth state changed", { event, sessionExists: !!session });
       
       if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        console.log("[AuthForm] Valid session detected, navigating to dashboard entry point");
+        logger.info("Valid session detected, navigating to dashboard entry point");
         navigate("/dashboard", { replace: true });
       }
     });
 
     return () => {
-      console.log("[AuthForm] Cleaning up auth state change listener");
+      logger.info("Cleaning up auth state change listener");
       subscription?.unsubscribe?.();
     };
   }, [navigate]);
@@ -60,17 +64,17 @@ const AuthForm = () => {
     e.preventDefault();
     setError(""); // Clear previous errors
     setIsLoading(true);
-    console.log("[AuthForm] Starting authentication process");
+    logger.info("Starting authentication process");
 
     try {
-      console.log("[AuthForm] Attempting signin");
+      logger.info("Attempting signin");
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("[AuthForm] Signin error:", error);
+        logger.error("Signin error", error);
         if (error.message.includes('credentials')) {
           setError("Invalid email or password. Please check your credentials and try again.");
         } else {
@@ -79,14 +83,14 @@ const AuthForm = () => {
         return;
       }
 
-      console.log("[AuthForm] Signin successful", { user: data.user?.id });
+      logger.info("Signin successful", { user: data.user?.id });
       // No success toast needed - navigation indicates success
       
     } catch (error: any) {
-      console.error("[AuthForm] Authentication error:", error);
+      logger.error("Authentication error", error);
       setError("An unexpected error occurred. Please try again.");
     } finally {
-      console.log("[AuthForm] Completing authentication process");
+      logger.info("Completing authentication process");
       setIsLoading(false);
     }
   };
@@ -95,7 +99,7 @@ const AuthForm = () => {
   const handleGoogleSignIn = async () => {
     setError("");
     setIsLoading(true);
-    console.log("[AuthForm] Starting Google authentication");
+    logger.info("Starting Google authentication");
 
     try {
       // Store OAuth destination for callback processing
@@ -109,17 +113,17 @@ const AuthForm = () => {
       });
 
       if (error) {
-        console.error("[AuthForm] Google signin error:", error);
+        logger.error("Google signin error", error);
         setError(error.message);
         setIsLoading(false);
         return;
       }
 
-      console.log("[AuthForm] Google signin initiated");
+      logger.info("Google signin initiated");
       // Don't set loading to false here - user will be redirected
       
     } catch (error: any) {
-      console.error("[AuthForm] Google authentication error:", error);
+      logger.error("Google authentication error", error);
       setError("An unexpected error occurred with Google Sign-in. Please try again.");
       setIsLoading(false);
     }

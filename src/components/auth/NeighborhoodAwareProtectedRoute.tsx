@@ -13,6 +13,10 @@ import { useOnboardingStatus } from "./hooks/useOnboardingStatus";
 import { useGuestOnboardingMode } from "./hooks/useGuestOnboardingMode";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { isJoinPage, isHomePage, isOnboardingPage } from "./utils/routeChecks";
+import { createLogger } from "@/utils/logger";
+
+// Dedicated logger for this route guard
+const logger = createLogger('NeighborhoodAwareProtectedRoute');
 
 interface NeighborhoodAwareProtectedRouteProps {
   children: React.ReactNode;
@@ -41,7 +45,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
 
   const isDebugMode = window.location.search.includes('debug=true');
   if (isDebugMode) {
-    console.log("[NeighborhoodAwareProtectedRoute] Route analysis:", {
+    logger.info("Route analysis", {
       path: location.pathname,
       neighborhoodIdFromUrl,
       isNeighborhoodRoute,
@@ -94,7 +98,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     // Super admins can access any neighborhood
     if (isSuperAdmin) {
       if (isDebugMode) {
-        console.log("[NeighborhoodAwareProtectedRoute] Super admin accessing neighborhood:", neighborhoodIdFromUrl);
+        logger.info("Super admin accessing neighborhood", { neighborhoodIdFromUrl });
       }
       return <>{children}</>;
     }
@@ -108,7 +112,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
     if (currentNeighborhood?.id && currentNeighborhood.id !== neighborhoodIdFromUrl) {
       const redirectPath = location.pathname.replace(`/n/${neighborhoodIdFromUrl}`, `/n/${currentNeighborhood.id}`);
       if (isDebugMode) {
-        console.log("[NeighborhoodAwareProtectedRoute] Redirecting to user's neighborhood:", redirectPath);
+        logger.info("Redirecting to user's neighborhood", { redirectPath });
       }
       return <Navigate to={redirectPath} replace />;
     }
@@ -118,7 +122,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
   if (!isNeighborhoodRoute && currentNeighborhood?.id && !isJoin) {
     const newPath = `/n/${currentNeighborhood.id}${location.pathname}`;
     if (isDebugMode) {
-      console.log("[NeighborhoodAwareProtectedRoute] Redirecting legacy route to neighborhood-specific URL:", newPath);
+      logger.info("Redirecting legacy route to neighborhood-specific URL", { newPath });
     }
     return <Navigate to={newPath} replace />;
   }
@@ -139,7 +143,7 @@ const NeighborhoodAwareProtectedRoute = ({ children }: NeighborhoodAwareProtecte
   // redirect to join page - except for the join page itself and home page to avoid loops
   if (!currentNeighborhood && !isJoin && !isHome) {
     if (isDebugMode) {
-      console.log("[NeighborhoodAwareProtectedRoute] User has no neighborhood, showing loading state");
+      logger.info("User has no neighborhood, showing loading state");
     }
     return (
       <div className="min-h-screen flex items-center justify-center">

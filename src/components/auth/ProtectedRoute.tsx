@@ -15,6 +15,10 @@ import { useOnboardingStatus } from "./hooks/useOnboardingStatus";
 import { useGuestOnboardingMode } from "./hooks/useGuestOnboardingMode";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import { isJoinPage, isHomePage, isOnboardingPage } from "./utils/routeChecks";
+import { createLogger } from "@/utils/logger";
+
+// Create a module-scoped logger so we can control verbosity centrally
+const logger = createLogger('ProtectedRoute');
 
 /**
  * Props for the ProtectedRoute component
@@ -50,7 +54,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Debug info - only log in debug mode to reduce console noise
   const isDebugMode = window.location.search.includes('debug=true');
   if (isDebugMode) {
-    console.log("[ProtectedRoute] Checking route access:", {
+    logger.info("Checking route access", {
       path: location.pathname,
       isLoadingAuth,
       isLoadingNeighborhood,
@@ -82,7 +86,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Special case: Allow unauthenticated access to onboarding page if in guest mode
   if (isOnboardingPage(location) && !user && isGuestOnboardingMode) {
     if (isDebugMode) {
-      console.log("[ProtectedRoute] Allowing unauthenticated access to onboarding (guest mode)");
+      logger.info("Allowing unauthenticated access to onboarding (guest mode)");
     }
     return <>{children}</>;
   }
@@ -90,7 +94,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // If not authenticated, redirect to landing page (except for guest onboarding)
   if (!user || !session) {
     if (isDebugMode) {
-      console.log("[ProtectedRoute] User not authenticated, redirecting to landing page");
+      logger.info("User not authenticated, redirecting to landing page");
     }
     return <Navigate to="/" state={{ from: location }} replace />;
   }
@@ -99,7 +103,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // Don't redirect if we're already on the onboarding page to avoid loops
   if (needsOnboarding && !isOnboardingPage(location)) {
     if (isDebugMode) {
-      console.log("[ProtectedRoute] User needs to complete onboarding, redirecting");
+      logger.info("User needs to complete onboarding, redirecting");
     }
     return <Navigate to="/onboarding" replace />;
   }
@@ -112,7 +116,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // redirect to join page - except for the join page itself and home page to avoid loops
   if (!currentNeighborhood && !isJoin && !isHome) {
     if (isDebugMode) {
-      console.log("[ProtectedRoute] User has no neighborhood, redirecting to join page");
+      logger.info("User has no neighborhood, redirecting to join page");
     }
     // Show loading state briefly to prevent jarring redirect
     setTimeout(() => {

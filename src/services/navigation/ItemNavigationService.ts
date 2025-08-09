@@ -11,18 +11,14 @@ import { createLogger } from '@/utils/logger';
 import { HighlightableItemType } from '@/utils/highlight/types';
 import { highlightItem } from '@/utils/highlight/highlightItem';
 import { ItemContextService } from './ItemContextService';
+// Centralized route helpers keep neighborhood-aware URL logic simple and consistent
+import { ROUTE_MAP, neighborhoodPath, extractNeighborhoodId } from '@/utils/routes';
 
 // Create a dedicated logger for navigation service
 const logger = createLogger('ItemNavigationService');
 
-// Route mapping for different content types
-const ROUTE_MAP: Record<HighlightableItemType, string> = {
-  event: '/calendar',
-  safety: '/safety', 
-  skills: '/skills',
-  goods: '/goods',
-  neighbors: '/neighbors'
-};
+// Route map now lives in src/utils/routes to avoid duplication
+// import { ROUTE_MAP } from '@/utils/routes' (see imports above)
 
 // Readable names for content types
 const CONTENT_TYPE_NAMES: Record<HighlightableItemType, string> = {
@@ -108,19 +104,15 @@ export class ItemNavigationService {
         return { success: false, error };
       }
       
-      // Build the full neighborhood-aware route
-      // Extract neighborhood ID from current URL or use the current path context
-      const currentPath = window.location.pathname;
-      const neighborhoodMatch = currentPath.match(/\/n\/([^\/]+)/);
-      
-      if (!neighborhoodMatch) {
-        const error = `Cannot determine neighborhood context for navigation`;
-        logger.error(error);
-        return { success: false, error };
-      }
-      
-      const neighborhoodId = neighborhoodMatch[1];
-      const fullRoute = `/n/${neighborhoodId}${baseRoute}`;
+// Build the full neighborhood-aware route via helpers
+const neighborhoodId = extractNeighborhoodId(window.location.pathname);
+if (!neighborhoodId) {
+  const error = `Cannot determine neighborhood context for navigation`;
+  logger.error(error);
+  return { success: false, error };
+}
+
+const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
       
       // Build URL with parameters including highlight info and context
       const searchParams = new URLSearchParams({
