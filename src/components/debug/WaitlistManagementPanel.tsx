@@ -234,6 +234,56 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
     }
   };
 
+  /**
+   * Resends the admin invitation email for an existing invite
+   * - Useful when an invite already exists (button shows "Copy Invite") but we want to email it again
+   * - We do NOT recreate the invite; we just send the email with the current invite link
+   */
+  const handleResendInvite = async () => {
+    // Guard: we need an invite code to build the URL to include in the email
+    if (!inviteCode) {
+      toast.error('No invite code available to resend');
+      return;
+    }
+
+    // Show a busy state while we perform the async call
+    setIsProcessing(true);
+
+    try {
+      // Build a safe invite URL. We prefer the current origin (so it works in previews),
+      // and fall back to production domain in non-browser contexts.
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://neighborhoodos.com';
+      const inviteUrl = `${baseUrl}/join/${inviteCode}`;
+
+      // Call the existing edge function that sends invitation emails via Resend
+      // Note: This only sends the email; it doesn't change any DB state
+      const { error } = await supabase.functions.invoke('send-invitation', {
+        body: {
+          recipientEmail: response.email,              // send to the waitlist responder
+          inviterName: 'NeighborhoodOS',               // simple label since this is super-admin initiated
+          neighborhoodName: response.neighborhood_name,// helps personalize the subject
+          inviteUrl                                    // the unique link they can click to join
+        }
+      });
+
+      if (error) {
+        console.error('[WaitlistItem] Resend invite failed:', error);
+        toast.error('Could not resend the invitation email. Please try again.');
+        return;
+      }
+
+      // Happy path: confirm to the admin that the email was sent
+      toast.success('Invitation email re-sent successfully!');
+    } catch (err) {
+      // Graceful degradation: show a friendly message without technical details
+      console.error('[WaitlistItem] Unexpected error resending invite:', err);
+      toast.error('Something went wrong while resending. You can still copy the link.');
+    } finally {
+      // Always clear the busy state
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="border border-border bg-card rounded-lg p-3">
       {/* Compact header row with all key info */}
@@ -285,6 +335,20 @@ const WaitlistItem: React.FC<WaitlistItemProps> = ({ response, onNeighborhoodCre
 
         {/* Compact action button */}
         <div className="flex gap-1 shrink-0">
+          {/* When an invite already exists, show a small Resend button to trigger an email re-send */}
+          {buttonState === 'copy-invite' && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleResendInvite}
+              disabled={isLoadingInitialState || isProcessing || isCreating}
+              className="h-7 px-2 text-xs"
+              title="Send the invitation email again"
+            >
+              Resend
+            </Button>
+          )}
+
           <Button
             size="sm"
             variant={buttonState === 'copy-invite' ? "outline" : "default"}
