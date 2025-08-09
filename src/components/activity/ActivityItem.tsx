@@ -171,6 +171,13 @@ const ActivityItem = ({
   // Generate data attributes for this activity item
   const dataAttributes = generateDataAttributes(activityType, activity.content_id);
   
+  // For neighbor join activities, add a celebratory exclamation mark at the end of the title
+  // - We guard against double '!' to keep the UI clean
+  const isNeighborJoin = activity.activity_type === 'neighbor_joined';
+  const displayTitle = isNeighborJoin
+    ? (activity.title?.endsWith('!') ? activity.title : `${activity.title}!`)
+    : activity.title;
+  
   // If the activity is deleted, don't render it at all
   if (isDeleted) {
     return null;
@@ -219,7 +226,8 @@ const ActivityItem = ({
             />
           )}
           <p className="text-base font-medium text-foreground truncate">
-            {activity.title}
+            {/* Append '!' for neighbor join to add excitement, without changing DB data */}
+            {displayTitle}
           </p>
         </div>
 
