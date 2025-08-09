@@ -15,6 +15,10 @@ import EventForm from "./events/EventForm";
 import { SkillsProvider } from "@/contexts/SkillsContext";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { supabase } from "@/integrations/supabase/client";
+import { createLogger } from "@/utils/logger";
+
+// Logger for this component
+const logger = createLogger('QuickActions');
 
 /**
  * QuickActions component displays common actions for users to interact with the community.
@@ -46,7 +50,7 @@ const QuickActions = () => {
   useEffect(() => {
     const fetchNeighborhoodTimezone = async () => {
       if (currentNeighborhood?.id) {
-        console.log('[QuickActions] Fetching timezone for neighborhood:', currentNeighborhood.id);
+        logger.info('Fetching timezone for neighborhood', { neighborhoodId: currentNeighborhood.id });
         const { data, error } = await supabase
           .from('neighborhoods')
           .select('timezone')
@@ -55,9 +59,9 @@ const QuickActions = () => {
           
         if (data && !error) {
           setNeighborhoodTimezone(data.timezone || 'America/Los_Angeles');
-          console.log(`[QuickActions] Using timezone: ${data.timezone || 'America/Los_Angeles'}`);
+          logger.info('Using timezone', { timezone: data.timezone || 'America/Los_Angeles' });
         } else {
-          console.warn('[QuickActions] Could not fetch neighborhood timezone, using default');
+          logger.warn('Could not fetch neighborhood timezone, using default');
         }
       }
     };

@@ -4,6 +4,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Calendar, Brain, Gift, Info, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
+// Use centralized routes to avoid hardcoding and ensure consistency
+import { BASE_ROUTES, neighborhoodPath } from '@/utils/routes';
 
 /**
  * FeatureNavigation Component
@@ -20,66 +22,60 @@ const FeatureNavigation = () => {
 
   /**
    * Navigation items configuration
-   * Each item includes path, label, icon, and color theme
-   * Paths are generated as neighborhood-aware URLs
+   * Each item includes basePath, label, icon, and color theme
+   * We use centralized BASE_ROUTES to avoid hardcoded strings.
    */
   const navigationItems = [
     {
-      path: 'home',
+      basePath: BASE_ROUTES.home,
       label: 'Home',
       icon: Home,
       activeColor: 'text-gray-900'
     },
     {
-      path: 'calendar',
+      basePath: BASE_ROUTES.calendar,
       label: 'Calendar',
       icon: Calendar,
       activeColor: 'text-blue-600'
     },
     {
-      path: 'skills',
+      basePath: BASE_ROUTES.skills,
       label: 'Skills',
       icon: Brain,
       activeColor: 'text-green-600'
     },
     {
-      path: 'goods',
+      basePath: BASE_ROUTES.goods,
       label: 'Freebies',
       icon: Gift,
       activeColor: 'text-orange-600'
     },
     {
-      path: 'safety',
+      basePath: BASE_ROUTES.safety,
       label: 'Updates',
       icon: Info,
       activeColor: 'text-red-600'
     },
     {
-      path: 'neighbors',
+      basePath: BASE_ROUTES.neighbors,
       label: 'Neighbors',
       icon: Users,
       activeColor: 'text-purple-600'
     }
   ];
 
-  // Generate neighborhood-aware URL for each navigation item
-  const getNeighborhoodAwarePath = (path: string) => {
-    if (!currentNeighborhood?.id) {
-      // Fallback to legacy route if no neighborhood context
-      return `/${path}`;
-    }
-    return `/n/${currentNeighborhood.id}/${path}`;
-  };
+  // Generate neighborhood-aware URL for each navigation item using helper
+  const getNeighborhoodAwarePath = (basePath: string) => neighborhoodPath(basePath, currentNeighborhood?.id);
 
   return (
     <div className="space-y-1 pt-4">
       {navigationItems.map((item, index) => {
-        const fullPath = getNeighborhoodAwarePath(item.path);
+        const fullPath = getNeighborhoodAwarePath(item.basePath);
         const isActive = location.pathname === fullPath;
         const Icon = item.icon;
         
         return (
-          <div key={item.path}>
+          <div key={item.basePath}>
             {/* Add divider between Home and Calendar with matching spacing */}
             {index === 1 && <div className="my-3 h-px bg-gray-100" />}
             

@@ -20,6 +20,10 @@ import { Neighborhood } from "@/contexts/neighborhood/types";
 import { 
   fetchCreatedNeighborhoods
 } from "@/contexts/neighborhood/utils/neighborhoodFetchUtils";
+import { createLogger } from "@/utils/logger";
+
+// Dedicated logger for this dialog
+const logger = createLogger('InviteDialog');
 
 /**
  * InviteDialog Component
@@ -59,7 +63,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         .single();
       
       if (error) {
-        console.error('Error fetching profile for invitation:', error);
+        logger.error('Error fetching profile for invitation:', error);
         return null;
       }
       
@@ -71,11 +75,11 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   // Use effect to detect if we're stuck in a loading state for too long
   useEffect(() => {
     if (open && isLoading) {
-      console.log("[InviteDialog] Starting loading timeout detection");
+      logger.info("Starting loading timeout detection");
       
       const timeoutId = setTimeout(() => {
         if (isLoading) {
-          console.log("[InviteDialog] Loading timeout triggered - loading took too long");
+          logger.warn("Loading timeout triggered - loading took too long");
           setLoadingTooLong(true);
         }
       }, 3000);
@@ -91,7 +95,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
   // Debug log when component renders
   useEffect(() => {
     if (open) {
-      console.log("[InviteDialog] Render state:", {
+      logger.debug("Render state", {
         user: !!user,
         currentNeighborhood,
         isLoading,
@@ -101,7 +105,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       });
       
       if (isLoading) {
-        console.log("[InviteDialog] Still loading...");
+        logger.debug("Still loading...");
       }
     }
   }, [open, user, currentNeighborhood, isLoading, error, isGeneratingLink, loadingTooLong]);
@@ -131,7 +135,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
    */
   const generateAndCopyLink = async () => {
     if (!user || !currentNeighborhood) {
-      console.log("[InviteDialog] Cannot generate link:", { user: !!user, currentNeighborhood });
+      logger.warn("Cannot generate link", { hasUser: !!user, hasNeighborhood: !!currentNeighborhood });
       
       if (!currentNeighborhood) {
         toast.error("No neighborhood available. You need to be part of a neighborhood to invite others.");
@@ -144,7 +148,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
     try {
       const inviteCode = crypto.randomUUID();
       
-      console.log("[InviteDialog] Generating invite for neighborhood:", currentNeighborhood.id);
+      logger.info("Generating invite for neighborhood", { neighborhoodId: currentNeighborhood.id });
       
       const { error } = await supabase.from("invitations").insert({
         invite_code: inviteCode,
@@ -157,14 +161,14 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       const baseUrl = getBaseUrl();
       const inviteUrl = `${baseUrl}/join/${inviteCode}`;
       
-      console.log("[InviteDialog] Generated invite URL:", inviteUrl);
+      logger.info("Generated invite URL", { inviteUrl });
       
       await navigator.clipboard.writeText(inviteUrl);
       
       // Success toast is needed here because clipboard action isn't visually obvious
       toast.success("Invite link copied! You can now share this link with your neighbor.");
     } catch (error: any) {
-      console.error("[InviteDialog] Error generating invite:", error);
+      logger.error("Error generating invite", error);
       toast.error("Error generating invite link: " + error.message);
     } finally {
       setIsGeneratingLink(false);
@@ -234,7 +238,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
       toast.success("Invitation sent successfully!");
       setEmail("");
     } catch (error: any) {
-      console.error("Error sending invitation:", error);
+      logger.error("Error sending invitation", error);
       toast.error("Failed to send invitation: " + error.message);
     }
   };
@@ -243,7 +247,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
    * Handle manual refresh of neighborhood data
    */
   const handleRefreshData = () => {
-    console.log("[InviteDialog] Manually refreshing neighborhood data");
+    logger.info("Manually refreshing neighborhood data");
     refreshNeighborhoodData();
     setLoadingTooLong(false);
     
@@ -258,13 +262,13 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
    */
   const runNeighborhoodDiagnostics = async () => {
     if (!user) {
-      console.log("[Diagnostics] No user found");
+      logger.warn("Diagnostics: no user found");
       toast.error("No user found. Please login again to resolve this issue.");
       return;
     }
     
     try {
-      console.log("[Diagnostics] Running neighborhood diagnostics for user:", user.id);
+      logger.info("Running neighborhood diagnostics", { userId: user.id });
       
       const { data: createdNeighborhoods, error: createdError } = await fetchCreatedNeighborhoods(user.id);
       
@@ -274,7 +278,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         timestamp: new Date().toISOString()
       };
       
-      console.log("[Diagnostics] Results:", diagnosticInfo);
+      logger.info("Diagnostics results", diagnosticInfo);
       
       // Brief informational toast
       toast("Diagnostic Information", {
@@ -285,7 +289,7 @@ const InviteDialog = ({ open, onOpenChange }: { open: boolean; onOpenChange: (op
         toast.error("No neighborhood association found. You don't appear to be connected to any neighborhood. Try joining with an invite link or creating a new neighborhood.");
       }
     } catch (error: any) {
-      console.error("[Diagnostics] Error:", error);
+      logger.error("Diagnostics error", error);
       toast.error("Diagnostic error: " + error.message);
     }
   };

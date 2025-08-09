@@ -12,7 +12,7 @@ import { HighlightableItemType } from '@/utils/highlight/types';
 import { highlightItem } from '@/utils/highlight/highlightItem';
 import { ItemContextService } from './ItemContextService';
 // Centralized route helpers keep neighborhood-aware URL logic simple and consistent
-import { ROUTE_MAP, neighborhoodPath, extractNeighborhoodId } from '@/utils/routes';
+import { ROUTE_MAP, neighborhoodPath, extractNeighborhoodId, isOnBaseRoute } from '@/utils/routes';
 
 // Create a dedicated logger for navigation service
 const logger = createLogger('ItemNavigationService');
@@ -306,22 +306,15 @@ const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
     currentPath: string,
     options: NavigationOptions = {}
   ): Promise<NavigationResult> {
-    // Extract neighborhood-aware route comparison  
+    // If we're already on the correct page (ignoring /n/<id> prefix), just highlight
     const baseTargetRoute = ROUTE_MAP[type];
-    const currentBasePath = currentPath.split('?')[0];
-    
-    // Check if we're already on the correct neighborhood-aware page
-    const neighborhoodMatch = currentPath.match(/\/n\/([^\/]+)(\/.*)/);
-    const currentRoute = neighborhoodMatch ? neighborhoodMatch[2] : currentPath;
-    
-    if (currentRoute === baseTargetRoute) {
+    if (isOnBaseRoute(currentPath, baseTargetRoute)) {
       logger.info(`Already on correct page for ${type}, just highlighting`);
-      
       try {
         highlightItem(type, id, options.showToast || false);
-        return { 
-          success: true, 
-          message: `Highlighted ${CONTENT_TYPE_NAMES[type]} on current page` 
+        return {
+          success: true,
+          message: `Highlighted ${CONTENT_TYPE_NAMES[type]} on current page`
         };
       } catch (error) {
         logger.error(`Failed to highlight on current page: ${error}`);
@@ -378,8 +371,10 @@ const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
     baseUrl: string = window.location.origin
   ): string {
     const route = ROUTE_MAP[type];
+    const neighborhoodId = extractNeighborhoodId();
+    const fullPath = neighborhoodPath(route, neighborhoodId);
     const params = new URLSearchParams({ detail: id, type });
-    return `${baseUrl}${route}?${params.toString()}`;
+    return `${baseUrl}${fullPath}?${params.toString()}`;
   }
 }
 
