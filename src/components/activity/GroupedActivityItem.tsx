@@ -39,6 +39,23 @@ const getCompactTimeAgo = (date: Date): string => {
 };
 
 /**
+ * Small helper to extract a friendly "first name" from a display name
+ * - If the display name has spaces, we take the first segment (e.g., "Jane Doe" -> "Jane")
+ * - If it's a single word or handle, we strip a leading "@" and return that word
+ * - If empty/undefined, we fall back to "Neighbor"
+ */
+const extractFirstName = (displayName?: string | null): string => {
+  // Defensive: normalize to a trimmed string or empty string
+  const name = (displayName ?? '').trim();
+  if (!name) return 'Neighbor';
+  // Remove a leading @ like @jane_doe
+  const cleaned = name.replace(/^@/, '');
+  // Split by whitespace and take the first non-empty part
+  const first = cleaned.split(/\s+/)[0];
+  return first || 'Neighbor';
+};
+
+/**
  * Component for displaying grouped activity items in the feed
  */
 const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) => {
@@ -47,6 +64,10 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
   const activityColor = getActivityColor(primaryActivity.activity_type);
   const timeAgo = getCompactTimeAgo(new Date(primaryActivity.created_at));
   const groupText = getGroupedActivityText(group);
+  
+  // Derive a first name from the full display name for activity text/UI
+  const fullName = primaryActivity.profiles.display_name || 'Neighbor';
+  const firstName = extractFirstName(fullName);
   
   // Generate data attributes for the primary activity
   const activityType = primaryActivity.activity_type.split('_')[0] === 'skill' ? 'skills' : 'event';
@@ -83,7 +104,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
               </div>
             </TooltipTrigger>
             <TooltipContent className="bg-gray-800 text-white">
-              <p>{primaryActivity.profiles.display_name || "Neighbor"}</p>
+              {/* Show first name in the tooltip to keep activity UI consistent and privacy-friendly */}
+              <p>{firstName}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -102,7 +124,8 @@ const GroupedActivityItem = ({ group, onGroupClick }: GroupedActivityItemProps) 
             />
           )}
           <p className="text-base font-medium text-foreground truncate">
-            {primaryActivity.profiles.display_name || "A neighbor"} {groupText}
+            {/* Use only the first name for activity text; keeps feed concise and respects privacy */}
+            {firstName} {groupText}
           </p>
         </div>
 
