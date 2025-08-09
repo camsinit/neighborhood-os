@@ -15,6 +15,8 @@ interface BasicInvitationEmailProps {
   neighborhoodName: string;
   inviteUrl: string;
   inviterAvatarUrl?: string;
+  // Optional recipient name for personalized greeting (falls back to "neighbor")
+  recipientName?: string;
 }
 
 /**
@@ -26,10 +28,12 @@ export const BasicInvitationEmail = ({
   neighborhoodName = 'your neighborhood',
   inviteUrl = 'https://neighborhoodos.com',
   inviterAvatarUrl,
+  // Personalized greeting name derived by the edge function
+  recipientName = 'Neighbor',
 }: BasicInvitationEmailProps) => (
   <Html>
     <Head />
-    <Preview>{inviterName} invited you to join {neighborhoodName}</Preview>
+    <Preview>Your neighborhood is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
         <div style={titleContainer}>
@@ -40,35 +44,39 @@ export const BasicInvitationEmail = ({
               style={avatarImage}
             />
           )}
-          <Heading style={h1}>You're invited to join {neighborhoodName}!</Heading>
+          <Heading style={h1}>Your neighborhood is ready!</Heading>
         </div>
         
-        <Text style={greeting}>Hey there neighbor!</Text>
+        {/* Personalized greeting using recipientName when provided */}
+        <Text style={greeting}>Hi {recipientName || 'Neighbor'},</Text>
         
+        {/* Core message aligning with new copy */}
         <Text style={text}>
-          {inviterName} thought you'd be a great addition to the {neighborhoodName} neighborhood on neighborhoodOS.
+          <strong>{neighborhoodName}</strong> is all set up in neighborhoodOS and ready for you to join as the neighborhood instigator!
         </Text>
         
         <Text style={text}>
-          It's a simple way for neighbors to share useful stuff - like who's giving away extra tomatoes, when the next block party is, or if someone spotted a loose dog wandering around.
+          As the admin for the neighborhood, you’ll be able to:
         </Text>
         
-        <Text style={text}>
-          Ready to see what your neighbors are up to?
-        </Text>
+        {/* Simple bulleted list supported by React Email */}
+        <ul style={list}>
+          <li style={listItem}>Welcome your first neighbors</li>
+          <li style={listItem}>Post updates and events</li>
+          <li style={listItem}>Help keep the conversation friendly and useful</li>
+        </ul>
         
+        <Text style={text}>Your neighborhood is awaiting!</Text>
+        
+        {/* Clear action per new copy */}
         <Link href={inviteUrl} style={ctaButton}>
-          Join {neighborhoodName}
+          Join Your Neighborhood
         </Link>
         
         <Text style={smallText}>
           Or copy and paste this link into your browser: {inviteUrl}
         </Text>
         
-        <Text style={signOff}>
-          Welcome to the neighborhood,<br />
-          Cam
-        </Text>
         
         <Text style={footer}>
           You're receiving this because {inviterName} invited you to join their neighborhood.
@@ -132,6 +140,17 @@ const smallText = {
   fontSize: '14px',
   lineHeight: '20px',
   margin: '16px 0',
+};
+
+// Basic list styling for the bullet points in the new copy
+const list = {
+  color: '#555',
+  paddingLeft: '20px',
+  margin: '8px 0 16px',
+};
+
+const listItem = {
+  margin: '6px 0',
 };
 
 const signOff = {

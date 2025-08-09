@@ -156,6 +156,8 @@ serve(async (req) => {
 
     // Use unified relationship-aware name resolution
     const actorName = inviterName || resolveActorDisplayName(inviterProfile, inviterId ? `inviter-${inviterId}@example.com` : 'unknown@example.com', true);
+    // Derive a friendly recipient name from the email for a personalized greeting
+    const recipientDisplayName = extractNameFromEmail(recipientEmail);
     
     // Generate URLs with consistent tracking
     const baseUrl = "https://neighborhoodos.com";
@@ -192,6 +194,8 @@ serve(async (req) => {
         neighborhoodName: resolvedNeighborhoodName,
         inviteUrl,
         inviterAvatarUrl: inviterProfile?.avatar_url,
+        // Pass recipient name so the email can say "Hi {Name},"
+        recipientName: recipientDisplayName,
       })
     )
 
@@ -205,7 +209,8 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'neighborhoodOS <hello@updates.neighborhoodos.com>',
         to: [recipientEmail],
-        subject: `${actorName} invited you to join ${resolvedNeighborhoodName}`,
+        // Updated subject to match the requested copy
+        subject: 'Your neighborhood is ready!',
         html: emailHtml,
       }),
     })
