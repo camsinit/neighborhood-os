@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import { createLogger } from '@/utils/logger';
 /**
  * Simple Error Boundary for the onboarding flow
  * 
@@ -21,18 +21,20 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+  // Create a logger specifically for the error boundary to keep logs consistent
+  private logger = createLogger('ErrorBoundary');
+
   public state: State = {
     hasError: false
   };
-
   public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log error for debugging with structured, module-scoped logger
+    this.logger.error('ErrorBoundary caught an error', { error, errorInfo });
   }
 
   public render() {

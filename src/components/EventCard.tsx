@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatInNeighborhoodTimezone } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { createItemNavigationService } from "@/services/navigation/ItemNavigationService";
+import { createLogger } from "@/utils/logger";
 
 /**
  * EventCard component displays an event in the calendar
@@ -26,6 +27,9 @@ import { createItemNavigationService } from "@/services/navigation/ItemNavigatio
  * @param event - The event data to display
  * @param onDelete - Callback function when event is deleted
  */
+// Module-scoped logger for consistent, environment-aware logging
+const logger = createLogger('EventCard');
+
 const EventCard = ({
   event,
   onDelete
@@ -90,7 +94,7 @@ const EventCard = ({
       head: true
     }).eq('event_id', event.id);
     if (error) {
-      console.error('Error fetching RSVP count:', error);
+      logger.error('Error fetching RSVP count', error);
       return;
     }
     setRsvpCount(count || 0);

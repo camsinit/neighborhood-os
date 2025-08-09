@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@supabase/auth-helpers-react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { createLogger } from "@/utils/logger";
 
 export const useOnboardingStatus = () => {
   // State for tracking onboarding completion check
@@ -17,6 +18,7 @@ export const useOnboardingStatus = () => {
   
   const user = useUser();
   const location = useLocation();
+  const logger = createLogger('useOnboardingStatus');
   
   // Check if user has completed onboarding
   useEffect(() => {
@@ -46,7 +48,7 @@ export const useOnboardingStatus = () => {
         // Set flag to redirect if onboarding isn't completed
         setNeedsOnboarding(!data?.completed_onboarding);
       } catch (error) {
-        console.error("Error checking onboarding status:", error);
+        logger.error("Error checking onboarding status", error as any);
         // Default to not needing onboarding on error to avoid redirect loops
         setNeedsOnboarding(false);
       } finally {

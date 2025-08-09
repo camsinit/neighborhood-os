@@ -16,6 +16,7 @@ import { HighlightableItemType } from "@/utils/highlight/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createLogger } from "@/utils/logger";
 
 /**
  * Props for the SkillsActivityPanel component
@@ -67,6 +68,7 @@ const getPanelTitle = (activityType: string, count: number): string => {
 const SkillsActivityPanel = ({ group, open, onOpenChange }: SkillsActivityPanelProps) => {
   const navigate = useNavigate();
   const navigationService = createItemNavigationService(navigate);
+  const logger = createLogger('SkillsActivityPanel');
 
   if (!group) return null;
 
@@ -91,10 +93,10 @@ const SkillsActivityPanel = ({ group, open, onOpenChange }: SkillsActivityPanelP
         // Close the panel after successful navigation
         onOpenChange(false);
       } else {
-        console.error('Navigation failed:', result.error);
+        logger.error('Navigation failed', result.error as any);
       }
     } catch (error) {
-      console.error('Error navigating from activity panel:', error);
+      logger.error('Error navigating from activity panel', error as any);
     }
   };
 

@@ -12,7 +12,7 @@ import { generateDataAttributes } from "@/utils/dataAttributes";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
+import { createLogger } from "@/utils/logger";
 /**
  * Props for the ActivityItem component
  */
@@ -117,6 +117,8 @@ const ActivityItem = ({
 }: ActivityItemProps) => {
   const navigate = useNavigate();
   const navigationService = createItemNavigationService(navigate);
+  // Logger scoped to ActivityItem for clear, filtered logs
+  const logger = createLogger('ActivityItem');
   
   const IconComponent = getActivityIcon(activity.activity_type);
   const activityColor = getActivityColor(activity.activity_type);
@@ -146,10 +148,10 @@ const ActivityItem = ({
       );
       
       if (!result.success) {
-        console.error('Navigation failed:', result.error);
+        logger.error('Navigation failed', result.error as any);
       }
     } catch (error) {
-      console.error('Error navigating from activity item:', error);
+      logger.error('Error navigating from activity item', error as any);
     }
   };
 

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { createLogger } from '@/utils/logger';
 
 /**
  * Component for updating neighborhood location information
@@ -27,6 +28,7 @@ export const UpdateNeighborhoodLocation: React.FC<UpdateNeighborhoodLocationProp
   const [city, setCity] = useState(currentCity);
   const [state, setState] = useState(currentState);
   const [isUpdating, setIsUpdating] = useState(false);
+  const logger = createLogger('UpdateNeighborhoodLocation');
 
   /**
    * Handle updating the neighborhood location in the database
@@ -61,7 +63,7 @@ export const UpdateNeighborhoodLocation: React.FC<UpdateNeighborhoodLocationProp
       }
 
     } catch (error: any) {
-      console.error('Error updating neighborhood location:', error);
+      logger.error('Error updating neighborhood location', error as any);
       toast.error(error.message || 'Failed to update neighborhood location');
     } finally {
       setIsUpdating(false);

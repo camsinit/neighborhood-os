@@ -24,6 +24,7 @@ import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, L
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { createLogger } from '@/utils/logger';
 
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -34,6 +35,7 @@ interface AdminSettingsProps {
 const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
   const { toast } = useToast();
+  const logger = createLogger('AdminSettings');
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -94,7 +96,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
-      console.error(`Error auto-saving ${fieldName}:`, error);
+      logger.error(`Error auto-saving ${fieldName}`, error as any);
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
       
@@ -186,7 +188,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         description: "Neighborhood settings have been saved successfully.",
       });
     } catch (error) {
-      console.error('Error saving neighborhood settings:', error);
+      logger.error('Error saving neighborhood settings', error as any);
       toast({
         title: "Error",
         description: "Failed to save neighborhood settings. Please try again.",
@@ -270,7 +272,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         });
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('Error uploading image', error as any);
       toast({
         title: "Upload Failed",
         description: "Failed to upload image. Please try again.",

@@ -13,6 +13,7 @@ import AIChatMessages from './AIChatMessages';
 import AIChatHeader from './AIChatHeader';
 import { AIInputWithSuggestions } from '../ui/ai-input-with-suggestions';
 import { Text, CheckCheck } from "lucide-react";
+import { createLogger } from "@/utils/logger";
 
 // Define the message type for type safety
 export type Message = {
@@ -64,6 +65,7 @@ const NEIGHBORHOOD_ACTIONS = [
  * The outer wrapper div has been removed to flatten the structure
  */
 const AIChat = () => {
+  const logger = createLogger('AIChat');
   // State for messages, loading status
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,7 +132,7 @@ const AIChat = () => {
       
       // Handle errors
       if (error) {
-        console.error('Error calling anthropic-chat function:', error);
+        logger.error('Error calling anthropic-chat function', error as any);
         toast.error('Sorry, something went wrong. Please try again later.');
         return;
       }
@@ -148,7 +150,7 @@ const AIChat = () => {
       setMessages(prevMessages => [...prevMessages, aiMessage]);
       
     } catch (error) {
-      console.error('Error in AI chat:', error);
+      logger.error('Error in AI chat', error as any);
       toast.error('Failed to get a response from the AI assistant');
     } finally {
       setIsLoading(false);

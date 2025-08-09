@@ -20,8 +20,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, UserPlus, UserMinus, Eye, Mail, Phone, MapPin, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createLogger } from '@/utils/logger';
 
 const AdminMembers = () => {
+  const logger = createLogger('AdminMembers');
   const { data: members, isLoading } = useNeighborhoodMembers();
   const { isAdmin } = useIsNeighborhoodAdmin();
   const { currentNeighborhood } = useNeighborhood();
@@ -100,7 +102,7 @@ const AdminMembers = () => {
       // Refresh the members list
       queryClient.invalidateQueries({ queryKey: ['neighborhood-members'] });
     } catch (error: any) {
-      console.error('Error promoting user:', error);
+      logger.error('Error promoting user', error);
       toast({
         title: "Error",
         description: `Failed to promote ${userName}: ${error.message}`,
@@ -129,7 +131,7 @@ const AdminMembers = () => {
       // Refresh the members list
       queryClient.invalidateQueries({ queryKey: ['neighborhood-members'] });
     } catch (error: any) {
-      console.error('Error removing user:', error);
+      logger.error('Error removing user', error);
       toast({
         title: "Error",
         description: `Failed to remove ${userName}: ${error.message}`,
