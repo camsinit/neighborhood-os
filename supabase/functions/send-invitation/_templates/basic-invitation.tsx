@@ -36,16 +36,15 @@ export const BasicInvitationEmail = ({
     <Preview>Your neighborhood is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
-        <div style={titleContainer}>
-          {inviterAvatarUrl && (
+        {inviterAvatarUrl && (
+          <div style={titleContainer}>
             <img 
               src={inviterAvatarUrl} 
               alt={`${inviterName}'s profile`}
               style={avatarImage}
             />
-          )}
-          <Heading style={h1}>Your neighborhood is ready!</Heading>
-        </div>
+          </div>
+        )}
         
         {/* Personalized greeting using recipientName when provided */}
         <Text style={greeting}>Hi {recipientName || 'Neighbor'},</Text>
@@ -66,7 +65,7 @@ export const BasicInvitationEmail = ({
           <li style={listItem}>Help keep the conversation friendly and useful</li>
         </ul>
         
-        <Text style={text}>Your neighborhood is awaiting!</Text>
+        <Text style={text}>Your neighborhood awaits...</Text>
         
         {/* Clear action per new copy */}
         <Link href={inviteUrl} style={ctaButton}>
