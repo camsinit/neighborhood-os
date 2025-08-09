@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, MapPin, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Users, MapPin, Calendar, CheckCircle, AlertCircle, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@supabase/auth-helpers-react';
@@ -43,6 +43,8 @@ const JoinPage = () => {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  // Flag to indicate if this invite grants admin privileges to the recipient
+  const [isAdminInvite, setIsAdminInvite] = useState(false);
 
   // Check for OAuth errors in URL params
   useEffect(() => {
@@ -120,8 +122,23 @@ const JoinPage = () => {
         
         console.log("[JoinPage] Setting neighborhood preview:", neighborhoodPreview);
         setNeighborhood(neighborhoodPreview);
-        setIsLoading(false);
 
+        // Fetch whether this invitation is an admin invite so we can customize the flow/UI
+        // Note: RLS permits reading invitations by invite_code via a permissive policy
+        const { data: inviteRow, error: inviteRowError } = await supabase
+          .from('invitations')
+          .select('is_admin_invite')
+          .eq('invite_code', inviteCode)
+          .maybeSingle();
+        
+        if (inviteRowError) {
+          console.warn('[JoinPage] Could not determine if invite is admin:', inviteRowError);
+        } else {
+          setIsAdminInvite(!!inviteRow?.is_admin_invite);
+          console.log('[JoinPage] isAdminInvite:', !!inviteRow?.is_admin_invite);
+        }
+        
+        setIsLoading(false);
       } catch (error: any) {
         console.error("[JoinPage] Unexpected error:", error);
         setError("An unexpected error occurred. Please try again.");
@@ -264,6 +281,33 @@ const JoinPage = () => {
         } catch (emailError) {
           console.warn("[JoinPage] Failed to send invitation accepted emails:", emailError);
           // Don't fail the join process for email errors
+        }
+      }
+
+      // If this was an admin invite, set quickstart flag and verify admin role assignment
+      if (isAdminInvite) {
+        try {
+          // Store a flag so the dashboard layout can show the Admin Quickstart overlay once
+          localStorage.setItem('showAdminQuickstart', 'true');
+          localStorage.setItem('adminQuickstartNeighborhoodId', neighborhood.id);
+
+          // Double-check that admin privileges have been granted via trigger
+          // This uses a SECURITY DEFINER function so it can be called safely from the client
+          const { data: isAdminResult, error: roleCheckError } = await supabase.rpc('user_is_neighborhood_admin', {
+            _user: user.id,
+            _neighborhood: neighborhood.id
+          });
+
+          if (roleCheckError) {
+            console.warn('[JoinPage] Admin role verification failed (non-blocking):', roleCheckError);
+          } else if (isAdminResult === true) {
+            toast.success('Admin access confirmed for this neighborhood.');
+          } else {
+            // Graceful degradation: if admin role didn't attach immediately, inform the user without blocking
+            toast.message('Joined successfully. Admin access is being finalized. If it does not appear within a minute, please contact support.');
+          }
+        } catch (checkErr) {
+          console.warn('[JoinPage] Admin verification unexpected error (non-blocking):', checkErr);
         }
       }
 
@@ -474,6 +518,16 @@ const JoinPage = () => {
           {oauthError && (
             <div className="bg-red-50 border border-red-200 rounded-md p-3">
               <p className="text-sm text-red-600">{oauthError}</p>
+            </div>
+          )}
+          {/* If this is an admin invite, show clear context so the user knows their role */}
+          {isAdminInvite && (
+            <div className="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-3">
+              <ShieldCheck className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-800">You're invited as the neighborhood admin</p>
+                <p className="text-xs text-blue-700 mt-0.5">You'll be able to welcome neighbors, post updates/events, and manage settings.</p>
+              </div>
             </div>
           )}
           
