@@ -75,6 +75,7 @@ export const SurveyStepRenderer = ({
         <ProfileImageStep
           onImageChange={handleProfileImageChange}
           initialImageUrl={formData.profileImageUrl}
+          existingFile={formData.profileImage ?? null}
         />
       );
     case 3:

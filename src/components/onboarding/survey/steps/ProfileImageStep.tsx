@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserCircle, Upload, X, Crop } from "lucide-react";
@@ -14,12 +14,18 @@ import { ImageCropDialog } from "./profile/ImageCropDialog";
  */
 
 interface ProfileImageStepProps {
+  // Called when the user picks/crops a new image so the parent can store it
   onImageChange?: (file: File | null) => void;
+  // If we already have an image URL (e.g., from OAuth), use it as a fallback
   initialImageUrl?: string;
+  // NEW: pass the currently selected/cropped file from the parent so when the
+  // user navigates Back/Next and returns, we can rehydrate the preview.
+  existingFile?: File | null;
 }
 export const ProfileImageStep = ({
   onImageChange,
-  initialImageUrl
+  initialImageUrl,
+  existingFile
 }: ProfileImageStepProps) => {
   const user = useUser();
   const [originalImage, setOriginalImage] = useState<File | null>(null);
@@ -114,6 +120,27 @@ export const ProfileImageStep = ({
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
+
+  // When the step mounts (or when props change), rebuild the preview from
+  // any existing file stored in the parent, or fall back to initialImageUrl
+  // (e.g., from OAuth). This ensures the image persists when navigating Back.
+  useEffect(() => {
+    let createdUrl: string | null = null;
+
+    if (!previewUrl && existingFile) {
+      createdUrl = URL.createObjectURL(existingFile);
+      setPreviewUrl(createdUrl);
+      // Mark as "has an image" so we show the Crop/Change controls
+      setCroppedImage(existingFile);
+    } else if (!previewUrl && !existingFile && initialImageUrl) {
+      setPreviewUrl(initialImageUrl);
+    }
+
+    return () => {
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [existingFile, initialImageUrl]);
+
   return <div className="space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg font-semibold mb-2">Add a Profile Photo </h3>
@@ -125,7 +152,7 @@ export const ProfileImageStep = ({
         {/* Avatar display */}
         <div className="relative">
           <Avatar className="h-32 w-32">
-            <AvatarImage src={previewUrl || user?.user_metadata?.avatar_url} />
+            <AvatarImage src={previewUrl || initialImageUrl || user?.user_metadata?.avatar_url} />
             <AvatarFallback>
               {user?.email?.charAt(0).toUpperCase() || <UserCircle className="h-16 w-16" />}
             </AvatarFallback>
@@ -156,8 +183,8 @@ export const ProfileImageStep = ({
                 </div>
               </label>
             </> : <div className="text-center space-y-3">
-              
-              
+
+
               
               <div className="flex gap-2 justify-center">
                 {/* Re-crop button */}
