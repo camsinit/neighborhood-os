@@ -32,7 +32,6 @@ export interface SurveyFormData {
   
   // Auth-specific fields
   password?: string; // Only for manual signup
-  profileImage?: File | null; // Only if uploading new image
 }
 
 /**

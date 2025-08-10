@@ -40,7 +40,6 @@ export const useSurveyState = () => {
       followThrough: false,
       respectfulness: false,
     },
-    profileImage: null,
   });
   
   // Validation state for each step
@@ -99,10 +98,8 @@ export const useSurveyState = () => {
         }
       
       case 2: // Profile Image
-        // OAuth users might have a profile image URL, manual users need to upload
-        return formData.authMethod === 'oauth' ? 
-          !!(formData.profileImageUrl || formData.profileImage !== null) :
-          formData.profileImage !== null;
+        // Profile image is optional, so always return true
+        return true;
       
       case 3: // Neighborhood Agreements (final step)
         // All agreements must be accepted

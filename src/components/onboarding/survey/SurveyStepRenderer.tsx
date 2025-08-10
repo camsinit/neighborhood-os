@@ -31,9 +31,9 @@ export const SurveyStepRenderer = ({
   // Skills-related props removed
 }: SurveyStepRendererProps) => {
   
-  // Handle profile image change
-  const handleProfileImageChange = (file: File | null) => {
-    handleChange("profileImage", file);
+  // Handle profile image URL changes from ProfileImageStep
+  const handleProfileImageUrlChange = (url: string | null) => {
+    handleChange('profileImageUrl', url);
   };
 
   // Unified flow for both OAuth and manual users
@@ -73,9 +73,8 @@ export const SurveyStepRenderer = ({
     case 2:
       return (
         <ProfileImageStep
-          onImageChange={handleProfileImageChange}
+          onImageUrlChange={handleProfileImageUrlChange}
           initialImageUrl={formData.profileImageUrl}
-          existingFile={formData.profileImage ?? null}
         />
       );
     case 3:

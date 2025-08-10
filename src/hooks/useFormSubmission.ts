@@ -188,8 +188,12 @@ export const useFormSubmission = () => {
       // Step 3: Upload profile image if provided or download OAuth image (50%)
       setSubmissionState(prev => ({ ...prev, progress: 50 }));
       let avatarUrl: string | undefined;
-      if (formData.profileImage) {
-        avatarUrl = await uploadProfileImage(formData.profileImage, userId);
+      if (formData.profileImageUrl && !formData.profileImageUrl.startsWith('http')) {
+        // This is a blob URL from a cropped image, need to upload it
+        const response = await fetch(formData.profileImageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
+        avatarUrl = await uploadProfileImage(file, userId);
       } else if (formData.authMethod === 'oauth' && formData.profileImageUrl) {
         logger.info("Downloading and uploading OAuth profile image");
         try {

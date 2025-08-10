@@ -14,23 +14,19 @@ import { ImageCropDialog } from "./profile/ImageCropDialog";
  */
 
 interface ProfileImageStepProps {
-  // Called when the user picks/crops a new image so the parent can store it
-  onImageChange?: (file: File | null) => void;
-  // If we already have an image URL (e.g., from OAuth), use it as a fallback
+  // Called when the user picks/crops a new image so the parent can store the URL
+  onImageUrlChange?: (url: string | null) => void;
+  // If we already have an image URL (e.g., from OAuth or previous crop), use it
   initialImageUrl?: string;
-  // NEW: pass the currently selected/cropped file from the parent so when the
-  // user navigates Back/Next and returns, we can rehydrate the preview.
-  existingFile?: File | null;
 }
 export const ProfileImageStep = ({
-  onImageChange,
-  initialImageUrl,
-  existingFile
+  onImageUrlChange,
+  initialImageUrl
 }: ProfileImageStepProps) => {
   const user = useUser();
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialImageUrl || null);
   const [showCropDialog, setShowCropDialog] = useState(false);
 
   // Handle file selection - opens crop dialog
@@ -76,13 +72,8 @@ export const ProfileImageStep = ({
     const url = URL.createObjectURL(croppedBlob);
     setPreviewUrl(url);
 
-    // Convert blob to file for parent component
-    const croppedFile = new File([croppedBlob], originalImage?.name || 'cropped-image.jpg', {
-      type: 'image/jpeg'
-    });
-
-    // Notify parent component
-    onImageChange?.(croppedFile);
+    // Notify parent component about the new image URL
+    onImageUrlChange?.(url);
   };
 
   // Handle image removal
@@ -93,7 +84,7 @@ export const ProfileImageStep = ({
     setPreviewUrl(null);
     setOriginalImage(null);
     setCroppedImage(null);
-    onImageChange?.(null);
+    onImageUrlChange?.(null);
   };
 
   // Handle re-cropping existing image
@@ -121,25 +112,6 @@ export const ProfileImageStep = ({
     event.preventDefault();
   };
 
-  // When the step mounts (or when props change), rebuild the preview from
-  // any existing file stored in the parent, or fall back to initialImageUrl
-  // (e.g., from OAuth). This ensures the image persists when navigating Back.
-  useEffect(() => {
-    let createdUrl: string | null = null;
-
-    if (!previewUrl && existingFile) {
-      createdUrl = URL.createObjectURL(existingFile);
-      setPreviewUrl(createdUrl);
-      // Mark as "has an image" so we show the Crop/Change controls
-      setCroppedImage(existingFile);
-    } else if (!previewUrl && !existingFile && initialImageUrl) {
-      setPreviewUrl(initialImageUrl);
-    }
-
-    return () => {
-      if (createdUrl) URL.revokeObjectURL(createdUrl);
-    };
-  }, [existingFile, initialImageUrl]);
 
   return <div className="space-y-4">
       <div className="text-center mb-4">
