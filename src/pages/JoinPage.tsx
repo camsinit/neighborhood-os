@@ -526,7 +526,7 @@ const JoinPage = () => {
               <ShieldCheck className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-blue-800">
-                  {neighborhood?.inviterDisplayName || "Someone"} shared a neighborhood Admin invite with you.
+                  {neighborhood?.inviterDisplayName || "Someone"} shared an Admin invite.
                 </p>
               </div>
             </div>
