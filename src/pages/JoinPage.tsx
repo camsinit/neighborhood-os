@@ -525,8 +525,9 @@ const JoinPage = () => {
             <div className="flex items-start gap-3 rounded-md border border-blue-200 bg-blue-50 p-3">
               <ShieldCheck className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-blue-800">You're invited as the neighborhood admin</p>
-                <p className="text-xs text-blue-700 mt-0.5">You'll be able to welcome neighbors, post updates/events, and manage settings.</p>
+                <p className="text-sm font-medium text-blue-800">
+                  {neighborhood?.inviterDisplayName || "Someone"} shared a neighborhood Admin invite with you.
+                </p>
               </div>
             </div>
           )}
