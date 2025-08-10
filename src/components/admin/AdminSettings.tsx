@@ -445,9 +445,10 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                   )}
                 </div>
                 {!isReadOnly && (
+                  
                   <Button
                     variant="outline"
-                    onClick={() => document.getElementById('image-upload')?.click()}
+                    onClick={() => document.getElementById('invite-header-image-upload')?.click()}
                     disabled={isUploadingImage}
                   >
                     <Upload className="h-4 w-4 mr-2" />
@@ -457,9 +458,10 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
               </div>
             ) : (
               !isReadOnly && (
+                
                 <div 
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
-                  onClick={() => document.getElementById('image-upload')?.click()}
+                  onClick={() => document.getElementById('invite-header-image-upload')?.click()}
                 >
                   <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                   <p className="text-sm text-gray-600">
@@ -473,14 +475,18 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             )}
             
             {!isReadOnly && (
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                disabled={isUploadingImage}
-              />
+              <>
+                {/* Hidden file input dedicated to the header image uploader.
+                    We use a unique ID so document.getElementById targets THIS input, not others on the page. */}
+                <input
+                  id="invite-header-image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isUploadingImage}
+                />
+              </>
             )}
           </div>
 
