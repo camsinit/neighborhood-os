@@ -10,8 +10,11 @@ const Checkbox = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
+    // Square checkbox with a clear blue outline. We bump the border width for clarity
+    // and rely on the design system's `primary` color so this stays on-brand in both
+    // light and dark modes.
     className={cn(
-      "peer h-4 w-4 shrink-0 rounded-sm border border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      "peer h-4 w-4 shrink-0 rounded-none border-2 border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
       className
     )}
     {...props}

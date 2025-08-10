@@ -88,30 +88,38 @@ export const AgreementsStep = ({
   };
 
   return (
-    <div className="space-y-6">
+    // Outer wrapper for the step content. We keep spacing a bit tighter (compressed)
+    // so the list reads quickly on smaller screens like iPads.
+    <div className="space-y-4">
+      {/* Short instructional helper text so it's obvious what to do */}
+      <p className="text-sm text-muted-foreground">
+        Please check all the boxes to continue. These agreements help keep our neighborhood safe and respectful.
+      </p>
 
       {/* List of agreements with checkboxes */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         {NEIGHBORHOOD_AGREEMENTS.map((agreement) => (
-          <div key={agreement.id} className="space-y-2">
+          <div key={agreement.id} className="space-y-1">
             {/* Checkbox and main agreement text */}
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <Checkbox
                 id={agreement.id}
                 checked={agreementState[agreement.id]}
-                onCheckedChange={(checked) => 
+                onCheckedChange={(checked) =>
                   handleAgreementToggle(agreement.id, checked === true)
                 }
-                className="mt-1"
+                // Make the boxes visually clearer to “check off”: slightly larger,
+                // square corners, and a strong (brand/primary) outline.
+                className="mt-0.5 h-5 w-5 rounded-none border-2 border-primary"
               />
-              <div className="space-y-1 flex-1">
+              <div className="space-y-0.5 flex-1">
                 <Label
                   htmlFor={agreement.id}
-                  className="text-sm font-medium leading-none cursor-pointer"
+                  className="text-sm font-medium leading-snug cursor-pointer"
                 >
                   {agreement.title}
                 </Label>
-                {/* Sub-text explaining the agreement */}
+                {/* Sub-text explaining the agreement - compact and easy to scan */}
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {agreement.description}
                 </p>
@@ -120,7 +128,6 @@ export const AgreementsStep = ({
           </div>
         ))}
       </div>
-
     </div>
   );
 };

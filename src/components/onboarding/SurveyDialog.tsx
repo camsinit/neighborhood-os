@@ -94,24 +94,24 @@ const SurveyDialog = ({
   
   return (
     <Dialog open={open} onOpenChange={handleCloseRequest}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] md:max-w-[700px] lg:max-w-[760px] max-h-[90vh] grid-rows-[auto_auto_1fr_auto]">
         {/* Survey header */}
         <SurveyStepHeader title={steps[currentStep].title} />
         
         {/* Progress indicator */}
         <SurveyProgress currentStep={currentStep} totalSteps={steps.length} />
         
-        {/* Current step component */}
-        <div className="py-4">
-        <SurveyStepRenderer
-          currentStep={currentStep}
-          formData={formData}
-          handleChange={handleChange}
-          handleValidation={handleValidation}
-        />
+        {/* Current step component - make this region scrollable so the footer stays visible */}
+        <div className="py-2 overflow-y-auto min-h-0">
+          <SurveyStepRenderer
+            currentStep={currentStep}
+            formData={formData}
+            handleChange={handleChange}
+            handleValidation={handleValidation}
+          />
         </div>
         
-        {/* Navigation buttons */}
+        {/* Navigation buttons - always visible at the bottom of the dialog */}
         <SurveyNavigation
           currentStep={currentStep}
           totalSteps={steps.length}
