@@ -286,7 +286,7 @@ const Feature197 = ({
                   // Directory section shows the screenshot image
                   <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
                   // All other sections show videos
-                  <video src={currentVideoUrl} className="h-full max-h-80 w-full rounded-md object-cover" muted autoPlay loop preload="metadata" />}
+                  <video src={currentVideoUrl} className="h-full max-h-80 w-full rounded-md object-cover pointer-events-none" muted autoPlay loop preload="metadata" />}
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
@@ -299,7 +299,7 @@ const Feature197 = ({
           // Directory section shows the screenshot image
           <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
           // All other sections show videos
-          <video ref={videoRef} src={currentVideoUrl} className="w-full h-auto max-h-80 rounded-md object-contain" muted onEnded={handleVideoEnd} preload="metadata" />}
+          <video ref={videoRef} src={currentVideoUrl} className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" muted onEnded={handleVideoEnd} preload="metadata" />}
             
             {/* Replay button - shows when video ends (only for video sections) */}
             {showReplayButton && activeTabId !== 5 && <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
