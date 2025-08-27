@@ -128,8 +128,8 @@ const defaultFeatures: FeatureItem[] = [{
  * Feature197 - An accordion-based feature section component
  * 
  * This component displays features in an interactive accordion layout
- * with preloaded videos that change based on the selected feature. All videos
- * are preloaded for instant switching between features.
+ * with images that change based on the selected feature. Perfect for
+ * showcasing multiple features in an engaging, space-efficient way.
  */
 const Feature197 = ({
   features = defaultFeatures
@@ -142,9 +142,7 @@ const Feature197 = ({
 
   // Video state management
   const [showReplayButton, setShowReplayButton] = useState(false);
-  
-  // Refs for all video elements - we'll create one for each video to preload them
-  const videoRefs = useRef<{[key: number]: HTMLVideoElement | null}>({});
+  const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
 
   // Video mapping for each section - each has its own unique video file
@@ -186,6 +184,13 @@ const Feature197 = ({
 
   // Preload all assets when component mounts
   useEffect(() => {
+    // Preload all videos
+    Object.values(videoMapping).forEach(videoUrl => {
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.src = videoUrl;
+    });
+
     // Preload directory image
     const img = new Image();
     img.src = "/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png";
@@ -205,45 +210,35 @@ const Feature197 = ({
   // Intersection observer to trigger video play when section is visible
   useEffect(() => {
     const videoContainer = videoContainerRef.current;
-    if (!videoContainer) return;
-    
+    const video = videoRef.current;
+    if (!videoContainer || !video) return;
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          // Play the active video when section comes into view
-          const activeVideo = videoRefs.current[activeTabId || 1];
-          if (activeVideo && activeTabId !== 5) {
-            activeVideo.currentTime = 0;
-            setShowReplayButton(false);
-            activeVideo.play().catch(console.error);
-          }
+          // Reset video and play when section comes into view
+          video.currentTime = 0;
+          setShowReplayButton(false);
+          video.play().catch(console.error);
         }
       });
     }, {
-      threshold: 0.5 // Trigger when 50% of the element is visible
-    });
-    
+      threshold: 0.5
+    } // Trigger when 50% of the element is visible
+    );
     observer.observe(videoContainer);
     return () => observer.disconnect();
-  }, [activeTabId]);
+  }, []);
 
-  // Effect to manage video playback when active tab changes
+  // Effect to play video when active tab changes
   useEffect(() => {
-    // Pause all videos first
-    Object.values(videoRefs.current).forEach(video => {
-      if (video) {
-        video.pause();
-      }
-    });
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Play the active video if it exists
-    const activeVideo = videoRefs.current[activeTabId || 1];
-    if (activeVideo && activeTabId !== 5) { // Don't play for directory (id 5)
-      activeVideo.currentTime = 0;
-      setShowReplayButton(false);
-      activeVideo.play().catch(console.error);
-    }
-  }, [activeTabId]);
+    // Reset and play video when tab changes
+    video.currentTime = 0;
+    setShowReplayButton(false);
+    video.play().catch(console.error);
+  }, [activeTabId, currentVideoUrl]);
 
   // Handle video end event
   const handleVideoEnd = () => {
@@ -252,10 +247,9 @@ const Feature197 = ({
 
   // Handle replay button click
   const handleReplay = () => {
-    const activeVideo = videoRefs.current[activeTabId || 1];
-    if (activeVideo) {
-      activeVideo.currentTime = 0;
-      activeVideo.play();
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
       setShowReplayButton(false);
     }
   };
@@ -286,42 +280,35 @@ const Feature197 = ({
                       </div>
                     </div>
                     
-                    {/* Show video or image on both mobile and desktop devices below the description */}
-                    <div className="mt-4">
-                      {tab.id === 5 ? (
-                        // Directory section shows the screenshot image
-                        <img 
-                          src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" 
-                          alt="Neighbors directory showing community members" 
-                          className="w-full h-auto max-h-80 rounded-md object-contain" 
-                        />
-                      ) : (
-                        // All other sections show videos
-                        <video 
-                          src={videoMapping[tab.id as keyof typeof videoMapping]} 
-                          className="h-full max-h-80 w-full rounded-md object-cover pointer-events-none touch-none" 
-                          muted 
-                          autoPlay 
-                          loop 
-                          playsInline
-                          disablePictureInPicture
-                          disableRemotePlayback
-                          controls={false}
-                          controlsList="nodownload nofullscreen noremoteplayback"
-                          preload="auto"
-                          style={{ 
-                            WebkitTouchCallout: 'none',
-                            WebkitUserSelect: 'none',
-                            WebkitTapHighlightColor: 'transparent'
-                          }}
-                        />
-                      )}
+                    {/* Show video or image on mobile devices below the description */}
+                    <div className="mt-4 md:hidden">
+                      {activeTabId === 5 ?
+                  // Directory section shows the screenshot image
+                  <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
+                  // All other sections show videos
+                  <video src={currentVideoUrl} className="h-full max-h-80 w-full rounded-md object-cover pointer-events-none" muted autoPlay loop preload="metadata" />}
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
             </Accordion>
           </div>
           
+          {/* Right side: Feature video or image based on section */}
+          <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl mx-auto flex items-center justify-center h-full">
+            {activeTabId === 5 ?
+          // Directory section shows the screenshot image
+          <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
+          // All other sections show videos
+          <video ref={videoRef} src={currentVideoUrl} className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" muted onEnded={handleVideoEnd} preload="metadata" />}
+            
+            {/* Replay button - shows when video ends (only for video sections) */}
+            {showReplayButton && activeTabId !== 5 && <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
+                <Button onClick={handleReplay} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
+                  <RotateCcw className="h-5 w-5" />
+                  Replay
+                </Button>
+              </div>}
+          </div>
         </div>
       </div>
     </section>;
