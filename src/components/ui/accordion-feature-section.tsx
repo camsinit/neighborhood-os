@@ -178,7 +178,7 @@ const Feature197 = ({
             {features.map(tab => (
               <div key={tab.id} className="border rounded-lg p-6">
                 {/* Static header - no toggle functionality */}
-                <div className="py-1">
+                <div className="pt-1 pb-0">
                   <h3 className={`text-2xl font-bold text-left flex items-center gap-3 ${getColorClass(tab.id)}`}>
                     {React.createElement(getIcon(tab.id), { className: "h-6 w-6" })}
                     {tab.title}
