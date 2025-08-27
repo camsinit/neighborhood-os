@@ -33,7 +33,7 @@ export const ReplacementLogo = ({
 }: ReplacementLogoProps) => {
   // Logo content that will be either wrapped in a link or displayed directly
   const logoContent = (
-    <div className="flex flex-col items-center gap-2 min-w-0 my-0 mx-0 px-0 py-[2px]">
+    <div className="flex flex-col items-center gap-2 min-w-0 my-0 mx-0 px-0 py-[2px] group relative">
       {/* 
         Logo container with fixed dimensions to ensure consistency
         - w-8 h-8: Fixed 32px square container (reduced from 48px)
@@ -57,6 +57,11 @@ export const ReplacementLogo = ({
             console.log(`Successfully loaded logo: ${logo}`);
           }} 
         />
+      </div>
+      
+      {/* Tooltip showing brand name on hover */}
+      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+        {name}
       </div>
     </div>
   );
