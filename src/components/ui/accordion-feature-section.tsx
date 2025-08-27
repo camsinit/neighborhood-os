@@ -295,11 +295,24 @@ const Feature197 = ({
           
           {/* Right side: Feature video or image based on section */}
           <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl mx-auto flex items-center justify-center h-full">
-            {activeTabId === 5 ?
-          // Directory section shows the screenshot image
-          <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
-          // All other sections show videos
-          <video ref={videoRef} src={currentVideoUrl} className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" muted onEnded={handleVideoEnd} preload="metadata" />}
+            {activeTabId === 5 ? (
+              // Directory section shows the screenshot image
+              <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" />
+            ) : (
+              // All other sections show videos with fallback URLs
+              <video 
+                ref={videoRef} 
+                className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" 
+                muted 
+                onEnded={handleVideoEnd} 
+                preload="metadata"
+                playsInline
+              >
+                <source src={currentVideoUrl} type="video/mp4" />
+                <source src={`https://raw.githubusercontent.com/camsinit/neighborhood-os/main/public${currentVideoUrl}`} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
             
             {/* Replay button - shows when video ends (only for video sections) */}
             {showReplayButton && activeTabId !== 5 && <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
