@@ -60,7 +60,7 @@ export const ReplacementLogo = ({
       </div>
       
       {/* Tooltip showing brand name on hover */}
-      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
         {name}
       </div>
     </div>
