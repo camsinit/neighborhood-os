@@ -286,9 +286,36 @@ const Feature197 = ({
                       </div>
                     </div>
                     
-                    {/* Hide video on mobile to avoid duplication - users can see videos on desktop */}
-                    <div className="mt-4 md:hidden text-center text-sm text-muted-foreground italic">
-                      View on desktop to see the interactive video demonstration
+                    {/* Show video or image on mobile devices below the description */}
+                    <div className="mt-4 md:hidden">
+                      {tab.id === 5 ? (
+                        // Directory section shows the screenshot image
+                        <img 
+                          src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" 
+                          alt="Neighbors directory showing community members" 
+                          className="w-full h-auto max-h-80 rounded-md object-contain" 
+                        />
+                      ) : (
+                        // All other sections show videos
+                        <video 
+                          src={videoMapping[tab.id as keyof typeof videoMapping]} 
+                          className="h-full max-h-80 w-full rounded-md object-cover pointer-events-none touch-none" 
+                          muted 
+                          autoPlay 
+                          loop 
+                          playsInline
+                          disablePictureInPicture
+                          disableRemotePlayback
+                          controls={false}
+                          controlsList="nodownload nofullscreen noremoteplayback"
+                          preload="auto"
+                          style={{ 
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none',
+                            WebkitTapHighlightColor: 'transparent'
+                          }}
+                        />
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>)}
