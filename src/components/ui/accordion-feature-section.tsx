@@ -170,7 +170,7 @@ const Feature197 = ({
   };
 
   return (
-    <section className="py-16">
+    <section className="pt-10 pb-16">
       <div className="container mx-auto px-8">
         {/* Centered accordion taking up more space */}
         <div className="max-w-4xl mx-auto">
