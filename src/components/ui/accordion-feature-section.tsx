@@ -299,19 +299,24 @@ const Feature197 = ({
               // Directory section shows the screenshot image
               <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" />
             ) : (
-              // All other sections show videos with fallback URLs
+              // All other sections show videos - key prop forces reload when tab changes
               <video 
+                key={activeTabId} // Force reload when switching tabs
                 ref={videoRef} 
+                src={currentVideoUrl}
                 className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" 
                 muted 
                 onEnded={handleVideoEnd} 
                 preload="metadata"
                 playsInline
-              >
-                <source src={currentVideoUrl} type="video/mp4" />
-                <source src={`https://raw.githubusercontent.com/camsinit/neighborhood-os/main/public${currentVideoUrl}`} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+                onError={(e) => {
+                  // Fallback to GitHub raw URL if local video fails
+                  const video = e.currentTarget;
+                  if (!video.src.includes('githubusercontent')) {
+                    video.src = `https://raw.githubusercontent.com/camsinit/neighborhood-os/main/public${currentVideoUrl}`;
+                  }
+                }}
+              />
             )}
             
             {/* Replay button - shows when video ends (only for video sections) */}
