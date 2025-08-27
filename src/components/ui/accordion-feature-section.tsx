@@ -322,60 +322,6 @@ const Feature197 = ({
             </Accordion>
           </div>
           
-          {/* Right side: Feature video or image based on section */}
-          {/* Directory section shows the screenshot image */}
-          {activeTabId === 5 ? (
-            <img 
-              src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" 
-              alt="Neighbors directory showing community members" 
-              className="w-full h-auto max-h-80 rounded-md object-contain" 
-            />
-          ) : (
-            // Render all videos but only show the active one
-            <div ref={videoContainerRef} className="relative w-full h-full">
-              {Object.entries(videoMapping).map(([tabId, videoUrl]) => {
-                const isActive = Number(tabId) === activeTabId;
-                return (
-                  <video
-                    key={tabId}
-                    ref={(el) => { videoRefs.current[Number(tabId)] = el; }}
-                    src={videoUrl}
-                    className={`w-full h-auto max-h-80 rounded-md object-contain pointer-events-none touch-none ${
-                      isActive ? 'block' : 'hidden'
-                    }`}
-                    muted
-                    loop
-                    playsInline
-                    disablePictureInPicture
-                    disableRemotePlayback
-                    controls={false}
-                    controlsList="nodownload nofullscreen noremoteplayback"
-                    preload="auto"
-                    onEnded={isActive ? handleVideoEnd : undefined}
-                    style={{ 
-                      WebkitTouchCallout: 'none',
-                      WebkitUserSelect: 'none',
-                      WebkitTapHighlightColor: 'transparent'
-                    }}
-                  />
-                );
-              })}
-              
-              {/* Replay button - shows when video ends (only for video sections) */}
-              {showReplayButton && activeTabId !== 5 && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
-                  <Button 
-                    onClick={handleReplay} 
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" 
-                    size="lg"
-                  >
-                    <RotateCcw className="h-5 w-5" />
-                    Replay
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </section>;
