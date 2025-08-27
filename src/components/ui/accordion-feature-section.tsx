@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ReplacementLogo } from "@/components/ui/replacement-logo";
-import { Layout, Code, Moon, Eye, Zap } from "lucide-react";
+import { Calendar, Brain, Gift, Info, Users } from "lucide-react";
 
 /**
  * Interface defining the structure of a feature item
@@ -151,21 +151,21 @@ const Feature197 = ({
     }
   };
 
-  // Get the appropriate icon for each feature section
+  // Get the appropriate icon for each feature section (matching dashboard navigation)
   const getIcon = (tabId: number) => {
     switch (tabId) {
       case 1:
-        return Layout;
+        return Calendar; // Calendar page
       case 2:
-        return Code;
+        return Gift; // Freebies/Goods page
       case 3:
-        return Moon;
+        return Brain; // Skills page
       case 4:
-        return Eye;
+        return Info; // Updates/Safety page
       case 5:
-        return Zap;
+        return Users; // Neighbors page
       default:
-        return Layout;
+        return Calendar;
     }
   };
 
