@@ -207,6 +207,21 @@ const Feature197 = ({
   // Get current video URL based on active tab
   const currentVideoUrl = videoMapping[activeTabId as keyof typeof videoMapping] || "/videos/Events.mp4";
 
+  // Auto-play first video when component loads
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Small delay to ensure video element is ready
+    const timer = setTimeout(() => {
+      video.currentTime = 0;
+      setShowReplayButton(false);
+      video.play().catch(console.error);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []); // Only run once when component mounts
+
   // Intersection observer to trigger video play when section is visible
   useEffect(() => {
     const videoContainer = videoContainerRef.current;
