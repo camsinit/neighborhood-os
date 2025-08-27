@@ -1,6 +1,9 @@
 
 # This is the main Supabase configuration file for serverless edge functions
-project_id = "neighborhood-dashboard"
+project_id = "nnwzfliblfuldwxpuata"
+
+[db]
+major_version = 15
 
 [global.env_variables]
 # Leave this empty, secrets will be managed through Supabase dashboard
