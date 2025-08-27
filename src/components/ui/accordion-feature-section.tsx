@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ReplacementLogo } from "@/components/ui/replacement-logo";
 
 /**
@@ -123,32 +121,29 @@ const defaultFeatures: FeatureItem[] = [{
 }];
 
 /**
- * Feature197 - An accordion-based feature section component
+ * Feature197 - A static feature section component
  * 
- * This component displays features in an interactive accordion layout
- * with images that change based on the selected feature. Perfect for
- * showcasing multiple features in an engaging, space-efficient way.
+ * This component displays features in always-expanded sections
+ * with colorful headers and replacement logos. Perfect for
+ * showcasing multiple features in a clear, accessible way.
  */
 const Feature197 = ({
   features = defaultFeatures
 }: Feature197Props) => {
-  // State to track which accordion item is currently active
-  const [activeTabId, setActiveTabId] = useState<number | null>(1);
-  
   // Color mapping for each section to match their respective page theme
-  const getColorClass = (tabId: number, isActive: boolean) => {
+  const getColorClass = (tabId: number) => {
     const baseClasses = "transition-colors duration-200";
     switch (tabId) {
       case 1:
-        return isActive ? `text-blue-600 ${baseClasses}` : `text-muted-foreground hover:text-blue-600 ${baseClasses}`;
+        return `text-blue-600 ${baseClasses}`;
       case 2:
-        return isActive ? `text-orange-600 ${baseClasses}` : `text-muted-foreground hover:text-orange-600 ${baseClasses}`;
+        return `text-orange-600 ${baseClasses}`;
       case 3:
-        return isActive ? `text-green-600 ${baseClasses}` : `text-muted-foreground hover:text-green-600 ${baseClasses}`;
+        return `text-green-600 ${baseClasses}`;
       case 4:
-        return isActive ? `text-red-600 ${baseClasses}` : `text-muted-foreground hover:text-red-600 ${baseClasses}`;
+        return `text-red-600 ${baseClasses}`;
       case 5:
-        return isActive ? `text-purple-600 ${baseClasses}` : `text-muted-foreground hover:text-purple-600 ${baseClasses}`;
+        return `text-purple-600 ${baseClasses}`;
       default:
         return `text-foreground ${baseClasses}`;
     }
@@ -159,18 +154,18 @@ const Feature197 = ({
       <div className="container mx-auto px-8">
         {/* Centered accordion taking up more space */}
         <div className="max-w-4xl mx-auto">
-          <Accordion type="single" className="w-full space-y-6" defaultValue="item-1">
+          <div className="w-full space-y-6">
             {features.map(tab => (
-              <AccordionItem key={tab.id} value={`item-${tab.id}`} className="border rounded-lg p-6">
-                <AccordionTrigger 
-                  onClick={() => setActiveTabId(tab.id)} 
-                  className="cursor-pointer py-6 !no-underline transition hover:no-underline"
-                >
-                  <h3 className={`text-2xl font-bold text-left ${getColorClass(tab.id, tab.id === activeTabId)}`}>
+              <div key={tab.id} className="border rounded-lg p-6">
+                {/* Static header - no toggle functionality */}
+                <div className="py-6">
+                  <h3 className={`text-2xl font-bold text-left ${getColorClass(tab.id)}`}>
                     {tab.title}
                   </h3>
-                </AccordionTrigger>
-                <AccordionContent className="pt-6">
+                </div>
+                
+                {/* Always visible content */}
+                <div className="pt-6">
                   <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                     {tab.description}
                   </p>
@@ -189,10 +184,10 @@ const Feature197 = ({
                       ))}
                     </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
+                </div>
+              </div>
             ))}
-          </Accordion>
+          </div>
         </div>
       </div>
     </section>
