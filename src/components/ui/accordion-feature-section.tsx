@@ -1,6 +1,8 @@
 "use client";
 
+import React from "react";
 import { ReplacementLogo } from "@/components/ui/replacement-logo";
+import { Layout, Code, Moon, Eye, Zap } from "lucide-react";
 
 /**
  * Interface defining the structure of a feature item
@@ -149,6 +151,24 @@ const Feature197 = ({
     }
   };
 
+  // Get the appropriate icon for each feature section
+  const getIcon = (tabId: number) => {
+    switch (tabId) {
+      case 1:
+        return Layout;
+      case 2:
+        return Code;
+      case 3:
+        return Moon;
+      case 4:
+        return Eye;
+      case 5:
+        return Zap;
+      default:
+        return Layout;
+    }
+  };
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-8">
@@ -159,7 +179,8 @@ const Feature197 = ({
               <div key={tab.id} className="border rounded-lg p-6">
                 {/* Static header - no toggle functionality */}
                 <div className="py-6">
-                  <h3 className={`text-2xl font-bold text-left ${getColorClass(tab.id)}`}>
+                  <h3 className={`text-2xl font-bold text-left flex items-center gap-3 ${getColorClass(tab.id)}`}>
+                    {React.createElement(getIcon(tab.id), { className: "h-6 w-6" })}
                     {tab.title}
                   </h3>
                 </div>
