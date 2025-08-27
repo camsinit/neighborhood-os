@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { ReplacementLogo } from "@/components/ui/replacement-logo";
-import { RotateCcw } from "lucide-react";
 
 /**
  * Interface defining the structure of a feature item
@@ -134,218 +132,71 @@ const defaultFeatures: FeatureItem[] = [{
 const Feature197 = ({
   features = defaultFeatures
 }: Feature197Props) => {
-  // State to track which accordion item is currently active - starts with Gatherings (section 1)
+  // State to track which accordion item is currently active
   const [activeTabId, setActiveTabId] = useState<number | null>(1);
-
-  // State to track which image should be displayed - starts with first feature (Gatherings)
-  const [activeImage, setActiveImage] = useState(features[0].image);
-
-  // Video state management
-  const [showReplayButton, setShowReplayButton] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
-
-  // Video mapping for each section - each has its own unique video file
-  const videoMapping = {
-    1: "/videos/Events.mp4",
-    // Gatherings/Events
-    2: "/videos/Freebies.mp4",
-    // Freebies - using the correct Freebies video
-    3: "/videos/Skills.mp4",
-    // Skills - using the correct Skills video
-    4: "/videos/Updates.mp4",
-    // Updates/Safety
-    5: "/videos/Directory.mp4" // Directory
-  };
-
+  
   // Color mapping for each section to match their respective page theme
   const getColorClass = (tabId: number, isActive: boolean) => {
     const baseClasses = "transition-colors duration-200";
     switch (tabId) {
       case 1:
         return isActive ? `text-blue-600 ${baseClasses}` : `text-muted-foreground hover:text-blue-600 ${baseClasses}`;
-      // Gatherings - blue theme
       case 2:
         return isActive ? `text-orange-600 ${baseClasses}` : `text-muted-foreground hover:text-orange-600 ${baseClasses}`;
-      // Freebies - orange theme
       case 3:
         return isActive ? `text-green-600 ${baseClasses}` : `text-muted-foreground hover:text-green-600 ${baseClasses}`;
-      // Skills - green theme
       case 4:
         return isActive ? `text-red-600 ${baseClasses}` : `text-muted-foreground hover:text-red-600 ${baseClasses}`;
-      // Updates/Safety - red theme
       case 5:
         return isActive ? `text-purple-600 ${baseClasses}` : `text-muted-foreground hover:text-purple-600 ${baseClasses}`;
-      // Directory - purple theme
       default:
         return `text-foreground ${baseClasses}`;
     }
   };
 
-  // Preload all assets when component mounts
-  useEffect(() => {
-    // Preload all videos
-    Object.values(videoMapping).forEach(videoUrl => {
-      const video = document.createElement('video');
-      video.preload = 'auto';
-      video.src = videoUrl;
-    });
-
-    // Preload directory image
-    const img = new Image();
-    img.src = "/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png";
-
-    // Preload all feature logos
-    features.forEach(feature => {
-      feature.replaces.forEach(replacement => {
-        const logoImg = new Image();
-        logoImg.src = replacement.logo;
-      });
-    });
-  }, []);
-
-  // Get current video URL based on active tab
-  const currentVideoUrl = videoMapping[activeTabId as keyof typeof videoMapping] || "/videos/Events.mp4";
-
-  // Auto-play first video when component loads
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Small delay to ensure video element is ready
-    const timer = setTimeout(() => {
-      video.currentTime = 0;
-      setShowReplayButton(false);
-      video.play().catch(console.error);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []); // Only run once when component mounts
-
-  // Intersection observer to trigger video play when section is visible
-  useEffect(() => {
-    const videoContainer = videoContainerRef.current;
-    const video = videoRef.current;
-    if (!videoContainer || !video) return;
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Reset video and play when section comes into view
-          video.currentTime = 0;
-          setShowReplayButton(false);
-          video.play().catch(console.error);
-        }
-      });
-    }, {
-      threshold: 0.5
-    } // Trigger when 50% of the element is visible
-    );
-    observer.observe(videoContainer);
-    return () => observer.disconnect();
-  }, []);
-
-  // Effect to play video when active tab changes
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Reset and play video when tab changes
-    video.currentTime = 0;
-    setShowReplayButton(false);
-    video.play().catch(console.error);
-  }, [activeTabId, currentVideoUrl]);
-
-  // Handle video end event
-  const handleVideoEnd = () => {
-    setShowReplayButton(true);
-  };
-
-  // Handle replay button click
-  const handleReplay = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-      setShowReplayButton(false);
-    }
-  };
-  return <section className="py-[10px]">
-      <div className="container mx-auto px-[30px]">
-        <div className="mb-12 grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Left side: Accordion with feature titles and descriptions */}
-          <div>
-            <Accordion type="single" className="w-full" defaultValue="item-1">
-              {features.map(tab => <AccordionItem key={tab.id} value={`item-${tab.id}`}>
-                  <AccordionTrigger onClick={() => {
-                // Update the active image and tab when clicked
-                setActiveImage(tab.image);
-                setActiveTabId(tab.id);
-              }} className="cursor-pointer py-5 !no-underline transition">
-                    <h6 className={`text-xl font-semibold ${getColorClass(tab.id, tab.id === activeTabId)}`}>
-                      {tab.title}
-                    </h6>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <p className="mt-3 text-muted-foreground pb-[10px]">{tab.description}</p>
-                    
-                    {/* Replaces section with universally formatted logos */}
-                    <div className="mt-4 flex items-start gap-4">
-                      <span className="font-bold text-foreground">Replaces</span>
-                      <div className="flex items-center gap-[25px] flex-wrap flex-1 max-w-full">
-                        {tab.replaces.map((replacement, index) => <ReplacementLogo key={index} logo={replacement.logo} name={replacement.name} alt={replacement.alt} />)}
-                      </div>
+  return (
+    <section className="py-16">
+      <div className="container mx-auto px-8">
+        {/* Centered accordion taking up more space */}
+        <div className="max-w-4xl mx-auto">
+          <Accordion type="single" className="w-full space-y-6" defaultValue="item-1">
+            {features.map(tab => (
+              <AccordionItem key={tab.id} value={`item-${tab.id}`} className="border rounded-lg p-6">
+                <AccordionTrigger 
+                  onClick={() => setActiveTabId(tab.id)} 
+                  className="cursor-pointer py-6 !no-underline transition hover:no-underline"
+                >
+                  <h3 className={`text-2xl font-bold text-left ${getColorClass(tab.id, tab.id === activeTabId)}`}>
+                    {tab.title}
+                  </h3>
+                </AccordionTrigger>
+                <AccordionContent className="pt-6">
+                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                    {tab.description}
+                  </p>
+                  
+                  {/* Replaces section with universally formatted logos */}
+                  <div className="flex items-start gap-6">
+                    <span className="font-bold text-foreground text-lg min-w-fit">Replaces</span>
+                    <div className="flex items-center gap-8 flex-wrap flex-1">
+                      {tab.replaces.map((replacement, index) => (
+                        <ReplacementLogo 
+                          key={index} 
+                          logo={replacement.logo} 
+                          name={replacement.name} 
+                          alt={replacement.alt} 
+                        />
+                      ))}
                     </div>
-                    
-                    {/* Show video or image on mobile devices below the description */}
-                    <div className="mt-4 md:hidden">
-                      {activeTabId === 5 ?
-                  // Directory section shows the screenshot image
-                  <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" /> :
-                  // All other sections show videos
-                  <video src={currentVideoUrl} className="h-full max-h-80 w-full rounded-md object-cover pointer-events-none" muted autoPlay loop preload="metadata" />}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>)}
-            </Accordion>
-          </div>
-          
-          {/* Right side: Feature video or image based on section */}
-          <div ref={videoContainerRef} className="relative overflow-hidden rounded-xl mx-auto flex items-center justify-center h-full">
-            {activeTabId === 5 ? (
-              // Directory section shows the screenshot image
-              <img src="/lovable-uploads/a32964b8-235c-4ed7-82ca-2e3114b0079f.png" alt="Neighbors directory showing community members" className="w-full h-auto max-h-80 rounded-md object-contain" />
-            ) : (
-              // All other sections show videos - key prop forces reload when tab changes
-              <video 
-                key={activeTabId} // Force reload when switching tabs
-                ref={videoRef} 
-                src={currentVideoUrl}
-                className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none touch-none select-none" 
-                muted 
-                onEnded={handleVideoEnd} 
-                preload="metadata"
-                playsInline
-                disablePictureInPicture
-                controlsList="nodownload nofullscreen noremoteplayback"
-                onError={(e) => {
-                  // Fallback to GitHub raw URL if local video fails
-                  const video = e.currentTarget;
-                  if (!video.src.includes('githubusercontent')) {
-                    video.src = `https://raw.githubusercontent.com/camsinit/neighborhood-os/main/public${currentVideoUrl}`;
-                  }
-                }}
-              />
-            )}
-            
-            {/* Replay button - shows when video ends (only for video sections) */}
-            {showReplayButton && activeTabId !== 5 && <div className="absolute inset-0 flex items-center justify-center rounded-xl p-4">
-                <Button onClick={handleReplay} className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" size="lg">
-                  <RotateCcw className="h-5 w-5" />
-                  Replay
-                </Button>
-              </div>}
-          </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export { Feature197 };
