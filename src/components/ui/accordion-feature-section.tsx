@@ -134,10 +134,10 @@ const defaultFeatures: FeatureItem[] = [{
 const Feature197 = ({
   features = defaultFeatures
 }: Feature197Props) => {
-  // State to track which accordion item is currently active
+  // State to track which accordion item is currently active - starts with Gatherings (section 1)
   const [activeTabId, setActiveTabId] = useState<number | null>(1);
 
-  // State to track which image should be displayed
+  // State to track which image should be displayed - starts with first feature (Gatherings)
   const [activeImage, setActiveImage] = useState(features[0].image);
 
   // Video state management
@@ -319,11 +319,13 @@ const Feature197 = ({
                 key={activeTabId} // Force reload when switching tabs
                 ref={videoRef} 
                 src={currentVideoUrl}
-                className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none" 
+                className="w-full h-auto max-h-80 rounded-md object-contain pointer-events-none touch-none select-none" 
                 muted 
                 onEnded={handleVideoEnd} 
                 preload="metadata"
                 playsInline
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
                 onError={(e) => {
                   // Fallback to GitHub raw URL if local video fails
                   const video = e.currentTarget;
