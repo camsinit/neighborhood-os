@@ -309,6 +309,12 @@ const Feature197 = ({
                           controls={false}
                           controlsList="nodownload nofullscreen noremoteplayback"
                           preload="auto"
+                          onError={(e) => {
+                            console.error(`Video failed to load for tab ${tab.id}:`, videoMapping[tab.id as keyof typeof videoMapping]);
+                          }}
+                          onLoadStart={() => {
+                            console.log(`Loading video for tab ${tab.id}:`, videoMapping[tab.id as keyof typeof videoMapping]);
+                          }}
                           style={{ 
                             WebkitTouchCallout: 'none',
                             WebkitUserSelect: 'none',
