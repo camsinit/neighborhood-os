@@ -149,10 +149,10 @@ const Feature197 = ({
   const videoMapping = {
     1: "/videos/Events.mp4",
     // Gatherings/Events
-    2: "/videos/Skills.mp4",
-    // Freebies - using Skills video as requested
+    2: "/videos/Freebies.mp4",
+    // Freebies - using the correct Freebies video
     3: "/videos/Skills.mp4",
-    // Skills
+    // Skills - using the correct Skills video
     4: "/videos/Updates.mp4",
     // Updates/Safety
     5: "/videos/Directory.mp4" // Directory
