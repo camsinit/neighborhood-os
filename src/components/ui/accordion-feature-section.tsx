@@ -194,7 +194,7 @@ const Feature197 = ({
                   {/* Replaces section with universally formatted logos */}
                   <div className="flex items-start gap-6">
                     <span className="text-foreground text-base min-w-fit italic">Replaces</span>
-                    <div className="flex items-center gap-8 flex-wrap flex-1">
+                    <div className="flex items-center gap-4 flex-wrap flex-1">
                       {tab.replaces.map((replacement, index) => (
                         <ReplacementLogo 
                           key={index} 
