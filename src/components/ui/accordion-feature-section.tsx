@@ -286,8 +286,8 @@ const Feature197 = ({
                       </div>
                     </div>
                     
-                    {/* Show video or image on mobile devices below the description */}
-                    <div className="mt-4 md:hidden">
+                    {/* Show video or image on both mobile and desktop devices below the description */}
+                    <div className="mt-4">
                       {tab.id === 5 ? (
                         // Directory section shows the screenshot image
                         <img 
