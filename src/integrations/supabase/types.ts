@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -476,6 +476,9 @@ export type Database = {
           invite_header_image_url: string | null
           last_weekly_digest_sent: string | null
           name: string
+          physical_unit_label: string | null
+          physical_unit_type: string
+          physical_units: Json | null
           state: string | null
           timezone: string
           zip: string | null
@@ -490,6 +493,9 @@ export type Database = {
           invite_header_image_url?: string | null
           last_weekly_digest_sent?: string | null
           name: string
+          physical_unit_label?: string | null
+          physical_unit_type: string
+          physical_units?: Json | null
           state?: string | null
           timezone?: string
           zip?: string | null
@@ -504,6 +510,9 @@ export type Database = {
           invite_header_image_url?: string | null
           last_weekly_digest_sent?: string | null
           name?: string
+          physical_unit_label?: string | null
+          physical_unit_type?: string
+          physical_units?: Json | null
           state?: string | null
           timezone?: string
           zip?: string | null
@@ -1089,14 +1098,18 @@ export type Database = {
         Returns: undefined
       }
       add_neighborhood_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
+      }
+      admin_delete_neighborhood: {
+        Args: { neighborhood_uuid: string }
+        Returns: Json
       }
       assign_user_role: {
         Args: {
-          target_user_id: string
-          target_role: Database["public"]["Enums"]["user_role"]
           assigned_by_user_id?: string
+          target_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
         }
         Returns: boolean
       }
@@ -1106,8 +1119,8 @@ export type Database = {
       }
       calculate_priority_score: {
         Args: {
-          neighbors_count: number
           ai_experience: string
+          neighbors_count: number
           open_source: string
         }
         Returns: number
@@ -1126,25 +1139,25 @@ export type Database = {
       }
       check_user_role: {
         Args: {
-          user_uuid: string
           role_name: Database["public"]["Enums"]["user_role"]
+          user_uuid: string
         }
         Returns: boolean
       }
       create_admin_invitation: {
         Args: {
+          invitation_message?: string
           target_email: string
           target_neighborhood_id: string
-          invitation_message?: string
         }
         Returns: string
       }
       create_neighborhood_as_super_admin: {
         Args: {
-          neighborhood_name: string
-          neighborhood_city?: string
-          neighborhood_state?: string
           neighborhood_address?: string
+          neighborhood_city?: string
+          neighborhood_name: string
+          neighborhood_state?: string
           neighborhood_timezone?: string
         }
         Returns: string
@@ -1152,34 +1165,34 @@ export type Database = {
       create_neighborhood_as_super_admin_with_options: {
         Args:
           | {
-              neighborhood_name: string
-              neighborhood_city?: string
-              neighborhood_state?: string
+              join_as_member?: boolean
               neighborhood_address?: string
+              neighborhood_city?: string
+              neighborhood_name: string
+              neighborhood_state?: string
               neighborhood_timezone?: string
             }
           | {
-              neighborhood_name: string
-              neighborhood_city?: string
-              neighborhood_state?: string
               neighborhood_address?: string
+              neighborhood_city?: string
+              neighborhood_name: string
+              neighborhood_state?: string
               neighborhood_timezone?: string
-              join_as_member?: boolean
             }
         Returns: string
       }
       create_unified_system_notification: {
         Args: {
-          p_user_id: string
-          p_actor_id: string
-          p_title: string
-          p_content_type: string
-          p_content_id: string
-          p_notification_type: Database["public"]["Enums"]["notification_type"]
-          p_action_type?: Database["public"]["Enums"]["notification_action_type"]
           p_action_label?: string
-          p_relevance_score?: number
+          p_action_type?: Database["public"]["Enums"]["notification_action_type"]
+          p_actor_id: string
+          p_content_id: string
+          p_content_type: string
           p_metadata?: Json
+          p_notification_type: Database["public"]["Enums"]["notification_type"]
+          p_relevance_score?: number
+          p_title: string
+          p_user_id: string
         }
         Returns: string
       }
@@ -1200,29 +1213,29 @@ export type Database = {
         Returns: string
       }
       get_activities_safe: {
-        Args: { user_uuid: string; limit_count?: number }
+        Args: { limit_count?: number; user_uuid: string }
         Returns: {
-          id: string
-          actor_id: string
           activity_type: string
+          actor_id: string
           content_id: string
           content_type: string
-          title: string
           created_at: string
+          id: string
           metadata: Json
           neighborhood_id: string
+          title: string
         }[]
       }
       get_all_neighborhoods_for_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          name: string
           city: string
-          state: string
           created_at: string
           created_by: string
+          id: string
           member_count: number
+          name: string
+          state: string
         }[]
       }
       get_all_neighborhoods_safe: {
@@ -1237,6 +1250,9 @@ export type Database = {
           invite_header_image_url: string | null
           last_weekly_digest_sent: string | null
           name: string
+          physical_unit_label: string | null
+          physical_unit_type: string
+          physical_units: Json | null
           state: string | null
           timezone: string
           zip: string | null
@@ -1246,33 +1262,33 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: {
           id: string
-          name: string
-          joined_at: string
           is_creator: boolean
+          joined_at: string
+          name: string
         }[]
       }
       get_neighborhood_emails_for_digest: {
         Args: { target_neighborhood_id: string }
         Returns: {
-          user_id: string
-          email: string
           display_name: string
+          email: string
+          user_id: string
         }[]
       }
       get_neighborhood_from_invite: {
         Args: { invite_code_param: string }
         Returns: {
+          invitation_status: string
+          invite_header_image_url: string
+          inviter_avatar_url: string
+          inviter_display_name: string
+          inviter_id: string
+          member_count: number
+          neighborhood_city: string
+          neighborhood_created_at: string
           neighborhood_id: string
           neighborhood_name: string
-          neighborhood_city: string
           neighborhood_state: string
-          neighborhood_created_at: string
-          member_count: number
-          invitation_status: string
-          inviter_id: string
-          inviter_display_name: string
-          inviter_avatar_url: string
-          invite_header_image_url: string
         }[]
       }
       get_neighborhood_members: {
@@ -1294,30 +1310,30 @@ export type Database = {
       get_neighborhood_members_with_profiles: {
         Args: { neighborhood_uuid: string }
         Returns: {
-          user_id: string
+          address_visible: boolean
+          avatar_url: string
           display_name: string
           email: string
-          avatar_url: string
           email_visible: boolean
-          phone_visible: boolean
-          address_visible: boolean
           needs_visible: boolean
+          phone_visible: boolean
+          user_id: string
         }[]
       }
       get_neighborhood_user_emails: {
         Args: { target_neighborhood_id: string }
         Returns: {
-          user_id: string
           email: string
+          user_id: string
         }[]
       }
       get_neighborhoods_ready_for_digest: {
         Args: Record<PropertyKey, never>
         Returns: {
+          last_sent: string
           neighborhood_id: string
           neighborhood_name: string
           timezone: string
-          last_sent: string
         }[]
       }
       get_user_current_neighborhood: {
@@ -1331,26 +1347,26 @@ export type Database = {
       get_user_neighborhood_memberships: {
         Args: { user_uuid: string }
         Returns: {
-          neighborhood_id: string
-          user_id: string
-          status: string
           joined_at: string
+          neighborhood_id: string
+          status: string
+          user_id: string
         }[]
       }
       get_user_neighborhood_role: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: string
       }
       get_user_neighborhoods: {
         Args: { user_uuid: string }
         Returns: {
           id: string
-          name: string
           joined_at: string
+          name: string
         }[]
       }
       is_actual_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
       is_super_admin: {
@@ -1358,7 +1374,7 @@ export type Database = {
         Returns: boolean
       }
       is_user_in_neighborhood: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
       join_neighborhood_as_super_admin: {
@@ -1368,8 +1384,8 @@ export type Database = {
       log_security_event: {
         Args: {
           p_action_type: string
-          p_target_user_id?: string
           p_details?: Json
+          p_target_user_id?: string
         }
         Returns: undefined
       }
@@ -1383,42 +1399,42 @@ export type Database = {
       }
       remove_user_role: {
         Args: {
-          target_user_id: string
-          target_role: Database["public"]["Enums"]["user_role"]
           removed_by_user_id?: string
+          target_role: Database["public"]["Enums"]["user_role"]
+          target_user_id: string
         }
         Returns: boolean
       }
       should_user_receive_email_notification: {
         Args: {
-          p_user_id: string
-          p_notification_type: string
           p_content_type: string
+          p_notification_type: string
+          p_user_id: string
         }
         Returns: boolean
       }
       simple_membership_check: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
       transfer_neighborhood_ownership: {
         Args: {
           current_owner_uuid: string
-          new_owner_uuid: string
           neighborhood_uuid: string
+          new_owner_uuid: string
         }
         Returns: boolean
       }
       user_created_neighborhood: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
       user_is_neighborhood_admin: {
-        Args: { _user: string; _neighborhood: string }
+        Args: { _neighborhood: string; _user: string }
         Returns: boolean
       }
       user_is_neighborhood_member: {
-        Args: { user_uuid: string; neighborhood_uuid: string }
+        Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
       users_share_neighborhood: {

@@ -25,6 +25,8 @@ import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { createLogger } from '@/utils/logger';
+import { useNavigate } from 'react-router-dom';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -36,6 +38,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const { currentNeighborhood, refreshNeighborhoodData } = useNeighborhood();
   const { toast } = useToast();
   const logger = createLogger('AdminSettings');
+  const navigate = useNavigate();
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -53,6 +56,9 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   // State for image upload and auto-save
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  
+  // State for delete operation
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Auto-save function with debouncing
   const autoSave = useCallback(async (fieldName: string, value: string | boolean) => {
@@ -205,12 +211,72 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     });
   };
 
-  const handleDeleteNeighborhood = () => {
-    // TODO: Implement neighborhood deletion with confirmation
-    toast({
-      title: "Feature Coming Soon", 
-      description: "Neighborhood deletion will be implemented with multiple confirmation steps.",
-    });
+  /**
+   * Handle neighborhood deletion with confirmation
+   * 
+   * This function implements secure neighborhood deletion by:
+   * 1. Showing a confirmation dialog to prevent accidental deletion
+   * 2. Calling the server-side admin_delete_neighborhood function
+   * 3. Handling success/error cases with appropriate user feedback
+   * 4. Redirecting the user after successful deletion
+   */
+  const handleDeleteNeighborhood = async () => {
+    if (!currentNeighborhood) {
+      toast({
+        title: "Error",
+        description: "No neighborhood found to delete.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    
+    try {
+      logger.info('Starting neighborhood deletion process', { neighborhoodId: currentNeighborhood.id });
+      
+      // Call the secure server-side deletion function
+      const { data, error } = await supabase.rpc('admin_delete_neighborhood', {
+        neighborhood_uuid: currentNeighborhood.id
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Check if the deletion was successful
+      const result = data as any; // Type assertion for the response
+      if (result && result.success) {
+        logger.info('Neighborhood deleted successfully', { 
+          neighborhoodId: currentNeighborhood.id,
+          deletionLog: result.deletion_log 
+        });
+        
+        // Show success message
+        toast({
+          title: "Neighborhood Deleted",
+          description: "Your neighborhood and all associated data have been permanently deleted.",
+        });
+
+        // Navigate to home page after a brief delay to allow user to see the success message
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+      } else {
+        throw new Error(result?.error || 'Unknown error occurred during deletion');
+      }
+    } catch (error) {
+      logger.error('Error deleting neighborhood', error as any);
+      
+      // Show error message
+      toast({
+        title: "Deletion Failed",
+        description: error instanceof Error ? error.message : "Failed to delete neighborhood. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Handle image upload for invite header
@@ -583,10 +649,59 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                   Permanently delete this neighborhood and all its data
                 </p>
               </div>
-              <Button variant="destructive" onClick={handleDeleteNeighborhood}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
+              
+              {/* Delete confirmation dialog */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" disabled={isDeleting}>
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Neighborhood Forever?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your 
+                      neighborhood "{currentNeighborhood?.name}" and remove all 
+                      associated data including:
+                      <ul className="list-disc list-inside mt-2 space-y-1">
+                        <li>All events and RSVPs</li>
+                        <li>All safety updates and comments</li>
+                        <li>All skills and goods exchange posts</li>
+                        <li>All member data and neighborhood roles</li>
+                        <li>All invitations and shared items</li>
+                      </ul>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteNeighborhood}
+                      disabled={isDeleting}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        'Yes, delete forever'
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>
