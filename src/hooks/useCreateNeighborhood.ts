@@ -82,6 +82,7 @@ export const useCreateNeighborhood = () => {
           address: neighborhoodData.address || '',
           timezone: neighborhoodData.timezone,
           created_by: user.id,
+          physical_unit_type: 'None', // Required field with default value
         })
         .select()
         .single();
