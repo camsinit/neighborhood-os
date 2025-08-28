@@ -124,20 +124,35 @@ export const AccountSettingsTab: React.FC = () => {
           {/* Basic Information - Right Column */}
           <div className="space-y-6">
             <FormSection title="Basic Information">
-              {/* Display Name */}
-              <div className="space-y-2">
-                <Label htmlFor="display_name">Display Name</Label>
-                <AutoSaveField 
-                  fieldName="display_name" 
-                  value={settings.display_name}
-                >
-                  <Input
-                    id="display_name"
-                    placeholder="Your display name"
+              {/* Display Name and Email Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Display Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="display_name">Display Name</Label>
+                  <AutoSaveField 
+                    fieldName="display_name" 
                     value={settings.display_name}
-                    onChange={(e) => updateField('display_name', e.target.value)}
+                  >
+                    <Input
+                      id="display_name"
+                      placeholder="Your display name"
+                      value={settings.display_name}
+                      onChange={(e) => updateField('display_name', e.target.value)}
+                    />
+                  </AutoSaveField>
+                </div>
+
+                {/* Email Address (Read-only) */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    value={user?.email || ''}
+                    readOnly
+                    className="bg-muted text-muted-foreground cursor-not-allowed"
+                    placeholder="No email available"
                   />
-                </AutoSaveField>
+                </div>
               </div>
 
               {/* Bio */}
