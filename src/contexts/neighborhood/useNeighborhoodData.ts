@@ -96,42 +96,25 @@ export function useNeighborhoodData(
         neighborhood = data;
         logger.debug("Super admin neighborhood fetched:", { neighborhoodId: data?.id, name: data?.name });
       } else {
-        // Regular mode: fetch user's neighborhood
-        // First try neighborhoods they created
-        const { data: createdNeighborhoods, error: createdError } = await supabase
-          .from('neighborhoods')
-          .select('*')
-          .eq('created_by', user.id)
+        // Regular mode: only consider neighborhoods they're a member of
+        const { data: memberData, error: memberError } = await supabase
+          .from('neighborhood_members')
+          .select(`
+            neighborhoods:neighborhood_id (*)
+          `)
+          .eq('user_id', user.id)
+          .eq('status', 'active')
           .limit(1);
 
-        if (createdError) {
-          throw new Error(`Failed to fetch created neighborhoods: ${createdError.message}`);
+        if (memberError) {
+          throw new Error(`Failed to fetch member neighborhoods: ${memberError.message}`);
         }
 
-        if (createdNeighborhoods && createdNeighborhoods.length > 0) {
-          neighborhood = createdNeighborhoods[0];
-          logger.debug("Found created neighborhood:", { neighborhoodId: neighborhood.id, name: neighborhood.name });
+        if (memberData && memberData.length > 0 && memberData[0].neighborhoods) {
+          neighborhood = memberData[0].neighborhoods as Neighborhood;
+          logger.debug("Found member neighborhood:", { neighborhoodId: neighborhood.id, name: neighborhood.name });
         } else {
-          // Then try neighborhoods they're a member of
-          const { data: memberData, error: memberError } = await supabase
-            .from('neighborhood_members')
-            .select(`
-              neighborhoods:neighborhood_id (*)
-            `)
-            .eq('user_id', user.id)
-            .eq('status', 'active')
-            .limit(1);
-
-          if (memberError) {
-            throw new Error(`Failed to fetch member neighborhoods: ${memberError.message}`);
-          }
-
-          if (memberData && memberData.length > 0 && memberData[0].neighborhoods) {
-            neighborhood = memberData[0].neighborhoods as Neighborhood;
-            logger.debug("Found member neighborhood:", { neighborhoodId: neighborhood.id, name: neighborhood.name });
-          } else {
-            logger.debug("No neighborhoods found for user");
-          }
+          logger.debug("No active memberships found for user");
         }
       }
 
