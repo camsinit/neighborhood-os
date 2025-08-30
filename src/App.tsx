@@ -17,7 +17,7 @@ import CalendarPage from "./pages/CalendarPage";
 import SkillsPage from "./pages/SkillsPage";
 import GoodsPage from "./pages/GoodsPage";
 import SafetyPage from "./pages/SafetyPage";
-import NeighborsPage from "./pages/NeighborsPage";
+import GroupsPage from "./pages/GroupsPage";
 import ModulesPage from "./pages/ModulesPage";
 import DebugPage from "./pages/DebugPage";
 import SharePage from "./pages/SharePage";
@@ -154,7 +154,7 @@ const App = () => {
                     element={
                       <NeighborhoodAwareProtectedRoute>
                         <MainLayout>
-                          <NeighborsPage />
+                          <GroupsPage />
                         </MainLayout>
                       </NeighborhoodAwareProtectedRoute>
                     }
@@ -206,7 +206,7 @@ const App = () => {
                     element={
                       <NeighborhoodAwareProtectedRoute>
                         <MainLayout>
-                          <NeighborsPage />
+                          <GroupsPage />
                         </MainLayout>
                       </NeighborhoodAwareProtectedRoute>
                     }

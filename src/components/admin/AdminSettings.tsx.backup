@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, Loader2, MapPin, Plus, Minus, Edit3 } from 'lucide-react';
+import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, Loader2, MapPin, Plus, Minus } from 'lucide-react';
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -56,9 +56,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     physicalUnitLabel: '',
     physicalUnits: [] as string[]
   });
-  
-  // State for tracking which physical units are in edit mode
-  const [editingUnitIndex, setEditingUnitIndex] = useState<number | null>(null);
   
   // State for image upload and auto-save
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -103,7 +100,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
       if (error) throw error;
 
-      // Note: Not calling refreshNeighborhoodData() to avoid triggering unwanted neighborhood switching for super admins
+      // Refresh the neighborhood data to reflect changes
+      await refreshNeighborhoodData();
       
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
@@ -178,21 +176,14 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     const newUnits = [...physicalUnitsConfig.physicalUnits, ''];
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    
-    // Focus the newly added input field after a brief delay
-    setTimeout(() => {
-      const inputs = document.querySelectorAll('input[placeholder*="Name"]:not([placeholder*="neighborhood"])');
-      const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
-      if (lastInput) {
-        lastInput.focus();
-      }
-    }, 100);
+    // Don't auto-save empty units immediately
   };
 
   const removePhysicalUnit = (index: number) => {
     if (isReadOnly) return;
     const newUnits = physicalUnitsConfig.physicalUnits.filter((_, i) => i !== index);
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
+    // Trigger auto-save for the updated units list
     debouncedAutoSave('physicalUnits', newUnits);
   };
 
@@ -201,21 +192,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     const newUnits = [...physicalUnitsConfig.physicalUnits];
     newUnits[index] = value;
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
+    // Trigger auto-save for the updated units list
     debouncedAutoSave('physicalUnits', newUnits);
-  };
-
-  const handleEditUnit = (index: number) => {
-    setEditingUnitIndex(index);
-  };
-
-  const handleSaveUnit = (index: number) => {
-    setEditingUnitIndex(null);
-    // Auto-save is already handled by updatePhysicalUnit
-  };
-
-  const handleCancelEdit = (index: number) => {
-    setEditingUnitIndex(null);
-    // Could restore previous value here if needed
   };
 
   // Check if there are unsaved changes by comparing with original neighborhood data
@@ -256,7 +234,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
       if (error) throw error;
 
-      // Note: Not calling refreshNeighborhoodData() to avoid triggering unwanted neighborhood switching for super admins
+      // Refresh the neighborhood data to reflect changes in the UI
+      await refreshNeighborhoodData();
       
       toast({
         title: "Settings Updated",
@@ -595,22 +574,24 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                   <SelectItem value="street">Street</SelectItem>
                   <SelectItem value="floor">Floor</SelectItem>
                   <SelectItem value="block">Block</SelectItem>
+                  <SelectItem value="building">Building</SelectItem>
+                  <SelectItem value="court">Court</SelectItem>
+                  <SelectItem value="wing">Wing</SelectItem>
+                  <SelectItem value="section">Section</SelectItem>
                   <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {physicalUnitsConfig.physicalUnitType === 'custom' && (
-              <div className="space-y-2">
-                <Label htmlFor="physical-unit-label">Custom Label</Label>
-                <Input
-                  id="physical-unit-label"
-                  value={physicalUnitsConfig.physicalUnitLabel}
-                  onChange={(e) => handlePhysicalUnitsChange('physicalUnitLabel', e.target.value)}
-                  placeholder="Enter custom unit name"
-                  disabled={isReadOnly}
-                />
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="physical-unit-label">Custom Label (Optional)</Label>
+              <Input
+                id="physical-unit-label"
+                value={physicalUnitsConfig.physicalUnitLabel}
+                onChange={(e) => handlePhysicalUnitsChange('physicalUnitLabel', e.target.value)}
+                placeholder={`e.g., "${physicalUnitsConfig.physicalUnitType}s" or custom name`}
+                disabled={isReadOnly}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -625,7 +606,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                   className="flex items-center gap-1"
                 >
                   <Plus className="h-4 w-4" />
-                  Add
+                  Add Unit
                 </Button>
               )}
             </div>
@@ -638,7 +619,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                 <div className="text-center py-8 text-gray-500">
                   <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>No physical units defined yet</p>
-                  <p className="text-sm">Click "Add" to get started</p>
+                  <p className="text-sm">Click "Add Unit" to get started</p>
                 </div>
               ) : (
                 physicalUnitsConfig.physicalUnits.map((unit, index) => (
@@ -646,44 +627,19 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                     <Input
                       value={unit}
                       onChange={(e) => updatePhysicalUnit(index, e.target.value)}
-                      placeholder={`${physicalUnitsConfig.physicalUnitType.charAt(0).toUpperCase() + physicalUnitsConfig.physicalUnitType.slice(1)} Name`}
+                      placeholder={`${physicalUnitsConfig.physicalUnitType} name`}
                       disabled={isReadOnly}
                     />
                     {!isReadOnly && (
-                      <div className="flex items-center gap-1">
-                        {editingUnitIndex === index ? (
-                          <>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSaveUnit(index)}
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removePhysicalUnit(index)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditUnit(index)}
-                            className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePhysicalUnit(index)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
                     )}
                   </div>
                 ))
@@ -693,7 +649,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         </CardContent>
       </Card>
 
-      {/* Privacy Settings */}
+      {/* Privacy Settings */
       <Card>
         <CardHeader>
           <CardTitle>Privacy & Access</CardTitle>
