@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, Brain, Gift, Info, Users } from 'lucide-react';
+import { Home, Calendar, Brain, Gift, Info, UsersRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCurrentNeighborhood } from '@/hooks/useCurrentNeighborhood';
 // Use centralized routes to avoid hardcoding and ensure consistency
@@ -58,8 +58,8 @@ const FeatureNavigation = () => {
     },
     {
       basePath: BASE_ROUTES.neighbors,
-      label: 'Neighbors',
-      icon: Users,
+      label: 'Groups',
+      icon: UsersRound,
       activeColor: 'text-purple-600'
     }
   ];
