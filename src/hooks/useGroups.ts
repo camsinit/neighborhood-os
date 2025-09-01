@@ -194,70 +194,48 @@ export const usePhysicalUnitsWithResidents = () => {
       if (!neighborhood?.id) return [];
       
       try {
-        // Get neighborhood config first
+        // Get neighborhood config first - this is our source of truth
         const config = await groupService.getNeighborhoodPhysicalConfig(neighborhood.id);
         
-        logger.info('Physical units config loaded', { 
-          config, 
-          physicalUnitsCount: config.physical_units?.length || 0 
-        });
-
-        // Get all neighborhood members with their physical unit assignments
-        const { data: membersWithUnits, error } = await supabase
-          .from('neighborhood_members')
-          .select(`
-            physical_unit_value,
-            user_id,
-            profiles!inner (
-              id,
-              display_name,
-              avatar_url
-            )
-          `)
-          .eq('neighborhood_id', neighborhood.id)
-          .eq('status', 'active');
-
-        if (error) {
-          logger.error('Error fetching members with physical units', { error });
+        // If no physical units configured, return empty array
+        if (!config.physical_units || config.physical_units.length === 0) {
           return [];
         }
 
-        logger.info('Members with units loaded', { 
-          membersCount: membersWithUnits?.length || 0,
-          membersWithUnits: membersWithUnits?.map(m => ({ 
-            userId: m.user_id, 
-            physicalUnit: m.physical_unit_value 
-          }))
-        });
+        // Get simple count of members per physical unit (no complex joins)
+        const { data: members, error } = await supabase
+          .from('neighborhood_members')
+          .select('physical_unit_value, user_id')
+          .eq('neighborhood_id', neighborhood.id)
+          .eq('status', 'active')
+          .not('physical_unit_value', 'is', null);
 
-        // Group residents by physical unit
-        const unitResidentsMap = new Map<string, any[]>();
-        membersWithUnits?.forEach(member => {
+        if (error) {
+          console.error('Error fetching neighborhood members:', error);
+          // Still return units even if member query fails
+        }
+
+        // Build resident count map
+        const residentCountMap = new Map<string, number>();
+        members?.forEach(member => {
           if (member.physical_unit_value) {
-            const residents = unitResidentsMap.get(member.physical_unit_value) || [];
-            residents.push(member);
-            unitResidentsMap.set(member.physical_unit_value, residents);
+            const currentCount = residentCountMap.get(member.physical_unit_value) || 0;
+            residentCountMap.set(member.physical_unit_value, currentCount + 1);
           }
         });
 
-        // Create the result with all configured physical units
+        // Create result using ALL configured physical units
         const unitsWithResidents = config.physical_units.map(unit => ({
           unit_name: unit,
           unit_label: config.physical_unit_label,
-          residents: unitResidentsMap.get(unit) || [],
-          resident_count: unitResidentsMap.get(unit)?.length || 0
+          residents: [], // Simplified - not showing individual resident details for now
+          resident_count: residentCountMap.get(unit) || 0
         }));
-
-        logger.info('Final units with residents', { 
-          unitsWithResidents: unitsWithResidents.map(u => ({
-            unitName: u.unit_name,
-            residentCount: u.resident_count
-          }))
-        });
 
         return unitsWithResidents;
       } catch (error) {
-        logger.error('Error fetching physical units with residents', { error });
+        console.error('Error fetching physical units with residents:', error);
+        // Return empty array on error
         return [];
       }
     },

@@ -119,9 +119,12 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           unit.trim() !== '' && !currentUnits.includes(unit)
         );
 
-        // Invalidate cache for physicalUnitsWithResidents to refresh Streets view
+        // Invalidate cache to refresh Streets view immediately
         queryClient.invalidateQueries({ 
           queryKey: ['physicalUnitsWithResidents', currentNeighborhood.id] 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id) 
         });
         
         // Only create physical groups for newly added units
