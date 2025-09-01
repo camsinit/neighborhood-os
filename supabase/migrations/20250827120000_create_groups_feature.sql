@@ -266,7 +266,7 @@ BEGIN
   VALUES (NEW.id, NEW.created_by, 'owner');
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TRIGGER trigger_add_group_creator_as_owner
   AFTER INSERT ON groups

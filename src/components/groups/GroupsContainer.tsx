@@ -6,7 +6,7 @@ import { useGroups } from '@/hooks/useGroups';
 import { TabsContent } from '@/components/ui/tabs';
 
 interface GroupsContainerProps {
-  onCreateGroup: () => void;
+  onCreateGroup: (templateData?: { name: string; description: string }) => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
@@ -48,11 +48,12 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
           groups={groups}
           isLoading={isLoading}
           searchQuery={searchQuery}
+          onCreateGroup={onCreateGroup}
         />
       </TabsContent>
       
       <TabsContent value="directory" className="m-0">
-        <UserDirectory />
+        <UserDirectory searchQuery={searchQuery} />
       </TabsContent>
     </div>
   );
