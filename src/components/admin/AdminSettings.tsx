@@ -119,27 +119,33 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           unit.trim() !== '' && !currentUnits.includes(unit)
         );
         
-        // Automatically create physical groups for new units
-        for (const unitName of addedUnits) {
-          try {
-            await createGroupMutation.mutateAsync({
-              name: `${unitName} Group`,
-              description: `Residents of ${unitName}`,
-              group_type: 'physical',
-              physical_unit_value: unitName,
-              is_private: false,
-              max_members: 100
-            });
-            
-            logger.info('Auto-created physical group', { unitName, neighborhoodId: currentNeighborhood.id });
-          } catch (groupError) {
-            logger.warn('Failed to auto-create group for physical unit', { 
-              unitName, 
-              error: groupError,
-              neighborhoodId: currentNeighborhood.id 
-            });
-            // Don't fail the entire operation if group creation fails
+        // Only create physical groups for newly added units
+        if (addedUnits.length > 0) {
+          logger.info('Creating groups for new physical units', { addedUnits, neighborhoodId: currentNeighborhood.id });
+          
+          for (const unitName of addedUnits) {
+            try {
+              await createGroupMutation.mutateAsync({
+                name: `${unitName} Group`,
+                description: `Residents of ${unitName}`,
+                group_type: 'physical',
+                physical_unit_value: unitName,
+                is_private: false,
+                max_members: 100
+              });
+              
+              logger.info('Auto-created physical group', { unitName, neighborhoodId: currentNeighborhood.id });
+            } catch (groupError) {
+              logger.warn('Failed to auto-create group for physical unit', { 
+                unitName, 
+                error: groupError,
+                neighborhoodId: currentNeighborhood.id 
+              });
+              // Don't fail the entire operation if group creation fails
+            }
           }
+        } else {
+          logger.info('No new physical units to create groups for', { currentUnits, newUnits });
         }
         
         // Invalidate groups cache to refresh physical units data in Groups page
