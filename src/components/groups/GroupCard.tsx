@@ -66,7 +66,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
     return group.group_type === 'physical' ? (
       <MapPin className="h-4 w-4" />
     ) : (
-      <Users className="h-4 w-4" />
+      null
     );
   };
 
