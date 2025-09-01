@@ -168,7 +168,11 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                   variant="default"
                   onClick={handleJoinGroup}
                   disabled={joinGroupMutation.isPending}
-                  className="w-full"
+                  className="w-full hover:opacity-90"
+                  style={{ 
+                    backgroundColor: 'hsl(258, 90%, 66%)',
+                    borderColor: 'hsl(258, 90%, 66%)'
+                  }}
                 >
                   {joinGroupMutation.isPending ? 'Joining...' : 'Join Group'}
                 </Button>
