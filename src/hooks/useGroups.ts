@@ -352,7 +352,10 @@ export const useCreateGroup = () => {
         }
       }
       
-      toast.success(`Group "${newGroup.name}" created successfully!`);
+      // Only show success toast for non-physical groups or manual creation
+      if (newGroup.group_type !== 'physical') {
+        toast.success(`Group "${newGroup.name}" created successfully!`);
+      }
     },
     
     onError: (error: unknown, variables, context) => {

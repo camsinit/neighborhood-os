@@ -182,11 +182,14 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
       
-      toast({
-        title: "Auto-save Failed",
-        description: `Failed to save ${fieldName}. Please try again.`,
-        variant: "destructive",
-      });
+      // Only show toast for non-physical unit field errors
+      if (fieldName !== 'physicalUnits') {
+        toast({
+          title: "Auto-save Failed",
+          description: `Failed to save ${fieldName}. Please try again.`,
+          variant: "destructive",
+        });
+      }
     }
   }, [isReadOnly, currentNeighborhood, createGroupMutation, logger, toast]);
 
