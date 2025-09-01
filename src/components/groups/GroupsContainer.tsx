@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { GroupsSections } from '@/components/groups/GroupsSections';
 import { GroupsSearchBar } from '@/components/groups/GroupsSearchBar';
+import { PhysicalUnitsView } from '@/components/groups/PhysicalUnitsView';
 import { useGroups } from '@/hooks/useGroups';
 import { TabsContent } from '@/components/ui/tabs';
 
@@ -50,6 +51,10 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
           searchQuery={searchQuery}
           onCreateGroup={onCreateGroup}
         />
+      </TabsContent>
+      
+      <TabsContent value="units" className="m-0">
+        <PhysicalUnitsView searchQuery={searchQuery} />
       </TabsContent>
       
       <TabsContent value="directory" className="m-0">

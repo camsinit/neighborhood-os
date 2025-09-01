@@ -1,8 +1,9 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, UsersRound, Users } from 'lucide-react';
+import { Search, UsersRound, Users, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNeighborhoodPhysicalConfig } from '@/hooks/useGroups';
 
 interface GroupsSearchBarProps {
   searchQuery: string;
@@ -25,6 +26,8 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
   activeTab,
   onTabChange
 }) => {
+  // Get the neighborhood's physical unit configuration for dynamic tab label
+  const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
@@ -33,7 +36,13 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           <Input 
             type="text" 
-            placeholder={activeTab === 'groups' ? 'Search groups...' : 'Search neighbors...'} 
+            placeholder={
+              activeTab === 'groups' 
+                ? 'Search groups...' 
+                : activeTab === 'units'
+                  ? `Search ${physicalConfig?.physical_unit_label?.toLowerCase() || 'units'}...`
+                  : 'Search neighbors...'
+            } 
             value={searchQuery} 
             onChange={e => onSearchChange(e.target.value)} 
             className="pl-10" 
@@ -46,6 +55,10 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
             <TabsTrigger value="groups" className="flex items-center gap-1.5">
               <UsersRound className="h-4 w-4" />
               Groups
+            </TabsTrigger>
+            <TabsTrigger value="units" className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" />
+              {physicalConfig?.physical_unit_label || 'Units'}
             </TabsTrigger>
             <TabsTrigger value="directory" className="flex items-center gap-1.5">
               <Users className="h-4 w-4" />
