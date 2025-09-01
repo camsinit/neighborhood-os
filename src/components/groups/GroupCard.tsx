@@ -105,9 +105,6 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               
               {/* Group Type Badge */}
               {getGroupTypeIcon()}
-              <span className="text-sm text-gray-600 truncate">
-                {getGroupTypeLabel()}
-              </span>
             </div>
 
             {/* Privacy Icon */}
