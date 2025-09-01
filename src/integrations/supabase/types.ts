@@ -485,6 +485,7 @@ export type Database = {
           id: string
           joined_at: string
           neighborhood_id: string
+          physical_unit_value: string | null
           status: string
           user_id: string
         }
@@ -492,6 +493,7 @@ export type Database = {
           id?: string
           joined_at?: string
           neighborhood_id: string
+          physical_unit_value?: string | null
           status?: string
           user_id: string
         }
@@ -499,6 +501,7 @@ export type Database = {
           id?: string
           joined_at?: string
           neighborhood_id?: string
+          physical_unit_value?: string | null
           status?: string
           user_id?: string
         }

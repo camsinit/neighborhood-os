@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Users, Loader2, Home } from 'lucide-react';
-import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithGroups } from '@/hooks/useGroups';
+import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents } from '@/hooks/useGroups';
 
 interface PhysicalUnitsViewProps {
   searchQuery: string;
@@ -18,12 +18,12 @@ interface PhysicalUnitsViewProps {
 export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
   searchQuery
 }) => {
-  // Get the neighborhood's physical unit configuration and units with groups
+  // Get the neighborhood's physical unit configuration and units with resident assignments
   const { data: physicalConfig, isLoading: configLoading } = useNeighborhoodPhysicalConfig();
-  const { data: unitsWithGroups = [], isLoading: unitsLoading } = usePhysicalUnitsWithGroups();
+  const { data: unitsWithResidents = [], isLoading: unitsLoading } = usePhysicalUnitsWithResidents();
 
   // Filter units based on search query
-  const filteredUnits = unitsWithGroups.filter(unit =>
+  const filteredUnits = unitsWithResidents.filter(unit =>
     unit.unit_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -40,7 +40,7 @@ export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
   }
 
   // No physical units configured
-  if (!physicalConfig || unitsWithGroups.length === 0) {
+  if (!physicalConfig || unitsWithResidents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500">
         <Home className="h-12 w-12 mb-4 text-gray-300" />
@@ -95,14 +95,22 @@ export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
 /**
  * PhysicalUnitCard Component
  * 
- * Individual card for each physical unit showing the unit name and any associated group.
- * Designed to match the styling of GroupCard but focused on the physical location.
+ * Individual card for each physical unit showing the unit name and assigned residents.
+ * The admin creates the unit which represents the physical organization structure.
  */
 interface PhysicalUnitCardProps {
   unit: {
     unit_name: string;
     unit_label: string;
-    group?: any | null; // Group data if a group exists for this unit
+    residents: Array<{
+      user_id: string;
+      profiles: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+      };
+    }>;
+    resident_count: number;
   };
   unitLabel: string;
 }
@@ -125,38 +133,45 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel }) 
                 </span>
               </div>
             </div>
+            {/* Resident count badge */}
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              {unit.resident_count}
+            </Badge>
           </div>
 
-          {/* Group status */}
-          <div className="pt-2 border-t border-gray-100">
-            {unit.group ? (
+          {/* Resident assignments - only show if there are residents */}
+          {unit.resident_count > 0 && (
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-green-500" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{unit.group.name}</p>
-                  <p className="text-xs text-gray-500">
-                    Active group • {unit.group.member_count || 0} members
-                  </p>
-                </div>
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                  Active
-                </Badge>
+                <span className="text-sm font-medium text-gray-900">
+                  {unit.resident_count} {unit.resident_count === 1 ? 'Resident' : 'Residents'}
+                </span>
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-gray-400" />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-500">No group created</p>
-                  <p className="text-xs text-gray-400">
-                    Residents can create a group for this {unitLabel.slice(0, -1).toLowerCase()}
-                  </p>
-                </div>
-                <Badge variant="outline" className="bg-gray-50 text-gray-500 border-gray-200">
-                  Available
-                </Badge>
+              
+              {/* Show first few residents */}
+              <div className="space-y-1">
+                {unit.residents.slice(0, 3).map((resident) => (
+                  <div key={resident.user_id} className="text-xs text-gray-600">
+                    • {resident.profiles.display_name || 'Anonymous Neighbor'}
+                  </div>
+                ))}
+                {unit.resident_count > 3 && (
+                  <div className="text-xs text-gray-500">
+                    + {unit.resident_count - 3} more
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Empty state for no residents */}
+          {unit.resident_count === 0 && (
+            <div className="flex items-center gap-2 text-gray-500">
+              <Users className="h-4 w-4" />
+              <span className="text-sm">No residents assigned yet</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

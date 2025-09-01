@@ -182,6 +182,71 @@ export const usePhysicalUnitsWithGroups = () => {
 };
 
 /**
+ * Get physical units with assigned residents
+ * This replaces the group-based approach with direct resident assignments
+ */
+export const usePhysicalUnitsWithResidents = () => {
+  const neighborhood = useCurrentNeighborhood();
+  
+  return useQuery({
+    queryKey: ['physicalUnitsWithResidents', neighborhood?.id],
+    queryFn: async () => {
+      if (!neighborhood?.id) return [];
+      
+      try {
+        // Get neighborhood config first
+        const config = await groupService.getNeighborhoodPhysicalConfig(neighborhood.id);
+        
+        // Get all neighborhood members with their physical unit assignments
+        const { data: membersWithUnits, error } = await supabase
+          .from('neighborhood_members')
+          .select(`
+            physical_unit_value,
+            user_id,
+            profiles!inner (
+              id,
+              display_name,
+              avatar_url
+            )
+          `)
+          .eq('neighborhood_id', neighborhood.id)
+          .eq('status', 'active');
+
+        if (error) {
+          logger.error('Error fetching members with physical units', { error });
+          return [];
+        }
+
+        // Group residents by physical unit
+        const unitResidentsMap = new Map<string, any[]>();
+        membersWithUnits?.forEach(member => {
+          if (member.physical_unit_value) {
+            const residents = unitResidentsMap.get(member.physical_unit_value) || [];
+            residents.push(member);
+            unitResidentsMap.set(member.physical_unit_value, residents);
+          }
+        });
+
+        // Create the result with all configured physical units
+        const unitsWithResidents = config.physical_units.map(unit => ({
+          unit_name: unit,
+          unit_label: config.physical_unit_label,
+          residents: unitResidentsMap.get(unit) || [],
+          resident_count: unitResidentsMap.get(unit)?.length || 0
+        }));
+
+        return unitsWithResidents;
+      } catch (error) {
+        logger.error('Error fetching physical units with residents', { error });
+        return [];
+      }
+    },
+    enabled: !!neighborhood?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+/**
  * Get neighborhood physical configuration
  */
 export const useNeighborhoodPhysicalConfig = () => {
