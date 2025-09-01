@@ -73,15 +73,15 @@ const AdminPage = () => {
         </div>
 
         {/* Admin Tabs */}
-        <Tabs defaultValue="members" className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+        <Tabs defaultValue="settings" className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="members" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Members</span>
-            </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+            <TabsTrigger value="members" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Members</span>
             </TabsTrigger>
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
