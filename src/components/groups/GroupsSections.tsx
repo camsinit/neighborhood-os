@@ -33,8 +33,7 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
     group.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Separate groups by type
-  const physicalGroups = filteredGroups.filter(group => group.group_type === 'physical');
+  // Only show social groups in the Groups tab (physical groups are shown in Streets tab)
   const socialGroups = filteredGroups.filter(group => group.group_type === 'social');
 
   // Dynamic section title for physical groups
@@ -70,31 +69,7 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Physical Groups Section */}
-      {physicalGroups.length > 0 && (
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">{physicalSectionTitle}</h2>
-            </div>
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-              {physicalGroups.length}
-            </Badge>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {physicalGroups.map((group) => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                showJoinButton={true}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Social Groups Section */}
+      {/* Social Groups Section - Only social groups are shown in Groups tab */}
       {socialGroups.length > 0 && (
         <div>
           <div className="flex items-center gap-3 mb-4">

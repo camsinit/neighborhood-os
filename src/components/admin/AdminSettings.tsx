@@ -118,6 +118,11 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         const addedUnits = newUnits.filter(unit => 
           unit.trim() !== '' && !currentUnits.includes(unit)
         );
+
+        // Invalidate cache for physicalUnitsWithResidents to refresh Streets view
+        queryClient.invalidateQueries({ 
+          queryKey: ['physicalUnitsWithResidents', currentNeighborhood.id] 
+        });
         
         // Only create physical groups for newly added units
         if (addedUnits.length > 0) {

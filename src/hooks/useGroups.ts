@@ -262,7 +262,10 @@ export const usePhysicalUnitsWithResidents = () => {
       }
     },
     enabled: !!neighborhood?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always consider data stale to ensure fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 };
 
