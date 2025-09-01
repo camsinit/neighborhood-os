@@ -231,13 +231,21 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       });
       
       // Initialize physical units configuration
+      logger.info('Loading physical units config from neighborhood', {
+        neighborhoodId: neighborhood.id,
+        physicalUnitType: neighborhood.physical_unit_type,
+        physicalUnitLabel: neighborhood.physical_unit_label,
+        physicalUnits: neighborhood.physical_units,
+        physicalUnitsLength: neighborhood.physical_units?.length || 0
+      });
+      
       setPhysicalUnitsConfig({
         physicalUnitType: neighborhood.physical_unit_type || 'street',
         physicalUnitLabel: neighborhood.physical_unit_label || '',
-        physicalUnits: neighborhood.physical_units || []
+        physicalUnits: Array.isArray(neighborhood.physical_units) ? neighborhood.physical_units : []
       });
     }
-  }, [currentNeighborhood]);
+  }, [currentNeighborhood, logger]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
