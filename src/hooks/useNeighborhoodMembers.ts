@@ -31,6 +31,7 @@ export interface NeighborhoodMember {
   needs_visible: boolean;
   joined_at: string;
   neighborhood_role: 'admin' | 'steward' | 'neighbor';
+  physical_unit_value?: string | null; // Physical unit assignment (street, floor, etc.)
 }
 
 export function useNeighborhoodMembers() {
@@ -46,10 +47,10 @@ export function useNeighborhoodMembers() {
       }
 
       try {
-        // Get all neighborhood members
+        // Get all neighborhood members including physical unit assignments
         const { data: members, error: membersError } = await supabase
           .from('neighborhood_members')
-          .select('user_id, joined_at')
+          .select('user_id, joined_at, physical_unit_value')
           .eq('neighborhood_id', currentNeighborhood.id)
           .eq('status', 'active');
 
@@ -133,7 +134,8 @@ export function useNeighborhoodMembers() {
             access_needs: profile?.access_needs || null,
             bio: profile?.bio || null,
             joined_at: member.joined_at,
-            neighborhood_role: role
+            neighborhood_role: role,
+            physical_unit_value: member.physical_unit_value || null
           };
         });
 

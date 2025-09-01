@@ -13,24 +13,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNeighborhoodMembers } from '@/hooks/useNeighborhoodMembers';
 import { useIsNeighborhoodAdmin } from '@/hooks/useIsNeighborhoodAdmin';
 import { useNeighborhood } from '@/contexts/NeighborhoodContext';
+import { useNeighborhoodPhysicalConfig } from '@/hooks/useGroups';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Download, UserPlus, UserMinus, Eye, Mail, Phone, MapPin, Heart } from 'lucide-react';
+import { Download, UserPlus, UserMinus, Eye, Mail, Phone, MapPin, Heart, Home } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createLogger } from '@/utils/logger';
 
 const AdminMembers = () => {
   const logger = createLogger('AdminMembers');
   const { data: members, isLoading } = useNeighborhoodMembers();
+  const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
   const { isAdmin } = useIsNeighborhoodAdmin();
   const { currentNeighborhood } = useNeighborhood();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [editingPhysicalUnit, setEditingPhysicalUnit] = useState<string | null>(null);
 
   // Get member initials for avatar fallback
   const getInitials = (name: string | null) => {
@@ -135,6 +139,36 @@ const AdminMembers = () => {
       toast({
         title: "Error",
         description: `Failed to remove ${userName}: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle physical unit assignment update
+  const handleUpdatePhysicalUnit = async (userId: string, userName: string, newPhysicalUnit: string | null) => {
+    try {
+      const { error } = await supabase
+        .from('neighborhood_members')
+        .update({ physical_unit_value: newPhysicalUnit })
+        .eq('user_id', userId)
+        .eq('neighborhood_id', currentNeighborhood?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Physical Unit Updated",
+        description: `${userName}'s ${physicalConfig?.physical_unit_label?.toLowerCase() || 'physical unit'} assignment has been updated.`,
+      });
+
+      // Reset editing state and refresh data
+      setEditingPhysicalUnit(null);
+      queryClient.invalidateQueries({ queryKey: ['neighborhood-members'] });
+      queryClient.invalidateQueries({ queryKey: ['physicalUnitsWithResidents'] });
+    } catch (error: any) {
+      logger.error('Error updating physical unit', error);
+      toast({
+        title: "Error",
+        description: `Failed to update ${userName}'s assignment: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -249,6 +283,64 @@ const AdminMembers = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Physical Unit Assignment - Only show if admin and physical units are configured */}
+                    {isAdmin && physicalConfig?.physical_units && physicalConfig.physical_units.length > 0 && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Home className="h-3 w-3 text-blue-500" />
+                        {editingPhysicalUnit === member.user_id ? (
+                          <div className="flex items-center gap-2">
+                            <Select
+                              value={member.physical_unit_value || ''}
+                              onValueChange={(value) => handleUpdatePhysicalUnit(
+                                member.user_id, 
+                                member.display_name || 'Unknown',
+                                value === '' ? null : value
+                              )}
+                            >
+                              <SelectTrigger className="w-40 h-6 text-xs">
+                                <SelectValue placeholder={`Select ${physicalConfig.physical_unit_label?.toLowerCase()}`} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">
+                                  No {physicalConfig.physical_unit_label?.toLowerCase()}
+                                </SelectItem>
+                                {physicalConfig.physical_units.map((unit) => (
+                                  <SelectItem key={unit} value={unit}>
+                                    {unit}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => setEditingPhysicalUnit(null)}
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => setEditingPhysicalUnit(member.user_id)}
+                          >
+                            {member.physical_unit_value ? (
+                              <span className="text-blue-600 font-medium">
+                                {member.physical_unit_value}
+                              </span>
+                            ) : (
+                              <span className="text-gray-500">
+                                Assign {physicalConfig.physical_unit_label?.toLowerCase()}
+                              </span>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     
                     <p className="text-xs text-muted-foreground">
                       Joined {new Date(member.joined_at).toLocaleDateString()}
