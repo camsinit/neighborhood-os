@@ -258,12 +258,6 @@ const AdminMembers = () => {
                     
                     {/* Contact Info (respecting privacy settings) */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {member.email_visible && (
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          <span>Email visible</span>
-                        </div>
-                      )}
                       {member.phone_visible && member.phone_number && (
                         <div className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />
