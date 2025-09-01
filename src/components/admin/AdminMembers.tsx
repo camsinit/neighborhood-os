@@ -285,18 +285,18 @@ const AdminMembers = () => {
                         {editingPhysicalUnit === member.user_id ? (
                           <div className="flex items-center gap-2">
                             <Select
-                              value={member.physical_unit_value || ''}
+                              value={member.physical_unit_value || '__none__'}
                               onValueChange={(value) => handleUpdatePhysicalUnit(
                                 member.user_id, 
                                 member.display_name || 'Unknown',
-                                value === '' ? null : value
+                                value === '__none__' ? null : value
                               )}
                             >
                               <SelectTrigger className="w-40 h-6 text-xs">
                                 <SelectValue placeholder={`Select ${physicalConfig.physical_unit_label?.toLowerCase()}`} />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="">
+                              <SelectContent className="z-50 bg-background border border-border shadow-md">
+                                <SelectItem value="__none__">
                                   No {physicalConfig.physical_unit_label?.toLowerCase()}
                                 </SelectItem>
                                 {physicalConfig.physical_units.map((unit) => (
