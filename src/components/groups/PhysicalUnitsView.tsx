@@ -40,7 +40,7 @@ export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
   }
 
   // No physical units configured
-  if (!physicalConfig || unitsWithResidents.length === 0) {
+  if (!physicalConfig || !physicalConfig.physical_units || physicalConfig.physical_units.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-gray-500">
         <Home className="h-12 w-12 mb-4 text-gray-300" />

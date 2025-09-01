@@ -197,6 +197,11 @@ export const usePhysicalUnitsWithResidents = () => {
         // Get neighborhood config first
         const config = await groupService.getNeighborhoodPhysicalConfig(neighborhood.id);
         
+        logger.info('Physical units config loaded', { 
+          config, 
+          physicalUnitsCount: config.physical_units?.length || 0 
+        });
+
         // Get all neighborhood members with their physical unit assignments
         const { data: membersWithUnits, error } = await supabase
           .from('neighborhood_members')
@@ -217,6 +222,14 @@ export const usePhysicalUnitsWithResidents = () => {
           return [];
         }
 
+        logger.info('Members with units loaded', { 
+          membersCount: membersWithUnits?.length || 0,
+          membersWithUnits: membersWithUnits?.map(m => ({ 
+            userId: m.user_id, 
+            physicalUnit: m.physical_unit_value 
+          }))
+        });
+
         // Group residents by physical unit
         const unitResidentsMap = new Map<string, any[]>();
         membersWithUnits?.forEach(member => {
@@ -234,6 +247,13 @@ export const usePhysicalUnitsWithResidents = () => {
           residents: unitResidentsMap.get(unit) || [],
           resident_count: unitResidentsMap.get(unit)?.length || 0
         }));
+
+        logger.info('Final units with residents', { 
+          unitsWithResidents: unitsWithResidents.map(u => ({
+            unitName: u.unit_name,
+            residentCount: u.resident_count
+          }))
+        });
 
         return unitsWithResidents;
       } catch (error) {
