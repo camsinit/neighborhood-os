@@ -342,6 +342,94 @@ export type Database = {
           },
         ]
       }
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          invited_by: string | null
+          joined_at: string
+          role: Database["public"]["Enums"]["group_member_role"]
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: Database["public"]["Enums"]["group_member_role"]
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string
+          role?: Database["public"]["Enums"]["group_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          group_type: Database["public"]["Enums"]["group_type"]
+          id: string
+          is_private: boolean
+          max_members: number
+          name: string
+          neighborhood_id: string
+          physical_unit_value: string | null
+          status: Database["public"]["Enums"]["group_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          group_type: Database["public"]["Enums"]["group_type"]
+          id?: string
+          is_private?: boolean
+          max_members?: number
+          name: string
+          neighborhood_id: string
+          physical_unit_value?: string | null
+          status?: Database["public"]["Enums"]["group_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          group_type?: Database["public"]["Enums"]["group_type"]
+          id?: string
+          is_private?: boolean
+          max_members?: number
+          name?: string
+          neighborhood_id?: string
+          physical_unit_value?: string | null
+          status?: Database["public"]["Enums"]["group_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_neighborhood_id_fkey"
+            columns: ["neighborhood_id"]
+            isOneToOne: false
+            referencedRelation: "neighborhoods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           accepted_at: string | null
@@ -1458,6 +1546,9 @@ export type Database = {
         | "care_requested"
         | "safety_update"
         | "neighbor_joined"
+      group_member_role: "owner" | "moderator" | "member"
+      group_status: "active" | "archived" | "suspended"
+      group_type: "physical" | "social"
       invitation_status: "pending" | "accepted" | "expired" | "deleted"
       notification_action_type:
         | "rsvp"
@@ -1622,6 +1713,9 @@ export const Constants = {
         "safety_update",
         "neighbor_joined",
       ],
+      group_member_role: ["owner", "moderator", "member"],
+      group_status: ["active", "archived", "suspended"],
+      group_type: ["physical", "social"],
       invitation_status: ["pending", "accepted", "expired", "deleted"],
       notification_action_type: [
         "rsvp",

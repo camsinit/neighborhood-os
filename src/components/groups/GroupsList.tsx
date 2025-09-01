@@ -21,6 +21,7 @@ export const GroupsList: React.FC<GroupsListProps> = ({ onAddGroup }) => {
         groups={[]}
         isLoading={false}
         searchQuery=""
+        onCreateGroup={onAddGroup || (() => {})}
       />
     </div>
   );

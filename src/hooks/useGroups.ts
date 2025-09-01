@@ -106,8 +106,8 @@ export const useGroups = (options: GetGroupsOptions = {}) => {
             queryKey: groupQueryKeys.neighborhoods(neighborhood.id)
           });
           
-          if (payload.new?.group_id || payload.old?.group_id) {
-            const groupId = payload.new?.group_id || payload.old?.group_id;
+          if ((payload.new as any)?.group_id || (payload.old as any)?.group_id) {
+            const groupId = (payload.new as any)?.group_id || (payload.old as any)?.group_id;
             queryClient.invalidateQueries({
               queryKey: groupQueryKeys.members(groupId)
             });

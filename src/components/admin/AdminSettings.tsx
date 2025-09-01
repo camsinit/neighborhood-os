@@ -177,7 +177,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
     // Trigger auto-save for this field
-    debouncedAutoSave(field, value);
+    debouncedAutoSave(field, typeof value === 'string' ? value : value.join(','));
   };
 
   const addPhysicalUnit = () => {
@@ -199,7 +199,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     const newUnits = physicalUnitsConfig.physicalUnits.filter((_, i) => i !== index);
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    debouncedAutoSave('physicalUnits', newUnits);
+    debouncedAutoSave('physicalUnits', JSON.stringify(newUnits));
   };
 
   const updatePhysicalUnit = (index: number, value: string) => {
@@ -207,7 +207,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     const newUnits = [...physicalUnitsConfig.physicalUnits];
     newUnits[index] = value;
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    debouncedAutoSave('physicalUnits', newUnits);
+    debouncedAutoSave('physicalUnits', JSON.stringify(newUnits));
   };
 
   const handleEditUnit = (index: number) => {
