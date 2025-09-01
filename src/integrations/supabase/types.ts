@@ -1457,6 +1457,14 @@ export type Database = {
         Args: { neighborhood_uuid: string; user_uuid: string }
         Returns: boolean
       }
+      is_group_manager: {
+        Args: { group_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { group_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
       is_super_admin: {
         Args: { user_uuid: string }
         Returns: boolean
