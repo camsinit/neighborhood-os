@@ -137,10 +137,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               </div>
 
               {/* Created Date */}
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>Created {formatDate(group.created_at)}</span>
-              </div>
+              <Calendar className="h-3 w-3" />
+              <span>Created {formatDate(group.created_at)}</span>
             </div>
           </div>
 
