@@ -24,6 +24,7 @@ import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, L
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useCreateGroup } from '@/hooks/useGroups';
 import { createLogger } from '@/utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -39,6 +40,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const { toast } = useToast();
   const logger = createLogger('AdminSettings');
   const navigate = useNavigate();
+  const createGroupMutation = useCreateGroup();
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -97,17 +99,59 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         return;
       }
       
-      // Update the specific field in the database
-      const updateData: Record<string, any> = {
-        [dbField]: value || null
-      };
-      
-      const { error } = await supabase
-        .from('neighborhoods')
-        .update(updateData)
-        .eq('id', currentNeighborhood.id);
+      // Handle physical units separately to create groups
+      if (fieldName === 'physicalUnits' && typeof value === 'string') {
+        const newUnits = JSON.parse(value) as string[];
+        const currentUnits = (currentNeighborhood as any).physical_units || [];
+        
+        // Update the physical units in the database first
+        const { error } = await supabase
+          .from('neighborhoods')
+          .update({ [dbField]: newUnits })
+          .eq('id', currentNeighborhood.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        
+        // Find newly added units (units that exist in newUnits but not in currentUnits)
+        const addedUnits = newUnits.filter(unit => 
+          unit.trim() !== '' && !currentUnits.includes(unit)
+        );
+        
+        // Automatically create physical groups for new units
+        for (const unitName of addedUnits) {
+          try {
+            await createGroupMutation.mutateAsync({
+              name: `${unitName} Group`,
+              description: `Residents of ${unitName}`,
+              group_type: 'physical',
+              physical_unit_value: unitName,
+              is_private: false,
+              max_members: 100
+            });
+            
+            logger.info('Auto-created physical group', { unitName, neighborhoodId: currentNeighborhood.id });
+          } catch (groupError) {
+            logger.warn('Failed to auto-create group for physical unit', { 
+              unitName, 
+              error: groupError,
+              neighborhoodId: currentNeighborhood.id 
+            });
+            // Don't fail the entire operation if group creation fails
+          }
+        }
+      } else {
+        // Update other fields normally
+        const updateData: Record<string, any> = {
+          [dbField]: value || null
+        };
+        
+        const { error } = await supabase
+          .from('neighborhoods')
+          .update(updateData)
+          .eq('id', currentNeighborhood.id);
+
+        if (error) throw error;
+      }
 
       // Note: Not calling refreshNeighborhoodData() to avoid triggering unwanted neighborhood switching for super admins
       
@@ -124,7 +168,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         variant: "destructive",
       });
     }
-  }, [isReadOnly, currentNeighborhood, refreshNeighborhoodData, toast]);
+  }, [isReadOnly, currentNeighborhood, createGroupMutation, logger, toast]);
 
   // Simple debounce implementation
   const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
