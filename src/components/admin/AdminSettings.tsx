@@ -24,9 +24,10 @@ import { AlertTriangle, Settings, Shield, Trash2, UserCheck, Upload, X, Check, L
 import { useNeighborhood } from '@/contexts/neighborhood';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useCreateGroup } from '@/hooks/useGroups';
+import { useCreateGroup, groupQueryKeys } from '@/hooks/useGroups';
 import { createLogger } from '@/utils/logger';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 import type { Tables } from '@/integrations/supabase/types';
@@ -41,6 +42,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const logger = createLogger('AdminSettings');
   const navigate = useNavigate();
   const createGroupMutation = useCreateGroup();
+  const queryClient = useQueryClient();
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -139,6 +141,14 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             // Don't fail the entire operation if group creation fails
           }
         }
+        
+        // Invalidate groups cache to refresh physical units data in Groups page
+        queryClient.invalidateQueries({
+          queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id)
+        });
+        queryClient.invalidateQueries({
+          queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
+        });
       } else {
         // Update other fields normally
         const updateData: Record<string, any> = {
@@ -151,6 +161,16 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           .eq('id', currentNeighborhood.id);
 
         if (error) throw error;
+        
+        // If updating physical unit type or label, invalidate groups cache
+        if (fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
+          queryClient.invalidateQueries({
+            queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id)
+          });
+          queryClient.invalidateQueries({
+            queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
+          });
+        }
       }
 
       // Note: Not calling refreshNeighborhoodData() to avoid triggering unwanted neighborhood switching for super admins
