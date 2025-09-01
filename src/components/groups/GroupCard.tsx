@@ -136,9 +136,13 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                 <span>{group.member_count || 0} members</span>
               </div>
 
-              {/* Created Date */}
-              <Calendar className="h-3 w-3" />
-              <span>Created {formatDate(group.created_at)}</span>
+              {/* Created Date - Only show for Physical Groups */}
+              {group.group_type === 'physical' && (
+                <>
+                  <Calendar className="h-3 w-3" />
+                  <span>Created {formatDate(group.created_at)}</span>
+                </>
+              )}
             </div>
           </div>
 
