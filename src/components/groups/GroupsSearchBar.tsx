@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface GroupsSearchBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  onCreateGroup: () => void;
+  onCreateGroup: (templateData?: { name: string; description: string }) => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
@@ -33,7 +33,7 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
           <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           <Input 
             type="text" 
-            placeholder="Search..." 
+            placeholder={activeTab === 'groups' ? 'Search groups...' : 'Search neighbors...'} 
             value={searchQuery} 
             onChange={e => onSearchChange(e.target.value)} 
             className="pl-10" 
@@ -49,7 +49,7 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
             </TabsTrigger>
             <TabsTrigger value="directory" className="flex items-center gap-1.5">
               <Users className="h-4 w-4" />
-              Directory
+              Neighbors
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -57,7 +57,7 @@ export const GroupsSearchBar: React.FC<GroupsSearchBarProps> = ({
       
       {/* Create group button with purple theme matching neighbors color */}
       <Button 
-        onClick={onCreateGroup} 
+        onClick={() => onCreateGroup()} 
         className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1.5"
       >
         <UsersRound className="h-4 w-4" />

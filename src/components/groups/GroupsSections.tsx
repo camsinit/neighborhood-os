@@ -10,6 +10,7 @@ interface GroupsSectionsProps {
   groups: Group[];
   isLoading: boolean;
   searchQuery: string;
+  onCreateGroup: (templateData?: { name: string; description: string }) => void;
 }
 
 /**
@@ -21,7 +22,8 @@ interface GroupsSectionsProps {
 export const GroupsSections: React.FC<GroupsSectionsProps> = ({
   groups,
   isLoading,
-  searchQuery
+  searchQuery,
+  onCreateGroup
 }) => {
   const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
 
@@ -63,7 +65,7 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
       );
     }
     
-    return <GroupsEmptyState onCreateGroup={() => {}} />;
+    return <GroupsEmptyState onCreateGroup={onCreateGroup} />;
   }
 
   return (

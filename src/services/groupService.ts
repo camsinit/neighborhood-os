@@ -47,10 +47,9 @@ export class GroupService {
       .from('groups')
       .select(`
         *,
-        created_by_profile:profiles!groups_created_by_fkey(
+        created_by_profile:profiles(
           id, display_name, avatar_url
-        ),
-        member_count:group_members(count)
+        )
       `)
       .eq('neighborhood_id', neighborhoodId)
       .eq('status', 'active');
@@ -112,10 +111,9 @@ export class GroupService {
       .from('groups')
       .select(`
         *,
-        created_by_profile:profiles!groups_created_by_fkey(
+        created_by_profile:profiles(
           id, display_name, avatar_url
-        ),
-        member_count:group_members(count)
+        )
       `)
       .eq('id', groupId)
       .eq('status', 'active')
@@ -134,62 +132,90 @@ export class GroupService {
    * Create a new group
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
-    logger.info('Creating new group', { 
+    logger.info('=== STARTING GROUP CREATION ===', { 
       name: data.name, 
       type: data.group_type, 
-      neighborhoodId: data.neighborhood_id 
+      neighborhoodId: data.neighborhood_id,
+      createdBy: data.created_by,
+      isPrivate: data.is_private,
+      maxMembers: data.max_members,
+      physicalUnitValue: data.physical_unit_value
     });
 
-    // Validation for physical groups
-    if (data.group_type === 'physical') {
-      if (!data.physical_unit_value) {
-        throw new GroupError(
-          'Physical unit is required for physical groups', 
-          GroupErrorCodes.INVALID_PHYSICAL_UNIT
-        );
+    try {
+      // Step 1: Validate physical groups
+      logger.info('Step 1: Validating group type and physical unit');
+      if (data.group_type === 'physical') {
+        logger.info('Group is physical type, checking physical unit value');
+        if (!data.physical_unit_value) {
+          logger.error('Physical unit value is missing for physical group');
+          throw new GroupError(
+            'Physical unit is required for physical groups', 
+            GroupErrorCodes.INVALID_PHYSICAL_UNIT
+          );
+        }
+        logger.info('Physical unit value provided:', data.physical_unit_value);
+
+        // Check if physical group already exists for this unit
+        logger.info('Checking for existing physical group with same unit');
+        const { data: existingGroup, error: existingError } = await supabase
+          .from('groups')
+          .select('id, name')
+          .eq('neighborhood_id', data.neighborhood_id)
+          .eq('group_type', 'physical')
+          .eq('physical_unit_value', data.physical_unit_value)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (existingError) {
+          logger.error('Error checking for existing physical group:', existingError);
+        }
+
+        if (existingGroup) {
+          logger.error('Physical group already exists for unit:', data.physical_unit_value);
+          throw new GroupError(
+            `A physical group already exists for "${data.physical_unit_value}"`,
+            GroupErrorCodes.DUPLICATE_PHYSICAL_UNIT
+          );
+        }
+        logger.info('No existing physical group found for this unit');
+
+        // Validate that the physical unit is configured for this neighborhood
+        logger.info('Validating physical unit against neighborhood configuration');
+        await this.validatePhysicalUnit(data.neighborhood_id, data.physical_unit_value);
+        logger.info('Physical unit validation passed');
+      } else {
+        // For social groups, ensure physical_unit_value is null
+        logger.info('Group is social type, setting physical_unit_value to null');
+        data.physical_unit_value = null;
       }
 
-      // Check if physical group already exists for this unit
-      const { data: existingGroup } = await supabase
+      // Step 2: Check for duplicate group names
+      logger.info('Step 2: Checking for duplicate group names');
+      const { data: duplicateGroup, error: duplicateError } = await supabase
         .from('groups')
-        .select('id, name')
+        .select('id')
         .eq('neighborhood_id', data.neighborhood_id)
-        .eq('group_type', 'physical')
-        .eq('physical_unit_value', data.physical_unit_value)
+        .eq('name', data.name)
         .eq('status', 'active')
         .maybeSingle();
 
-      if (existingGroup) {
-        throw new GroupError(
-          `A physical group already exists for "${data.physical_unit_value}"`,
-          GroupErrorCodes.DUPLICATE_PHYSICAL_UNIT
-        );
+      if (duplicateError) {
+        logger.error('Error checking for duplicate group name:', duplicateError);
       }
 
-      // Validate that the physical unit is configured for this neighborhood
-      await this.validatePhysicalUnit(data.neighborhood_id, data.physical_unit_value);
-    }
+      if (duplicateGroup) {
+        logger.error('Duplicate group name found:', data.name);
+        throw new GroupError(
+          'A group with this name already exists in your neighborhood',
+          GroupErrorCodes.DUPLICATE_GROUP_NAME
+        );
+      }
+      logger.info('No duplicate group name found');
 
-    // Check for duplicate group names
-    const { data: duplicateGroup } = await supabase
-      .from('groups')
-      .select('id')
-      .eq('neighborhood_id', data.neighborhood_id)
-      .eq('name', data.name)
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (duplicateGroup) {
-      throw new GroupError(
-        'A group with this name already exists in your neighborhood',
-        GroupErrorCodes.DUPLICATE_GROUP_NAME
-      );
-    }
-
-    // Create the group
-    const { data: newGroup, error } = await supabase
-      .from('groups')
-      .insert({
+      // Step 3: Prepare insert data
+      logger.info('Step 3: Preparing insert data');
+      const insertData = {
         neighborhood_id: data.neighborhood_id,
         name: data.name,
         description: data.description,
@@ -198,28 +224,54 @@ export class GroupService {
         created_by: data.created_by,
         is_private: data.is_private || false,
         max_members: data.max_members || 100
-      })
-      .select(`
-        *,
-        created_by_profile:profiles!groups_created_by_fkey(
-          id, display_name, avatar_url
-        )
-      `)
-      .single();
+      };
+      logger.info('Insert data prepared:', insertData);
 
-    if (error) {
-      logger.error('Error creating group', { error, groupData: data });
-      throw new GroupError('Failed to create group', GroupErrorCodes.PERMISSION_DENIED);
+      // Step 4: Create the group
+      logger.info('Step 4: Inserting group into database');
+      const { data: newGroup, error } = await supabase
+        .from('groups')
+        .insert(insertData)
+        .select(`
+          *,
+          created_by_profile:profiles(
+            id, display_name, avatar_url
+          )
+        `)
+        .single();
+
+      if (error) {
+        logger.error('=== GROUP CREATION FAILED ===', { 
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          }, 
+          groupData: data,
+          insertData: insertData
+        });
+        throw new GroupError('Failed to create group', GroupErrorCodes.PERMISSION_DENIED);
+      }
+
+      logger.info('=== GROUP CREATION SUCCESSFUL ===', { 
+        groupId: newGroup.id, 
+        name: newGroup.name,
+        type: newGroup.group_type,
+        createdBy: newGroup.created_by,
+        createdAt: newGroup.created_at
+      });
+
+      // The database trigger will automatically add the creator as owner
+      return { ...newGroup, member_count: 1 };
+    } catch (error) {
+      logger.error('=== GROUP CREATION EXCEPTION ===', { 
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        groupData: data
+      });
+      throw error;
     }
-
-    logger.info('Successfully created group', { 
-      groupId: newGroup.id, 
-      name: newGroup.name,
-      type: newGroup.group_type 
-    });
-
-    // The database trigger will automatically add the creator as owner
-    return { ...newGroup, member_count: 1 };
   }
 
   /**
@@ -234,10 +286,9 @@ export class GroupService {
       .eq('id', groupId)
       .select(`
         *,
-        created_by_profile:profiles!groups_created_by_fkey(
+        created_by_profile:profiles(
           id, display_name, avatar_url
-        ),
-        member_count:group_members(count)
+        )
       `)
       .single();
 
@@ -281,8 +332,7 @@ export class GroupService {
         role, joined_at,
         group:groups(
           id, name, group_type, physical_unit_value, description, 
-          is_private, status, created_at,
-          member_count:group_members(count)
+          is_private, status, created_at
         )
       `)
       .eq('user_id', userId)
@@ -359,7 +409,7 @@ export class GroupService {
     // Check group capacity
     const { data: group } = await supabase
       .from('groups')
-      .select('max_members, is_private, member_count:group_members(count)')
+      .select('max_members, is_private')
       .eq('id', data.group_id)
       .single();
 
@@ -485,10 +535,7 @@ export class GroupService {
     // Get existing physical groups
     const { data: groups } = await supabase
       .from('groups')
-      .select(`
-        *,
-        member_count:group_members(count)
-      `)
+      .select('*')
       .eq('neighborhood_id', neighborhoodId)
       .eq('group_type', 'physical')
       .eq('status', 'active');
@@ -566,14 +613,27 @@ export class GroupService {
    * Validate that a physical unit is available in a neighborhood
    */
   private async validatePhysicalUnit(neighborhoodId: string, unitValue: string): Promise<void> {
+    logger.info('validatePhysicalUnit called', { neighborhoodId, unitValue });
+    
     const config = await this.getNeighborhoodPhysicalConfig(neighborhoodId);
+    logger.info('Neighborhood config retrieved', { 
+      physicalUnitType: config.physical_unit_type,
+      physicalUnitLabel: config.physical_unit_label,
+      availableUnits: config.physical_units
+    });
     
     if (!config.physical_units.includes(unitValue)) {
+      logger.error('Physical unit validation failed', {
+        requestedUnit: unitValue,
+        availableUnits: config.physical_units
+      });
       throw new GroupError(
         `Physical unit "${unitValue}" is not configured for this neighborhood. Available units: ${config.physical_units.join(', ')}`,
         GroupErrorCodes.INVALID_PHYSICAL_UNIT
       );
     }
+    
+    logger.info('Physical unit validation passed', { unitValue });
   }
 }
 

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Users, MapPin, Heart, Shield, Book, Utensils, Baby } from 'lucide-react';
 
 interface GroupsEmptyStateProps {
-  onCreateGroup: () => void;
+  onCreateGroup: (templateData?: { name: string; description: string }) => void;
 }
 
 export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGroup }) => {
@@ -31,7 +31,7 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
               key={index}
               variant="outline"
               className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-gray-50 border-gray-200"
-              onClick={onCreateGroup}
+              onClick={() => onCreateGroup({ name: template.name, description: template.description })}
             >
               <template.icon className="h-5 w-5 text-gray-600" />
               <span className="font-medium text-sm">{template.name}</span>

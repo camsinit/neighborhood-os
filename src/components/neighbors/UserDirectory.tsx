@@ -14,21 +14,21 @@ import { NeighborhoodError } from "./components/NeighborhoodError";
 import { UserError } from "./components/UserError";
 import { NoNeighborhoodState } from "./components/NoNeighborhoodState";
 import { UserGrid } from "./components/UserGrid";
-import { NeighborsHeader } from "./components/NeighborsHeader";
+
+interface UserDirectoryProps {
+  searchQuery?: string;
+}
 
 /**
  * UserDirectory Component
  * 
  * This is the main component that displays a directory of users in the neighborhood.
  * It handles loading, error states, and rendering the appropriate UI based on the data.
- * Updated to include search functionality with header and match safety updates layout.
+ * Now receives search query as a prop from the parent component.
  */
-export const UserDirectory = () => {
+export const UserDirectory: React.FC<UserDirectoryProps> = ({ searchQuery = "" }) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
-  
-  // State for search functionality
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Get neighborhood context to show appropriate messages
   const {
@@ -128,12 +128,6 @@ export const UserDirectory = () => {
   
   return (
     <div className="p-6">
-      {/* Search header */}
-      <NeighborsHeader 
-        onSearchChange={setSearchQuery}
-        totalCount={filteredUsers?.length || 0}
-      />
-
       {/* Grid of neighbor cards */}
       <UserGrid users={filteredUsers || []} onUserSelect={setSelectedUser} />
 

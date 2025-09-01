@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ModuleLayout from '@/components/layout/ModuleLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sheet } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
@@ -11,7 +11,7 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
 
 // Import groups components
 import { GroupsContainer } from '@/components/groups/GroupsContainer';
-import { CreateGroupDialog } from '@/components/groups/CreateGroupDialog';
+import { CreateGroupForm } from '@/components/groups/CreateGroupForm';
 
 /**
  * GroupsPage Component
@@ -38,12 +38,23 @@ function GroupsPage() {
     pageName: 'GroupsPage'
   });
   
-  // State for dialogs
+  // State for dialogs and sheets
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const [isCreateGroupSheetOpen, setIsCreateGroupSheetOpen] = useState(false);
+  const [groupTemplateData, setGroupTemplateData] = useState<{ name: string; description: string } | undefined>(undefined);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+  };
+
+  const handleCreateGroup = (templateData?: { name: string; description: string }) => {
+    setGroupTemplateData(templateData);
+    setIsCreateGroupSheetOpen(true);
+  };
+
+  const handleCloseCreateGroup = () => {
+    setIsCreateGroupSheetOpen(false);
+    setGroupTemplateData(undefined);
   };
   
   return (
@@ -63,7 +74,7 @@ function GroupsPage() {
         >
           <Tabs value={activeTab} onValueChange={handleTabChange}>
             <GroupsContainer 
-              onCreateGroup={() => setIsCreateGroupOpen(true)}
+              onCreateGroup={handleCreateGroup}
               activeTab={activeTab}
               onTabChange={handleTabChange}
             />
@@ -84,11 +95,22 @@ function GroupsPage() {
         onOpenChange={setIsInviteOpen}
       />
 
-      {/* Create group dialog */}
-      <CreateGroupDialog 
-        open={isCreateGroupOpen}
-        onOpenChange={setIsCreateGroupOpen}
-      />
+      {/* Create group sheet */}
+      {isCreateGroupSheetOpen && (
+        <Sheet open={isCreateGroupSheetOpen} onOpenChange={(open) => !open && handleCloseCreateGroup()}>
+          <SheetContent className="sm:max-w-md overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle className="text-xl font-bold">
+                Create New Group
+              </SheetTitle>
+            </SheetHeader>
+            <CreateGroupForm 
+              onClose={handleCloseCreateGroup}
+              initialData={groupTemplateData}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
     </>
   );
 }
