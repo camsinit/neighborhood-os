@@ -88,20 +88,11 @@ export const coreModules: ModuleDefinition[] = [
   },
   {
     id: 'goods',
-    name: 'Freebies',
+    name: 'Goods',
     description: 'Items exchange and sharing',
     themeColor: 'goods',
     path: BASE_ROUTES.goods,
     icon: 'Gift',
-    isEnabled: true
-  },
-  {
-    id: 'safety',
-    name: 'Updates',
-    description: 'Neighborhood updates and information',
-    themeColor: 'safety',
-    path: BASE_ROUTES.safety,
-    icon: 'Info', // Changed from Shield to Info
     isEnabled: true
   },
   {

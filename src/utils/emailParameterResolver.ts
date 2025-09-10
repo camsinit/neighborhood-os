@@ -253,7 +253,7 @@ export function generateEmailUrl(
       path = BASE_ROUTES.goods;
       break;
     case 'safety':
-      path = BASE_ROUTES.safety;
+      path = BASE_ROUTES.home;
       break;
     case 'neighbors':
       path = BASE_ROUTES.neighbors;
@@ -314,7 +314,7 @@ function generateContentUrl(content: ContentReference, config: EmailUrlConfig): 
       basePath = `/goods/${content.id}`;
       break;
     case 'safety_update':
-      basePath = `/safety/${content.id}`;
+      basePath = `/home?highlight=${content.id}`;
       break;
     case 'neighbor_profile':
       basePath = `/neighbors/${content.id}`;
@@ -385,9 +385,9 @@ function generateActionDescription(context: EmailContext): string {
     case 'skill_exchange':
       return `${actorName} responded to your skill post`;
     case 'safety_update':
-      return `${actorName} commented on your safety update`;
+      return `${actorName} commented on your update`;
     default:
-      return `${actorName} interacted with your ${contentType.replace('_', ' ')}`;
+      return `${actorName} interacted with your ${context.content.type.replace('_', ' ')}`;
   }
 }
 

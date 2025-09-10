@@ -253,7 +253,7 @@ const SharePage = () => {
       // Use centralized base routes to avoid hardcoded strings
       const routes = {
         events: BASE_ROUTES.calendar,
-        safety: BASE_ROUTES.safety,
+        safety: BASE_ROUTES.home,
         skills: BASE_ROUTES.skills,
         goods: BASE_ROUTES.goods
       } as const;
