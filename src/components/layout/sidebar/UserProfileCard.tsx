@@ -67,7 +67,7 @@ const UserProfileCard = () => {
   };
 
   return (
-    <div className="p-4 bg-muted/40">
+    <div className="p-4">
       <div className="flex items-center gap-3">
         {/* User Avatar - Show ghost mode indicator if in ghost mode */}
         {isGhostMode ? (

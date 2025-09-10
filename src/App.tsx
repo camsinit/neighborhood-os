@@ -16,7 +16,6 @@ import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 import SkillsPage from "./pages/SkillsPage";
 import GoodsPage from "./pages/GoodsPage";
-import SafetyPage from "./pages/SafetyPage";
 import GroupsPage from "./pages/GroupsPage";
 import ModulesPage from "./pages/ModulesPage";
 import DebugPage from "./pages/DebugPage";
@@ -140,16 +139,6 @@ const App = () => {
                     }
                   />
                   <Route
-                    path={BASE_ROUTES.safety}
-                    element={
-                      <NeighborhoodAwareProtectedRoute>
-                        <MainLayout>
-                          <SafetyPage />
-                        </MainLayout>
-                      </NeighborhoodAwareProtectedRoute>
-                    }
-                  />
-                  <Route
                     path={BASE_ROUTES.neighbors}
                     element={
                       <NeighborhoodAwareProtectedRoute>
@@ -187,16 +176,6 @@ const App = () => {
                       <NeighborhoodAwareProtectedRoute>
                         <MainLayout>
                           <GoodsPage />
-                        </MainLayout>
-                      </NeighborhoodAwareProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/n/:neighborhoodId/safety"
-                    element={
-                      <NeighborhoodAwareProtectedRoute>
-                        <MainLayout>
-                          <SafetyPage />
                         </MainLayout>
                       </NeighborhoodAwareProtectedRoute>
                     }
