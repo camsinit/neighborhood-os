@@ -90,6 +90,65 @@ export async function createTemplatedNotification(params: TemplatedNotificationP
 }
 
 /**
+ * Creates a group event notification for all group members
+ */
+export async function createGroupEventNotification(
+  groupId: string,
+  creatorId: string,
+  eventId: string,
+  eventTitle: string,
+  creatorName: string
+): Promise<string | null> {
+  try {
+    logger.debug('Creating group event notifications for group:', groupId);
+    
+    // Get all group members except the creator
+    const { data: groupMembers, error } = await supabase
+      .from('group_members')
+      .select('user_id')
+      .eq('group_id', groupId)
+      .neq('user_id', creatorId);
+    
+    if (error) {
+      logger.error('Error fetching group members:', error);
+      return null;
+    }
+    
+    if (!groupMembers || groupMembers.length === 0) {
+      logger.debug('No group members to notify');
+      return null;
+    }
+    
+    // Create notifications for all group members
+    const notifications = groupMembers.map(member =>
+      createTemplatedNotification({
+        templateId: 'group_event_created',
+        recipientUserId: member.user_id,
+        actorUserId: creatorId,
+        contentId: eventId,
+        variables: {
+          actor: creatorName,
+          title: eventTitle
+        },
+        metadata: {
+          groupId,
+          eventId,
+          creatorId
+        }
+      })
+    );
+    
+    await Promise.all(notifications);
+    logger.debug(`Created ${notifications.length} group event notifications`);
+    
+    return eventId;
+  } catch (error) {
+    logger.error('Error creating group event notifications:', error);
+    return null;
+  }
+}
+
+/**
  * Helper function to create an event RSVP notification
  */
 export async function createEventRSVPNotification(

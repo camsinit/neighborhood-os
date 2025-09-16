@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { unifiedEvents } from '@/utils/unifiedEventSystem';
 import { createLogger } from '@/utils/logger';
+import { createGroupEventNotification } from '@/utils/notifications/templatedNotificationService';
 
 // Create a dedicated logger for this hook
 const logger = createLogger('useEventSubmit');
@@ -113,6 +114,27 @@ export const useEventSubmit = ({ onSuccess }: EventSubmitProps) => {
         eventId: data?.[0]?.id,
         timestamp: new Date().toISOString()
       });
+      
+      // If this is a group event, send notifications to group members
+      if (formData.groupId && data?.[0]?.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+        
+        const creatorName = profile?.display_name || 'A neighbor';
+        
+        await createGroupEventNotification(
+          formData.groupId,
+          user.id,
+          data[0].id,
+          formData.title,
+          creatorName
+        );
+        
+        logger.info("Group event notifications sent");
+      }
       
       // Force refresh of activities query to immediately show the new activity
       queryClient.invalidateQueries({ queryKey: ["activities", neighborhood.id] });

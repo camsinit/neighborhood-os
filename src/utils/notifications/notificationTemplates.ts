@@ -48,6 +48,17 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone creates a new event in your neighborhood'
   },
 
+  group_event_created: {
+    id: 'group_event_created',
+    template: '{{actor}} created a new group event: {{title}}',
+    contentType: 'events',
+    notificationType: 'event',
+    actionType: 'view',
+    actionLabel: 'View Event',
+    relevanceScore: 3, // High - group member notification
+    description: 'When someone creates a new event for your group'
+  },
+
   // Skills Module  
   skill_session_request: {
     id: 'skill_session_request',
