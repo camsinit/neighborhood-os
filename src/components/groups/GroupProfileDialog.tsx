@@ -50,6 +50,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
   // Group action hooks
   const joinGroupMutation = useJoinGroup();
   const leaveGroupMutation = useLeaveGroup();
+  const queryClient = useQueryClient();
 
   // Get current user on mount
   useEffect(() => {
@@ -301,7 +302,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
         onAddEvent={() => {
           setIsCreateEventOpen(false);
           // Refresh the group activities after event creation
-          // queryClient.invalidateQueries({ queryKey: ['activities'] });
+          queryClient.invalidateQueries({ queryKey: ['activities'] });
         }}
         initialDate={null}
         // Pre-populate with group information
