@@ -42,7 +42,13 @@ export interface Event {
   recurrence_end_date?: string;
   created_at: string;
   neighborhood_id: string; // Add neighborhood_id field which is required for activities
+  group_id?: string; // Optional group ID for group events
   profiles?: Profile; // Profile of the host
+  group?: {
+    id: string;
+    name: string;
+    group_type: string;
+  }; // Optional group information for group events
   metadata?: {
     isRecurringInstance?: boolean;
     originalEventId?: string;

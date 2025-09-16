@@ -22,6 +22,7 @@ import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups'
 import { useActivities } from '@/hooks/useActivities';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
 
 interface GroupProfileDialogProps {
@@ -299,7 +300,13 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
         onOpenChange={setIsCreateEventOpen}
         onAddEvent={() => {
           setIsCreateEventOpen(false);
-          // TODO: Pre-populate with group information
+          // Refresh the group activities after event creation
+          // queryClient.invalidateQueries({ queryKey: ['activities'] });
+        }}
+        initialDate={null}
+        // Pre-populate with group information
+        initialValues={{
+          groupId: group.id
         }}
       />
 

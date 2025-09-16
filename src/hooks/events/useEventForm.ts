@@ -15,6 +15,7 @@ export interface EventFormValues {
   isRecurring?: boolean;
   recurrencePattern?: string;
   recurrenceEndDate?: string;
+  groupId?: string;
 }
 
 /**
@@ -27,6 +28,7 @@ interface UseEventFormProps {
   eventId?: string;
   mode?: 'create' | 'edit';
   neighborhoodTimezone?: string; // Add timezone parameter
+  selectedGroupId?: string; // Pre-selected group for group events
 }
 
 /**
@@ -44,7 +46,8 @@ export const useEventForm = ({
   onAddEvent,
   eventId,
   mode = 'create',
-  neighborhoodTimezone = 'America/Los_Angeles' // Default timezone
+  neighborhoodTimezone = 'America/Los_Angeles', // Default timezone
+  selectedGroupId
 }: UseEventFormProps) => {
   // Initialize form state from initial values or defaults
   const [title, setTitle] = useState(initialValues.title || "");
@@ -52,6 +55,7 @@ export const useEventForm = ({
   const [date, setDate] = useState(initialValues.date || "");
   const [time, setTime] = useState(initialValues.time || "");
   const [location, setLocation] = useState(initialValues.location || "");
+  const [groupId, setGroupId] = useState(selectedGroupId || initialValues.groupId || "");
   
   // UI-ONLY FIELDS - these are for the UI but not stored in the database yet
   const [isRecurring, setIsRecurring] = useState(initialValues.isRecurring || false);
@@ -101,6 +105,7 @@ export const useEventForm = ({
       date,
       time,
       location,
+      groupId: groupId || undefined, // Include group ID if selected
       
       // UI-ONLY FIELDS - these won't be stored in the database
       // but are included here for future functionality
@@ -139,6 +144,10 @@ export const useEventForm = ({
     setTime,
     location,
     setLocation,
+    
+    // Group selection
+    groupId,
+    setGroupId,
     
     // Recurrence fields
     isRecurring,

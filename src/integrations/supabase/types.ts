@@ -200,6 +200,7 @@ export type Database = {
           created_at: string
           description: string | null
           event_id: string | null
+          group_id: string | null
           host_id: string
           id: string
           is_archived: boolean | null
@@ -216,6 +217,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           event_id?: string | null
+          group_id?: string | null
           host_id: string
           id?: string
           is_archived?: boolean | null
@@ -232,6 +234,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           event_id?: string | null
+          group_id?: string | null
           host_id?: string
           id?: string
           is_archived?: boolean | null
@@ -245,6 +248,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "events_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_host_id_fkey"
             columns: ["host_id"]

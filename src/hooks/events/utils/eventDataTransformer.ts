@@ -30,6 +30,7 @@ export const transformEventFormData = (
     location: formData.location,
     host_id: userId,
     neighborhood_id: neighborhoodId,
+    group_id: formData.groupId || null, // Include group_id if provided
     // Use the properly combined date and time
     time: dateTimeStr,
     // Include recurring event fields with proper validation
@@ -63,6 +64,7 @@ export const transformEventUpdateData = (
     title: formData.title,
     description: formData.description || '', // Ensure description is never null
     location: formData.location,
+    group_id: formData.groupId !== undefined ? (formData.groupId || null) : undefined, // Include group_id if provided in update
     // Use the properly combined date and time
     time: dateTimeStr,
     // Include recurring event fields with proper validation  

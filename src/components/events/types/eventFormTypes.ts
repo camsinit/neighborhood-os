@@ -11,6 +11,7 @@ export interface EventFormValues {
   isRecurring?: boolean;
   recurrencePattern?: string;
   recurrenceEndDate?: string;
+  groupId?: string; // Optional group ID for group events
 }
 
 /**
@@ -25,4 +26,5 @@ export interface EventFormProps {
   mode?: 'create' | 'edit';
   deleteButton?: React.ReactNode;
   neighborhoodTimezone?: string; // Added timezone prop
+  selectedGroupId?: string; // Pre-selected group for group events
 }

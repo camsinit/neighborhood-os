@@ -12,6 +12,11 @@ interface AddEventDialogProps {
   onOpenChange: (open: boolean) => void;
   onAddEvent: (event: any) => void;
   initialDate?: Date | null;
+  initialValues?: {
+    groupId?: string;
+    date?: string;
+    time?: string;
+  };
 }
 
 /**
@@ -23,7 +28,7 @@ interface AddEventDialogProps {
 // Create a module-scoped logger instance for controlled logging
 const logger = createLogger('AddEventDialog');
 
-const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEventDialogProps) => {
+const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate, initialValues = {} }: AddEventDialogProps) => {
   // Get the current neighborhood
   const { currentNeighborhood } = useNeighborhood();
   
@@ -71,7 +76,8 @@ const AddEventDialog = ({ open, onOpenChange, onAddEvent, initialDate }: AddEven
         onAddEvent={onAddEvent}
         initialValues={{
           date: formattedDate,
-          time: formattedTime
+          time: formattedTime,
+          ...initialValues // Merge in any additional initial values (like groupId)
         }}
         neighborhoodTimezone={neighborhoodTimezone}
       />

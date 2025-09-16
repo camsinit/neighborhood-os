@@ -1,6 +1,7 @@
 
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { Pencil, Clock, Users } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import EditEventDialog from "./event/EditEventDialog";
@@ -159,6 +160,19 @@ const EventCard = ({
       {isHost && isHovering}
       
       <div className="font-medium line-clamp-2">{event.title}</div>
+      
+      {/* Show group indicator if this is a group event */}
+      {event.group && (
+        <div className="mt-1">
+          <Badge 
+            variant="secondary" 
+            className="text-xs px-1 py-0 h-4 bg-purple-100 text-purple-700 border-purple-200"
+          >
+            {event.group.name}
+          </Badge>
+        </div>
+      )}
+      
       {rsvpCount > 0 && <div className="flex items-center gap-1 text-gray-600 mt-1">
           <Users className="h-3 w-3" />
           <span>{rsvpCount}</span>

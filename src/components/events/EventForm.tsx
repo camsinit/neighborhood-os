@@ -32,6 +32,8 @@ const EventForm = ({
     setTime,
     location,
     setLocation,
+    groupId,
+    setGroupId,
     isRecurring,
     setIsRecurring,
     recurrencePattern,
@@ -46,7 +48,8 @@ const EventForm = ({
     onAddEvent,
     eventId,
     mode,
-    neighborhoodTimezone // Pass the neighborhood timezone to the event form hook
+    neighborhoodTimezone, // Pass the neighborhood timezone to the event form hook
+    selectedGroupId: initialValues?.groupId // Pass pre-selected group if any
   });
 
   return (
@@ -63,6 +66,8 @@ const EventForm = ({
         setTime={setTime}
         location={location}
         setLocation={setLocation}
+        selectedGroupId={groupId}
+        onGroupChange={setGroupId}
       />
       
       {/* Recurrence Fields Component */}

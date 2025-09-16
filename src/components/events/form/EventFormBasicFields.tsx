@@ -2,6 +2,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import EventFormGroupField from "./EventFormGroupField";
 
 /**
  * Props for the EventFormBasicFields component
@@ -17,6 +18,8 @@ interface EventFormBasicFieldsProps {
   setDate: (date: string) => void;
   time: string;
   setTime: (time: string) => void;
+  selectedGroupId?: string;
+  onGroupChange: (groupId: string | undefined) => void;
 }
 
 /**
@@ -35,7 +38,9 @@ const EventFormBasicFields = ({
   date,
   setDate,
   time,
-  setTime
+  setTime,
+  selectedGroupId,
+  onGroupChange
 }: EventFormBasicFieldsProps) => {
   return (
     <>
@@ -99,6 +104,12 @@ const EventFormBasicFields = ({
           placeholder="Where will this event take place?"
         />
       </div>
+
+      {/* Group Selection */}
+      <EventFormGroupField
+        selectedGroupId={selectedGroupId}
+        onGroupChange={onGroupChange}
+      />
     </>
   );
 };
