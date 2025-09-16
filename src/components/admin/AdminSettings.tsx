@@ -78,6 +78,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const autoSave = useCallback(async (fieldName: string, value: string | boolean) => {
     if (isReadOnly || !currentNeighborhood) return;
     
+    setIsAutoSaving(true);
     setSaveStatus('saving');
     
     try {
@@ -187,7 +188,11 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         }
       }
 
-      // Note: Not calling refreshNeighborhoodData() to avoid triggering unwanted neighborhood switching for super admins
+      // Refresh neighborhood data immediately for physical unit type/label changes to show saved values
+      if (fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
+        console.log('[AdminSettings] Refreshing neighborhood data after physical unit save:', fieldName);
+        refreshNeighborhoodData();
+      }
       
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
@@ -204,6 +209,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
           variant: "destructive",
         });
       }
+    } finally {
+      setIsAutoSaving(false);
     }
   }, [isReadOnly, currentNeighborhood, createGroupMutation, logger, toast]);
 
@@ -222,9 +229,12 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     }, 1000);
   }, [autoSave]);
 
+  // Track if we're currently auto-saving to prevent state resets
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+
   // Initialize form data when neighborhood data loads
   useEffect(() => {
-    if (currentNeighborhood) {
+    if (currentNeighborhood && !isAutoSaving) {
       const neighborhood = currentNeighborhood as any; // Cast to access database properties
       setFormData({
         name: neighborhood.name || '',
@@ -253,7 +263,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         physicalUnits: Array.isArray(neighborhood.physical_units) ? neighborhood.physical_units : []
       });
     }
-  }, [currentNeighborhood, logger]);
+  }, [currentNeighborhood, logger, isAutoSaving]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
@@ -264,6 +274,16 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
   const handlePhysicalUnitsChange = (field: string, value: string | string[]) => {
     if (isReadOnly) return;
+    
+    // Debug logging for physical unit type changes
+    if (field === 'physicalUnitType') {
+      console.log('[AdminSettings] Physical unit type changed:', { 
+        from: physicalUnitsConfig.physicalUnitType, 
+        to: value,
+        neighborhoodId: currentNeighborhood?.id 
+      });
+    }
+    
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
     // Trigger auto-save for this field
     debouncedAutoSave(field, typeof value === 'string' ? value : value.join(','));
