@@ -31,6 +31,7 @@ export interface Group {
   description?: string;
   group_type: GroupType;
   physical_unit_value?: string; // Only for physical groups
+  banner_image_url?: string; // Cover photo for groups
   created_by: string;
   created_at: string;
   updated_at: string;

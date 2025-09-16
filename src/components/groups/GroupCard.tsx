@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, Lock, Globe, Calendar, User } from 'lucide-react';
 import { Group } from '@/types/groups';
-import { useJoinGroup, useLeaveGroup } from '@/hooks/useGroups';
+// Removed join/leave imports - handled in GroupProfileDialog now
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,17 +22,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onClick,
   showJoinButton = false
 }) => {
-  const joinGroupMutation = useJoinGroup();
-  const leaveGroupMutation = useLeaveGroup();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCurrentUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
+  // Removed mutation hooks and user state - handled in GroupProfileDialog now
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking on action buttons
@@ -42,25 +32,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({
     onClick?.(group);
   };
 
-  const handleJoinGroup = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await joinGroupMutation.mutateAsync(group.id);
-    } catch (error) {
-      console.error('Failed to join group:', error);
-    }
-  };
+  // Removed join/leave handlers - these are now handled in the GroupProfileDialog
 
-  const handleLeaveGroup = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      await leaveGroupMutation.mutateAsync(group.id);
-    } catch (error) {
-      console.error('Failed to leave group:', error);
-    }
-  };
-
-  const isUserMember = group.current_user_membership !== undefined;
+  // Removed membership check - handled in GroupProfileDialog now
 
   const getGroupTypeIcon = () => {
     return group.group_type === 'physical' ? (
@@ -158,49 +132,17 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             </div>
           )}
 
-          {/* Join/Leave Actions */}
-          {showJoinButton && currentUserId && (
+          {/* Learn More Action */}
+          {showJoinButton && (
             <div className="pt-3 border-t border-gray-100">
-              {!isUserMember ? (
-                <Button
-                  size="sm"
-                  variant="default"
-                  onClick={handleJoinGroup}
-                  disabled={joinGroupMutation.isPending}
-                  className="w-full hover:opacity-90"
-                  style={{ 
-                    backgroundColor: 'hsl(258, 90%, 66%)',
-                    borderColor: 'hsl(258, 90%, 66%)'
-                  }}
-                >
-                  {joinGroupMutation.isPending ? 'Joining...' : 'Join Group'}
-                </Button>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant="secondary"
-                      className="capitalize"
-                    >
-                      {group.current_user_membership?.role}
-                    </Badge>
-                    <span className="text-xs text-gray-500">
-                      Joined {formatDate(group.current_user_membership?.joined_at || '')}
-                    </span>
-                  </div>
-                  
-                  {group.current_user_membership?.role !== 'owner' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleLeaveGroup}
-                      disabled={leaveGroupMutation.isPending}
-                    >
-                      {leaveGroupMutation.isPending ? 'Leaving...' : 'Leave'}
-                    </Button>
-                  )}
-                </div>
-              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCardClick}
+                className="w-full"
+              >
+                Learn More
+              </Button>
             </div>
           )}
         </div>

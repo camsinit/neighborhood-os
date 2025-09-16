@@ -11,6 +11,7 @@ interface GroupsSectionsProps {
   isLoading: boolean;
   searchQuery: string;
   onCreateGroup: (templateData?: { name: string; description: string }) => void;
+  onGroupSelect?: (group: Group) => void;
 }
 
 /**
@@ -23,7 +24,8 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
   groups,
   isLoading,
   searchQuery,
-  onCreateGroup
+  onCreateGroup,
+  onGroupSelect
 }) => {
   const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
 
@@ -87,6 +89,7 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
                 key={group.id}
                 group={group}
                 showJoinButton={true}
+                onClick={onGroupSelect}
               />
             ))}
           </div>

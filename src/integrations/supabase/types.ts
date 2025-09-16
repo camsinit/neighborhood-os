@@ -379,6 +379,7 @@ export type Database = {
       }
       groups: {
         Row: {
+          banner_image_url: string | null
           created_at: string
           created_by: string
           description: string | null
@@ -393,6 +394,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_image_url?: string | null
           created_at?: string
           created_by: string
           description?: string | null
@@ -407,6 +409,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_image_url?: string | null
           created_at?: string
           created_by?: string
           description?: string | null
