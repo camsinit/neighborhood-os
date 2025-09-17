@@ -312,7 +312,7 @@ export class GroupService {
         role,
         joined_at,
         invited_by,
-        profile:profiles!user_id (
+        profiles!group_members_user_id_fkey (
           id,
           display_name,
           avatar_url
@@ -334,10 +334,10 @@ export class GroupService {
       role: member.role,
       joined_at: member.joined_at,
       invited_by: member.invited_by,
-      profile: member.profile ? {
-        id: member.profile.id,
-        display_name: member.profile.display_name,
-        avatar_url: member.profile.avatar_url
+      profile: member.profiles ? {
+        id: member.profiles.id,
+        display_name: member.profiles.display_name,
+        avatar_url: member.profiles.avatar_url
       } : null
     }));
 
