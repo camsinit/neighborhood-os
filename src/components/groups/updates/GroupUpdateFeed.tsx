@@ -291,39 +291,6 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Post Update button */}
-        {!showCreateForm ? (
-          <Button
-            onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <MessageSquare className="h-4 w-4" />
-            Post Update
-          </Button>
-        ) : (
-          <Button
-            onClick={() => setShowCreateForm(false)}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <X className="h-4 w-4" />
-            Cancel
-          </Button>
-        )}
-
-        {/* Create Event button */}
-        <Button
-          onClick={() => setIsCreateEventOpen(true)}
-          className="flex items-center gap-2"
-          variant="outline"
-        >
-          <Plus className="h-4 w-4" />
-          Create Event
-        </Button>
-      </div>
 
       {/* Create update form */}
       {showCreateForm && (
