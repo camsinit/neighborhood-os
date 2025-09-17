@@ -241,55 +241,13 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
             )}
 
-            {/* Group Updates Feed */}
+            {/* Group Updates Feed - Simplified UI */}
             {isUserMember && (
               <GroupUpdateFeed 
                 groupId={group.id} 
                 isGroupManager={memberRole === 'owner' || memberRole === 'moderator'} 
               />
             )}
-
-            {/* Timeline Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Recent Activity</h3>
-              
-              {activities && activities.length > 0 ? (
-                <div className="space-y-3">
-                  {activities.map((activity, index) => (
-                    <Card key={activity.id || index} className="border-l-4 border-l-purple-500">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              <User className="h-4 w-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium">{activity.title}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-gray-500">
-                                {formatDate(activity.created_at)}
-                              </span>
-                              <Badge variant="outline" className="text-xs">
-                                {activity.activity_type.replace('_', ' ')}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No recent activity</p>
-                  {isUserMember && (
-                    <p className="text-sm mt-1">Be the first to post an update or create an event!</p>
-                  )}
-                </div>
-              )}
-            </div>
 
             {/* Group Info */}
             <div className="text-sm text-gray-500 pt-4 border-t">
