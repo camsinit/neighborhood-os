@@ -24,7 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
-import { GroupUpdateFeed } from './updates/GroupUpdateFeed';
+// GroupUpdateFeed import temporarily removed to fix circular dependency
 
 interface GroupProfileDialogProps {
   group: Group | null;
@@ -230,12 +230,11 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
             )}
 
-            {/* Group Updates Feed - Simplified UI */}
+            {/* Group Updates Feed - Temporarily removed to fix circular dependency */}
             {isUserMember && (
-              <GroupUpdateFeed 
-                groupId={group.id} 
-                isGroupManager={memberRole === 'owner' || memberRole === 'moderator'} 
-              />
+              <div className="text-center py-8 text-gray-500">
+                Group updates coming soon
+              </div>
             )}
 
             {/* Group Info */}
