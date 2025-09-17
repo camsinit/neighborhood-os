@@ -104,7 +104,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
   return (
     <>
       <Dialog open={!!group} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
           <DialogHeader>
             <DialogTitle className="sr-only">
               {group.name} Group Details
@@ -123,99 +123,88 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
             )}
 
-            {/* Group Header */}
+            {/* Group Header - Redesigned to match reference image */}
             <div className="space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h2 className="text-2xl font-bold">{group.name}</h2>
-                    {group.is_private ? (
-                      <Lock className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Globe className="h-5 w-5 text-gray-400" />
-                    )}
-                  </div>
-                  
-                  {/* Group Type Badge */}
-                  <div className="flex items-center gap-2 mb-3">
-                    {group.group_type === 'physical' && <MapPin className="h-4 w-4" />}
-                    <Badge variant="secondary">
-                      {group.group_type === 'physical' 
-                        ? group.physical_unit_value || 'Physical Group'
-                        : 'Social Group'
-                      }
-                    </Badge>
-                  </div>
-                  
-                  {/* Description */}
-                  {group.description && (
-                    <p className="text-gray-600 mb-4">{group.description}</p>
-                  )}
-                </div>
+              {/* Top row: Group name and privacy status */}
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-white">{group.name}</h1>
+                {group.is_private ? (
+                  <Lock className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <Globe className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+              
+              {/* Privacy status and member count on second line */}
+              <div className="flex items-center gap-2 text-gray-400">
+                <span className="text-sm">
+                  {group.is_private ? 'Private group' : 'Public group'} • {group.member_count || 0} members
+                </span>
               </div>
 
-              {/* Member Avatars & Join Button */}
+              {/* Bottom row: Member avatars on left, action buttons on right */}
               <div className="flex items-center justify-between">
-                {/* Member Stack */}
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2">
-                    {memberAvatars.map((member, index) => (
-                      <Avatar key={member.user_id} className="h-8 w-8 border-2 border-white">
-                        <AvatarImage src={member.profile?.avatar_url || ''} />
-                        <AvatarFallback className="text-xs">
-                          <User className="h-3 w-3" />
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                    {additionalMemberCount > 0 && (
-                      <div className="h-8 w-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                        <span className="text-xs font-medium text-gray-600">
-                          +{additionalMemberCount}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <Users className="h-4 w-4" />
-                    <span>{group.member_count || 0} members</span>
-                  </div>
+                {/* Left side: Member avatar stack */}
+                <div className="flex -space-x-2">
+                  {memberAvatars.map((member, index) => (
+                    <Avatar key={member.user_id} className="h-10 w-10 border-2 border-white">
+                      <AvatarImage src={member.profile?.avatar_url || ''} />
+                      <AvatarFallback className="text-xs">
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {additionalMemberCount > 0 && (
+                    <div className="h-10 w-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                      <span className="text-xs font-medium text-gray-600">
+                        +{additionalMemberCount}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Join/Joined Button */}
-                {currentUserId && (
-                  <div className="flex items-center gap-2">
-                    {!isUserMember ? (
-                      <Button
-                        onClick={handleJoinGroup}
-                        disabled={joinGroupMutation.isPending}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        {joinGroupMutation.isPending ? 'Joining...' : 'Join Group'}
+                {/* Right side: Action buttons */}
+                <div className="flex items-center gap-3">
+                  {currentUserId && isUserMember && (
+                    <>
+                      {/* Invite button */}
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Invite
                       </Button>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          className="border-purple-600 text-purple-600 bg-white"
-                        >
-                          <Check className="h-4 w-4 mr-2" />
-                          Joined
-                        </Button>
-                        {memberRole !== 'owner' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleLeaveGroup}
-                            disabled={leaveGroupMutation.isPending}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            Leave
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                      
+                      {/* Share button */}
+                      <Button variant="outline" className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Share
+                      </Button>
+                    </>
+                  )}
+                  
+                  {/* Join button for non-members */}
+                  {currentUserId && !isUserMember && (
+                    <Button
+                      onClick={handleJoinGroup}
+                      disabled={joinGroupMutation.isPending}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium"
+                    >
+                      {joinGroupMutation.isPending ? 'Joining...' : 'Join Group'}
+                    </Button>
+                  )}
+                  
+                  {/* Leave option for members (but not owners) */}
+                  {currentUserId && isUserMember && memberRole !== 'owner' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLeaveGroup}
+                      disabled={leaveGroupMutation.isPending}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    >
+                      Leave
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
