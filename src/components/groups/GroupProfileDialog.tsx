@@ -240,6 +240,14 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
             )}
 
+            {/* Group Updates Feed - Coming Soon */}
+            <div className="space-y-4">
+              <div className="text-center text-muted-foreground p-6">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Group updates and discussions coming soon!</p>
+              </div>
+            </div>
+
             {/* Timeline Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Recent Activity</h3>

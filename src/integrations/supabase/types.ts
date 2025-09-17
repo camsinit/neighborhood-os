@@ -387,6 +387,102 @@ export type Database = {
           },
         ]
       }
+      group_update_comments: {
+        Row: {
+          content: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          is_deleted: boolean
+          update_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_deleted?: boolean
+          update_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          is_deleted?: boolean
+          update_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      group_update_reactions: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          emoji: string
+          id: string
+          update_id: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          emoji: string
+          id?: string
+          update_id?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          emoji?: string
+          id?: string
+          update_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      group_updates: {
+        Row: {
+          content: string
+          created_at: string
+          edited_by: string | null
+          group_id: string
+          id: string
+          image_urls: string[] | null
+          is_deleted: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          edited_by?: string | null
+          group_id: string
+          id?: string
+          image_urls?: string[] | null
+          is_deleted?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          edited_by?: string | null
+          group_id?: string
+          id?: string
+          image_urls?: string[] | null
+          is_deleted?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       groups: {
         Row: {
           banner_image_url: string | null
