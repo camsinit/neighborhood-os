@@ -9,6 +9,9 @@ import { DialogFooter } from '@/components/ui/dialog';
 import { useCreateGroup, useNeighborhoodPhysicalConfig } from '@/hooks/useGroups';
 import { CreateGroupFormData } from '@/types/groups';
 import { moduleThemeColors } from '@/theme/moduleTheme';
+import { CoverPhotoUpload } from './CoverPhotoUpload';
+import { NeighborSearch } from './NeighborSearch';
+import { NeighborhoodMember } from '@/hooks/useNeighborhoodMembers';
 
 interface CreateGroupFormProps {
   onClose: () => void;
@@ -22,13 +25,19 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
   const createGroupMutation = useCreateGroup();
   const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
   
+  // Form state with new fields for cover photo and invited neighbors
   const [formData, setFormData] = useState<CreateGroupFormData>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     group_type: 'social',
     is_private: false,
     physical_unit_value: undefined,
+    banner_image_url: undefined,
+    invited_neighbors: [],
   });
+
+  // Local state for managing selected neighbors
+  const [selectedNeighbors, setSelectedNeighbors] = useState<NeighborhoodMember[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +58,10 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
       group_type: 'social',
       is_private: false,
       physical_unit_value: undefined,
+      banner_image_url: undefined,
+      invited_neighbors: [],
     });
+    setSelectedNeighbors([]);
   };
 
   const handleClose = () => {
@@ -62,6 +74,24 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
       ...prev,
       [field]: value
     }));
+  };
+
+  // Handle neighbor selection for invitations
+  const handleNeighborSelect = (neighbor: NeighborhoodMember) => {
+    const updatedNeighbors = [...selectedNeighbors, neighbor];
+    setSelectedNeighbors(updatedNeighbors);
+    updateFormData('invited_neighbors', updatedNeighbors.map(n => n.user_id));
+  };
+
+  const handleNeighborRemove = (neighborId: string) => {
+    const updatedNeighbors = selectedNeighbors.filter(n => n.user_id !== neighborId);
+    setSelectedNeighbors(updatedNeighbors);
+    updateFormData('invited_neighbors', updatedNeighbors.map(n => n.user_id));
+  };
+
+  // Handle cover photo changes
+  const handleCoverPhotoChange = (url: string | null) => {
+    updateFormData('banner_image_url', url);
   };
 
   return (
@@ -89,6 +119,19 @@ export const CreateGroupForm: React.FC<CreateGroupFormProps> = ({ onClose, initi
           rows={3}
         />
       </div>
+
+      {/* Cover Photo Upload */}
+      <CoverPhotoUpload
+        coverPhotoUrl={formData.banner_image_url || null}
+        onCoverPhotoChange={handleCoverPhotoChange}
+      />
+
+      {/* Neighbor Search and Invite */}
+      <NeighborSearch
+        selectedNeighbors={selectedNeighbors}
+        onNeighborSelect={handleNeighborSelect}
+        onNeighborRemove={handleNeighborRemove}
+      />
 
       {/* Privacy Setting */}
       <div className="space-y-4">

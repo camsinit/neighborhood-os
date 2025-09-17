@@ -117,6 +117,8 @@ export interface CreateGroupFormData {
   physical_unit_value?: string;
   is_private: boolean;
   max_members?: number;
+  banner_image_url?: string; // Cover photo URL
+  invited_neighbors?: string[]; // User IDs of neighbors to invite
 }
 
 export interface CreateGroupData extends CreateGroupFormData {
