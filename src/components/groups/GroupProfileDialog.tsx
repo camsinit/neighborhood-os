@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
+import { GroupUpdateFeed } from './updates/GroupUpdateFeed';
 
 interface GroupProfileDialogProps {
   group: Group | null;
@@ -240,13 +241,13 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
             )}
 
-            {/* Group Updates Feed - Coming Soon */}
-            <div className="space-y-4">
-              <div className="text-center text-muted-foreground p-6">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Group updates and discussions coming soon!</p>
-              </div>
-            </div>
+            {/* Group Updates Feed */}
+            {isUserMember && (
+              <GroupUpdateFeed 
+                groupId={group.id} 
+                isGroupManager={memberRole === 'owner' || memberRole === 'moderator'} 
+              />
+            )}
 
             {/* Timeline Section */}
             <div className="space-y-4">
