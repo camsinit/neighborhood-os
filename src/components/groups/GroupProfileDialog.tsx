@@ -127,7 +127,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
             <div className="space-y-4">
               {/* Top row: Group name and privacy status */}
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-white">{group.name}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
                 {group.is_private ? (
                   <Lock className="h-5 w-5 text-gray-400" />
                 ) : (
@@ -136,7 +136,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
               </div>
               
               {/* Privacy status and member count on second line */}
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-gray-600">
                 <span className="text-sm">
                   {group.is_private ? 'Private group' : 'Public group'} • {group.member_count || 0} members
                 </span>
@@ -150,7 +150,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
                     <Avatar key={member.user_id} className="h-10 w-10 border-2 border-white">
                       <AvatarImage src={member.profile?.avatar_url || ''} />
                       <AvatarFallback className="text-xs">
-                        <User className="h-4 w-4" />
+                        {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>
                   ))}
