@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DialogFooter } from '@/components/ui/dialog';
-import { useUpdateGroup } from '@/hooks/useGroups';
+import { useUpdateGroup, useNeighborhoodPhysicalConfig } from '@/hooks/useGroups';
 import { UpdateGroupFormData, Group } from '@/types/groups';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { CoverPhotoUpload } from './CoverPhotoUpload';
@@ -31,8 +32,9 @@ interface EditGroupFormProps {
  * @param group - The group object containing current data to pre-populate
  */
 export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) => {
-  // Get the update group mutation hook
+  // Get the update group mutation hook and physical config
   const updateGroupMutation = useUpdateGroup();
+  const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
   
   // Form state initialized with current group data
   const [formData, setFormData] = useState<UpdateGroupFormData>({
@@ -40,6 +42,8 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
     description: group.description || '',
     is_private: group.is_private,
     max_members: group.max_members,
+    // Add physical_unit_value if the group has it
+    physical_unit_value: group.physical_unit_value || undefined,
   });
 
   // State for cover photo (banner image)
@@ -65,6 +69,7 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
       });
       
       onClose();
+      resetForm();
     } catch (error) {
       console.error('Failed to update group:', error);
     }
@@ -79,6 +84,7 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
       description: group.description || '',
       is_private: group.is_private,
       max_members: group.max_members,
+      physical_unit_value: group.physical_unit_value || undefined,
     });
     setBannerImageUrl(group.banner_image_url || undefined);
   };
@@ -103,64 +109,96 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Cover Photo Upload Section */}
+      {/* Group Name */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Group Cover Photo</Label>
-        <CoverPhotoUpload
-          coverPhotoUrl={bannerImageUrl || null}
-          onCoverPhotoChange={(url) => setBannerImageUrl(url || undefined)}
-        />
-      </div>
-
-      {/* Group Name Field */}
-      <div className="space-y-2">
-        <Label htmlFor="name" className="text-sm font-medium">
-          Group Name *
-        </Label>
+        <Label htmlFor="name">Group Name *</Label>
         <Input
           id="name"
           value={formData.name}
           onChange={(e) => updateFormData('name', e.target.value)}
-          placeholder="Enter group name"
+          placeholder="Enter group name..."
           required
-          className="border-gray-300 focus:border-primary"
         />
       </div>
 
-      {/* Group Description Field */}
+      {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description" className="text-sm font-medium">
-          Description
-        </Label>
+        <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           value={formData.description}
           onChange={(e) => updateFormData('description', e.target.value)}
-          placeholder="Describe your group..."
+          placeholder="Describe what this group is about..."
           rows={3}
-          className="border-gray-300 focus:border-primary resize-none"
         />
       </div>
 
+      {/* Cover Photo Upload */}
+      <CoverPhotoUpload
+        coverPhotoUrl={bannerImageUrl || null}
+        onCoverPhotoChange={(url) => setBannerImageUrl(url || undefined)}
+      />
+
       {/* Privacy Setting */}
-      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-        <div className="space-y-1">
-          <Label className="text-sm font-medium">Private Group</Label>
-          <p className="text-xs text-gray-500">
-            Private groups require approval to join
-          </p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Label htmlFor="is_private">Private Group</Label>
+            <p className="text-sm text-gray-500">
+              Private groups require invitations to join
+            </p>
+          </div>
+          <Switch
+            id="is_private"
+            checked={formData.is_private}
+            onCheckedChange={(checked) => {
+              updateFormData('is_private', checked);
+              // Clear physical unit selection when making public
+              if (!checked) {
+                updateFormData('physical_unit_value', undefined);
+              }
+            }}
+          />
         </div>
-        <Switch
-          checked={formData.is_private}
-          onCheckedChange={(checked) => updateFormData('is_private', checked)}
-        />
+
+        {/* Physical Unit Selection for Private Groups */}
+        {formData.is_private && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="private_physical_unit">Limit to specific area</Label>
+              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">Optional</span>
+            </div>
+            <p className="text-sm text-gray-600 mb-3">
+              Only neighbors from the selected area will be able to see and join this private group.
+            </p>
+            <Select
+              value={formData.physical_unit_value || ''}
+              onValueChange={(value) => updateFormData('physical_unit_value', value || undefined)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={`Select a ${physicalConfig?.physical_unit_label?.toLowerCase() || 'area'} (optional)`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All areas</SelectItem>
+                {physicalConfig?.physical_units.map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {physicalConfig?.physical_units.length === 0 && (
+              <p className="text-sm text-gray-500">
+                No specific areas configured for this neighborhood
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Max Members Field */}
       <div className="space-y-2">
-        <Label htmlFor="max_members" className="text-sm font-medium">
-          Maximum Members
-        </Label>
+        <Label htmlFor="max_members">Maximum Members</Label>
         <Input
           id="max_members"
           type="number"
@@ -169,28 +207,22 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
           placeholder="100"
           min="1"
           max="1000"
-          className="border-gray-300 focus:border-primary"
         />
       </div>
 
       {/* Form Actions */}
-      <DialogFooter className="flex gap-3 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleClose}
-          className="border-gray-300 text-gray-700 hover:bg-gray-50"
-        >
+      <DialogFooter className="pt-2">
+        <Button type="button" variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button
-          type="submit"
+        <Button 
+          type="submit" 
           disabled={updateGroupMutation.isPending || !formData.name.trim()}
           style={{ 
             backgroundColor: moduleThemeColors.neighbors.primary,
             borderColor: moduleThemeColors.neighbors.primary 
           }}
-          className="text-white hover:opacity-90"
+          className="hover:opacity-90"
         >
           {updateGroupMutation.isPending ? 'Updating...' : 'Update Group'}
         </Button>

@@ -132,6 +132,8 @@ export interface UpdateGroupFormData {
   is_private?: boolean;
   max_members?: number;
   status?: GroupStatus;
+  physical_unit_value?: string;
+  banner_image_url?: string;
 }
 
 export interface JoinGroupData {
