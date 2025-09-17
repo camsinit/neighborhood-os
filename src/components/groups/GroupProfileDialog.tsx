@@ -104,7 +104,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
   return (
     <>
       <Dialog open={!!group} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white border-gray-200">
           <DialogHeader>
             <DialogTitle className="sr-only">
               {group.name} Group Details
