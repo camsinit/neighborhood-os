@@ -380,12 +380,10 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
           ))}
         </div>
       ) : (
-        <Card>
-          <CardContent className="pt-6 text-center text-muted-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No updates yet. Be the first to share something with your group!</p>
-          </CardContent>
-        </Card>
+        <div className="text-center text-muted-foreground py-8">
+          <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No updates yet. Be the first to share something with your group!</p>
+        </div>
       )}
 
       {/* Create Event Dialog */}
