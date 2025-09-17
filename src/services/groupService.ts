@@ -30,6 +30,7 @@ const logger = createLogger('GroupService');
 export class GroupService {
   /**
    * Get all groups in a neighborhood with optional filtering
+   * Now includes current user membership status and actual member count
    */
   async getGroups(
     neighborhoodId: string, 
@@ -38,12 +39,25 @@ export class GroupService {
     logger.info('Fetching groups', { neighborhoodId, options });
 
     try {
-      // Use the generic supabase client to query groups table
+      // Get current user ID for membership check
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id;
+
+      // Build query with member count and current user membership
       let query = (supabase as any)
         .from('groups')
-        .select('*')
+        .select(`
+          *,
+          member_count:group_members(count),
+          current_user_membership:group_members!left(role, joined_at)
+        `)
         .eq('neighborhood_id', neighborhoodId)
         .eq('status', 'active');
+
+      // Filter for current user membership if user is logged in
+      if (currentUserId) {
+        query = query.eq('current_user_membership.user_id', currentUserId);
+      }
 
       // Apply filters
       if (options.groupType) {
@@ -61,8 +75,17 @@ export class GroupService {
         throw new GroupError('Failed to fetch groups', GroupErrorCodes.GROUP_NOT_FOUND);
       }
 
-      logger.info('Successfully fetched groups', { count: data?.length || 0, neighborhoodId });
-      return data || [];
+      // Transform the data to handle the nested structure
+      const groups: Group[] = (data || []).map((group: any) => ({
+        ...group,
+        member_count: Array.isArray(group.member_count) ? group.member_count.length : 0,
+        current_user_membership: Array.isArray(group.current_user_membership) && group.current_user_membership.length > 0 
+          ? group.current_user_membership[0] 
+          : null
+      }));
+
+      logger.info('Successfully fetched groups', { count: groups.length, neighborhoodId });
+      return groups;
     } catch (error) {
       logger.error('Error in getGroups', { error, neighborhoodId });
       throw error;

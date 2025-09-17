@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Group } from '@/types/groups';
 import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups';
-import { useActivities } from '@/hooks/useActivities';
+import { useGroupActivities } from '@/hooks/useGroupActivities';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,7 +46,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
   
   // Group data hooks
   const { data: groupMembers } = useGroupMembers(group?.id || '');
-  const { data: activities } = useActivities();
+  const { data: activities } = useGroupActivities(group?.id || '');
   
   // Group action hooks
   const joinGroupMutation = useJoinGroup();
