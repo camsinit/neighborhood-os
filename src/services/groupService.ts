@@ -297,14 +297,27 @@ export class GroupService {
   }
 
   /**
-   * Get group members
+   * Get group members with profile information
    */
   async getGroupMembers(groupId: string): Promise<GroupMember[]> {
     logger.info('Fetching group members', { groupId });
 
+    // Join group_members with profiles to get avatar_url and display_name
     const { data, error } = await (supabase as any)
       .from('group_members')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        group_id,
+        role,
+        joined_at,
+        invited_by,
+        profile:profiles!user_id (
+          id,
+          display_name,
+          avatar_url
+        )
+      `)
       .eq('group_id', groupId)
       .order('joined_at', { ascending: true });
 
@@ -313,8 +326,23 @@ export class GroupService {
       return [];
     }
 
-    logger.info('Successfully fetched group members', { count: data?.length || 0, groupId });
-    return data || [];
+    // Transform the data to match GroupMember interface
+    const members = (data || []).map((member: any) => ({
+      id: member.id,
+      user_id: member.user_id,
+      group_id: member.group_id,
+      role: member.role,
+      joined_at: member.joined_at,
+      invited_by: member.invited_by,
+      profile: member.profile ? {
+        id: member.profile.id,
+        display_name: member.profile.display_name,
+        avatar_url: member.profile.avatar_url
+      } : null
+    }));
+
+    logger.info('Successfully fetched group members', { count: members.length, groupId });
+    return members;
   }
 
   /**
