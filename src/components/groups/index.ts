@@ -1,6 +1,7 @@
 export { GroupCard } from './GroupCard';
 export { GroupsList } from './GroupsList';
 export { CreateGroupDialog } from './CreateGroupDialog';
+export { EditGroupForm } from './EditGroupForm';
 export { GroupsEmptyState } from './GroupsEmptyState';
 export { GroupsContainer } from './GroupsContainer';
 export { GroupsSearchBar } from './GroupsSearchBar';

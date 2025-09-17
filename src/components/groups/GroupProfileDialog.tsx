@@ -13,6 +13,7 @@ import {
   Globe, 
   Calendar, 
   Plus, 
+  Edit,
   MessageSquare,
   User,
   Check 
@@ -24,6 +25,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
+import { EditGroupForm } from './EditGroupForm';
 // GroupUpdateFeed import temporarily removed to fix circular dependency
 
 interface GroupProfileDialogProps {
@@ -43,6 +45,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isPostUpdateOpen, setIsPostUpdateOpen] = useState(false);
+  const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
   
   // Group data hooks
   const { data: groupMembers } = useGroupMembers(group?.id || '');
@@ -64,9 +67,10 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
 
   if (!group) return null;
 
-  // Check if current user is a member
+  // Check if current user is a member and their role
   const isUserMember = group.current_user_membership !== undefined;
   const memberRole = group.current_user_membership?.role;
+  const canEditGroup = memberRole === 'owner' || memberRole === 'moderator';
 
   // Handle joining the group
   const handleJoinGroup = async () => {
@@ -103,12 +107,22 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
 
   return (
     <>
-      <Dialog open={!!group} onOpenChange={onClose}>
+      <Dialog open={!!group && !isEditGroupOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-white border-gray-200">
-          <DialogHeader>
+          <DialogHeader className="relative">
             <DialogTitle className="sr-only">
               {group.name} Group Details
             </DialogTitle>
+            {/* Edit button for group owners/moderators */}
+            {canEditGroup && (
+              <button
+                onClick={() => setIsEditGroupOpen(true)}
+                className="absolute -top-2 -right-2 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                aria-label="Edit group"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+            )}
           </DialogHeader>
           
           <div className="space-y-6">
@@ -279,6 +293,23 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
             <div className="py-4">
               <p className="text-gray-500">Update posting functionality coming soon...</p>
             </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
+      {/* Edit Group Sheet */}
+      {isEditGroupOpen && (
+        <Sheet open={isEditGroupOpen} onOpenChange={setIsEditGroupOpen}>
+          <SheetContent className="sm:max-w-md overflow-y-auto">
+            <SheetHeader className="mb-4">
+              <SheetTitle className="text-xl font-bold">
+                Edit Group
+              </SheetTitle>
+            </SheetHeader>
+            <EditGroupForm 
+              onClose={() => setIsEditGroupOpen(false)}
+              group={group}
+            />
           </SheetContent>
         </Sheet>
       )}
