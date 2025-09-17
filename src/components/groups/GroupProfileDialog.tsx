@@ -165,31 +165,34 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
 
                 {/* Right side: Action buttons */}
                 <div className="flex items-center gap-3">
-                  {currentUserId && isUserMember && (
+                  {currentUserId && (
                     <>
-                      {/* Invite button */}
-                      <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Invite
+                      {/* Dynamic button: Join if not member, Invite if member */}
+                      <Button 
+                        onClick={isUserMember ? undefined : handleJoinGroup}
+                        disabled={!isUserMember && joinGroupMutation.isPending}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
+                      >
+                        {isUserMember ? (
+                          <>
+                            <Plus className="h-4 w-4" />
+                            Invite
+                          </>
+                        ) : (
+                          <>
+                            {joinGroupMutation.isPending ? 'Joining...' : 'Join'}
+                          </>
+                        )}
                       </Button>
                       
-                      {/* Share button */}
-                      <Button variant="outline" className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Share
-                      </Button>
+                      {/* Share button - only show for members */}
+                      {isUserMember && (
+                        <Button variant="outline" className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          Share
+                        </Button>
+                      )}
                     </>
-                  )}
-                  
-                  {/* Join button for non-members */}
-                  {currentUserId && !isUserMember && (
-                    <Button
-                      onClick={handleJoinGroup}
-                      disabled={joinGroupMutation.isPending}
-                      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium"
-                    >
-                      {joinGroupMutation.isPending ? 'Joining...' : 'Join Group'}
-                    </Button>
                   )}
                   
                   {/* Leave option for members (but not owners) */}
