@@ -10,10 +10,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, MessageSquare, Calendar } from 'lucide-react';
+import { Plus, MessageSquare, Calendar, X } from 'lucide-react';
 import { GroupUpdateCard } from './GroupUpdateCard';
 import { CreateGroupUpdateForm } from './CreateGroupUpdateForm';
 import EventCard from '@/components/EventCard';
+import AddEventDialog from '@/components/AddEventDialog';
 import { GroupUpdateWithComments } from '@/types/groupUpdates';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from "@supabase/auth-helpers-react";
@@ -32,8 +33,8 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
   const user = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'updates' | 'events'>('updates');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   // Fetch group updates
   const { data: updates = [], isLoading: updatesLoading } = useQuery({
@@ -290,120 +291,113 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Tab navigation */}
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'updates' | 'events')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="updates" className="flex items-center gap-2">
+      {/* Action buttons */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Post Update button */}
+        {!showCreateForm ? (
+          <Button
+            onClick={() => setShowCreateForm(true)}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
             <MessageSquare className="h-4 w-4" />
-            Updates
-          </TabsTrigger>
-          <TabsTrigger value="events" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Events
-          </TabsTrigger>
-        </TabsList>
+            Post Update
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowCreateForm(false)}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
+            <X className="h-4 w-4" />
+            Cancel
+          </Button>
+        )}
 
-        {/* Updates tab */}
-        <TabsContent value="updates" className="space-y-6">
-          {/* Create update button/form */}
-          {!showCreateForm ? (
-            <Card>
-              <CardContent className="pt-6">
-                <Button
-                  onClick={() => setShowCreateForm(true)}
-                  className="w-full flex items-center gap-2"
-                  variant="outline"
-                >
-                  <Plus className="h-4 w-4" />
-                  Share an update with your group
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Update</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CreateGroupUpdateForm
-                  groupId={groupId}
-                  onSubmit={(data) => createUpdateMutation.mutateAsync(data)}
-                  onCancel={() => setShowCreateForm(false)}
-                  isSubmitting={createUpdateMutation.isPending}
-                />
-              </CardContent>
-            </Card>
-          )}
+        {/* Create Event button */}
+        <Button
+          onClick={() => setIsCreateEventOpen(true)}
+          className="flex items-center gap-2"
+          variant="outline"
+        >
+          <Plus className="h-4 w-4" />
+          Create Event
+        </Button>
+      </div>
 
-          {/* Updates feed */}
-          {updatesLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="h-20 bg-muted rounded" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : updates.length > 0 ? (
-            <div className="space-y-4">
-              {updates.map((update) => (
-                <GroupUpdateCard
-                  key={update.id}
-                  update={update}
-                  currentUserId={user.id}
-                  isGroupManager={isGroupManager}
-                  onReact={async (updateId, emoji) => {
-                    reactMutation.mutate({ updateId, emoji });
-                  }}
-                  onComment={async (updateId, content) => {
-                    commentMutation.mutate({ updateId, content });
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="pt-6 text-center text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No updates yet. Be the first to share something with your group!</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+      {/* Create update form */}
+      {showCreateForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Create Update</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CreateGroupUpdateForm
+              groupId={groupId}
+              onSubmit={(data) => createUpdateMutation.mutateAsync(data)}
+              onCancel={() => setShowCreateForm(false)}
+              isSubmitting={createUpdateMutation.isPending}
+            />
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Events tab */}
-        <TabsContent value="events" className="space-y-6">
-          {eventsLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="h-20 bg-muted rounded" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : events.length > 0 ? (
-            <div className="space-y-4">
-              {events.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="pt-6 text-center text-muted-foreground">
-                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No events scheduled for this group yet.</p>
+      {/* Combined activity feed */}
+      {updatesLoading || eventsLoading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-20 bg-muted rounded" />
               </CardContent>
             </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      ) : updates.length > 0 || events.length > 0 ? (
+        <div className="space-y-4">
+          {/* Show updates */}
+          {updates.map((update) => (
+            <GroupUpdateCard
+              key={`update-${update.id}`}
+              update={update}
+              currentUserId={user.id}
+              isGroupManager={isGroupManager}
+              onReact={async (updateId, emoji) => {
+                reactMutation.mutate({ updateId, emoji });
+              }}
+              onComment={async (updateId, content) => {
+                commentMutation.mutate({ updateId, content });
+              }}
+            />
+          ))}
+          
+          {/* Show events */}
+          {events.map((event) => (
+            <EventCard
+              key={`event-${event.id}`}
+              event={event}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>No updates yet. Be the first to share something with your group!</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Create Event Dialog */}
+      <AddEventDialog
+        open={isCreateEventOpen}
+        onOpenChange={setIsCreateEventOpen}
+        onAddEvent={() => {
+          // Refetch events after creation
+          queryClient.invalidateQueries({ queryKey: ['group-events', groupId] });
+        }}
+        initialValues={{ groupId }}
+      />
     </div>
   );
 }
