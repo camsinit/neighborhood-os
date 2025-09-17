@@ -302,46 +302,56 @@ export class GroupService {
   async getGroupMembers(groupId: string): Promise<GroupMember[]> {
     logger.info('Fetching group members', { groupId });
 
-    // Join group_members with profiles to get avatar_url and display_name
-    const { data, error } = await (supabase as any)
+    // First get group members, then get their profiles separately
+    const { data: membersData, error: membersError } = await (supabase as any)
       .from('group_members')
-      .select(`
-        id,
-        user_id,
-        group_id,
-        role,
-        joined_at,
-        invited_by,
-        profiles!group_members_user_id_fkey (
-          id,
-          display_name,
-          avatar_url
-        )
-      `)
+      .select('*')
       .eq('group_id', groupId)
       .order('joined_at', { ascending: true });
 
-    if (error) {
-      logger.error('Error fetching group members', { error, groupId });
+    if (membersError) {
+      logger.error('[GroupService] Error fetching group members', { error: membersError, groupId });
       return [];
     }
 
+    if (!membersData || membersData.length === 0) {
+      logger.info('No members found for group', { groupId });
+      return [];
+    }
+    // Get user IDs to fetch their profiles
+    const userIds = membersData.map(member => member.user_id);
+    
+    // Fetch profiles for all users
+    const { data: profilesData, error: profilesError } = await (supabase as any)
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', userIds);
+
+    if (profilesError) {
+      logger.error('[GroupService] Error fetching profiles', { error: profilesError, groupId });
+      // Continue without profiles rather than failing completely
+    }
+
+    // Create a map of user_id to profile for easy lookup
+    const profilesMap = new Map();
+    if (profilesData) {
+      profilesData.forEach(profile => {
+        profilesMap.set(profile.id, profile);
+      });
+    }
+
     // Transform the data to match GroupMember interface
-    const members = (data || []).map((member: any) => ({
+    const members = membersData.map((member: any) => ({
       id: member.id,
       user_id: member.user_id,
       group_id: member.group_id,
       role: member.role,
       joined_at: member.joined_at,
       invited_by: member.invited_by,
-      profile: member.profiles ? {
-        id: member.profiles.id,
-        display_name: member.profiles.display_name,
-        avatar_url: member.profiles.avatar_url
-      } : null
+      profile: profilesMap.get(member.user_id) || null
     }));
 
-    logger.info('Successfully fetched group members', { count: members.length, groupId });
+    logger.info('Successfully fetched group members with profiles', { count: members.length, groupId });
     return members;
   }
 
