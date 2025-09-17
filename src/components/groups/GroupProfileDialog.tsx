@@ -210,7 +210,7 @@ export const GroupProfileDialog = ({ group, onClose }: GroupProfileDialogProps) 
 
             {/* Action Buttons (for members only) */}
             {isUserMember && (
-              <div className="flex gap-2 py-4 border-y border-gray-100">
+              <div className="flex gap-2 py-4 border-t border-gray-100">
                 <Button
                   variant="outline"
                   onClick={() => setIsPostUpdateOpen(true)}
