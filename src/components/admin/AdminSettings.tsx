@@ -671,46 +671,61 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
             
             {formData.inviteHeaderImageUrl ? (
               <div className="space-y-2">
-                <div className="relative w-full h-32 rounded-lg overflow-hidden border">
+                <div 
+                  className="relative w-full h-32 rounded-lg overflow-hidden border cursor-pointer group"
+                  onClick={() => !isReadOnly && document.getElementById('invite-header-image-upload')?.click()}
+                >
                   <img 
                     src={formData.inviteHeaderImageUrl} 
                     alt="Invite header preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                   />
+                  
+                  {/* Hover overlay with animation */}
+                  {!isReadOnly && (
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center text-white">
+                        <Upload className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-sm font-medium">Replace Image</p>
+                        <p className="text-xs">Click to upload new photo</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   {!isReadOnly && (
                     <button
-                      onClick={handleRemoveImage}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage();
+                      }}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 opacity-80 hover:opacity-100"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
-                {!isReadOnly && (
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById('invite-header-image-upload')?.click()}
-                    disabled={isUploadingImage}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {isUploadingImage ? 'Uploading...' : 'Change Image'}
-                  </Button>
-                )}
+                
+                {/* Image guidelines caption */}
+                <p className="text-xs text-muted-foreground">
+                  <strong>Recommended:</strong> 16:9 aspect ratio (e.g., 1200×675px) • JPG or PNG • Max 5MB
+                </p>
               </div>
             ) : (
               !isReadOnly && (
-                
-                <div 
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
-                  onClick={() => document.getElementById('invite-header-image-upload')?.click()}
-                >
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-600">
-                    {isUploadingImage ? 'Uploading...' : 'Click to upload header image'}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    PNG, JPG up to 5MB
+                <div className="space-y-2">
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors duration-200 hover-scale"
+                    onClick={() => document.getElementById('invite-header-image-upload')?.click()}
+                  >
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-600">
+                      {isUploadingImage ? 'Uploading...' : 'Click to upload header image'}
+                    </p>
+                  </div>
+                  
+                  {/* Image guidelines caption */}
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Recommended:</strong> 16:9 aspect ratio (e.g., 1200×675px) • JPG or PNG • Max 5MB
                   </p>
                 </div>
               )
