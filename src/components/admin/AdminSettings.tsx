@@ -327,7 +327,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         }
       }
       
-      // Refresh caches
+      // Refresh caches and neighborhood data immediately
       queryClient.invalidateQueries({ 
         queryKey: ['physicalUnitsWithResidents', currentNeighborhood.id] 
       });
@@ -337,6 +337,9 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       queryClient.invalidateQueries({
         queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
       });
+      
+      // Force refresh of neighborhood data in context to update the physical_units
+      refreshNeighborhoodData();
       
       // Update local state to reflect saved data
       setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: uniqueUnits }));
