@@ -163,7 +163,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
   // Initialize form data when neighborhood data loads
   useEffect(() => {
-    if (currentNeighborhood) {
+    if (currentNeighborhood && !hasUnsavedPhysicalUnits) {
       const neighborhood = currentNeighborhood as any; // Cast to access database properties
       setFormData({
         name: neighborhood.name || '',
@@ -195,7 +195,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       // Reset unsaved changes flag when data loads
       setHasUnsavedPhysicalUnits(false);
     }
-  }, [currentNeighborhood, logger]);
+  }, [currentNeighborhood, hasUnsavedPhysicalUnits, logger]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
@@ -322,9 +322,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       // Update local state to reflect saved data
       setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: uniqueUnits }));
       setHasUnsavedPhysicalUnits(false);
-      
-      // Refresh neighborhood data to show saved values
-      refreshNeighborhoodData();
       
       toast({
         title: "Physical Units Saved",
