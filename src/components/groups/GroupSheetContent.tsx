@@ -123,7 +123,7 @@ const GroupSheetContent = ({
 
         <div className="space-y-6 pt-6">
           {/* Banner Image (if available) - provides visual appeal and group branding */}
-          {group.banner_image_url && <div className="w-full h-48 rounded-lg overflow-hidden">
+          {group.banner_image_url && <div className="h-48 rounded-lg overflow-hidden">
               <img src={group.banner_image_url} alt={`${group.name} banner`} className="w-full h-full object-cover" />
             </div>}
 
