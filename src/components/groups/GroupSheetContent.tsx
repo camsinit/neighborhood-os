@@ -132,31 +132,33 @@ const GroupSheetContent = ({
             {/* Top row: Group name and privacy status indicator */}
             
             
-            {/* Privacy status and member count on second line */}
+            {/* Privacy status and member count with profile images */}
             <div className="flex items-center gap-2 text-gray-600">
+              {/* Profile images on the left */}
+              <div className="flex -space-x-1">
+                {memberAvatars.slice(0, 3).map((member, index) => (
+                  <Avatar key={member.user_id} className="h-5 w-5 border border-white">
+                    <AvatarImage src={member.profile?.avatar_url || ''} />
+                    <AvatarFallback className="text-xs">
+                      {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {additionalMemberCount > 0 && (
+                  <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">
+                      +{additionalMemberCount}
+                    </span>
+                  </div>
+                )}
+              </div>
               <span className="text-sm">
                 {group.is_private ? 'Private group' : 'Public group'} • {group.member_count || 0} members
               </span>
             </div>
 
-            {/* Bottom row: Member avatars on left, action buttons on right */}
+            {/* Action buttons section */}
             <div className="flex items-center justify-between">
-              {/* Left side: Member avatar stack - shows visual representation of group members */}
-              <div className="flex -space-x-2">
-                {memberAvatars.map((member, index) => <Avatar key={member.user_id} className="h-10 w-10 border-2 border-white">
-                    <AvatarImage src={member.profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-xs">
-                      {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>)}
-                {/* Show additional member count if more than 5 members */}
-                {additionalMemberCount > 0 && <div className="h-10 w-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">
-                      +{additionalMemberCount}
-                    </span>
-                  </div>}
-              </div>
-
               {/* Right side: Action buttons - contextual based on membership status */}
               <div className="flex items-center gap-3">
                 {currentUserId && <>
