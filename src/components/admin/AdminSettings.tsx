@@ -103,8 +103,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         return;
       }
       
-      // Skip physical units fields from auto-save
-      if (fieldName === 'physicalUnits' || fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
+      // Skip only physical units array and label from auto-save (these need special handling)
+      if (fieldName === 'physicalUnits' || fieldName === 'physicalUnitLabel') {
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
         return;
@@ -207,9 +207,16 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const handlePhysicalUnitsChange = (field: string, value: string | string[]) => {
     if (isReadOnly) return;
     
-    // Update local state only - no auto-save
+    // Update local state
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedPhysicalUnits(true);
+    
+    // For physicalUnitType, trigger auto-save immediately
+    if (field === 'physicalUnitType') {
+      debouncedAutoSave(field, value as string);
+    } else {
+      // For other fields (physicalUnits array, physicalUnitLabel), mark as unsaved
+      setHasUnsavedPhysicalUnits(true);
+    }
   };
 
   const addPhysicalUnit = () => {
