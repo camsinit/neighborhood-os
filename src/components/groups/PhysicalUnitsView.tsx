@@ -108,6 +108,9 @@ interface PhysicalUnitCardProps {
 }
 
 const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, onUnitClick }) => {
+  // State to track if we're in "confirm leave" mode
+  const [showLeaveConfirm, setShowLeaveConfirm] = React.useState(false);
+  
   // Hooks for joining and leaving groups
   const joinGroupMutation = useJoinGroup();
   const leaveGroupMutation = useLeaveGroup();
@@ -124,14 +127,26 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
   // Check if user is already a member of this physical group
   const isUserMember = !!matchingGroup?.current_user_membership;
   
+  // Reset leave confirm mode when user leaves successfully
+  React.useEffect(() => {
+    if (!isUserMember) {
+      setShowLeaveConfirm(false);
+    }
+  }, [isUserMember]);
+  
   // Handle joining or leaving the physical unit group
   const handleToggleMembership = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when button is clicked
     
     if (matchingGroup) {
       if (isUserMember) {
-        // User is a member, so leave the group
-        leaveGroupMutation.mutate(matchingGroup.id);
+        if (showLeaveConfirm) {
+          // User clicked leave confirmation, actually leave the group
+          leaveGroupMutation.mutate(matchingGroup.id);
+        } else {
+          // User clicked "Joined", show leave confirmation
+          setShowLeaveConfirm(true);
+        }
       } else {
         // User is not a member, so join the group
         joinGroupMutation.mutate(matchingGroup.id);
@@ -140,11 +155,19 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
       console.log('No matching group found for unit:', unit.unit_name);
     }
   };
+
+  // Handle clicking outside the button to reset leave confirm state
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (showLeaveConfirm) {
+      setShowLeaveConfirm(false);
+    }
+    onUnitClick?.(unit);
+  };
   
   return (
     <Card 
       className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300 cursor-pointer"
-      onClick={() => onUnitClick?.(unit)}
+      onClick={handleCardClick}
     >
       <CardContent className="p-4">
         <div className="space-y-3">
@@ -198,19 +221,29 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
           {/* Join/Leave toggle button */}
           <div className="pt-2 border-t border-gray-100">
             <Button 
-              className={isUserMember 
-                ? "w-full bg-white hover:bg-red-50 border text-red-600 border-red-200 hover:border-red-300" 
-                : "w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className={
+                isUserMember 
+                  ? showLeaveConfirm
+                    ? "w-full bg-red-600 hover:bg-red-700 text-white"
+                    : "w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  : "w-full bg-purple-600 hover:bg-purple-700 text-white"
               }
               size="sm"
               onClick={handleToggleMembership}
               disabled={joinGroupMutation.isPending || leaveGroupMutation.isPending}
             >
               {isUserMember ? (
-                <>
-                  <Users className="h-4 w-4 mr-2" />
-                  {leaveGroupMutation.isPending ? 'Leaving...' : 'Joined'}
-                </>
+                showLeaveConfirm ? (
+                  <>
+                    <Users className="h-4 w-4 mr-2" />
+                    {leaveGroupMutation.isPending ? 'Leaving...' : 'Leave'}
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-4 w-4 mr-2" />
+                    Joined
+                  </>
+                )
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
