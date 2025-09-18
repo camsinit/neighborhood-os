@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { AppSheetContent } from '@/components/ui/app-sheet-content';
-import { Users, Lock, Globe, Plus, Edit, MessageSquare, User } from 'lucide-react';
+import { Users, Lock, Globe, Plus, Edit, MessageSquare, User, X } from 'lucide-react';
 import { Group } from '@/types/groups';
 import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups';
 import { useGroupActivities } from '@/hooks/useGroupActivities';
@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
 import { EditGroupForm } from './EditGroupForm';
 import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
+import { CreateGroupUpdate } from './activity/CreateGroupUpdate';
 
 /**
  * GroupSheetContent Component
@@ -39,9 +40,10 @@ const GroupSheetContent = ({
 }: GroupSheetContentProps) => {
   // State for current user and membership status
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
-  const [isPostUpdateOpen, setIsPostUpdateOpen] = useState(false);
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
+  
+  // State for content view - determines what to show in the sheet
+  const [currentView, setCurrentView] = useState<'group' | 'create-event' | 'create-update'>('group');
 
   // Group data hooks - fetch members and activities for this group
   const {
@@ -114,99 +116,138 @@ const GroupSheetContent = ({
       onOpenChange(false);
     }
   };
+
+  // Functions to handle view switching
+  const handleCreateEvent = () => {
+    setCurrentView('create-event');
+  };
+
+  const handleCreateUpdate = () => {
+    setCurrentView('create-update');
+  };
+
+  const handleBackToGroup = () => {
+    setCurrentView('group');
+  };
+
+  const handleEventCreated = () => {
+    setCurrentView('group');
+    // Refresh the group activities after event creation
+    queryClient.invalidateQueries({
+      queryKey: ['activities']
+    });
+  };
+
+  const handleUpdateCreated = () => {
+    setCurrentView('group');
+    // Refresh the group activities after update creation
+    queryClient.invalidateQueries({
+      queryKey: ['group-timeline', group.id]
+    });
+  };
   return <>
-      <AppSheetContent moduleTheme="neighbors" className="overflow-y-auto">
+      <AppSheetContent moduleTheme="neighbors" className="overflow-y-auto relative">
+        {/* Main Group View */}
+        {currentView === 'group' && (
+          <div className="space-y-6 pt-6">
+            {/* Banner Image (if available) - provides visual appeal and group branding */}
+            {group.banner_image_url && (
+              <div className="h-48 rounded-lg overflow-hidden">
+                <img src={group.banner_image_url} alt={`${group.name} banner`} className="w-full h-full object-cover" />
+              </div>
+            )}
 
-        <div className="space-y-6 pt-6">
-          {/* Banner Image (if available) - provides visual appeal and group branding */}
-          {group.banner_image_url && <div className="h-48 rounded-lg overflow-hidden">
-              <img src={group.banner_image_url} alt={`${group.name} banner`} className="w-full h-full object-cover" />
-            </div>}
-
-          {/* Group Header Section - Main group information display */}
-          <div className="space-y-4">
-            {/* Top row: Group name and privacy status indicator */}
-            
-            
-            {/* Privacy status and member count with profile images */}
-            <div className="flex items-center gap-2 text-gray-600">
-              {/* Profile images on the left */}
-              <div className="flex -space-x-1">
-                {memberAvatars.slice(0, 3).map((member, index) => (
-                  <Avatar key={member.user_id} className="h-5 w-5 border border-white">
-                    <AvatarImage src={member.profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-xs">
-                      {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-                {additionalMemberCount > 0 && (
-                  <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">
-                      +{additionalMemberCount}
-                    </span>
-                  </div>
+            {/* Group Header Section - Main group information display */}
+            <div className="space-y-4">
+              {/* Privacy status and member count with profile images */}
+              <div className="flex items-center gap-2 text-gray-600">
+                {/* Profile images on the left */}
+                <div className="flex -space-x-1">
+                  {memberAvatars.slice(0, 3).map((member, index) => (
+                    <Avatar key={member.user_id} className="h-5 w-5 border border-white">
+                      <AvatarImage src={member.profile?.avatar_url || ''} />
+                      <AvatarFallback className="text-xs">
+                        {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {additionalMemberCount > 0 && (
+                    <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
+                      <span className="text-xs font-medium text-gray-600">
+                        +{additionalMemberCount}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="text-sm text-gray-600">
+                  {group.member_count || 0} members
+                </span>
+                <span className="text-sm text-gray-600">
+                  {group.is_private ? 'Private group' : 'Public group'}
+                </span>
+                
+                {/* Edit button for group owners/moderators */}
+                {canEditGroup && (
+                  <button 
+                    onClick={() => setIsEditGroupOpen(true)} 
+                    className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                    aria-label="Edit group"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
                 )}
               </div>
-              <span className="text-sm text-gray-600">
-                {group.member_count || 0} members
-              </span>
-              <span className="text-sm text-gray-600">
-                {group.is_private ? 'Private group' : 'Public group'}
-              </span>
-              
-              {/* Edit button for group owners/moderators */}
-              {canEditGroup && (
-                <button 
-                  onClick={() => setIsEditGroupOpen(true)} 
-                  className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
-                  aria-label="Edit group"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-              )}
             </div>
 
+            {/* Group Activity Timeline - Shows events and updates */}
+            {isUserMember && (
+              <GroupActivityTimeline 
+                groupId={group.id}
+                isGroupManager={canEditGroup}
+                onCreateEvent={handleCreateEvent}
+                onCreateUpdate={handleCreateUpdate}
+                showInviteButton={isUserMember}
+                onInvite={() => {/* TODO: Add invite functionality */}}
+              />
+            )}
           </div>
+        )}
 
-          {/* Group Activity Timeline - Shows events and updates */}
-          {isUserMember && (
-            <GroupActivityTimeline 
-              groupId={group.id}
-              isGroupManager={canEditGroup}
-              onCreateEvent={() => setIsCreateEventOpen(true)}
-              showInviteButton={isUserMember}
-              onInvite={() => {/* TODO: Add invite functionality */}}
-            />
-          )}
-
-        </div>
-      </AppSheetContent>
-
-      {/* Create Event Dialog - Allows members to create events for the group */}
-      <AddEventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} onAddEvent={() => {
-      setIsCreateEventOpen(false);
-      // Refresh the group activities after event creation
-      queryClient.invalidateQueries({
-        queryKey: ['activities']
-      });
-    }} initialDate={null}
-    // Pre-populate with group information for convenience
-    initialValues={{
-      groupId: group.id
-    }} />
-
-      {/* Post Update Sheet - TODO: Implement when update posting is available */}
-      {isPostUpdateOpen && <Sheet open={isPostUpdateOpen} onOpenChange={setIsPostUpdateOpen}>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Post Group Update</SheetTitle>
-            </SheetHeader>
-            <div className="py-4">
-              <p className="text-gray-500">Update posting functionality coming soon...</p>
+        {/* Create Event View - Replaces entire content */}
+        {currentView === 'create-event' && (
+          <div className="absolute inset-0 bg-background">
+            {/* Header with back button */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Create Event</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBackToGroup}
+                className="h-8 w-8"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
-          </SheetContent>
-        </Sheet>}
+            
+            {/* Event creation form content - simplified for inline display */}
+            <div className="p-4">
+              <p className="text-gray-500 text-center">Event creation form will be embedded here</p>
+              <Button onClick={handleBackToGroup} className="mt-4 w-full">
+                Back to Group
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Create Update View - Replaces entire content */}
+        {currentView === 'create-update' && (
+          <CreateGroupUpdate
+            groupId={group.id}
+            onClose={handleBackToGroup}
+            onSuccess={handleUpdateCreated}
+          />
+        )}
+      </AppSheetContent>
 
       {/* Edit Group Sheet - Allows owners/moderators to edit group details */}
       {isEditGroupOpen && <Sheet open={isEditGroupOpen} onOpenChange={setIsEditGroupOpen}>
