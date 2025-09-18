@@ -34,16 +34,17 @@ const EventFormGroupField = ({
     <div className="space-y-2">
       <Label htmlFor="group">Group (Optional)</Label>
       <Select 
-        value={selectedGroupId || ""} 
-        onValueChange={(value) => onGroupChange(value || undefined)}
+        value={selectedGroupId || "__none__"} 
+        onValueChange={(value) => onGroupChange(value === "__none__" ? undefined : value)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select a group (optional)" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">No group</SelectItem>
+          {/* Use a special non-empty value for "No group" to avoid Radix UI validation errors */}
+          <SelectItem value="__none__">No group</SelectItem>
           {isLoading ? (
-            <SelectItem value="" disabled>Loading groups...</SelectItem>
+            <SelectItem value="__loading__" disabled>Loading groups...</SelectItem>
           ) : (
             memberGroups.map((group) => (
               <SelectItem key={group.id} value={group.id}>
