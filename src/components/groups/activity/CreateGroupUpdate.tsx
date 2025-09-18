@@ -117,21 +117,21 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
       className="absolute inset-0 bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200 flex flex-col"
       onKeyDown={handleKeyDown}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <h2 className="text-lg font-semibold">Create Update</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="h-8 w-8"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Form Content - contained within the create update div */}
+      {/* Combined Header and Form Content */}
       <div className="p-4 space-y-4 flex-1">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Create Update</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-8 w-8"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+
         {/* Title Field */}
         <div>
           <div className="flex items-center justify-between mb-2">
