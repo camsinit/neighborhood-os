@@ -162,15 +162,16 @@ const GroupSheetContent = ({
               {/* Right side: Action buttons - contextual based on membership status */}
               <div className="flex items-center gap-3">
                 {currentUserId && <>
-                    {/* Dynamic button: Join if not member, Invite if member */}
-                    <Button onClick={isUserMember ? undefined : handleJoinGroup} disabled={!isUserMember && joinGroupMutation.isPending} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                      {isUserMember ? <>
-                          <Plus className="h-4 w-4" />
-                          Invite
-                        </> : <>
-                          {joinGroupMutation.isPending ? 'Joining...' : 'Join'}
-                        </>}
-                    </Button>
+                    {/* Dynamic button: Join if not member */}
+                    {!isUserMember && (
+                      <Button 
+                        onClick={handleJoinGroup} 
+                        disabled={joinGroupMutation.isPending} 
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
+                      >
+                        {joinGroupMutation.isPending ? 'Joining...' : 'Join'}
+                      </Button>
+                    )}
                     
                     {/* Share button - only show for members */}
                     {isUserMember && <Button variant="outline" className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
@@ -193,6 +194,8 @@ const GroupSheetContent = ({
               groupId={group.id}
               isGroupManager={canEditGroup}
               onCreateEvent={() => setIsCreateEventOpen(true)}
+              showInviteButton={isUserMember}
+              onInvite={() => {/* TODO: Add invite functionality */}}
             />
           )}
 

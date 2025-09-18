@@ -24,12 +24,16 @@ interface GroupActivityTimelineProps {
   groupId: string;
   isGroupManager: boolean;
   onCreateEvent: () => void;
+  showInviteButton?: boolean;
+  onInvite?: () => void;
 }
 
 export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   groupId,
   isGroupManager,
-  onCreateEvent
+  onCreateEvent,
+  showInviteButton = false,
+  onInvite
 }) => {
   // Component state for overlays and detail panels
   const [isCreateUpdateOpen, setIsCreateUpdateOpen] = useState(false);
@@ -192,7 +196,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
         <div className="flex gap-2 mb-6">
           <Button
             onClick={handleCreateUpdate}
-            className="flex-1 h-12"
+            className="flex-1 h-10"
             variant="outline"
           >
             <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
@@ -201,12 +205,23 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
           
           <Button
             onClick={onCreateEvent}
-            className="flex-1 h-12"
+            className="flex-1 h-10"
             variant="outline"
           >
             <Calendar className="w-4 h-4 mr-2 text-blue-600" />
             Create Event
           </Button>
+
+          {showInviteButton && (
+            <Button
+              onClick={onInvite}
+              className="flex-1 h-10 bg-white text-purple-600 border-purple-600 hover:bg-purple-50"
+              variant="outline"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Invite
+            </Button>
+          )}
         </div>
       )}
 
