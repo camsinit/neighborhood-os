@@ -28,7 +28,7 @@ interface AppSheetContentProps extends React.ComponentPropsWithoutRef<typeof She
    */
   moduleTheme?: ModuleTheme;
   /**
-   * Custom width override (defaults to responsive w-[400px] sm:w-[540px])
+   * Custom width override (defaults to sm:max-w-md for consistency)
    */
   width?: string;
 }
@@ -39,7 +39,7 @@ interface AppSheetContentProps extends React.ComponentPropsWithoutRef<typeof She
  * A enhanced version of SheetContent that provides:
  * - Consistent white background across all side panels
  * - Optional module-themed left border for visual association
- * - Standardized responsive width (400px mobile, 540px desktop)
+ * - Standardized responsive width (sm:max-w-md for consistency)
  * - Clean shadow and border styling
  * - Automatic overflow handling for scrollable content
  */
@@ -50,7 +50,7 @@ const AppSheetContent = React.forwardRef<
   className, 
   children, 
   moduleTheme, 
-  width = "w-[400px] sm:w-[540px]",
+  width = "sm:max-w-md",
   ...props 
 }, ref) => {
   
