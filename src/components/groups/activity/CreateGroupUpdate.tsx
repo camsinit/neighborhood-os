@@ -114,7 +114,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
 
   return (
     <div 
-      className="absolute inset-0 bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200"
+      className="fixed inset-0 bg-background border rounded-lg shadow-lg z-50 animate-in slide-in-from-top-4 duration-200"
       onKeyDown={handleKeyDown}
     >
       {/* Header */}
