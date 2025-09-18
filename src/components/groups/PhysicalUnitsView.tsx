@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Users, Loader2, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Users, Loader2, Home, Plus } from 'lucide-react';
 import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents } from '@/hooks/useGroups';
 
 interface PhysicalUnitsViewProps {
@@ -179,6 +180,22 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
               <span className="text-sm">No residents assigned yet</span>
             </div>
           )}
+
+          {/* Join button */}
+          <div className="pt-2 border-t border-gray-100">
+            <Button 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent card click when button is clicked
+                // TODO: Implement join functionality
+                console.log('Joining unit:', unit.unit_name);
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Join
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
