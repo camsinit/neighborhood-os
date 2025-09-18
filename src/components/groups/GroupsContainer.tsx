@@ -14,6 +14,7 @@ interface GroupsContainerProps {
   onTabChange: (tab: string) => void;
   onGroupClick?: (itemId: string, item?: any) => void;
   onNeighborClick?: (itemId: string, item?: any) => void;
+  onUnitClick?: (unit: any) => void; // Add unit click handler prop
 }
 
 /**
@@ -27,7 +28,8 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
   activeTab,
   onTabChange,
   onGroupClick,
-  onNeighborClick
+  onNeighborClick,
+  onUnitClick
 }) => {
   // State management for search and filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +79,7 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
       </TabsContent>
       
       <TabsContent value="units" className="m-0">
-        <PhysicalUnitsView searchQuery={searchQuery} />
+        <PhysicalUnitsView searchQuery={searchQuery} onUnitClick={onUnitClick} />
       </TabsContent>
       
       <TabsContent value="directory" className="m-0">

@@ -6,6 +6,7 @@ import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents } from '@/
 
 interface PhysicalUnitsViewProps {
   searchQuery: string;
+  onUnitClick?: (unit: any) => void; // Add click handler prop
 }
 
 /**
@@ -16,7 +17,8 @@ interface PhysicalUnitsViewProps {
  * The title and content adapt to the admin's configured physical unit type.
  */
 export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
-  searchQuery
+  searchQuery,
+  onUnitClick
 }) => {
   // Get the neighborhood's physical unit configuration and units with resident assignments
   const { data: physicalConfig, isLoading: configLoading } = useNeighborhoodPhysicalConfig();
@@ -81,10 +83,11 @@ export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
       {/* Physical units grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredUnits.map((unit) => (
-          <PhysicalUnitCard
-            key={unit.unit_name}
-            unit={unit}
-            unitLabel={physicalConfig.physical_unit_label}
+          <PhysicalUnitCard 
+            key={unit.unit_name} 
+            unit={unit} 
+            unitLabel={physicalConfig?.physical_unit_label || 'Units'}
+            onUnitClick={onUnitClick}
           />
         ))}
       </div>
@@ -113,11 +116,15 @@ interface PhysicalUnitCardProps {
     resident_count: number;
   };
   unitLabel: string;
+  onUnitClick?: (unit: any) => void; // Add click handler prop
 }
 
-const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel }) => {
+const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, onUnitClick }) => {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300">
+    <Card 
+      className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300 cursor-pointer"
+      onClick={() => onUnitClick?.(unit)}
+    >
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Unit header */}

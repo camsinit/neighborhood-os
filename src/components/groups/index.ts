@@ -7,3 +7,4 @@ export { GroupsContainer } from './GroupsContainer';
 export { GroupsSearchBar } from './GroupsSearchBar';
 export { GroupsSections } from './GroupsSections';
 export { default as GroupSheetContent } from './GroupSheetContent';
+export { default as PhysicalUnitSheetContent } from './PhysicalUnitSheetContent';

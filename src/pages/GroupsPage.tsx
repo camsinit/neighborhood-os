@@ -7,6 +7,7 @@ import { usePageSheetController } from '@/hooks/usePageSheetController';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
 import NeighborSheetContent from '@/components/neighbors/NeighborSheetContent';
 import GroupSheetContent from '@/components/groups/GroupSheetContent';
+import PhysicalUnitSheetContent from '@/components/groups/PhysicalUnitSheetContent';
 import { useNeighborUsers } from '@/components/neighbors/hooks/useNeighborUsers';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
@@ -54,6 +55,10 @@ function GroupsPage() {
     },
     pageName: 'GroupsPage-Groups'
   });
+
+  // Physical unit sheet controller
+  const [isUnitSheetOpen, setIsUnitSheetOpen] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<any>(null);
   
   // State for dialogs and sheets
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -62,6 +67,27 @@ function GroupsPage() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+  };
+
+  // Handle neighbor sheet opening
+  const handleNeighborClick = (itemId: string, item?: any) => {
+    openNeighborSheet(itemId);
+  };
+
+  // Handle group sheet opening  
+  const handleGroupClick = (itemId: string, item?: any) => {
+    openGroupSheet(itemId);
+  };
+
+  // Handle physical unit sheet opening
+  const handleUnitClick = (unit: any) => {
+    setSelectedUnit(unit);
+    setIsUnitSheetOpen(true);
+  };
+
+  const handleCloseUnitSheet = () => {
+    setIsUnitSheetOpen(false);
+    setSelectedUnit(null);
   };
 
   const handleCreateGroup = (templateData?: { name: string; description: string }) => {
@@ -94,8 +120,9 @@ function GroupsPage() {
               onCreateGroup={handleCreateGroup}
               activeTab={activeTab}
               onTabChange={handleTabChange}
-              onGroupClick={openGroupSheet}
-              onNeighborClick={openNeighborSheet}
+              onGroupClick={handleGroupClick}
+              onNeighborClick={handleNeighborClick}
+              onUnitClick={handleUnitClick}
             />
           </Tabs>
         </div>
@@ -112,6 +139,13 @@ function GroupsPage() {
       {isGroupSheetOpen && groupSheetItem && (
         <Sheet open={isGroupSheetOpen} onOpenChange={(open) => !open && closeGroupSheet()}>
           <GroupSheetContent group={groupSheetItem} onOpenChange={closeGroupSheet} />
+        </Sheet>
+      )}
+
+      {/* Physical unit sheet management */}
+      {isUnitSheetOpen && selectedUnit && (
+        <Sheet open={isUnitSheetOpen} onOpenChange={(open) => !open && handleCloseUnitSheet()}>
+          <PhysicalUnitSheetContent unit={selectedUnit} onOpenChange={handleCloseUnitSheet} />
         </Sheet>
       )}
 
