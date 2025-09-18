@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Loader2, Home, Plus } from 'lucide-react';
-import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents, useJoinGroup, useGroups } from '@/hooks/useGroups';
+import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents, useJoinGroup, useLeaveGroup, useGroups } from '@/hooks/useGroups';
 
 interface PhysicalUnitsViewProps {
   searchQuery: string;
@@ -108,8 +108,9 @@ interface PhysicalUnitCardProps {
 }
 
 const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, onUnitClick }) => {
-  // Hook for joining groups
+  // Hooks for joining and leaving groups
   const joinGroupMutation = useJoinGroup();
+  const leaveGroupMutation = useLeaveGroup();
   
   // Get all groups to find the matching physical group for this unit
   const { data: allGroups = [] } = useGroups({});
@@ -123,12 +124,18 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
   // Check if user is already a member of this physical group
   const isUserMember = !!matchingGroup?.current_user_membership;
   
-  // Handle joining the physical unit group
-  const handleJoinUnit = (e: React.MouseEvent) => {
+  // Handle joining or leaving the physical unit group
+  const handleToggleMembership = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when button is clicked
     
     if (matchingGroup) {
-      joinGroupMutation.mutate(matchingGroup.id);
+      if (isUserMember) {
+        // User is a member, so leave the group
+        leaveGroupMutation.mutate(matchingGroup.id);
+      } else {
+        // User is not a member, so join the group
+        joinGroupMutation.mutate(matchingGroup.id);
+      }
     } else {
       console.log('No matching group found for unit:', unit.unit_name);
     }
@@ -188,26 +195,26 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
             </div>
           )}
 
-          {/* Join/Joined button */}
+          {/* Join/Leave toggle button */}
           <div className="pt-2 border-t border-gray-100">
             <Button 
               className={isUserMember 
-                ? "w-full bg-white hover:bg-gray-50 border text-purple-600 border-purple-200" 
+                ? "w-full bg-white hover:bg-red-50 border text-red-600 border-red-200 hover:border-red-300" 
                 : "w-full bg-purple-600 hover:bg-purple-700 text-white"
               }
               size="sm"
-              onClick={handleJoinUnit}
-              disabled={joinGroupMutation.isPending || isUserMember}
+              onClick={handleToggleMembership}
+              disabled={joinGroupMutation.isPending || leaveGroupMutation.isPending}
             >
               {isUserMember ? (
                 <>
                   <Users className="h-4 w-4 mr-2" />
-                  Joined
+                  {leaveGroupMutation.isPending ? 'Leaving...' : 'Leave'}
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Join
+                  {joinGroupMutation.isPending ? 'Joining...' : 'Join'}
                 </>
               )}
             </Button>
