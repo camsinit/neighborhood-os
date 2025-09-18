@@ -90,7 +90,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       </div>
 
       {/* Separating stroke */}
-      <div className="h-px bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"></div>
+      <div className="h-px bg-gradient-to-r from-purple-100 via-purple-200 to-purple-100"></div>
 
       {/* Content Section */}
       <CardContent className="p-4 space-y-3">
