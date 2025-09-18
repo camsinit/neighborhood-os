@@ -116,63 +116,61 @@ const GroupSheetContent = ({
   };
   return <>
       <AppSheetContent moduleTheme="neighbors" className="overflow-y-auto">
-        {/* Banner Image Section */}
-        {group.banner_image_url && (
-          <div className="h-48 rounded-lg overflow-hidden mx-6 mt-6">
-            <img 
-              src={group.banner_image_url} 
-              alt={`${group.name} banner`} 
-              className="w-full h-full object-cover" 
-            />
-          </div>
-        )}
 
-        {/* Group Info Section */}
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            {/* Member avatars */}
-            <div className="flex -space-x-1">
-              {memberAvatars.slice(0, 3).map((member, index) => (
-                <Avatar key={member.user_id} className="h-5 w-5 border border-white">
-                  <AvatarImage src={member.profile?.avatar_url || ''} />
-                  <AvatarFallback className="text-xs">
-                    {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {additionalMemberCount > 0 && (
-                <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    +{additionalMemberCount}
-                  </span>
-                </div>
+        <div className="space-y-6 pt-6">
+          {/* Banner Image (if available) - provides visual appeal and group branding */}
+          {group.banner_image_url && <div className="h-48 rounded-lg overflow-hidden">
+              <img src={group.banner_image_url} alt={`${group.name} banner`} className="w-full h-full object-cover" />
+            </div>}
+
+          {/* Group Header Section - Main group information display */}
+          <div className="space-y-4">
+            {/* Top row: Group name and privacy status indicator */}
+            
+            
+            {/* Privacy status and member count with profile images */}
+            <div className="flex items-center gap-2 text-gray-600">
+              {/* Profile images on the left */}
+              <div className="flex -space-x-1">
+                {memberAvatars.slice(0, 3).map((member, index) => (
+                  <Avatar key={member.user_id} className="h-5 w-5 border border-white">
+                    <AvatarImage src={member.profile?.avatar_url || ''} />
+                    <AvatarFallback className="text-xs">
+                      {member.profile?.display_name?.[0]?.toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {additionalMemberCount > 0 && (
+                  <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600">
+                      +{additionalMemberCount}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <span className="text-sm text-gray-600">
+                {group.member_count || 0} members
+              </span>
+              <span className="text-sm text-gray-600">
+                {group.is_private ? 'Private group' : 'Public group'}
+              </span>
+              
+              {/* Edit button for group owners/moderators */}
+              {canEditGroup && (
+                <button 
+                  onClick={() => setIsEditGroupOpen(true)} 
+                  className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                  aria-label="Edit group"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
               )}
             </div>
-            
-            {/* Group metadata */}
-            <span className="text-sm text-gray-600">
-              {group.member_count || 0} members
-            </span>
-            <span className="text-sm text-gray-600">
-              {group.is_private ? 'Private group' : 'Public group'}
-            </span>
-            
-            {/* Edit button for group owners/moderators */}
-            {canEditGroup && (
-              <button 
-                onClick={() => setIsEditGroupOpen(true)} 
-                className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
-                aria-label="Edit group"
-              >
-                <Edit className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
 
-        {/* Activity Timeline Section */}
-        {isUserMember && (
-          <div className="px-6 pb-6">
+          </div>
+
+          {/* Group Activity Timeline - Shows events and updates */}
+          {isUserMember && (
             <GroupActivityTimeline 
               groupId={group.id}
               isGroupManager={canEditGroup}
@@ -180,8 +178,9 @@ const GroupSheetContent = ({
               showInviteButton={isUserMember}
               onInvite={() => {/* TODO: Add invite functionality */}}
             />
-          </div>
-        )}
+          )}
+
+        </div>
       </AppSheetContent>
 
       {/* Create Event Dialog - Allows members to create events for the group */}
