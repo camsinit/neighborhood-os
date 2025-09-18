@@ -64,12 +64,13 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     physicalUnits: [] as string[]
   });
   
-  // State for tracking which physical units are in edit mode
-  const [editingUnitIndex, setEditingUnitIndex] = useState<number | null>(null);
-  
   // State for image upload and auto-save
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  
+  // State for physical units save tracking
+  const [hasUnsavedPhysicalUnits, setHasUnsavedPhysicalUnits] = useState(false);
+  const [isSavingPhysicalUnits, setIsSavingPhysicalUnits] = useState(false);
   
   // State for delete operation
   const [isDeleting, setIsDeleting] = useState(false);
@@ -102,97 +103,25 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         return;
       }
       
-      // Handle physical units separately to create groups
-      if (fieldName === 'physicalUnits' && typeof value === 'string') {
-        const newUnits = JSON.parse(value) as string[];
-        const currentUnits = (currentNeighborhood as any).physical_units || [];
-        
-        // Update the physical units in the database first
-        const { error } = await supabase
-          .from('neighborhoods')
-          .update({ [dbField]: newUnits })
-          .eq('id', currentNeighborhood.id);
-
-        if (error) throw error;
-        
-        // Find newly added units (units that exist in newUnits but not in currentUnits)
-        const addedUnits = newUnits.filter(unit => 
-          unit.trim() !== '' && !currentUnits.includes(unit)
-        );
-
-        // Invalidate cache to refresh Streets view immediately
-        queryClient.invalidateQueries({ 
-          queryKey: ['physicalUnitsWithResidents', currentNeighborhood.id] 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id) 
-        });
-        
-        // Only create physical groups for newly added units
-        if (addedUnits.length > 0) {
-          logger.info('Creating groups for new physical units', { addedUnits, neighborhoodId: currentNeighborhood.id });
-          
-          for (const unitName of addedUnits) {
-            try {
-              await createGroupMutation.mutateAsync({
-                name: `${unitName} Group`,
-                description: `Residents of ${unitName}`,
-                group_type: 'physical',
-                physical_unit_value: unitName,
-                is_private: false,
-                max_members: 100
-              });
-              
-              logger.info('Auto-created physical group', { unitName, neighborhoodId: currentNeighborhood.id });
-            } catch (groupError) {
-              logger.warn('Failed to auto-create group for physical unit', { 
-                unitName, 
-                error: groupError,
-                neighborhoodId: currentNeighborhood.id 
-              });
-              // Don't fail the entire operation if group creation fails
-            }
-          }
-        } else {
-          logger.info('No new physical units to create groups for', { currentUnits, newUnits });
-        }
-        
-        // Invalidate groups cache to refresh physical units data in Groups page
-        queryClient.invalidateQueries({
-          queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id)
-        });
-        queryClient.invalidateQueries({
-          queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
-        });
-      } else {
-        // Update other fields normally
-        const updateData: Record<string, any> = {
-          [dbField]: value || null
-        };
-        
-        const { error } = await supabase
-          .from('neighborhoods')
-          .update(updateData)
-          .eq('id', currentNeighborhood.id);
-
-        if (error) throw error;
-        
-        // If updating physical unit type or label, invalidate groups cache
-        if (fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
-          queryClient.invalidateQueries({
-            queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id)
-          });
-          queryClient.invalidateQueries({
-            queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
-          });
-        }
+      // Skip physical units fields from auto-save
+      if (fieldName === 'physicalUnits' || fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+        return;
       }
+      
+      // Update other fields normally
+      const updateData: Record<string, any> = {
+        [dbField]: value || null
+      };
+      
+      const { error } = await supabase
+        .from('neighborhoods')
+        .update(updateData)
+        .eq('id', currentNeighborhood.id);
 
-      // Refresh neighborhood data immediately for physical unit type/label changes to show saved values
-      if (fieldName === 'physicalUnitType' || fieldName === 'physicalUnitLabel') {
-        console.log('[AdminSettings] Refreshing neighborhood data after physical unit save:', fieldName);
-        refreshNeighborhoodData();
-      }
+      if (error) throw error;
+
       
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
@@ -234,7 +163,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
   // Initialize form data when neighborhood data loads
   useEffect(() => {
-    if (currentNeighborhood && !isAutoSaving) {
+    if (currentNeighborhood) {
       const neighborhood = currentNeighborhood as any; // Cast to access database properties
       setFormData({
         name: neighborhood.name || '',
@@ -262,8 +191,11 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         physicalUnitLabel: neighborhood.physical_unit_label || '',
         physicalUnits: Array.isArray(neighborhood.physical_units) ? neighborhood.physical_units : []
       });
+      
+      // Reset unsaved changes flag when data loads
+      setHasUnsavedPhysicalUnits(false);
     }
-  }, [currentNeighborhood, logger, isAutoSaving]);
+  }, [currentNeighborhood, logger]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
@@ -275,24 +207,16 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const handlePhysicalUnitsChange = (field: string, value: string | string[]) => {
     if (isReadOnly) return;
     
-    // Debug logging for physical unit type changes
-    if (field === 'physicalUnitType') {
-      console.log('[AdminSettings] Physical unit type changed:', { 
-        from: physicalUnitsConfig.physicalUnitType, 
-        to: value,
-        neighborhoodId: currentNeighborhood?.id 
-      });
-    }
-    
+    // Update local state only - no auto-save
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
-    // Trigger auto-save for this field
-    debouncedAutoSave(field, typeof value === 'string' ? value : value.join(','));
+    setHasUnsavedPhysicalUnits(true);
   };
 
   const addPhysicalUnit = () => {
     if (isReadOnly) return;
     const newUnits = [...physicalUnitsConfig.physicalUnits, ''];
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
+    setHasUnsavedPhysicalUnits(true);
     
     // Focus the newly added input field after a brief delay
     setTimeout(() => {
@@ -308,7 +232,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     const newUnits = physicalUnitsConfig.physicalUnits.filter((_, i) => i !== index);
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    debouncedAutoSave('physicalUnits', JSON.stringify(newUnits));
+    setHasUnsavedPhysicalUnits(true);
   };
 
   const updatePhysicalUnit = (index: number, value: string) => {
@@ -316,38 +240,106 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     const newUnits = [...physicalUnitsConfig.physicalUnits];
     newUnits[index] = value;
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    debouncedAutoSave('physicalUnits', JSON.stringify(newUnits));
+    setHasUnsavedPhysicalUnits(true);
   };
 
-  const handleEditUnit = (index: number) => {
-    setEditingUnitIndex(index);
-  };
-
-  const handleSaveUnit = (index: number) => {
-    setEditingUnitIndex(null);
-    // Auto-save is already handled by updatePhysicalUnit
-  };
-
-  const handleCancelEdit = (index: number) => {
-    setEditingUnitIndex(null);
-    // Could restore previous value here if needed
-  };
-
-  // Check if there are unsaved changes by comparing with original neighborhood data
-  const hasUnsavedChanges = () => {
-    if (!currentNeighborhood) return false;
-    const neighborhood = currentNeighborhood as any;
+  // Save physical units with proper validation and group creation
+  const savePhysicalUnits = async () => {
+    if (isReadOnly || !currentNeighborhood || !hasUnsavedPhysicalUnits) return;
     
-    return (
-      formData.name !== (neighborhood.name || '') ||
-      formData.city !== (neighborhood.city || '') ||
-      formData.state !== (neighborhood.state || '') ||
-      formData.timezone !== (neighborhood.timezone || 'America/Los_Angeles') ||
-      formData.inviteHeaderImageUrl !== (neighborhood.invite_header_image_url || '') ||
-      physicalUnitsConfig.physicalUnitType !== (neighborhood.physical_unit_type || 'street') ||
-      physicalUnitsConfig.physicalUnitLabel !== (neighborhood.physical_unit_label || '') ||
-      JSON.stringify(physicalUnitsConfig.physicalUnits) !== JSON.stringify(neighborhood.physical_units || [])
-    );
+    setIsSavingPhysicalUnits(true);
+    
+    try {
+      // Validate physical units - remove empty strings
+      const validUnits = physicalUnitsConfig.physicalUnits.filter(unit => unit.trim() !== '');
+      
+      // Check for duplicates
+      const uniqueUnits = [...new Set(validUnits)];
+      if (uniqueUnits.length !== validUnits.length) {
+        toast({
+          title: "Duplicate Units",
+          description: "Please remove duplicate physical units.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const neighborhood = currentNeighborhood as any;
+      const currentUnits = neighborhood.physical_units || [];
+      
+      // Update the physical units in the database
+      const { error } = await supabase
+        .from('neighborhoods')
+        .update({
+          physical_unit_type: physicalUnitsConfig.physicalUnitType,
+          physical_unit_label: physicalUnitsConfig.physicalUnitLabel || null,
+          physical_units: uniqueUnits
+        })
+        .eq('id', currentNeighborhood.id);
+
+      if (error) throw error;
+      
+      // Find newly added units for group creation
+      const addedUnits = uniqueUnits.filter(unit => !currentUnits.includes(unit));
+      
+      // Create groups for new physical units
+      if (addedUnits.length > 0) {
+        logger.info('Creating groups for new physical units', { addedUnits, neighborhoodId: currentNeighborhood.id });
+        
+        for (const unitName of addedUnits) {
+          try {
+            await createGroupMutation.mutateAsync({
+              name: `${unitName} Group`,
+              description: `Residents of ${unitName}`,
+              group_type: 'physical',
+              physical_unit_value: unitName,
+              is_private: false,
+              max_members: 100
+            });
+            
+            logger.info('Auto-created physical group', { unitName, neighborhoodId: currentNeighborhood.id });
+          } catch (groupError) {
+            logger.warn('Failed to auto-create group for physical unit', { 
+              unitName, 
+              error: groupError,
+              neighborhoodId: currentNeighborhood.id 
+            });
+          }
+        }
+      }
+      
+      // Refresh caches
+      queryClient.invalidateQueries({ 
+        queryKey: ['physicalUnitsWithResidents', currentNeighborhood.id] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: groupQueryKeys.neighborhoodConfig(currentNeighborhood.id) 
+      });
+      queryClient.invalidateQueries({
+        queryKey: groupQueryKeys.physicalUnits(currentNeighborhood.id)
+      });
+      
+      // Update local state to reflect saved data
+      setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: uniqueUnits }));
+      setHasUnsavedPhysicalUnits(false);
+      
+      // Refresh neighborhood data to show saved values
+      refreshNeighborhoodData();
+      
+      toast({
+        title: "Physical Units Saved",
+        description: "Physical units configuration has been updated successfully.",
+      });
+    } catch (error) {
+      logger.error('Error saving physical units', error as any);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save physical units. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingPhysicalUnits(false);
+    }
   };
 
   const handleSaveSettings = async () => {
@@ -824,46 +816,42 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                       placeholder={`${physicalUnitsConfig.physicalUnitType.charAt(0).toUpperCase() + physicalUnitsConfig.physicalUnitType.slice(1)} Name`}
                       disabled={isReadOnly}
                     />
-                    {!isReadOnly && (
-                      <div className="flex items-center gap-1">
-                        {editingUnitIndex === index ? (
-                          <>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSaveUnit(index)}
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removePhysicalUnit(index)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditUnit(index)}
-                            className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                     {!isReadOnly && (
+                       <Button
+                         type="button"
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => removePhysicalUnit(index)}
+                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                       >
+                         <Minus className="h-4 w-4" />
+                       </Button>
+                     )}
                   </div>
                 ))
               )}
             </div>
+            
+            {/* Save Physical Units Button */}
+            {!isReadOnly && hasUnsavedPhysicalUnits && (
+              <div className="pt-4 border-t">
+                <Button
+                  type="button"
+                  onClick={savePhysicalUnits}
+                  disabled={isSavingPhysicalUnits}
+                  className="w-full"
+                >
+                  {isSavingPhysicalUnits ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving Physical Units...
+                    </>
+                  ) : (
+                    'Save Physical Units'
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
