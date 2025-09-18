@@ -160,35 +160,6 @@ const GroupSheetContent = ({
               </span>
             </div>
 
-            {/* Action buttons section */}
-            <div className="flex items-center justify-between">
-              {/* Right side: Action buttons - contextual based on membership status */}
-              <div className="flex items-center gap-3">
-                {currentUserId && <>
-                    {/* Dynamic button: Join if not member */}
-                    {!isUserMember && (
-                      <Button 
-                        onClick={handleJoinGroup} 
-                        disabled={joinGroupMutation.isPending} 
-                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
-                      >
-                        {joinGroupMutation.isPending ? 'Joining...' : 'Join'}
-                      </Button>
-                    )}
-                    
-                    {/* Share button - only show for members */}
-                    {isUserMember && <Button variant="outline" className="bg-gray-700 hover:bg-gray-600 text-white border-gray-600 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Share
-                      </Button>}
-                  </>}
-                
-                {/* Leave option for members (but not owners) - prevent owners from leaving their groups */}
-                {currentUserId && isUserMember && memberRole !== 'owner' && <Button variant="ghost" size="sm" onClick={handleLeaveGroup} disabled={leaveGroupMutation.isPending} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
-                    Leave
-                  </Button>}
-              </div>
-            </div>
           </div>
 
           {/* Group Activity Timeline - Shows events and updates */}
