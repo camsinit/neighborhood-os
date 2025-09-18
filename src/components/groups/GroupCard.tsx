@@ -4,10 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, Lock, Globe, Calendar, User } from 'lucide-react';
-import { Group } from '@/types/groups';
-// Removed join/leave imports - handled in GroupProfileDialog now
+import { Group, GroupMember } from '@/types/groups';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { GroupService } from '@/services/groupService';
 
 interface GroupCardProps {
   group: Group;
@@ -22,7 +21,24 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onClick,
   showJoinButton = false
 }) => {
-  // Removed mutation hooks and user state - handled in GroupProfileDialog now
+  // State to hold member avatars for the profile stack
+  const [memberAvatars, setMemberAvatars] = useState<GroupMember[]>([]);
+  const groupService = new GroupService();
+
+  // Fetch group members to display profile images
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const members = await groupService.getGroupMembers(group.id);
+        // Only show first 4 members for the profile stack
+        setMemberAvatars(members.slice(0, 4));
+      } catch (error) {
+        console.error('Error fetching group members:', error);
+      }
+    };
+
+    fetchMembers();
+  }, [group.id]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking on action buttons
@@ -32,120 +48,114 @@ export const GroupCard: React.FC<GroupCardProps> = ({
     onClick?.(group);
   };
 
-  // Removed join/leave handlers - these are now handled in the GroupProfileDialog
+  // Function to render overlapping profile images
+  const renderMemberStack = () => {
+    if (memberAvatars.length === 0) return null;
 
-  // Removed membership check - handled in GroupProfileDialog now
-
-  const getGroupTypeIcon = () => {
-    return group.group_type === 'physical' ? (
-      <MapPin className="h-4 w-4" />
-    ) : (
-      null
+    return (
+      <div className="flex items-center gap-1">
+        {/* Profile stack - overlapping avatars */}
+        <div className="flex -space-x-2">
+          {memberAvatars.map((member, index) => (
+            <Avatar 
+              key={member.id} 
+              className="h-8 w-8 border-2 border-white ring-1 ring-gray-100"
+              style={{ zIndex: memberAvatars.length - index }}
+            >
+              <AvatarImage src={member.profile?.avatar_url || ''} />
+              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                {member.profile?.display_name?.charAt(0) || <User className="h-3 w-3" />}
+              </AvatarFallback>
+            </Avatar>
+          ))}
+        </div>
+        
+        {/* Member count text */}
+        <span className="text-sm font-medium text-gray-600 ml-1">
+          {group.member_count || 0} {group.member_count === 1 ? 'Member' : 'Members'}
+        </span>
+      </div>
     );
-  };
-
-  const getGroupTypeLabel = () => {
-    if (group.group_type === 'physical') {
-      return group.physical_unit_value || 'Physical Group';
-    }
-    return 'Social Group';
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
   };
 
   return (
     <Card 
       className={cn(
-        "overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer",
-        "border border-gray-200 hover:border-gray-300",
+        "overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer",
+        "bg-white border border-gray-200 hover:border-gray-300 rounded-lg",
         className
       )}
       onClick={handleCardClick}
     >
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg truncate text-gray-900">
-                {group.name}
-              </h3>
-              
-              {/* Group Type Badge */}
-              {getGroupTypeIcon()}
-            </div>
-
-            {/* Privacy Icon */}
-            <div className="flex-shrink-0 ml-2">
-              {group.is_private ? (
-                <Lock className="h-4 w-4 text-gray-400" />
+      {/* Cover Photo Section */}
+      <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/40 overflow-hidden">
+        {group.banner_image_url ? (
+          <img 
+            src={group.banner_image_url} 
+            alt={`${group.name} cover`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          // Default gradient background with subtle pattern
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/30 to-primary/40 flex items-center justify-center">
+            <div className="text-primary/60">
+              {group.group_type === 'physical' ? (
+                <MapPin className="h-12 w-12" />
               ) : (
-                <Globe className="h-4 w-4 text-gray-400" />
+                <Users className="h-12 w-12" />
               )}
             </div>
           </div>
-
-          {/* Description */}
-          {group.description && (
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {group.description}
-            </p>
-          )}
-
-          {/* Stats Row */}
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-4">
-              {/* Member Count */}
-              <div className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                <span>{group.member_count || 0} members</span>
-              </div>
-
-              {/* Created Date - Only show for Physical Groups */}
-              {group.group_type === 'physical' && (
-                <>
-                  <Calendar className="h-3 w-3" />
-                  <span>Created {formatDate(group.created_at)}</span>
-                </>
-              )}
+        )}
+        
+        {/* Privacy indicator overlay */}
+        <div className="absolute top-3 right-3">
+          {group.is_private ? (
+            <div className="bg-black/20 backdrop-blur-sm rounded-full p-1.5">
+              <Lock className="h-4 w-4 text-white" />
             </div>
-          </div>
-
-          {/* Creator Info */}
-          {group.created_by_profile && (
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={group.created_by_profile.avatar_url || ''} />
-                <AvatarFallback className="text-xs">
-                  <User className="h-3 w-3" />
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-gray-500">
-                Created by {group.created_by_profile.display_name}
-              </span>
-            </div>
-          )}
-
-          {/* Learn More Action */}
-          {showJoinButton && (
-            <div className="pt-3 border-t border-gray-100">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCardClick}
-                className="w-full"
-              >
-                Learn More
-              </Button>
+          ) : (
+            <div className="bg-black/20 backdrop-blur-sm rounded-full p-1.5">
+              <Globe className="h-4 w-4 text-white" />
             </div>
           )}
         </div>
+      </div>
+
+      {/* Separating stroke */}
+      <div className="h-px bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200"></div>
+
+      {/* Content Section */}
+      <CardContent className="p-4 space-y-3">
+        {/* Title */}
+        <h3 className="font-semibold text-lg text-gray-900 leading-tight">
+          {group.name}
+        </h3>
+        
+        {/* Description - truncated to 1 line */}
+        {group.description && (
+          <p className="text-sm text-gray-600 line-clamp-1 leading-relaxed">
+            {group.description}
+          </p>
+        )}
+
+        {/* Member Profile Stack */}
+        <div className="pt-1">
+          {renderMemberStack()}
+        </div>
+
+        {/* Join/Learn More Button */}
+        {showJoinButton && (
+          <div className="pt-2">
+            <Button
+              size="sm"
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white font-medium"
+              onClick={handleCardClick}
+            >
+              {group.is_private ? 'Request to Join' : 'Join Group'}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
