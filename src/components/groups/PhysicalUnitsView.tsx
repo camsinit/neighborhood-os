@@ -194,27 +194,13 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
           {/* Join button */}
           <div className="pt-2 border-t border-gray-100">
             <Button 
-              className={
-                matchingGroup?.current_user_membership 
-                  ? "w-full bg-white hover:bg-gray-50 border font-medium" 
-                  : "w-full bg-purple-600 hover:bg-purple-700 text-white"
-              }
-              style={matchingGroup?.current_user_membership ? {
-                color: 'hsl(var(--neighbors-color))',
-                borderColor: 'hsl(var(--neighbors-color))'
-              } : {}}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
               size="sm"
               onClick={handleJoinUnit}
               disabled={joinGroupMutation.isPending}
             >
-              {matchingGroup?.current_user_membership ? (
-                'Joined'
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Join
-                </>
-              )}
+              <Plus className="h-4 w-4 mr-2" />
+              Join
             </Button>
           </div>
         </div>
