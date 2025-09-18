@@ -185,18 +185,6 @@ const GroupSheetContent = ({
             </div>
           </div>
 
-          {/* Action Buttons Section (for members only) - Tools for group interaction */}
-          {isUserMember && <div className="flex gap-2 py-4 border-t border-gray-100">
-              <Button variant="outline" onClick={() => setIsPostUpdateOpen(true)} className="flex-1">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Post Update
-              </Button>
-              <Button variant="outline" onClick={() => setIsCreateEventOpen(true)} className="flex-1">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Event
-              </Button>
-            </div>}
-
           {/* Group Activity Timeline - Shows events and updates */}
           {isUserMember && (
             <GroupActivityTimeline 
