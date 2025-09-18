@@ -220,12 +220,29 @@ export const usePhysicalUnitsWithResidents = () => {
 
         // Create a map of physical unit to member count
         const memberCountMap = new Map<string, number>();
+        console.log('Physical groups from DB:', physicalGroups);
+        console.log('Configured physical units:', config.physical_units);
+        
         physicalGroups?.forEach(group => {
           if (group.physical_unit_value) {
-            const memberCount = Array.isArray(group.member_count) ? group.member_count.length : 0;
-            memberCountMap.set(group.physical_unit_value, memberCount);
+            // Fix: Extract the actual count from the aggregate query result
+            const memberCount = Array.isArray(group.member_count) && group.member_count.length > 0 
+              ? group.member_count[0]?.count || 0 
+              : 0;
+            
+            console.log(`Group "${group.name}" (${group.physical_unit_value}): ${memberCount} members`);
+            
+            // Only count groups that match configured physical units exactly
+            if (config.physical_units.includes(group.physical_unit_value)) {
+              const currentCount = memberCountMap.get(group.physical_unit_value) || 0;
+              memberCountMap.set(group.physical_unit_value, currentCount + memberCount);
+            } else {
+              console.warn(`Group physical_unit_value "${group.physical_unit_value}" doesn't match any configured unit`);
+            }
           }
         });
+        
+        console.log('Final member count map:', Object.fromEntries(memberCountMap));
 
         // Create result using ALL configured physical units
         const unitsWithResidents = config.physical_units.map(unit => ({
