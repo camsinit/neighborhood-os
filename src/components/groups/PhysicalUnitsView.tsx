@@ -209,7 +209,7 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
               {isUserMember ? (
                 <>
                   <Users className="h-4 w-4 mr-2" />
-                  {leaveGroupMutation.isPending ? 'Leaving...' : 'Leave'}
+                  {leaveGroupMutation.isPending ? 'Leaving...' : 'Joined'}
                 </>
               ) : (
                 <>
