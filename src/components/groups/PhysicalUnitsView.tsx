@@ -68,19 +68,6 @@ export const PhysicalUnitsView: React.FC<PhysicalUnitsViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header with unit count */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-5 w-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">
-            {physicalConfig.physical_unit_label}
-          </h2>
-        </div>
-        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-          {filteredUnits.length}
-        </Badge>
-      </div>
-
       {/* Physical units grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredUnits.map((unit) => (
