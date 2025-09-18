@@ -118,7 +118,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
       onKeyDown={handleKeyDown}
     >
       {/* Combined Header and Form Content */}
-      <div className="px-4 py-1.5 space-y-4 flex-1">
+      <div className="p-4 space-y-4 flex-1">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Create Update</h2>
