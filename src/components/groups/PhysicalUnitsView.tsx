@@ -152,7 +152,7 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
               </div>
             </div>
             {/* Resident count badge */}
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
               {unit.resident_count}
             </Badge>
           </div>
