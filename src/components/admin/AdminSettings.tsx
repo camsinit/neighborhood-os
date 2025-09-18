@@ -167,7 +167,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       const neighborhood = currentNeighborhood as any; // Cast to access database properties
       setFormData({
         name: neighborhood.name || '',
-        description: '', // Not stored in current schema
+        description: neighborhood.description || '', // Use actual neighborhood description
         city: neighborhood.city || '',
         state: neighborhood.state || '',
         timezone: neighborhood.timezone || 'America/Los_Angeles',
