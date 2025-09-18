@@ -161,24 +161,24 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
             className="focus:ring-purple-500 focus:border-purple-500 resize-none"
           />
         </div>
-      </div>
 
-      {/* Submit Button */}
-      <div className="p-4 border-t">
-        <Button
-          onClick={handleSubmit}
-          disabled={!title.trim() || !content.trim() || createUpdateMutation.isPending}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-        >
-          {createUpdateMutation.isPending ? (
-            'Posting...'
-          ) : (
-            <div className="flex items-center justify-center">
-              <ArrowUp className="w-4 h-4 mr-2" />
-              Post Update
-            </div>
-          )}
-        </Button>
+        {/* Submit Button */}
+        <div className="pt-4 border-t">
+          <Button
+            onClick={handleSubmit}
+            disabled={!title.trim() || !content.trim() || createUpdateMutation.isPending}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            {createUpdateMutation.isPending ? (
+              'Posting...'
+            ) : (
+              <div className="flex items-center justify-center">
+                <ArrowUp className="w-4 h-4 mr-2" />
+                Post Update
+              </div>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
