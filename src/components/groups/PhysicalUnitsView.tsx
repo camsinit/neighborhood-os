@@ -167,7 +167,7 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-green-500" />
                 <span className="text-sm font-medium text-gray-900">
-                  {unit.resident_count} {unit.resident_count === 1 ? 'Resident' : 'Residents'}
+                  {unit.resident_count} {unit.resident_count === 1 ? 'Neighbor' : 'Neighbors'}
                 </span>
               </div>
               
