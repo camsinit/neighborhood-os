@@ -156,7 +156,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Share what's on your mind with the group..."
+            placeholder="Share an update with the group..."
             rows={4}
             className="focus:ring-purple-500 focus:border-purple-500 resize-none"
           />
