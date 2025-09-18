@@ -9,7 +9,8 @@ export type HighlightableItemType =
   | 'safety' 
   | 'skills' 
   | 'goods' 
-  | 'neighbors';
+  | 'neighbors'
+  | 'group';
 
 // Structure for a highlight event
 export interface HighlightItemDetail {

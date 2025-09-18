@@ -143,3 +143,12 @@
 .layout-animate {
   transition: all 0.5s ease-in-out;
 }
+
+/* Group highlight animation */
+.highlighted-group-item {
+  animation: glow-pulse 2s ease-in-out;
+  outline: 3px solid transparent;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+  position: relative;
+  z-index: 10;
+}

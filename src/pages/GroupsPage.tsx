@@ -6,6 +6,7 @@ import { UserDirectory } from '@/components/neighbors/UserDirectory';
 import { usePageSheetController } from '@/hooks/usePageSheetController';
 import UnifiedInviteDialog from '@/components/invite/UnifiedInviteDialog';
 import NeighborSheetContent from '@/components/neighbors/NeighborSheetContent';
+import GroupSheetContent from '@/components/groups/GroupSheetContent';
 import { useNeighborUsers } from '@/components/neighbors/hooks/useNeighborUsers';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 
@@ -26,16 +27,32 @@ function GroupsPage() {
   
   // Universal page controller for sheet management (for neighbors tab)
   const {
-    isSheetOpen,
-    sheetItem,
-    openSheet,
-    closeSheet
+    isSheetOpen: isNeighborSheetOpen,
+    sheetItem: neighborSheetItem,
+    openSheet: openNeighborSheet,
+    closeSheet: closeNeighborSheet
   } = usePageSheetController({
     contentType: 'neighbors',
     fetchItem: async (id: string) => {
       return users?.find(user => user.id === id) || null;
     },
-    pageName: 'GroupsPage'
+    pageName: 'GroupsPage-Neighbors'
+  });
+
+  // Universal page controller for group sheet management
+  const {
+    isSheetOpen: isGroupSheetOpen,
+    sheetItem: groupSheetItem,
+    openSheet: openGroupSheet,
+    closeSheet: closeGroupSheet
+  } = usePageSheetController({
+    contentType: 'group',
+    fetchItem: async (id: string) => {
+      // This will be handled by the GroupsContainer component
+      // The actual fetching logic will be passed down
+      return null;
+    },
+    pageName: 'GroupsPage-Groups'
   });
   
   // State for dialogs and sheets
@@ -77,15 +94,24 @@ function GroupsPage() {
               onCreateGroup={handleCreateGroup}
               activeTab={activeTab}
               onTabChange={handleTabChange}
+              onGroupClick={openGroupSheet}
+              onNeighborClick={openNeighborSheet}
             />
           </Tabs>
         </div>
       </ModuleLayout>
 
       {/* Universal sheet management for neighbors */}
-      {isSheetOpen && sheetItem && (
-        <Sheet open={isSheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-          <NeighborSheetContent neighbor={sheetItem} onOpenChange={closeSheet} />
+      {isNeighborSheetOpen && neighborSheetItem && (
+        <Sheet open={isNeighborSheetOpen} onOpenChange={(open) => !open && closeNeighborSheet()}>
+          <NeighborSheetContent neighbor={neighborSheetItem} onOpenChange={closeNeighborSheet} />
+        </Sheet>
+      )}
+
+      {/* Universal sheet management for groups */}
+      {isGroupSheetOpen && groupSheetItem && (
+        <Sheet open={isGroupSheetOpen} onOpenChange={(open) => !open && closeGroupSheet()}>
+          <GroupSheetContent group={groupSheetItem} onOpenChange={closeGroupSheet} />
         </Sheet>
       )}
 

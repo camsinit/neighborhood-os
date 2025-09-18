@@ -26,7 +26,8 @@ const CONTENT_TYPE_NAMES: Record<HighlightableItemType, string> = {
   safety: 'Safety Update',
   skills: 'Skill',
   goods: 'Item',
-  neighbors: 'Neighbor'
+  neighbors: 'Neighbor',
+  group: 'Group'
 };
 
 /**
@@ -283,6 +284,13 @@ const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
           break;
           
         case 'neighbors':
+          if (options.openDialog) {
+            enhancedOptions.urlParams!['profile'] = 'open';
+          }
+          break;
+          
+        case 'group':
+          // Groups open in side panel by default via detail parameter
           if (options.openDialog) {
             enhancedOptions.urlParams!['profile'] = 'open';
           }

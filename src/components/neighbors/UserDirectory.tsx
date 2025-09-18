@@ -17,6 +17,7 @@ import { UserGrid } from "./components/UserGrid";
 
 interface UserDirectoryProps {
   searchQuery?: string;
+  onNeighborClick?: (itemId: string, item?: any) => void;
 }
 
 /**
@@ -26,7 +27,7 @@ interface UserDirectoryProps {
  * It handles loading, error states, and rendering the appropriate UI based on the data.
  * Now receives search query as a prop from the parent component.
  */
-export const UserDirectory: React.FC<UserDirectoryProps> = ({ searchQuery = "" }) => {
+export const UserDirectory: React.FC<UserDirectoryProps> = ({ searchQuery = "", onNeighborClick }) => {
   // State to track which user's profile is being viewed
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
 
@@ -129,10 +130,15 @@ export const UserDirectory: React.FC<UserDirectoryProps> = ({ searchQuery = "" }
   return (
     <div className="p-6">
       {/* Grid of neighbor cards */}
-      <UserGrid users={filteredUsers || []} onUserSelect={setSelectedUser} />
+      <UserGrid 
+        users={filteredUsers || []} 
+        onUserSelect={onNeighborClick ? (user) => onNeighborClick(user.id, user) : setSelectedUser} 
+      />
 
-      {/* Profile Dialog */}
-      <NeighborProfileDialog user={selectedUser} onClose={() => setSelectedUser(null)} />
+      {/* Profile Dialog - Only show when not using the new sheet system */}
+      {!onNeighborClick && (
+        <NeighborProfileDialog user={selectedUser} onClose={() => setSelectedUser(null)} />
+      )}
     </div>
   );
 };

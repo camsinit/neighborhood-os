@@ -12,6 +12,8 @@ interface GroupsContainerProps {
   onCreateGroup: (templateData?: { name: string; description: string }) => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onGroupClick?: (itemId: string, item?: any) => void;
+  onNeighborClick?: (itemId: string, item?: any) => void;
 }
 
 /**
@@ -23,7 +25,9 @@ interface GroupsContainerProps {
 export const GroupsContainer: React.FC<GroupsContainerProps> = ({
   onCreateGroup,
   activeTab,
-  onTabChange
+  onTabChange,
+  onGroupClick,
+  onNeighborClick
 }) => {
   // State management for search and filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,9 +39,15 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
     includeCurrentUserMembership: true
   });
 
-  // Handle group selection for profile dialog
+  // Handle group selection for profile dialog or sheet
   const handleGroupSelect = (group: Group) => {
-    setSelectedGroup(group);
+    if (onGroupClick) {
+      // Use the new sheet system
+      onGroupClick(group.id, group);
+    } else {
+      // Fallback to old dialog system
+      setSelectedGroup(group);
+    }
   };
 
   const handleCloseGroupProfile = () => {
@@ -71,14 +81,16 @@ export const GroupsContainer: React.FC<GroupsContainerProps> = ({
       </TabsContent>
       
       <TabsContent value="directory" className="m-0">
-        <UserDirectory searchQuery={searchQuery} />
+        <UserDirectory searchQuery={searchQuery} onNeighborClick={onNeighborClick} />
       </TabsContent>
 
-      {/* Group Profile Dialog */}
-      <GroupProfileDialog 
-        group={selectedGroup}
-        onClose={handleCloseGroupProfile}
-      />
+      {/* Group Profile Dialog - Only show when not using the new sheet system */}
+      {!onGroupClick && (
+        <GroupProfileDialog 
+          group={selectedGroup}
+          onClose={handleCloseGroupProfile}
+        />
+      )}
     </div>
   );
 };

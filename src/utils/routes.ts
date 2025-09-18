@@ -20,6 +20,7 @@ export const BASE_ROUTES = {
   goods: '/goods',
   safety: '/safety',
   neighbors: '/neighbors',
+  groups: '/groups',
 } as const;
 
 /**
@@ -32,6 +33,7 @@ export const ROUTE_MAP: Record<HighlightableItemType, string> = {
   skills: BASE_ROUTES.skills,
   goods: BASE_ROUTES.goods,
   neighbors: BASE_ROUTES.neighbors,
+  group: BASE_ROUTES.groups,
 };
 
 /**

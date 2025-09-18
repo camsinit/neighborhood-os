@@ -7,6 +7,7 @@ import { Users, MapPin, Lock, Globe, Calendar, User } from 'lucide-react';
 import { Group, GroupMember } from '@/types/groups';
 import { cn } from '@/lib/utils';
 import { GroupService } from '@/services/groupService';
+import { useDataAttributes } from '@/utils/dataAttributes';
 interface GroupCardProps {
   group: Group;
   className?: string;
@@ -22,6 +23,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   // State to hold member avatars for the profile stack
   const [memberAvatars, setMemberAvatars] = useState<GroupMember[]>([]);
   const groupService = new GroupService();
+  
+  // Add data attributes for highlighting support
+  const dataAttributes = useDataAttributes('group', group.id);
 
   // Fetch group members to display profile images
   useEffect(() => {
@@ -66,7 +70,11 @@ export const GroupCard: React.FC<GroupCardProps> = ({
         </span>
       </div>;
   };
-  return <Card className={cn("overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer", "bg-white border border-gray-200 hover:border-gray-300 rounded-lg", className)} onClick={handleCardClick}>
+  return <Card 
+    className={cn("overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer", "bg-white border border-gray-200 hover:border-gray-300 rounded-lg", className)} 
+    onClick={handleCardClick}
+    {...dataAttributes}
+  >
       {/* Cover Photo Section */}
       <div className="relative h-40 bg-gradient-to-br from-primary/20 to-primary/40 overflow-hidden">
         {group.banner_image_url ? <img src={group.banner_image_url} alt={`${group.name} cover`} className="w-full h-full object-cover" /> :
