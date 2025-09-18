@@ -89,10 +89,10 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
 
   return (
     <AppSheetContent 
-      className="w-full max-w-2xl mx-auto bg-white border-0 p-0"
+      moduleTheme="neighbors" 
+      className="overflow-y-auto"
     >
-      {/* Header Section - Physical Unit Information */}
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 pt-6">
         {/* Physical Unit Header Section - Main unit information display */}
         <div className="space-y-4">
           {/* Top row: Unit name and type indicator */}
@@ -101,50 +101,33 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
             <Home className="h-6 w-6 text-blue-500" />
           </div>
           
-          {/* Unit type and resident count on second line */}
+          {/* Unit type and resident count with profile images */}
           <div className="flex items-center gap-2 text-gray-600">
-            <MapPin className="h-4 w-4 text-blue-500" />
-            <span className="text-sm">
-              {unit.unit_label.slice(0, -1)} • {unit.resident_count} {unit.resident_count === 1 ? 'resident' : 'residents'}
-            </span>
-          </div>
-
-          {/* Bottom row: Resident avatars on left, action buttons on right */}
-          <div className="flex items-center justify-between">
-            {/* Left side: Resident avatar stack - shows visual representation of unit residents */}
-            <div className="flex -space-x-2">
-              {memberAvatars.map((resident) => (
-                <Avatar key={resident.user_id} className="h-10 w-10 border-2 border-white">
+            {/* Profile images on the left */}
+            <div className="flex -space-x-1">
+              {memberAvatars.slice(0, 3).map((resident) => (
+                <Avatar key={resident.user_id} className="h-5 w-5 border border-white">
                   <AvatarImage src={resident.profiles?.avatar_url || ''} />
                   <AvatarFallback className="text-xs">
                     {resident.profiles?.display_name?.[0]?.toUpperCase() || '?'}
                   </AvatarFallback>
                 </Avatar>
               ))}
-              {/* Show additional resident count if more than 5 residents */}
               {additionalMemberCount > 0 && (
-                <div className="h-10 w-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center">
                   <span className="text-xs font-medium text-gray-600">
                     +{additionalMemberCount}
                   </span>
                 </div>
               )}
             </div>
-
-            {/* Right side: Action buttons - contextual based on residency */}
-            <div className="flex items-center gap-3">
-              {currentUserId && (
-                <>
-                  {/* Invite neighbors button - available to all neighborhood members */}
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Invite Neighbors
-                  </Button>
-                </>
-              )}
-            </div>
+            <span className="text-sm text-gray-600">
+              {unit.resident_count === 1 ? '1 resident' : `${unit.resident_count} residents`}
+            </span>
+            <MapPin className="h-4 w-4 text-blue-500" />
+            <span className="text-sm text-gray-600">
+              {unit.unit_label.slice(0, -1)}
+            </span>
           </div>
         </div>
 
@@ -217,6 +200,18 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
                 This {unit.unit_label.slice(0, -1).toLowerCase()} doesn't have any residents assigned yet.
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Action buttons section - contextual based on residency */}
+        {currentUserId && (
+          <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Invite Neighbors
+            </Button>
           </div>
         )}
       </div>
