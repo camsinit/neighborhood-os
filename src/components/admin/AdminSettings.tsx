@@ -288,8 +288,27 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         
         for (const unitName of addedUnits) {
           try {
+            // Check if a group with this name already exists before creating
+            const groupName = `${unitName} Group`;
+            const { data: existingGroup } = await supabase
+              .from('groups')
+              .select('id')
+              .eq('neighborhood_id', currentNeighborhood.id)
+              .eq('name', groupName)
+              .eq('status', 'active')
+              .maybeSingle();
+
+            if (existingGroup) {
+              logger.info('Group already exists for physical unit, skipping creation', { 
+                unitName, 
+                groupName,
+                neighborhoodId: currentNeighborhood.id 
+              });
+              continue;
+            }
+
             await createGroupMutation.mutateAsync({
-              name: `${unitName} Group`,
+              name: groupName,
               description: `Residents of ${unitName}`,
               group_type: 'physical',
               physical_unit_value: unitName,
