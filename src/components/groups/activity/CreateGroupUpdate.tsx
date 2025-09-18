@@ -163,7 +163,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
         </div>
 
         {/* Submit Button */}
-        <div className="pt-4">
+        <div>
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || !content.trim() || createUpdateMutation.isPending}
