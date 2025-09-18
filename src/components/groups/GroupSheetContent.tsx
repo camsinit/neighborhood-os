@@ -149,7 +149,7 @@ const GroupSheetContent = ({
                 )}
               </div>
               <span className="text-sm text-gray-600">
-                {group.member_count || 0} members
+                {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}
               </span>
               <span className="text-sm text-gray-600">
                 {group.is_private ? 'Private group' : 'Public group'}
