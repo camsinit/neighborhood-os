@@ -180,13 +180,6 @@ const GroupSheetContent = ({
             />
           )}
 
-          {/* Group Info Section - Shows creation date and creator information */}
-          <div className="text-sm text-gray-500 pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <span>Created {formatDate(group.created_at)}</span>
-              {group.created_by_profile && <span>by {group.created_by_profile.display_name}</span>}
-            </div>
-          </div>
         </div>
       </AppSheetContent>
 
