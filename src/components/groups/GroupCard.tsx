@@ -101,11 +101,19 @@ export const GroupCard: React.FC<GroupCardProps> = ({
           {renderMemberStack()}
         </div>
 
-        {/* Join/Leave Button */}
+        {/* Join/Joined Button */}
         {showJoinButton && <div className="pt-2">
-            <Button size="sm" className="w-full bg-gray-700 hover:bg-gray-800 text-white font-medium" onClick={handleCardClick}>
+            <Button 
+              size="sm" 
+              className={
+                group.current_user_membership 
+                  ? "w-full bg-white hover:bg-gray-50 text-primary border border-primary font-medium" 
+                  : "w-full bg-gray-700 hover:bg-gray-800 text-white font-medium"
+              } 
+              onClick={handleCardClick}
+            >
               {group.current_user_membership 
-                ? 'Leave Group' 
+                ? 'Joined' 
                 : group.is_private 
                   ? 'Request to Join' 
                   : 'Join Group'
