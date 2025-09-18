@@ -114,7 +114,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
 
   return (
     <div 
-      className="absolute top-0 left-0 right-0 bottom-[-100px] bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200 flex flex-col"
+      className="absolute top-0 left-0 right-0 bottom-[-150px] bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200 flex flex-col"
       onKeyDown={handleKeyDown}
     >
       {/* Combined Header and Form Content */}
