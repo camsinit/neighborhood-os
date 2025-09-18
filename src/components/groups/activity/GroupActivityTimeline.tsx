@@ -16,6 +16,7 @@ import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { GroupActivityCard } from './GroupActivityCard';
 import { CreateGroupUpdate } from './CreateGroupUpdate';
 import { GroupEventDetail } from './GroupEventDetail';
+import { GroupViewTabs, GroupViewType } from './GroupViewTabs';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,9 +41,10 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   // Navigation hook for routing to Calendar page
   const navigate = useNavigate();
   
-  // Component state for overlays and detail panels
+  // Component state for overlays, detail panels, and view type
   const [isCreateUpdateOpen, setIsCreateUpdateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<GroupViewType>('timeline'); // Always default to timeline
 
   // Fetch unified group activities (events + updates)
   const { data: activities = [], isLoading, error } = useQuery({
@@ -156,6 +158,21 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
     setSelectedEvent(null);
   };
 
+  // Filter activities based on current view
+  const getFilteredActivities = () => {
+    switch (activeView) {
+      case 'updates':
+        return activities.filter(activity => activity.type === 'update');
+      case 'events':
+        return activities.filter(activity => activity.type === 'event');
+      case 'timeline':
+      default:
+        return activities;
+    }
+  };
+
+  const filteredActivities = getFilteredActivities();
+
   // Loading state
   if (isLoading) {
     return (
@@ -196,73 +213,81 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
         />
       )}
 
-      {/* Action Buttons */}
-      {!isCreateUpdateOpen && (
-        <div className="flex gap-2 mb-6">
-          <Button
-            onClick={handleCreateUpdate}
-            className="flex-1 h-10"
-            variant="outline"
-          >
-            <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
-            New Update
-          </Button>
-          
-          <Button
-            onClick={() => onCreateEvent(groupId)}
-            className="flex-1 h-10"
-            variant="outline"
-          >
-            <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-            New Event
-          </Button>
-
-          {showInviteButton && (
+      {/* View Tabs */}
+      <GroupViewTabs activeView={activeView} onViewChange={setActiveView}>
+        {/* Action Buttons */}
+        {!isCreateUpdateOpen && (
+          <div className="flex gap-2 mb-6">
             <Button
-              onClick={onInvite}
-              className="flex-1 h-10 bg-purple-100/50 text-purple-600 border-purple-600 hover:bg-purple-50"
+              onClick={handleCreateUpdate}
+              className="flex-1 h-10"
               variant="outline"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Invite
+              <MessageSquare className="w-4 h-4 mr-2 text-purple-600" />
+              New Update
             </Button>
+            
+            <Button
+              onClick={() => onCreateEvent(groupId)}
+              className="flex-1 h-10"
+              variant="outline"
+            >
+              <Calendar className="w-4 h-4 mr-2 text-blue-600" />
+              New Event
+            </Button>
+
+            {showInviteButton && (
+              <Button
+                onClick={onInvite}
+                className="flex-1 h-10 bg-purple-100/50 text-purple-600 border-purple-600 hover:bg-purple-50"
+                variant="outline"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Invite
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Filtered Timeline Content */}
+        <div className="space-y-4">
+          {filteredActivities.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                <Plus className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">
+                {activeView === 'updates' ? 'No Updates Yet' : 
+                 activeView === 'events' ? 'No Events Yet' : 'No Activity Yet'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {activeView === 'updates' ? 'Be the first to share an update!' : 
+                 activeView === 'events' ? 'Be the first to create an event!' : 
+                 'Be the first to share an update or create an event!'}
+              </p>
+            </div>
+          ) : (
+            filteredActivities.map((activity, index) => (
+              <div key={activity.id} className="relative">
+                {/* Timeline connector line (except for last item) */}
+                {index < filteredActivities.length - 1 && (
+                  <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
+                )}
+                
+                <GroupActivityCard
+                  activity={activity}
+                  onClick={() => {
+                    if (activity.type === 'event' && activity.event) {
+                      handleEventClick(activity.event.id);
+                    }
+                    // For updates, they can be handled in the card component
+                  }}
+                />
+              </div>
+            ))
           )}
         </div>
-      )}
-
-      {/* Timeline */}
-      <div className="space-y-4">
-        {activities.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <Plus className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">No Activity Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Be the first to share an update or create an event!
-            </p>
-          </div>
-        ) : (
-          activities.map((activity, index) => (
-            <div key={activity.id} className="relative">
-              {/* Timeline connector line (except for last item) */}
-              {index < activities.length - 1 && (
-                <div className="absolute left-5 top-12 bottom-0 w-px bg-border" />
-              )}
-              
-              <GroupActivityCard
-                activity={activity}
-                onClick={() => {
-                  if (activity.type === 'event' && activity.event) {
-                    handleEventClick(activity.event.id);
-                  }
-                  // For updates, they can be handled in the card component
-                }}
-              />
-            </div>
-          ))
-        )}
-      </div>
+      </GroupViewTabs>
 
       {/* Event Detail Panel */}
       {selectedEvent && (

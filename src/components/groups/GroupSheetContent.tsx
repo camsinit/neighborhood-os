@@ -135,8 +135,10 @@ const GroupSheetContent = ({
 
           {/* Group Header Section - Main group information display */}
           <div className="space-y-4">
-            {/* Top row: Group name and privacy status indicator */}
-            
+            {/* Prominent Group Title */}
+            <h1 className="text-2xl font-bold text-foreground">
+              {group.name}
+            </h1>
             
             {/* Privacy status and member count with profile images */}
             <div className="flex items-center gap-2 text-gray-600">
@@ -159,10 +161,11 @@ const GroupSheetContent = ({
                 )}
               </div>
               <span className="text-sm text-gray-600">
-                {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}
-              </span>
-              <span className="text-sm text-gray-600">
-                {group.is_private ? 'Private group' : 'Public group'}
+                {group.is_private ? (
+                  <>🔒 Private group • {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}</>
+                ) : (
+                  <>🌐 Public group • {group.member_count === 1 ? '1 neighbor' : `${group.member_count || 0} neighbors`}</>
+                )}
               </span>
               
               {/* Edit button for group owners/moderators */}
@@ -178,6 +181,11 @@ const GroupSheetContent = ({
             </div>
 
           </div>
+
+          {/* Horizontal Separator Line */}
+          {isUserMember && (
+            <hr className="border-t border-gray-200" />
+          )}
 
           {/* Group Activity Timeline - Shows events and updates */}
           {isUserMember && (
