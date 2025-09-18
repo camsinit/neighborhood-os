@@ -225,7 +225,7 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
                 isUserMember 
                   ? showLeaveConfirm
                     ? "w-full bg-red-600 hover:bg-red-700 text-white"
-                    : "w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    : "w-full bg-white hover:bg-purple-50 border border-purple-600 text-purple-600 hover:border-purple-700 hover:text-purple-700"
                   : "w-full bg-purple-600 hover:bg-purple-700 text-white"
               }
               size="sm"
