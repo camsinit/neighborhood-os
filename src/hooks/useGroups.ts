@@ -480,6 +480,10 @@ export const useJoinGroup = () => {
         queryClient.invalidateQueries({
           queryKey: groupQueryKeys.members(groupId)
         });
+        // Invalidate physical units data to update neighbor counts
+        queryClient.invalidateQueries({
+          queryKey: ['physicalUnitsWithResidents', neighborhood.id]
+        });
       }
       
       toast.success('Successfully joined group!');
@@ -527,6 +531,10 @@ export const useLeaveGroup = () => {
         });
         queryClient.invalidateQueries({
           queryKey: groupQueryKeys.members(groupId)
+        });
+        // Invalidate physical units data to update neighbor counts
+        queryClient.invalidateQueries({
+          queryKey: ['physicalUnitsWithResidents', neighborhood.id]
         });
       }
       
