@@ -161,19 +161,6 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
             className="focus:ring-purple-500 focus:border-purple-500 resize-none"
           />
         </div>
-
-        {/* Image Upload (Simple placeholder for now) */}
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full"
-            disabled
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Add Images (Coming Soon)
-          </Button>
-        </div>
       </div>
 
       {/* Submit Button */}
