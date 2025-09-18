@@ -52,10 +52,7 @@ function GroupsPage() {
     contentType: 'group',
     fetchItem: async (id: string) => {
       // Find the group in the loaded groups data
-      console.log('[GroupsPage] Fetching group for sheet:', id, 'available groups:', groups.length);
-      const group = groups.find(group => group.id === id);
-      console.log('[GroupsPage] Found group:', group ? 'yes' : 'no');
-      return group || null;
+      return groups.find(group => group.id === id) || null;
     },
     pageName: 'GroupsPage-Groups'
   });
@@ -139,8 +136,7 @@ function GroupsPage() {
         </Sheet>
       )}
 
-      {/* Universal sheet management for groups - should work on any tab */}
-      {console.log('[GroupsPage] Group sheet render check:', { isGroupSheetOpen, hasGroupSheetItem: !!groupSheetItem, groupSheetItem })}
+      {/* Universal sheet management for groups */}
       {isGroupSheetOpen && groupSheetItem && (
         <Sheet open={isGroupSheetOpen} onOpenChange={(open) => !open && closeGroupSheet()}>
           <GroupSheetContent group={groupSheetItem} onOpenChange={closeGroupSheet} />

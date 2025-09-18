@@ -24,7 +24,6 @@ interface GroupActivityTimelineProps {
   groupId: string;
   isGroupManager: boolean;
   onCreateEvent: () => void;
-  onCreateUpdate?: () => void;
   showInviteButton?: boolean;
   onInvite?: () => void;
 }
@@ -33,7 +32,6 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   groupId,
   isGroupManager,
   onCreateEvent,
-  onCreateUpdate,
   showInviteButton = false,
   onInvite
 }) => {
@@ -197,7 +195,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
       {!isCreateUpdateOpen && (
         <div className="flex gap-2 mb-6">
           <Button
-            onClick={onCreateUpdate || handleCreateUpdate}
+            onClick={handleCreateUpdate}
             className="flex-1 h-10"
             variant="outline"
           >
