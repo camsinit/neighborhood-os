@@ -14,6 +14,7 @@ import { moduleThemeColors } from '@/theme/moduleTheme';
 // Import groups components
 import { GroupsContainer } from '@/components/groups/GroupsContainer';
 import { CreateGroupForm } from '@/components/groups/CreateGroupForm';
+import { useGroups } from '@/hooks/useGroups';
 
 /**
  * GroupsPage Component
@@ -24,6 +25,7 @@ import { CreateGroupForm } from '@/components/groups/CreateGroupForm';
  */
 function GroupsPage() {
   const { data: users } = useNeighborUsers();
+  const { data: groups = [] } = useGroups({ includeCurrentUserMembership: true });
   const [activeTab, setActiveTab] = useState('groups');
   
   // Universal page controller for sheet management (for neighbors tab)
@@ -49,9 +51,8 @@ function GroupsPage() {
   } = usePageSheetController({
     contentType: 'group',
     fetchItem: async (id: string) => {
-      // This will be handled by the GroupsContainer component
-      // The actual fetching logic will be passed down
-      return null;
+      // Find the group in the loaded groups data
+      return groups.find(group => group.id === id) || null;
     },
     pageName: 'GroupsPage-Groups'
   });
