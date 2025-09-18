@@ -116,10 +116,6 @@ const GroupSheetContent = ({
   };
   return <>
       <AppSheetContent moduleTheme="neighbors" className="overflow-y-auto">
-        {/* Edit button for group owners/moderators - positioned absolutely for easy access */}
-        {canEditGroup && <button onClick={() => setIsEditGroupOpen(true)} className="absolute top-4 right-4 z-10 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" aria-label="Edit group">
-            <Edit className="h-4 w-4" />
-          </button>}
 
         <div className="space-y-6 pt-6">
           {/* Banner Image (if available) - provides visual appeal and group branding */}
@@ -158,6 +154,17 @@ const GroupSheetContent = ({
               <span className="text-sm text-gray-600">
                 {group.is_private ? 'Private group' : 'Public group'}
               </span>
+              
+              {/* Edit button for group owners/moderators */}
+              {canEditGroup && (
+                <button 
+                  onClick={() => setIsEditGroupOpen(true)} 
+                  className="ml-auto p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors" 
+                  aria-label="Edit group"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
           </div>
