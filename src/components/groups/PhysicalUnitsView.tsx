@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MapPin, Users, Loader2, Home, Plus } from 'lucide-react';
 import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents, useJoinGroup, useLeaveGroup, useGroups } from '@/hooks/useGroups';
 
@@ -156,37 +155,10 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
                 {unit.unit_name}
               </h3>
             </div>
-            {/* Neighbor profile stack */}
-            <div className="flex items-center gap-2 bg-white">
-              {unit.resident_count > 0 ? (
-                <>
-                  {/* Profile stack - show up to 3 avatars */}
-                  <div className="flex -space-x-2">
-                    {unit.residents.slice(0, 3).map((resident, index) => (
-                      <Avatar 
-                        key={resident.user_id} 
-                        className="w-8 h-8 border-2 border-white ring-1 ring-gray-200"
-                        style={{ zIndex: 3 - index }} // Ensures proper stacking order
-                      >
-                        <AvatarImage 
-                          src={resident.profiles.avatar_url || undefined} 
-                          alt={resident.profiles.display_name || 'Neighbor'} 
-                        />
-                        <AvatarFallback className="text-xs bg-gray-100 text-gray-600">
-                          {(resident.profiles.display_name || 'N').charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </div>
-                  {/* Total count indicator */}
-                  <span className="text-sm font-medium text-gray-900">
-                    {unit.resident_count}
-                  </span>
-                </>
-              ) : (
-                <span className="text-sm text-gray-500">0</span>
-              )}
-            </div>
+            {/* Resident count badge */}
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+              {unit.resident_count}
+            </Badge>
           </div>
 
           {/* Resident assignments - only show if there are residents */}
