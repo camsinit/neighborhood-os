@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Loader2, Home, Plus } from 'lucide-react';
-import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents } from '@/hooks/useGroups';
+import { useNeighborhoodPhysicalConfig, usePhysicalUnitsWithResidents, useJoinGroup, useGroups } from '@/hooks/useGroups';
 
 interface PhysicalUnitsViewProps {
   searchQuery: string;
@@ -108,6 +108,29 @@ interface PhysicalUnitCardProps {
 }
 
 const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, onUnitClick }) => {
+  // Hook for joining groups
+  const joinGroupMutation = useJoinGroup();
+  
+  // Get all groups to find the matching physical group for this unit
+  const { data: allGroups = [] } = useGroups({});
+  
+  // Find the group that matches this physical unit
+  const matchingGroup = allGroups.find(group => 
+    group.group_type === 'physical' && 
+    group.physical_unit_value === unit.unit_name
+  );
+  
+  // Handle joining the physical unit group
+  const handleJoinUnit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when button is clicked
+    
+    if (matchingGroup) {
+      joinGroupMutation.mutate(matchingGroup.id);
+    } else {
+      console.log('No matching group found for unit:', unit.unit_name);
+    }
+  };
+  
   return (
     <Card 
       className="overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300 cursor-pointer"
@@ -171,16 +194,27 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
           {/* Join button */}
           <div className="pt-2 border-t border-gray-100">
             <Button 
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className={
+                matchingGroup?.current_user_membership 
+                  ? "w-full bg-white hover:bg-gray-50 border font-medium" 
+                  : "w-full bg-purple-600 hover:bg-purple-700 text-white"
+              }
+              style={matchingGroup?.current_user_membership ? {
+                color: 'hsl(var(--neighbors-color))',
+                borderColor: 'hsl(var(--neighbors-color))'
+              } : {}}
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent card click when button is clicked
-                // TODO: Implement join functionality
-                console.log('Joining unit:', unit.unit_name);
-              }}
+              onClick={handleJoinUnit}
+              disabled={joinGroupMutation.isPending}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Join
+              {matchingGroup?.current_user_membership ? (
+                'Joined'
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Join
+                </>
+              )}
             </Button>
           </div>
         </div>
