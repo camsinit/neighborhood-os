@@ -115,9 +115,13 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               size="sm" 
               className={
                 group.current_user_membership 
-                  ? "w-full bg-white hover:bg-gray-50 text-primary border border-primary font-medium" 
+                  ? "w-full bg-white hover:bg-gray-50 border font-medium" 
                   : "w-full bg-gray-700 hover:bg-gray-800 text-white font-medium"
-              } 
+              }
+              style={group.current_user_membership ? {
+                color: 'hsl(var(--neighbors-color))',
+                borderColor: 'hsl(var(--neighbors-color))'
+              } : {}}
               onClick={handleCardClick}
             >
               {group.current_user_membership 
