@@ -40,18 +40,6 @@ const EmailInviteSection = ({
 }: EmailInviteSectionProps) => {
   return (
     <div className="space-y-4">
-      {/* Email invite header with icon and description */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-blue-50 rounded-lg">
-          <Mail className="h-5 w-5 text-blue-600" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-lg">Send Email Invitation</h3>
-          <p className="text-sm text-gray-600">
-            Send a personalized invite directly to their inbox
-          </p>
-        </div>
-      </div>
       
       {/* Email input form with validation */}
       <div className="space-y-3">

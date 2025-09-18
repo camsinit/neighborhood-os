@@ -74,15 +74,6 @@ export const GroupsSections: React.FC<GroupsSectionsProps> = ({
       {/* Social Groups Section - Only social groups are shown in Groups tab */}
       {socialGroups.length > 0 && (
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Social Groups</h2>
-            </div>
-            <Badge variant="secondary" className="bg-green-50 text-green-700">
-              {socialGroups.length}
-            </Badge>
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {socialGroups.map((group) => (
               <GroupCard
