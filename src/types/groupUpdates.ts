@@ -6,6 +6,7 @@ export interface GroupUpdate {
   id: string;
   group_id: string;
   user_id: string;
+  title: string; // NEW: Title field (max 25 chars)
   content: string;
   image_urls: string[];
   created_at: string;
@@ -53,6 +54,7 @@ export interface GroupUpdateReaction {
 
 export interface CreateGroupUpdateData {
   group_id: string;
+  title: string; // NEW: Required title field
   content: string;
   image_urls?: string[];
 }

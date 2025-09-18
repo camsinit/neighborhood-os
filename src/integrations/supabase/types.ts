@@ -456,6 +456,7 @@ export type Database = {
           id: string
           image_urls: string[] | null
           is_deleted: boolean
+          title: string
           updated_at: string
           user_id: string
         }
@@ -467,6 +468,7 @@ export type Database = {
           id?: string
           image_urls?: string[] | null
           is_deleted?: boolean
+          title: string
           updated_at?: string
           user_id: string
         }
@@ -478,6 +480,7 @@ export type Database = {
           id?: string
           image_urls?: string[] | null
           is_deleted?: boolean
+          title?: string
           updated_at?: string
           user_id?: string
         }

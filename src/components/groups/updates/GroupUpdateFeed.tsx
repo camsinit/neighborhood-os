@@ -48,6 +48,7 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
           id,
           group_id,
           user_id,
+          title,
           content,
           image_urls,
           created_at,
@@ -137,6 +138,8 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
 
           return {
             ...update,
+            // Ensure title field exists (fallback for old data)
+            title: update.title || update.content.slice(0, 25),
             profiles: updateProfiles.find(p => p.id === update.user_id),
             comments: commentsWithProfiles || [],
             reactions: reactionsWithProfiles || [],
@@ -179,7 +182,7 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
 
   // Create update mutation
   const createUpdateMutation = useMutation({
-    mutationFn: async (data: { content: string; image_urls?: string[] }) => {
+    mutationFn: async (data: { title?: string; content: string; image_urls?: string[] }) => {
       if (!user) throw new Error('User not authenticated');
 
       const { error } = await supabase
@@ -187,6 +190,7 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
         .insert({
           group_id: groupId,
           user_id: user.id,
+          title: data.title || data.content.slice(0, 25), // Use title or truncate content
           content: data.content,
           image_urls: data.image_urls || []
         });

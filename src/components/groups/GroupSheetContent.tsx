@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import AddEventDialog from '@/components/AddEventDialog';
 import { EditGroupForm } from './EditGroupForm';
+import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
 
 /**
  * GroupSheetContent Component
@@ -196,10 +197,14 @@ const GroupSheetContent = ({
               </Button>
             </div>}
 
-          {/* Group Updates Feed - Placeholder for future group update functionality */}
-          {isUserMember && <div className="text-center py-8 text-gray-500">
-              Group updates coming soon
-            </div>}
+          {/* Group Activity Timeline - Shows events and updates */}
+          {isUserMember && (
+            <GroupActivityTimeline 
+              groupId={group.id}
+              isGroupManager={canEditGroup}
+              onCreateEvent={() => setIsCreateEventOpen(true)}
+            />
+          )}
 
           {/* Group Info Section - Shows creation date and creator information */}
           <div className="text-sm text-gray-500 pt-4 border-t">
