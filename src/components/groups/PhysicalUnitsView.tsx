@@ -120,6 +120,9 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
     group.physical_unit_value === unit.unit_name
   );
   
+  // Check if user is already a member of this physical group
+  const isUserMember = !!matchingGroup?.current_user_membership;
+  
   // Handle joining the physical unit group
   const handleJoinUnit = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click when button is clicked
@@ -185,16 +188,28 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
             </div>
           )}
 
-          {/* Join button */}
+          {/* Join/Joined button */}
           <div className="pt-2 border-t border-gray-100">
             <Button 
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className={isUserMember 
+                ? "w-full bg-white hover:bg-gray-50 border text-purple-600 border-purple-200" 
+                : "w-full bg-purple-600 hover:bg-purple-700 text-white"
+              }
               size="sm"
               onClick={handleJoinUnit}
-              disabled={joinGroupMutation.isPending}
+              disabled={joinGroupMutation.isPending || isUserMember}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Join
+              {isUserMember ? (
+                <>
+                  <Users className="h-4 w-4 mr-2" />
+                  Joined
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Join
+                </>
+              )}
             </Button>
           </div>
         </div>

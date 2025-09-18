@@ -182,8 +182,8 @@ export const usePhysicalUnitsWithGroups = () => {
 };
 
 /**
- * Get physical units with assigned residents
- * This replaces the group-based approach with direct resident assignments
+ * Get physical units with assigned residents  
+ * Now using group membership instead of physical_unit_value assignments
  */
 export const usePhysicalUnitsWithResidents = () => {
   const neighborhood = useCurrentNeighborhood();
@@ -202,25 +202,28 @@ export const usePhysicalUnitsWithResidents = () => {
           return [];
         }
 
-        // Get simple count of members per physical unit (no complex joins)
-        const { data: members, error } = await supabase
-          .from('neighborhood_members')
-          .select('physical_unit_value, user_id')
+        // Get all physical groups for this neighborhood with member counts
+        const { data: physicalGroups, error } = await supabase
+          .from('groups')
+          .select(`
+            *,
+            member_count:group_members(count)
+          `)
           .eq('neighborhood_id', neighborhood.id)
-          .eq('status', 'active')
-          .not('physical_unit_value', 'is', null);
+          .eq('group_type', 'physical')
+          .eq('status', 'active');
 
         if (error) {
-          console.error('Error fetching neighborhood members:', error);
-          // Still return units even if member query fails
+          console.error('Error fetching physical groups:', error);
+          // Still return units even if groups query fails
         }
 
-        // Build resident count map
-        const residentCountMap = new Map<string, number>();
-        members?.forEach(member => {
-          if (member.physical_unit_value) {
-            const currentCount = residentCountMap.get(member.physical_unit_value) || 0;
-            residentCountMap.set(member.physical_unit_value, currentCount + 1);
+        // Create a map of physical unit to member count
+        const memberCountMap = new Map<string, number>();
+        physicalGroups?.forEach(group => {
+          if (group.physical_unit_value) {
+            const memberCount = Array.isArray(group.member_count) ? group.member_count.length : 0;
+            memberCountMap.set(group.physical_unit_value, memberCount);
           }
         });
 
@@ -229,7 +232,7 @@ export const usePhysicalUnitsWithResidents = () => {
           unit_name: unit,
           unit_label: config.physical_unit_label,
           residents: [], // Simplified - not showing individual resident details for now
-          resident_count: residentCountMap.get(unit) || 0
+          resident_count: memberCountMap.get(unit) || 0
         }));
 
         return unitsWithResidents;
