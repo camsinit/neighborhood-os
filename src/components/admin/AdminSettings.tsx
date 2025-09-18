@@ -774,7 +774,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Physical Units
+            Physical Groups
           </CardTitle>
           <CardDescription>
             Define the physical grouping units for your neighborhood (e.g., streets, buildings, floors)
