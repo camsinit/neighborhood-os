@@ -10,6 +10,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { GroupActivityItem } from '@/types/groupActivityTypes';
 import { GroupActivityCard } from './GroupActivityCard';
@@ -19,11 +20,12 @@ import { Button } from '@/components/ui/button';
 import { Plus, Calendar, MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
 
 interface GroupActivityTimelineProps {
   groupId: string;
   isGroupManager: boolean;
-  onCreateEvent: () => void;
+  onCreateEvent: (groupId: string) => void; // Pass groupId to handler
   showInviteButton?: boolean;
   onInvite?: () => void;
 }
@@ -35,6 +37,9 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
   showInviteButton = false,
   onInvite
 }) => {
+  // Navigation hook for routing to Calendar page
+  const navigate = useNavigate();
+  
   // Component state for overlays and detail panels
   const [isCreateUpdateOpen, setIsCreateUpdateOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
@@ -204,7 +209,7 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
           </Button>
           
           <Button
-            onClick={onCreateEvent}
+            onClick={() => onCreateEvent(groupId)}
             className="flex-1 h-10"
             variant="outline"
           >

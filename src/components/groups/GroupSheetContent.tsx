@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -9,9 +10,9 @@ import { useJoinGroup, useLeaveGroup, useGroupMembers } from '@/hooks/useGroups'
 import { useGroupActivities } from '@/hooks/useGroupActivities';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import AddEventDialog from '@/components/AddEventDialog';
 import { EditGroupForm } from './EditGroupForm';
 import { GroupActivityTimeline } from './activity/GroupActivityTimeline';
+import { extractNeighborhoodId, neighborhoodPath, BASE_ROUTES } from '@/utils/routes';
 
 /**
  * GroupSheetContent Component
@@ -37,9 +38,11 @@ const GroupSheetContent = ({
   group,
   onOpenChange
 }: GroupSheetContentProps) => {
+  // Navigation hook for routing to Calendar page
+  const navigate = useNavigate();
+  
   // State for current user and membership status
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isPostUpdateOpen, setIsPostUpdateOpen] = useState(false);
   const [isEditGroupOpen, setIsEditGroupOpen] = useState(false);
 
@@ -108,6 +111,13 @@ const GroupSheetContent = ({
     });
   };
 
+  // Handle creating events by navigating to Calendar page with pre-selected group
+  const handleCreateEvent = (groupId: string) => {
+    const neighborhoodId = extractNeighborhoodId();
+    const calendarPath = neighborhoodPath(BASE_ROUTES.calendar, neighborhoodId);
+    navigate(`${calendarPath}?action=add_event&groupId=${groupId}`);
+  };
+
   // Function to close the sheet and propagate to parent component
   const handleSheetClose = () => {
     if (onOpenChange) {
@@ -174,7 +184,7 @@ const GroupSheetContent = ({
             <GroupActivityTimeline 
               groupId={group.id}
               isGroupManager={canEditGroup}
-              onCreateEvent={() => setIsCreateEventOpen(true)}
+              onCreateEvent={handleCreateEvent}
               showInviteButton={isUserMember}
               onInvite={() => {/* TODO: Add invite functionality */}}
             />
@@ -183,18 +193,6 @@ const GroupSheetContent = ({
         </div>
       </AppSheetContent>
 
-      {/* Create Event Dialog - Allows members to create events for the group */}
-      <AddEventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} onAddEvent={() => {
-      setIsCreateEventOpen(false);
-      // Refresh the group activities after event creation
-      queryClient.invalidateQueries({
-        queryKey: ['activities']
-      });
-    }} initialDate={null}
-    // Pre-populate with group information for convenience
-    initialValues={{
-      groupId: group.id
-    }} />
 
       {/* Post Update Sheet - TODO: Implement when update posting is available */}
       {isPostUpdateOpen && <Sheet open={isPostUpdateOpen} onOpenChange={setIsPostUpdateOpen}>

@@ -47,7 +47,7 @@ function CalendarPage() {
     const action = searchParams.get('action');
     const dateParam = searchParams.get('date');
     
-    if (action === 'add') {
+    if (action === 'add' || action === 'add_event') {
       // Set initial date if provided
       if (dateParam) {
         try {
@@ -149,7 +149,8 @@ function CalendarPage() {
               onAddEvent={handleEventAdded}
               initialValues={{
                 date: initialEventDate ? initialEventDate.toISOString().split('T')[0] : '',
-                time: initialEventDate ? initialEventDate.toTimeString().slice(0, 5) : ''
+                time: initialEventDate ? initialEventDate.toTimeString().slice(0, 5) : '',
+                groupId: searchParams.get('groupId') || undefined // Pre-select group from URL
               }}
               neighborhoodTimezone={neighborhoodTimezone}
             />
