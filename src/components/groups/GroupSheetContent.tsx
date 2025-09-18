@@ -152,8 +152,11 @@ const GroupSheetContent = ({
                   </div>
                 )}
               </div>
-              <span className="text-sm">
-                {group.is_private ? 'Private group' : 'Public group'} • {group.member_count || 0} members
+              <span className="text-sm text-gray-600">
+                {group.member_count || 0} members
+              </span>
+              <span className="text-sm text-gray-600">
+                {group.is_private ? 'Private group' : 'Public group'}
               </span>
             </div>
 
