@@ -95,15 +95,12 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
       <div className="space-y-6 pt-6">
         {/* Physical Unit Header Section - Main unit information display */}
         <div className="space-y-4">
-          {/* Top row: Unit name and type indicator */}
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">{unit.unit_name}</h1>
-            <Home className="h-6 w-6 text-blue-500" />
-          </div>
+          {/* Clean unit title (matching social groups structure) */}
+          <h1 className="text-2xl font-semibold text-gray-900">{unit.unit_name}</h1>
           
-          {/* Unit type and resident count with profile images */}
+          {/* Unit metadata with profile images - matches social groups format exactly */}
           <div className="flex items-center gap-2 text-gray-600">
-            {/* Profile images on the left */}
+            {/* Profile images on the left - shows visual representation of residents */}
             <div className="flex -space-x-1">
               {memberAvatars.slice(0, 3).map((resident) => (
                 <Avatar key={resident.user_id} className="h-5 w-5 border border-white">
@@ -121,35 +118,33 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
                 </div>
               )}
             </div>
+            {/* Resident count - matches "X neighbors" format from social groups */}
             <span className="text-sm text-gray-600">
               {unit.resident_count === 1 ? '1 resident' : `${unit.resident_count} residents`}
             </span>
-            <MapPin className="h-4 w-4 text-blue-500" />
+            {/* Unit type indicator - matches "Private/Public group" format */}
             <span className="text-sm text-gray-600">
               {unit.unit_label.slice(0, -1)}
             </span>
           </div>
         </div>
 
-        {/* Residents Section - List all residents with their profiles */}
+        {/* Residents Section - Simple list matching social groups style */}
         {unit.resident_count > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-gray-700" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                Residents ({unit.resident_count})
-              </h2>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Residents ({unit.resident_count})
+            </h3>
             
-            {/* Resident list - shows all residents with their information */}
+            {/* Resident list - clean, simple styling like social groups */}
             <div className="space-y-3">
               {unit.residents.map((resident) => (
                 <div 
                   key={resident.user_id}
-                  className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   {/* Resident avatar */}
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={resident.profiles?.avatar_url || ''} />
                     <AvatarFallback>
                       {resident.profiles?.display_name?.[0]?.toUpperCase() || '?'}
@@ -169,16 +164,13 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">
-                      Lives on {unit.unit_name}
-                    </p>
                   </div>
 
                   {/* Action button for each resident */}
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hover:bg-gray-200"
+                    className="opacity-70 hover:opacity-100"
                   >
                     <User className="h-4 w-4" />
                   </Button>
@@ -203,9 +195,9 @@ const PhysicalUnitSheetContent = ({ unit, onOpenChange }: PhysicalUnitSheetConte
           </div>
         )}
 
-        {/* Action buttons section - contextual based on residency */}
+        {/* Action buttons section - integrated naturally like social groups */}
         {currentUserId && (
-          <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-3">
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2"
             >
