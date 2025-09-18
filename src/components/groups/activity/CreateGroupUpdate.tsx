@@ -114,7 +114,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
 
   return (
     <div 
-      className="absolute inset-0 bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200"
+      className="absolute inset-0 bg-background border rounded-lg shadow-lg z-10 animate-in slide-in-from-top-4 duration-200 flex flex-col"
       onKeyDown={handleKeyDown}
     >
       {/* Header */}
@@ -130,7 +130,7 @@ export const CreateGroupUpdate: React.FC<CreateGroupUpdateProps> = ({
         </Button>
       </div>
 
-      {/* Form */}
+      {/* Form Content - contained within the create update div */}
       <div className="p-4 space-y-4 flex-1">
         {/* Title Field */}
         <div>
