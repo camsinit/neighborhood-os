@@ -204,13 +204,6 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
             </div>
           )}
 
-          {/* Empty state for no residents */}
-          {unit.resident_count === 0 && (
-            <div className="flex items-center gap-2 text-gray-500">
-              <Users className="h-4 w-4" />
-              <span className="text-sm">No residents assigned yet</span>
-            </div>
-          )}
 
           {/* Join/Leave toggle button */}
           <div className="pt-2 border-t border-gray-100">
