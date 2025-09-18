@@ -144,12 +144,6 @@ const PhysicalUnitCard: React.FC<PhysicalUnitCardProps> = ({ unit, unitLabel, on
               <h3 className="font-semibold text-lg truncate text-gray-900">
                 {unit.unit_name}
               </h3>
-              <div className="flex items-center gap-2 mt-1">
-                <MapPin className="h-4 w-4 text-blue-500" />
-                <span className="text-sm text-gray-600">
-                  {unitLabel.slice(0, -1)} {/* Remove 's' from plural form */}
-                </span>
-              </div>
             </div>
             {/* Resident count badge */}
             <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
