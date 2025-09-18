@@ -182,7 +182,7 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
 
   // Create update mutation
   const createUpdateMutation = useMutation({
-    mutationFn: async (data: { title?: string; content: string; image_urls?: string[] }) => {
+    mutationFn: async (data: { title: string; content: string; image_urls?: string[] }) => {
       if (!user) throw new Error('User not authenticated');
 
       const { error } = await supabase
@@ -190,7 +190,7 @@ export function GroupUpdateFeed({ groupId, isGroupManager, className = '' }: Gro
         .insert({
           group_id: groupId,
           user_id: user.id,
-          title: data.title || data.content.slice(0, 25), // Use title or truncate content
+          title: data.title, // Title is now required from the form
           content: data.content,
           image_urls: data.image_urls || []
         });

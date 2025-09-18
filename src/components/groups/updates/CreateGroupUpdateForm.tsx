@@ -1,8 +1,11 @@
 /**
  * CreateGroupUpdateForm Component
  * 
- * Form for creating new group updates with text content and optional images.
- * Supports rich text input and image uploads.
+ * Universal form for creating new group updates with:
+ * - Title field (25 char limit)
+ * - Content field (unlimited)
+ * - Image upload capability
+ * - Consistent design across all group types
  */
 
 import React, { useState } from 'react';
@@ -10,17 +13,19 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useAutoResizeTextarea } from '@/components/hooks/use-auto-resize-textarea';
-import { Image, X } from 'lucide-react';
+import { Image, X, ArrowUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { createLogger } from '@/utils/logger';
 
 const logger = createLogger('CreateGroupUpdateForm');
 
-// Form validation schema
+// Form validation schema - Updated to include title field
 const createUpdateSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(25, 'Title must be 25 characters or less'),
   content: z.string().min(1, 'Content is required').max(2000, 'Content must be less than 2000 characters'),
 });
 
@@ -28,7 +33,7 @@ type CreateUpdateFormData = z.infer<typeof createUpdateSchema>;
 
 interface CreateGroupUpdateFormProps {
   groupId: string;
-  onSubmit: (data: { content: string; image_urls?: string[] }) => Promise<void>;
+  onSubmit: (data: { title: string; content: string; image_urls?: string[] }) => Promise<void>;
   onCancel?: () => void;
   isSubmitting?: boolean;
 }
@@ -52,6 +57,7 @@ export function CreateGroupUpdateForm({
   const form = useForm<CreateUpdateFormData>({
     resolver: zodResolver(createUpdateSchema),
     defaultValues: {
+      title: '',
       content: '',
     },
   });
@@ -128,6 +134,7 @@ export function CreateGroupUpdateForm({
       );
       
       await onSubmit({
+        title: data.title,
         content: data.content,
         image_urls: imageDataUrls
       });
@@ -152,17 +159,44 @@ export function CreateGroupUpdateForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Title Field */}
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center justify-between mb-2">
+                <FormLabel className="text-sm font-medium">Title</FormLabel>
+                <span className={`text-xs ${field.value.length > 20 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {field.value.length}/25
+                </span>
+              </div>
+              <FormControl>
+                <Input
+                  placeholder="Brief title for your update..."
+                  maxLength={25}
+                  className="focus:ring-purple-500 focus:border-purple-500"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Content textarea */}
         <FormField
           control={form.control}
           name="content"
           render={({ field }) => (
             <FormItem>
+              <FormLabel className="text-sm font-medium">Content</FormLabel>
               <FormControl>
                 <Textarea
                   ref={textareaRef}
-                  placeholder="Share an update with your group..."
-                  className="min-h-[80px] resize-none"
+                  placeholder="Share an update with the group..."
+                  rows={4}
+                  className="focus:ring-purple-500 focus:border-purple-500 resize-none"
                   value={field.value}
                   onChange={(e) => {
                     field.onChange(e);
@@ -235,8 +269,16 @@ export function CreateGroupUpdateForm({
             <Button 
               type="submit" 
               disabled={isSubmitting || !form.formState.isValid}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
-              {isSubmitting ? 'Posting...' : 'Post Update'}
+              {isSubmitting ? (
+                'Posting...'
+              ) : (
+                <div className="flex items-center justify-center">
+                  <ArrowUp className="w-4 h-4 mr-2" />
+                  Post Update
+                </div>
+              )}
             </Button>
           </div>
         </div>
