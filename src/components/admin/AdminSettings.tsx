@@ -68,8 +68,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   
-  // State for physical units save tracking
-  const [hasUnsavedPhysicalUnits, setHasUnsavedPhysicalUnits] = useState(false);
+  // State for physical units save tracking (only for complex array operations)
   const [isSavingPhysicalUnits, setIsSavingPhysicalUnits] = useState(false);
   
   // State for delete operation
@@ -103,8 +102,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         return;
       }
       
-      // Skip only physical units array and label from auto-save (these need special handling)
-      if (fieldName === 'physicalUnits' || fieldName === 'physicalUnitLabel') {
+      // Skip only physical units array from auto-save (needs special handling for group creation)
+      if (fieldName === 'physicalUnits') {
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
         return;
@@ -163,7 +162,7 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
 
   // Initialize form data when neighborhood data loads
   useEffect(() => {
-    if (currentNeighborhood && !hasUnsavedPhysicalUnits) {
+    if (currentNeighborhood && !isAutoSaving) {
       const neighborhood = currentNeighborhood as any; // Cast to access database properties
       setFormData({
         name: neighborhood.name || '',
@@ -192,10 +191,8 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
         physicalUnits: Array.isArray(neighborhood.physical_units) ? neighborhood.physical_units : []
       });
       
-      // Reset unsaved changes flag when data loads
-      setHasUnsavedPhysicalUnits(false);
     }
-  }, [currentNeighborhood, hasUnsavedPhysicalUnits, logger]);
+  }, [currentNeighborhood, isAutoSaving, logger]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     if (isReadOnly) return;
@@ -207,15 +204,12 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
   const handlePhysicalUnitsChange = (field: string, value: string | string[]) => {
     if (isReadOnly) return;
     
-    // Update local state
+    // Update local state immediately for optimistic UI
     setPhysicalUnitsConfig(prev => ({ ...prev, [field]: value }));
     
-    // For physicalUnitType, trigger auto-save immediately
-    if (field === 'physicalUnitType') {
+    // Auto-save all simple fields immediately (not the complex array)
+    if (field === 'physicalUnitType' || field === 'physicalUnitLabel') {
       debouncedAutoSave(field, value as string);
-    } else {
-      // For other fields (physicalUnits array, physicalUnitLabel), mark as unsaved
-      setHasUnsavedPhysicalUnits(true);
     }
   };
 
@@ -223,7 +217,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     const newUnits = [...physicalUnitsConfig.physicalUnits, ''];
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    setHasUnsavedPhysicalUnits(true);
     
     // Focus the newly added input field after a brief delay
     setTimeout(() => {
@@ -239,7 +232,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     if (isReadOnly) return;
     const newUnits = physicalUnitsConfig.physicalUnits.filter((_, i) => i !== index);
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    setHasUnsavedPhysicalUnits(true);
   };
 
   const updatePhysicalUnit = (index: number, value: string) => {
@@ -247,12 +239,11 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
     const newUnits = [...physicalUnitsConfig.physicalUnits];
     newUnits[index] = value;
     setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: newUnits }));
-    setHasUnsavedPhysicalUnits(true);
   };
 
   // Save physical units with proper validation and group creation
   const savePhysicalUnits = async () => {
-    if (isReadOnly || !currentNeighborhood || !hasUnsavedPhysicalUnits) return;
+    if (isReadOnly || !currentNeighborhood) return;
     
     setIsSavingPhysicalUnits(true);
     
@@ -350,7 +341,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
       
       // Update local state to reflect saved data
       setPhysicalUnitsConfig(prev => ({ ...prev, physicalUnits: uniqueUnits }));
-      setHasUnsavedPhysicalUnits(false);
       
       toast({
         title: "Physical Units Saved",
@@ -872,27 +862,6 @@ const AdminSettings = ({ isReadOnly }: AdminSettingsProps) => {
                 ))
               )}
             </div>
-            
-            {/* Save Physical Units Button */}
-            {!isReadOnly && hasUnsavedPhysicalUnits && (
-              <div className="pt-4 border-t">
-                <Button
-                  type="button"
-                  onClick={savePhysicalUnits}
-                  disabled={isSavingPhysicalUnits}
-                  className="w-full"
-                >
-                  {isSavingPhysicalUnits ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving Physical Units...
-                    </>
-                  ) : (
-                    'Save Physical Units'
-                  )}
-                </Button>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
