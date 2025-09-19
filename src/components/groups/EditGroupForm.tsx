@@ -124,7 +124,7 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form id="edit-group-form" onSubmit={handleSubmit} className="space-y-6">
       {/* Group Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Group Name *</Label>
@@ -204,23 +204,7 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
         </div>
       </div>
 
-      {/* Form Actions */}
-      <DialogFooter className="pt-2">
-        <Button type="button" variant="outline" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={updateGroupMutation.isPending || !formData.name.trim()}
-          style={{ 
-            backgroundColor: moduleThemeColors.neighbors.primary,
-            borderColor: moduleThemeColors.neighbors.primary 
-          }}
-          className="hover:opacity-90"
-        >
-          {updateGroupMutation.isPending ? 'Updating...' : 'Update Group'}
-        </Button>
-      </DialogFooter>
+      {/* Form actions moved to SheetHeader */}
     </form>
   );
 };

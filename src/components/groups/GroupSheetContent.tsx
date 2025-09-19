@@ -232,9 +232,27 @@ const GroupSheetContent = ({
       {isEditGroupOpen && <Sheet open={isEditGroupOpen} onOpenChange={setIsEditGroupOpen}>
           <SheetContent className="sm:max-w-md overflow-y-auto">
             <SheetHeader className="mb-4">
-              <SheetTitle className="text-xl font-bold">
-                Edit Group
-              </SheetTitle>
+              <div className="flex items-center justify-between">
+                <SheetTitle className="text-xl font-bold">
+                  Edit Group
+                </SheetTitle>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsEditGroupOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    form="edit-group-form"
+                    type="submit"
+                    style={{ 
+                      backgroundColor: 'hsl(var(--neighbors-primary))',
+                      borderColor: 'hsl(var(--neighbors-primary))' 
+                    }}
+                    className="hover:opacity-90"
+                  >
+                    Update Group
+                  </Button>
+                </div>
+              </div>
             </SheetHeader>
             <EditGroupForm onClose={() => setIsEditGroupOpen(false)} group={group} />
           </SheetContent>
