@@ -70,23 +70,11 @@ export const PhysicalUnitActivityTimeline: React.FC<PhysicalUnitActivityTimeline
           }
         });
 
-        // Fetch unit-related events from the events table
-        const { data: events, error: eventsError } = await supabase
-          .from('events')
-          .select(`
-            id,
-            title,
-            description,
-            time,
-            location,
-            host_id,
-            neighborhood_id,
-            created_at,
-            profiles:host_id(display_name, avatar_url)
-          `)
-          .eq('neighborhood_id', neighborhoodId)
-          .ilike('location', `%${unitName}%`)
-          .order('created_at', { ascending: false });
+        // For now, skip fetching general neighborhood events for physical units
+        // Physical units should only show unit-specific activities (resident changes, unit updates, etc.)
+        // TODO: In the future, we might add a way to associate events specifically with physical units
+        const events: any[] = [];
+        const eventsError = null;
 
         if (eventsError) {
           logger.error('Error fetching unit events:', eventsError);
