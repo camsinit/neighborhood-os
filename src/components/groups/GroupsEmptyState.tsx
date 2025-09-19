@@ -22,28 +22,34 @@ export const GroupsEmptyState: React.FC<GroupsEmptyStateProps> = ({ onCreateGrou
     <div className="py-12 px-4">
       {/* Popular group suggestions */}
       <div className="max-w-4xl mx-auto">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+        {/* Enhanced heading with larger, bolder text for seniors */}
+        <h4 className="text-2xl font-bold text-gray-900 mb-8 text-center">
           Popular Group Ideas
         </h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {/* Reduced grid density and increased spacing for better readability */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {groupTemplates.map((template, index) => (
             <Button
               key={index}
               variant="outline"
-              className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-gray-50 border-gray-200"
+              className="h-auto p-8 flex flex-col items-center gap-4 hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 rounded-xl transition-all duration-200 min-h-[140px]"
               onClick={() => onCreateGroup({ name: template.name, description: template.description })}
             >
-              <template.icon className="h-5 w-5 text-gray-600" />
-              <span className="font-medium text-sm">{template.name}</span>
-              <span className="text-xs text-gray-500 text-center leading-tight">
+              {/* Larger icons for better visibility */}
+              <template.icon className="h-8 w-8 text-gray-700" />
+              {/* Larger, bolder text for group names */}
+              <span className="font-bold text-lg text-gray-900">{template.name}</span>
+              {/* Improved contrast and larger description text */}
+              <span className="text-base text-gray-700 text-center leading-relaxed font-medium">
                 {template.description}
               </span>
             </Button>
           ))}
         </div>
         
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
+        <div className="text-center mt-8">
+          {/* Larger, more visible instruction text */}
+          <p className="text-lg text-gray-700 font-medium">
             Click any suggestion to get started, or create a custom group
           </p>
         </div>

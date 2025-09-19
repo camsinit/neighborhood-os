@@ -64,14 +64,14 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             </Avatar>)}
         </div>
         
-        {/* Member count text */}
-        <span className="text-sm font-medium text-gray-600 ml-1">
+        {/* Member count text with better contrast */}
+        <span className="text-base font-bold text-gray-800 ml-1">
           {group.member_count || 0} {group.member_count === 1 ? 'Member' : 'Members'}
         </span>
       </div>;
   };
   return <Card 
-    className={cn("overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer", "bg-white border border-gray-200 hover:border-gray-300 rounded-lg", className)} 
+    className={cn("overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer", "bg-white border-2 border-gray-300 hover:border-gray-400 rounded-xl", className)} 
     onClick={handleCardClick}
     {...dataAttributes}
   >
@@ -92,15 +92,15 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       {/* Separating stroke */}
       <div className="h-px bg-gradient-to-r from-purple-100 via-purple-200 to-purple-100"></div>
 
-      {/* Content Section */}
-      <CardContent className="p-4 space-y-3">
-        {/* Title */}
-        <h3 className="font-semibold text-lg text-gray-900 leading-tight">
+      {/* Content Section with increased padding */}
+      <CardContent className="p-6 space-y-4">
+        {/* Title with larger, bolder text */}
+        <h3 className="font-bold text-xl text-gray-900 leading-tight">
           {group.name}
         </h3>
         
-        {/* Description - truncated to 1 line */}
-        {group.description && <p className="text-sm text-gray-600 line-clamp-1 leading-relaxed">
+        {/* Description with improved contrast and readability */}
+        {group.description && <p className="text-base text-gray-800 line-clamp-2 leading-relaxed font-medium">
             {group.description}
           </p>}
 
@@ -109,14 +109,14 @@ export const GroupCard: React.FC<GroupCardProps> = ({
           {renderMemberStack()}
         </div>
 
-        {/* Join/Joined Button */}
-        {showJoinButton && <div className="pt-2">
+        {/* Join/Joined Button with better sizing */}
+        {showJoinButton && <div className="pt-3">
             <Button 
-              size="sm" 
+              size="lg" 
               className={
                 group.current_user_membership 
-                  ? "w-full bg-white hover:bg-gray-50 border font-medium" 
-                  : "w-full bg-gray-700 hover:bg-gray-800 text-white font-medium"
+                  ? "w-full bg-white hover:bg-gray-50 border-2 font-bold text-base py-3" 
+                  : "w-full bg-gray-700 hover:bg-gray-800 text-white font-bold text-base py-3"
               }
               style={group.current_user_membership ? {
                 color: 'hsl(var(--neighbors-color))',
