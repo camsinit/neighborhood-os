@@ -231,6 +231,7 @@ export function GroupUpdateComments({
               size="sm"
               onClick={handleSubmitComment}
               disabled={!newComment.trim() || isSubmitting}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               <Send className="h-3 w-3 mr-1" />
               {isSubmitting ? 'Posting...' : 'Comment'}
