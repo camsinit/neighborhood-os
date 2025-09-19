@@ -46,7 +46,11 @@ const CONTENT_TYPE_COLORS: Record<string, string> = {
   
   // Neighbors
   'neighbors': '#8B5FFF',
-  'neighbor': '#8B5FFF'
+  'neighbor': '#8B5FFF',
+  
+  // Groups
+  'groups': '#8B5FFF',
+  'group': '#8B5FFF'
 };
 
 const getThemeColor = (contentType: string): string => {
@@ -81,6 +85,8 @@ const getHighlightType = (contentType: string): HighlightableItemType | null => 
       return 'goods';
     case 'neighbors':
       return 'neighbors';
+    case 'groups':
+      return 'group';
     default:
       return null;
   }
