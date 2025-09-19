@@ -195,6 +195,48 @@ export class GroupService {
         createdAt: newGroup.created_at
       });
 
+      // Step 4: Send invitations to selected neighbors
+      if (data.invited_neighbors && data.invited_neighbors.length > 0) {
+        logger.info('Sending group invitations', { 
+          groupId: newGroup.id,
+          invitedCount: data.invited_neighbors.length 
+        });
+
+        try {
+          // Import the notification service
+          const { createGroupInvitationNotifications } = await import('@/utils/notifications/templatedNotificationService');
+          
+          // Get the creator's display name
+          const { data: creatorProfile } = await (supabase as any)
+            .from('profiles')
+            .select('display_name')
+            .eq('id', data.created_by)
+            .single();
+
+          const creatorName = creatorProfile?.display_name || 'A neighbor';
+
+          // Send invitation notifications
+          await createGroupInvitationNotifications(
+            newGroup.id,
+            newGroup.name,
+            data.created_by,
+            creatorName,
+            data.invited_neighbors
+          );
+
+          logger.info('Group invitations sent successfully', { 
+            groupId: newGroup.id,
+            invitedCount: data.invited_neighbors.length 
+          });
+        } catch (inviteError) {
+          logger.error('Error sending group invitations', { 
+            error: inviteError, 
+            groupId: newGroup.id 
+          });
+          // Don't fail group creation if invitations fail
+        }
+      }
+
       return { ...newGroup, member_count: 1 };
     } catch (error) {
       logger.error('=== GROUP CREATION EXCEPTION ===', { 

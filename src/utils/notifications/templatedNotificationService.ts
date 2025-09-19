@@ -328,6 +328,54 @@ export async function createSkillSessionCancelledNotification(
   });
 }
 
+/**
+ * Creates group invitation notifications for invited neighbors
+ */
+export async function createGroupInvitationNotifications(
+  groupId: string,
+  groupName: string,
+  inviterId: string,
+  inviterName: string,
+  invitedNeighborIds: string[]
+): Promise<void> {
+  try {
+    logger.debug('Creating group invitation notifications', { 
+      groupId, 
+      groupName, 
+      inviterName, 
+      invitedCount: invitedNeighborIds.length 
+    });
+
+    // Create notifications for all invited neighbors
+    const notifications = invitedNeighborIds.map(neighborId => 
+      createTemplatedNotification({
+        templateId: 'group_invitation',
+        recipientUserId: neighborId,
+        actorUserId: inviterId,
+        contentId: groupId,
+        variables: {
+          actor: inviterName,
+          groupName: groupName
+        },
+        metadata: {
+          groupId,
+          groupName,
+          inviterName
+        }
+      })
+    );
+
+    await Promise.all(notifications);
+    logger.info('Group invitation notifications created successfully', { 
+      groupId, 
+      notificationCount: invitedNeighborIds.length 
+    });
+  } catch (error) {
+    logger.error('Error creating group invitation notifications', { error, groupId });
+    throw error;
+  }
+}
+
 export default {
   createTemplatedNotification,
   createEventRSVPNotification,
@@ -336,5 +384,6 @@ export default {
   createSafetyCommentNotification,
   createGoodsResponseNotification,
   createCareResponseNotification,
-  createSkillSessionCancelledNotification
+  createSkillSessionCancelledNotification,
+  createGroupInvitationNotifications
 };

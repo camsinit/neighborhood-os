@@ -260,6 +260,17 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     actionLabel: 'View Event',
     relevanceScore: 3, // High - group events are important
     description: 'When someone creates an event for your group'
+  },
+
+  group_invitation: {
+    id: 'group_invitation',
+    template: '{{actor}} invited you to join {{groupName}}',
+    contentType: 'groups',
+    notificationType: 'groups',
+    actionType: 'view',
+    actionLabel: 'View Group',
+    relevanceScore: 3, // High - direct invitation to you
+    description: 'When someone invites you to join their group'
   }
 };
 
