@@ -152,9 +152,21 @@ export const NeighborSearch: React.FC<NeighborSearchProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 py-2">
-              No neighbors found matching "{searchTerm}"
-            </p>
+            <div className="text-sm text-gray-500 py-4 text-center space-y-2">
+              <p>No neighbors found matching "{searchTerm}"</p>
+              {(() => {
+                const currentUserName = user?.user_metadata?.display_name?.toLowerCase() || '';
+                const searchLower = searchTerm.toLowerCase();
+                const isSearchingForSelf = currentUserName.includes(searchLower) || 
+                  currentUserName.split(' ').some(part => part.startsWith(searchLower));
+                
+                return isSearchingForSelf ? (
+                  <p className="text-xs text-blue-600 font-medium">
+                    💡 You can't invite yourself to your own group
+                  </p>
+                ) : null;
+              })()}
+            </div>
           )}
         </div>
       )}
