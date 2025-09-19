@@ -261,25 +261,6 @@ export const GroupActivityTimeline: React.FC<GroupActivityTimelineProps> = ({
               New Update
             </Button>
             
-            <Button
-              onClick={() => onCreateEvent(groupId)}
-              className="flex-1 h-10"
-              variant="outline"
-            >
-              <Calendar className="w-4 h-4 mr-2 text-blue-600" />
-              New Event
-            </Button>
-
-            {showInviteButton && (
-              <Button
-                onClick={onInvite}
-                className="flex-1 h-10 bg-purple-100/50 text-purple-600 border-purple-600 hover:bg-purple-50"
-                variant="outline"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Invite
-              </Button>
-            )}
           </div>
         )}
 
