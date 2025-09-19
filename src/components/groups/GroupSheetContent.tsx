@@ -173,8 +173,9 @@ const GroupSheetContent = ({
                 {/* Share button - visible to all users */}
                 <button 
                   onClick={() => {
-                    // Copy group URL to clipboard
-                    const groupUrl = `${window.location.origin}/n/${group.neighborhood_id}/neighbors?detail=${group.id}&type=group`;
+                    // Copy group URL to clipboard using proper route utilities
+                    const groupsPath = neighborhoodPath(BASE_ROUTES.groups, group.neighborhood_id);
+                    const groupUrl = `${window.location.origin}${groupsPath}?detail=${group.id}&type=group`;
                     navigator.clipboard.writeText(groupUrl);
                     // TODO: Add toast notification for successful copy
                   }} 

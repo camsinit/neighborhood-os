@@ -142,10 +142,12 @@ const ActivityItem = ({
     const itemType = getHighlightableType(activity.activity_type);
     
     try {
+      // Pass the neighborhood_id from the activity to ensure proper navigation context
       const result = await navigationService.navigateToItem(
         itemType, 
         activity.content_id, 
-        { showToast: true }
+        { showToast: true },
+        activity.neighborhood_id // Provide neighborhood context from activity data
       );
       
       if (!result.success) {

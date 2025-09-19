@@ -85,7 +85,8 @@ export class ItemNavigationService {
   async navigateToItem(
     type: HighlightableItemType,
     id: string,
-    options: NavigationOptions = {}
+    options: NavigationOptions = {},
+    providedNeighborhoodId?: string
   ): Promise<NavigationResult> {
     const {
       showToast = false,
@@ -105,13 +106,14 @@ export class ItemNavigationService {
         return { success: false, error };
       }
       
-// Build the full neighborhood-aware route via helpers
-const neighborhoodId = extractNeighborhoodId(window.location.pathname);
-if (!neighborhoodId) {
-  const error = `Cannot determine neighborhood context for navigation`;
-  logger.error(error);
-  return { success: false, error };
-}
+      // Build the full neighborhood-aware route via helpers
+      // Use provided neighborhood ID first, then fall back to URL extraction
+      const neighborhoodId = providedNeighborhoodId || extractNeighborhoodId(window.location.pathname);
+      if (!neighborhoodId) {
+        const error = `Cannot determine neighborhood context for navigation`;
+        logger.error(error);
+        return { success: false, error };
+      }
 
 const fullRoute = neighborhoodPath(baseRoute, neighborhoodId);
       
