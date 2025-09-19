@@ -102,6 +102,7 @@ const getHighlightableType = (activityType: string): HighlightableItemType => {
     case 'event': return 'event';
     case 'good': return 'goods';
     case 'safety': return 'safety';
+    case 'group': return 'group'; // Map group activities to group highlight type
     default: return 'event'; // Default fallback
   }
 };
