@@ -180,9 +180,9 @@ const QuickActions = () => {
       
       {/* Three-column grid focused on core community features */}
       <div className="grid grid-cols-3 gap-6">
-        <ActionColumn title="Calendar & Events" actions={calendarActions} moduleType="calendar" />
-        <ActionColumn title="Skills & Learning" actions={skillsActions} moduleType="skills" />
-        <ActionColumn title="Groups & Community" actions={groupsActions} moduleType="neighbors" />
+        <ActionColumn title="Events" actions={calendarActions} moduleType="calendar" />
+        <ActionColumn title="Skillsharing" actions={skillsActions} moduleType="skills" />
+        <ActionColumn title="Community" actions={groupsActions} moduleType="neighbors" />
       </div>
 
       {/* Event Sheet - Clean white background with blue accent */}
