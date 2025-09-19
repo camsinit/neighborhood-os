@@ -1,14 +1,11 @@
 
-import { Calendar, HelpCircle, Heart, AlertTriangle, Package, Wrench, Zap } from "lucide-react";
+import { Calendar, HelpCircle, Users, Wrench, Zap, UsersRound, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SafetyUpdateForm from "./safety/SafetyUpdateForm";
-import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
 import SkillRequestSheet from "./skills/SkillRequestSheet";
 import { Sheet, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AppSheetContent } from "@/components/ui/app-sheet-content";
-import GoodsForm from "./goods/GoodsForm";
 import ModuleButton from "./ui/module-button";
 import { moduleThemeColors } from "@/theme/moduleTheme";
 import EventForm from "./events/EventForm";
@@ -16,20 +13,21 @@ import { SkillsProvider } from "@/contexts/SkillsContext";
 import { useNeighborhood } from "@/contexts/neighborhood";
 import { supabase } from "@/integrations/supabase/client";
 import { createLogger } from "@/utils/logger";
+import { neighborhoodPath, BASE_ROUTES } from "@/utils/routes";
+import SkillsSidePanelSelector from "./skills/SkillsSidePanelSelector";
 
 // Logger for this component
 const logger = createLogger('QuickActions');
 
 /**
- * QuickActions component displays common actions for users to interact with the community.
+ * QuickActions component displays essential actions for community engagement.
  * 
- * This includes:
- * - Adding events - NOW using Sheet pattern for consistency
- * - Sharing or requesting items (goods) - using proper goods forms
- * - Sharing or requesting skills - NOW wrapped in SkillsProvider to fix context error
- * - Adding safety updates - using Sheet consistently
+ * Focused on core features:
+ * - Calendar/Events - Adding events and viewing calendar
+ * - Skills - Sharing and requesting skills  
+ * - Groups - Creating groups and finding neighbors
  * 
- * All actions now use Sheet components for complete consistency across the app.
+ * All actions use Sheet components for consistent UX across the app.
  */
 const QuickActions = () => {
   const navigate = useNavigate();
@@ -37,11 +35,8 @@ const QuickActions = () => {
   
   // State for controlling various sheets
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
-  const [isSafetyUpdateOpen, setIsSafetyUpdateOpen] = useState(false);
-  const [isGoodsSheetOpen, setIsGoodsSheetOpen] = useState(false);
   const [isSkillSheetOpen, setIsSkillSheetOpen] = useState(false);
   const [isSkillRequestSheetOpen, setIsSkillRequestSheetOpen] = useState(false);
-  const [initialRequestType, setInitialRequestType] = useState<"need" | "offer" | null>(null);
   
   // Event-specific state for neighborhood timezone
   const [neighborhoodTimezone, setNeighborhoodTimezone] = useState<string>('America/Los_Angeles');
@@ -72,29 +67,26 @@ const QuickActions = () => {
     }
   }, [isAddEventOpen, currentNeighborhood]);
 
-  // Goods/Items actions (orange theme)
-  const goodsActions = [{
-    icon: Package,
-    label: "Share an item",
+  // Calendar/Events actions (blue theme)
+  const calendarActions = [{
+    icon: Calendar,
+    label: "Add Event",
     onClick: () => {
-      // Use structured logging instead of console.log for controlled verbosity
-      logger.info('Opening goods sheet for sharing');
-      setInitialRequestType("offer");
-      setIsGoodsSheetOpen(true);
+      logger.info('Opening event sheet');
+      setIsAddEventOpen(true);
     },
-    moduleTheme: 'goods' as const
+    moduleTheme: 'calendar' as const
   }, {
-    icon: Package,
-    label: "Request an item",
+    icon: Calendar,
+    label: "View Calendar", 
     onClick: () => {
-      logger.info('Opening goods sheet for requesting');
-      setInitialRequestType("need");
-      setIsGoodsSheetOpen(true);
+      const calendarPath = neighborhoodPath(BASE_ROUTES.calendar, currentNeighborhood?.id);
+      navigate(calendarPath);
     },
-    moduleTheme: 'goods' as const
+    moduleTheme: 'calendar' as const
   }];
 
-  // Skills actions (green theme) - now using Sheet with SkillsProvider
+  // Skills actions (green theme) - keeping the core skills functionality
   const skillsActions = [{
     icon: Wrench,
     label: "Share a skill",
@@ -113,23 +105,23 @@ const QuickActions = () => {
     moduleTheme: 'skills' as const
   }];
 
-  // Events & Safety actions (blue and red themes) - now both using Sheet
-  const otherActions = [{
-    icon: Calendar,
-    label: "Add Event",
+  // Groups & Community actions (purple theme) - new focus on social connection
+  const groupsActions = [{
+    icon: UsersRound,
+    label: "Find Groups",
     onClick: () => {
-      logger.info('Opening event sheet');
-      setIsAddEventOpen(true);
+      const groupsPath = neighborhoodPath(BASE_ROUTES.neighbors, currentNeighborhood?.id);
+      navigate(groupsPath);
     },
-    moduleTheme: 'calendar' as const
+    moduleTheme: 'neighbors' as const
   }, {
-    icon: AlertTriangle,
-    label: "Add Safety Update",
+    icon: UserPlus,
+    label: "Explore Neighbors",
     onClick: () => {
-      logger.info('Opening safety update sheet');
-      setIsSafetyUpdateOpen(true);
+      const neighborsPath = neighborhoodPath(BASE_ROUTES.neighbors, currentNeighborhood?.id);
+      navigate(neighborsPath);
     },
-    moduleTheme: 'safety' as const
+    moduleTheme: 'neighbors' as const
   }];
 
   // Event added handler with proper cleanup
@@ -158,9 +150,9 @@ const QuickActions = () => {
       icon: any;
       label: string;
       onClick: () => void;
-      moduleTheme: "goods" | "skills" | "calendar" | "safety";
+      moduleTheme: "calendar" | "skills" | "neighbors";
     }>;
-    moduleType: "goods" | "skills" | "calendar" | "safety";
+    moduleType: "calendar" | "skills" | "neighbors";
   }) => <div className="flex flex-col gap-2">
       {/* Column heading with colored accent */}
       <h3 className="text-sm font-semibold mb-2 pb-1 border-b-2" style={{
@@ -186,11 +178,11 @@ const QuickActions = () => {
         Quick Actions
       </h2>
       
-      {/* Three-column grid for organized actions */}
+      {/* Three-column grid focused on core community features */}
       <div className="grid grid-cols-3 gap-6">
-        <ActionColumn title="Freebies" actions={goodsActions} moduleType="goods" />
-        <ActionColumn title="Skill Sharing" actions={skillsActions} moduleType="skills" />
-        <ActionColumn title="Events & Updates" actions={otherActions} moduleType="calendar" />
+        <ActionColumn title="Calendar & Events" actions={calendarActions} moduleType="calendar" />
+        <ActionColumn title="Skills & Learning" actions={skillsActions} moduleType="skills" />
+        <ActionColumn title="Groups & Community" actions={groupsActions} moduleType="neighbors" />
       </div>
 
       {/* Event Sheet - Clean white background with blue accent */}
@@ -218,46 +210,6 @@ const QuickActions = () => {
         </AppSheetContent>
       </Sheet>
       
-      {/* Safety Update Sheet - Clean white background with red accent */}
-      <Sheet open={isSafetyUpdateOpen} onOpenChange={setIsSafetyUpdateOpen}>
-        <AppSheetContent 
-          side="right" 
-          moduleTheme="safety"
-        >
-          <SheetHeader className="border-b border-border/40 pb-4">
-            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" style={{ color: moduleThemeColors.safety.primary }} />
-              Share Safety Update
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <SafetyUpdateForm onSuccess={() => setIsSafetyUpdateOpen(false)} />
-          </div>
-        </AppSheetContent>
-      </Sheet>
-      
-      {/* Goods Sheet - Clean white background with orange accent */}
-      <Sheet open={isGoodsSheetOpen} onOpenChange={setIsGoodsSheetOpen}>
-        <AppSheetContent 
-          side="right" 
-          moduleTheme="goods"
-        >
-          <SheetHeader className="border-b border-border/40 pb-4">
-            <SheetTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
-              <Package className="h-5 w-5" style={{ color: moduleThemeColors.goods.primary }} />
-              {initialRequestType === "offer" ? "Offer an Item" : "Request an Item"}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <GoodsForm
-              onClose={() => setIsGoodsSheetOpen(false)}
-              initialRequestType={initialRequestType}
-              mode="create"
-            />
-          </div>
-        </AppSheetContent>
-      </Sheet>
-      
       {/* Skills Sheet - Clean white background with green accent */}
       <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
         <AppSheetContent 
@@ -271,7 +223,7 @@ const QuickActions = () => {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            {/* ENHANCED: Use new SkillsSidePanelSelector optimized for side panels */}
+            {/* Use SkillsSidePanelSelector optimized for side panels */}
             <SkillsProvider>
               <SkillsSidePanelSelector 
                 onSkillAdded={handleSkillAdded} 
