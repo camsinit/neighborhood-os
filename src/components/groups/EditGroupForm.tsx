@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DialogFooter } from '@/components/ui/dialog';
-import { useUpdateGroup, useNeighborhoodPhysicalConfig } from '@/hooks/useGroups';
+import { useUpdateGroup, useNeighborhoodPhysicalConfig, useDeleteGroup } from '@/hooks/useGroups';
 import { UpdateGroupFormData, Group } from '@/types/groups';
 import { moduleThemeColors } from '@/theme/moduleTheme';
 import { CoverPhotoUpload } from './CoverPhotoUpload';
@@ -32,8 +32,9 @@ interface EditGroupFormProps {
  * @param group - The group object containing current data to pre-populate
  */
 export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) => {
-  // Get the update group mutation hook and physical config
+  // Get the mutation hooks and physical config
   const updateGroupMutation = useUpdateGroup();
+  const deleteGroupMutation = useDeleteGroup();
   const { data: physicalConfig } = useNeighborhoodPhysicalConfig();
   
   // Form state initialized with current group data
@@ -48,6 +49,9 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
 
   // State for cover photo (banner image)
   const [bannerImageUrl, setBannerImageUrl] = useState<string | undefined>(group.banner_image_url || undefined);
+  
+  // State for delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   /**
    * Handles form submission
@@ -105,6 +109,18 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
       ...prev,
       [field]: value
     }));
+  };
+
+  /**
+   * Handles group deletion with confirmation
+   */
+  const handleDeleteGroup = async () => {
+    try {
+      await deleteGroupMutation.mutateAsync(group.id);
+      onClose(); // Close the form after successful deletion
+    } catch (error) {
+      console.error('Failed to delete group:', error);
+    }
   };
 
   return (
@@ -208,6 +224,51 @@ export const EditGroupForm: React.FC<EditGroupFormProps> = ({ onClose, group }) 
           min="1"
           max="1000"
         />
+      </div>
+
+      {/* Delete Group Section */}
+      <div className="pt-4 border-t border-gray-200">
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-900">Danger Zone</h3>
+          <p className="text-xs text-gray-500">
+            Deleting a group will permanently remove all group content, members, and history. This action cannot be undone.
+          </p>
+          
+          {!showDeleteConfirm ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+            >
+              Delete Group
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-red-800">
+                Are you sure you want to delete "{group.name}"?
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleDeleteGroup}
+                  disabled={deleteGroupMutation.isPending}
+                  className="flex-1 bg-red-600 text-white hover:bg-red-700 border-red-600 hover:border-red-700"
+                >
+                  {deleteGroupMutation.isPending ? 'Deleting...' : 'Yes, Delete'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Form Actions */}
