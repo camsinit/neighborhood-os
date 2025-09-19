@@ -243,11 +243,7 @@ const GroupSheetContent = ({
                   <Button 
                     form="edit-group-form"
                     type="submit"
-                    style={{ 
-                      backgroundColor: 'hsl(var(--neighbors-primary))',
-                      borderColor: 'hsl(var(--neighbors-primary))' 
-                    }}
-                    className="hover:opacity-90"
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
                   >
                     Update Group
                   </Button>
