@@ -119,7 +119,7 @@ const GroupUpdateSheetContent = ({ update, onOpenChange }: GroupUpdateSheetConte
    * Main view with enhanced styling matching safety updates
    */
   return (
-    <SheetContent side="right" className="w-full sm:max-w-lg p-0">
+    <SheetContent side="right" className="w-full sm:max-w-md p-0">
       <div className="h-full flex flex-col">
         {/* Enhanced header section with gradient background */}
         <div 
