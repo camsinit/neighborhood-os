@@ -1386,14 +1386,14 @@ export type Database = {
       }
       create_unified_system_notification: {
         Args: {
-          p_action_label?: string
-          p_action_type?: Database["public"]["Enums"]["notification_action_type"]
+          p_action_label: string
+          p_action_type: Database["public"]["Enums"]["notification_action_type"]
           p_actor_id: string
           p_content_id: string
           p_content_type: string
           p_metadata?: Json
           p_notification_type: Database["public"]["Enums"]["notification_type"]
-          p_relevance_score?: number
+          p_relevance_score: number
           p_title: string
           p_user_id: string
         }

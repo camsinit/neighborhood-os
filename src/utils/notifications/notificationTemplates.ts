@@ -1,4 +1,3 @@
-
 /**
  * Notification Templates Configuration
  * 
@@ -48,77 +47,52 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     description: 'When someone creates a new event in your neighborhood'
   },
 
-  group_event_created: {
-    id: 'group_event_created',
-    template: '{{actor}} created a new group event: {{title}}',
+  event_reminder: {
+    id: 'event_reminder',
+    template: 'Reminder: {{title}} starts in 2 hours',
     contentType: 'events',
     notificationType: 'event',
     actionType: 'view',
     actionLabel: 'View Event',
-    relevanceScore: 3, // High - group member notification
-    description: 'When someone creates a new event for your group'
+    relevanceScore: 3, // High - time-sensitive
+    description: 'Automatic reminder for events you\'ve RSVP\'d to'
   },
 
-  // Skills Module  
-  skill_session_request: {
-    id: 'skill_session_request',
-    template: '{{actor}} is interested in your {{title}} skill',
-    contentType: 'skills',
-    notificationType: 'skills',
-    actionType: 'respond',
-    actionLabel: 'View Interest',
-    relevanceScore: 3, // High - direct request
-    description: 'When someone is interested in a skill you offer'
-  },
-
-
-  // skill_session_cancelled template removed - skill sessions deprecated
-
-  skill_offered: {
-    id: 'skill_offered',
-    template: '{{actor}} is offering {{title}}',
-    contentType: 'skills',
-    notificationType: 'skills',
-    actionType: 'view',
-    actionLabel: 'View Skill',
-    relevanceScore: 1, // Low - general interest
-    description: 'When someone offers a new skill in your neighborhood'
-  },
-
+  // Skills Module
   skill_requested: {
     id: 'skill_requested',
-    template: '{{actor}} is looking to learn {{title}}',
+    template: '{{actor}} is looking for help with {{title}}',
     contentType: 'skills',
     notificationType: 'skills',
     actionType: 'respond',
-    actionLabel: 'Help Out',
-    relevanceScore: 2, // Medium - you might be able to help
-    description: 'When someone requests to learn a skill you might offer'
+    actionLabel: 'Offer Help',
+    relevanceScore: 2, // Medium - you might have this skill
+    description: 'When someone requests a skill you might have'
   },
 
-  // Goods Module
-  goods_response: {
-    id: 'goods_response',
-    template: '{{actor}} can help with your {{title}} request',
-    contentType: 'goods',
-    notificationType: 'goods',
-    actionType: 'respond',
-    actionLabel: 'View Response',
-    relevanceScore: 3, // High - direct help offered
-    description: 'When someone responds to your goods request'
+  skill_session_request: {
+    id: 'skill_session_request',
+    template: '{{actor}} wants to learn {{title}} from you',
+    contentType: 'skills',
+    notificationType: 'skills',
+    actionType: 'schedule',
+    actionLabel: 'Schedule Session',
+    relevanceScore: 3, // High - direct request for your skills
+    description: 'When someone specifically requests to learn from you'
   },
 
-  goods_offered: {
-    id: 'goods_offered',
-    template: '{{actor}} is sharing {{title}}',
-    contentType: 'goods',
-    notificationType: 'goods',
+  skill_session_cancelled: {
+    id: 'skill_session_cancelled',
+    template: '{{actor}} cancelled the {{title}} session',
+    contentType: 'skill_sessions',
+    notificationType: 'skills',
     actionType: 'view',
-    actionLabel: 'View Item',
-    relevanceScore: 1, // Low - general interest
-    description: 'When someone offers goods in your neighborhood'
+    actionLabel: 'View Details',
+    relevanceScore: 3, // High - affects your schedule
+    description: 'When a scheduled skill session is cancelled'
   },
 
+  // Goods Exchange Module
   goods_requested: {
     id: 'goods_requested',
     template: '{{actor}} is looking for {{title}}',
@@ -126,19 +100,52 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     notificationType: 'goods',
     actionType: 'respond',
     actionLabel: 'Help Out',
-    relevanceScore: 2, // Medium - you might be able to help
-    description: 'When someone requests goods you might have'
+    relevanceScore: 1, // Low - you might have what they need
+    description: 'When someone requests something you might have'
+  },
+
+  goods_response: {
+    id: 'goods_response',
+    template: '{{actor}} has {{title}} for you',
+    contentType: 'goods',
+    notificationType: 'goods',
+    actionType: 'respond',
+    actionLabel: 'Get Details',
+    relevanceScore: 3, // High - direct response to your request
+    description: 'When someone responds to your goods request'
+  },
+
+  goods_shared: {
+    id: 'goods_shared',
+    template: '{{actor}} is sharing {{title}}',
+    contentType: 'goods',
+    notificationType: 'goods',
+    actionType: 'view',
+    actionLabel: 'View Item',
+    relevanceScore: 1, // Low - community sharing
+    description: 'When someone shares items with the neighborhood'
   },
 
   // Safety Module
-  safety_comment: {
-    id: 'safety_comment',
-    template: '{{actor}} commented on your {{title}}',
+  safety_emergency: {
+    id: 'safety_emergency',
+    template: '{{actor}} reported an emergency: {{title}}',
     contentType: 'safety',
     notificationType: 'safety',
     actionType: 'view',
+    actionLabel: 'View Report',
+    relevanceScore: 3, // High - safety is critical
+    description: 'When someone reports an emergency in your neighborhood'
+  },
+
+  safety_comment: {
+    id: 'safety_comment',
+    template: '{{actor}} commented on your {{title}} report',
+    contentType: 'safety',
+    notificationType: 'safety',
+    actionType: 'comment',
     actionLabel: 'View Comment',
-    relevanceScore: 2, // Medium - follow-up on your content
+    relevanceScore: 3, // High - direct engagement with your content
     description: 'When someone comments on your safety report'
   },
 
@@ -149,19 +156,8 @@ export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
     notificationType: 'safety',
     actionType: 'view',
     actionLabel: 'View Update',
-    relevanceScore: 2, // Medium - neighborhood safety
-    description: 'When someone posts a safety update in your neighborhood'
-  },
-
-  safety_emergency: {
-    id: 'safety_emergency',
-    template: '{{actor}} reported an emergency: {{title}}',
-    contentType: 'safety',
-    notificationType: 'safety',
-    actionType: 'view',
-    actionLabel: 'View Emergency',
-    relevanceScore: 3, // High - urgent safety matter
-    description: 'When someone reports an emergency in your neighborhood'
+    relevanceScore: 2, // Medium - important for awareness
+    description: 'When someone shares a safety update in your neighborhood'
   },
 
   safety_suspicious: {
